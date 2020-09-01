@@ -11,7 +11,7 @@ defmodule Moba.Engine.Schema.Battler do
     field :hero_id, :integer
     field :name, :string
     field :code, :string
-    field :image, :string
+    field :image, Moba.Image.Type
     field :is_bot, :boolean
 
     field :level, :integer
