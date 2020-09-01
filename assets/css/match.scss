@@ -1,0 +1,32 @@
+.match{
+
+  .fixed-card{
+    max-height: 310px;
+    overflow:auto;
+  }
+
+  .skill-img{
+    width: 23%;
+    margin: 1px;
+    max-width: 90px;
+  }
+
+  .item-img{
+    width: 15%;
+    max-width: 60px;
+    margin: 1px;
+  }
+
+  .performance{
+    .card-box{
+      padding: 0.5rem;
+      margin-bottom: 0;
+    }
+
+    .avatar{
+      width: 100%;
+      max-width: 150px;
+    }
+  }
+
+}

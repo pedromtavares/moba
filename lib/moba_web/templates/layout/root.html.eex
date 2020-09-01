@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%=render "_head.html", conn: @conn%>
+    <body>
+        <%=render "_navigation.html", conn: @conn, current_user: @current_user, clean: true%>
+        <%= if get_flash(@conn, :info) do %>
+            <div class="alert alert-primary alert-dismissible bg-primary text-white border-0 fade show text-center col" role="alert" style="border-radius: 0">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+                <i class="fa fa-info-circle mr-1"></i><%= get_flash(@conn, :info)%>
+            </div>
+        <% end %>
+        <%=unless assigns[:current_hero] || assigns[:hide_join_new_match_button] do %>
+            <div class="row mb-2 mt-2">
+                <div class="col">
+                    <div class="row">
+                        <div class="col-4 margin-auto">
+                            <a href="/arena/select" class="btn btn-block btn-primary btn-lg"><i class="fa fa-hand-point-right mr-1"></i>Join the new match</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% end %>
+        <div class="wrapper <%=wrapper_for(@conn)%>" id="main-wrapper">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12 col-xl-10 margin-auto">
+                        <%= @inner_content %>
+                    </div>
+                    <%=unless is_nil(@current_user) || @current_user.is_guest, do: live_render(@conn, MobaWeb.ChatLiveView, session: %{"user_id" => @current_user.id})%>
+                </div>
+            </div>
+        </div>
+        <%= csrf_meta_tag() %>
+        <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+    </body>
+</html>

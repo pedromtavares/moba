@@ -1,0 +1,60 @@
+<div class="chat-button-container">
+    <%=if @unread_count > 0 do %>
+        <span class="unread-count badge badge-pill badge-danger"><%=@unread_count%></span>
+    <% end %>
+    <button class="btn btn-secondary d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Show Chat</button>
+</div>
+
+<div class="right-bar" id="chat" phx-window-keydown="close-chat">
+    <div class="chat-title img-border-sm">
+        <a href="javascript:void(0);" class="right-bar-toggle" phx-hook="ToggleChatButton" phx-click="close-chat" id="close-chat">
+            <i class="fa fa-times text-white"></i>
+        </a>
+        <h4 class="m-0 text-white text-center">
+            <i class="fa fa-comments" style="font-size: 1.5rem"></i><br/>
+            Chat
+        </h4>
+    </div>
+    <div class="inbox-widget px-2">
+        <%= if length(@messages) > 0 do %>
+            <div class="messages-container">
+                <%= for message <- Enum.uniq(Enum.reverse(@messages)) do %>
+                    <div class="inbox-item">
+                        <div class="inbox-item-img">
+                            <%= if message.code do %>
+                                <img src="<%=GH.image_url(message)%>" class="img-border-xs"/>
+                            <% end %>
+                        </div>
+                        <p class="inbox-item-author">
+                            <%=live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.author), class: if(message.is_admin, do: "text-danger", else: "text-dark")%>
+                            <%=if message.is_admin do %>
+                                <small class="text-danger">(admin)</small>
+                            <% end %>
+                            <%=if @user.is_admin do %>
+                                <a href="javascript:void(0)" phx-click="delete" phx-value-id="<%=message.id%>" class="text-left text-danger float-right small">Delete</a>
+                            <% end %>
+                        </p>
+                        <p class="inbox-item-text"><%=chat_message(message.body)%></p>
+                    </div>
+                <% end %>
+            </div>
+        <% else %>
+            <div class="messages-container d-flex flex-center">
+                <h5>No messages today, be the first one to say hi!</h5>
+            </div>
+        <% end %>
+        <hr>
+        <%= f = form_for @changeset, "#", [phx_submit: :send, class: "form-horizontal"] %>
+        <%= text_input f, :body, class: "form-control", placeholder: "Type and press enter to send", maxlength: 250, minlength: 2 %>
+    </div>
+</div>
+
+<div id="alert-toasts" class="message-toast-container" phx-update="append">
+    <%= for alert <- message_alerts(@alerts) do %>
+        <%=render("_message_alert.html", alert: alert)%>
+    <% end %>
+</div>
+
+<%= for alert <- battle_alerts(@alerts) do %>
+    <%=render("_battle_alert.html", alert: alert, socket: @socket)%>
+<% end %>

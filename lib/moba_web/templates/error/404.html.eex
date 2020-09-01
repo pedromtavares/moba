@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>Browser MOBA - Free RPG</title>
+        <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
+        <script src="https://kit.fontawesome.com/26d6de301e.js"></script>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <script async src="https://www.googletagmanager.com/gtag/js?id=UA-154582215-1"></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'UA-154582215-1');
+        </script>
+    </head>
+
+    <body>
+
+        <div class="account-pages mt-5 mb-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-md-8 col-lg-6 col-xl-5">
+                        <div class="card">
+
+                            <div class="card-body p-4">
+
+                                <div class="error-ghost text-center">
+                                    <img src="/images/404.svg" width="200" alt="error-image">
+                                </div>
+
+                                <div class="text-center">
+                                    <h3 class="mt-4 text-uppercase font-weight-bold">Page not found</h3>
+                                    <p class="text-muted mb-0 mt-3" style="line-height: 20px;">It's looking like you may have taken a wrong turn. Don't worry...
+                                        it happens to the best of us. You might want to check your internet connection.
+                                        Here's a little tip that might help you get back on track.</p>
+
+                                    <a class="btn btn-primary mt-3" href="/"><i class="mdi mdi-reply mr-1"></i> Return Home</a>
+                                </div>
+
+                            </div> <!-- end card-body -->
+                        </div>
+                        <!-- end card -->
+
+                    </div> <!-- end col -->
+                </div>
+                <!-- end row -->
+            </div>
+            <!-- end container -->
+        </div>
+        <!-- end page -->
+
+
+</body>
+</html>

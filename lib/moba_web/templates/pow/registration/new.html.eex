@@ -1,0 +1,113 @@
+<style>
+    body::before {
+      background-image: url(/images/home.jpg);
+      background-size: cover;
+      content: "";
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      opacity: 0.2;
+    }
+</style>
+<div class="account-pages mt-5 mb-5">
+    <div class="container-fluid">
+        <%= if hero = current_hero(@conn) do %>
+            <% avatar = current_avatar(hero) %>
+            <% avatars = creation_avatars() %>
+            <div class="row justify-content-center align-items-center border py-3 mb-3" id="create-bar">
+                <div class="col-4 text-center">
+                    <img src="<%=GH.image_url(avatar)%>" class="avatar img-border mt-2" style="max-width: 160px"/>
+                    <h3 class="mb-0"><%=avatar.name%></h3>
+                    <h5>Level <%=hero.level%></h5>
+                </div>
+
+                <div class="d-none d-md-block col-3">
+                    <%=MobaWeb.CreateView.render "_stats.html", avatar: avatar, avatars: avatars%>
+                </div>
+
+                <div class="d-none d-md-block col-5">
+                    <div class="row align-items-center">
+                        <div class="col text-center font-weight-bold">
+                            <h4 class="m-0">Skill Build</h4>
+                        </div>
+                    </div>
+                    <div class="skills-container mt-2">
+                        <%= for skill <- hero.active_build.skills do %>
+                            <div class="skill-container">
+                                <img src="<%=GH.image_url(skill)%>" class="skill img-border-sm <%=if skill.passive, do: "passive"%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" id="skill_<%=skill.id%>"/>
+                                <br/>
+                                <strong><%=skill.name%></strong>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        <% end %>
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-4">
+                <div class="card black-bar">
+                    <div class="card-body p-4">
+                        <div class="text-center w-75 m-auto">
+                            <h3 class="text-primary">One last step</h3>
+
+                        </div>
+
+                        <%= form_for @changeset, @action, [as: :user], fn f -> %>
+                            <%= if @changeset.action do %>
+                                <p class="alert alert-danger">Oops, something went wrong! Please check the errors below.</p>
+                            <% end %>
+
+                            <div class="form-group">
+                                <label for="email">E-mail</label>
+                                <%= error_tag f, Pow.Ecto.Schema.user_id_field(@changeset) %>
+                                <%= text_input f, Pow.Ecto.Schema.user_id_field(@changeset), class: "form-control" %>
+
+                            </div>
+                            <div class="form-group">
+                                <label for="username">Hero Name</label>
+                                <%= error_tag f, :username %>
+                                <%= text_input f, :username, class: "form-control"  %>
+
+                            </div>
+                            <div class="form-group">
+                                <label for="password">Password</label>
+                                <%= error_tag f, :password %>
+                                <%= password_input f, :password, class: "form-control"  %>
+
+                            </div>
+                            <div class="form-group mb-4">
+                                <label for="password">Confirm Password</label>
+                                <%= error_tag f, :confirm_password %>
+                                <%= password_input f, :confirm_password, class: "form-control"  %>
+
+                            </div>
+
+                            <div class="form-group mb-0 text-center">
+                                <button class="btn btn-primary btn-block" type="submit"> Sign Up </button>
+                            </div>
+
+                        <% end %>
+
+
+                    </div> <!-- end card-body -->
+                    <div class="row mt-1">
+                        <div class="col-12 text-center">
+                            <p class="text-muted">Already have account?  <a href="/session/new" class="text-muted font-weight-medium ml-1">Sign In</a></p>
+                        </div> <!-- end col -->
+                    </div>
+                </div>
+                <!-- end card -->
+
+
+                <!-- end row -->
+
+            </div> <!-- end col -->
+        </div>
+        <!-- end row -->
+    </div>
+    <!-- end container -->
+</div>

@@ -1,0 +1,79 @@
+<div class="arena-select" phx-hook="SetMainWrapper">
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <h2 class="page-title mb-2 text-white">
+                <i class="fa fa-crosshairs fa-2x text-danger mt-2 mb-2"></i><br/>
+                Enter the Arena
+            </h2>
+            <p class="text-danger">Create a new Hero or pick one of your previously created Heroes to fight for you in the Arena during the current match.</p>
+        </div>
+    </div>
+
+    <%=unless @current_user.current_pve_hero_id do %>
+        <div class="text-center mb-2 mt-4">
+            <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
+        </div>
+    <% end %>
+    <div class="row">
+        <%=for hero <- @heroes do %>
+            <div class="col-xl-4 col-md-6 col-12" id="hero_<%=hero.id%>">
+                <div class="card">
+                    <div class="card-body pb-2">
+                        <div class="row">
+                            <div class="col text-center">
+                                <h4 class="text-white mt-0">Level <%=hero.level%> <%=hero.avatar.name%></h4>
+                                <img src="<%=GH.image_url(hero.avatar)%>" class="avatar img-border-sm mb-1"/>
+                                <p class="text-muted font-italic">
+                                    <%=if hero.pvp_picks > 0 do %>
+                                        (picked <%=hero.pvp_picks%> time<%=if hero.pvp_picks > 1, do: "s"%>)
+                                    <% else %>
+                                        (never picked)
+                                    <% end %>
+                                </p>
+                                <%=GH.hero_stats(hero, true)%>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-center">
+                                <%= if can_switch_build?(hero) do %>
+                                    <div class="text-center mt-2 mb-2">
+                                        <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-2" phx-click="switch-build" phx-value-id="<%=hero.id%>"><i class="fa fa-sync mr-1"></i>Switch Build</a>
+                                    </div>
+                                <% else %>
+                                    <div class="mt-4 mb-4"></div>
+                                <% end %>
+                                <div class="skill-container mb-1"><%=GH.hero_skill_list(hero)%></div>
+
+                                <div class="item-container"><%=GH.hero_item_list(hero)%></div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col d-flex justify-content-around">
+                                <h2 class="text-success text-center mt-0">
+                                    <small>Jungle Win Rate</small><br/>
+                                    <img src="/images/league_<%=hero.league_tier%>.png" style="width: 30px" class="mr-1"/><%=GH.pve_win_rate(hero)%>%
+                                </h2>
+                                <%=if hero.pvp_ranking do %>
+                                    <h2 class="text-warning text-center mt-0">
+                                        <small>Previous Rank</small><br/>
+                                        #<%=hero.pvp_ranking%>
+                                    </h2>
+                                <% end %>
+                                <%= if GH.pvp_win_rate(hero) > 0 do %>
+                                    <h2 class="text-danger text-center mt-0">
+                                        <small>Arena Win Rate</small><br/>
+                                        <%=GH.pvp_win_rate(hero)%>%
+                                    </h2>
+                                <% end %>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer text-center">
+                        <button class="btn btn-danger btn-lg btn-block" phx-click="select" phx-value-id="<%=hero.id%>"><i class="fa fa-crosshairs mr-1"></i> Pick <%=hero.avatar.name%></button>
+                    </div>
+                </div>
+            </div>
+        <% end %>
+    </div>
+</div>

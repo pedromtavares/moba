@@ -1,0 +1,51 @@
+<div class="col-xl-4 col-md-6 col-12" id="hero_<%=@hero.id%>">
+    <div class="card">
+
+        <div class="card-body ribbon-box">
+            <%= if @hero.id == @user.current_pve_hero_id do %>
+                <div class="ribbon ribbon-success float-left"><i class="fa fa-leaf mr-1"></i> Current Jungle</div>
+            <% end %>
+            <%= if @hero.id == @user.current_pvp_hero_id do %>
+                <div class="ribbon ribbon-danger float-right"><i class="fa fa-crosshairs mr-1"></i> Current Arena</div>
+            <% end %>
+            <div class="row mb-1 mt-1">
+                <div class="col text-center">
+                    <img src="<%=GH.image_url(@hero.avatar)%>" class="avatar img-border-sm mb-1"/>
+                    <h4 class="text-muted mt-0">Level <%=@hero.level%> <%=@hero.avatar.name%></h4>
+                    <%=GH.hero_stats(@hero, true)%>
+                </div>
+            </div>
+            <div class="row mb-1 mt-2">
+                <div class="col text-center">
+                    <div class="skill-container mb-1"><%=GH.hero_skill_list(@hero)%></div>
+
+                    <div class="item-container"><%=GH.hero_item_list(@hero)%></div>
+                </div>
+            </div>
+        </div>
+        <div class="card-footer">
+            <div class="row">
+                <div class="col d-flex justify-content-around">
+                    <%= unless @hero.bot_difficulty do %>
+                        <h2 class="text-success text-center mt-0">
+                            <small>Jungle Win Rate</small><br/>
+                            <img src="/images/league_<%=@hero.league_tier%>.png" style="width: 30px" class="mr-1"/><%=GH.pve_win_rate(@hero)%>%
+                        </h2>
+                    <% end %>
+                    <%=if @hero.pvp_ranking do %>
+                        <h2 class="text-warning text-center mt-0">
+                            <small><%= if @hero.id == @user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</small><br/>
+                            #<%=@hero.pvp_ranking%>
+                        </h2>
+                    <% end %>
+                    <%= if GH.pvp_win_rate(@hero) > 0 do %>
+                    <h2 class="text-danger text-center mt-0">
+                        <small>Arena Win Rate</small><br/>
+                        <%=GH.pvp_win_rate(@hero)%>%
+                    </h2>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

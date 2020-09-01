@@ -1,0 +1,162 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link "Edit", to: Routes.item_path(@conn, :edit, @item), class: "torch-button" %>
+    <%= link "Back", to: Routes.item_path(@conn, :index), class: "torch-button" %>
+  </div>
+</section>
+
+<section id="torch-header-and-content">
+  <div class="torch-container">
+    <div class="header">
+      <h3>Item Details</h3>
+    </div>
+    <ul>
+
+        <li>
+          <div class="torch-show-label"></div>
+          <div class="torch-show-data">><img src="<%=GH.image_url(@item)%>"/></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Name:</div>
+          <div class="torch-show-data"><%= @item.name %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Description:</div>
+          <div class="torch-show-data"><%= @item.description %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Effects:</div>
+          <div class="torch-show-data"><%= @item.effects %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Code:</div>
+          <div class="torch-show-data"><%= @item.code %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Rarity:</div>
+          <div class="torch-show-data"><%= @item.rarity %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Mp cost:</div>
+          <div class="torch-show-data"><%= @item.mp_cost %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Cooldown:</div>
+          <div class="torch-show-data"><%= @item.cooldown %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Active:</div>
+          <div class="torch-show-data"><%= @item.active %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base hp:</div>
+          <div class="torch-show-data"><%= @item.base_hp %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base mp:</div>
+          <div class="torch-show-data"><%= @item.base_mp %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base atk:</div>
+          <div class="torch-show-data"><%= @item.base_atk %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base power:</div>
+          <div class="torch-show-data"><%= @item.base_power %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base armor:</div>
+          <div class="torch-show-data"><%= @item.base_armor %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base speed:</div>
+          <div class="torch-show-data"><%= @item.base_speed %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Base amount:</div>
+          <div class="torch-show-data"><%= @item.base_amount %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Atk multiplier:</div>
+          <div class="torch-show-data"><%= @item.atk_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Other atk multiplier:</div>
+          <div class="torch-show-data"><%= @item.other_atk_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Hp multiplier:</div>
+          <div class="torch-show-data"><%= @item.hp_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Other hp multiplier:</div>
+          <div class="torch-show-data"><%= @item.other_hp_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Hp regen multiplier:</div>
+          <div class="torch-show-data"><%= @item.hp_regen_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Mp multiplier:</div>
+          <div class="torch-show-data"><%= @item.mp_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Other mp multiplier:</div>
+          <div class="torch-show-data"><%= @item.other_mp_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Mp regen multiplier:</div>
+          <div class="torch-show-data"><%= @item.mp_regen_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Extra multiplier:</div>
+          <div class="torch-show-data"><%= @item.extra_multiplier %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Armor amount:</div>
+          <div class="torch-show-data"><%= @item.armor_amount %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Power amount:</div>
+          <div class="torch-show-data"><%= @item.power_amount %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Roll number:</div>
+          <div class="torch-show-data"><%= @item.roll_number %></div>
+        </li>
+
+        <li>
+          <div class="torch-show-label">Extra amount:</div>
+          <div class="torch-show-data"><%= @item.extra_amount %></div>
+        </li>
+
+    </ul>
+  </div>
+</section>

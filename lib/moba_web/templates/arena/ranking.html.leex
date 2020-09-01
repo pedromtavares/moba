@@ -1,0 +1,96 @@
+<div class="row card-box no-gutters border ranking" id="ranking">
+    <div class="col text-center">
+            <table class="table table-dark mb-0">
+                <tbody phx-update="append" id="ranking-table">
+                    <%=for hero <- @ranking do %>
+                        <tr id="hero-<%=hero.id%>" class="d-none d-lg-table-row">
+                            <td>
+                                <h1>
+                                    #<%=hero.pvp_ranking%>
+                                    <br/>
+                                    <small class="text-dark"><em>(<%=hero.pvp_points%>)</em></small>
+                                </h1>
+                            </td>
+                            <td>
+                                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.name) do %>
+                                    <%=GH.hero_avatar(hero)%>
+                                    <br/>
+                                    <h4>
+                                        <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
+                                        <span class="text-reset"><%=hero.name%></span>
+                                    </h4>
+                                <% end %>
+                            </td>
+                            <td>
+                                <h4 class="text-dark mb-3"><em>Level <%=hero.level%> <%=hero.avatar.name%></em></h4>
+                                <%=GH.hero_stats(hero)%>
+                            </td>
+                            <td>
+                                <%=GH.hero_skill_list(hero)%>
+                                <br/>
+                                <%=GH.hero_item_list(hero)%>
+                            </td>
+                            <td>
+                                <%= if can_battle?(@hero, hero) do %>
+                                    <button class="btn btn-danger btn-lg btn-icon waves-effect" phx-click="battle" phx-target="#ranking" phx-value-id="<%=hero.id%>" phx-value-number="<%=hero.active_build_id%>" phx-hook="Loading" loading="Preparing..." id="ranking-battle-<%=hero.id%>">
+                                        <span class="loading-text"><i class="fa fa-crosshairs mr-1"></i> Attack <small class="font-italic"><%=points_for_arena_battle(@hero, hero)%></small></span>
+                                    </button>
+                                <% else %>
+                                    <button class="btn btn-danger btn-lg btn-icon waves-effect disabled no-action" data-toggle="tooltip" title="You have already battled this opponent in this round.">
+                                        <i class="fa fa-times mr-1"></i> Battle
+                                    </button>
+                                <% end %>
+                            </td>
+                        </tr>
+                        <tr id="hero-mobile-<%=hero.id%>-2" class="d-table-row d-lg-none">
+                            <td style="padding-bottom:0;padding-top:0rem;min-width: 120px">
+                                <h2>
+                                    #<%=hero.pvp_ranking%>
+                                    <br/>
+                                    <small class="text-dark"><em>(<%=hero.pvp_points%> Points)</em></small>
+                                </h2>
+                                <%= if can_battle?(@hero, hero) do %>
+                                    <button class="btn btn-outline-danger btn-sm btn-icon waves-effect" phx-click="battle"  id="ranking-battle-mobile-<%=hero.id%>" phx-target="#ranking" phx-value-id="<%=hero.id%>" phx-value-number="<%=hero.active_build_id%>" phx-hook="Loading" loading="Preparing..." >
+                                        <span class="loading-text"><i class="fa fa-crosshairs mr-1"></i> Attack <small class="font-italic"><%=points_for_arena_battle(@hero, hero)%></small></span>
+                                    </button>
+                                <% else %>
+                                    <button class="btn btn-outline-danger btn-sm btn-icon waves-effect disabled no-action tooltip-mobile" data-toggle="tooltip" title="You have already battled this opponent in this round.">
+                                        <i class="fa fa-times mr-1"></i> Battle
+                                    </button>
+                                <% end %>
+                            </td>
+                            <td class="pb-0">
+                                <img src="<%=GH.image_url(hero.avatar)%>" class="avatar img-border"/><br/>
+                                <%= if hero.bot_difficulty do %>
+                                    <h4><%=hero.name%></h4>
+                                <% else %>
+                                    <h4><%=live_redirect hero.name, to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.name), class: "text-reset"%></h4>
+                                <% end %>
+                                <h4 class="text-dark mb-3"><em>Level <%=hero.level%> <%=hero.avatar.name%></em></h4>
+                            </td>
+                        </tr>
+                        <tr id="hero-mobile-<%=hero.id%>-3" class="d-table-row d-lg-none">
+                            <td colspan="2" style="border-top: 0;padding-top:0">
+                                <%=GH.hero_stats(hero)%>
+                                <div class="skill-container"><%=GH.hero_skill_list(hero)%></div>
+                                <div class="item-container"><%=GH.hero_item_list(hero)%></div>
+                            </td>
+                        </tr>
+                  <% end %>
+                </tbody>
+            </table>
+            <div class="card-footer">
+                <nav>
+                    <ul class="pagination flex-center">
+                        <%= if length(@ranking) > 0 do %>
+                            <li class="page-item">
+                                <a class="page-link" phx-click="page" phx-value-number="<%=@page + 1%>" phx-hook="Loading" phx-target="#ranking" id="next-ranking-<%=@page+1%>">
+                                    <span class="loading-text">Load more <i class="fa fa-chevron-down ml-1"></i></span>
+                                </a>
+                            </li>
+                        <% end %>
+                    </ul>
+                </nav>
+            </div>
+    </div>
+</div>

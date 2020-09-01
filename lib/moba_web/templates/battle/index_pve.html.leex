@@ -1,0 +1,100 @@
+<div class="battles content-with-hero-bar" phx-hook="SetMainWrapper" id="battle-history">
+    <div class="row">
+        <div class="col-sm-12 text-center">
+            <h1 class="page-title mb-3 mt-3 text-primary">
+              <i class="fa fa-history"></i> Battle History
+            </h1>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-xl-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center text-success"><i class="fa fa-leaf align-middle"></i> Jungle</h2>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="card-box border mb-0">
+                                <i class="fa fa-calendar font-24 text-success"></i>
+                                <h3><%=@current_hero.wins%>/<%=@current_hero.ties%>/<%=@current_hero.losses%></h3>
+                                <p class="text-uppercase mb-1 font-13 font-weight-medium">Wins/Ties/Losses</p>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="card-box border mb-0">
+                                <i class="fa fa-trophy font-24 text-success"></i>
+                                <h3><%=Moba.Game.pve_win_rate(@current_hero)%>%</h3>
+                                <p class="text-uppercase mb-1 font-13 font-weight-medium">Win Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-dark mb-2 text-center">
+                    <tbody phx-update="append" id="history-jungle">
+                        <%= for battle <- @battles[:pve] do %>
+                            <%=render "_battle_row.html", battle: battle, current_hero: @current_hero%>
+                        <% end %>
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination flex-center">
+                        <%= if @pages[:pve] > 0  && Enum.count(@battles[:pve]) > 0 do %>
+                            <li class="page-item">
+                                <a class="page-link" phx-hook="Loading" phx-click="page" phx-value-number="<%=@pages[:pve] + 1%>" phx-value-type="pve" id="load-more-pve-<%=@pages[:pve]%>">
+                                    <span class="loading-text">Load more <i class="fa fa-chevron-down ml-1"></i> </span>
+                                </a>
+                            </li>
+                        <% end %>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <div class="col-12 col-xl-6">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="text-center text-info"><i class="fa fa-star align-middle"></i> League Challenge</h2>
+                </div>
+                <div class="card-body text-center">
+                    <div class="row">
+                        <div class="col-md-12 col-xl-6">
+                            <div class="card-box border mb-0">
+                                <i class="fa fa-bullseye font-24 text-info"></i>
+                                <h3><%=@current_hero.league_attempts%></h3>
+                                <p class="text-uppercase mb-1 font-13 font-weight-medium">Attempts</p>
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-xl-6">
+                            <div class="card-box border mb-0">
+                                <i class="fa fa-trophy font-24 text-info"></i>
+                                <h3><%=league_success_rate(@current_hero)%>%</h3>
+                                <p class="text-uppercase mb-1 font-13 font-weight-medium">Success Rate</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-dark mb-2 text-center">
+                    <tbody phx-update="append" id="history-league">
+                        <%= for battle <- @battles[:league] do %>
+                            <%=render "_battle_row.html", battle: battle, current_hero: @current_hero%>
+                        <% end %>
+                    </tbody>
+                </table>
+                <nav>
+                    <ul class="pagination flex-center">
+                        <%= if @pages[:league] > 0 do %>
+                            <li class="page-item">
+                                <a class="page-link" phx-click="page" phx-hook="Loading" phx-value-number="<%=@pages[:league] + 1%>" phx-value-type="league" id="load-more-league-<%=@pages[:league]%>">
+                                    <span class="loading-text">Load more <i class="fa fa-chevron-down ml-1"></i></span>
+                                </a>
+                            </li>
+                        <% end %>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%= live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "hero-live-view") %>

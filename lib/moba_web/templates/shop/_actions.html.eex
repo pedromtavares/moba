@@ -1,0 +1,17 @@
+<hr class="img-border-xs"/>
+<div class="row selected-shop">
+    <div class="col center">
+        <img src="<%=GH.image_url(@selected_shop)%>" data-toggle="tooltip" title="<%=GH.item_description(@selected_shop)%>" class="item-img" />
+    </div>
+</div>
+<hr/>
+<div class="row">
+    <div class="col center">
+        <button class="btn btn-warning buy-button" phx-click="buy" phx-target="#shop" <%=unless can_buy?(@hero, @selected_shop), do: "disabled"%> phx-hook="Loading" loading="Buying...">
+            <span class="loading-text">Buy for <i class="fa fa-coins"></i> <%=price(@selected_shop)%></span>
+        </button>
+        <%= unless normal?(@selected_shop) do %>
+            <button class="btn btn-primary transmute-button" phx-click="start-transmute" phx-target="#shop" <%=unless can_transmute?(@hero, @selected_shop), do: "disabled"%> ><i class="fa fa-refresh"></i> Transmute</button>
+        <% end %>
+    </div>
+</div>

@@ -1,0 +1,14 @@
+<%= if show_step(@hero, @step) do %>
+    <li class="nav-item">
+        <a href="javascript:;" class="nav-link <%=if @hero.league_step > @step, do: "success"%>">
+            <span class="number">
+                <%=if @hero.league_step > @step do %>
+                    <i class="fa fa-check"></i>
+                <% else %>
+                    <%=@step%>
+                <%end%>
+            </span>
+            <span class="d-none d-md-inline"><%=@label%></span>
+        </a>
+    </li>
+<% end %>

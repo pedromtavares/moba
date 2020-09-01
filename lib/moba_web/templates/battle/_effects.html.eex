@@ -1,0 +1,50 @@
+<div class="col-6 pr-1">
+    <div class="notification turn-hero">
+        <img src="<%=GH.image_url(@hero)%>" class="img-border-xs"/> <span class="d-none d-md-inline"><%=@hero.name%></span>
+        <div class="float-right">
+        <%= if @is_attacker do %>
+          <%= if @hero.power != 0 do %>
+            <span data-toggle="tooltip" title="<%=power_description(@hero)%>" class="badge badge-light-pink tooltip-mobile"><i class="fa fa-bolt mr-1"></i><%=@hero.power%></span>
+          <% end %>
+          <%= if @hero.atk != @hero.base_atk do %>
+            <span data-toggle="tooltip" title="<%=atk_description(@hero)%>" class="badge badge-light-success tooltip-mobile">
+              <i class="fa fa-gavel mr-1"></i><%=@hero.atk%>
+            </span>
+          <% end %>
+        <% else %>
+          <%= if @hero.armor > 0 do %>
+            <span data-toggle="tooltip" title="<%=armor_description(@hero)%>" class="badge badge-light-warning tooltip-mobile"><i class="fa fa-shield mr-1"></i><%=@hero.armor%></span>
+          <% end %>
+        <% end %>
+        </div>
+        <hr class="mt-1 mb-1">
+        <div class="progress progress-fixed">
+            <div style="width:<%=minimal_percentage(current_hp(@hero) * 100 / @hero.total_hp)%>%" class="progress-bar bg-danger">
+                <span>&nbsp;<%=current_hp(@hero)%>&nbsp;</span>
+            </div>
+            <%= unless @hero.current_hp == @hero.total_hp || hp_result(@hero) == 0 do %>
+              <div style="width:<%=hp_result_percentage(@hero)%>%" class="progress-bar d-none d-md-block bg-<%=if hp_result(@hero) > 0, do: "success-dark", else: "danger-dark"%>" data-toggle="tooltip" title="<%=hp_description(@hero)%>">
+                  <span>&nbsp;&nbsp;<%=hp_result(@hero)%>&nbsp;&nbsp;</span>
+              </div>
+            <% end %>
+        </div>
+        <div class="progress progress-fixed">
+            <div style="width:<%=display_percentage(current_mp(@hero) * 100 / @hero.total_mp)%>%" class="progress-bar bg-primary">
+                <span>&nbsp;<%=current_mp(@hero)%>&nbsp;</span>
+            </div>
+            <%= unless @hero.current_mp == @hero.total_mp || mp_result(@hero) == 0 do %>
+              <div style="width:<%=mp_result_percentage(@hero)%>%" class="progress-bar d-none d-md-block bg-<%=if mp_result(@hero) > 0, do: "info", else: "info-dark"%>" data-toggle="tooltip" title="<%=mp_description(@hero)%>">
+                  <span>&nbsp;&nbsp;<%=mp_result(@hero)%>&nbsp;&nbsp;</span>
+              </div>
+            <% end %>
+        </div>
+        <%= if @debug do %>
+          <hr style="margin:5px 0 5px 0">
+          <%= for effect <- @hero.effects do %>
+            <div class="notification debug">
+                <span><%=effect["resource"]%> - </span> <%=effect["key"]%>: <%=effect["value"]%>
+            </div>
+          <% end %>
+        <% end %>
+   </div>
+</div>

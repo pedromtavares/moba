@@ -1,0 +1,158 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link "Previous Match", to: "/admin/matches/#{@match.id-1}", class: "torch-button" %>
+    <%= unless @match == Moba.Game.current_match() do %>
+      <%= link "Next Match", to: "/admin/matches/#{@match.id+1}", class: "torch-button" %>
+    <% end %>
+    <%= link "Edit", to: Routes.match_path(@conn, :edit, @match), class: "torch-button" %>
+    <%= link "Back", to: Routes.match_path(@conn, :index), class: "torch-button" %>
+  </div>
+</section>
+
+<section id="torch-header-and-content">
+  <div class="torch-container">
+    <div class="header">
+      <h3>Match Details - <%=length(@players)%> players</h3>
+    </div>
+
+    <div style="display: flex">
+      <%=for {skill, {winrate, count}} <- @normal_rates do %>
+        <div style="text-align: center">
+          <img src="<%=GH.image_url(skill)%>" style="width: 100%"/>
+          <br/>
+          <h1 style="color:red;font-size: 1.5rem"><%=round(winrate)%>% <br/>(<%=count%>)</h1>
+        </div>
+      <% end %>
+    </div>
+
+    <hr style="margin: 2rem 0rem"/>
+
+    <div style="display: flex">
+      <%=for {skill, {winrate, count}} <- @ult_rates do %>
+        <div style="text-align: center">
+          <img src="<%=GH.image_url(skill)%>" style="width: 100%"/>
+          <br/>
+          <h1 style="color:red;font-size: 1.5rem"><%=round(winrate)%>% <br/>(<%=count%>)</h1>
+        </div>
+      <% end %>
+    </div>
+
+
+    <ul>
+      <table class='table table-bordered'>
+        <tr>
+          <th colspan=2>Hero</th>
+          <th colspan=2>Performance</th>
+          <th colspan=2>Rank</th>
+          <th colspan=3>User</th>
+        </tr>
+        <%=for hero <- @players do %>
+          <tr>
+            <td width="80" style="text-align: center;font-weight: bold;font-size: 1.3rem">
+              <%=hero.avatar.name%>
+              <br/>
+              <img src="<%=GH.image_url(hero.avatar)%>" style="width: 80px;">
+              <h1>Lvl <%=hero.level%></h1>
+              <small style="font-size: 0.8rem;font-weight: normal;font-style:italic">(<%=MobaWeb.HeroView.xp_percentage(hero) |> round()%>%)</small>
+            </td>
+
+            <td style="text-align: center;">
+              <br/>
+              <%=for skill <- hero.active_build.skills do %>
+                <img src="<%=GH.image_url(skill)%>" style="width: 40px;">
+              <% end %>
+              <br/>
+              <%=for item <- hero.items do %>
+                <img src="<%=GH.image_url(item)%>" style="width: 25px;">
+              <% end %>
+            </td>
+
+            <td style="color: green;text-align: center;">
+              <strong style="font-size: 1.3rem;font-weight: bold;">WR: <%=GH.pve_win_rate(hero)%>%</strong> <br/>Streak: <%=hero.win_streak%><br/>Battles: <%=hero.pve_battles_available%>
+            </td>
+
+            <td style="color:red;text-align: center;">
+              <strong style="font-size: 1.3rem;font-weight: bold;">WR: <%=GH.pvp_win_rate(hero)%>%</strong>
+              <br/>
+              Attempts: <%=hero.league_attempts%>
+            </td>
+
+            <td width="50">
+              <img src="/images/league_<%=hero.league_tier%>.png" style="width: 50px;">
+            </td>
+
+            <td style="text-align: center;font-weight: bold;font-size: 1.3rem">
+              #<%=hero.pvp_ranking%>
+              <br/>
+              <small style="font-size: 1rem;font-weight: normal;font-style:italic">(<%=hero.pvp_points%>)</small>
+            </td>
+
+            <td><%=hero.user.username%></td>
+
+            <td><%=hero.user.email%></td>
+
+            <td>Online <%= hero.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></td>
+          </tr>
+        <% end %>
+      </table>
+
+      <li>
+        <div class="torch-show-label">Next changelog:</div>
+        <div class="torch-show-data"><%= @match.next_changelog %></div>
+      </li>
+
+      <table class='table table-bordered'>
+        <tr>
+          <th colspan=2>Hero</th>
+          <th>Performance</th>
+          <th colspan=2>Rank</th>
+          <th colspan=2>BOT</th>
+        </tr>
+        <%=for hero <- @bots do %>
+          <tr>
+            <td width="80" style="text-align: center;font-weight: bold;font-size: 1.3rem">
+              <%=hero.avatar.name%>
+              <br/>
+              <img src="<%=GH.image_url(hero.avatar)%>" style="width: 80px;">
+              <h1>Lvl <%=hero.level%></h1>
+            </td>
+
+            <td style="text-align: center;">
+              <br/>
+              <%=for skill <- hero.active_build.skills do %>
+                <img src="<%=GH.image_url(skill)%>" style="width: 40px;">
+              <% end %>
+              <br/>
+              <%=for item <- hero.items do %>
+                <img src="<%=GH.image_url(item)%>" style="width: 25px;">
+              <% end %>
+              <hr/>
+              <%=hero.active_build.skill_order |> Enum.join(", ")%>
+            </td>
+
+            <td style="color:red;text-align: center;">
+              <strong style="font-size: 1.3rem;font-weight: bold;">WR: <%=Moba.Game.pvp_win_rate(hero)%>%</strong>
+            </td>
+
+            <td width="50">
+              <img src="/images/league_<%=hero.league_tier%>.png" style="width: 50px;">
+            </td>
+
+            <td style="text-align: center;font-weight: bold;font-size: 1.3rem">
+              #<%=hero.pvp_ranking%>
+              <br/>
+              <small style="font-size: 1rem;font-weight: normal;font-style:italic">(<%=hero.pvp_points%>)</small>
+            </td>
+
+            <td><%=hero.name%></td>
+
+            <td style="text-align: center;">
+              <strong style="font-size: 1.3rem;font-weight: bold;"><%=hero.bot_difficulty%></strong>
+            </td>
+          </tr>
+        <% end %>
+      </table>
+    </ul>
+
+  </div>
+</section>

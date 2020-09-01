@@ -1,0 +1,58 @@
+<div class="row align-items-center">
+    <div class="col text-center font-weight-bold border-bottom">
+        <h4 class="m-0"><img src="/images/<%=@avatar.role%>_icon.png" style="width: 30px" class="text-center mr-1"/><%=role(@avatar)%>
+            <br/>
+            <small class="font-italic d-block mb-2 mt-1">
+                <%=role_description(@avatar)%>
+            </small>
+        </h4>
+    </div>
+</div>
+<div class="row align-items-center">
+    <div class="col-6 text-right border-bottom border-right text-danger font-weight-bold stat-col">
+        <i class="fa fa-gavel mr-1"></i>Offense
+    </div>
+    <div class="col">
+        <div class="progress progress-fixed">
+            <div style="width:<%=display_percentage(:offense, @avatar, @avatars)%>%" class="progress-bar bg-danger">
+                <span></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row align-items-center">
+    <div class="col-6 text-right border-bottom border-right text-warning font-weight-bold stat-col">
+        <i class="fa fa-shield mr-1"></i>Defense
+    </div>
+    <div class="col">
+        <div class="progress progress-fixed">
+            <div style="width:<%=display_percentage(:defense, @avatar, @avatars)%>%" class="progress-bar bg-warning">
+                <span></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row align-items-center">
+    <div class="col-6 text-right border-bottom border-right text-primary font-weight-bold stat-col">
+        <i class="fa fa-magic mr-1"></i>Magic
+    </div>
+    <div class="col">
+        <div class="progress progress-fixed">
+            <div style="width:<%=display_percentage(:magic, @avatar, @avatars)%>%" class="progress-bar bg-primary">
+                <span></span>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row align-items-center">
+    <div class="col-6 text-right border-bottom border-right text-success font-weight-bold stat-col">
+        <i class="fa fa-running mr-1"></i>Speed
+    </div>
+    <div class="col">
+        <div class="progress progress-fixed">
+            <div style="width:<%=display_percentage(:speed, @avatar, @avatars)%>%" class="progress-bar bg-success">
+                <span></span>
+            </div>
+        </div>
+    </div>
+</div>

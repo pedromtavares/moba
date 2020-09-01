@@ -1,0 +1,126 @@
+.shop::after{
+  content: "";
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+
+  box-shadow: inset 0px 0px 300px 50px black;
+  background: #4A3716;
+  opacity: 1;
+}
+
+.shop-modal{
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 180px;
+  right: 0;
+  overflow-y: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 998;
+  background-color: rgba(0, 0, 0, 0.7);
+
+  @media (max-width: 992px) {
+    bottom: 206px;
+  }
+}
+
+.shop{
+  position: relative;
+  z-index: 999;
+  margin: 3rem;
+  padding: 0 3rem;
+  border: 2px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  min-height: 700px;
+
+  @media (max-width: 992px) {
+    margin: 0.5rem;
+    padding: 1rem;
+    margin-top: 2rem;
+  }
+
+  #close-button{
+    position: relative;
+    float: right;
+    text-align: right;
+    bottom: 0px;
+    left: 40px;
+    cursor: pointer;
+
+    @media (max-width: 992px) {
+      bottom: 20px;
+      left: 15px;
+    }
+  }
+
+  .bg-light{
+    font-size: 1rem;
+  }
+
+  .item-container{
+    float:left;
+    text-align: center;
+  }
+  .item-img{
+    border: 3px solid #2c333a;
+    margin: 1px;
+    max-width: 70px;
+    cursor: pointer;
+    text-align: center;
+    float:left;
+    background: black;
+  }
+  .active{
+    border: 2px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+  }
+  .empty-item{
+    box-shadow: inset 0px 0px 40px black;
+    width: 70px;
+    height: 53px;
+    float:left;
+
+    i{
+      opacity: 0.3;
+    }
+  }
+  .selected-shop{
+
+    img{
+      float: none;
+    }
+  }
+
+  .inactive {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  .card-box{
+    text-align: left;
+    background-color: rgba(54, 64, 74, 0.5);
+    padding: 0.5rem;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+    h4 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+  }
+  small{
+    font-size: 0.90rem;
+  }
+}
+
+

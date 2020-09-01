@@ -1,0 +1,46 @@
+<tr id="battle-<%=@battle.id%>" class="battle-row <%=if @battle.unread_id == @current_hero.id, do: "unread-row"%>" phx-click="redirect" phx-value-id="<%=@battle.id%>" phx-hook="Loading">
+    <td>
+        <%=result_badge(@battle, @current_hero)%>
+    </td>
+    <td>
+        <% opponent = if @current_hero.id == @battle.attacker_id, do: @battle.defender, else: @battle.attacker %>
+        <img src="<%=GH.image_url(opponent.avatar)%>" class="avatar img-border-xs"/>
+        <br/>
+        <span class="text-dark font-italic"><%=opponent.name%></span>
+    </td>
+    <td>
+        <%= if @battle.difficulty do %>
+            <%=difficulty_badge(@battle)%>
+            <br/>
+        <% end %>
+        <%= if @battle.rewards do %>
+            <%=reward_badges(@battle, @current_hero)%>
+        <% end %>
+        <%= if @battle.type == "league" do %>
+            <ul class="nav nav-pills nav-justified form-wizard-header flex-center">
+                <%= if @battle.winner && @battle.winner.id == @current_hero.id do %>
+                    <%= if @battle.attacker_snapshot.league_step == 0 do %>
+                        <img src="/images/league_<%=@battle.attacker_snapshot.league_tier%>.png" class="mr-1 league-rank"/>
+                    <% else %>
+                        <li class="nav-item">
+                            <a href="javascript:;" class="nav-link success">
+                                <span class="number"><i class="fa fa-check" aria-hidden="true"></i></span>
+                                <span class="d-none d-sm-inline"><%=@battle.attacker_snapshot.previous_league_step%></span>
+                            </a>
+                        </li>
+                    <% end %>
+                <% else %>
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link failure">
+                            <span class="number"><i class="fa fa-times" aria-hidden="true"></i></span>
+                            <span class="d-none d-sm-inline"><%=@battle.attacker_snapshot.previous_league_step%></span>
+                        </a>
+                    </li>
+                <% end %>
+            </ul>
+        <% end %>
+    </td>
+    <td>
+        <span class="loading-text"><%=Timex.format!(@battle.inserted_at, "{relative}", :relative)%></span>
+    </td>
+</tr>

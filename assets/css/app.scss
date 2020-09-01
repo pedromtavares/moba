@@ -1,0 +1,346 @@
+/* This file is for your main application css. */
+
+@import "./template/bootstrap.css";
+@import "./template/app.css";
+
+@import "./jungle.scss";
+@import "./arena.scss";
+@import "./match.scss";
+@import "./create.scss";
+@import "./battles.scss";
+@import "./shop.scss";
+@import "./user.scss";
+@import "./tavern.scss";
+@import "./shared.scss";
+
+@import "../node_modules/nprogress/nprogress.css";
+@import "../node_modules/shepherd.js/dist/css/shepherd.css";
+
+@font-face {
+  font-family: bravadaArma;
+  src: url("/fonts/bravada-arma.ttf");
+}
+
+body{
+  background: #272E35;
+}
+
+.phx-click-loading{
+  opacity: 1;
+}
+
+.progress-bar{
+  min-width: 10%;
+}
+
+.black-bar{
+  background: #38414a;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  box-shadow: inset 0px 0px 300px black;
+}
+
+.shepherd-content{
+  background: #38414a;
+  border: 2px solid;
+  border-color: white;
+  box-shadow: inset 0px 0px 300px black;
+  border-radius: 0;
+  z-index: 999999;
+
+  .shepherd-header{
+    display: block;
+    float: right;
+  }
+
+  .shepherd-text{
+    color: white;
+  }
+}
+
+.swal-modal{
+  background: #38414a;
+  border: 3px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  box-shadow: inset 0px 0px 300px black;
+
+  .swal-title{
+    color: #ee324d;
+  }
+
+  .swal-text{
+    color: white;
+  }
+
+  .swal-button-container{
+    display: block;
+  }
+
+  .challenge-button:hover{
+    color: #fff;
+    background-color: #ee324d !important;
+    border-color: #ed2643 !important;
+  }
+
+  .swal-button:hover{
+    background-color: inherit;
+  }
+}
+
+.table td{
+  vertical-align: middle;
+}
+
+#topnav {
+  background: rgba(54, 64, 74, 0.5);
+  // background: linear-gradient(to right, rgba(0,0,0,0), rgba(54, 64, 74, 0.15));
+  position: inherit;
+  border-bottom: 0;
+  box-shadow: none;
+  border: 0;
+  border-bottom: 2px solid;
+  border-image-source: radial-gradient(white, #2f3c4a);
+  border-image-slice: 1;
+
+  .nav-link{
+    float: left;
+    color: white;
+    font-weight: bold;
+  }
+
+  .game-nav{
+    i{
+      font-size: 1.5rem;
+    }
+
+    .nav-link{
+      padding-top: 1rem;
+    }
+  }
+
+  .container-fluid{
+    margin-right: 0;
+    margin-left: 0;
+    max-width: 100%;
+  }
+
+  @media (max-width: 767.98px) {
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+
+    .container-fluid{
+      padding: 0;
+    }
+  }
+
+  .topbar-menu{
+    margin-top: 0px;
+  }
+}
+
+#main-wrapper > .container-fluid{
+  // margin-right: 0;
+  // margin-left: 0;
+  max-width: 100%;
+  // padding: 0;
+}
+
+.wrapper {
+  padding-top: 5px;
+  overflow-y: hidden;
+}
+
+.content-with-hero-bar{
+  margin-bottom: 150px;
+
+  @media (max-width: 992px) {
+    margin-bottom: 220px;
+  }
+}
+
+.clean-container{
+  margin-right: auto !important;
+  margin-left: auto !important;
+  padding-right: 12px !important;
+  padding-left: 12px !important;
+}
+
+.center{
+  text-align: center;
+}
+
+.flex-center{
+  align-items: center;
+  justify-content: center;
+}
+
+.card-box{
+  background-color: rgba(54, 64, 74, 0.5);
+}
+
+.card-border{
+  border: 1px solid #36404a;
+  background-clip: border-box;
+  padding: 1.5rem;
+  border-radius: 0.25rem;
+}
+
+.margin-auto{
+  margin: auto;
+}
+
+.no-action{
+  cursor: default !important;
+}
+
+.no-wrap{
+  text-overflow: clip;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.flex-column{
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.btn-group button{
+  cursor: default;
+}
+
+.btn-group button:hover{
+  background: none;
+}
+
+.btn-group-vertical button:hover{
+  background: none;
+}
+
+b, strong {
+  font-weight: bolder !important;
+}
+
+.badge-light-purple{
+  color: #837ad6 !important;
+}
+
+.league-rank{
+  max-height: 50px;
+}
+
+.league-logo{
+  height: 20px;
+}
+
+.avatar{
+  border-radius:4px;
+  max-width: 120px;
+}
+
+.avatar-container{
+  display: inline-block;
+  vertical-align: middle;
+  position: relative;
+
+  .avatar{
+    vertical-align: middle;
+  }
+
+  .medals{
+    position: absolute;
+    top: 61px;
+    right: 3px;
+    border-top: 2px solid;
+    border-left: 2px solid;
+    border-color: #424e5a;
+    padding: 0 5px;
+  }
+}
+
+.title-container{
+  text-align: center;
+
+  i{
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 1198.98px) {
+  .avatar{
+    max-width: 100px;
+  }
+}
+
+.passive{
+  border-color: black !important;
+  border-image-source: none !important;
+}
+
+.item-img.passive{
+  border-color: rgba(26,32,39,1) !important;
+  border-image-source: none !important;
+}
+
+.img-border{
+  border: 3px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+}
+
+.img-border-sm{
+  border: 2px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+}
+
+.img-border-xs{
+  border: 1px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+}
+
+.btn-outline-dark{
+  border: 1px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+}
+
+.tooltip-cursor{
+  cursor: context-menu !important;
+}
+
+.bg-warning-light{
+  background-color: #fbdba5 !important;
+}
+
+.bg-danger-dark{
+  background-color: rgba(241, 85, 108, 0.2) !important;
+  color: #f1556c !important;
+}
+
+.bg-info-dark{
+  background-color: rgba(59, 175, 218, 0.2) !important;
+  color: #3bafda !important;
+}
+
+.bg-success-dark{
+  background-color: rgba(26, 188, 156, 0.2) !important;
+  color: #1abc9c !important;
+}
+
+.bg-light{
+  background-color: rgba(73,85,97, 0.4) !important;
+  box-shadow: 0 0 15px #bbb;
+  font-size: 1.5rem;
+  border-width: 3px;
+}
+
+.bg-light-dark{
+  background-color: rgba(0, 0, 0, 0.6);
+}

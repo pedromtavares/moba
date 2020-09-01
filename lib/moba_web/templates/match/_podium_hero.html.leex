@@ -1,0 +1,24 @@
+<%= if @hero do %>
+    <div class="card-box px-0 pt-2 border pb-2">
+        <h1 class="text-center border-bottom pt-0 pb-2 mt-0 mb-3 text-warning border-warning">#<%=@ranking%></h1>
+        <div class="row">
+            <div class="col text-center">
+                <img src="<%=GH.image_url(@hero.avatar)%>" class="avatar img-border"/><br/>
+                <h4 class="mb-0">
+                    <%=live_redirect @hero.name, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.name), class: "text-reset"%>
+                    <br/>
+                    <small class="font-italic text-muted">Level <%=@hero.level%> <%=@hero.avatar.name%></small>
+                </h4>
+            </div>
+            <div class="col-xl-7 col-12">
+                <%=GH.hero_skill_list(@hero)%>
+                <br/>
+                <%=GH.hero_item_list(@hero)%>
+            </div>
+        </div>
+        <div class="row mt-3 text-center">
+            <div class="col"><%=GH.hero_stats(@hero, true)%></div>
+        </div>
+        <h5 class="text-center border-top pt-3 pb-0 mt-3 mb-0 text-warning border-warning">Rewards: <%=rewards_for(@ranking)%></h5>
+    </div>
+<% end %>

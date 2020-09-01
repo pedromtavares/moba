@@ -1,0 +1,116 @@
+<%= @current_hero && live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "hero-live-view") %>
+
+<div class="row mt-3">
+    <div class="col">
+        <div class="title-container">
+            <i class="fa fa-trophy text-warning"></i>
+            <h3>Ranking</h3>
+            <p class="text-muted">
+                View the current best heroes and all time top users of Browser MOBA.
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4 mt-4">
+    <div class="col-md-4 offset-1 margin-auto">
+        <a href="/match" class="btn btn-block btn-secondary btn-lg"><i class="fa fa-history mr-1"></i>Previous Match</a>
+    </div>
+</div>
+
+
+<div class="row mt-3 content-with-hero-bar" phx-hook="SetMainWrapper">
+    <div class="col text-center">
+        <ul class="nav nav-tabs nav-bordered nav-justified">
+            <li class="nav-item">
+                <a href="javascript:;" class="nav-link <%=unless @show_users, do: "active"%>" phx-click="show-heroes" phx-hook="Loading" id="show-heroes-link">
+                    <span class="loading-text">Current top Heroes</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="javascript:;" class="nav-link <%=if @show_users, do: "active"%>" phx-click="show-users" phx-hook="Loading" id="show-users-link">
+                    <span class="loading-text">All time top Users</span>
+                </a>
+            </li>
+        </ul>
+        <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=if @show_users, do: "d-none"%>">
+            <tbody id="hall-of-heroes">
+                <%=for hero <- @heroes do %>
+                    <tr id="hero-<%=hero.id%>">
+                        <td>
+                            <h1 class="mb-0">
+                                #<%=hero.pvp_ranking%>
+                            </h1>
+                            <div class="text-center text-danger"><%=hero.pvp_points%> Points</div>
+                        </td>
+                        <td>
+                            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.name) do %>
+                                <%=GH.hero_avatar(hero)%><br/>
+                                <h4 class="mb-0"><%=hero.name%></h4>
+                            <% end %>
+                        </td>
+                        <td>
+                            <h4 class="text-dark mb-3"><em>Level <%=hero.level%> <%=hero.avatar.name%></em></h4>
+                            <%=GH.hero_stats(hero, true)%>
+                        </td>
+                        <td>
+                            <%=GH.hero_skill_list(hero)%>
+                            <br/>
+                            <%=GH.hero_item_list(hero)%>
+                        </td>
+                    </tr>
+              <% end %>
+            </tbody>
+        </table>
+        <%= if @users do %>
+            <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @show_users, do: "d-none"%>">
+                <tbody id="hall-of-users">
+                    <tr>
+                        <td colspan="4" class='text-warning'>Ranked by number of Medals <i class="fa fa-medal"></i> - You win medals by finishing in the top 3 of a match</td>
+                    </tr>
+                    <%=for {user, index} <- Enum.with_index(@users, 1) do %>
+                        <tr id="user-<%=user.id%>">
+                            <td>
+                                <h1>
+                                    #<%=index%>
+                                </h1>
+                            </td>
+                            <td>
+                                <span class="font-15 badge badge-pill badge-light-warning py-1 px-2 text-reset">
+                                    <i class="fa fa-medal mr-1"></i><%=user.medal_count%>
+                                </span>
+                            </td>
+                            <td>
+                                <h2>
+                                    <%=live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, user.username), class: "text-reset"%>
+                                    <br/>
+                                    <small class="text-dark"><em>Last online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
+                                </h2>
+                            </td>
+                            <td style="width: 50%">
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="float-left center">
+                                            <ul class="pagination pagination-rounded mb-0">
+                                                <li class="page-item">
+                                                    <div class="page-link text-white bg-primary" data-toggle="tooltip" title="Level" style="margin-right: -1rem">
+                                                        <%=user.level%>
+                                                    </div>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="progress" style="height:25px;margin-top: 4px;"  data-toggle="tooltip" title="Experience: <%=user.experience%>/<%=Moba.user_level_xp()%>">
+                                            <div style="width:<%=xp_percentage(user)%>%;" class="progress-bar bg-primary text-white">
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                  <% end %>
+                </tbody>
+            </table>
+        <% end %>
+    </div>
+</div>

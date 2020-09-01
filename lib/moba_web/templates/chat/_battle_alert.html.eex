@@ -1,0 +1,13 @@
+<div role="alert" aria-live="assertive" aria-atomic="true" class="toast battle-toast" data-autohide="false" phx-hook="BattleToast" id="battle-toast">
+    <div class="toast-header">
+        <strong class="mr-auto">Account Level UP!</strong>
+        <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+  </div>
+  <div class="toast-body">
+        <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), class: "text-reset" do %>
+            Your Account is now Level <%=@alert.level%>, and you've been awarded a <span class="text-warning">Shard <i class="fab fa-ethereum"></i></span>. Click for more info on <span class="text-warning">Shards</span>.
+        <% end %>
+    </div>
+</div>

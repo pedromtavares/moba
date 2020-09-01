@@ -1,0 +1,65 @@
+<%= @current_hero && live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "hero-live-view") %>
+
+<div class="content-with-hero-bar match" phx-hook="SetMainWrapper">
+    <div class="row mt-3">
+        <div class="col">
+            <div class="title-container">
+                <i class="fa fa-history text-info"></i>
+                <h3>Previous Match</h3>
+                <p class="text-muted">
+                    Check out your performance and the winners of the previous match.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <%= if @last_pve_hero || @last_pvp_hero do %>
+            <div class="row performance mb-0">
+                <%=@last_pve_hero && render "_pve_hero.html", hero: @last_pve_hero%>
+                <%=@last_pvp_hero && render "_pvp_hero.html", hero: @last_pvp_hero%>
+            </div>
+    <% end %>
+
+    <%= if @match && @match.next_changelog  do %>
+        <div class="offset-2 col-8 mb-4">
+            <h3 class="page-title mb-2 text-center">
+                <i class="fa fa-clipboard-list mr-2"></i>Changelog for Next Match
+            </h3>
+            <div class="card-box text-white fixed-card">
+                <%=GH.formatted_effect(@match.next_changelog)%>
+            </div>
+        </div>
+    <% end %>
+
+    <%= if @winners do %>
+        <div class="row">
+            <div class="col">
+                <h3 class="page-title mb-3 text-center">
+                    <i class="fa fa-medal mr-2"></i>Winners
+                </h3>
+            </div>
+        </div>
+
+        <%= if @winner_index do %>
+            <div class="row">
+                <div class="col">
+                    <div class="alert alert-warning alert-dismissible bg-warning border-0 fade show text-center" role="alert">
+                        Congratulations, you've finished the previous match at #<%=@winner_index+1%>, enjoy your Rewards!
+                    </div>
+                </div>
+            </div>
+        <% end %>
+
+        <div class="row winners">
+            <div class="col mt-2">
+                <%=render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket%>
+            </div>
+            <div class="col">
+                <%=render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket%>
+            </div>
+            <div class="col mt-2">
+                <%=render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket%>
+            </div>
+        </div>
+    <% end %>
+</div>

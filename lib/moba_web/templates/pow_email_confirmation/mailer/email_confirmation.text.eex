@@ -1,0 +1,5 @@
+Hi,
+
+Please use the following link to confirm your e-mail address:
+
+<%= @url %>
