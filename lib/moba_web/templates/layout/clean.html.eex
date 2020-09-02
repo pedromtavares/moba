@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%=render "_head.html", conn: @conn, current_hero: nil%>
+    <body>
+        <%=render "_navigation.html", conn: @conn, current_user: @current_user, clean: true %>
+        <div class="wrapper" id="main-wrapper">
+            <div class="container-fluid clean-container">
+                <div class="row">
+                    <div class="col-12">
+                        <%= @inner_content %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%= csrf_meta_tag() %>
+        <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+    </body>
+</html>

@@ -1,0 +1,58 @@
+<article class="timeline-item <%=if @is_attacker, do: "timeline-item-left timeline-attacker", else: "timeline-defender"%> turn"  id="turn-<%=@turn.number%>">
+    <div class="timeline-desk">
+        <div class="timeline-box card-box" style="text-align: left">
+            <span class="<%=if @is_attacker, do: "arrow-alt", else: "arrow"%>"></span>
+            <span class="timeline-icon"><%=@turn.number%></span>
+            <div class="col-12 d-block d-md-none" style="margin-top: -0.5rem">
+                <div class="text-center">
+                    <span class="badge badge-pill text-white text-center turn-badge">Turn #<%=@turn.number%></span>
+                </div>
+            </div>
+            <h3 class="center">
+                <%= if @turn.attacker.stunned do %>
+                    <img src="/images/stunned.png" class="skill-img img-border">
+                    <br/>
+                    <%=@turn.attacker.name%> is stunned and cannot attack.</h3>
+                <% else %>
+                    <img src="<%=GH.image_url(@turn.skill)%>" class="skill-img img-border tooltip-mobile" data-toggle="tooltip" title="<%=turn_skill_description(@turn)%>"/>
+                    <%=if @turn.attacker.silenced do %>
+                        <img src="/images/silenced.png" data-toggle="tooltip" title="<%=@turn.attacker.name%> is silenced this turn and cannot cast spells." class="skill-img silenced img-border-xs"/>
+                    <% end %>
+                    <%=if @turn.attacker.disarmed do %>
+                        <img src="/images/disarmed.png" data-toggle="tooltip" title="<%=@turn.attacker.name%> is disarmed and cannot deal physical damage." class="skill-img silenced img-border-xs"/>
+                    <% end %>
+                    <%=if @turn.item do %>
+                        <img src="<%=GH.image_url(@turn.item)%>" data-toggle="tooltip" title="<%=turn_item_description(@turn)%>" class="skill-img tooltip-mobile img-border-sm activated-item mb-3"/>
+                    <% end %>
+                    <br/>
+                    <%=@turn.attacker.name%> used <%=skill_name(@turn.skill)%>
+                <% end %>
+            </h3>
+            <% descriptions = effect_descriptions(@turn) %>
+            <% {first, tail} = List.pop_at(descriptions, 0) %>
+            <%= if first do %>
+                <%= render "_description.html", turn: @turn, resource: elem(first, 0), effect: elem(first, 1) %>
+                <div class="descriptions">
+                    <%= for {resource, effect} <- tail do %>
+                        <%= render "_description.html", turn: @turn, resource: resource, effect: effect %>
+                    <% end %>
+                </div>
+            <% end %>
+            <%= if Enum.count(descriptions) > 1 do %>
+                <div class="row show-all-effects">
+                    <div class="col center">
+                        <span class="badge badge-pill badge-dark center text-white" id="show-effects-for-<%=@turn.number%>" phx-hook="ExpandEffects" style="cursor:pointer" data-turn="<%=@turn.number%>"><em>show all effects</em></span>
+                    </div>
+                </div>
+            <% end %>
+            <div style="height: 10px;" class="d-none d-md-block">
+                &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+            </div>
+            <div class="row no-gutters">
+                <%=render "_effects.html", debug: @debug, is_attacker: @is_attacker, hero: if @is_attacker, do: @turn.attacker, else: @turn.defender %>
+                <%=render "_effects.html", debug: @debug, is_attacker: !@is_attacker, hero: if @is_attacker, do: @turn.defender, else: @turn.attacker %>
+            </div>
+        </div>
+    </div>
+</article>
+

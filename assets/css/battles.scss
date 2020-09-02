@@ -1,0 +1,691 @@
+.wrapper-league::after{
+  content: "";
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+
+  box-shadow: inset 0px 0px 300px 50px black;
+  background: #103D45;
+  opacity: 1;
+}
+
+.wrapper-battles::after{
+  content: "";
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+
+  box-shadow: inset 0px 0px 300px 50px black;
+  opacity: 1;
+}
+
+@keyframes shadows {
+  0% {
+    box-shadow: 0 0 5px 0 rgba(255, 255, 255, 1);
+  }
+  100% {
+    box-shadow: 0 0 15px 0 rgba(255, 255, 255, 1);
+  }
+}
+
+.battle-toast{
+  position: fixed;
+  margin: 5% auto;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  bottom: 90px;
+  text-align: center;
+}
+
+#hero-battle{
+  margin-bottom: 100px;
+  min-height: 700px;
+
+  .versus-box{
+    @media (min-width: 768px) {
+      margin-top: 50px;
+
+      p{
+        margin-top: 2.5rem;
+      }
+    }
+
+    h1{
+      font-size: 80px;
+    }
+  }
+
+  .battle-initiated{
+    margin-bottom: 2rem;
+  }
+
+  @media (max-width: 767.98px) {
+    .timeline:before{
+      display: none;
+    }
+  }
+
+  .timeline-desk .notification {
+    background: none repeat scroll 0 0 #444b5d;
+    // margin-top: 20px;
+    padding: 8px;
+    color: white;
+    border-radius: 5px;
+
+    @media (max-width: 767.98px) {
+      margin-top: 0;
+    }
+  }
+
+  .timeline-box{
+    background-color: rgba(54, 64, 74, 0.5) !important;
+    font-size: 0.9rem;
+  }
+
+  .notification{
+    background-color: rgba(54, 64, 74, 0.8) !important;
+
+    img{
+      width: 30px;
+      margin-right: 5px;
+    }
+  }
+
+  .debug{
+    margin-top:0;
+    font-size:12px;
+    margin-bottom:5px;
+  }
+
+  .timeline-attacker{
+    display: block;
+    width: 50%;
+    float:left;
+    min-height: 500px;
+
+    .timeline-icon, .turn-badge{
+      background-color: rgba(241, 85, 108, 1);
+      color:white;
+    }
+
+    .arrow-alt{
+      border-left-color: rgba(241, 85, 108, 0.7) !important;
+    }
+
+    .card-box{
+      border-color: rgba(241, 85, 108, 0.7) !important;
+    }
+
+    @media (max-width: 767.98px) {
+      width: 100%;
+      min-height: unset;
+    }
+  }
+
+  .timeline-defender{
+    display: block;
+    width: 50%;
+    float:right;
+    min-height: 500px;
+
+    .timeline-icon, .turn-badge{
+      background-color: rgba(59, 175, 218, 1);
+      color: white;
+    }
+
+    .arrow{
+      border-right-color: rgba(59, 175, 218, 0.7) !important;
+    }
+
+    .card-box{
+      border-color: rgba(59, 175, 218, 0.7) !important;
+    }
+
+    @media (max-width: 767.98px) {
+      width: 100%;
+      min-height: unset;
+    }
+  }
+
+  #turn-2{
+    margin-top: 10rem;
+    @media (max-width: 767.98px) {
+      margin-top: 0 !important;
+    }
+  }
+
+  .show-all-effects{
+    margin: 0.5rem;
+    margin-top: 0;
+    @media (max-width: 767.98px) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .turn-hero{
+   img{
+    width: 40px;
+   }
+   .progress {
+      margin: 3px 3px 3px 0;
+      height: 15px;
+    }
+  }
+
+  .timeline-desk {
+    .descriptions{
+      display: none;
+      // @media (max-width: 767.98px) {
+      //   height: auto !important;
+      // }
+    }
+
+    .descriptions.active{
+      display: block;
+      height: auto;
+      max-height: 200px;
+      overflow: auto;
+      overflow-x: hidden;
+
+      i{
+        display:none;
+      }
+    }
+  }
+
+  .turn {
+    .skill-img{
+      width: 100px;
+      margin-bottom: 5px;
+    }
+    .silenced{
+      width: 50px;
+      position: relative;
+      top: 30px;
+      right: 20px;
+    }
+    .activated-item{
+      width: 50px;
+      position: relative;
+      top: 45px;
+      right: 30px;
+    }
+  }
+
+  .hero{
+    background-color: rgba(54, 64, 74, 0.3) !important;
+
+    .avatar{
+      width: 150px;
+      max-width: unset
+    }
+
+    .skill-img{
+      margin: 3px;
+      width: 20%;
+      max-width:65px;
+    }
+    .item-img{
+      max-width:45px;
+      background: black;
+    }
+
+    .skill-list{
+      margin: 3px 0;
+    }
+
+    .item-list{
+      margin: 3px 0;
+    }
+  }
+}
+
+
+.battles {
+  @media (max-width: 767.98px) {
+    .table td{
+      padding: 0.4rem;
+    }
+  }
+
+  small{
+    font-size: 0.90rem;
+  }
+
+  .card{
+    background-color: rgba(54, 64, 74, 0.5);
+  }
+
+  .card-header{
+    background-color: rgba(54, 64, 74, 0.5);
+  }
+
+  .avatar{
+    width: 70px;
+  }
+
+  .ribbon{
+    a{
+      color: white;
+    }
+  }
+
+  .table tbody + tbody{
+    border: 0;
+  }
+
+  #unread-arena, .unread-row{
+    background-color: rgba(59, 175, 218, 0.1);
+  }
+
+
+
+  .battle-row{
+    cursor: pointer;
+
+    td{
+      vertical-align: middle;
+
+      .badge{
+        margin-right: 5px;
+      }
+
+      .ribbon{
+        margin-bottom: 0;
+        padding: 2px 6px;
+        width: 80px;
+      }
+    }
+
+    .form-wizard-header{
+      .success{
+        background-color: rgba(26, 188, 156, 0.2);
+        color: #1abc9c !important;
+
+        .number{
+          color: #1abc9c !important;
+        }
+      }
+
+      .failure{
+        background-color: rgba(241, 85, 108, 0.2);
+        color: #f1556c !important;
+        border: 1px solid rgba(241, 85, 108, 0.2);
+
+        .number{
+          color: #f1556c !important;
+        }
+      }
+
+      .nav-link{
+        cursor: default;
+        padding: 0.25rem 0.5rem;
+      }
+    }
+  }
+}
+
+#battle-bar{
+  background: #38414a;
+  border: 0;
+  border-top: 3px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 0 12px 0 12px;
+  box-shadow: inset 0px 0px 300px black;
+  z-index: 1000;
+
+  .inner-content{
+    min-height: 180px;
+  }
+
+  .can-use{
+    cursor: pointer;
+    border: 2px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+  }
+
+  .empty-item{
+    border: 3px solid rgba(26,32,39,1);
+    box-shadow: inset 0px 0px 40px black;
+    width: 60px;
+    height: 47px;
+  }
+
+  .inactive {
+    box-shadow: inset 0px 0px 300px black;
+    cursor: not-allowed;
+
+    img {
+      // border: 3px solid rgba(46,60,73,1);
+      opacity: 0.5;
+      padding: 3px;
+    }
+  }
+
+  .skills-container{
+    width: 400px;
+    margin: auto;
+  }
+
+  .items-container{
+    width: 400px;
+    margin: auto;
+    height: 50px;
+  }
+
+  .current-skill{
+    animation: 1s shadows infinite;
+  }
+
+  .last-skill{
+    opacity: 1 !important;
+  }
+
+  .current-item{
+    animation: 1s shadows infinite;
+  }
+
+  .last-item{
+    opacity: 1 !important;
+  }
+
+  .skill-img{
+    width: 65px;
+  }
+
+  .item-img{
+    width: 60px;
+    height: 47px;
+  }
+
+  .img-container{
+    margin-right: 3px;
+  }
+
+  .skill-container{
+    width: 65px;
+    height: 65px;
+
+    .mp-cost{
+      position: relative;
+      bottom: 22px;
+      left: 42px;
+    }
+
+    .cooldown{
+      position: relative;
+      bottom: 40px;
+      left: 16px;
+      font-size: 0.8rem;
+    }
+
+    .passive{
+      position: relative;
+      bottom: 40px;
+      left: 20px;
+      font-size: 0.8rem;
+    }
+  }
+
+  .item-container{
+    width: 60px;
+    height: 47px;
+
+    .mp-cost{
+      position: relative;
+      bottom: 22px;
+      left: 42px;
+    }
+
+    .cooldown{
+      position: relative;
+      bottom: 35px;
+      left: 16px;
+      font-size: 0.7rem;
+    }
+
+    .passive{
+      position: relative;
+      bottom: 35px;
+      left: 20px;
+      font-size: 0.7rem;
+    }
+  }
+
+  .basic-attack{
+    margin-left: 2rem;
+  }
+
+
+  @media (max-width: 575.98px) {
+    .skills-container{
+      width: 100%;
+    }
+    .skill-img{
+      width: 55px;
+    }
+
+    .basic-attack{
+      margin-left: 1.2rem;
+    }
+
+    .skill-container{
+      width: 55px;
+      height: 55px;
+      margin-right: 5px;
+
+      .mp-cost{
+        position: relative;
+        bottom: 17px !important;
+        left: 32px !important;
+      }
+
+      .cooldown{
+        left: 8px !important;
+      }
+    }
+
+    .item-img{
+      width: 50px;
+      height: 37px;
+    }
+
+    .item-container{
+      width: 50px;
+      height: 37px;
+
+      .mp-cost{
+        left: 32px !important;
+      }
+
+      .cooldown{
+        font-size: 0.6rem;
+        left: 10px;
+        bottom: 30px;
+      }
+    }
+
+  }
+
+  @media (max-width: 370px) {
+    .skill-img{
+      width: 50px;
+    }
+
+    .basic-attack{
+      margin-left: .5rem;
+    }
+
+    .skill-container{
+      width: 50px;
+      height: 50px;
+      margin-right: 2px;
+
+      .mp-cost{
+        position: relative;
+        bottom: 17px !important;
+        left: 32px !important;
+      }
+
+      .cooldown{
+        left: 8px !important;
+      }
+    }
+
+    .item-img{
+      width: 45px;
+      height: 32px;
+    }
+
+    .item-container{
+      width: 45px;
+      height: 32px;
+
+      .mp-cost{
+        left: 32px !important;
+      }
+
+      .cooldown{
+        font-size: 0.6rem;
+        left: 10px;
+        bottom: 30px;
+      }
+    }
+  }
+
+  .battle-border-left{
+    border-left: 3px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+    @media (max-width: 1198.98px) {
+      border: 0;
+    }
+  }
+
+  .battle-border-right{
+    border-right: 3px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+    @media (max-width: 1198.98px) {
+      border: 0;
+    }
+  }
+
+  .battle-border-top{
+    border: 0;
+    border-top: 3px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+    @media (max-width: 767.98px) {
+      border: 0;
+    }
+  }
+
+  .list-group-item{
+    background-color: unset;
+  }
+
+  .progress {
+    margin: 3px 3px 3px 0;
+    height: 15px;
+  }
+
+  .victory-xp-bar{
+    height: 25px;
+    float: left;
+    width: 90%;
+  }
+
+  .attack-button{
+    margin-bottom: 10px;
+  }
+
+  .level-bubble{
+    width: 3%;
+  }
+
+  .hero-level{
+   color: black;
+  }
+
+  .hero-next-level{
+    color: white;
+    margin-left: -20px;
+  }
+
+  .hero-leveled{
+    background: #3bafda;
+  }
+
+  .victory-title{
+
+    small{
+      font-size: 1rem;
+    }
+  }
+
+  .streaks{
+
+    .shape{
+      margin-right: 0px;
+      margin-bottom: 0;
+    }
+  }
+
+  .leveled{
+
+    .shape{
+      margin-bottom: 0;
+      clip-path: polygon(100% 0, 79% 54%, 100% 100%, 0 100%, 0 0);
+      padding-right: 25px;
+    }
+  }
+
+  .form-wizard-header{
+
+    .success{
+      background-color: rgba(26, 188, 156, 0.2);
+      color: #1abc9c !important;
+
+      .number{
+        color: #1abc9c !important;
+      }
+    }
+
+    .failure{
+      background-color: rgba(241, 85, 108, 0.2);
+      color: #f1556c !important;
+      border: 1px solid rgba(241, 85, 108, 0.2);
+
+      .number{
+        color: #f1556c !important;
+      }
+    }
+
+    .nav-link{
+      cursor: default;
+    }
+  }
+
+  .promotion {
+    img{
+      width: 25px;
+    }
+    a{
+      cursor: default;
+    }
+  }
+}

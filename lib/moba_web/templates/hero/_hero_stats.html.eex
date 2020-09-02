@@ -1,0 +1,10 @@
+<div class="btn-group hero-stats">
+    <button class="btn btn-icon waves-effect btn-outline-dark text-danger" data-toggle="tooltip" title="Total HP"> <i class="fa fa-heart mr-1"></i> <%=@hero.total_hp + @hero.item_hp%></button>
+    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-info" data-toggle="tooltip" title="Total MP"> <i class="fa fa-flask"></i> <%=@hero.total_mp + @hero.item_mp%></button>
+    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-success" data-toggle="tooltip" title="ATK"> <i class="fa fa-gavel"></i> <%=@hero.atk + @hero.item_atk%></button>
+    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-pink" data-toggle="tooltip" title="Power"> <i class="fa fa-bolt"></i> <%=@hero.power + @hero.item_power%></button>
+    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-warning" data-toggle="tooltip" title="Armor"> <i class="fa fa-shield"></i> <%=@hero.armor + @hero.item_armor%></button>
+    <%= if assigns[:show_speed] do %>
+      <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-purple" data-toggle="tooltip" title="Speed"> <i class="fa fa-running"></i> <%=@hero.speed + @hero.item_speed%></button>
+    <% end %>
+</div>

@@ -1,0 +1,33 @@
+<div class="d-none d-lg-block col" id="arena_target_<%=@target.id%>">
+    <div class="text-center target card-box mb-0">
+        <div class="row mt-2 mb-1">
+            <div class="col-12">
+                <%=live_redirect to: Routes.live_path(assigns[:socket], MobaWeb.UserLiveView, @target.name) do %>
+                    <%=GH.hero_avatar(@target)%>
+                    <h4 class="mb-1 font-17"><img src="/images/league_<%=@target.league_tier%>.png" class="league-logo"> <%=@target.name%> <em>#<%=@target.pvp_ranking%></em></h4>
+                    <h5 class="mb-1 font-14 text-dark"><em>Level <%=@target.level%> <%=@target.avatar.name%></em></h5>
+                <% end %>
+                <div class="gank-button mb-1 mt-1">
+                    <button class="battle-button btn btn-lg btn-icon waves-effect btn-danger mt-1" phx-click="battle" id="battle-against-<%=@target.id%>" phx-value-id="<%=@target.id%>" phx-value-number="<%=@target.active_build_id%>" phx-hook="Loading" loading="Preparing..." data-toggle="tooltip" title="Points that you gain/lose on victory/defeat">
+                        <span class="loading-text"><i class="fa fa-crosshairs mr-1"></i> Attack <small class="font-italic"><%=points_for_arena_battle(@current_hero, @target)%></small></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <%=GH.hero_stats(@target)%>
+                <div class="skills-container mt-1 mb-1">
+                    <%=GH.hero_skill_list(@target)%>
+                </div>
+                <div class="items-container mb-1">
+                    <%=GH.hero_item_list(@target)%>
+
+                    <%= if length(@target.items) == 0 do %>
+                        <div style="height: 41px"></div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

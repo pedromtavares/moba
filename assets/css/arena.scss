@@ -1,0 +1,340 @@
+.wrapper-arena::after{
+  content: "";
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+  z-index: -1;
+  box-shadow: inset 0px 0px 300px 50px black;
+  background: #481920;
+  opacity: 1;
+}
+
+.arena-select{
+  .card, .card-footer{
+    background-color: rgba(54, 64, 74, 0.7);
+  }
+  .skill-container{
+    img{
+      width: 25%;
+      max-width: 90px;
+    }
+  }
+  .item-container{
+    img{
+      width: 16.6%;
+      max-width: 60px;
+      background: black;
+    }
+  }
+  .avatar{
+    max-width: 160px;
+  }
+  .btn-danger {
+    color: #f1556c;
+    background: rgba(241,85,108, 0.2) !important;
+  }
+  .btn-success {
+    color: #1abc9c;
+    background: rgba(26,188,156, 0.2) !important;
+  }
+}
+
+.arena{
+  margin-bottom: 180px;
+
+  .btn-danger {
+    color: #f1556c;
+    background: rgba(241,85,108, 0.2) !important;
+  }
+
+  @media (max-width: 992px) {
+    margin-bottom: 220px;
+  }
+
+  .top-border{
+    border-top: 1px solid #36404a;
+  }
+
+  .card-box{
+    background-color: rgba(54, 64, 74, 0.3);
+    padding: 0;
+    margin-bottom: 3rem;
+  }
+  .card-border{
+    padding: 1rem 0.5rem;
+    border: 0;
+  }
+  .info-box{
+    // border: 1px solid #36404a;
+    border-top: 0;
+    border-bottom: 0;
+    @media (max-width: 992px) {
+      border: 0;
+    }
+
+    .form-group{
+      margin-bottom: 0;
+    }
+
+    form{
+      justify-content: space-around;
+      // width:94%;
+
+      .filter{
+        // margin-bottom: 0.5rem;
+      }
+
+      @media (max-width: 992px) {
+        width: 100%;
+
+        .filter{
+          margin-bottom: 0 !important;
+        }
+      }
+
+    }
+
+    .form-group{
+      flex: 0 1 auto;
+    }
+
+  }
+
+  .nav-container{
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+    // border-top: 1px solid #36404a;
+  }
+
+  .extra-nav{
+    margin-bottom: 2rem;
+    // border-top: 1px solid #36404a;
+  }
+
+  .page-link{
+    background-color: rgba(73, 85, 97, .7);
+    padding: 0.45rem 0.9rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    border-radius: 0.15rem;
+  }
+
+  .padding-right{
+    padding-right: 4rem;
+  }
+
+  .padding-left{
+    padding-left: 4rem;
+  }
+
+  .round-progress{
+    height:30px;
+    border-radius:0;
+    width: 70%;
+
+    small{
+      margin-top:4px;
+      width: 70%;
+    }
+  }
+
+  .empty-target{
+    height: 400px;
+  }
+
+  .target{
+
+    .avatar{
+      width: 150px;
+      max-width: 150px;
+    }
+
+    .skill-img{
+      margin: 3px;
+      width:75px;
+    }
+
+    .item-img{
+      width:55px;
+      background: black;
+    }
+
+    .skill-list{
+      margin: 3px 0;
+    }
+
+    .item-list{
+      margin: 3px 0;
+    }
+
+    @media (max-width: 1400px) {
+      .avatar{
+        width: 100px;
+      }
+
+      .skill-img{
+        margin: 3px;
+        width:65px;
+      }
+      .item-img{
+        width:45px;
+      }
+    }
+  }
+
+  .mobile-target{
+    margin-top: 1rem;
+
+    >div{
+      padding-top: 2rem;
+      // border-top: 1px solid #36404a;
+    }
+
+
+    .skill-img{
+      width: 25%;
+      max-width: 80px;
+    }
+
+    .item-img{
+      width: 16.6%;
+      max-width: 50px;
+      // border-top: 0;
+    }
+
+    .skill-img:first-child{
+      border-left: 0;
+    }
+    .skill-img:last-child{
+      border-right: 0;
+    }
+
+    .btn-lg{
+      margin: 1rem 0;
+    }
+
+    .btn-group{
+      width: 100%;
+      margin-top: 1rem;
+
+      button:first-child{
+        border-left: 0;
+      }
+      button:last-child{
+        border-right: 0;
+      }
+
+    }
+  }
+
+  .table{
+    background: rgba(54, 64, 74, 0.5);
+
+    td{
+      vertical-align: middle;
+    }
+  }
+
+  .card-header, .card-footer{
+    background-color: rgba(65,77,89, 0.1);
+  }
+
+  small{
+    font-size: 0.90rem;
+  }
+
+  .custom-select{
+    width: auto !important;
+    background-color: unset;
+  }
+
+  .pagination{
+    margin-bottom: 0;
+  }
+
+  .nav-link.active{
+    background-color: rgba(73, 85, 97, 0.8) !important;
+    border-color: rgba(241, 85, 108, 0.5) !important;
+  }
+
+  .card-header{
+    padding: 1rem 0;
+  }
+
+   hr{
+      border-top: 3px solid #36404a;
+    }
+
+  #ranking{
+    .current-hero{
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+.ranking{
+  .skill-img{
+    width:23%;
+    max-width: 80px;
+    margin: 1px;
+  }
+
+  .item-img{
+    width: 50px;
+    margin: 1px;
+    background: black;
+  }
+
+  .avatar{
+    max-width: 150px;
+    width: 100%;
+  }
+
+  .nav-link{
+    background-color: rgba(73, 85, 97, 0.3);
+    padding: 0.5rem;
+  }
+
+  .nav-item{
+    width: 20%;
+
+    img{
+      width: 100%;
+      max-width: 70px;
+      max-height: unset;
+    }
+  }
+
+  .hero-stats{
+    width: 100%;
+    margin-bottom: 0.5rem;
+
+    @media (max-width: 992px) {
+      button{
+        font-size: 0.7rem;
+      }
+    }
+  }
+
+  .skill-container{
+    width: 100%;
+    margin-bottom: 0.5rem;
+
+    img{
+      width: 25%;
+      margin: 0;
+    }
+  }
+
+  .item-container{
+    width: 100%;
+
+    img{
+      width: 16.5%;
+    }
+  }
+}
+

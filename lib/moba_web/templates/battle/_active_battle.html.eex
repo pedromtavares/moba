@@ -1,0 +1,109 @@
+<div class="row">
+    <div class="col col-md-6">
+        <div class="row mt-2">
+            <div class="col center">
+                <button class="btn btn-danger attack-button" phx-hook="AttackButton" id="attack-button" data-skill="<%=@skill && @skill.id%>">
+                    <span class="loading-text">
+                        Attack with <span id="active-skill-name"><%=skill_name(@skill)%></span> <span id="active-item-name"><%=item_name(@item)%></span>
+                    </span>
+                </button>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col">
+                <div class="skills-container">
+                    <%= for skill <- @battle.attacker.active_build.skills do %>
+                        <%= if can_use?(@turn, skill) && !@turn.attacker.double_skill do %>
+                            <div class="img-container skill-container float-left" data-resource="<%=skill.id%>">
+                                <img phx-value-id="<%=skill.id%>" src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" data-name="<%=skill.name%>" class="skill-img can-use <%=if @skill && @skill.code == skill.code, do: "current-skill"%>" phx-hook="InstaSkill" id="active-skill-<%=skill.id%>"/>
+                                <br/>
+                                <span class="badge badge-pill badge-primary mp-cost"><%=skill.mp_cost%></span>
+                            </div>
+                        <% else %>
+                            <div class="img-container skill-container float-left inactive">
+                                <img src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" class="skill-img" id="inactive-skill-<%=skill.id%>"/>
+                                <%= resource_status(skill, @turn.attacker) %>
+                            </div>
+                        <% end %>
+                    <% end %>
+                    <div class="img-container basic-attack float-left <%=@turn.attacker.double_skill && "inactive"%>" data-resource="">
+                        <img phx-click="pick-skill" phx-value-id="" src="/images/basic_attack.png" data-toggle="tooltip" title="<%=GH.basic_attack_description()%>" data-name="Basic Attack" class="skill-img can-use <%=unless @skill, do: "current-skill"%>" data-resource="" phx-hook="InstaSkill" id="pick-basic-attack"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="items-container">
+                    <%= for item <- @battle.attacker.items do %>
+                        <%= if can_use?(@turn, item) do %>
+                            <div class="img-container item-container float-left">
+                                <img phx-value-id="<%=item.id%>" phx-hook="InstaItem" src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" data-name="<%=item.name%>" class="item-img can-use <%=if @item == item, do: "current-item"%>" id="attacker-item-<%=item.id%>" />
+                                <%= if item.mp_cost > 0 do %>
+                                    <span class="badge badge-pill badge-primary mp-cost"><%=item.mp_cost%></span>
+                                <% end %>
+                            </div>
+                        <% else %>
+                            <div class="img-container item-container float-left inactive">
+                                <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class="item-img inactive"/>
+                                <%= resource_status(item, @turn.attacker) %>
+                            </div>
+                        <% end %>
+                    <% end %>
+                    <%= if Enum.count(@battle.attacker.items) < 6 do %>
+                        <%= for _ <- (Enum.count(@battle.attacker.items)..5) do %>
+                            <div class="img-container item-container float-left">
+                                <div class="item-img empty-item"></div>
+                            </div>
+                        <% end %>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 battle-border-left d-none d-md-block">
+        <div class="row mt-2">
+            <div class="col center">
+                <%= if @last_turn && @last_turn.skill do %>
+                    <div class="btn btn-outline-danger">
+                        Attacked you with <%=skill_name(@last_turn.skill)%> <%=item_name(@last_turn.item)%>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+        <div class="row mb-1">
+            <div class="col mt-1">
+                <div class="skills-container">
+                    <div class="img-container mr-4 float-left inactive">
+                        <img src="/images/basic_attack.png" data-toggle="tooltip" title="<%=GH.basic_attack_description()%>" class="skill-img <%=if @last_turn && @last_turn.skill && @last_turn.skill.code == "basic_attack", do: "last-skill"%>""/>
+                    </div>
+                    <%= for skill <- @battle.defender.active_build.skills do %>
+                        <div class="img-container float-left inactive skill-container">
+                            <img src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" class="skill-img <%=if @last_turn && @last_turn.skill && @last_turn.skill.id == skill.id, do: "last-skill"%>"/>
+                            <%= resource_status(skill, @turn.defender) %>
+                        </div>
+                    <% end %>
+
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div class="items-container">
+                    <%= for item <- @battle.defender.items do %>
+                        <div class="img-container float-left inactive">
+                            <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class="item-img <%=if @last_turn && @last_turn.item == item, do: "last-item"%>"/>
+                        </div>
+                    <% end %>
+                    <%= if Enum.count(@battle.defender.items) < 6 do %>
+                        <%= for _ <- (Enum.count(@battle.defender.items)..5) do %>
+                            <div class="img-container item-container float-left">
+                                <div class="item-img empty-item"></div>
+                            </div>
+                        <% end %>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

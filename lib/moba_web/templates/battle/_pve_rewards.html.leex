@@ -1,0 +1,107 @@
+<div class="row">
+    <div class="col center victory-title margin-auto">
+        <h3>
+            <%=battle_result(@battle)%>
+            <br/>
+            <small>
+                <%= unless @hero.level >= Moba.max_hero_level() do %>
+                    <%= if @battle.rewards.battle_xp > 0 do %>
+                        <span class="badge badge-pill badge-light-primary d-none d-sm-inline">+<%=@battle.rewards.battle_xp%> Battle XP</span>
+                    <% end %>
+                    <%= if @battle.rewards.win_xp > 0 do %>
+                        <span class="badge badge-pill badge-light-primary d-none d-sm-inline">+<%=@battle.rewards.win_xp%> Victory XP</span>
+                    <% end %>
+                    <%= if @battle.rewards.win_streak_xp > 0 do %>
+                        <span class="badge badge-pill badge-light-purple d-none d-sm-inline">+<%=@battle.rewards.win_streak_xp%> Win Streak XP</span>
+                    <% end %>
+                    <%= if @battle.rewards.loss_streak_xp > 0 do %>
+                        <span class="badge badge-pill badge-light-dark d-none d-sm-inline">+<%=@battle.rewards.loss_streak_xp%> Loss Streak XP</span>
+                    <% end %>
+                    <%= if @battle.rewards.total_xp > 0 do %>
+                        <span class="badge badge-pill badge-light-primary d-inline d-sm-none">+<%=@battle.rewards.total_xp%> XP</span>
+                    <% end %>
+                <% end %>
+                <%= if @battle.rewards.total_gold > 0 do %>
+                    <span class="badge badge-pill badge-light-warning">+<%=@battle.rewards.total_gold%>g</span>
+                <% end %>
+                <%= if @battle.rewards.total_pve_points > 0 do %>
+                    <span class="badge badge-pill badge-light-success">+<%=@battle.rewards.total_pve_points%> Jungle Points</span>
+                <% end %>
+                <%= if @battle.rewards.battle_xp > 0 do %>
+                    <span class="badge badge-pill badge-light-info d-none"><%=@battle.rewards.difficulty_percentage%>% XP/gold for <%=@battle.difficulty%> difficulty </span>
+                <% else %>
+                    <span class="badge badge-pill badge-light-dark">No rewards given on defeat</span>
+                <% end %>
+            </small>
+        </h3>
+    </div>
+</div>
+
+<div class="row">
+    <div class="d-none d-md-block col-2">
+        <div class="ribbon-box streaks">
+            <%= if @hero.win_streak > 1 do %>
+                <div class="ribbon ribbon-purple float-right shape"> Win Streak: <%=@hero.win_streak - 1%></div>
+            <% end %>
+            <%= if @hero.loss_streak > 1 do %>
+                <div class="ribbon ribbon-dark float-right shape"> Loss Streak: <%=@hero.loss_streak%></div>
+            <% end %>
+        </div>
+    </div>
+    <div class="col-12 col-md-8 center">
+        <div class="float-left center level-bubble">
+            <ul class="pagination pagination-rounded mb-0">
+                <li class="page-item">
+                    <div class="page-link hero-level bg-white">
+                        <%=if @hero.leveled_up, do: @hero.level-1, else: @hero.level%>
+                    </div>
+                </li>
+            </ul>
+        </div>
+        <div class="progress progress-fixed victory-xp-bar">
+            <%= if @hero.level >= Moba.max_hero_level() do %>
+                <div style="width:100%" class="progress-bar bg-white">
+                    <span class="text-light">MAX LEVEL</span>
+                </div>
+            <% else %>
+                <div style="width:<%=hero_xp_percentage(@battle)%>%" class="progress-bar bg-white">
+                </div>
+                <div style="width:<%=battle_xp_percentage(@battle)%>%" class="progress-bar">
+                    <%=if @battle.rewards.total_xp > 0 do %>
+                        <span>&nbsp;&nbsp;+<%=@battle.rewards.total_xp%> XP&nbsp;&nbsp;</span>
+                    <% end %>
+                </div>
+            <% end %>
+        </div>
+        <div class="float-left center level-bubble">
+            <%= unless @hero.level >= Moba.max_hero_level() do %>
+                <ul class="pagination pagination-rounded mb-0">
+                    <li class="page-item">
+                        <div class="page-link hero-next-level <%=if @hero.leveled_up, do: "hero-leveled"%>">
+                            <%=if @hero.leveled_up, do: @hero.level, else: @hero.level+1%>
+                        </div>
+                    </li>
+                </ul>
+            <% end %>
+        </div>
+    </div>
+    <div class="d-none d-md-block col-2">
+        <div class="ribbon-box leveled">
+            <%= if @hero.leveled_up do %>
+                <div class="ribbon ribbon-primary float-left shape"> Level Up!</div>
+            <% end %>
+        </div>
+    </div>
+</div>
+<div class="row battle-border-top pt-1 mt-1">
+    <div class="col-6 col-md-4">
+        <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-secondary", "phx-hook": "Loading", id: "load-battles" do %>
+            <span class="loading-text"><i class="fa fa-history"></i> Battle History</span>
+        <% end %>
+    </div>
+    <div class="col-6 col-md-4 center">
+        <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-success", "phx-hook": "Loading", id: "load-jungle" do %>
+            <span class="loading-text"><i class="fa fa-leaf"></i> Jungle</span>
+        <% end %>
+    </div>
+</div>

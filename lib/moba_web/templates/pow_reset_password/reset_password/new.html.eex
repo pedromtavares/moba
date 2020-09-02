@@ -1,0 +1,40 @@
+<div class="account-pages mt-5 mb-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6 col-xl-5">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <div class="text-center w-75 m-auto">
+                            <h3>Reset Password</h3>
+
+                        </div>
+
+                        <%= form_for @changeset, @action, [as: :user], fn f -> %>
+                            <%= if @changeset.action do %>
+                                <p class="alert alert-danger">Oops, something went wrong! Please check the errors below.</p>
+                            <% end %>
+
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <%= error_tag f, :email %>
+                                <%= text_input f, :email, class: "form-control" %>
+
+                            </div>
+
+                            <div class="form-group mb-0 text-center">
+                                <button class="btn btn-primary btn-block" type="submit"> Send Reset Instructions</button>
+                            </div>
+
+                        <% end %>
+
+
+                    </div> <!-- end card-body -->
+                </div>
+                <!-- end card -->
+
+            </div> <!-- end col -->
+        </div>
+        <!-- end row -->
+    </div>
+    <!-- end container -->
+</div>

@@ -1,0 +1,68 @@
+<%= @current_hero && live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "hero-live-view") %>
+
+<div class="content-with-hero-bar tavern" phx-hook="SetMainWrapper" id="tavern">
+
+    <div class="row mt-3">
+        <div class="col">
+            <div class="title-container">
+                <i class="fa fa-store-alt text-primary"></i>
+                <h3>Tavern</h3>
+                <p class="text-muted">
+                    Unlock new heroes and skills to play with by using your Shards. You can acquire Shards by leveling heroes in the Jungle or finishing in the top 3 of the Arena.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-2 ml-auto">
+            <div class="widget-simple text-center card-box">
+                <h3 class="text-warning counter mt-0"><i class="fab fa-ethereum mr-2"></i><%=@current_user.shard_count%></h3>
+                <p class="text-muted mb-0">Shards</p>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-2 mr-auto">
+            <div class="widget-simple text-center card-box pb-2 pt-2">
+                <h3 class="text-primary counter mt-0"><i class="fa fa-user mr-2"></i><%=@current_user.level%></h3>
+                <p class="text-muted mb-0">Account Level</p>
+                <div class="progress progress-fixed account-level-bar">
+                <div style="width:<%=MobaWeb.HallView.xp_percentage(@current_user)%>%" class="progress-bar">
+                    <span>&nbsp;&nbsp;<%=@current_user.experience%>/<%=Moba.user_level_xp()%>&nbsp;&nbsp;</span>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h3 class="page-title mb-3 text-center">
+                <i class="fa fa-users mr-2"></i>Avatars
+                <br/>
+                <small class="font-italic">Unlocked Avatars will show up when creating a new Hero</small>
+            </h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <%= for avatar <- @avatars do %>
+            <%=render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
+        <% end %>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h2 class="page-title mb-3 mt-3 text-center">
+                <i class="fa fa-magic mr-2"></i>Skills
+                <br/>
+                <small class="font-italic">Unlocked Skills will show up when creating a new Hero</small>
+            </h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <%= for skill <- @skills do %>
+            <%=render "_skill.html", skill: skill, user: @current_user %>
+        <% end %>
+    </div>
+</div>

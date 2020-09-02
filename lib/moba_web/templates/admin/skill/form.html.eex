@@ -1,0 +1,186 @@
+<%= form_for @changeset, @action, [multipart: true, id: "torch-form"], fn f -> %>
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details -
+        <%=for skill <- @skills do %>
+          <a href="/admin/skills/<%=skill.id%>/edit" target="_blank">Level <%=skill.level%></a>
+        <% end %>
+        </span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+
+    <div class="torch-form-group">
+      <%= label f, :enabled %>
+      <%= checkbox f, :enabled %>
+      <%= error_tag f, :enabled %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :name %>
+      <%= text_input f, :name %>
+      <%= error_tag f, :name %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :level %>
+      <%= text_input f, :level %>
+      <%= error_tag f, :level %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :description %>
+      <%= textarea f, :description %>
+      <%= error_tag f, :description %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :image %>
+      <%= file_input f, :image %>
+      <%= error_tag f, :image %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :effects %>
+      <%= textarea f, :effects %>
+      <%= error_tag f, :effects %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :code %>
+      <%= text_input f, :code %>
+      <%= error_tag f, :code %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :level_requirement %>
+      <%= number_input f, :level_requirement %>
+      <%= error_tag f, :level_requirement %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>Mp Cost | <%=Enum.map(@skills, fn skill -> skill.mp_cost end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :mp_cost %>
+      <%= error_tag f, :mp_cost %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>Cooldown | <%=Enum.map(@skills, fn skill -> skill.cooldown end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :cooldown %>
+      <%= error_tag f, :cooldown %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>Duration | <%=Enum.map(@skills, fn skill -> skill.duration end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :duration %>
+      <%= error_tag f, :duration %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :passive %>
+      <%= checkbox f, :passive %>
+      <%= error_tag f, :passive %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :ultimate %>
+      <%= checkbox f, :ultimate %>
+      <%= error_tag f, :ultimate %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>base_damage | <%=Enum.map(@skills, fn skill -> skill.base_damage end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :base_damage %>
+      <%= error_tag f, :base_damage %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>base_amount | <%=Enum.map(@skills, fn skill -> skill.base_amount end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :base_amount %>
+      <%= error_tag f, :base_amount %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>atk_multiplier | <%=Enum.map(@skills, fn skill -> skill.atk_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :atk_multiplier, step: "any" %>
+      <%= error_tag f, :atk_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>other_atk_multiplier | <%=Enum.map(@skills, fn skill -> skill.other_atk_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :other_atk_multiplier, step: "any" %>
+      <%= error_tag f, :other_atk_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>hp_multiplier | <%=Enum.map(@skills, fn skill -> skill.hp_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :hp_multiplier, step: "any" %>
+      <%= error_tag f, :hp_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>other_hp_multiplier | <%=Enum.map(@skills, fn skill -> skill.other_hp_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :other_hp_multiplier, step: "any" %>
+      <%= error_tag f, :other_hp_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>hp_regen_multiplier | <%=Enum.map(@skills, fn skill -> skill.hp_regen_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :hp_regen_multiplier, step: "any" %>
+      <%= error_tag f, :hp_regen_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>mp_multiplier | <%=Enum.map(@skills, fn skill -> skill.mp_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :mp_multiplier, step: "any" %>
+      <%= error_tag f, :mp_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>other_mp_multiplier | <%=Enum.map(@skills, fn skill -> skill.other_mp_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :other_mp_multiplier, step: "any" %>
+      <%= error_tag f, :other_mp_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>mp_regen_multiplier | <%=Enum.map(@skills, fn skill -> skill.mp_regen_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :mp_regen_multiplier, step: "any" %>
+      <%= error_tag f, :mp_regen_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>extra_multiplier | <%=Enum.map(@skills, fn skill -> skill.extra_multiplier end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :extra_multiplier, step: "any" %>
+      <%= error_tag f, :extra_multiplier %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>armor_amount | <%=Enum.map(@skills, fn skill -> skill.armor_amount end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :armor_amount %>
+      <%= error_tag f, :armor_amount %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>power_amount | <%=Enum.map(@skills, fn skill -> skill.power_amount end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :power_amount %>
+      <%= error_tag f, :power_amount %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>roll_number | <%=Enum.map(@skills, fn skill -> skill.roll_number end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :roll_number %>
+      <%= error_tag f, :roll_number %>
+    </div>
+
+    <div class="torch-form-group">
+      <label>extra_amount | <%=Enum.map(@skills, fn skill -> skill.extra_amount end) |> Enum.join(" / ")%></label>
+      <%= number_input f, :extra_amount %>
+      <%= error_tag f, :extra_amount %>
+    </div>
+
+    <div class="torch-submit-form">
+      <%= submit "Submit", class: "torch-submit-button" %>
+    </div>
+  </fieldset>
+<% end %>

@@ -1,0 +1,37 @@
+<div class="col d-none d-md-block <%=if @first, do: "border-right", else: "border-left"%>">
+    <div class="text-center target">
+        <div class="row mt-1">
+            <div class="col-12">
+                <img src="<%=GH.image_url(@target.defender.avatar)%>" class="avatar img-border"/>
+                <h4 class="mb-2 font-17 text-<%=difficulty_color(@target.difficulty)%>">Level <%=@target.defender.level%> <%=@target.defender.avatar.name%></h4>
+                <div class="gank-button mb-1">
+                    <%= if @current_hero.pve_battles_available > 0 do %>
+                        <button phx-click="battle" id="gank-<%=@target.id%>" phx-value-id="<%=@target.id%>" class="battle-button btn btn-lg btn-icon loading-text waves-effect btn-<%=difficulty_color(@target.difficulty)%>" phx-hook="Loading" loading="Ganking...">
+                          <span class="loading-text"><i class="fa fa-leaf mr-1"></i> Gank</span>
+                        </button>
+                    <% else %>
+                        <button class="battle-button btn btn-icon btn-lg waves-effect btn-<%=difficulty_color(@target.difficulty)%> disabled" data-toggle="tooltip" title="You do not have available ganks">
+                            <i class="fa fa-leaf mr-1"></i> Gank
+                        </button>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 mt-1">
+                <%=GH.hero_stats(@target.defender)%>
+                <div class="skills-container mt-1 mb-1">
+                    <%=GH.hero_skill_list(@target.defender)%>
+                </div>
+                <div class="items-container mb-1">
+                    <%=GH.hero_item_list(@target.defender)%>
+
+                    <%= if length(@target.defender.items) == 0 do %>
+                        <div style="height: 41px"></div>
+                    <% end %>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

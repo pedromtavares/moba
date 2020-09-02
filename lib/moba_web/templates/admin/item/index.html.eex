@@ -1,0 +1,179 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link "New Item", to: Routes.item_path(@conn, :new) %>
+  </div>
+</section>
+<section id="torch-index-content">
+  <div class="torch-container">
+    <section id="torch-filters">
+      <h3>Find Items</h3>
+      <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
+
+          <div class="field">
+            <label>Enabled</label>
+            <%= filter_boolean_input(:item, :enabled, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Name</label>
+            <%= filter_select(:item, :name, @conn.params) %>
+            <%= filter_string_input(:item, :name, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Description</label>
+            <%= filter_select(:item, :description, @conn.params) %>
+            <%= filter_text_input(:item, :description, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Code</label>
+            <%= filter_select(:item, :code, @conn.params) %>
+            <%= filter_string_input(:item, :code, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Rarity</label>
+            <%= filter_select(:item, :rarity, @conn.params) %>
+            <%= filter_string_input(:item, :rarity, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Active</label>
+            <%= filter_boolean_input(:item, :active, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Mp cost</label>
+            <%= number_filter_select(:item, :mp_cost, @conn.params) %>
+            <%= filter_number_input(:item, :mp_cost, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Cooldown</label>
+            <%= number_filter_select(:item, :cooldown, @conn.params) %>
+            <%= filter_number_input(:item, :cooldown, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Duration</label>
+            <%= number_filter_select(:item, :duration, @conn.params) %>
+            <%= filter_number_input(:item, :duration, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Base hp</label>
+            <%= number_filter_select(:item, :base_hp, @conn.params) %>
+            <%= filter_number_input(:item, :base_hp, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Base mp</label>
+            <%= number_filter_select(:item, :base_mp, @conn.params) %>
+            <%= filter_number_input(:item, :base_mp, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Base atk</label>
+            <%= number_filter_select(:item, :base_atk, @conn.params) %>
+            <%= filter_number_input(:item, :base_atk, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Base power</label>
+            <%= number_filter_select(:item, :base_power, @conn.params) %>
+            <%= filter_number_input(:item, :base_power, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Base armor</label>
+            <%= number_filter_select(:item, :base_armor, @conn.params) %>
+            <%= filter_number_input(:item, :base_armor, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Base speed</label>
+            <%= number_filter_select(:item, :base_speed, @conn.params) %>
+            <%= filter_number_input(:item, :base_speed, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Armor amount</label>
+            <%= number_filter_select(:item, :armor_amount, @conn.params) %>
+            <%= filter_number_input(:item, :armor_amount, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Power amount</label>
+            <%= number_filter_select(:item, :power_amount, @conn.params) %>
+            <%= filter_number_input(:item, :power_amount, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Roll number</label>
+            <%= number_filter_select(:item, :roll_number, @conn.params) %>
+            <%= filter_number_input(:item, :roll_number, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Extra amount</label>
+            <%= number_filter_select(:item, :extra_amount, @conn.params) %>
+            <%= filter_number_input(:item, :extra_amount, @conn.params) %>
+          </div>
+
+        <button type="submit" class="torch-button">Search</button>
+        <%= link "Clear Filters", to: Routes.item_path(@conn, :index) %>
+      <% end %>
+
+    </section>
+
+    <section id="torch-table">
+    <%= if length(@items) > 0 do %>
+      <table>
+        <thead>
+          <tr>
+              <th></th>
+              <th><%= table_link(@conn, "Name", :name) %></th>
+
+              <th><%= table_link(@conn, "Code", :code) %></th>
+
+              <th><%= table_link(@conn, "Rarity", :rarity) %></th>
+
+              <th><%= table_link(@conn, "Active", :active) %></th>
+
+              <th><%= table_link(@conn, "Enabled", :enabled) %></th>
+
+            <th><span>Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for item <- @items do %>
+            <tr>
+                <td><img src="<%=GH.image_url(item)%>"/></td>
+
+                <td><%= item.name %></td>
+
+                <td><%= item.code %></td>
+
+                <td><%= item.rarity %></td>
+
+                <td><%= item.active %></td>
+
+                <td><%= item.enabled %></td>
+
+              <td class="torch-actions">
+                <span><%= link "Show", to: Routes.item_path(@conn, :show, item) %></span>
+                <span><%= link "Edit", to: Routes.item_path(@conn, :edit, item) %></span>
+                <span><%= link "Delete", to: Routes.item_path(@conn, :delete, item), method: :delete, data: [confirm: "Are you sure?"] %></span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <%= render Torch.PaginationView, "_pagination.html", assigns %>
+    <% else %>
+      <p class="torch-no-data">No Items match your search.</p>
+    <% end %>
+    </section>
+  </div>
+</section>

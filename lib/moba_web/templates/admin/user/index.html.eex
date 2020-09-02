@@ -1,0 +1,126 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+
+    <a>Online today: <%=@online_today%></a>
+    <a>Online now: <%=@online_now%></a>
+    <a>New users: <%=@new_users%></a>
+    <%= link "Create User", to: Routes.user_path(@conn, :new) %>
+  </div>
+</section>
+<section id="torch-index-content">
+  <div class="torch-container">
+    <section id="torch-filters">
+      <h3>Find Users (<%=@total_entries%> total)</h3>
+      <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
+
+          <div class="field">
+            <label>Username</label>
+            <%= filter_select(:user, :username, @conn.params) %>
+            <%= filter_string_input(:user, :username, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Email</label>
+            <%= filter_select(:user, :email, @conn.params) %>
+            <%= filter_string_input(:user, :email, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Last Online At</label>
+            <%= filter_date_input(:user, :last_online_at, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Inserted At</label>
+            <%= filter_date_input(:user, :inserted_at, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Is admin</label>
+            <%= filter_boolean_input(:user, :is_admin, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Is bot</label>
+            <%= filter_boolean_input(:user, :is_bot, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Is guest</label>
+            <%= filter_boolean_input(:user, :is_guest, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Level</label>
+            <%= number_filter_select(:user, :level, @conn.params) %>
+            <%= filter_number_input(:user, :level, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Experience</label>
+            <%= number_filter_select(:user, :experience, @conn.params) %>
+            <%= filter_number_input(:user, :experience, @conn.params) %>
+          </div>
+
+        <button type="submit" class="torch-button">Search</button>
+        <%= link "Clear Filters", to: Routes.user_path(@conn, :index) %>
+      <% end %>
+
+    </section>
+
+    <section id="torch-table">
+    <%= if length(@users) > 0 do %>
+      <table>
+        <thead>
+          <tr>
+
+              <th><%= table_link(@conn, "Username", :username) %></th>
+
+              <th><%= table_link(@conn, "Email", :email) %></th>
+
+              <th><%= table_link(@conn, "Last Online", :last_online_at) %></th>
+
+              <th><%= table_link(@conn, "Level", :level) %></th>
+
+              <th><%= table_link(@conn, "Experience", :experience) %></th>
+
+              <th>Has Current Hero</th>
+
+            <th><span>Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for user <- @users do %>
+            <tr>
+
+                <td <%=if user.is_admin, do: "style=color:red"%>><%= if user.is_guest, do: "Guest", else: user.username %> <%=if user.is_bot, do: "(BOT)"%></td>
+
+                <td><%= if user.is_guest, do: "Guest", else: user.email %></td>
+
+                <td><%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></td>
+
+                <td><%= user.level %></td>
+
+                <td><%= user.experience %></td>
+                <td>
+                  <%= if hero = hero_for(user) do%>
+                    <img src="<%=GH.image_url(hero.avatar)%>" style="width: 30px;"/>
+                  <% end %>
+                </td>
+
+                <td class="torch-actions">
+                  <span><%= link "Show", to: Routes.user_path(@conn, :show, user) %></span>
+                  <span><%= link "Edit", to: Routes.user_path(@conn, :edit, user) %></span>
+                  <span><%= link "Delete", to: Routes.user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"] %></span>
+                </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <%= render Torch.PaginationView, "_pagination.html", assigns %>
+    <% else %>
+      <p class="torch-no-data">No Users match your search.</p>
+    <% end %>
+    </section>
+  </div>
+</section>

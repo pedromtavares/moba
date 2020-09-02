@@ -1,0 +1,144 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link "New Avatar", to: Routes.avatar_path(@conn, :new) %>
+  </div>
+</section>
+<section id="torch-index-content">
+  <div class="torch-container">
+    <section id="torch-filters">
+      <h3>Find Avatars</h3>
+      <%= form_tag @conn.request_path, method: :get, id: "torch-filters-form" do %>
+
+          <div class="field">
+            <label>Enabled</label>
+            <%= filter_boolean_input(:avatar, :enabled, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Name</label>
+            <%= filter_select(:avatar, :name, @conn.params) %>
+            <%= filter_string_input(:avatar, :name, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Code</label>
+            <%= filter_select(:avatar, :code, @conn.params) %>
+            <%= filter_string_input(:avatar, :code, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Role</label>
+            <%= filter_select(:avatar, :role, @conn.params) %>
+            <%= filter_string_input(:avatar, :role, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Atk</label>
+            <%= number_filter_select(:avatar, :atk, @conn.params) %>
+            <%= filter_number_input(:avatar, :atk, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Total hp</label>
+            <%= number_filter_select(:avatar, :total_hp, @conn.params) %>
+            <%= filter_number_input(:avatar, :total_hp, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Total mp</label>
+            <%= number_filter_select(:avatar, :total_mp, @conn.params) %>
+            <%= filter_number_input(:avatar, :total_mp, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Atk per level</label>
+            <%= number_filter_select(:avatar, :atk_per_level, @conn.params) %>
+            <%= filter_number_input(:avatar, :atk_per_level, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Hp per level</label>
+            <%= number_filter_select(:avatar, :hp_per_level, @conn.params) %>
+            <%= filter_number_input(:avatar, :hp_per_level, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Mp per level</label>
+            <%= number_filter_select(:avatar, :mp_per_level, @conn.params) %>
+            <%= filter_number_input(:avatar, :mp_per_level, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Speed</label>
+            <%= number_filter_select(:avatar, :speed, @conn.params) %>
+            <%= filter_number_input(:avatar, :speed, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Power</label>
+            <%= number_filter_select(:avatar, :power, @conn.params) %>
+            <%= filter_number_input(:avatar, :power, @conn.params) %>
+          </div>
+
+          <div class="field">
+            <label>Armor</label>
+            <%= number_filter_select(:avatar, :armor, @conn.params) %>
+            <%= filter_number_input(:avatar, :armor, @conn.params) %>
+          </div>
+
+        <button type="submit" class="torch-button">Search</button>
+        <%= link "Clear Filters", to: Routes.avatar_path(@conn, :index) %>
+      <% end %>
+
+    </section>
+
+    <section id="torch-table">
+    <%= if length(@avatars) > 0 do %>
+      <table>
+        <thead>
+          <tr>
+              <th></th>
+              <th><%= table_link(@conn, "Name", :name) %></th>
+
+              <th><%= table_link(@conn, "Code", :code) %></th>
+
+              <th><%= table_link(@conn, "Role", :role) %></th>
+
+              <th><%= table_link(@conn, "Enabled", :enabled) %></th>
+
+              <th><%= table_link(@conn, "Level Requirement", :level_requirement) %></th>
+
+            <th><span>Actions</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <%= for avatar <- @avatars do %>
+            <tr>
+                <td><img src="<%=GH.image_url(avatar)%>"/></td>
+
+                <td><%= avatar.name %></td>
+
+                <td><%= avatar.code %></td>
+
+                <td><%= avatar.role %></td>
+
+                <td><%= avatar.enabled %></td>
+
+                <td><%= avatar.level_requirement %></td>
+
+              <td class="torch-actions">
+                <span><%= link "Show", to: Routes.avatar_path(@conn, :show, avatar) %></span>
+                <span><%= link "Edit", to: Routes.avatar_path(@conn, :edit, avatar) %></span>
+                <span><%= link "Delete", to: Routes.avatar_path(@conn, :delete, avatar), method: :delete, data: [confirm: "Are you sure?"] %></span>
+              </td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+      <%= render Torch.PaginationView, "_pagination.html", assigns %>
+    <% else %>
+      <p class="torch-no-data">No Avatars match your search.</p>
+    <% end %>
+    </section>
+  </div>
+</section>

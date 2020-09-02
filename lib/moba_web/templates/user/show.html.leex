@@ -1,0 +1,106 @@
+<%= @current_hero && live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "hero-live-view") %>
+
+<div class="user-profile content-with-hero-bar" phx-hook="SetMainWrapper">
+    <div class="row mb-2 mt-3">
+        <div class="col text-center">
+            <div class="title-container">
+                <i class="fa fa-user text-primary"></i>
+                <h3><%=@user.username%></h3>
+            </div>
+            <%=if @user == @current_user do %>
+                <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
+                    <i class="fa fa-edit mr-1"></i>Edit Profile
+                <% end %>
+
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), class: "font-13 badge badge-pill badge-light-warning py-1 px-2 text-reset" do %>
+                    <i class="fab fa-ethereum mr-1"></i>Redeem Shards (<%=@user.shard_count%>)
+                <% end %>
+            <% else %>
+                <%= if @user.is_bot do %>
+                    <small class="font-italic text-dark">A.I. Player</small>
+                <% else %>
+                    <small class="font-italic text-dark">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
+                <% end %>
+            <% end %>
+        </div>
+    </div>
+
+    <div class="row d-flex justify-content-center">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-2">
+            <div class="widget-simple text-center card-box">
+                <h3 class="text-danger counter mt-0"><i class="fa fa-crosshairs mr-1"></i> <%=MobaWeb.UserView.win_rate(@user)%>%</h3>
+                <p class="text-muted mb-0">Overall Win Rate</p>
+            </div>
+        </div>
+        <%= if @user.ranking do %>
+            <div class="col-12 col-md-6 col-lg-4 col-xl-2">
+                <div class="widget-simple text-center card-box">
+                    <h3 class="text-primary counter mt-0"><i class="fa fa-trophy"></i> #<%=@user.ranking%></h3>
+                    <p class="text-muted mb-0">Overall Rank</p>
+                </div>
+            </div>
+        <% end %>
+        <div class="col-12 col-md-6 col-lg-4 col-xl-2">
+            <div class="widget-simple text-center card-box">
+                <h3 class="text-warning counter mt-0"><i class="fa fa-medal"></i> <%=@user.medal_count%></h3>
+                <p class="text-muted mb-0">Medals</p>
+            </div>
+        </div>
+    </div>
+
+    <%= if @user == @current_user do %>
+        <div class="row">
+            <div class="col text-center text-primary font-italic">
+                Below is your Account Level. Gain Account XP by leveling heroes in the Jungle.
+            </div>
+        </div>
+    <% end %>
+
+    <%= unless @user.is_bot do %>
+        <div class="row mb-2">
+            <div class="col-8 col-xl-6 margin-auto text-center d-flex justify-content-between" title="Your Account Level. Gain Account XP by leveling heroes in the Jungle" data-toggle="tooltip">
+                <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%=@user.level%></div>
+                <div class="progress progress-fixed account-level-bar">
+                    <div style="width:<%=MobaWeb.HallView.xp_percentage(@user)%>%" class="progress-bar">
+                        <span>&nbsp;&nbsp;<%=@user.experience%>/<%=Moba.user_level_xp()%>&nbsp;&nbsp;</span>
+                    </div>
+                </div>
+                <div class="badge badge-primary bg-white text-light font-16" style="padding: 15px"><%=@user.level+1%></div>
+            </div>
+        </div>
+    <% end %>
+
+    <%=if @user != @current_user do %>
+        <div class="row mb-3 mt-3">
+            <div class="col-12 col-lg-6 col-xl-4 margin-auto text-center">
+                <div class="card-box">
+                    <h3 class="page-title mb-2 text-danger"><i class="fa fa-medal mr-1"></i>Score</h3>
+                    <div class="row">
+                        <div class="col">
+                            <h4 class="text-center">
+                                <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.pvp_score["#{@user.id}"] || 0%></span>
+                                <i class="fa fa-times mx-2"></i>
+                                <span class="badge badge-pill badge-light-danger font-20"><%=@user.pvp_score["#{@current_user.id}"] || 0%></span> <%=@user.username%>
+                            </h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <% end %>
+
+    <div class="row mt-3 mb-1">
+        <div class="col text-center">
+            <h3 class="page-title mb-2 text-primary"><i class="fa fa-users mr-1"></i>Recent Heroes</h3>
+        </div>
+    </div>
+
+    <div class="row">
+        <%= for hero <- @heroes do %>
+            <%=render("_hero.html", hero: hero, user: @user)%>
+        <% end %>
+        <%=if Enum.count(@heroes) < 1 do %>
+            <div class="col"><h5 class="text-center">No previous heroes found</h5></div>
+        <% end %>
+    </div>
+</div>

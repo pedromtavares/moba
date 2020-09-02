@@ -1,0 +1,107 @@
+#create-new, #hero-builder{
+  .progress-fixed{
+    height: 0.6rem;
+  }
+  .stat-col{
+    padding-top: 0.2rem;
+    padding-bottom: 0.2rem;
+  }
+  .empty-skill{
+    border: 3px solid rgba(26,32,39,1);
+    box-shadow: inset 0px 0px 40px black;
+    width: 80px;
+    height: 80px;
+    float:left;
+    margin: 5px;
+  }
+  .skill{
+    margin: 5px;
+    width: 80px;
+    height: 80px;
+    cursor: pointer !important;
+  }
+  .current{
+    box-shadow: 0 0 15px 0 rgba(255, 255, 255, 1);
+  }
+  .build-box{
+    margin: 0.5rem;
+  }
+}
+
+#create-bar{
+  // display: none;
+  background: #38414a;
+  // border: 0;
+  // border: 3px solid;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  // position: fixed;
+  // left: 0;
+  // right: 0;
+  // bottom: 0;
+  // padding: 12px;
+  box-shadow: inset 0px 0px 300px black;
+  z-index: 1000;
+  margin-left:-24px;
+  margin-right: -24px;
+  height: 225px;
+
+  @media (max-width: 1199.98px) {
+
+    .skill{
+      width: 70px !important;
+      height: 70px !important;
+    }
+
+    .empty-skill{
+      width: 70px !important;
+      height: 70px !important;
+    }
+  }
+
+  @media (max-width: 1399.98px) {
+    .container-fluid{
+      max-width: 100%;
+    }
+    .button-container{
+      margin-top: 1rem !important;
+    }
+
+  }
+
+  .button-container{
+    margin-top: 1.5rem;
+  }
+
+  .stats-container{
+    text-align: center;
+  }
+
+  .avatar{
+    margin: 0;
+    cursor: default;
+  }
+
+  .skill{
+    width: 80px;
+    height: 80px;
+    cursor: default;
+    margin-bottom: 0;
+  }
+
+  .skills-container{
+    width: 90%;
+    margin: auto;
+
+    @media (max-width: 767.98px) {
+      width: 100%;
+    }
+  }
+
+  .skill-container{
+    width: 25%;
+    float: left;
+    text-align: center;
+
+  }
+}

@@ -1,0 +1,15 @@
+<div class="col-12 col-md-6 col-lg-4 col-xl-3" id="avatar-<%=@avatar.id%>">
+    <div class="card ribbon-box">
+        <%= if unlocked?(@avatar, @user) do %>
+            <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
+        <% end %>
+        <div class="card-body text-center">
+            <img src="<%=GH.image_url(@avatar)%>" class="avatar img-border"/>
+            <img src="<%=GH.image_url(@avatar.ultimate)%>" class="ultimate img-border-sm <%=if @avatar.ultimate.passive, do: "passive" %>" data-toggle="tooltip" title="<%=GH.skill_description(@avatar.ultimate)%>"/>
+            <br/>
+            <h3><%=@avatar.name%></h3>
+            <%=CreateView.render "_stats.html", avatar: @avatar, avatars: @avatars%>
+        </div>
+        <%=unless unlocked?(@avatar, @user), do: render("_actions.html", resource: @avatar, user: @user, action: "unlock-avatar")%>
+    </div>
+</div>

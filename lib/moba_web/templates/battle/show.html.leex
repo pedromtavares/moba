@@ -1,0 +1,91 @@
+<%=if @action_turn_number do %>
+    <div id="scroll-to-turn" phx-hook="ScrollToTarget" phx-target-element="#turn-<%=@action_turn_number%>"/>
+<% end %>
+
+<div id='hero-battle' class="battle <%=battle_class(@battle)%> mt-3" phx-hook="SetMainWrapper">
+
+    <div class="row">
+        <div class="col-12 col-md-5">
+            <%=render "_hero.html", hero: @battle.attacker, last_hero: last_hero_for(@battle.attacker, @last_turn), battle: @battle, snapshot: @battle.attacker_snapshot%>
+        </div>
+        <div class="col-12 col-md-2 text-center versus-box">
+            <h1>VS</h1>
+            <p>
+                <strong>Battle #<%=@battle.id%></strong>
+                <br/>
+                <span class="text-dark"><em><%=Timex.format!(@battle.inserted_at, "{relative}", :relative)%></em></span>
+            </p>
+        </div>
+        <div class="col-12 col-md-5">
+            <%=render "_hero.html", hero: @battle.defender, last_hero: last_hero_for(@battle.defender, @last_turn), battle: @battle, snapshot: @battle.defender_snapshot%>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <%= if Enum.count(@battle.turns) > 0 do %>
+                <div class="timeline mt-3" dir="ltr" style="margin-bottom: 0">
+                    <div class="text-center battle-initiated">
+                        <div class='btn btn-outline-<%=if @battle.initiator_id == @battle.attacker_id, do: "danger", else: "primary"%> width-lg' phx-hook="Scroll" id="battle-initiated">Battle initiated by <%=@battle.initiator.name%></div>
+                    </div>
+                    <%= for turn <- @battle.turns do %>
+                        <%=render "_turn.html", turn: turn, is_attacker: turn.attacker.hero_id == @battle.attacker_id, debug: @debug%>
+                    <% end %>
+                    <div class="clearfix"></div>
+                    <%= if @battle.finished do %>
+                        <div class="row">
+                            <div class="text-center col-12">
+                                <%= if @battle.type == "pve" do %>
+                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), "phx-hook": "Loading", id: "battle-over-jungle" do %>
+                                        <button class="btn btn-danger width-lg text-white">
+                                            <span class="loading-text">Battle Over!</span>
+                                        </button>
+                                    <% end %>
+                                <% end %>
+                                <%= if @battle.type == "pvp" do %>
+                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLiveView), "phx-hook": "Loading", id: "battle-over-arena" do %>
+                                        <button class="btn btn-danger width-lg text-white">
+                                            <span class="loading-text">Battle Over!</span>
+                                        </button>
+                                    <% end %>
+                                <% end %>
+                                <%= if @battle.type == "league" do %>
+                                    <a href="javascript:;" id="league-battle-over" phx-click="next-battle" phx-value-id="<%=@battle.id%>" class="btn btn-danger width-lg text-white" phx-hook="Loading">
+                                        <span class="loading-text">Battle Over!</span>
+                                    </a>
+                                <% end %>
+                            </div>
+                        </div>
+                        <div class="row mt-5">
+                            <div class="text-center col-12">
+                                <button class="btn btn-primary width-lg text-white" data-link="https://browsermoba.com/battles/<%=@battle.id%>" phx-hook="ShareBattle" id="share-battle">
+                                    Share this Battle
+                                </button>
+                            </div>
+                        </div>
+                    <% end %>
+                </div>
+            <% else %>
+                <div class="text-center mt-5">
+                    <h3 class="mt-5">Click to select a skill on the battle bar below and then click the Attack button to start the battle!</h3>
+                </div>
+            <% end %>
+        </div>
+    </div>
+    <div class="clearfix">&nbsp;</div>
+</div>
+<div id="battle-bar">
+    <div class="container-fluid">
+        <div class="row">
+            <%=render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.attacker, turn_hero: if @turn.attacker.hero_id == @battle.attacker_id, do: @turn.attacker, else: @turn.defender%>
+            <div class="col-12 col-xl-8 battle-border-left battle-border-right">
+                <%= if @battle.finished do %>
+                    <%=render_rewards(@battle, assigns)%>
+                <% else %>
+                    <%=render "_active_battle.html", battle: @battle, turn: @turn, skill: @skill, item: @item, last_turn: @last_turn%>
+                <% end %>
+            </div>
+            <%=render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.defender, turn_hero: if @turn.attacker.hero_id == @battle.attacker_id, do: @turn.defender, else: @turn.attacker%>
+        </div>
+    </div>
+</div>

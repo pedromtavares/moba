@@ -1,0 +1,23 @@
+<div id="jungle-rules" class="modal fade show" tabindex="-1" role="dialog" aria-labelledby="jungle-rules-label" aria-modal="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title margin-auto pl-3" id="jungle-rules-label"><i class="fa fa-leaf mr-1 text-success"></i>Jungle Rules</h4>
+                <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <h5 class="text-center">Objective</h5>
+                <p>Your main goal in the Jungle is to level up your hero to by using your all of your available Ganks to beat opponents and gain <span class="text-primary">XP</span>. When your available Ganks are over, you will enter the <span class="text-danger">Arena</span>, where your hero will be truly put to the test.</p>
+                <h5 class="text-center">Leagues</h5>
+                <p>You also gain <span class="text-success">Points</span> from each Gank, which are used to get you to the next League. Upon reaching <%=Moba.pve_points_limit()%> points, you can fight through a <span class="text-danger">League Challenge</span> that will put you in a higher league if you are victorious. Winning the <span class="text-danger">League Challenge</span> also grants you <span class="text-warning"><%=Moba.league_win_gold_bonus()%> gold</span> and a <span class="text-pink"><%=round(Moba.league_buff_multiplier() * 100)%>% stats boost</span> which really helps your leveling, so make sure you fight in them as soon as you can.</p>
+                <h5 class="text-center">Skills</h5>
+                <p>You get Skill Points every 2 levels, which you can use to level up your skills. Your ultimate skill can only be leveled up when your hero is at level 10 and 20. </p>
+                <h5 class="text-center">Shop</h5>
+                <p>Ganking also rewards you with <span class="text-warning">gold</span> which you can use to buy items in the Shop, located in the bottom right corner. You can either buy items directly or transmute weaker ones to form stronger ones. Make sure to always spend your <span class="text-warning">gold</span>, as items make your hero considerably stronger.</p>
+                <h5 class="text-center">Tips</h5>
+                <i class="fa fa-hand-point-right mr-1"></i> Keeping a Win Streak is very important, if you're not sure you can beat a target, try a weaker one.<br/>
+                <i class="fa fa-hand-point-right mr-1"></i> After winning a <span class="text-danger">League Challenge</span>, you gain a <span class="text-pink"><%=round(Moba.league_buff_multiplier() * 100)%>% stats boost</span>, so use that advantage to fight stronger targets.<br/>
+            </div>
+        </div>
+    </div>
+</div>

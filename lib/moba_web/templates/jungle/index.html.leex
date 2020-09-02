@@ -1,0 +1,173 @@
+<div class="jungle" phx-hook="SetMainWrapper" id="jungle">
+    <%= if @pending_battle do %>
+        <%= GameView.render "_pending_battle.html", battle: @pending_battle %>
+    <% else %>
+        <%= if @current_hero.user.is_guest && @current_hero.level >= 10 do %>
+            <div class="row" style="margin-top: 300px">
+              <div class="col-12 text-center">
+                  <div class="alert alert-warning bg-light border-warning text-warning">
+                    <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-warning" do %>
+                        <i class="fa fa-sign-out-alt"></i> Enjoying the game? Click to create an account and continue leveling your hero!
+                    <% end %>
+                  </div>
+              </div>
+          </div>
+        <% else %>
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="card-box border border-success p-2 bg-success-dark mb-0">
+                        <div class="row">
+                            <div class="col-lg col-12 mt-3" id="jungle-stats">
+                                <div class="row align-items-center">
+                                    <div class="col-lg">
+                                        <div class="text-white text-center">
+                                            <h2 class="text-white mb-0"><%=@current_hero.pve_battles_available%></h2>
+                                            <p>Ganks available</p>
+                                            <p class="mb-0" data-toggle="tooltip" title="<%=streak_title(@current_hero)%>">
+                                                <%=if @current_hero.loss_streak > 1 do %>
+                                                    <span class="text-dark"><i class="fa fa-cubes mr-1"></i>Loss Streak: <strong><%=@current_hero.loss_streak%></strong></span>
+                                                <% else %>
+                                                    <span class="text-warning"><i class="fa fa-cubes mr-1"></i>Win Streak: <strong><%=@current_hero.win_streak%></strong></span>
+                                                <% end %>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg col-12 text-center">
+                                <h2 class="text-success"><i class="fa fa-leaf fa-2x"></i><br/>Jungle</h2>
+                                <a href="javascript:;" data-toggle="modal" data-target="#jungle-rules" class="text-white font-italic"><i class="fa fa-list-alt font-italic mr-1"></i>View Rules</a>
+                            </div>
+                            <div class="col-lg col-12 mt-3" id="current-hero-league">
+                                <div class="row mt-2 d-flex align-items-center">
+                                    <%= if next = next_league(@current_hero) do %>
+                                        <div class="col">
+                                            <div class="text-right">
+                                                <img src="/images/league_<%=@current_hero.league_tier%>.png" class="league-rank" data-toggle="tooltip" title="<%=Moba.leagues[@current_hero.league_tier]%> (Current)"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-7">
+                                            <div class="progress" style="height:30px;">
+                                                <div style="width:<%=next_league_percentage(@current_hero)%>%" class="progress-bar bg-success">
+                                                </div>
+                                                <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%=@current_hero.pve_points%>/<%=Moba.pve_points_limit()%> Points</small>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="text-left">
+                                                <img src="/images/league_<%=next%>.png" class="league-rank" data-toggle="tooltip" title="<%=Moba.leagues[next]%>"/>
+                                            </div>
+                                        </div>
+                                    <% else %>
+                                        <div class="col text-center">
+                                            <img src="/images/league_<%=@current_hero.league_tier%>.png" style="width: 60px"/>
+                                        </div>
+                                    <% end %>
+                                </div>
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <%= if @current_hero.pve_points >= Moba.pve_points_limit() && !Game.max_league?(@current_hero) do %>
+                                            <div phx-hook="LeagueChallengeAlert" id="league-challenge-alert"></div>
+                                            <button class="btn btn-danger btn-lg mt-1 league-challenge" phx-hook="Loading" loading="Starting..." phx-click="league" phx-target="#hero-bar" data-toggle="tooltip" title="Click to start your League Challenge. You will face consecutive opponents and must win all the battles in order to rank up to the next League." id="start-league-challenge">
+                                                <span class="loading-text"><i class="fa fa-dice-d20 mr-1"></i> League Challenge</span>
+                                            </button>
+                                        <% else %>
+                                            <h3 class="text-white mb-0 mt-1"><%=Moba.leagues[@current_hero.league_tier]%></h3>
+                                        <% end %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <%=if @current_hero.buffed_battles_available > 0 do %>
+                <div class="row text-center mt-1">
+                    <div class="col">
+                        <h3 class="m-0">
+                            <span class="badge badge-pill badge-light-danger mt-3 p-2" id="league-buff">
+                                <i class="fa fa-plus mr-1"></i>League buff active: +<%=round(Moba.league_buff_multiplier() * 100)%>% stats for the next
+                                <%=if @current_hero.buffed_battles_available > 1 do %>
+                                    <%=@current_hero.buffed_battles_available%> battles
+                                <%else %>
+                                    battle
+                                <% end %>
+                            </span>
+                        </h3>
+                    </div>
+                </div>
+            <% end %>
+
+            <%= if @current_hero.pve_battles_available > 0 do %>
+                <div class="row mt-3">
+                    <div class="col">
+                        <div class="card-box border weak-targets">
+                            <div class="d-flex align-items-center row">
+                                <%=render "_weak_info.html", extra_classes: "d-block d-md-none", current_hero: @current_hero%>
+
+                                <%=render "_jungle_target.html", target: weak(@targets)|>List.first(), socket: @socket, current_hero: @current_hero, first: true %>
+                                <%=render "_weak_info.html", extra_classes: "d-none d-md-block", current_hero: @current_hero%>
+                                <%=render "_jungle_target.html", target: weak(@targets)|>List.last(), socket: @socket, current_hero: @current_hero, first: false %>
+
+                                <%=for target <- weak(@targets) do %>
+                                    <%=render "_mobile_jungle_target.html", target: target, socket: @socket, current_hero: @current_hero%>
+                                <% end %>
+                            </div>
+                        </div>
+
+                        <%= if @tutorial_step && @tutorial_step != 1 do %>
+                            <div class="card-box border moderate-targets">
+                                <div class="d-flex align-items-center row">
+                                    <%=render "_moderate_info.html", extra_classes: "d-block d-md-none", current_hero: @current_hero%>
+
+                                    <%=render "_jungle_target.html", target: moderate(@targets)|>List.first(), socket: @socket, current_hero: @current_hero, first: true %>
+                                    <%=render "_moderate_info.html", extra_classes: "d-none d-md-block", current_hero: @current_hero%>
+                                    <%=render "_jungle_target.html", target: moderate(@targets)|>List.last(), socket: @socket, current_hero: @current_hero, first: false %>
+
+                                    <%=for target <- moderate(@targets) do %>
+                                        <%=render "_mobile_jungle_target.html", target: target, socket: @socket, current_hero: @current_hero%>
+                                    <% end %>
+                                </div>
+                            </div>
+
+                            <div class="card-box border strong-targets">
+                                <div class="d-flex align-items-center row">
+                                    <%=render "_strong_info.html", extra_classes: "d-block d-md-none", current_hero: @current_hero%>
+
+                                    <%=render "_jungle_target.html", target: strong(@targets)|>List.first(), socket: @socket, current_hero: @current_hero, first: true %>
+                                    <%=render "_strong_info.html", extra_classes: "d-none d-md-block", current_hero: @current_hero%>
+                                    <%=render "_jungle_target.html", target: strong(@targets)|>List.last(), socket: @socket, current_hero: @current_hero, first: false %>
+
+                                    <%=for target <- strong(@targets) do %>
+                                        <%=render "_mobile_jungle_target.html", target: target, socket: @socket, current_hero: @current_hero%>
+                                    <% end %>
+                                </div>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            <% else %>
+                <div class="row mt-3 text-center">
+                    <div class="col">
+                        <div class="card-box p-3">
+                            <h4 class="text-danger mb-3">You have finished all of your available battles in the Jungle, now it's time to take your hero to the next phase.</h4>
+                            <a href="/game/pvp" class="btn btn-danger btn-lg mb-3"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
+                            <br/>
+                            <%= if can_create_new_hero?(@current_user) do %>
+                                <span class="text-success font-italic">or...</span>
+                                <br/>
+                                <a href="/create" class="btn btn-success btn-sm mt-1"><i class="fa fa-leaf mr-1"></i>Create another Hero</a>
+                            <% else %>
+                                <span class="text-success font-italic">You will be able to create a new Hero <%=next_match_description()%></span>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
+        <% end %>
+    <% end %>
+</div>
+<%= live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id, "origin" => "jungle", "tutorial_step" => @tutorial_step}, id: "hero-live-view") %>
+<%= render "_jungle_rules.html"%>
+<%= Phoenix.LiveView.Helpers.live_component(@socket, MobaWeb.Tutorial, step: @tutorial_step) %>
