@@ -8,7 +8,9 @@
 use Mix.Config
 
 config :moba,
-  ecto_repos: [Moba.Repo]
+  ecto_repos: [Moba.Repo],
+  env: Mix.env(),
+  arena_difficulty: System.get_env("ARENA_DIFFICULTY") || "easy"
 
 # Configures the endpoint
 config :moba, MobaWeb.Endpoint,
@@ -19,8 +21,6 @@ config :moba, MobaWeb.Endpoint,
   live_view: [
     signing_salt: "0rCmKQt21BmJfTqBwGVEaIm/AY2dnbry"
   ]
-
-config :moba, env: Mix.env()
 
 config :torch,
   otp_app: :moba,
@@ -37,7 +37,6 @@ config :moba, :pow,
   web_mailer_module: MobaWeb,
   routes_backend: MobaWeb.PowRoutes,
   cache_store_backend: MobaWeb.PowRedisCache
-
 
 config :moba, MobaWeb.PowMailer, adapter: Bamboo.LocalAdapter
 

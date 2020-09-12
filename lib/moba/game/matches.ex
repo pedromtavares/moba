@@ -155,8 +155,8 @@ defmodule Moba.Game.Matches do
       Logger.info("New PVP hero for #{user.username}")
 
       avatar = Enum.random(avatars)
-      # easy: 15..22 | medium: 18..25 | hard: 22-25
-      level = Enum.random(15..22)
+      difficulty = Application.get_env(:moba, :arena_difficulty)
+      level = arena_bot_level(difficulty)
 
       hero =
         Game.create_bot_hero!(
@@ -249,5 +249,16 @@ defmodule Moba.Game.Matches do
         match
       )
     end)
+  end
+
+  defp arena_bot_level(difficulty) do
+    range =
+      case difficulty do
+        "moderate" -> 18..25
+        "strong" -> 22..25
+        _ -> 15..22
+      end
+
+    Enum.random(range)
   end
 end
