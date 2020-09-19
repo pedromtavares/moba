@@ -56,7 +56,7 @@ defmodule MobaWeb.Admin.MatchController do
   end
 
   defp get_cached_rates(inserted_at) do
-    case Cachex.get(:game_cache, "match-#{inserted_at}1") do
+    case Cachex.get(:game_cache, "match-#{inserted_at}") do
       {:ok, nil} -> put_cache(inserted_at)
       {:ok, rates} -> rates
     end
@@ -64,7 +64,7 @@ defmodule MobaWeb.Admin.MatchController do
 
   defp put_cache(inserted_at) do
     rates = Admin.recent_winrates(inserted_at)
-    Cachex.put(:rates_cache, "match-#{inserted_at}", rates)
+    Cachex.put(:game_cache, "match-#{inserted_at}", rates)
     rates
   end
 
