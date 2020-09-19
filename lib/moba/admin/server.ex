@@ -45,15 +45,23 @@ defmodule Moba.Admin.Server do
   defp current_state do
     match = Game.current_match()
 
-    {players, bots} = Admin.current_arena_heroes()
+    if match do
+      {players, bots} = Admin.current_arena_heroes()
 
-    rates = Admin.recent_winrates(match.inserted_at)
+      rates = Admin.recent_winrates(match.inserted_at)
 
-    %{
-      players: players,
-      bots: bots,
-      rates: rates
-    }
+      %{
+        players: players,
+        bots: bots,
+        rates: rates
+      }
+    else
+      %{
+        players: [],
+        bots: [],
+        rates: []
+      }
+    end
   end
 
   defp get_cached_data(match) do
