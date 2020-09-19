@@ -23,7 +23,8 @@ defmodule Moba.Application do
       {Redix, {redis_uri, [name: :redix]}},
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
-      Moba.Game.Server
+      Moba.Game.Server,
+      Moba.Admin.Server
     ]
 
     :telemetry.attach(
