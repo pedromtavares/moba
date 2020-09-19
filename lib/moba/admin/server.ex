@@ -7,8 +7,8 @@ defmodule Moba.Admin.Server do
 
   alias Moba.{Admin, Game}
 
-  # 30 secs
-  @timeout 1000 * 30
+  # 300 secs
+  @timeout 1000 * 300
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
@@ -18,27 +18,14 @@ defmodule Moba.Admin.Server do
 
   def init(_) do
     schedule_update()
-    {:ok, %{}}
+    {:ok, current_state()}
   end
 
   def schedule_update, do: Process.send_after(self(), :server_update, @timeout)
 
   def handle_info(:server_update, _state) do
     schedule_update()
-
-    match = Game.current_match()
-
-    {players, bots} = Admin.current_arena_heroes()
-
-    rates = Admin.recent_winrates(match.inserted_at)
-
-    state = %{
-      players: players,
-      bots: bots,
-      rates: rates
-    }
-
-    {:noreply, state}
+    {:noreply, current_state()}
   end
 
   @doc """
@@ -53,6 +40,20 @@ defmodule Moba.Admin.Server do
       end
 
     {:reply, data, state}
+  end
+
+  defp current_state do
+    match = Game.current_match()
+
+    {players, bots} = Admin.current_arena_heroes()
+
+    rates = Admin.recent_winrates(match.inserted_at)
+
+    %{
+      players: players,
+      bots: bots,
+      rates: rates
+    }
   end
 
   defp get_cached_data(match) do
