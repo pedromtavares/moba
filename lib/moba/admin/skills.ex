@@ -67,18 +67,21 @@ defmodule Moba.Admin.Skills do
           where: s.id != ^skill.id,
           where: is_nil(s.match_id)
 
+      changes = %{
+        description: attrs["description"],
+        effects: attrs["effects"],
+        enabled: attrs["enabled"],
+        name: attrs["name"],
+        level_requirement: attrs["level_requirement"]
+      }
+
+      changes = if attrs["image"], do: Map.put(changes, :image, attrs["image"]), else: changes
+
       query
       |> Repo.all()
       |> Enum.each(fn skill ->
         skill
-        |> Skill.changeset(%{
-          description: attrs["description"],
-          effects: attrs["effects"],
-          enabled: attrs["enabled"],
-          name: attrs["name"],
-          level_requirement: attrs["level_requirement"],
-          image: attrs["image"]
-        })
+        |> Skill.changeset(changes)
         |> Repo.update!()
       end)
     end

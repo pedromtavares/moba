@@ -20,16 +20,16 @@ defmodule MobaWeb.Admin.MatchController do
   def show(conn, %{"id" => id}) do
     match = Admin.get_match!(id)
 
-    {players, bots} = Admin.current_arena_heroes()
+    data = Admin.Server.get_data(match)
 
-    rates = get_cached_rates(match.inserted_at)
+    rates = data.rates
     normal_rates = rates_by_list(rates, Game.list_normal_skills())
     ult_rates = rates_by_list(rates, Game.list_ultimate_skills())
 
     render(conn, "show.html",
       match: match,
-      players: players,
-      bots: bots,
+      players: Enum.sort_by(data.players, & &1.pvp_ranking, :asc),
+      bots: data.bots,
       normal_rates: normal_rates,
       ult_rates: ult_rates
     )
@@ -53,19 +53,6 @@ defmodule MobaWeb.Admin.MatchController do
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", match: match, changeset: changeset)
     end
-  end
-
-  defp get_cached_rates(inserted_at) do
-    case Cachex.get(:game_cache, "match-#{inserted_at}1") do
-      {:ok, nil} -> put_cache(inserted_at)
-      {:ok, rates} -> rates
-    end
-  end
-
-  defp put_cache(inserted_at) do
-    rates = Admin.recent_winrates(inserted_at)
-    Cachex.put(:rates_cache, "match-#{inserted_at}", rates)
-    rates
   end
 
   defp rates_by_list(rates, list) do

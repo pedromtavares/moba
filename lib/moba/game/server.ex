@@ -7,7 +7,7 @@ defmodule Moba.Game.Server do
 
   alias Moba.Game
 
-  # 10 secs
+  # 30 secs
   @timeout 1000 * 30
 
   # 10mins

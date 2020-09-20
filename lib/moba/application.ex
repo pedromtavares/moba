@@ -4,7 +4,6 @@ defmodule Moba.Application do
   @moduledoc false
 
   use Application
-  # import Cachex.Spec
 
   def start(_type, _args) do
     # "redis://redis-rofs:10000"
@@ -19,14 +18,13 @@ defmodule Moba.Application do
       # Start the endpoint when the application starts
       MobaWeb.Endpoint,
       # Cache for hero creation
-      Supervisor.Spec.worker(Cachex, [
-        :game_cache,
-      ]),
+      {Cachex, name: :game_cache},
       # Redix for persistent sessions
       {Redix, {redis_uri, [name: :redix]}},
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
-      Moba.Game.Server
+      Moba.Game.Server,
+      Moba.Admin.Server
     ]
 
     :telemetry.attach(
