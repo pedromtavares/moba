@@ -362,12 +362,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "dazzle" do
     [
       {
-        ["bad_juju", "static_link", "shuriken_toss", "fiery_soul"],
+        ["bad_juju", "echo_stomp", "shuriken_toss", "fiery_soul"],
         ["maelstrom", "boots_of_travel", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
         "Your basic Carry build focused on Attack (ATK) skills to take advantage of Power provided by the ult."
       },
       {
-        ["bad_juju", "maledict", "lightning_bolt", "death_pulse"],
+        ["bad_juju", "illuminate", "fiery_soul", "lightning_bolt"],
         ["maelstrom", "linkens_sphere", "assault_cuirass", "scythe_of_vyse", "boots_of_travel", "daedalus"],
         "Full nuke build to take advantage of Power provided by the ult."
       }
@@ -502,7 +502,7 @@ defmodule Moba.Game.Builds do
         "Full Nuker with great damage output. May need some Magic (MP) items to be viable."
       },
       {
-        ["spell_steal", "maledict", "mana_shield", "fiery_soul"],
+        ["maledict", "spell_steal", "mana_shield", "fiery_soul"],
         ["vanguard", "dagon", "boots_of_travel", "linkens_sphere", "orchid_malevolence", "daedalus"],
         "A more low-cost Power-focused variant."
       }
