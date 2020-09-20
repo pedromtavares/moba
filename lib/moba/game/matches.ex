@@ -35,6 +35,8 @@ defmodule Moba.Game.Matches do
     Moba.update_rankings!()
     Engine.read_all_battles()
 
+    Task.start_link(&cleanup_old_records/0)
+
     match
   end
 
@@ -114,8 +116,6 @@ defmodule Moba.Game.Matches do
 
     HeroQuery.pvp_active()
     |> Repo.update_all(set: [pvp_active: false, pvp_history: %{}])
-
-    Task.start_link(&cleanup_old_records/0)
   end
 
   defp create!(attrs \\ %{}) do
