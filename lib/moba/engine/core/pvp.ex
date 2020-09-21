@@ -144,7 +144,7 @@ defmodule Moba.Engine.Core.Pvp do
   end
 
   defp update_ranking(battle) do
-    Task.start_link(&Game.update_ranking!/0)
+    Moba.run_async(fn -> Game.update_ranking!() end)
 
     battle
   end

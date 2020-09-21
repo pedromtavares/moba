@@ -4,7 +4,7 @@ defmodule Moba.Admin do
   """
 
   alias Moba.Admin
-  alias Admin.{Skills, Items, Avatars, Matches, Users}
+  alias Admin.{Skills, Items, Avatars, Matches, Users, Server}
 
   # SKILLS
 
@@ -72,19 +72,25 @@ defmodule Moba.Admin do
 
   def change_user(user), do: Users.change(user)
 
+  def get_user_stats, do: Users.get_stats()
+
   # MATCHES
 
   def paginate_matches(params \\ %{}), do: Matches.paginate(params)
 
   def list_matches, do: Matches.list()
 
+  def list_recent_matches, do: Matches.list_recent()
   def get_match!(id), do: Matches.get!(id)
 
   def update_match(match, attrs), do: Matches.update(match, attrs)
 
   def change_match(match), do: Matches.change(match)
 
+  def get_server_data(match), do: Server.get_data(match)
   def recent_winrates(match_time), do: Matches.recent_winrates(match_time)
 
   def current_arena_heroes, do: Matches.current_arena_heroes()
+
+  def current_active_players, do: Matches.current_active_players()
 end

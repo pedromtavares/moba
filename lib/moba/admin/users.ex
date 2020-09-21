@@ -15,10 +15,6 @@ defmodule Moba.Admin.Users do
   @pagination_distance 5
 
   def paginate(params \\ %{}) do
-    online_today = UserQuery.online_users(User, 24) |> UserQuery.non_bots() |> Repo.aggregate(:count)
-    online_now = UserQuery.online_users() |> UserQuery.non_bots() |> Repo.aggregate(:count)
-    new_users = UserQuery.new_users() |> UserQuery.non_bots() |> Repo.aggregate(:count)
-
     params =
       params
       |> Map.put_new("sort_direction", "desc")
@@ -32,9 +28,6 @@ defmodule Moba.Admin.Users do
       {:ok,
        %{
          users: page.entries,
-         online_now: online_now,
-         online_today: online_today,
-         new_users: new_users,
          page_number: page.page_number,
          page_size: page.page_size,
          total_pages: page.total_pages,
@@ -73,6 +66,20 @@ defmodule Moba.Admin.Users do
 
   def change(%User{} = user) do
     User.admin_changeset(user, %{})
+  end
+
+  def get_stats do
+    online_today = UserQuery.online_users(User, 24) |> UserQuery.non_guests() |> Repo.aggregate(:count)
+    online_recently = UserQuery.online_users(User, 1) |> UserQuery.non_guests() |> Repo.aggregate(:count)
+    new_users = UserQuery.new_users(User, 24) |> UserQuery.non_guests() |> Repo.aggregate(:count)
+    new_guests = UserQuery.new_users(User, 24) |> UserQuery.guests() |> Repo.aggregate(:count)
+
+    %{
+      new_guests: new_guests,
+      new_users: new_users,
+      online_today: online_today,
+      online_recently: online_recently
+    }
   end
 
   defp do_paginate(filter, params) do

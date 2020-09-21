@@ -11,7 +11,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   def new_users(query \\ User, since_hours_ago \\ 24) do
     ago = Timex.now() |> Timex.shift(hours: -since_hours_ago)
 
-    from(user in query, where: user.inserted_at > ^ago)
+    from(user in non_bots(query), where: user.inserted_at > ^ago)
   end
 
   def non_bots(query \\ User) do
@@ -22,10 +22,14 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(user in query, where: user.is_guest == false)
   end
 
+  def guests(query \\ User) do
+    from(user in query, where: user.is_guest == true)
+  end
+
   def online_users(query \\ User, hours_ago \\ 1) do
     ago = Timex.now() |> Timex.shift(hours: -hours_ago)
 
-    from(user in query, where: user.last_online_at > ^ago)
+    from(user in non_bots(query), where: user.last_online_at > ^ago)
   end
 
   def set_online_query(user) do
@@ -66,7 +70,8 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def current_players do
     from(u in User,
-      where: not is_nil(u.current_pve_hero_id) or not is_nil(u.current_pvp_hero_id)
+      where: not is_nil(u.current_pve_hero_id) or not is_nil(u.current_pvp_hero_id),
+      order_by: [desc: u.last_online_at]
     )
   end
 end
