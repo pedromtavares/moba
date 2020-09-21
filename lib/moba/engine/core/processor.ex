@@ -269,9 +269,9 @@ defmodule Moba.Engine.Core.Processor do
     resource = %{buff | defender_buff: true}
 
     turn
+    |> Map.put(:defender, %{defender | defender_buffs: tick_buff_duration(defender.defender_buffs, buff)})
     |> apply_resource(resource)
     |> Map.put(:resource, %{buff | defender_buff: nil})
-    |> Map.put(:defender, %{defender | defender_buffs: tick_buff_duration(defender.defender_buffs, buff)})
   end
 
   defp apply_defender_buff(turn, _, _), do: turn
