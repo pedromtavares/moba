@@ -7,8 +7,8 @@ defmodule Moba.Admin.Server do
 
   alias Moba.{Admin, Game}
 
-  # 300 secs
-  @timeout 1000 * 300
+  # 60 secs
+  @timeout 1000 * 60
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
@@ -46,19 +46,19 @@ defmodule Moba.Admin.Server do
     match = Game.current_match()
 
     if match do
-      {players, bots} = Admin.current_arena_heroes()
-
+      players = Admin.current_active_players()
+      arena = Admin.current_arena_heroes()
       rates = Admin.recent_winrates(match.inserted_at)
 
       %{
         players: players,
-        bots: bots,
+        arena: arena,
         rates: rates
       }
     else
       %{
         players: [],
-        bots: [],
+        arena: [],
         rates: []
       }
     end
@@ -77,15 +77,15 @@ defmodule Moba.Admin.Server do
     key = "admin-match-#{match.id}"
     rates = Admin.recent_winrates(match.inserted_at)
 
-    players =
+    arena =
       Enum.map(match.winners, fn {ranking, winner_id} ->
         Map.put(Game.get_hero!(winner_id), :pvp_ranking, String.to_integer(ranking))
       end)
 
     data = %{
       rates: rates,
-      players: players,
-      bots: []
+      players: [],
+      arena: arena
     }
 
     Cachex.put(:game_cache, key, data)

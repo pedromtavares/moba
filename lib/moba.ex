@@ -149,7 +149,10 @@ defmodule Moba do
   def start! do
     IO.puts("Starting match...")
     Game.start!()
+    cleanup()
   end
+
+  def cleanup, do: Moba.Cleaner.cleanup_old_records()
 
   @doc """
   Accounts ranking is defined by who has the highest medal_count
@@ -181,5 +184,13 @@ defmodule Moba do
 
     a_struct = Map.merge(a_struct, processed_map)
     a_struct
+  end
+
+  def run_async(fun) do
+    if Application.get_env(:moba, :env) == :test do
+      fun.()
+    else
+      Task.start(fun)
+    end
   end
 end

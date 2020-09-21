@@ -35,8 +35,6 @@ defmodule Moba.Game.Matches do
     Moba.update_rankings!()
     Engine.read_all_battles()
 
-    Task.start_link(&cleanup_old_records/0)
-
     match
   end
 
@@ -87,17 +85,6 @@ defmodule Moba.Game.Matches do
   end
 
   def load_podium(_), do: nil
-
-  def cleanup_old_records do
-    ago = Timex.now() |> Timex.shift(days: -7)
-    query = from b in Moba.Engine.Schema.Battle, where: b.inserted_at <= ^ago, order_by: b.id, limit: 50
-
-    Repo.all(query) |> delete_records()
-
-    query = from h in Moba.Game.Schema.Hero, where: h.inserted_at <= ^ago, where: is_nil(h.user_id), limit: 50
-
-    Repo.all(query) |> delete_records()
-  end
 
   # --------------------------------
 
@@ -209,13 +196,24 @@ defmodule Moba.Game.Matches do
 
   # Clears all active heroes from the current players in the match
   # Users will need to create new Heroes for the Jungle and/or pick a new Hero for the Arena
+  # Jungle heroes that haven't finished all of their available battles will not be cleared
   defp clear_current_heroes!(match) do
     Logger.info("Resetting players...")
 
     UserQuery.current_players()
     |> Repo.all()
+    |> Repo.preload(:current_pve_hero)
     |> Enum.map(fn user ->
-      Accounts.update_user!(user, %{tutorial_step: 0, current_pve_hero_id: nil, current_pvp_hero_id: nil})
+      base_changes = %{tutorial_step: 0, current_pvp_hero_id: nil}
+
+      changes =
+        if user.current_pve_hero && user.current_pve_hero.pve_battles_available == 0 do
+          Map.put(base_changes, :current_pve_hero_id, nil)
+        else
+          base_changes
+        end
+
+      Accounts.update_user!(user, changes)
     end)
 
     match
@@ -274,15 +272,4 @@ defmodule Moba.Game.Matches do
 
     Enum.random(range)
   end
-
-  defp delete_records(results) when length(results) > 0 do
-    Enum.map(results, fn record ->
-      IO.puts("Deleting #{record.__struct__} ##{record.id}")
-      Repo.delete(record)
-    end)
-
-    cleanup_old_records()
-  end
-
-  defp delete_records(_), do: nil
 end

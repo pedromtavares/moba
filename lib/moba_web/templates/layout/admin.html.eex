@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <%=render "_head.html", conn: @conn, current_hero: nil%>
+    <body>
+        <header id="topnav">
+            <div class="topbar-menu">
+                <div class="container-fluid clean-container">
+                    <div id="inner-navigation">
+                        <div class="col-xl-10 margin-auto">
+                            <div class="row d-flex justify-content-center text-center game-nav no-gutters">
+                                <div class="col">
+                                    <a href="/" class="nav-link d-none d-md-block">
+                                        <i class="fa fa-gamepad"></i>
+                                        <br/>
+                                        Back to the Game
+                                    </a>
+                                    <div class="d-flex justify-content-end">
+                                        <a href="/admin/skills?sort_direction=desc&sort_field=enabled" class="nav-link">
+                                            <i class="fa fa-book-dead"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Skills</span>
+                                        </a>
+                                        <a href="/admin/items?sort_direction=desc&sort_field=enabled" class="nav-link">
+                                            <i class="fa fa-hat-wizard"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Items</span>
+                                        </a>
+                                        <a href="/admin/avatars?sort_direction=desc&sort_field=enabled" class="nav-link">
+                                            <i class="fa fa-user-ninja"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Avatars</span>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-1 flex-center d-none d-md-flex">
+                                    <a href="/admin/matches/<%=Moba.Game.current_match().id%>">
+                                        <img src="/images/favlogo.png" style="height:50px;" />
+                                    </a>
+                                </div>
+                                <div class="col">
+                                        <a href="/admin/users?_utf8=✓&filters%5B%5D=user%5Busername_contains%5D&filters%5B%5D=user%5Bemail_contains%5D&user%5Bis_bot_equals%5D=false&filters%5B%5D=user%5Blevel_equals%5D&filters%5B%5D=user%5Bexperience_equals%5D&user%5Bis_guest_equals%5D=false" class="nav-link">
+                                            <i class="fa fa-users"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Users</span>
+                                        </a>
+                                        <a href="/admin/matches" class="nav-link">
+                                            <i class="fa fa-cubes"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Matches</span>
+                                        </a>
+                                        <a href="/admin/dashboard" class="nav-link">
+                                            <i class="fab fa-phoenix-framework"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Phoenix</span>
+                                        </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <div class="wrapper" id="main-wrapper">
+            <div class="container-fluid clean-container">
+                <div class="row">
+                    <div class="col">
+                        <%= @inner_content %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%= csrf_meta_tag() %>
+        <script type="text/javascript" src="<%= Routes.static_path(@conn, "/js/app.js") %>"></script>
+    </body>
+</html>

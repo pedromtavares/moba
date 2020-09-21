@@ -10,7 +10,7 @@ use Mix.Config
 config :moba,
   ecto_repos: [Moba.Repo],
   env: Mix.env(),
-  arena_difficulty: System.get_env("ARENA_DIFFICULTY") || "easy"
+  arena_difficulty: System.get_env("ARENA_DIFFICULTY") || "weak"
 
 # Configures the endpoint
 config :moba, MobaWeb.Endpoint,

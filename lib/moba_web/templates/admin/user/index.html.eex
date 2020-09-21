@@ -1,9 +1,5 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-
-    <a>Online today: <%=@online_today%></a>
-    <a>Online now: <%=@online_now%></a>
-    <a>New users: <%=@new_users%></a>
     <%= link "Create User", to: Routes.user_path(@conn, :new) %>
   </div>
 </section>

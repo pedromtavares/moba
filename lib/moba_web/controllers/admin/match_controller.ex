@@ -3,7 +3,7 @@ defmodule MobaWeb.Admin.MatchController do
 
   alias Moba.{Game, Admin}
 
-  plug(:put_layout, {MobaWeb.LayoutView, "torch.html"})
+  plug(:put_layout, {MobaWeb.LayoutView, "admin.html"})
 
   def index(conn, params) do
     case Admin.paginate_matches(params) do
@@ -19,19 +19,27 @@ defmodule MobaWeb.Admin.MatchController do
 
   def show(conn, %{"id" => id}) do
     match = Admin.get_match!(id)
+    matches = Admin.list_recent_matches()
 
-    data = Admin.Server.get_data(match)
+    data = Admin.get_server_data(match)
+    user_stats = Admin.get_user_stats()
 
     rates = data.rates
     normal_rates = rates_by_list(rates, Game.list_normal_skills())
     ult_rates = rates_by_list(rates, Game.list_ultimate_skills())
 
+    arena = data.arena
+    bots = Enum.filter(arena, fn hero -> hero.bot_difficulty end)
+
     render(conn, "show.html",
       match: match,
-      players: Enum.sort_by(data.players, & &1.pvp_ranking, :asc),
-      bots: data.bots,
+      players: data.players,
+      arena: Enum.sort_by(arena, & &1.pvp_ranking, :asc),
+      bots: bots,
       normal_rates: normal_rates,
-      ult_rates: ult_rates
+      ult_rates: ult_rates,
+      matches: matches,
+      user_stats: user_stats
     )
   end
 
