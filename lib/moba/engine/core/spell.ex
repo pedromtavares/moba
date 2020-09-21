@@ -201,7 +201,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.remove_double_skill()
   end
 
-  def effects_for(%{resource: %Skill{code: code}, buff: nil} = turn) when code == "bad_juju" do
+  def effects_for(%{resource: %Skill{code: code, buff: nil}} = turn) when code == "bad_juju" do
     turn
     |> Effect.add_buff()
   end

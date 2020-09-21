@@ -412,7 +412,7 @@ defmodule Moba.Game.Builds do
         "Basic Power Carry build to quickly finish a battle."
       },
       {
-        ["static_link", "omnislash", "shuriken_toss", "phase_shift"],
+        ["static_link", "omnislash", "blade_fury", "phase_shift"],
         ["maelstrom", "boots_of_travel", "assault_cuirass", "scythe_of_vyse", "linkens_sphere", "daedalus"],
         "A more defensive variant which may need extra Magic (MP) to function well."
       }
@@ -422,7 +422,7 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "lina" do
     [
       {
-        ["empower", "maledict", "laguna_blade", "phase_shift"],
+        ["empower", "maledict", "laguna_blade", "fiery_soul"],
         ["arcane_boots", "diffusal_blade", "assault_cuirass", "dagon5", "orchid_malevolence", "shivas_guard"],
         "Good balance of offense and defense with support for her ult by the use of Maledict. Will need Magic (MP) items to properly function."
       },
@@ -452,12 +452,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "puck" do
     [
       {
-        ["dream_coil", "illuminate", "lightning_bolt", "fiery_soul"],
+        ["dream_coil", "illuminate", "lightning_bolt", "phase_shift"],
         ["arcane_boots", "dagon5", "assault_cuirass", "shivas_guard", "orchid_malevolence", "scythe_of_vyse"],
         "Typical Nuker build, Maledict + Bolt after the ult is cast to take advantage of the stun can be quite effective."
       },
       {
-        ["dream_coil", "echo_stomp", "decay", "shuriken_toss"],
+        ["dream_coil", "echo_stomp", "phase_shift", "shuriken_toss"],
         ["maelstrom", "dagon", "heavens_halberd", "diffusal_blade", "orchid_malevolence", "linkens_sphere"],
         "More versatile Carry build with 3 actives that is made viable due to her extra MP. Make sure to cast Echo Stomp right after the ult."
       }
@@ -498,12 +498,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["maledict", "spell_steal", "lightning_bolt", "death_pulse"],
-        ["tranquil_boots", "diffusal_blade", "bkb", "heavens_halberd", "scythe_of_vyse", "daedalus"],
+        ["tranquil_boots", "diffusal_blade", "bkb", "dagon5", "shivas_guard", "daedalus"],
         "Full Nuker with great damage output. May need some Magic (MP) items to be viable."
       },
       {
         ["maledict", "spell_steal", "mana_shield", "fiery_soul"],
-        ["vanguard", "dagon", "boots_of_travel", "linkens_sphere", "orchid_malevolence", "daedalus"],
+        ["vanguard", "dagon", "boots_of_travel", "linkens_sphere", "shivas_guard", "daedalus"],
         "A more low-cost Power-focused variant."
       }
     ]
