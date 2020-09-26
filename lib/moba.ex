@@ -6,8 +6,8 @@ defmodule Moba do
   alias Moba.{Game, Accounts}
 
   # General constants
-  @initial_battles 50
-  @xp_boosted_battles 25
+  @initial_battles 30
+  @xp_boosted_battles 30
   @initial_gold 1000
   @items_base_price 400
   @max_battle_turns 12
@@ -24,10 +24,10 @@ defmodule Moba do
 
   # PVE constants
   @base_xp 100
-  @xp_increment 40
+  @xp_increment 20
   @battle_xp 50
-  @redeem_pve_to_league_points_threshold 12
-  @pve_points_limit 24
+  @redeem_pve_to_league_points_threshold 10
+  @pve_points_limit 20
   @max_hero_level 25
 
   # PVP constants
@@ -39,7 +39,7 @@ defmodule Moba do
 
   # League constants
   @max_league_tier 5
-  @league_win_gold_bonus 1000
+  @league_win_gold_bonus 2000
   @league_loss_penalty 5
   @league_step_victory_points 10
   @league_win_buffed_battles_bonus 3

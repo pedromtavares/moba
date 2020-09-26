@@ -426,15 +426,27 @@ defmodule Moba.Engine.Core.Effect do
   end
 
   def add_cooldown(%{attacker: attacker, resource: resource} = turn) do
-    %{turn | attacker: %{attacker | cooldowns: Map.put(attacker.cooldowns, resource.code, resource.cooldown || 1)}}
+    %{
+      turn
+      | attacker: %{
+          attacker
+          | future_cooldowns: Map.put(attacker.future_cooldowns, resource.code, resource.cooldown || 1)
+        }
+    }
   end
 
   def add_defender_cooldown(%{defender: defender, resource: resource} = turn) do
-    %{turn | defender: %{defender | cooldowns: Map.put(defender.cooldowns, resource.code, resource.cooldown || 1)}}
+    %{
+      turn
+      | defender: %{
+          defender
+          | future_cooldowns: Map.put(defender.future_cooldowns, resource.code, resource.cooldown || 1)
+        }
+    }
   end
 
   def reset_cooldowns(%{attacker: attacker} = turn) do
-    %{turn | attacker: %{attacker | cooldowns: %{}}}
+    %{turn | attacker: %{attacker | future_cooldowns: %{}}}
   end
 
   def attacker_extra(turn) do

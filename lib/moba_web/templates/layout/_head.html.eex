@@ -2,10 +2,10 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="Description" content="Create and level up your own hero from your favorite MOBA to battle against other players in daily matches.">
-    <title>Browser MOBA - Free RPG</title>
+    <meta name="Description" content="Create and level up your own hero to battle against other players in daily matches.">
+    <title><%=assigns[:title] || "Browser MOBA - Free RPG"%></title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
-    <link rel="shortcut icon" href="<%= Routes.static_path(@conn, "/images/favicon.png") %>" />
+    <link rel="shortcut icon" href="<%= assigns[:favicon] || Routes.static_path(@conn, "/images/favicon.png") %>" />
     <script src="https://kit.fontawesome.com/26d6de301e.js"></script>
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-154582215-1"></script>

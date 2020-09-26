@@ -66,11 +66,11 @@
             <% else %>
                 <div style="width:<%=hero_xp_percentage(@battle)%>%" class="progress-bar bg-white">
                 </div>
-                <div style="width:<%=battle_xp_percentage(@battle)%>%" class="progress-bar">
-                    <%=if @battle.rewards.total_xp > 0 do %>
+                <%=if @battle.rewards.total_xp > 0 do %>
+                    <div style="width:<%=battle_xp_percentage(@battle)%>%" class="progress-bar">
                         <span>&nbsp;&nbsp;+<%=@battle.rewards.total_xp%> XP&nbsp;&nbsp;</span>
-                    <% end %>
-                </div>
+                    </div>
+                <% end %>
             <% end %>
         </div>
         <div class="float-left center level-bubble">

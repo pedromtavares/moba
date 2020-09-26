@@ -64,7 +64,7 @@ defmodule Moba.Game do
 
   @doc """
   Orchestrates the creation of a Hero, which involves creating its initial build, activating it
-  and generating its first targets
+  and generating its first Jungle targets
   """
   def create_hero!(attrs, user, avatar, skills, match \\ current_match()) do
     hero = Heroes.create!(attrs, user, avatar, match)

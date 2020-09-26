@@ -208,8 +208,8 @@ defmodule Moba.Engine.Core.Logger do
     } ATK[/hp]!"
   end
 
-  defp description_for("static_link", %{"turn_atk" => [{atk, defender}, {_, attacker}]}, _) do
-    "#{attacker} is still linked with #{defender}, [hp]sapping #{atk * -1} ATK[/hp]."
+  defp description_for("static_link", %{"turn_atk" => {atk, defender}}, heroes) do
+    "#{opponent_for(defender, heroes)} is still linked with #{defender}, [hp]sapping #{atk * -1} ATK[/hp]."
   end
 
   # ULTIMATES
@@ -286,6 +286,12 @@ defmodule Moba.Engine.Core.Logger do
 
   defp description_for("gods_strength", %{"next_power_normal" => {power, attacker}}, _) do
     "Channeling immense rogue strength, #{attacker} will have an extra [power]#{power} Power[/power] for the two next Basic Attacks."
+  end
+
+  defp description_for("guardian_angel", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
+    "#{attacker} has been [status]#blessed[/status] by dealing [damage]#{damage} damage[/damage] to #{defender}, also [hp]regenerating #{
+      regen
+    } HP[/hp] and granted immunity to stuns, silences, MP burns and physical damage."
   end
 
   defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}}, _) do

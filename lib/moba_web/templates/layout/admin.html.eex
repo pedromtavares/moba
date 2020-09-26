@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%=render "_head.html", conn: @conn, current_hero: nil%>
+    <%=render "_head.html", conn: @conn, current_hero: nil, title: "Admin - Browser MOBA", favicon: Routes.static_path(@conn, "/images/league_6.png")%>
     <body>
         <header id="topnav">
             <div class="topbar-menu">

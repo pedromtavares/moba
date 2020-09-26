@@ -97,5 +97,6 @@ defmodule Moba.Engine.Schema.Battler do
 
     field :effects, {:array, :map}, default: []
     field :cooldowns, :map, default: %{}
+    field :future_cooldowns, :map, default: %{}
   end
 end
