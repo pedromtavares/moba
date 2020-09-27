@@ -97,6 +97,31 @@ defmodule Moba.Accounts.Users do
   def set_current_pvp_hero!(user, hero_id), do: update!(user, %{current_pvp_hero_id: hero_id})
 
   @doc """
+  Clears all active heroes from the current players in the match
+  Users will need to create new Heroes for the Jungle and/or pick a new Hero for the Arena
+  Jungle heroes that haven't finished all of their available battles will not be cleared
+  """
+  def clear_active_players! do
+    UserQuery.current_players()
+    |> Repo.all()
+    |> Repo.preload(:current_pve_hero)
+    |> Enum.map(fn user ->
+      if can_clear_pve_hero?(user) do
+        update!(user, %{current_pvp_hero_id: nil, current_pve_hero_id: nil})
+      else
+        set_current_pvp_hero!(user, nil)
+      end
+    end)
+  end
+
+  def clear_pve_hero!(user), do: (can_clear_pve_hero?(user) && set_current_pve_hero!(user, nil)) || user
+
+  def can_clear_pve_hero?(user) do
+    %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)
+    pve_hero && pve_hero.pve_battles_available == 0
+  end
+
+  @doc """
   Increments PVP counts and sets the pvp_score map that is displayed on the user's profile
   Each user holds the score count of every other user they have battled against
   """

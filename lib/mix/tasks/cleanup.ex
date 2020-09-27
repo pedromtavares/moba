@@ -5,6 +5,6 @@ defmodule Mix.Tasks.Cleanup do
   def run(_) do
     Mix.Task.run("app.start")
 
-    Moba.cleanup()
+    Moba.Cleaner.cleanup_old_records()
   end
 end

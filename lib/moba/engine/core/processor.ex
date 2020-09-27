@@ -18,7 +18,7 @@ defmodule Moba.Engine.Core.Processor do
     |> apply_permanent_skill()
     |> calculate_atk()
     |> attack()
-    |> flush_cooldowns()
+    |> tick_cooldowns()
     |> passives()
     |> increases_and_reductions()
     |> apply_defender_buffs()
@@ -106,19 +106,17 @@ defmodule Moba.Engine.Core.Processor do
     |> use_item()
   end
 
-  # Decrements all cooldowns from the attacker by 1
-  defp flush_cooldowns(%{attacker: %{cooldowns: cooldowns}} = turn) when map_size(cooldowns) == 0 do
-    turn
-  end
-
-  defp flush_cooldowns(%{attacker: attacker} = turn) do
+  # Decrements all future cooldowns from the attacker by 1 and sets them as current cooldowns for future turns
+  defp tick_cooldowns(%{attacker: %{future_cooldowns: cooldowns} = attacker} = turn) when map_size(cooldowns) > 0 do
     result =
-      Enum.reduce(attacker.cooldowns, %{}, fn {key, val}, acc ->
+      Enum.reduce(cooldowns, %{}, fn {key, val}, acc ->
         Map.put(acc, key, val - 1)
       end)
 
-    %{turn | attacker: %{attacker | cooldowns: result}}
+    %{turn | attacker: %{attacker | cooldowns: result, future_cooldowns: result}}
   end
+
+  defp tick_cooldowns(turn), do: turn
 
   # Applies passive spells, which cannot be activated and generally do not cost MP
   # Not triggered if the attacker is stunned

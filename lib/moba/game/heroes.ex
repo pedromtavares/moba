@@ -132,8 +132,6 @@ defmodule Moba.Game.Heroes do
     |> max_league_updates()
   end
 
-  def update_defender!(hero, updates), do: update!(hero, updates)
-
   @doc """
   A new PVP hero will start out with points inherited from its User and a clean score.
   To keep the same amount of Heroes in the Arena, the weakest PVP bot will be inactivated.

@@ -85,6 +85,7 @@ defmodule Moba.Admin.Matches do
     UserQuery.current_players()
     |> UserQuery.non_bots()
     |> UserQuery.non_guests()
+    |> UserQuery.online_users(48)
     |> Repo.all()
     |> Enum.map(fn user ->
       Map.put(user, :current_hero, Game.current_hero(user))

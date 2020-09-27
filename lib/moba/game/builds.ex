@@ -147,7 +147,7 @@ defmodule Moba.Game.Builds do
   # item lists go from weak -> strong, so weak bots get this list as is and stronger bots reverse it,
   # first buying stronger items, making them much more challenging at any level
   defp items_list(item_list, difficulty, level) do
-    gold = Moba.xp_until_hero_level(level) + extra_gold(difficulty)
+    gold = Moba.xp_until_hero_level(level) + extra_gold(level, difficulty)
 
     {result, _} =
       case difficulty do
@@ -216,12 +216,16 @@ defmodule Moba.Game.Builds do
     |> Repo.all()
   end
 
-  defp extra_gold(difficulty) do
-    case difficulty do
-      "weak" -> 1150
-      "moderate" -> 2400
-      "strong" -> 7200
-    end
+  defp extra_gold(level, difficulty) do
+    base =
+      case difficulty do
+        "weak" -> 500
+        "moderate" -> 1000
+        "strong" -> 3000
+      end
+
+    # simulates bonus gold from league challenges
+    base + div(level, 5) * 1000
   end
 
   defp skills_to_order(skills) do

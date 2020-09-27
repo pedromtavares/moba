@@ -35,7 +35,7 @@ defmodule MobaWeb.ArenaSelectLiveView do
   def handle_event("select", %{"id" => id}, socket) do
     hero = Game.get_hero!(id)
 
-    Game.prepare_hero_for_pvp!(hero)
+    Moba.prepare_current_pvp_hero!(hero)
 
     {:noreply, socket |> redirect(to: "/game/pvp")}
   end

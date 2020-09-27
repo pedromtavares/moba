@@ -2,40 +2,18 @@ defmodule Moba.GameTest do
   use Moba.DataCase
 
   describe "matches" do
-    test "#start" do
-      old = Game.current_match()
-      winner = create_pvp_hero(%{pvp_points: 10000})
-
-      current = Game.Matches.start!(0..0)
-      old = Admin.get_match!(old.id)
-      winner_user = Accounts.get_user!(winner.user_id)
-
-      assert current.active
-      refute old.active
-      assert current.last_server_update_at
-      assert current.last_pvp_round_at
-
-      assert Game.get_current_skill!("coup")
-      assert Game.get_item_by_code!("boots_of_speed")
-
-      assert old.winners["1"] == winner.id
-      refute winner_user.current_pvp_hero_id
-      refute Game.get_hero!(winner.id) |> Map.get(:pvp_active)
+    test "#current_match" do
+      assert Game.current_match().active
     end
 
-    test "server_update!" do
-      current = Game.current_match()
-
-      match = Game.server_update!(current)
-
-      assert match.last_server_update_at > current.last_server_update_at
+    test "#create_match!" do
+      match = Game.create_match!(%{next_changelog: "hi"})
+      assert match.next_changelog == "hi"
     end
 
-    test "new_pvp_round!" do
-      current = Game.current_match()
-      match = Game.new_pvp_round!(current)
-
-      assert match.last_pvp_round_at > current.last_pvp_round_at
+    test "update_match!" do
+      match = Game.update_match!(Moba.current_match(), %{next_changelog: "hi"})
+      assert match.next_changelog == "hi"
     end
   end
 
@@ -55,18 +33,15 @@ defmodule Moba.GameTest do
     end
 
     test "#create_hero!" do
-      user = create_user()
       avatar = base_avatar()
       skills = base_skills()
 
-      hero = Game.create_hero!(%{name: "Foo"}, user, avatar, skills)
+      hero = Game.create_hero!(%{name: "Foo"}, create_user(), avatar, skills)
       hero = Game.get_hero!(hero.id)
-      user = Accounts.get_user!(user.id)
       targets = Game.list_targets(hero.id)
 
       assert hero.active_build.type == "pve"
       assert length(hero.active_build.skills) == 4
-      assert user.current_pve_hero_id == hero.id
       assert length(targets) > 0
     end
 
@@ -114,7 +89,7 @@ defmodule Moba.GameTest do
       updated = Game.update_attacker!(hero, updates)
       assert updated.level == 2
       assert updated.gold == 50
-      assert updated.experience == 60
+      assert updated.experience == 80
       assert updated.skill_levels_available == 1
       assert updated.total_hp > hero.total_hp
       assert updated.total_mp > hero.total_mp
@@ -123,24 +98,9 @@ defmodule Moba.GameTest do
       assert updated.power == hero.power
       assert updated.armor == hero.armor
 
-      user = Accounts.get_user!(updated.user_id)
-      assert user.experience == 200
-
       max_league_hero = create_base_hero(%{league_tier: 5})
       updated = Game.update_attacker!(max_league_hero, updates)
       assert updated.level == 25
-    end
-
-    test "#update_defender!" do
-      hero = create_base_hero()
-      updates = %{total_xp: 200, gold: 50}
-      updated = Game.update_defender!(hero, updates)
-      # XP is not incremented for defender
-      assert updated.level == 1
-      assert updated.gold == 50
-
-      user = Accounts.get_user!(updated.user_id)
-      assert user.experience == 0
     end
 
     test "#prepare_hero_for_pvp!" do
@@ -149,12 +109,17 @@ defmodule Moba.GameTest do
       weak_bot = create_bot_hero(-100)
 
       prepared = Game.prepare_hero_for_pvp!(hero)
-      user = Accounts.get_user!(hero.user_id)
       weak_bot = Game.get_hero!(weak_bot.id)
 
-      assert user.current_pvp_hero_id == prepared.id
+      hero_skills = hero.active_build.skills
+      prepared_skills = prepared.active_build.skills
+
       assert length(hero.items) == length(prepared.items)
-      assert length(hero.active_build.skills) == length(prepared.active_build.skills)
+      assert length(hero_skills) == length(prepared.active_build.skills)
+
+      assert Enum.map(hero_skills, fn skill -> skill.level end) |> Enum.sum() ==
+               Enum.map(prepared_skills, fn skill -> skill.level end) |> Enum.sum()
+
       assert prepared.pvp_points == 100
       assert prepared.pvp_wins == 0
       assert prepared.pvp_losses == 0
@@ -196,12 +161,12 @@ defmodule Moba.GameTest do
     end
 
     test "#redeem_league!" do
-      hero = create_base_hero(%{pve_points: 20})
+      hero = create_base_hero(%{pve_points: 15})
       assert Game.redeem_league!(hero) == hero
 
-      hero = create_base_hero(%{pve_points: 24}) |> Game.redeem_league!()
+      hero = create_base_hero(%{pve_points: 20}) |> Game.redeem_league!()
 
-      assert hero.pve_points == 12
+      assert hero.pve_points == 10
       assert hero.league_step == 1
     end
 
@@ -380,7 +345,7 @@ defmodule Moba.GameTest do
 
       refute Game.can_buy_item?(base_hero, item)
 
-      hero_with_full_inventory = create_bot_hero(0, 30, "strong")
+      hero_with_full_inventory = create_bot_hero(0, 40, "strong")
 
       refute Game.can_buy_item?(hero_with_full_inventory, item)
 

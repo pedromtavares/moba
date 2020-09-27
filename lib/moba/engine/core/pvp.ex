@@ -50,7 +50,7 @@ defmodule Moba.Engine.Core.Pvp do
     %Battle{
       attacker: attacker,
       defender: defender,
-      match_id: Game.current_match().id,
+      match_id: Moba.current_match().id,
       type: Engine.battle_types().pvp
     }
   end
@@ -63,7 +63,7 @@ defmodule Moba.Engine.Core.Pvp do
   end
 
   defp update_attacker({%{attacker: attacker} = battle, updates}) do
-    Game.update_attacker!(attacker, updates)
+    Moba.update_attacker!(attacker, updates)
 
     battle
   end
@@ -132,8 +132,8 @@ defmodule Moba.Engine.Core.Pvp do
         pvp_points: points_limits(defender.pvp_points + rewards.defender_pvp_points, defender)
       })
 
-    attacker = Game.update_attacker!(attacker, attacker_updates)
-    defender = Game.update_defender!(defender, defender_updates)
+    attacker = Moba.update_attacker!(attacker, attacker_updates)
+    defender = Moba.update_defender!(defender, defender_updates)
 
     {battle, attacker, defender}
   end

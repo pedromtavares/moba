@@ -27,11 +27,14 @@ defmodule Moba.AccountsTest do
     end
 
     test "#set_current_pvp_hero!", %{user: user} do
-      hero = create_base_hero()
+      hero = create_base_hero(%{pve_battles_available: 0}, user)
+      user = Accounts.get_user!(user.id)
+      assert user.current_pve_hero_id
 
       user = Accounts.set_current_pvp_hero!(user, hero.id)
 
       assert user.current_pvp_hero_id == hero.id
+      refute user.current_pve_hero_id
     end
   end
 

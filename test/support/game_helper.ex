@@ -5,7 +5,7 @@ defmodule Test.GameHelper do
     base = %{name: "Test"}
 
     hero =
-      Game.create_hero!(
+      Moba.create_current_pve_hero!(
         Map.merge(base, attrs),
         user,
         avatar,

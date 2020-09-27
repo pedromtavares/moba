@@ -4,6 +4,6 @@ defmodule Mix.Tasks.Skynet do
   @shortdoc "Server update with skynet attack"
   def run(_) do
     Mix.Task.run("app.start")
-    Moba.Game.server_update!()
+    Moba.Conductor.server_update!()
   end
 end

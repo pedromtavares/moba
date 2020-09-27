@@ -280,6 +280,7 @@ defmodule Moba.Engine.Core.Spell do
   def effects_for(%{resource: %Skill{code: code, buff: nil}} = turn) when code == "guardian_angel" do
     turn
     |> Effect.add_buff()
+    |> Effect.atk_damage()
   end
 
   def effects_for(%{resource: %Skill{code: code}} = turn) when code == "guardian_angel" do
@@ -348,10 +349,10 @@ defmodule Moba.Engine.Core.Spell do
     last_skill = attacker.last_skill
 
     if last_skill && last_skill.code != code && attacker.current_mp >= last_skill.mp_cost do
-      turn = Processor.cast_skill(turn, attacker.last_skill)
+      turn = Processor.cast_skill(turn, last_skill)
 
       %{turn | resource: resource, skill: resource}
-      |> Effect.attacker_bonus(attacker.last_skill.name)
+      |> Effect.attacker_bonus(last_skill.name)
     else
       Effect.atk_damage(turn)
     end

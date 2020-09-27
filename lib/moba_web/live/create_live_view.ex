@@ -119,7 +119,7 @@ defmodule MobaWeb.CreateLiveView do
 
     name = if user.is_guest, do: avatar.name, else: user.username
 
-    Game.create_hero!(%{name: name}, user, avatar, skills)
+    Moba.create_current_pve_hero!(%{name: name}, user, avatar, skills)
 
     {:noreply, socket |> redirect(to: "/game/pve")}
   end

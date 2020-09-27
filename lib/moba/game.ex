@@ -7,24 +7,17 @@ defmodule Moba.Game do
   siblings.
   """
 
-  alias Moba.{Game, Accounts}
-  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds}
+  alias Moba.Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds}
 
   # MATCHES
-
-  def start!, do: Matches.start!()
 
   def current_match, do: Matches.current()
 
   def last_match, do: Matches.last_active()
 
-  def server_update!(match \\ current_match()) do
-    updated = Matches.server_update!(match)
-    Game.update_ranking!()
-    updated
-  end
+  def create_match!(attrs \\ %{}), do: Matches.create!(attrs)
 
-  def new_pvp_round!(match), do: Matches.new_pvp_round!(match)
+  def update_match!(match, attrs), do: Matches.update!(match, attrs)
 
   def podium_for(match), do: Matches.load_podium(match)
 
@@ -64,11 +57,10 @@ defmodule Moba.Game do
 
   @doc """
   Orchestrates the creation of a Hero, which involves creating its initial build, activating it
-  and generating its first targets
+  and generating its first Jungle targets
   """
   def create_hero!(attrs, user, avatar, skills, match \\ current_match()) do
     hero = Heroes.create!(attrs, user, avatar, match)
-    user && Accounts.set_current_pve_hero!(user, hero.id)
     build = Builds.create!("pve", hero, skills)
 
     hero
@@ -86,23 +78,13 @@ defmodule Moba.Game do
     updated
   end
 
-  def update_attacker!(hero, updates) do
-    Accounts.user_pvp_updates!(hero.user_id, updates)
-    Heroes.update_attacker!(hero, updates)
-  end
-
-  def update_defender!(hero, updates) do
-    Accounts.user_pvp_updates!(hero.user_id, updates)
-    Heroes.update_defender!(hero, updates)
-  end
+  def update_attacker!(hero, updates), do: Heroes.update_attacker!(hero, updates)
 
   @doc """
   When a Hero is picked for the Arena, it needs to have its inventory and skills updated
   to reflect current values in the admin panel, since Heroes can stay "benched" for a long time
   """
   def prepare_hero_for_pvp!(hero) do
-    Accounts.set_current_pvp_hero!(hero.user, hero.id)
-
     hero
     |> Builds.update_all_with_current_skills!()
     |> Items.replace_inventory_with_current!()

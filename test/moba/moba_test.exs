@@ -66,20 +66,68 @@ defmodule Moba.MobaTest do
     end
 
     test "#xp_to_next_hero_level" do
-      assert Moba.xp_to_next_hero_level(2) == 140
-      assert Moba.xp_to_next_hero_level(5) == 260
-      assert Moba.xp_to_next_hero_level(10) == 460
-      assert Moba.xp_to_next_hero_level(15) == 660
-      assert Moba.xp_to_next_hero_level(20) == 860
-      assert Moba.xp_to_next_hero_level(25) == 1060
+      assert Moba.xp_to_next_hero_level(2) == 120
+      assert Moba.xp_to_next_hero_level(5) == 180
+      assert Moba.xp_to_next_hero_level(10) == 280
+      assert Moba.xp_to_next_hero_level(15) == 380
+      assert Moba.xp_to_next_hero_level(20) == 480
+      assert Moba.xp_to_next_hero_level(25) == 580
     end
 
     test "#xp_until_hero_level" do
-      assert Moba.xp_until_hero_level(5) == 800
-      assert Moba.xp_until_hero_level(10) == 2700
-      assert Moba.xp_until_hero_level(15) == 5600
-      assert Moba.xp_until_hero_level(20) == 9500
-      assert Moba.xp_until_hero_level(25) == 14400
+      assert Moba.xp_until_hero_level(5) == 600
+      assert Moba.xp_until_hero_level(10) == 1800
+      assert Moba.xp_until_hero_level(15) == 3500
+      assert Moba.xp_until_hero_level(20) == 5700
+      assert Moba.xp_until_hero_level(25) == 8400
+    end
+  end
+
+  describe "cross-domain functions" do
+    test "#create_current_pve_hero!" do
+      user = create_user()
+      avatar = base_avatar()
+      skills = base_skills()
+
+      hero = Moba.create_current_pve_hero!(%{name: "Foo"}, user, avatar, skills)
+      hero = Game.get_hero!(hero.id)
+      user = Accounts.get_user!(user.id)
+
+      assert hero
+      assert user.current_pve_hero_id == hero.id
+    end
+
+    test "#update_attacker!" do
+      hero = create_base_hero()
+      updates = %{total_xp: 200, gold: 50}
+      updated = Moba.update_attacker!(hero, updates)
+      assert updated.level == 2
+      assert updated.gold == 50
+
+      user = Accounts.get_user!(updated.user_id)
+      assert user.experience == 200
+    end
+
+    test "#update_defender!" do
+      hero = create_base_hero()
+      updates = %{gold: 50}
+      updated = Moba.update_defender!(hero, updates)
+
+      assert updated.gold == 50
+
+      user = Accounts.get_user!(updated.user_id)
+      assert user.experience == 0
+    end
+
+    test "#prepare_current_pvp_hero!" do
+      user = create_user(%{pvp_points: 100})
+      hero = create_base_hero(%{}, user)
+
+      prepared = Moba.prepare_current_pvp_hero!(hero)
+      user = Accounts.get_user!(hero.user_id)
+
+      assert user.current_pvp_hero_id == prepared.id
+      assert prepared.pvp_active
     end
   end
 end
