@@ -42,7 +42,7 @@ defmodule Moba.Engine.Core.League do
   defp manage_first_step(battle), do: {battle, %{}}
 
   defp update_attacker({battle, updates}) when updates != %{} do
-    Game.update_attacker!(battle.attacker, updates)
+    Moba.update_attacker!(battle.attacker, updates)
 
     battle
   end
@@ -86,7 +86,7 @@ defmodule Moba.Engine.Core.League do
 
   # Automatically creates another League battle upon victory
   defp finalize_attacker({%{winner: winner} = battle, updates}) do
-    attacker = Game.update_attacker!(battle.attacker, updates)
+    attacker = Moba.update_attacker!(battle.attacker, updates)
 
     if winner && attacker.id == winner.id && attacker.league_step > 0 do
       Engine.create_league_battle!(attacker)

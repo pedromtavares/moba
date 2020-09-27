@@ -30,6 +30,7 @@ defmodule MobaWeb.ConnCase do
       alias Moba.Accounts
       alias Moba.Engine
       alias Moba.Admin
+      alias Moba.Conductor
 
       # The default endpoint for testing
       @endpoint MobaWeb.Endpoint

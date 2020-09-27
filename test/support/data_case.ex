@@ -21,6 +21,7 @@ defmodule Moba.DataCase do
       alias Moba.Accounts
       alias Moba.Engine
       alias Moba.Admin
+      alias Moba.Conductor
 
       import Ecto
       import Ecto.Changeset

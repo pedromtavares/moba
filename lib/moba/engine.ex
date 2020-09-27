@@ -18,7 +18,7 @@ defmodule Moba.Engine do
 
   def update_battle!(battle, attrs), do: Battles.update!(battle, attrs)
 
-  def list_battles(hero, type, page \\ 1, limit \\ 5, match \\ Game.current_match()) do
+  def list_battles(hero, type, page \\ 1, limit \\ 5, match \\ Moba.current_match()) do
     Battles.list(hero, type, page, limit, match)
   end
 

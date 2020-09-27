@@ -35,7 +35,13 @@ defmodule Moba.Accounts do
 
   def set_current_pve_hero!(user, hero_id), do: Users.set_current_pve_hero!(user, hero_id)
 
-  def set_current_pvp_hero!(user, hero_id), do: Users.set_current_pvp_hero!(user, hero_id)
+  def set_current_pvp_hero!(user, hero_id) do
+    user
+    |> Users.set_current_pvp_hero!(hero_id)
+    |> Users.clear_pve_hero!()
+  end
+
+  def clear_active_players!, do: Users.clear_active_players!()
 
   def user_pvp_updates!(nil, _), do: nil
 

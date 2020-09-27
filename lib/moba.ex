@@ -1,9 +1,9 @@
 defmodule Moba do
   @moduledoc """
-  High-level helpers and core variables
+  High-level helpers, core variables and cross-context orchestration
   """
 
-  alias Moba.{Game, Accounts}
+  alias Moba.{Game, Accounts, Conductor, Cleaner}
 
   # General constants
   @initial_battles 30
@@ -148,11 +148,32 @@ defmodule Moba do
 
   def start! do
     IO.puts("Starting match...")
-    Game.start!()
-    cleanup()
+    Conductor.start_match!()
+    Cleaner.cleanup_old_records()
   end
 
-  def cleanup, do: Moba.Cleaner.cleanup_old_records()
+  def current_match, do: Game.current_match()
+
+  def create_current_pve_hero!(attrs, user, avatar, skills, match \\ current_match()) do
+    hero = Game.create_hero!(attrs, user, avatar, skills, match)
+    user && Accounts.set_current_pve_hero!(user, hero.id)
+    hero
+  end
+
+  def prepare_current_pvp_hero!(hero) do
+    Accounts.set_current_pvp_hero!(hero.user, hero.id)
+    Game.prepare_hero_for_pvp!(hero)
+  end
+
+  def update_attacker!(hero, updates) do
+    Accounts.user_pvp_updates!(hero.user_id, updates)
+    Game.update_attacker!(hero, updates)
+  end
+
+  def update_defender!(hero, updates) do
+    Accounts.user_pvp_updates!(hero.user_id, updates)
+    Game.update_hero!(hero, updates)
+  end
 
   @doc """
   Accounts ranking is defined by who has the highest medal_count

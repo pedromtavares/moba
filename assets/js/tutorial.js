@@ -1,39 +1,39 @@
 import Shepherd from 'shepherd.js';
 
 const Tutorial = {
-  start: function(hookInstance, step){
+  start: function (hookInstance, step) {
     Shepherd.activeTour && Shepherd.activeTour.complete();
 
     let tour = new Shepherd.Tour(this.tourOptions(step))
 
     tour = this.tourSteps(tour, step, hookInstance)
 
-    setTimeout(function(){
+    setTimeout(function () {
       tour.start();
     }, 1000)
   },
-  complete: function(hookInstance){
-    if(Shepherd.activeTour){
+  complete: function (hookInstance) {
+    if (Shepherd.activeTour) {
       hookInstance.pushEvent("tutorial14", {});
       Shepherd.activeTour.complete();
     }
   },
-  tourOptions: function(step){
+  tourOptions: function (step) {
     let opts = {
-      defaultStepOptions: {scrollTo: false}
+      defaultStepOptions: { scrollTo: false }
     };
 
-    switch(step){
+    switch (step) {
       case 1: return opts;
       case 3: return opts;
       case 7: return opts;
       case 8: return opts;
       case 9: return opts;
-      default: return {...opts, useModalOverlay: true}
+      default: return { ...opts, useModalOverlay: true }
     }
   },
-  tourSteps: function(tour, step, hookInstance){
-    switch(step){
+  tourSteps: function (tour, step, hookInstance) {
+    switch (step) {
       case 1:
         tour.addStep({
           id: 'first-tutorial-first-step',
@@ -57,7 +57,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'Open Shop',
-              action: function(){hookInstance.pushEvent("tutorial3", {}); this.complete()}
+              action: function () { hookInstance.pushEvent("tutorial3", {}); this.complete() }
             }
           ]
         });
@@ -73,7 +73,7 @@ const Tutorial = {
           popperOptions: {
             modifiers: [{ name: 'offset', options: { offset: [0, 20] } }]
           },
-          cancelIcon: {enabled: true}
+          cancelIcon: { enabled: true }
         });
         break;
       case 4:
@@ -93,7 +93,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'fourth-tutorial-second-step',
-          text: "<p class='text-center'>With every battle, you also gain <span class='text-success'>Jungle Points</span>, which you need to gather to rank up to the next League. Keep battling until you've reached 24 points, good luck!</p>",
+          text: "<p class='text-center'>With every battle, you also gain <span class='text-success'>Jungle Points</span>, which you need to gather to rank up to the next League. Keep battling until you've reached 20 points, good luck!</p>",
           attachTo: {
             element: '#current-hero-league',
             on: 'bottom'
@@ -101,7 +101,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'OK',
-              action: function(){hookInstance.pushEvent("tutorial5", {}); this.complete()}
+              action: function () { hookInstance.pushEvent("tutorial5", {}); this.complete() }
             }
           ]
         });
@@ -113,10 +113,10 @@ const Tutorial = {
           buttons: [
             {
               text: 'Open Shop',
-              action: function(){hookInstance.pushEventTo("#hero-bar", "toggle-shop", {}); setTimeout(this.next, 500)}
+              action: function () { hookInstance.pushEventTo("#hero-bar", "toggle-shop", {}); setTimeout(this.next, 500) }
             }
           ],
-          cancelIcon: {enabled: true}
+          cancelIcon: { enabled: true }
         });
         tour.addStep({
           id: 'sixth-tutorial-second-step',
@@ -125,7 +125,7 @@ const Tutorial = {
             element: '.normal-items',
             on: 'right'
           },
-          cancelIcon: {enabled: true}
+          cancelIcon: { enabled: true }
         });
         break;
       case 7:
@@ -136,7 +136,7 @@ const Tutorial = {
             element: '.code-tranquil_boots',
             on: 'left'
           },
-          cancelIcon: {enabled: true},
+          cancelIcon: { enabled: true },
           popperOptions: {
             modifiers: [{ name: 'offset', options: { offset: [0, 20] } }]
           }
@@ -150,7 +150,7 @@ const Tutorial = {
             element: '.inventory-item',
             on: 'left'
           },
-          cancelIcon: {enabled: true},
+          cancelIcon: { enabled: true },
           popperOptions: {
             modifiers: [{ name: 'offset', options: { offset: [0, 20] } }]
           }
@@ -167,7 +167,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'OK, back to Ganking',
-              action: function(){hookInstance.pushEventTo("#hero-bar", "close-shop", {}); this.complete()}
+              action: function () { hookInstance.pushEventTo("#hero-bar", "close-shop", {}); this.complete() }
             }
           ],
           popperOptions: {
@@ -220,7 +220,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'Finish Tutorial',
-              action: function(){hookInstance.pushEvent("tutorial12", {}); this.complete()}
+              action: function () { hookInstance.pushEvent("tutorial12", {}); this.complete() }
             }
           ],
           popperOptions: {
@@ -245,7 +245,7 @@ const Tutorial = {
           popperOptions: {
             modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
           },
-          cancelIcon: {enabled: true},
+          cancelIcon: { enabled: true },
         });
         tour.addStep({
           id: 'thirteenth-tutorial-first-step',
@@ -291,7 +291,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'Finish Tutorial',
-              action: function(){hookInstance.pushEvent("tutorial14", {}); this.complete()}
+              action: function () { hookInstance.pushEvent("tutorial14", {}); this.complete() }
             }
           ],
           popperOptions: {

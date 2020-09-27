@@ -98,8 +98,8 @@ defmodule Moba.EngineTest do
       assert rewards.total_xp == 70
       assert rewards.total_pve_points == 1
 
-      reloaded_attacker = Game.Heroes.get!(attacker.id)
-      reloaded_defender = Game.Heroes.get!(defender.id)
+      reloaded_attacker = Game.get_hero!(attacker.id)
+      reloaded_defender = Game.get_hero!(defender.id)
 
       assert reloaded_attacker.experience != attacker.experience
       assert reloaded_defender.experience == defender.experience
@@ -132,8 +132,8 @@ defmodule Moba.EngineTest do
       assert rewards.total_xp == 400
       assert rewards.total_pve_points == 6
 
-      updated_attacker = Game.Heroes.get!(attacker.id)
-      defender = Game.Heroes.get!(defender.id)
+      updated_attacker = Game.get_hero!(attacker.id)
+      defender = Game.get_hero!(defender.id)
 
       assert updated_attacker.experience != attacker.experience
       assert updated_attacker.level != attacker.level
@@ -155,8 +155,8 @@ defmodule Moba.EngineTest do
 
       assert battle.winner.id == defender.id
 
-      attacker = Game.Heroes.get!(attacker.id)
-      defender = Game.Heroes.get!(defender.id)
+      attacker = Game.get_hero!(attacker.id)
+      defender = Game.get_hero!(defender.id)
 
       assert attacker.experience == 0
       assert attacker.level == 1
