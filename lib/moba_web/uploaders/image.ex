@@ -51,10 +51,11 @@ defmodule Moba.Image do
   # Provide a default URL if there hasn't been a file uploaded
   def default_url(_version, scope) do
     struct = Map.get(scope, :__struct__)
+
     case struct do
-      s when s in [Battler, Avatar, Message] -> Endpoint.url <> "/images/default_avatar.png"
-      Item -> Endpoint.url <> "/images/default_item.png"
-      _ -> Endpoint.url <> "/images/default_skill.png"
+      s when s in [Battler, Avatar, Message] -> Endpoint.url() <> "/images/default_avatar.png"
+      Item -> Endpoint.url() <> "/images/default_item.png"
+      _ -> Endpoint.url() <> "/images/default_skill.png"
     end
   end
 

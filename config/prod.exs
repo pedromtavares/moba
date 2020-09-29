@@ -26,8 +26,7 @@ config :arc,
   storage: Arc.Storage.S3,
   bucket: {:system, "S3_BUCKET"}
 
-config :appsignal, :config,
-  active: true
+config :appsignal, :config, active: true
 
 config :moba, MobaWeb.PowMailer,
   adapter: Bamboo.SendGridAdapter,
