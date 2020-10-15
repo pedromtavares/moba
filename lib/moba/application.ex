@@ -19,20 +19,12 @@ defmodule Moba.Application do
       MobaWeb.Endpoint,
       # Cache for hero creation
       {Cachex, name: :game_cache},
-      # Redix for persistent sessions
-      {Redix, {redis_uri, [name: :redix]}},
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
       Moba.Conductor,
-      Moba.Admin.Server
+      Moba.Admin.Server,
+      {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
     ]
-
-    :telemetry.attach(
-      "appsignal-ecto",
-      [:moba, :repo, :query],
-      &Appsignal.Ecto.handle_event/4,
-      nil
-    )
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

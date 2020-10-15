@@ -23,5 +23,3 @@ config :pow, Pow.Ecto.Schema.Password, iterations: 1
 
 config :arc,
   storage: Arc.Storage.Local
-
-config :appsignal, :config, active: false

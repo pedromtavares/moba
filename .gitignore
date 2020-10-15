@@ -32,6 +32,7 @@ npm-debug.log
 # we ignore priv/static. You may want to comment
 # this depending on your deployment strategy.
 /priv/static/
+/priv/data/
 
 /uploads
 
@@ -44,5 +45,3 @@ npm-debug.log
 /config/*.secret.exs
 
 .DS_Store
-
-Mnesia.nonode@nohost/

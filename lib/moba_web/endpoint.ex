@@ -1,6 +1,6 @@
 defmodule MobaWeb.Endpoint do
+  use Sentry.PlugCapture
   use Phoenix.Endpoint, otp_app: :moba
-  use Appsignal.Phoenix
 
   @session_options [
     store: :cookie,
@@ -59,6 +59,8 @@ defmodule MobaWeb.Endpoint do
     parsers: [:urlencoded, :multipart, :json],
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
+
+  plug Sentry.PlugContext
 
   plug Plug.MethodOverride
   plug Plug.Head

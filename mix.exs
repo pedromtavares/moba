@@ -22,7 +22,7 @@ defmodule Moba.MixProject do
   def application do
     [
       mod: {Moba.Application, []},
-      extra_applications: [:logger, :runtime_tools, :timex]
+      extra_applications: [:logger, :runtime_tools, :timex, :mnesia]
     ]
   end
 
@@ -60,14 +60,14 @@ defmodule Moba.MixProject do
       {:bamboo, "~> 1.3"},
       {:hackney, ">= 1.15.2"},
       {:faker, "~> 0.13"},
-      {:appsignal, "~> 1.12"},
       {:elixir_uuid, "~> 1.2"},
       {:cachex, "~> 3.3"},
-      {:redix, "~> 0.9.2"},
       {:phoenix_live_dashboard, "~> 0.2.6"},
       {:telemetry_poller, "~> 0.4"},
       {:telemetry_metrics, "~> 0.4"},
       {:ecto_explain, "~> 0.1.2"},
+      {:sentry, "~> 8.0"},
+      {:pow_postgres_store, github: "ZennerIoT/pow_postgres_store"},
       {:floki, ">= 0.0.0", only: :test},
       {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false}
     ]

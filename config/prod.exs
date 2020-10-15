@@ -26,11 +26,19 @@ config :arc,
   storage: Arc.Storage.S3,
   bucket: {:system, "S3_BUCKET"}
 
-config :appsignal, :config, active: true
-
 config :moba, MobaWeb.PowMailer,
   adapter: Bamboo.SendGridAdapter,
   api_key: System.get_env("SENDGRID_KEY")
+
+config :sentry,
+  dsn: System.get_env("SENTRY_DSN"),
+  environment_name: :prod,
+  enable_source_code_context: true,
+  root_source_code_path: File.cwd!(),
+  tags: %{
+    env: "production"
+  },
+  included_environments: [:prod]
 
 # ## SSL Support
 #

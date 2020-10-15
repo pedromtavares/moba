@@ -36,7 +36,9 @@ config :moba, :pow,
   mailer_backend: MobaWeb.PowMailer,
   web_mailer_module: MobaWeb,
   routes_backend: MobaWeb.PowRoutes,
-  cache_store_backend: MobaWeb.PowRedisCache
+  cache_store_backend: Pow.Postgres.Store
+
+config :pow, Pow.Postgres.Store, repo: Moba.Repo
 
 config :moba, MobaWeb.PowMailer, adapter: Bamboo.LocalAdapter
 
