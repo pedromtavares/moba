@@ -223,11 +223,13 @@ defmodule MobaWeb.GameHelpers do
 
   # image field needs to be converted to a map of atoms due to serialization
   defp get_url(image, resource) do
-    image = if image && Map.get(image, "file_name") do
-      for {key, val} <- image, into: %{}, do: {String.to_atom(key), val}
-    else
-      image
-    end
+    image =
+      if image && Map.get(image, "file_name") do
+        for {key, val} <- image, into: %{}, do: {String.to_atom(key), val}
+      else
+        image
+      end
+
     Moba.Image.url({image, resource}, :original)
   end
 end

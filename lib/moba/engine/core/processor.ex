@@ -364,7 +364,7 @@ defmodule Moba.Engine.Core.Processor do
 
   # Applies the current resource in the turn and immediately activates any buffs or
   # debuffs that may have been added by it (Moba.Engine.Core.Effect#add_buff for example)
-  defp apply_spell(turn, opts \\ nil) do
+  defp apply_spell(turn, opts \\ %{}) do
     turn
     |> Spell.apply(opts)
     |> maybe_apply_buff()
@@ -391,7 +391,7 @@ defmodule Moba.Engine.Core.Processor do
 
   defp apply_resource(turn, resource) do
     %{turn | resource: resource}
-    |> Spell.apply()
+    |> Spell.apply(%{})
   end
 
   defp get_resource_from_order(order, battler) do
