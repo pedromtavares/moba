@@ -22,7 +22,7 @@ defmodule Moba.MixProject do
   def application do
     [
       mod: {Moba.Application, []},
-      extra_applications: [:logger, :runtime_tools, :timex]
+      extra_applications: [:logger, :runtime_tools, :timex, :mnesia]
     ]
   end
 
