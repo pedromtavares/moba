@@ -27,13 +27,6 @@ defmodule Moba.Application do
       Moba.Admin.Server
     ]
 
-    :telemetry.attach(
-      "appsignal-ecto",
-      [:moba, :repo, :query],
-      &Appsignal.Ecto.handle_event/4,
-      nil
-    )
-
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Moba.Supervisor]

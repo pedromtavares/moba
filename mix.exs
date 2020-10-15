@@ -60,7 +60,6 @@ defmodule Moba.MixProject do
       {:bamboo, "~> 1.3"},
       {:hackney, ">= 1.15.2"},
       {:faker, "~> 0.13"},
-      {:appsignal, "~> 1.12"},
       {:elixir_uuid, "~> 1.2"},
       {:cachex, "~> 3.3"},
       {:redix, "~> 0.9.2"},
@@ -68,6 +67,7 @@ defmodule Moba.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:telemetry_metrics, "~> 0.4"},
       {:ecto_explain, "~> 0.1.2"},
+      {:sentry, "~> 8.0"},
       {:floki, ">= 0.0.0", only: :test}
     ]
   end
