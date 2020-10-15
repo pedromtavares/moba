@@ -36,7 +36,9 @@ config :moba, :pow,
   mailer_backend: MobaWeb.PowMailer,
   web_mailer_module: MobaWeb,
   routes_backend: MobaWeb.PowRoutes,
-  cache_store_backend: Pow.Store.Backend.MnesiaCache
+  cache_store_backend: Pow.Postgres.Store
+
+config :pow, Pow.Postgres.Store, repo: Moba.Repo
 
 config :moba, MobaWeb.PowMailer, adapter: Bamboo.LocalAdapter
 
@@ -47,14 +49,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-mnesia_priv_path = System.get_env("MNESIA_DIR") || "priv/data/mnesia_#{Mix.env()}"
-mnesia_path = Path.join(File.cwd!(), mnesia_priv_path)
-
-unless File.exists?(mnesia_path), do: File.mkdir_p!(mnesia_path)
-
-config :mnesia,
-  dir: to_charlist(mnesia_priv_path)
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

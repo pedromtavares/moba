@@ -19,13 +19,11 @@ defmodule Moba.Application do
       MobaWeb.Endpoint,
       # Cache for hero creation
       {Cachex, name: :game_cache},
-      # Redix for persistent sessions
-      {Redix, {redis_uri, [name: :redix]}},
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
       Moba.Conductor,
       Moba.Admin.Server,
-      Pow.Store.Backend.MnesiaCache
+      {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
