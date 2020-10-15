@@ -26,8 +26,6 @@ config :torch,
   otp_app: :moba,
   template_format: "eex"
 
-config :mnesia, dir: to_charlist(System.get_env("MNESIA_DIR") || "data/")
-
 config :moba, :pow,
   user: Moba.Accounts.Schema.User,
   repo: Moba.Repo,
@@ -49,6 +47,14 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
+
+mnesia_priv_path = System.get_env("MNESIA_DIR") || "priv/data/mnesia_#{Mix.env()}"
+mnesia_path = Path.join(File.cwd!(), mnesia_priv_path)
+
+unless File.exists?(mnesia_path), do: File.mkdir_p!(mnesia_path)
+
+config :mnesia,
+  dir: to_charlist(mnesia_priv_path)
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
