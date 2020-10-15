@@ -51,10 +51,15 @@ defmodule SeedHelper do
 end
 
 %User{is_admin: true, tutorial_step: 0, shard_count: 100, level: 20}
-|> User.changeset(%{email: "admin@browsermoba.com", username: "Admin", password: "123456", password_confirmation: "123456"})
+|> User.changeset(%{
+  email: "admin@browsermoba.com",
+  username: "Admin",
+  password: "123456",
+  password_confirmation: "123456"
+})
 |> Repo.insert!()
 
-Enum.map((1..30), fn _number -> SeedHelper.create_bot() end)
+Enum.map(1..30, fn _number -> SeedHelper.create_bot() end)
 
 # ITEMS
 
@@ -837,7 +842,7 @@ SeedHelper.create_avatar(
       code: "abaddon",
       ultimate: borrowed_time,
       ultimate_code: "borrowed_time",
-      level_requirement: 5,
+      level_requirement: 5
     },
     tank
   )

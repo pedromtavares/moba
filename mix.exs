@@ -68,7 +68,8 @@ defmodule Moba.MixProject do
       {:telemetry_metrics, "~> 0.4"},
       {:ecto_explain, "~> 0.1.2"},
       {:sentry, "~> 8.0"},
-      {:floki, ">= 0.0.0", only: :test}
+      {:floki, ">= 0.0.0", only: :test},
+      {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false}
     ]
   end
 

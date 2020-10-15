@@ -48,12 +48,12 @@ defmodule MobaWeb.ArenaLiveView do
     redirect_to_battle(id, build_id, socket)
   end
 
-  def handle_info({"battle", %{id: id, build_id: build_id}}, socket) do
-    redirect_to_battle(id, build_id, socket)
-  end
-
   def handle_event("tutorial14", _, socket) do
     {:noreply, socket |> Tutorial.next_step(14)}
+  end
+
+  def handle_info({"battle", %{id: id, build_id: build_id}}, socket) do
+    redirect_to_battle(id, build_id, socket)
   end
 
   def handle_info({"tutorial-step", %{step: step}}, socket) do
