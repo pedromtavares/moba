@@ -26,6 +26,8 @@ config :torch,
   otp_app: :moba,
   template_format: "eex"
 
+config :mnesia, dir: to_charlist(System.get_env("MNESIA_DIR") || "data/")
+
 config :moba, :pow,
   user: Moba.Accounts.Schema.User,
   repo: Moba.Repo,
@@ -36,7 +38,7 @@ config :moba, :pow,
   mailer_backend: MobaWeb.PowMailer,
   web_mailer_module: MobaWeb,
   routes_backend: MobaWeb.PowRoutes,
-  cache_store_backend: MobaWeb.PowRedisCache
+  cache_store_backend: Pow.Store.Backend.MnesiaCache
 
 config :moba, MobaWeb.PowMailer, adapter: Bamboo.LocalAdapter
 

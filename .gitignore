@@ -45,4 +45,4 @@ npm-debug.log
 
 .DS_Store
 
-Mnesia.nonode@nohost/
+/data

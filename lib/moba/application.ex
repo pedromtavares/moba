@@ -24,7 +24,8 @@ defmodule Moba.Application do
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
       Moba.Conductor,
-      Moba.Admin.Server
+      Moba.Admin.Server,
+      Pow.Store.Backend.MnesiaCache
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
