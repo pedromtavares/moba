@@ -6,8 +6,6 @@ defmodule Moba.Application do
   use Application
 
   def start(_type, _args) do
-    # "redis://redis-rofs:10000"
-    redis_uri = System.get_env("REDIS_URI") || "redis://localhost:6379"
     # List all child processes to be supervised
     children = [
       # Start the Ecto repository

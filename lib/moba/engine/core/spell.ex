@@ -405,14 +405,9 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Skill{code: "counter_helix"}} = turn, is_attacking: false) do
     turn
     |> roll(
-      fn turn -> effects_for(turn) end,
+      fn turn -> Effect.self_base_damage(turn) end,
       fn turn -> turn end
     )
-  end
-
-  defp effects_for(%{resource: %Skill{code: "counter_helix"}} = turn, _options) do
-    turn
-    |> Effect.self_base_damage()
   end
 
   defp effects_for(%{resource: %Skill{code: "feast"}} = turn, is_attacking: true) do
@@ -443,7 +438,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "fury_swipes"}} = turn, _options) do
+  defp effects_for(%{resource: %Skill{code: "fury_swipes", debuff: true}} = turn, _options) do
     Effect.base_damage(turn)
   end
 
