@@ -171,4 +171,4 @@ Each `Effect` updates either the `defender` or the `attacker`, returning a modif
 In essence, all a particular `Effect` does is update one of the fields of the `Battler` struct, like `damage`, `hp_regen`, `stunned`, `silenced`, [and many more](lib/moba/engine/schema/battler.ex). It's these interactions between effects that generate nearly infinite different battle outcomes.
 
 
-[discord]: https://discord.gg/QNwEdPS
+[discord]: https://discord.gg/wA3JxVU

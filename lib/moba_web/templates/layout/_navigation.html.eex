@@ -20,7 +20,7 @@
                                             Admin Panel
                                         </a>
                                     <% else %>
-                                        <a href="https://discord.gg/QNwEdPS" target="_blank" class="nav-link d-none d-md-block">
+                                        <a href="https://discord.gg/wA3JxVU" target="_blank" class="nav-link d-none d-md-block">
                                             <i class="fab fa-discord"></i>
                                             <br/>
                                             Join our Community!
