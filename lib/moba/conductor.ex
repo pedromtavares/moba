@@ -257,7 +257,7 @@ defmodule Moba.Conductor do
       case difficulty do
         "moderate" -> 18..25
         "strong" -> 22..25
-        "ultimate" -> 25
+        "ultimate" -> 25..25
         _ -> 15..22
       end
 
