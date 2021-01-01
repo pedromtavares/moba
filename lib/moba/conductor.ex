@@ -63,6 +63,7 @@ defmodule Moba.Conductor do
       create_match!()
       |> generate_resources!()
       |> generate_hero_bots!(bot_level_range)
+      |> refresh_targets!()
       |> generate_user_bots!()
       |> new_pvp_round!()
       |> server_update!()
@@ -151,6 +152,18 @@ defmodule Moba.Conductor do
         Game.create_bot_hero!(avatar, level, "moderate", match)
         Game.create_bot_hero!(avatar, level, "strong", match)
       end)
+    end)
+
+    match
+  end
+
+  # generates new targets for unfinished Jungle heroes
+  defp refresh_targets!(match) do
+    UserQuery.current_players()
+    |> Repo.all()
+    |> Repo.preload(:current_pve_hero)
+    |> Enum.map(fn %{current_pve_hero: hero} ->
+      Game.generate_targets!(hero)
     end)
 
     match

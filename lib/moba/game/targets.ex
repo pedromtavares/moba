@@ -42,7 +42,7 @@ defmodule Moba.Game.Targets do
     exclude_list = [hero.id | exclude]
     level_range = level_range(hero, difficulty)
 
-    HeroQuery.pve_targets(difficulty, level_range, exclude_list, hero.match_id)
+    HeroQuery.pve_targets(difficulty, level_range, exclude_list, Game.current_match().id)
     |> Repo.all()
     |> Enum.map(fn defender ->
       {:ok, target} =

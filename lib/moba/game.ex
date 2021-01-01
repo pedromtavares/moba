@@ -178,7 +178,7 @@ defmodule Moba.Game do
 
   def get_target!(target_id), do: Targets.get!(target_id)
 
-  def generate_targets!(attacker), do: Targets.generate!(attacker)
+  def generate_targets!(hero), do: Targets.generate!(hero)
 
   def list_targets(hero_id), do: Targets.list(hero_id)
 
