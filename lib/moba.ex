@@ -31,7 +31,7 @@ defmodule Moba do
   @max_hero_level 25
 
   # PVP constants
-  @pvp_heroes_per_page 2
+  @pvp_heroes_per_page 3
   @ranking_heroes_per_page 10
   @pvp_timeout_in_hours 24
   @pvp_round_decay 25

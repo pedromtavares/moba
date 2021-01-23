@@ -39,7 +39,7 @@ const Tutorial = {
           id: 'first-tutorial-first-step',
           text: "Welcome to the Jungle! Now that you've created your hero, it's time to put it to the test. Gank this target to start your first battle.",
           attachTo: {
-            element: '.weak-targets .battle-button',
+            element: '.targets .battle-button',
             on: 'right'
           },
           popperOptions: {

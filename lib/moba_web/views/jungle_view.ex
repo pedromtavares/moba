@@ -13,9 +13,30 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def weak(targets), do: filter_targets(targets, "weak")
-  def moderate(targets), do: filter_targets(targets, "moderate")
-  def strong(targets), do: filter_targets(targets, "strong")
+  def difficulty_label(difficulty) do
+    case difficulty do
+      "weak" -> "Easy"
+      "moderate" -> "Medium"
+      "strong" -> "Hard"
+      _ -> "??"
+    end
+  end
+
+  def offense_percentage(target, targets) do
+    heroes = Enum.map(targets, &(&1.defender))
+    with_stats = Enum.map(heroes, &(with_display_stats(&1, heroes)))
+    max = Enum.max_by(with_stats, fn hero -> hero.display_offense end) || target.defender
+
+    with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
+  end
+
+  def defense_percentage(target, targets) do
+    heroes = Enum.map(targets, &(&1.defender))
+    with_stats = Enum.map(heroes, &(with_display_stats(&1, heroes)))
+    max = Enum.max_by(with_stats, fn hero -> hero.display_defense end) || target.defender
+
+    with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
+  end
 
   def next_league_percentage(hero) do
     max = Moba.pve_points_limit()
@@ -57,19 +78,42 @@ defmodule MobaWeb.JungleView do
 
     streak_xp = round(Moba.win_streak_xp(2) * Moba.streak_percentage(difficulty) / 100)
 
-    content_tag :div do
+    safe_to_string(content_tag :div do
       [
         xp_reward,
         content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1"),
         points,
         content_tag(:span, "+#{streak_xp} XP/Gold per Win Streak", class: "badge badge-pill badge-light-purple")
       ]
-    end
+    end)
   end
 
   def streak_title(hero), do: HeroView.bonus_xp_title(hero)
 
   def next_match_description, do: HeroView.next_match_description()
 
-  defp filter_targets(targets, difficulty), do: Enum.filter(targets, fn target -> target.difficulty == difficulty end)
+  defp with_display_stats(hero, heroes) do
+    minimum = minimum_stats(heroes)
+    units = Moba.avatar_stat_units()
+
+    Map.merge(hero, %{
+      display_defense:
+        (total_hp(hero) - minimum[:total_hp]) / units[:total_hp] + (total_armor(hero) - minimum[:armor]) / units[:armor],
+      display_offense: (total_atk(hero) - minimum[:atk]) / units[:atk] + (total_power(hero) - minimum[:power]) / units[:power]
+    })
+  end
+
+  defp minimum_stats(heroes) do
+    %{
+      atk: Enum.min_by(heroes, fn hero -> total_atk(hero) end) |> total_atk(),
+      total_hp: Enum.min_by(heroes, fn hero -> total_hp(hero) end) |> total_hp(),
+      armor: Enum.min_by(heroes, fn hero -> total_armor(hero) end) |> total_armor(),
+      power: Enum.min_by(heroes, fn hero -> total_power(hero) end) |> total_power(),
+    }
+  end
+
+  defp total_hp(hero), do: hero.total_hp + hero.item_hp
+  defp total_atk(hero), do: hero.atk + hero.item_atk
+  defp total_armor(hero), do: hero.armor + hero.item_armor
+  defp total_power(hero), do: hero.power + hero.item_power
 end

@@ -291,7 +291,7 @@ defmodule Moba.EngineTest do
       assert hero.league_step == 0
       assert hero.league_tier == attacker.league_tier + 1
       assert hero.league_successes == attacker.league_successes + 1
-      assert hero.buffed_battles_available == Moba.league_win_buffed_battles_bonus()
+      assert hero.buffed_battles_available == attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus()
       assert hero.gold == attacker.gold + Moba.league_win_gold_bonus()
     end
   end

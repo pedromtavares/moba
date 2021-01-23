@@ -69,7 +69,7 @@ defmodule Moba.Game.Heroes do
   and thus have their stats greatly reduced
   If a user is passed, the bot will be automatically assigned to PVP (Arena).
   """
-  def create_bot!(avatar, level, difficulty, match, user \\ nil, league_tier \\ 0, pvp_points \\ 0) do
+  def create_bot!(avatar, level, difficulty, match, user \\ nil, pvp_points \\ 0, league_tier \\ 0) do
     name = if user, do: user.username, else: avatar.name
 
     bot =

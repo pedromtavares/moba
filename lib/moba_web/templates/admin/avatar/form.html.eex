@@ -32,6 +32,12 @@
     </div>
 
     <div class="torch-form-group">
+      <%= label f, :background %>
+      <%= file_input f, :background %>
+      <%= error_tag f, :background %>
+    </div>
+
+    <div class="torch-form-group">
       <%= label f, :role %>
       <%= text_input f, :role %>
       <%= error_tag f, :role %>

@@ -4,7 +4,7 @@ defmodule Moba.Game.Query.HeroQuery do
   """
 
   alias Moba.Game
-  alias Game.Schema.Hero
+  alias Game.Schema.{Hero, Avatar}
 
   import Ecto.Query, only: [from: 2]
 
@@ -34,21 +34,22 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(@ranking_per_page, page_to_offset(page, @ranking_per_page))
   end
 
-  def pve_targets(difficulty, level_range, exclude_list, match_id) do
+  def pve_targets(difficulty, level_range, exclude_list, current_match_id, codes) do
     Hero
     |> by_difficulty(difficulty)
     |> pvp_inactive()
     |> by_level(level_range)
-    |> by_match(match_id)
+    |> by_match(current_match_id)
+    |> by_codes(codes)
     |> exclude(exclude_list)
     |> limit_by(2)
     |> random()
   end
 
-  def league_defender(attacker_id, base_level, difficulty, match_id) do
+  def league_defender(attacker_id, base_level, difficulty, current_match_id) do
     bots()
     |> by_level(base_level..base_level)
-    |> by_match(match_id)
+    |> by_match(current_match_id)
     |> by_difficulty(difficulty)
     |> exclude([attacker_id])
     |> random()
@@ -168,9 +169,15 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def by_pvp_points(query, min, max) do
-    from result in query,
-      where: result.pvp_points >= ^min,
-      where: result.pvp_points <= ^max
+    from hero in query,
+      where: hero.pvp_points >= ^min,
+      where: hero.pvp_points <= ^max
+  end
+
+  def by_codes(query, codes) do
+    from hero in query,
+      join: avatar in Avatar, on: hero.avatar_id == avatar.id,
+      where: is_nil(avatar.level_requirement) or avatar.code in ^codes
   end
 
   def limit_by(query, limit, offset \\ 0) do

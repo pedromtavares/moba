@@ -33,6 +33,10 @@ defmodule Moba.Game.Leagues do
     end
   end
 
+  def tier_for(level) do
+    Enum.find((0..5), fn tier -> base_level(tier) + 3 > level end) || 0
+  end
+
   # --------------------------------
 
   # this is a small facilitator: the #league_defender query returns 3 heroes and this makes sure the
@@ -41,23 +45,23 @@ defmodule Moba.Game.Leagues do
     query |> Repo.all() |> Enum.sort_by(fn hero -> hero.total_hp end, :asc) |> List.first()
   end
 
-  defp easiest_defender(%{id: id, league_tier: league_tier, match_id: match_id}) do
-    HeroQuery.league_defender(id, base_level(league_tier), "weak", match_id)
+  defp easiest_defender(%{id: id, league_tier: league_tier}) do
+    HeroQuery.league_defender(id, base_level(league_tier), "weak", Game.current_match().id)
     |> get_first()
   end
 
-  defp easy_defender(%{id: id, league_tier: league_tier, match_id: match_id}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 1, "weak", match_id)
+  defp easy_defender(%{id: id, league_tier: league_tier}) do
+    HeroQuery.league_defender(id, base_level(league_tier) + 1, "weak", Game.current_match().id)
     |> get_first()
   end
 
-  defp moderate_defender(%{id: id, league_tier: league_tier, match_id: match_id}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 2, "moderate", match_id)
+  defp moderate_defender(%{id: id, league_tier: league_tier}) do
+    HeroQuery.league_defender(id, base_level(league_tier) + 2, "moderate", Game.current_match().id)
     |> get_first()
   end
 
-  defp hard_defender(%{id: id, league_tier: league_tier, match_id: match_id}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong", match_id)
+  defp hard_defender(%{id: id, league_tier: league_tier}) do
+    HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong", Game.current_match().id)
     |> get_first()
   end
 

@@ -8,27 +8,7 @@
     border-bottom-left-radius: 0;
   }
 
-  .ribbon.float-right{
-    position: absolute;
-    right: 25px;
-  }
-  .ribbon.float-left{
-    position: absolute;
-    left: 25px;
-  }
-  .skill-container{
-    img{
-      width: 25%;
-      max-width: 80px;
-    }
-  }
-  .item-container{
-    img{
-      width: 16.6%;
-      max-width: 52px;
-    }
-  }
-  .avatar{
-    max-width: 160px;
+  .hero-card{
+    min-height: 500px;
   }
 }

@@ -93,6 +93,7 @@
                                 <%else %>
                                     battle
                                 <% end %>
+                                (<%=@current_hero.buffed_battles_available%>/<%=Moba.league_win_buffed_battles_bonus()%>)
                             </span>
                         </h3>
                     </div>
@@ -102,49 +103,11 @@
             <%= if @current_hero.pve_battles_available > 0 do %>
                 <div class="row mt-3">
                     <div class="col">
-                        <div class="card-box border weak-targets">
-                            <div class="d-flex align-items-center row">
-                                <%=render "_weak_info.html", extra_classes: "d-block d-md-none", current_hero: @current_hero%>
-
-                                <%=render "_jungle_target.html", target: weak(@targets)|>List.first(), socket: @socket, current_hero: @current_hero, first: true %>
-                                <%=render "_weak_info.html", extra_classes: "d-none d-md-block", current_hero: @current_hero%>
-                                <%=render "_jungle_target.html", target: weak(@targets)|>List.last(), socket: @socket, current_hero: @current_hero, first: false %>
-
-                                <%=for target <- weak(@targets) do %>
-                                    <%=render "_mobile_jungle_target.html", target: target, socket: @socket, current_hero: @current_hero%>
-                                <% end %>
-                            </div>
+                        <div class="row d-flex align-items-center targets">
+                            <%=for target <- @targets do %>
+                                <%=render "_jungle_target.html", target: target, targets: @targets, current_hero: @current_hero%>
+                            <% end %>
                         </div>
-
-                        <%= if @tutorial_step && @tutorial_step != 1 do %>
-                            <div class="card-box border moderate-targets">
-                                <div class="d-flex align-items-center row">
-                                    <%=render "_moderate_info.html", extra_classes: "d-block d-md-none", current_hero: @current_hero%>
-
-                                    <%=render "_jungle_target.html", target: moderate(@targets)|>List.first(), socket: @socket, current_hero: @current_hero, first: true %>
-                                    <%=render "_moderate_info.html", extra_classes: "d-none d-md-block", current_hero: @current_hero%>
-                                    <%=render "_jungle_target.html", target: moderate(@targets)|>List.last(), socket: @socket, current_hero: @current_hero, first: false %>
-
-                                    <%=for target <- moderate(@targets) do %>
-                                        <%=render "_mobile_jungle_target.html", target: target, socket: @socket, current_hero: @current_hero%>
-                                    <% end %>
-                                </div>
-                            </div>
-
-                            <div class="card-box border strong-targets">
-                                <div class="d-flex align-items-center row">
-                                    <%=render "_strong_info.html", extra_classes: "d-block d-md-none", current_hero: @current_hero%>
-
-                                    <%=render "_jungle_target.html", target: strong(@targets)|>List.first(), socket: @socket, current_hero: @current_hero, first: true %>
-                                    <%=render "_strong_info.html", extra_classes: "d-none d-md-block", current_hero: @current_hero%>
-                                    <%=render "_jungle_target.html", target: strong(@targets)|>List.last(), socket: @socket, current_hero: @current_hero, first: false %>
-
-                                    <%=for target <- strong(@targets) do %>
-                                        <%=render "_mobile_jungle_target.html", target: target, socket: @socket, current_hero: @current_hero%>
-                                    <% end %>
-                                </div>
-                            </div>
-                        <% end %>
                     </div>
                 </div>
             <% else %>

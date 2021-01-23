@@ -1,4 +1,4 @@
-<div class="row card-box no-gutters border ranking" id="ranking">
+<div class="row card-box no-gutters border ranking p-0" id="ranking">
     <div class="col text-center">
             <table class="table table-dark mb-0">
                 <tbody phx-update="append" id="ranking-table">
@@ -28,15 +28,15 @@
                             <td>
                                 <%=GH.hero_skill_list(hero)%>
                                 <br/>
-                                <%=GH.hero_item_list(hero)%>
+                                <%=GH.hero_item_list(hero, true)%>
                             </td>
                             <td>
                                 <%= if can_battle?(@hero, hero) do %>
-                                    <button class="btn btn-danger btn-lg btn-icon waves-effect" phx-click="battle" phx-target="#ranking" phx-value-id="<%=hero.id%>" phx-value-number="<%=hero.active_build_id%>" phx-hook="Loading" loading="Preparing..." id="ranking-battle-<%=hero.id%>">
+                                    <button class="btn btn-danger battle-button btn-lg btn-icon waves-effect" phx-click="battle" phx-target="#ranking" phx-value-id="<%=hero.id%>" phx-value-number="<%=hero.active_build_id%>" phx-hook="Loading" loading="Preparing..." id="ranking-battle-<%=hero.id%>">
                                         <span class="loading-text"><i class="fa fa-crosshairs mr-1"></i> Attack <small class="font-italic"><%=points_for_arena_battle(@hero, hero)%></small></span>
                                     </button>
                                 <% else %>
-                                    <button class="btn btn-danger btn-lg btn-icon waves-effect disabled no-action" data-toggle="tooltip" title="You have already battled this opponent in this round.">
+                                    <button class="btn btn-danger battle-button btn-lg btn-icon waves-effect disabled no-action" data-toggle="tooltip" title="You have already battled this opponent in this round.">
                                         <i class="fa fa-times mr-1"></i> Battle
                                     </button>
                                 <% end %>

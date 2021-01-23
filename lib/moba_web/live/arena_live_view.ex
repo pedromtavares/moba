@@ -33,7 +33,9 @@ defmodule MobaWeb.ArenaLiveView do
     {:noreply, Tutorial.next_step(socket, 13)}
   end
 
-  def handle_event("search", %{"filter" => filter, "sort" => sort}, socket) do
+  def handle_event("search", params, socket) do
+    filter = params["filter"] || socket.assigns.filter
+    sort = params["sort"] || socket.assigns.sort
     results = Game.pvp_search(socket.assigns.current_hero, filter, sort, 1)
     {:noreply, assign(socket, filter: filter, sort: sort, search_results: results, page: 1)}
   end

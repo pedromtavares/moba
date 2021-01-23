@@ -221,11 +221,10 @@ defmodule Moba.Game.Builds do
       case difficulty do
         "weak" -> 500
         "moderate" -> 1000
-        "strong" -> 3000
+        "strong" -> 2000
       end
 
-    # simulates bonus gold from league challenges
-    base + div(level, 5) * 1000
+    base + Game.league_tier_for(level) * Moba.league_win_gold_bonus()
   end
 
   defp skills_to_order(skills) do

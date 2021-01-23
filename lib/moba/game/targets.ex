@@ -26,23 +26,23 @@ defmodule Moba.Game.Targets do
   Generates Target records by picking pre-generated bots according to their difficulty and Hero level.
   Currently 2 Targets of each difficulty is generated after every PVE battle.
   """
-  def generate!(hero) do
+  def generate!(hero, unlocked_codes \\ []) do
     Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
 
-    weak = create(hero, "weak")
-    moderate = create(hero, "moderate", Enum.map(weak, & &1.defender.id))
-    strong = create(hero, "strong", Enum.map(weak ++ moderate, & &1.defender.id))
+    weak = create(hero, "weak", unlocked_codes)
+    moderate = create(hero, "moderate", unlocked_codes, Enum.map(weak, & &1.defender.id))
+    strong = create(hero, "strong", unlocked_codes, Enum.map(weak ++ moderate, & &1.defender.id))
 
     Map.put(hero, :targets, weak ++ moderate ++ strong)
   end
 
   # --------------------------------
 
-  defp create(hero, difficulty, exclude \\ []) do
+  defp create(hero, difficulty, unlocked_codes, exclude \\ []) do
     exclude_list = [hero.id | exclude]
     level_range = level_range(hero, difficulty)
 
-    HeroQuery.pve_targets(difficulty, level_range, exclude_list, Game.current_match().id)
+    HeroQuery.pve_targets(difficulty, level_range, exclude_list, Game.current_match().id, unlocked_codes)
     |> Repo.all()
     |> Enum.map(fn defender ->
       {:ok, target} =

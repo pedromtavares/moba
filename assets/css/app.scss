@@ -178,8 +178,16 @@ body{
   justify-content: center;
 }
 
+.card-header{
+  background-color: rgba(54, 64, 74, 0.8);
+}
+
 .card-box{
-  background-color: rgba(54, 64, 74, 0.5);
+  background-color: rgba(54, 64, 74, 0.8);
+}
+
+.card-footer{
+  background-color: rgba(54, 64, 74, 0.8);
 }
 
 .card-border{
@@ -287,6 +295,10 @@ b, strong {
   border-image-source: none !important;
 }
 
+.simple-border{
+  border: 1px solid #36404a;
+}
+
 .img-border{
   border: 3px solid;
   border-image-source: radial-gradient(white, rgb(47, 60, 74));
@@ -343,4 +355,110 @@ b, strong {
 
 .bg-light-dark{
   background-color: rgba(0, 0, 0, 0.6);
+}
+
+.bg-offense{
+  background-color: #F672A7;
+}
+
+.text-offense{
+  color: #F672A7;
+}
+
+.bg-defense{
+  background-color: #F4825D;
+}
+
+.text-defense{
+  color: #F4825D;
+}
+
+.hero-card{
+  background-color: initial !important;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  min-height: 400px;
+
+  .league-logo{
+    margin-top: -4px;
+  }
+
+  .avatar{
+    width: 120px;
+    max-width: 120px;
+    float:right;
+  }
+
+  .level{
+    font-size: 0.8rem;
+  }
+
+  .skills-container{
+    width: 70%;
+    float:left;
+
+    @media (max-width: 999.98px) {
+      width: 60%;
+    }
+  }
+
+  .skill-img.passive{
+    border-color: #36404a !important;
+    border-width: 0.4rem !important;
+  }
+
+  .skill-img{
+    max-width: 25%;
+    border: 0.2rem solid #36404a;
+  }
+
+  .items-container{
+    width: 30%;
+    float: left;
+    // box-shadow: inset 0px 0px 60px black;
+    height: 100%;
+    border: .2rem solid #36404a;
+    border-right: 0;
+    border-bottom: 0;
+
+    @media (max-width: 999.98px) {
+      width: 40%;
+    }
+  }
+  .item-container{
+    max-height: 50%;
+  }
+  .item-img{
+    width: 100%;
+    height: 100%;
+    border: 0.1rem solid #36404a;
+  }
+
+  .item-img.passive{
+    border-color: #36404a !important;
+    border-width: 0.1rem !important;
+  }
+
+  @media (max-width: 1400px) {
+    .avatar{
+      width: 100px;
+    }
+
+    .skill-img{
+      margin: .5px;
+      width: 65px;
+    }
+    .item-img{
+      width: 45px;
+    }
+  }
+
+  .skill-list{
+    margin: 3px 0;
+  }
+
+  .item-list{
+    margin: 3px 0;
+  }
 }

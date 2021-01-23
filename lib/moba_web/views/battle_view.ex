@@ -3,6 +3,9 @@ defmodule MobaWeb.BattleView do
 
   alias Moba.{Engine, Game}
 
+  defdelegate difficulty_color(diff), to: MobaWeb.JungleView
+  defdelegate difficulty_label(diff), to: MobaWeb.JungleView
+
   def can_use?(_, %{active: false}), do: false
   def can_use?(_, %{passive: true}), do: false
   def can_use?(turn, resource), do: Engine.can_use_resource?(turn, resource)
@@ -186,9 +189,9 @@ defmodule MobaWeb.BattleView do
 
   def difficulty_badge(%{type: "pve", difficulty: difficulty}) do
     case difficulty do
-      "weak" -> content_tag(:div, "WEAK", class: "badge badge-light-success")
-      "moderate" -> content_tag(:div, "MODERATE", class: "badge badge-light-primary")
-      "strong" -> content_tag(:div, "STRONG", class: "badge badge-light-danger")
+      "weak" -> content_tag(:div, "EASY", class: "badge badge-light-success")
+      "moderate" -> content_tag(:div, "MEDIUM", class: "badge badge-light-primary")
+      "strong" -> content_tag(:div, "HARD", class: "badge badge-light-danger")
       _ -> ""
     end
   end
@@ -404,11 +407,12 @@ defmodule MobaWeb.BattleView do
     |> Enum.map(fn item -> Moba.struct_from_map(item, as: %Game.Schema.Item{}) end)
     |> Game.sort_items()
     |> Enum.map(fn item ->
-      img_tag(GH.image_url(item),
+      image = img_tag(GH.image_url(item),
         data: [toggle: "tooltip"],
         title: GH.item_description(item),
         class: "item-img img-border-xs tooltip-mobile"
       )
+      content_tag(:div, image, class: "item-container col-4")
     end)
   end
 

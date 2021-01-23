@@ -1,4 +1,4 @@
-<div class="arena-select" phx-hook="SetMainWrapper">
+<div class="arena-select" phx-hook="SetMainWrapper" id="arena-select">
 
     <div class="row">
         <div class="col-12 text-center">
@@ -18,41 +18,27 @@
     <div class="row">
         <%=for hero <- @heroes do %>
             <div class="col-xl-4 col-md-6 col-12" id="hero_<%=hero.id%>">
-                <div class="card">
-                    <div class="card-body pb-2">
-                        <div class="row">
-                            <div class="col text-center">
-                                <h4 class="text-white mt-0">Level <%=hero.level%> <%=hero.avatar.name%></h4>
-                                <img src="<%=GH.image_url(hero.avatar)%>" class="avatar img-border-sm mb-1"/>
-                                <p class="text-muted font-italic">
-                                    <%=if hero.pvp_picks > 0 do %>
-                                        (picked <%=hero.pvp_picks%> time<%=if hero.pvp_picks > 1, do: "s"%>)
-                                    <% else %>
-                                        (never picked)
-                                    <% end %>
-                                </p>
-                                <%=GH.hero_stats(hero, true)%>
+                <div class="hero-card card" style="background-image: url(<%=GH.background_url(hero.avatar)%>">
+                    <div class="card-header pt-0 pb-1">
+                        <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+                            <span class="font-italic level">Level<br/><span class="font-italic font-20"><%=hero.level%></span></span>
+                            <div>
+                                <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
+                                <%=hero.name%>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col text-center">
-                                <%= if can_switch_build?(hero) do %>
-                                    <div class="text-center mt-2 mb-2">
-                                        <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-2" phx-click="switch-build" phx-value-id="<%=hero.id%>"><i class="fa fa-sync mr-1"></i>Switch Build</a>
-                                    </div>
+                            <span class="font-15 font-italic">
+                                <%=if hero.pvp_picks > 0 do %>
+                                    <%=hero.pvp_picks%> pick<%=if hero.pvp_picks > 1, do: "s"%>
                                 <% else %>
-                                    <div class="mt-4 mb-4"></div>
+                                    Unpicked
                                 <% end %>
-                                <div class="skill-container mb-1"><%=GH.hero_skill_list(hero)%></div>
-
-                                <div class="item-container"><%=GH.hero_item_list(hero)%></div>
-                            </div>
-                        </div>
+                            </span>
+                        </h4>
                         <div class="row">
                             <div class="col d-flex justify-content-around">
                                 <h2 class="text-success text-center mt-0">
                                     <small>Jungle Win Rate</small><br/>
-                                    <img src="/images/league_<%=hero.league_tier%>.png" style="width: 30px" class="mr-1"/><%=GH.pve_win_rate(hero)%>%
+                                    <%=GH.pve_win_rate(hero)%>%
                                 </h2>
                                 <%=if hero.pvp_ranking do %>
                                     <h2 class="text-warning text-center mt-0">
@@ -69,8 +55,31 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer text-center">
-                        <button class="btn btn-danger btn-lg btn-block" phx-click="select" phx-value-id="<%=hero.id%>"><i class="fa fa-crosshairs mr-1"></i> Pick <%=hero.avatar.name%></button>
+                    <div class="card-body text-center ribbon-box d-flex align-items-center justify-content-center">
+                        <button class="btn btn-danger btn-lg pick-button" phx-click="select" phx-value-id="<%=hero.id%>">
+                            <i class="fa fa-crosshairs fa-2x"></i>
+                            <br/>
+                            Pick <%=hero.avatar.name%>
+                        </button>
+                    </div>
+                    <div class="card-footer p-0 text-center" data-toggle="tooltip" data-tippy-placement="bottom" title="<%=GH.hero_stats_string(hero, true)%>">
+                        <%= if can_switch_build?(hero) do %>
+                            <div class="row text-center mt-1">
+                                <div class="col">
+                                    <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-2" phx-click="switch-build" phx-value-id="<%=hero.id%>"><i class="fa fa-sync mr-1"></i>Switch Build</a>
+                                </div>
+                            </div>
+                        <% end %>
+                        <div class="row">
+                            <div class="col-12 mt-1">
+                                <div class="skills-container d-flex justify-content-between">
+                                    <%=GH.hero_skill_list(hero)%>
+                                </div>
+                                <div class="items-container row no-gutters">
+                                    <%=GH.hero_item_list(hero)%>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -18,6 +18,11 @@
         </li>
 
         <li>
+          <div class="torch-show-label"></div>
+          <div class="torch-show-data"><img src="<%=GH.background_url(@avatar)%>" style="width: 300px"/></div>
+        </li>
+
+        <li>
           <div class="torch-show-label">Name:</div>
           <div class="torch-show-data"><%= @avatar.name %></div>
         </li>

@@ -43,7 +43,7 @@ defmodule SeedHelper do
 
   def attrs_with_image(attrs) do
     unless System.get_env("GITHUB_ACTIONS") do
-      Map.merge(attrs, %{image: image_for(attrs[:code])})
+      Map.merge(attrs, %{image: image_for(attrs[:code]), background: image_for(attrs[:code])})
     else
       attrs
     end

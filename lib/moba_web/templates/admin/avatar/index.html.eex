@@ -114,7 +114,7 @@
         <tbody>
           <%= for avatar <- @avatars do %>
             <tr>
-                <td><img src="<%=GH.image_url(avatar)%>"/></td>
+                <td><img src="<%=GH.image_url(avatar)%>"/> <img src="<%=GH.background_url(avatar)%>"/></td>
 
                 <td><%= avatar.name %></td>
 

@@ -12,6 +12,9 @@ defmodule MobaWeb.GameHelpers do
   def image_url(%{image: image} = resource), do: get_url(image, resource)
   def image_url(%{"image" => image} = resource), do: get_url(image, resource)
 
+  def background_url(%{background: background} = resource), do: get_background_url(background, resource)
+  def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
+
   def hero_skill_list(%{active_build: %{skills: skills}}) do
     Enum.map(skills, fn skill ->
       img_tag(image_url(skill),
@@ -22,7 +25,22 @@ defmodule MobaWeb.GameHelpers do
     end)
   end
 
-  def hero_item_list(%{items: items}) do
+
+  def hero_item_list(hero, legacy \\ false)
+
+  def hero_item_list(%{items: items}, false) do
+    Moba.Game.sort_items(items)
+    |> Enum.map(fn item ->
+      image = img_tag(image_url(item),
+        data: [toggle: "tooltip"],
+        title: item_description(item),
+        class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"
+      )
+      content_tag(:div, image, class: "item-container col-4")
+    end)
+  end
+
+  def hero_item_list(%{items: items}, true) do
     Moba.Game.sort_items(items)
     |> Enum.map(fn item ->
       img_tag(image_url(item),
@@ -52,6 +70,10 @@ defmodule MobaWeb.GameHelpers do
 
   def hero_stats(hero, show_speed \\ false) do
     MobaWeb.HeroView.render("_hero_stats.html", hero: hero, show_speed: show_speed)
+  end
+
+  def hero_stats_string(hero, show_speed \\ false) do
+    Phoenix.View.render_to_string(MobaWeb.HeroView, "_hero_stats.html", hero: hero, show_speed: show_speed)
   end
 
   def pvp_win_rate(hero), do: Moba.Game.pvp_win_rate(hero)
@@ -231,5 +253,17 @@ defmodule MobaWeb.GameHelpers do
       end
 
     Moba.Image.url({image, resource}, :original)
+  end
+
+  # image field needs to be converted to a map of atoms due to serialization
+  defp get_background_url(background, resource) do
+    background =
+      if background && Map.get(background, "file_name") do
+        for {key, val} <- background, into: %{}, do: {String.to_atom(key), val}
+      else
+        background
+      end
+
+    Moba.Background.url({background, resource}, :original)
   end
 end

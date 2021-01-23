@@ -16,6 +16,7 @@ defmodule Moba.Game.Schema.Avatar do
 
   schema "avatars" do
     field :image, Moba.Image.Type
+    field :background, Moba.Background.Type
 
     field :name, :string
     field :code, :string
@@ -65,7 +66,7 @@ defmodule Moba.Game.Schema.Avatar do
       :level_requirement,
       :description
     ])
-    |> cast_attachments(attrs, [:image])
+    |> cast_attachments(attrs, [:image, :background])
   end
 
   def create_changeset(avatar, attrs, ultimate, match) do

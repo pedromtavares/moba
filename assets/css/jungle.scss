@@ -7,7 +7,7 @@
   bottom: 0;
   right: 0;
   position: absolute;
-  z-index: -1;
+  z-index: -100;
 
   box-shadow: inset 0px 0px 300px 50px black;
   background: #07382E;
@@ -35,6 +35,10 @@
     animation: 1s league-glow infinite;
   }
 
+  .gank-button{
+    background-color: rgba(54, 64, 74, 0.9);
+  }
+
   .btn {
     background: 0 !important;
   }
@@ -58,127 +62,5 @@
     background-color: rgba(54, 64, 74, 0.3);
     padding: 0;
     margin-bottom: 3rem;
-  }
-  .card-border{
-    padding: 1rem 0.5rem;
-    // border-top:0;
-    // border-bottom:0;
-    border: 0;
-    border-radius: 0;
-    @media (max-width: 999.98px) {
-      // border-top: 1px solid #36404a;
-      border-bottom: 1px solid #36404a;
-      border-left: 0;
-      border-right: 0;
-    }
-  }
-  .info-box{
-    // border: 1px solid #36404a;
-    // border-top: 0;
-    // border-bottom: 0;
-  }
-
-  .target{
-    background-color: initial !important;
-
-    .avatar{
-      width: 150px;
-      max-width: 150px;
-    }
-
-    .skill-img{
-      margin: .5px;
-      width: 75px;
-    }
-
-    .item-img{
-      width: 55px;
-      background: black;
-    }
-
-    @media (max-width: 1400px) {
-      .avatar{
-        width: 100px;
-      }
-
-      .skill-img{
-        margin: .5px;
-        width: 65px;
-      }
-      .item-img{
-        width: 45px;
-      }
-    }
-
-    .skill-list{
-      margin: 3px 0;
-    }
-
-    .item-list{
-      margin: 3px 0;
-    }
-  }
-
-  .mobile-target:last-child{
-    >div{
-      padding-top: 2rem;
-      border-top: 1px solid #36404a;
-    }
-  }
-
-  .mobile-target{
-    margin-top: 2rem;
-
-
-    .skill-img{
-      width: 25%;
-    }
-
-    .item-img{
-      width: 16.6%;
-      // border-top: 0;
-    }
-
-    .skill-img:first-child{
-      border-left: 0;
-    }
-    .skill-img:last-child{
-      border-right: 0;
-    }
-
-    .btn-lg{
-      margin: 1rem 0;
-    }
-
-    .btn-group{
-      width: 100%;
-      margin-top: 1rem;
-
-      button:first-child{
-        border-left: 0;
-      }
-      button:last-child{
-        border-right: 0;
-      }
-      // button{
-      //   border-bottom: 0;
-      // }
-    }
-  }
-
-  .build-right{
-    text-align: right;
-
-    @media (max-width: 999.98px) {
-      text-align: center;
-    }
-  }
-
-  .build-left{
-    text-align: left;
-
-    @media (max-width: 999.98px) {
-      text-align: center;
-    }
   }
 }

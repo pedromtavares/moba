@@ -142,7 +142,7 @@ defmodule Moba.Conductor do
   defp generate_hero_bots!(match, level_range) do
     Logger.info("Generating PVE bots...")
 
-    AvatarQuery.base_current()
+    AvatarQuery.all_current()
     |> Repo.all()
     |> Enum.each(fn avatar ->
       Logger.info("Generating #{avatar.name}s...")
@@ -162,8 +162,8 @@ defmodule Moba.Conductor do
     UserQuery.current_players()
     |> Repo.all()
     |> Repo.preload(:current_pve_hero)
-    |> Enum.map(fn %{current_pve_hero: hero} ->
-      Game.generate_targets!(hero)
+    |> Enum.map(fn %{current_pve_hero: hero} = user ->
+      Game.generate_targets!(%{hero | user: user})
     end)
 
     match
@@ -191,7 +191,6 @@ defmodule Moba.Conductor do
           "strong",
           match,
           user,
-          4,
           user.pvp_points
         )
 

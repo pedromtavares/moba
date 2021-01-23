@@ -37,7 +37,6 @@ defmodule Test.GameHelper do
       difficulty,
       Game.current_match(),
       create_user(),
-      4,
       pvp_points
     )
   end

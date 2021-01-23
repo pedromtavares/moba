@@ -67,7 +67,7 @@ defmodule Moba.Engine.Core.League do
             league_tier: league_tier + 1,
             league_successes: successes + 1,
             gold: attacker.gold + Moba.league_win_gold_bonus(),
-            buffed_battles_available: Moba.league_win_buffed_battles_bonus()
+            buffed_battles_available: attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus()
           }
 
         win ->

@@ -5,7 +5,7 @@
   bottom: 0;
   right: 0;
   position: absolute;
-  z-index: -1;
+  z-index: -100;
 
   box-shadow: inset 0px 0px 300px 50px black;
   background: #103D45;
@@ -48,9 +48,25 @@
   margin-bottom: 100px;
   min-height: 700px;
 
+  .hero-card{
+    min-height: 500px;
+
+    .medal{
+      color: #f7b84b;
+      background: rgba(247, 184, 75, 0.4) !important;
+      border: 0;
+      margin: 0.5rem;
+    }
+
+    .ribbon.float-right{
+    position: absolute;
+    right: 25px;
+  }
+  }
+
   .versus-box{
     @media (min-width: 768px) {
-      margin-top: 50px;
+      margin-top: 10rem;
 
       p{
         margin-top: 2.5rem;

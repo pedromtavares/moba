@@ -52,11 +52,13 @@ defmodule Moba.GameTest do
       bot_level_10 = Game.create_bot_hero!(avatar, 10, "strong", match)
 
       assert bot_level_10.level == 10
+      assert bot_level_10.league_tier == 1
       refute bot_level_10.pvp_last_picked
       refute bot_level_10.pvp_active
 
       bot_level_0 = Game.create_bot_hero!(avatar, 0, "weak", match)
 
+      assert bot_level_0.league_tier == 0
       assert bot_level_0.atk < avatar.atk
       assert bot_level_0.total_hp < avatar.total_hp
       assert bot_level_0.total_mp < avatar.total_mp
@@ -67,8 +69,9 @@ defmodule Moba.GameTest do
       avatar = base_avatar()
       match = Game.current_match()
 
-      bot = Game.create_bot_hero!(avatar, 10, "strong", match, user)
+      bot = Game.create_bot_hero!(avatar, 25, "strong", match, user)
 
+      assert bot.league_tier == 5
       assert bot.pvp_active
       assert bot.pvp_last_picked
     end

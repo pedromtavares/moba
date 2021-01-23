@@ -7,7 +7,8 @@ defmodule Moba.Game do
   siblings.
   """
 
-  alias Moba.Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds}
+  alias Moba.{Repo, Game, Accounts}
+  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds}
 
   # MATCHES
 
@@ -68,8 +69,9 @@ defmodule Moba.Game do
     |> generate_targets!()
   end
 
-  def create_bot_hero!(avatar, level, difficulty, match, user \\ nil, league_tier \\ 0, pvp_points \\ 0) do
-    Heroes.create_bot!(avatar, level, difficulty, match, user, league_tier, pvp_points)
+  def create_bot_hero!(avatar, level, difficulty, match, user \\ nil, pvp_points \\ 0) do
+    league_tier = Leagues.tier_for(level)
+    Heroes.create_bot!(avatar, level, difficulty, match, user, pvp_points, league_tier)
   end
 
   def update_hero!(hero, attrs, items \\ nil) do
@@ -172,13 +174,19 @@ defmodule Moba.Game do
 
   def max_league_step_for(league), do: Leagues.max_step_for(league)
 
+  def league_tier_for(level), do: Leagues.tier_for(level)
+
   def league_defender_for(attacker), do: Leagues.defender_for(attacker)
 
   # TARGETS
 
   def get_target!(target_id), do: Targets.get!(target_id)
 
-  def generate_targets!(hero), do: Targets.generate!(hero)
+  def generate_targets!(hero) do
+    hero = Repo.preload(hero, :user)
+    codes = hero.user && Accounts.unlocked_codes_for(hero.user) || []
+    Targets.generate!(hero, codes)
+  end
 
   def list_targets(hero_id), do: Targets.list(hero_id)
 
