@@ -131,7 +131,7 @@ defmodule Moba.Game.Items do
 
   # --------------------------------
 
-  defp has_item?(hero, item), do: Enum.member?(hero.items, item)
+  defp has_item?(hero, item), do: Enum.map(hero.items, &(&1.code)) |> Enum.member?(item.code)
 
   defp full_inventory?(hero), do: length(hero.items) >= 6
 
@@ -150,7 +150,8 @@ defmodule Moba.Game.Items do
   end
 
   defp unequip(hero, items) do
-    new_inventory = hero.items -- items
+    items_codes = Enum.map(items, &(&1.code))
+    new_inventory = Enum.filter(hero.items, fn item -> !Enum.member?(items_codes, item.code) end)
 
     if Enum.find(items, fn item -> item.active end), do: Game.reset_item_orders!(hero)
 
