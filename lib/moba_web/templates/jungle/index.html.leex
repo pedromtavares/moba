@@ -87,12 +87,7 @@
                     <div class="col">
                         <h3 class="m-0">
                             <span class="badge badge-pill badge-light-danger mt-3 p-2" id="league-buff">
-                                <i class="fa fa-plus mr-1"></i>League buff active: +<%=round(Moba.league_buff_multiplier() * 100)%>% stats for the next
-                                <%=if @current_hero.buffed_battles_available > 1 do %>
-                                    <%=@current_hero.buffed_battles_available%> battles
-                                <%else %>
-                                    battle
-                                <% end %>
+                                <i class="fa fa-plus mr-1"></i>League buff active: +<%=round(Moba.league_buff_multiplier() * 100)%>% stats
                                 (<%=@current_hero.buffed_battles_available%>/<%=Moba.league_win_buffed_battles_bonus()%>)
                             </span>
                         </h3>

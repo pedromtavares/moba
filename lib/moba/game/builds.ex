@@ -216,6 +216,8 @@ defmodule Moba.Game.Builds do
     |> Repo.all()
   end
 
+  defp extra_gold(level, _) when level >= 25, do: 999999
+
   defp extra_gold(level, difficulty) do
     base =
       case difficulty do

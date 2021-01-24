@@ -373,6 +373,24 @@ b, strong {
   color: #F4825D;
 }
 
+.dont-break-out {
+  /* These are technically the same, but use both */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+
+  -ms-word-break: break-all;
+  /* This is the dangerous one in WebKit, as it breaks things wherever */
+  word-break: break-all;
+  /* Instead use this non-standard one: */
+  word-break: break-word;
+
+  /* Adds a hyphen where the word breaks, if supported (No Blink) */
+  -ms-hyphens: auto;
+  -moz-hyphens: auto;
+  -webkit-hyphens: auto;
+  hyphens: auto;
+}
+
 .hero-card{
   background-color: initial !important;
   background-repeat: no-repeat;
@@ -382,12 +400,6 @@ b, strong {
 
   .league-logo{
     margin-top: -4px;
-  }
-
-  .avatar{
-    width: 120px;
-    max-width: 120px;
-    float:right;
   }
 
   .level{
@@ -400,6 +412,7 @@ b, strong {
 
     @media (max-width: 999.98px) {
       width: 60%;
+      height: 55px;
     }
   }
 
@@ -409,7 +422,7 @@ b, strong {
   }
 
   .skill-img{
-    max-width: 25%;
+    width: 25%;
     border: 0.2rem solid #36404a;
   }
 
@@ -438,20 +451,6 @@ b, strong {
   .item-img.passive{
     border-color: #36404a !important;
     border-width: 0.1rem !important;
-  }
-
-  @media (max-width: 1400px) {
-    .avatar{
-      width: 100px;
-    }
-
-    .skill-img{
-      margin: .5px;
-      width: 65px;
-    }
-    .item-img{
-      width: 45px;
-    }
   }
 
   .skill-list{
