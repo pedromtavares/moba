@@ -9,7 +9,7 @@ defmodule MobaWeb.UserLiveViewTest do
 
     username = hero.user.username
 
-    {:ok, _view, html} = live(conn, "/user/#{username}")
+    {:ok, _view, html} = live(conn, "/user/#{hero.user_id}")
     assert html =~ username
   end
 end
