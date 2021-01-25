@@ -27,7 +27,7 @@ defmodule MobaWeb.JungleView do
     with_stats = Enum.map(heroes, &(with_display_stats(&1, heroes)))
     max = Enum.max_by(with_stats, fn hero -> hero.display_offense end) || target.defender
 
-    with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
+    max && with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
   end
 
   def defense_percentage(target, targets) do
@@ -35,7 +35,7 @@ defmodule MobaWeb.JungleView do
     with_stats = Enum.map(heroes, &(with_display_stats(&1, heroes)))
     max = Enum.max_by(with_stats, fn hero -> hero.display_defense end) || target.defender
 
-    with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
+    max && with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
   end
 
   def next_league_percentage(hero) do
@@ -83,7 +83,7 @@ defmodule MobaWeb.JungleView do
         xp_reward,
         content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1"),
         points,
-        content_tag(:span, "+#{streak_xp} XP/Gold per Win Streak", class: "badge badge-pill badge-light-purple")
+        content_tag(:span, "+#{streak_xp} XP/Gold per Undefeated Streak", class: "badge badge-pill badge-light-purple")
       ]
     end)
   end

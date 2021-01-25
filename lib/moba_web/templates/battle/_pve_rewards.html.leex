@@ -12,7 +12,7 @@
                         <span class="badge badge-pill badge-light-primary d-none d-sm-inline">+<%=@battle.rewards.win_xp%> Victory XP</span>
                     <% end %>
                     <%= if @battle.rewards.win_streak_xp > 0 do %>
-                        <span class="badge badge-pill badge-light-purple d-none d-sm-inline">+<%=@battle.rewards.win_streak_xp%> Win Streak XP</span>
+                        <span class="badge badge-pill badge-light-purple d-none d-sm-inline">+<%=@battle.rewards.win_streak_xp%> Undefeated Streak XP</span>
                     <% end %>
                     <%= if @battle.rewards.loss_streak_xp > 0 do %>
                         <span class="badge badge-pill badge-light-dark d-none d-sm-inline">+<%=@battle.rewards.loss_streak_xp%> Loss Streak XP</span>
@@ -41,7 +41,7 @@
     <div class="d-none d-md-block col-2">
         <div class="ribbon-box streaks">
             <%= if @hero.win_streak > 1 do %>
-                <div class="ribbon ribbon-purple float-right shape"> Win Streak: <%=@hero.win_streak - 1%></div>
+                <div class="ribbon ribbon-purple float-right shape"> Undefeated: <%=@hero.win_streak - 1%></div>
             <% end %>
             <%= if @hero.loss_streak > 1 do %>
                 <div class="ribbon ribbon-dark float-right shape"> Loss Streak: <%=@hero.loss_streak%></div>

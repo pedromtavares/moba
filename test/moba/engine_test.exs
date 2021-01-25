@@ -86,7 +86,7 @@ defmodule Moba.EngineTest do
 
     test "battle ties and attacker gains xp", %{strong_hero: attacker, alternate_hero: defender} do
       battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "weak"})
+        Engine.create_pve_battle!(%{attacker: %{attacker | win_streak: 1}, defender: defender, difficulty: "weak"})
         |> Engine.auto_finish_battle!()
 
       assert battle.type == "pve"
@@ -95,7 +95,8 @@ defmodule Moba.EngineTest do
       assert rewards.battle_xp == 70
       assert rewards.difficulty_percentage == 70
       assert rewards.win_xp == 0
-      assert rewards.total_xp == 70
+      assert rewards.win_streak_xp == 5
+      assert rewards.total_xp == 75
       assert rewards.total_pve_points == 1
 
       reloaded_attacker = Game.get_hero!(attacker.id)
@@ -104,14 +105,14 @@ defmodule Moba.EngineTest do
       assert reloaded_attacker.experience != attacker.experience
       assert reloaded_defender.experience == defender.experience
       assert reloaded_attacker.ties == 1
-      assert reloaded_attacker.win_streak == 0
+      assert reloaded_attacker.win_streak == 2
       assert reloaded_attacker.loss_streak == 0
 
       assert reloaded_attacker.pve_battles_available == attacker.pve_battles_available - 1
       assert reloaded_defender.pve_battles_available == defender.pve_battles_available
 
-      assert reloaded_attacker.experience == 70
-      assert reloaded_attacker.gold == attacker.gold + 70
+      assert reloaded_attacker.experience == 75
+      assert reloaded_attacker.gold == attacker.gold + 75
       assert reloaded_attacker.pve_points == attacker.pve_points + 1
     end
 

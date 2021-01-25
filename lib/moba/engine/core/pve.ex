@@ -69,7 +69,7 @@ defmodule Moba.Engine.Core.Pve do
     loss_streak_xp = (alive && loss_streak_xp(attacker) |> final_xp_value(streak_percentage)) || 0
 
     win_xp = (win && base_xp |> final_xp_value(percentage)) || 0
-    win_streak_xp = (win && win_streak_xp(attacker) |> final_xp_value(streak_percentage)) || 0
+    win_streak_xp = (alive && win_streak_xp(attacker) |> final_xp_value(streak_percentage)) || 0
 
     pve_points = !Game.max_league?(attacker) && difficulty_pve_points(difficulty, win, alive)
 
@@ -106,7 +106,7 @@ defmodule Moba.Engine.Core.Pve do
           %{loss_streak: attacker.loss_streak + 1, win_streak: 0, losses: attacker.losses + 1}
 
         true ->
-          %{win_streak: 0, loss_streak: 0, ties: attacker.ties + 1}
+          %{win_streak: attacker.win_streak + 1, loss_streak: 0, ties: attacker.ties + 1}
       end
 
     {battle, updates}

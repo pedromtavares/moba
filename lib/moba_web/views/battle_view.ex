@@ -230,7 +230,7 @@ defmodule MobaWeb.BattleView do
 
     win_streak =
       if snapshot.win_streak > 1 && battle.type == "pve" do
-        content_tag(:span, "Win Streak: #{snapshot.win_streak}", class: "badge badge-light-purple")
+        content_tag(:span, "Undefeated: #{snapshot.win_streak}", class: "badge badge-light-purple")
       else
         ""
       end

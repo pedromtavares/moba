@@ -25,9 +25,9 @@
                                             <p>Ganks available</p>
                                             <p class="mb-0" data-toggle="tooltip" title="<%=streak_title(@current_hero)%>">
                                                 <%=if @current_hero.loss_streak > 1 do %>
-                                                    <span class="text-dark"><i class="fa fa-cubes mr-1"></i>Loss Streak: <strong><%=@current_hero.loss_streak%></strong></span>
+                                                    <span class="text-dark"><i class="fa fa-skull-crossbones mr-1"></i>Loss Streak: <strong><%=@current_hero.loss_streak%></strong></span>
                                                 <% else %>
-                                                    <span class="text-warning"><i class="fa fa-cubes mr-1"></i>Win Streak: <strong><%=@current_hero.win_streak%></strong></span>
+                                                    <span class="text-warning"><i class="fa fa-trophy mr-1"></i>Undefeated Streak: <strong><%=@current_hero.win_streak%></strong></span>
                                                 <% end %>
                                             </p>
                                         </div>
