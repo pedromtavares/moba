@@ -4,8 +4,7 @@
     <div class="row mb-2 mt-3">
         <div class="col text-center">
             <div class="title-container">
-                <i class="fa fa-user text-primary"></i>
-                <h3><%=@user.username%></h3>
+                <h1><%=@user.username%></h1>
             </div>
             <%=if @user == @current_user do %>
                 <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
@@ -27,21 +26,21 @@
 
     <div class="row d-flex justify-content-center">
         <div class="col-12 col-md-6 col-lg-4 col-xl-2">
-            <div class="widget-simple text-center card-box">
+            <div class="widget-simple text-center card-box py-2 px-1">
                 <h3 class="text-danger counter mt-0"><i class="fa fa-crosshairs mr-1"></i> <%=MobaWeb.UserView.win_rate(@user)%>%</h3>
                 <p class="text-muted mb-0">Overall Win Rate</p>
             </div>
         </div>
         <%= if @user.ranking do %>
             <div class="col-12 col-md-6 col-lg-4 col-xl-2">
-                <div class="widget-simple text-center card-box">
+                <div class="widget-simple text-center card-box py-2 px-1">
                     <h3 class="text-primary counter mt-0"><i class="fa fa-trophy"></i> #<%=@user.ranking%></h3>
                     <p class="text-muted mb-0">Overall Rank</p>
                 </div>
             </div>
         <% end %>
         <div class="col-12 col-md-6 col-lg-4 col-xl-2">
-            <div class="widget-simple text-center card-box">
+            <div class="widget-simple text-center card-box py-2 px-1">
                 <h3 class="text-warning counter mt-0"><i class="fa fa-medal"></i> <%=@user.medal_count%></h3>
                 <p class="text-muted mb-0">Medals</p>
             </div>
@@ -73,7 +72,7 @@
     <%=if @user != @current_user do %>
         <div class="row mb-3 mt-3">
             <div class="col-12 col-lg-6 col-xl-4 margin-auto text-center">
-                <div class="card-box">
+                <div class="card-box py-2 px-1">
                     <h3 class="page-title mb-2 text-danger"><i class="fa fa-medal mr-1"></i>Score</h3>
                     <div class="row">
                         <div class="col">

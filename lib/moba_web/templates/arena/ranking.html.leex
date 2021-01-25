@@ -12,7 +12,7 @@
                                 </h1>
                             </td>
                             <td>
-                                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.name) do %>
+                                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.user_id) do %>
                                     <%=GH.hero_avatar(hero)%>
                                     <br/>
                                     <h4>
@@ -64,7 +64,7 @@
                                 <%= if hero.bot_difficulty do %>
                                     <h4><%=hero.name%></h4>
                                 <% else %>
-                                    <h4><%=live_redirect hero.name, to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.name), class: "text-reset"%></h4>
+                                    <h4><%=live_redirect hero.name, to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.user_id), class: "text-reset"%></h4>
                                 <% end %>
                                 <h4 class="text-dark mb-3"><em>Level <%=hero.level%> <%=hero.avatar.name%></em></h4>
                             </td>

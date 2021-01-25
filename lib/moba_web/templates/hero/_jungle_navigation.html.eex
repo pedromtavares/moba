@@ -6,16 +6,31 @@
     </div>
 <% end %>
 <%= if @origin == "arena" do %>
-    <div class="col-4">
-        <%=link to: "/game/pve", class: "h3 jungle-box nav-box" do %>
-            <span class="loading-text">
-                <i class="fa fa-leaf font-18 align-middle mr-1"></i>
-                <%= if @current_user.current_pve_hero_id do %>
-                    Jungle
-                <% else %>
-                    New Hero
-                <% end %>
-            </span>
-        <%end%>
-    </div>
+    <%=if @current_user.current_pve_hero_id || Game.can_create_new_hero?(@current_user) do %>
+        <div class="col-4">
+            <%=link to: "/game/pve", class: "h3 jungle-box nav-box" do %>
+                <span class="loading-text">
+                    <i class="fa fa-leaf font-18 align-middle mr-1"></i>
+                    <%= if @current_user.current_pve_hero_id do %>
+                        Jungle
+                    <% else %>
+                        New Hero
+                    <% end %>
+                </span>
+            <%end%>
+        </div>
+    <% else %>
+        <div class="col-4 d-none d-md-block">
+            <div class="h3 jungle-box nav-box tooltip-cursor" data-toggle="tooltip" title="New hero available only on the next match">
+                <span class="loading-text">
+                    <i class="fa fa-leaf font-18 align-middle mr-1"></i>
+                    <%= if @current_user.current_pve_hero_id do %>
+                        Jungle
+                    <% else %>
+                        New Hero
+                    <% end %>
+                </span>
+            </div>
+        </div>
+    <% end %>
 <% end %>

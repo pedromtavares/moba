@@ -26,7 +26,7 @@
                             <% end %>
                         </div>
                         <p class="inbox-item-author">
-                            <%=live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.author), class: if(message.is_admin, do: "text-danger", else: "text-dark")%>
+                            <%=live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark")%>
                             <%=if message.is_admin do %>
                                 <small class="text-danger">(admin)</small>
                             <% end %>

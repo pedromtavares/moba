@@ -50,7 +50,7 @@
                                         <br/>
                                         <span class="d-none d-md-inline">Library</span>
                                     <% end %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.username), class: "nav-link" do %>
+                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
                                         <i class="fa fa-user"></i>
                                         <br/>
                                         <span class="d-none d-md-inline">Profile</span>

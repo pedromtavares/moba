@@ -5,7 +5,7 @@
             <div class="col text-center">
                 <img src="<%=GH.image_url(@hero.avatar)%>" class="avatar img-border"/><br/>
                 <h4 class="mb-0">
-                    <%=live_redirect @hero.name, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.name), class: "text-reset"%>
+                    <%=live_redirect @hero.name, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id), class: "text-reset"%>
                     <br/>
                     <small class="font-italic text-muted">Level <%=@hero.level%> <%=@hero.avatar.name%></small>
                 </h4>

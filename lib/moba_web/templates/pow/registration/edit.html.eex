@@ -2,7 +2,7 @@
     <div class="container">
         <div class="row">
                     <div class="col-12 text-center">
-                        <p class="text-muted"><a href="/user/<%=@current_user.username%>" class="text-muted font-weight-medium ml-1">Back to Profile</a></p>
+                        <p class="text-muted"><a href="/user/<%=@current_user.id%>" class="text-muted font-weight-medium ml-1">Back to Profile</a></p>
                     </div> <!-- end col -->
                 </div>
         <div class="row justify-content-center">

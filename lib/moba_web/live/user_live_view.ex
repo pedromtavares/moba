@@ -13,8 +13,8 @@ defmodule MobaWeb.UserLiveView do
     {:ok, assign(socket, current_hero: hero)}
   end
 
-  def handle_params(%{"username" => username}, _uri, socket) do
-    user = Accounts.get_user_by_username!(username)
+  def handle_params(%{"id" => id}, _uri, socket) do
+    user = Accounts.get_user!(id)
     hero = Game.current_hero(user)
     heroes = Game.latest_heroes(user.id)
 

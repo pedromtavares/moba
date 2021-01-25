@@ -62,7 +62,7 @@ defmodule MobaWeb.Router do
 
     live "/tavern", TavernLiveView
 
-    live "/user/:username", UserLiveView
+    live "/user/:id", UserLiveView
 
     live "/library", LibraryLiveView
 
