@@ -118,7 +118,7 @@ defmodule Moba.Engine.Core.Pve do
       Map.merge(updates, %{
         total_xp: rewards.total_xp,
         gold: attacker.gold + rewards.total_gold,
-        buffed_battles_available: attacker.buffed_battles_available - 1,
+        buffed_battles_available: zero_limit(attacker.buffed_battles_available - 1),
         xp_boosted_battles_available: attacker.xp_boosted_battles_available - 1,
         pve_points: points_limit(attacker.pve_points + rewards.total_pve_points)
       })
@@ -145,4 +145,7 @@ defmodule Moba.Engine.Core.Pve do
 
   defp points_limit(result) when result > @pve_points_limit, do: @pve_points_limit
   defp points_limit(result), do: result
+
+  defp zero_limit(number) when number < 0, do: 0
+  defp zero_limit(number), do: number
 end
