@@ -109,13 +109,15 @@
                 <div class="row mt-3 text-center">
                     <div class="col">
                         <div class="card-box p-3">
-                            <h4 class="text-danger mb-3">You have finished all of your available battles in the Jungle, now it's time to take your hero to the next phase.</h4>
-                            <a href="/game/pvp" class="btn btn-danger btn-lg mb-3"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
-                            <br/>
-                            <%= if can_create_new_hero?(@current_user) do %>
-                                <span class="text-success font-italic">or...</span>
+                            <%= if can_join_arena?(@current_user) do %>
+                                <h4 class="text-danger mb-3">You have finished all of your available battles in the Jungle, now it's time to take your hero to the next phase.</h4>
+                                <a href="/game/pvp" class="btn btn-danger btn-lg mb-3"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
                                 <br/>
-                                <a href="/create" class="btn btn-success btn-sm mt-1"><i class="fa fa-leaf mr-1"></i>Create another Hero</a>
+                            <% else %>
+                                <h4 class="text-danger mb-3">Your hero did not reach the <img src="/images/league_4.png" class="league-logo" style="margin-top:-5px"/> <span class="text-primary">Diamond League</span> and cannot join the Arena.</h4>
+                            <% end %>
+                            <%= if can_create_new_hero?(@current_user) do %>
+                                <a href="/create" class="btn btn-success mt-1"><i class="fa fa-leaf mr-1"></i>Create another Hero</a>
                             <% else %>
                                 <span class="text-success font-italic">You will be able to create a new Hero <%=next_match_description()%></span>
                             <% end %>

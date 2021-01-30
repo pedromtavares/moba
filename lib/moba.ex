@@ -29,6 +29,7 @@ defmodule Moba do
   @redeem_pve_to_league_points_threshold 10
   @pve_points_limit 20
   @max_hero_level 25
+  @daily_hero_limit 3
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -64,6 +65,7 @@ defmodule Moba do
   def redeem_pve_to_league_points_threshold, do: @redeem_pve_to_league_points_threshold
   def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
+  def daily_hero_limit, do: @daily_hero_limit
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
@@ -155,8 +157,9 @@ defmodule Moba do
   def current_match, do: Game.current_match()
 
   def create_current_pve_hero!(attrs, user, avatar, skills, match \\ current_match()) do
+    Accounts.maybe_archive_current_pve_hero(user)
     hero = Game.create_hero!(attrs, user, avatar, skills, match)
-    user && Accounts.set_current_pve_hero!(user, hero.id)
+    Accounts.set_current_pve_hero!(user, hero.id)
     hero
   end
 

@@ -23,11 +23,22 @@ defmodule Moba.GameTest do
 
       assert Game.can_create_new_hero?(user)
 
-      create_base_hero(%{}, user)
+      hero = create_base_hero(%{}, user)
+      Game.update_hero!(hero, %{pve_battles_available: 0})
 
       assert Game.can_create_new_hero?(user)
 
-      create_base_hero(%{}, user)
+      hero = create_base_hero(%{}, user)
+      Game.update_hero!(hero, %{pve_battles_available: 0})
+
+      assert Game.can_create_new_hero?(user)
+
+      create_base_hero(%{}, user) # gets archived
+
+      assert Game.can_create_new_hero?(user)
+
+      hero = create_base_hero(%{}, user)
+      Game.update_hero!(hero, %{pve_battles_available: 0})
 
       refute Game.can_create_new_hero?(user)
     end

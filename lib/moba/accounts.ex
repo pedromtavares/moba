@@ -7,7 +7,8 @@ defmodule Moba.Accounts do
   siblings.
   """
 
-  alias Moba.Accounts.{Users, Messages, Unlocks}
+  alias Moba.{Repo, Game, Accounts}
+  alias Accounts.{Users, Messages, Unlocks}
 
   # USERS
 
@@ -42,6 +43,13 @@ defmodule Moba.Accounts do
   end
 
   def clear_active_players!, do: Users.clear_active_players!()
+
+  def maybe_archive_current_pve_hero(user) do
+    if user.current_pve_hero_id && !Users.can_clear_pve_hero?(user) do
+      %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)
+      Game.update_hero!(pve_hero, %{archived_at: DateTime.utc_now()})
+    end
+  end
 
   def user_pvp_updates!(nil, _), do: nil
 

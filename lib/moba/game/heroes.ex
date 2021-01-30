@@ -26,6 +26,7 @@ defmodule Moba.Game.Heroes do
     Hero
     |> HeroQuery.by_user(user_id)
     |> HeroQuery.by_match(match_id)
+    |> HeroQuery.unarchived()
     |> Repo.all()
   end
 

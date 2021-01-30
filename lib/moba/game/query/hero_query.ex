@@ -57,7 +57,11 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def latest(user_id) do
-    from(hero in by_user(Hero, user_id),
+    base = Hero
+      |> by_user(user_id)
+      |> unarchived()
+
+    from(hero in base,
       limit: 9,
       order_by: [desc: [hero.pvp_picks, hero.id]]
     )
@@ -67,7 +71,8 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in by_user(Hero, user_id),
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.id]],
-      where: hero.pve_battles_available == 0
+      where: hero.pve_battles_available == 0,
+      where: hero.league_tier >= 4
     )
   end
 
@@ -189,6 +194,11 @@ defmodule Moba.Game.Query.HeroQuery do
   def random(query) do
     from hero in query,
       order_by: fragment("RANDOM()")
+  end
+
+  def unarchived(query) do
+    from hero in query,
+      where: is_nil(hero.archived_at)
   end
 
   def pvp_ranked(query \\ Hero) do

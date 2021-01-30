@@ -19,6 +19,8 @@ defmodule MobaWeb.ArenaView do
 
   def can_switch_build?(hero), do: Game.hero_has_other_build?(hero)
 
+  def can_create_new_hero?(user), do: Game.can_create_new_hero?(user)
+
   def pvp_round_progress_percentage do
     match = Game.current_match()
 

@@ -52,6 +52,8 @@ defmodule MobaWeb.JungleView do
 
   def can_create_new_hero?(user), do: Game.can_create_new_hero?(user)
 
+  def can_join_arena?(user), do: length(Game.eligible_heroes_for_pvp(user.id)) > 0
+
   def reward_badges_for(%{xp_boosted_battles_available: xp_boost} = hero, difficulty) do
     battle_xp = if xp_boost > 0, do: Moba.battle_xp() * 2, else: Moba.battle_xp()
     base_xp = round(battle_xp * Moba.xp_percentage(difficulty) / 100)

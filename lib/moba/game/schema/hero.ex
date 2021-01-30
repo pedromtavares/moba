@@ -26,6 +26,7 @@ defmodule Moba.Game.Schema.Hero do
     field :skill_levels_available, :integer, default: 0
     field :gold, :integer
     field :bot_difficulty, :string
+    field :archived_at, :utc_datetime
 
     # PVE (Jungle) related fields
     field :pve_points, :integer
@@ -125,7 +126,8 @@ defmodule Moba.Game.Schema.Hero do
       :total_mp,
       :atk,
       :user_id,
-      :active_build_id
+      :active_build_id,
+      :archived_at
     ])
   end
 

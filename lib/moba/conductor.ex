@@ -173,6 +173,8 @@ defmodule Moba.Conductor do
   defp generate_user_bots!(match) do
     Logger.info("Generating PVP bots...")
 
+    HeroQuery.bots() |> HeroQuery.unarchived() |> Repo.update_all([set: [archived_at: DateTime.utc_now()]])
+
     avatars = AvatarQuery.all_current() |> Repo.all()
 
     UserQuery.eligible_arena_bots()
