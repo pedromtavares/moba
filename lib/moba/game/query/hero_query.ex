@@ -57,9 +57,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def latest(user_id) do
-    base = Hero
-      |> by_user(user_id)
-      |> unarchived()
+    base = Hero |> by_user(user_id)
 
     from(hero in base,
       limit: 9,

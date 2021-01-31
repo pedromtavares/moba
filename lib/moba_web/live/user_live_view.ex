@@ -18,7 +18,13 @@ defmodule MobaWeb.UserLiveView do
     hero = Game.current_hero(user)
     heroes = Game.latest_heroes(user.id)
 
-    {:noreply, assign(socket, user: user, hero: hero, show_heroes: true, heroes: heroes)}
+    listed = if length(heroes) > 3 do
+      Enum.filter(heroes, &(is_nil(&1.archived_at)))
+    else
+      heroes
+    end
+
+    {:noreply, assign(socket, user: user, hero: hero, show_heroes: true, heroes: listed)}
   end
 
   def handle_event("show-heroes", _, socket) do
