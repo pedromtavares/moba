@@ -112,21 +112,22 @@
                                 <%= if @editing do %>
                                     <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
                                 <% else %>
-                                    <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="<%=edit_orders_description(@current_mode)%>" class="badge badge-pill badge-light-warning py-1 px-2"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
+                                    <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="<%=edit_orders_description(@current_mode)%>" class="badge badge-pill badge-light-warning py-1 px-3 font-14"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
                                     <%= if @current_mode == "pve" && @current_hero.pve_battles_available != 0 do %>
-                                        <a href="/create" data-confirm="WARNING: This will replace your current hero with the newly created one." data-toggle="tooltip" title="Pick a different Hero to play the match with. This will replace your current Hero of the match. Only applies to the Jungle." class="badge badge-pill badge-light-danger py-1 px-2"><i class="fa fa-refresh mr-1"></i>Change Hero</a>
+                                        <a href="/create" data-confirm="WARNING: This will replace your current hero with the newly created one." data-toggle="tooltip" title="Pick a different Hero to play the match with. This will replace your current Hero of the match. Only applies to the Jungle." class="badge badge-pill badge-light-danger py-1 px-3 font-14"><i class="fa fa-refresh mr-1"></i>Change Hero</a>
                                     <% end %>
                                     <%= if @current_mode == "pvp" do %>
                                         <%= if can_create_extra_build?(@current_hero) do %>
-                                            <a href="/build" data-toggle="tooltip" title="Create an extra build for your Hero. You will be able to switch back and forth between builds at any time." class="badge badge-pill badge-light-danger py-1 px-2 red-glow"><i class="fa fa-dice-d20 mr-1"></i>Create Extra Build</a>
+                                            <a href="/build" data-toggle="tooltip" title="Create an extra build for your Hero. You will be able to switch back and forth between builds at any time." class="badge badge-pill badge-light-danger py-1 px-3 red-glow font-14"><i class="fa fa-dice-d20 mr-1"></i>Create Extra Build</a>
                                         <% else %>
-                                            <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-2" phx-click="switch-build"><i class="fa fa-sync mr-1"></i>Switch Build</a>
+                                            <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-3 font-14" phx-click="switch-build"><i class="fa fa-sync mr-1"></i>Switch Build</a>
                                         <% end %>
                                     <% end %>
                                 <% end %>
                             <% end %>
                         </div>
                     </div>
+
                 </div>
                 <div class="col-lg-2 d-none d-xl-block" id="current-hero-gold">
                     <div class="row">
