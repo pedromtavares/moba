@@ -17,7 +17,7 @@ defmodule Moba.Cleaner do
 
     Repo.all(query) |> delete_records()
 
-    query = from h in Hero, where: not is_nil(h.archived_at), where: h.archived_at <= ^ago, limit: 50
+    query = from h in HeroQuery.bots(), where: not is_nil(h.archived_at), where: h.archived_at <= ^ago, limit: 50
 
     Repo.all(query) |> delete_records()
 
