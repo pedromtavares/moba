@@ -1,8 +1,5 @@
 defmodule MobaWeb.UserLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.UserView
-  alias Moba.{Game, Accounts}
+  use MobaWeb, :live_view
 
   def mount(_, session, socket) do
     hero_id = Map.get(session, "hero_id")
@@ -18,11 +15,12 @@ defmodule MobaWeb.UserLiveView do
     hero = Game.current_hero(user)
     heroes = Game.latest_heroes(user.id)
 
-    listed = if length(heroes) > 3 do
-      Enum.filter(heroes, &(is_nil(&1.archived_at)))
-    else
-      heroes
-    end
+    listed =
+      if length(heroes) > 3 do
+        Enum.filter(heroes, &is_nil(&1.archived_at))
+      else
+        heroes
+      end
 
     {:noreply, assign(socket, user: user, hero: hero, show_heroes: true, heroes: listed)}
   end
@@ -32,6 +30,6 @@ defmodule MobaWeb.UserLiveView do
   end
 
   def render(assigns) do
-    UserView.render("show.html", assigns)
+    MobaWeb.UserView.render("show.html", assigns)
   end
 end

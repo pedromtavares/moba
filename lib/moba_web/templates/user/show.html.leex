@@ -1,4 +1,4 @@
-<%= @current_hero && live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "hero-live-view") %>
+<%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
 
 <div class="user-profile content-with-hero-bar" phx-hook="SetMainWrapper">
     <div class="row mb-2 mt-3">
@@ -96,7 +96,7 @@
 
     <div class="row">
         <%= for hero <- @heroes do %>
-            <%=render("_hero.html", hero: hero, user: @user)%>
+            <%=render("_hero.html", hero: hero, user: @user, socket: @socket)%>
         <% end %>
         <%=if Enum.count(@heroes) < 1 do %>
             <div class="col"><h5 class="text-center">No previous heroes found</h5></div>

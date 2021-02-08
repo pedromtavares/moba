@@ -98,15 +98,21 @@ defmodule Moba.Engine.Core.Pve do
   # Streaks are an exclusive to PVE battles and are used to give bonus rewards.
   defp manage_streaks(%{winner: winner, attacker: attacker, defender: defender} = battle) do
     updates =
-      cond do
-        winner && winner.id == attacker.id ->
-          %{win_streak: attacker.win_streak + 1, loss_streak: 0, wins: attacker.wins + 1}
+      if winner && winner.id == defender.id do
+        %{loss_streak: attacker.loss_streak + 1, win_streak: 0, losses: attacker.losses + 1}
+      else
+        new_streak = attacker.win_streak + 1
+        best_streak = if new_streak > attacker.best_pve_streak, do: new_streak, else: attacker.best_pve_streak
+        wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
+        ties = if !winner, do: attacker.ties + 1, else: attacker.ties
 
-        winner && winner.id == defender.id ->
-          %{loss_streak: attacker.loss_streak + 1, win_streak: 0, losses: attacker.losses + 1}
-
-        true ->
-          %{win_streak: attacker.win_streak + 1, loss_streak: 0, ties: attacker.ties + 1}
+        %{
+          win_streak: new_streak,
+          loss_streak: 0,
+          wins: wins,
+          ties: ties,
+          best_pve_streak: best_streak
+        }
       end
 
     {battle, updates}
@@ -118,6 +124,7 @@ defmodule Moba.Engine.Core.Pve do
       Map.merge(updates, %{
         total_xp: rewards.total_xp,
         gold: attacker.gold + rewards.total_gold,
+        total_farm: attacker.total_farm + rewards.total_gold,
         buffed_battles_available: zero_limit(attacker.buffed_battles_available - 1),
         xp_boosted_battles_available: attacker.xp_boosted_battles_available - 1,
         pve_points: points_limit(attacker.pve_points + rewards.total_pve_points)

@@ -38,6 +38,9 @@ defmodule Moba.Game.Schema.Hero do
     field :ties, :integer, default: 0
     field :win_streak, :integer, default: 0
     field :loss_streak, :integer, default: 0
+    field :total_farm, :integer, default: 0
+    field :best_pve_streak, :integer, default: 0
+    field :pve_ranking, :integer
 
     # PVP (Arena) related fields
     field :pvp_points, :integer
@@ -104,6 +107,9 @@ defmodule Moba.Game.Schema.Hero do
       :pvp_points,
       :bot_difficulty,
       :gold,
+      :total_farm,
+      :best_pve_streak,
+      :pve_ranking,
       :item_hp,
       :item_mp,
       :item_atk,

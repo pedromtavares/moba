@@ -64,6 +64,8 @@ defmodule MobaWeb.Router do
 
     live "/user/:id", UserLiveView
 
+    live "/hero/:id", HeroLiveView
+
     live "/library", LibraryLiveView
 
     live "/create", CreateLiveView, layout: {MobaWeb.LayoutView, :clean}

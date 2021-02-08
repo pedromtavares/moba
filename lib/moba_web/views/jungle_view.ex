@@ -1,8 +1,7 @@
 defmodule MobaWeb.JungleView do
   use MobaWeb, :view
 
-  alias Moba.Game
-  alias MobaWeb.{GameView, HeroView}
+  def streak_title(hero), do: MobaWeb.CurrentHeroView.bonus_xp_title(hero)
 
   def difficulty_color(difficulty) do
     case difficulty do
@@ -23,16 +22,16 @@ defmodule MobaWeb.JungleView do
   end
 
   def offense_percentage(target, targets) do
-    heroes = Enum.map(targets, &(&1.defender))
-    with_stats = Enum.map(heroes, &(with_display_stats(&1, heroes)))
+    heroes = Enum.map(targets, & &1.defender)
+    with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
     max = Enum.max_by(with_stats, fn hero -> hero.display_offense end) || target.defender
 
     max && with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
   end
 
   def defense_percentage(target, targets) do
-    heroes = Enum.map(targets, &(&1.defender))
-    with_stats = Enum.map(heroes, &(with_display_stats(&1, heroes)))
+    heroes = Enum.map(targets, & &1.defender)
+    with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
     max = Enum.max_by(with_stats, fn hero -> hero.display_defense end) || target.defender
 
     max && with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
@@ -49,10 +48,6 @@ defmodule MobaWeb.JungleView do
       true -> current_tier + 1
     end
   end
-
-  def can_create_new_hero?(user), do: Game.can_create_new_hero?(user)
-
-  def can_join_arena?(user), do: length(Game.eligible_heroes_for_pvp(user.id)) > 0
 
   def reward_badges_for(%{xp_boosted_battles_available: xp_boost} = hero, difficulty) do
     battle_xp = if xp_boost > 0, do: Moba.battle_xp() * 2, else: Moba.battle_xp()
@@ -80,19 +75,17 @@ defmodule MobaWeb.JungleView do
 
     streak_xp = round(Moba.win_streak_xp(2) * Moba.streak_percentage(difficulty) / 100)
 
-    safe_to_string(content_tag :div do
-      [
-        xp_reward,
-        content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1"),
-        points,
-        content_tag(:span, "+#{streak_xp} XP/Gold per Undefeated Streak", class: "badge badge-pill badge-light-purple")
-      ]
-    end)
+    safe_to_string(
+      content_tag :div do
+        [
+          xp_reward,
+          content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1"),
+          points,
+          content_tag(:span, "+#{streak_xp} XP/Gold per Undefeated Streak", class: "badge badge-pill badge-light-purple")
+        ]
+      end
+    )
   end
-
-  def streak_title(hero), do: HeroView.bonus_xp_title(hero)
-
-  def next_match_description, do: HeroView.next_match_description()
 
   defp with_display_stats(hero, heroes) do
     minimum = minimum_stats(heroes)
@@ -101,7 +94,8 @@ defmodule MobaWeb.JungleView do
     Map.merge(hero, %{
       display_defense:
         (total_hp(hero) - minimum[:total_hp]) / units[:total_hp] + (total_armor(hero) - minimum[:armor]) / units[:armor],
-      display_offense: (total_atk(hero) - minimum[:atk]) / units[:atk] + (total_power(hero) - minimum[:power]) / units[:power]
+      display_offense:
+        (total_atk(hero) - minimum[:atk]) / units[:atk] + (total_power(hero) - minimum[:power]) / units[:power]
     })
   end
 
@@ -110,7 +104,7 @@ defmodule MobaWeb.JungleView do
       atk: Enum.min_by(heroes, fn hero -> total_atk(hero) end) |> total_atk(),
       total_hp: Enum.min_by(heroes, fn hero -> total_hp(hero) end) |> total_hp(),
       armor: Enum.min_by(heroes, fn hero -> total_armor(hero) end) |> total_armor(),
-      power: Enum.min_by(heroes, fn hero -> total_power(hero) end) |> total_power(),
+      power: Enum.min_by(heroes, fn hero -> total_power(hero) end) |> total_power()
     }
   end
 

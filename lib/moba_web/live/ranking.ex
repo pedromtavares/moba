@@ -1,8 +1,5 @@
 defmodule MobaWeb.Ranking do
-  use Phoenix.LiveComponent
-
-  alias MobaWeb.ArenaView
-  alias Moba.Game
+  use MobaWeb, :live_component
 
   def mount(socket) do
     {:ok, assign(socket, page: 1), temporary_assigns: [ranking: []]}
@@ -12,7 +9,7 @@ defmodule MobaWeb.Ranking do
     {:ok,
      assign(socket,
        hero: hero,
-       ranking: Game.paged_ranking(1)
+       ranking: Game.paged_pvp_ranking(1)
      )}
   end
 
@@ -23,12 +20,12 @@ defmodule MobaWeb.Ranking do
 
   def handle_event("page", %{"number" => number}, socket) do
     page = process_page(number)
-    results = Game.paged_ranking(page)
+    results = Game.paged_pvp_ranking(page)
     {:noreply, assign(socket, page: page, ranking: results)}
   end
 
   def render(assigns) do
-    ArenaView.render("ranking.html", assigns)
+    MobaWeb.ArenaView.render("ranking.html", assigns)
   end
 
   defp process_page(page) do

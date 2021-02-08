@@ -33,7 +33,8 @@ defmodule Moba.GameTest do
 
       assert Game.can_create_new_hero?(user)
 
-      create_base_hero(%{}, user) # gets archived
+      # gets archived
+      create_base_hero(%{}, user)
 
       assert Game.can_create_new_hero?(user)
 
@@ -165,13 +166,26 @@ defmodule Moba.GameTest do
       hero1 = create_pvp_hero(%{pvp_points: 1000})
       hero2 = create_pvp_hero(%{pvp_points: 1020})
 
-      Game.update_ranking!()
+      Game.update_pvp_ranking!()
 
       hero1 = Game.get_hero!(hero1.id)
       hero2 = Game.get_hero!(hero2.id)
 
       assert hero1.pvp_ranking == 2
       assert hero2.pvp_ranking == 1
+    end
+
+    test "#update_pve_ranking" do
+      hero1 = create_base_hero(%{total_farm: 100})
+      hero2 = create_base_hero(%{total_farm: 200})
+
+      Game.update_pve_ranking!()
+
+      hero1 = Game.get_hero!(hero1.id)
+      hero2 = Game.get_hero!(hero2.id)
+
+      assert hero1.pve_ranking == 2
+      assert hero2.pve_ranking == 1
     end
 
     test "#redeem_league!" do

@@ -1,9 +1,7 @@
 defmodule MobaWeb.BattleLiveView do
-  use Phoenix.LiveView
+  use MobaWeb, :live_view
 
   alias MobaWeb.{BattleView, Tutorial}
-  alias Moba.{Game, Engine}
-  alias MobaWeb.Router.Helpers, as: Routes
 
   def mount(_, session, socket) do
     socket = assign_new(socket, :current_hero, fn -> Game.get_hero!(session["hero_id"]) end)

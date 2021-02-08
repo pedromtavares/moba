@@ -1,8 +1,5 @@
 defmodule MobaWeb.LibraryLiveView do
-  use Phoenix.LiveView
-
-  alias Moba.Game
-  alias MobaWeb.LibraryView
+  use MobaWeb, :live_view
 
   def mount(_, session, socket) do
     hero_id = Map.get(session, "hero_id")
@@ -19,6 +16,6 @@ defmodule MobaWeb.LibraryLiveView do
   end
 
   def render(assigns) do
-    LibraryView.render("index.html", assigns)
+    MobaWeb.LibraryView.render("index.html", assigns)
   end
 end

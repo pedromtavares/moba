@@ -1,5 +1,5 @@
 defmodule MobaWeb.Tutorial do
-  use Phoenix.LiveComponent
+  use MobaWeb, :live_component
 
   def mount(socket) do
     {:ok, socket}

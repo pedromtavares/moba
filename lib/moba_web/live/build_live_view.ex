@@ -1,10 +1,5 @@
 defmodule MobaWeb.BuildLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.BuildView
-  alias Moba.{Accounts, Game}
-
-  alias MobaWeb.Router.Helpers, as: Routes
+  use MobaWeb, :live_view
 
   def mount(_params, %{"hero_id" => hero_id}, socket) do
     socket = assign_new(socket, :current_hero, fn -> Game.get_hero!(hero_id) end)
@@ -57,7 +52,7 @@ defmodule MobaWeb.BuildLiveView do
   end
 
   def render(assigns) do
-    BuildView.render("index.html", assigns)
+    MobaWeb.BuildView.render("index.html", assigns)
   end
 
   defp add_skill(selected, skill) when length(selected) < 3 do

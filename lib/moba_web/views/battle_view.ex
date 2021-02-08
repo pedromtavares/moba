@@ -1,8 +1,6 @@
 defmodule MobaWeb.BattleView do
   use MobaWeb, :view
 
-  alias Moba.{Engine, Game}
-
   defdelegate difficulty_color(diff), to: MobaWeb.JungleView
   defdelegate difficulty_label(diff), to: MobaWeb.JungleView
 
@@ -407,11 +405,13 @@ defmodule MobaWeb.BattleView do
     |> Enum.map(fn item -> Moba.struct_from_map(item, as: %Game.Schema.Item{}) end)
     |> Game.sort_items()
     |> Enum.map(fn item ->
-      image = img_tag(GH.image_url(item),
-        data: [toggle: "tooltip"],
-        title: GH.item_description(item),
-        class: "item-img img-border-xs tooltip-mobile"
-      )
+      image =
+        img_tag(GH.image_url(item),
+          data: [toggle: "tooltip"],
+          title: GH.item_description(item),
+          class: "item-img img-border-xs tooltip-mobile"
+        )
+
       content_tag(:div, image, class: "item-container col-4")
     end)
   end

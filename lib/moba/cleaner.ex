@@ -38,11 +38,13 @@ defmodule Moba.Cleaner do
   defp archive_weak_heroes do
     base = HeroQuery.non_bots() |> HeroQuery.unarchived()
 
-    query = from hero in base,
-      join: user in User, on: hero.user_id == user.id,
-      where: hero.league_tier < 4 or is_nil(hero.league_tier),
-      where: is_nil(user.current_pve_hero_id) or user.current_pve_hero_id != hero.id
+    query =
+      from hero in base,
+        join: user in User,
+        on: hero.user_id == user.id,
+        where: hero.league_tier < 4 or is_nil(hero.league_tier),
+        where: is_nil(user.current_pve_hero_id) or user.current_pve_hero_id != hero.id
 
-    Repo.update_all(query, [set: [archived_at: DateTime.utc_now()]])
+    Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
   end
 end

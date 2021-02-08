@@ -1,9 +1,7 @@
 defmodule MobaWeb.ArenaLiveView do
-  use Phoenix.LiveView
+  use MobaWeb, :live_view
 
-  alias MobaWeb.{Tutorial, ArenaView}
-  alias Moba.{Game, Engine, Accounts}
-  alias MobaWeb.Router.Helpers, as: Routes
+  alias MobaWeb.Tutorial
 
   def mount(_, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
@@ -63,7 +61,7 @@ defmodule MobaWeb.ArenaLiveView do
   end
 
   def render(assigns) do
-    ArenaView.render("index.html", assigns)
+    MobaWeb.ArenaView.render("index.html", assigns)
   end
 
   defp redirect_to_battle(id, build_id, socket) do

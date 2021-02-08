@@ -1,8 +1,5 @@
 defmodule MobaWeb.CreateLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.CreateView
-  alias Moba.{Game, Accounts}
+  use MobaWeb, :live_view
 
   def mount(_params, %{"token" => token, "cache_key" => cache_key}, socket) do
     cached = get_cache(cache_key)
@@ -134,7 +131,7 @@ defmodule MobaWeb.CreateLiveView do
   end
 
   def render(assigns) do
-    CreateView.render("index.html", assigns)
+    MobaWeb.CreateView.render("index.html", assigns)
   end
 
   defp add_skill(selected, skill) when length(selected) < 3 do

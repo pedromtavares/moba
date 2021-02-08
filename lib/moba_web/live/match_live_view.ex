@@ -1,8 +1,5 @@
 defmodule MobaWeb.MatchLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.MatchView
-  alias Moba.{Game, Accounts}
+  use MobaWeb, :live_view
 
   def mount(_, session, socket) do
     hero_id = Map.get(session, "hero_id")
@@ -31,6 +28,6 @@ defmodule MobaWeb.MatchLiveView do
   end
 
   def render(assigns) do
-    MatchView.render("show.html", assigns)
+    MobaWeb.MatchView.render("show.html", assigns)
   end
 end

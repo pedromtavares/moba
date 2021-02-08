@@ -1,12 +1,7 @@
 defmodule MobaWeb.ArenaView do
   use MobaWeb, :view
 
-  alias Moba.{Game, Engine}
-  alias MobaWeb.{GameView, HeroView}
-
   def can_battle?(attacker, defender), do: Engine.can_pvp?(attacker, defender)
-
-  def next_match_description, do: HeroView.next_match_description()
 
   def points_for_arena_battle(attacker, defender) do
     diff = defender.pvp_points - attacker.pvp_points
@@ -27,7 +22,7 @@ defmodule MobaWeb.ArenaView do
     if match do
       start = match.last_pvp_round_at
       ending = start |> Timex.shift(hours: Moba.pvp_round_timeout_in_hours())
-      HeroView.time_percentage(start, ending)
+      GH.time_percentage(start, ending)
     else
       0
     end

@@ -64,3 +64,33 @@
     margin-bottom: 3rem;
   }
 }
+
+.hero-review{
+  .previous-tier{
+    width: 10%;
+    filter: grayscale(100%);
+  }
+  .current-tier{
+    width: 15%;
+  }
+  .next-tier{
+    width: 10%;
+    opacity: 0.5;
+  }
+  .ranking{
+    img{
+      width: 60px;
+      border: 1px solid;
+      border-image-source: radial-gradient(white, rgb(47, 60, 74));
+      border-image-slice: 1;
+    }
+  }
+
+  .hero-card{
+    height: 450px;
+
+    .performance{
+      background-color: rgba(54, 64, 74, 0.8);
+    }
+  }
+}

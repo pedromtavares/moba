@@ -1,8 +1,5 @@
 defmodule MobaWeb.ChatLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.ChatView
-  alias Moba.{Game, Accounts}
+  use MobaWeb, :live_view
 
   def mount(_, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
@@ -89,6 +86,6 @@ defmodule MobaWeb.ChatLiveView do
   end
 
   def render(assigns) do
-    ChatView.render("index.html", assigns)
+    MobaWeb.ChatView.render("index.html", assigns)
   end
 end

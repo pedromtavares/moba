@@ -1,8 +1,5 @@
 defmodule MobaWeb.TavernLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.TavernView
-  alias Moba.{Game, Accounts}
+  use MobaWeb, :live_view
 
   def mount(_, session, socket) do
     hero_id = Map.get(session, "hero_id")
@@ -31,6 +28,6 @@ defmodule MobaWeb.TavernLiveView do
   end
 
   def render(assigns) do
-    TavernView.render("index.html", assigns)
+    MobaWeb.TavernView.render("index.html", assigns)
   end
 end

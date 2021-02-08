@@ -103,11 +103,17 @@ defmodule Moba.Game do
 
   def pvp_search(hero, filter, sort, page), do: Heroes.pvp_search(hero, filter, sort, page)
 
-  def ranking(limit \\ 20), do: Heroes.ranking(limit)
+  def pvp_ranking(limit \\ 20), do: Heroes.pvp_ranking(limit)
 
-  def paged_ranking(page), do: Heroes.paged_ranking(page)
+  def paged_pvp_ranking(page), do: Heroes.paged_pvp_ranking(page)
 
-  def update_ranking!, do: Heroes.update_ranking!()
+  def update_pvp_ranking!, do: Heroes.update_pvp_ranking!()
+
+  def pve_search(hero), do: Heroes.pve_search(hero)
+
+  def pve_ranking(limit \\ 20), do: Heroes.pve_ranking(limit)
+
+  def update_pve_ranking!, do: Heroes.update_pve_ranking!()
 
   def redeem_league!(hero), do: Heroes.redeem_league!(hero)
 
@@ -184,7 +190,7 @@ defmodule Moba.Game do
 
   def generate_targets!(hero) do
     hero = Repo.preload(hero, :user)
-    codes = hero.user && Accounts.unlocked_codes_for(hero.user) || []
+    codes = (hero.user && Accounts.unlocked_codes_for(hero.user)) || []
     Targets.generate!(hero, codes)
   end
 

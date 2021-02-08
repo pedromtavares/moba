@@ -1,5 +1,5 @@
 defmodule Pow.Postgres.Repo.Migrations.CreateTablePowStore do
-  use Ecto.Migration 
+  use Ecto.Migration
 
   def change do
     create table("pow_store", primary_key: false) do

@@ -1,6 +1,6 @@
 <div class="jungle" phx-hook="SetMainWrapper" id="jungle">
     <%= if @pending_battle do %>
-        <%= GameView.render "_pending_battle.html", battle: @pending_battle %>
+        <%= MobaWeb.GameView.render "_pending_battle.html", battle: @pending_battle %>
     <% else %>
         <%= if @current_hero.user.is_guest && @current_hero.level >= 10 do %>
             <div class="row" style="margin-top: 300px">
@@ -66,14 +66,7 @@
                                 </div>
                                 <div class="row">
                                     <div class="col text-center">
-                                        <%= if @current_hero.pve_points >= Moba.pve_points_limit() && !Game.max_league?(@current_hero) do %>
-                                            <div phx-hook="LeagueChallengeAlert" id="league-challenge-alert"></div>
-                                            <button class="btn btn-danger btn-lg mt-1 league-challenge" phx-hook="Loading" loading="Starting..." phx-click="league" phx-target="#hero-bar" data-toggle="tooltip" title="Click to start your League Challenge. You will face consecutive opponents and must win all the battles in order to rank up to the next League." id="start-league-challenge">
-                                                <span class="loading-text"><i class="fa fa-dice-d20 mr-1"></i> League Challenge</span>
-                                            </button>
-                                        <% else %>
-                                            <h3 class="text-white mb-0 mt-1"><%=Moba.leagues[@current_hero.league_tier]%></h3>
-                                        <% end %>
+                                        <h3 class="text-white mb-0 mt-1"><%=Moba.leagues[@current_hero.league_tier]%></h3>
                                     </div>
                                 </div>
                             </div>
@@ -95,6 +88,22 @@
                 </div>
             <% end %>
 
+            <%= if @current_hero.pve_points >= Moba.pve_points_limit() && !Game.max_league?(@current_hero) do %>
+                <% next = next_league(@current_hero) %>
+                <div class="row mt-3">
+                    <div class="col text-center">
+                        <img src="/images/league_<%=next%>.png" style="height: 100px"/>
+                        <h3><%=Moba.leagues[next]%> Challenge</h3>
+                        <button class="btn btn-danger btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" phx-target="#hero-bar" id="start-league-challenge">
+                                <span class="loading-text"><i class="fa fa-play mr-1"></i> Start</span>
+                            </button>
+                        <p class="text-danger">
+                            Click above to start your <%=Moba.leagues[next]%> Challenge. You will face consecutive opponents and must win all the battles in order to rank up to the <%=Moba.leagues[next]%>.
+                        </p>
+                    </div>
+                </div>
+            <% end %>
+
             <%= if @current_hero.pve_battles_available > 0 do %>
                 <div class="row mt-3">
                     <div class="col">
@@ -105,29 +114,10 @@
                         </div>
                     </div>
                 </div>
-            <% else %>
-                <div class="row mt-3 text-center">
-                    <div class="col">
-                        <div class="card-box p-3">
-                            <%= if can_join_arena?(@current_user) do %>
-                                <h4 class="text-danger mb-3">You have finished all of your available battles in the Jungle, now it's time to take your hero to the next phase.</h4>
-                                <a href="/game/pvp" class="btn btn-danger btn-lg mb-3"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
-                                <br/>
-                            <% else %>
-                                <h4 class="text-danger mb-3">Your hero did not reach the <img src="/images/league_4.png" class="league-logo" style="margin-top:-5px"/> <span class="text-primary">Diamond League</span> and cannot join the Arena.</h4>
-                            <% end %>
-                            <%= if can_create_new_hero?(@current_user) do %>
-                                <a href="/create" class="btn btn-success mt-1"><i class="fa fa-leaf mr-1"></i>Create another Hero</a>
-                            <% else %>
-                                <span class="text-success font-italic">You will be able to create a new Hero <%=next_match_description()%></span>
-                            <% end %>
-                        </div>
-                    </div>
-                </div>
             <% end %>
         <% end %>
     <% end %>
 </div>
-<%= live_render(@socket, MobaWeb.HeroLiveView, session: %{"hero_id" => @current_hero.id, "origin" => "jungle", "tutorial_step" => @tutorial_step}, id: "hero-live-view") %>
+<%= live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id, "origin" => "jungle", "tutorial_step" => @tutorial_step}, id: "current-hero-live-view") %>
 <%= render "_jungle_rules.html"%>
 <%= Phoenix.LiveView.Helpers.live_component(@socket, MobaWeb.Tutorial, step: @tutorial_step) %>

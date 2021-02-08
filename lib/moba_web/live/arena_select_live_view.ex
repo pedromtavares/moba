@@ -1,8 +1,5 @@
 defmodule MobaWeb.ArenaSelectLiveView do
-  use Phoenix.LiveView
-
-  alias MobaWeb.ArenaView
-  alias Moba.{Accounts, Game}
+  use MobaWeb, :live_view
 
   def mount(_, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
@@ -50,6 +47,6 @@ defmodule MobaWeb.ArenaSelectLiveView do
   end
 
   def render(assigns) do
-    ArenaView.render("select.html", assigns)
+    MobaWeb.ArenaView.render("select.html", assigns)
   end
 end

@@ -28,7 +28,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(@pvp_per_page, page_to_offset(page, @pvp_per_page))
   end
 
-  def paged_ranking(page) do
+  def paged_pvp_ranking(page) do
     Hero
     |> pvp_ranked()
     |> limit_by(@ranking_per_page, page_to_offset(page, @ranking_per_page))
@@ -179,8 +179,16 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def by_codes(query, codes) do
     from hero in query,
-      join: avatar in Avatar, on: hero.avatar_id == avatar.id,
+      join: avatar in Avatar,
+      on: hero.avatar_id == avatar.id,
       where: is_nil(avatar.level_requirement) or avatar.code in ^codes
+  end
+
+  def by_pve_ranking(query, min, max) do
+    from hero in query,
+      where: hero.pve_ranking >= ^min,
+      where: hero.pve_ranking <= ^max,
+      order_by: [asc: hero.pve_ranking]
   end
 
   def limit_by(query, limit, offset \\ 0) do
@@ -199,10 +207,25 @@ defmodule Moba.Game.Query.HeroQuery do
       where: is_nil(hero.archived_at)
   end
 
+  def finished_pve(query \\ Hero) do
+    points_limit = Moba.pve_points_limit()
+
+    from hero in query,
+      where: hero.pve_battles_available == 0,
+      where: hero.pve_points < ^points_limit,
+      order_by: [desc: hero.total_farm]
+  end
+
   def pvp_ranked(query \\ Hero) do
     from hero in pvp_active(query),
       where: not is_nil(hero.pvp_ranking),
       order_by: [asc: hero.pvp_ranking]
+  end
+
+  def pve_ranked(query \\ Hero) do
+    from hero in non_bots(),
+      where: not is_nil(hero.pve_ranking),
+      order_by: [asc: hero.pve_ranking]
   end
 
   def non_retired(query \\ Hero) do

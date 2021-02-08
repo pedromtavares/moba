@@ -59,7 +59,7 @@
                         <% end %>
                         <div class="row d-none d-md-block no-gutters" id="current-hero-stats">
                             <div class="col flex no-wrap pl-0" style="overflow: visible;">
-                                <%=render "_current_stats.html", current_hero: @current_hero%>
+                                <%=render "_stats.html", current_hero: @current_hero%>
                             </div>
                         </div>
                     </div>
@@ -171,7 +171,7 @@
             <div class="row d-flex d-md-none mobile-row no-gutters">
                 <%= if @show_build do %>
                     <div class="col-12 tiny-stats mb-1 text-center mt-1">
-                        <%=render "_current_stats.html", current_hero: @current_hero %>
+                        <%=render "_stats.html", current_hero: @current_hero %>
                     </div>
                 <% else %>
                     <div class="col-5 pr-0">

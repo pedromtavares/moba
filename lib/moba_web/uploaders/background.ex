@@ -47,7 +47,7 @@ defmodule Moba.Background do
 
   # Provide a default URL if there hasn't been a file uploaded
   def default_url(_version, scope) do
-      Endpoint.url() <> "/images/default_background.jpg"
+    Endpoint.url() <> "/images/default_background.jpg"
   end
 
   # Specify custom headers for s3 objects

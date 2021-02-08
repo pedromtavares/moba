@@ -25,17 +25,18 @@ defmodule MobaWeb.GameHelpers do
     end)
   end
 
-
   def hero_item_list(hero, legacy \\ false)
 
   def hero_item_list(%{items: items}, false) do
     Moba.Game.sort_items(items)
     |> Enum.map(fn item ->
-      image = img_tag(image_url(item),
-        data: [toggle: "tooltip"],
-        title: item_description(item),
-        class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"
-      )
+      image =
+        img_tag(image_url(item),
+          data: [toggle: "tooltip"],
+          title: item_description(item),
+          class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"
+        )
+
       content_tag(:div, image, class: "item-container col-4")
     end)
   end
@@ -51,9 +52,9 @@ defmodule MobaWeb.GameHelpers do
     end)
   end
 
-  def hero_avatar(hero) do
+  def hero_avatar(hero, show_medals \\ true) do
     tooltip = "Earn Medals by finishing in the top 3 of a match"
-    medals = (hero.user && hero.user.medal_count > 0 && "
+    medals = (show_medals && hero.user && hero.user.medal_count > 0 && "
       <p class='medals text-warning bg-light-dark d-none d-xl-block text-center' title='#{tooltip}' data-toggle='tooltip'>
           <i class='fa fa-medal mr-1'></i>#{hero.user.medal_count}
       </p>
@@ -69,11 +70,17 @@ defmodule MobaWeb.GameHelpers do
   end
 
   def hero_stats(hero, show_speed \\ false) do
-    MobaWeb.HeroView.render("_hero_stats.html", hero: hero, show_speed: show_speed)
+    MobaWeb.HeroView.render("_stats.html", hero: hero, show_speed: show_speed)
   end
 
   def hero_stats_string(hero, show_speed \\ false) do
-    Phoenix.View.render_to_string(MobaWeb.HeroView, "_hero_stats.html", hero: hero, show_speed: show_speed)
+    Phoenix.View.render_to_string(MobaWeb.HeroView, "_stats.html", hero: hero, show_speed: show_speed)
+  end
+
+  def time_percentage(start, ending) do
+    diff_ending = Timex.diff(start, ending, :minutes)
+    diff_now = Timex.diff(start, Timex.now(), :minutes)
+    diff_now * 100 / diff_ending
   end
 
   def pvp_win_rate(hero), do: Moba.Game.pvp_win_rate(hero)

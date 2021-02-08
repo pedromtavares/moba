@@ -1,8 +1,6 @@
 defmodule MobaWeb.ShopView do
   use MobaWeb, :view
 
-  alias Moba.Game
-
   def normals(items), do: rarity_filter(items, "normal")
   def rares(items), do: rarity_filter(items, "rare")
   def epics(items), do: rarity_filter(items, "epic")

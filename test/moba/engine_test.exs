@@ -106,6 +106,7 @@ defmodule Moba.EngineTest do
       assert reloaded_defender.experience == defender.experience
       assert reloaded_attacker.ties == 1
       assert reloaded_attacker.win_streak == 2
+      assert reloaded_attacker.best_pve_streak == 2
       assert reloaded_attacker.loss_streak == 0
 
       assert reloaded_attacker.pve_battles_available == attacker.pve_battles_available - 1
@@ -113,6 +114,7 @@ defmodule Moba.EngineTest do
 
       assert reloaded_attacker.experience == 75
       assert reloaded_attacker.gold == attacker.gold + 75
+      assert reloaded_attacker.total_farm == attacker.total_farm + 75
       assert reloaded_attacker.pve_points == attacker.pve_points + 1
     end
 
@@ -294,6 +296,7 @@ defmodule Moba.EngineTest do
       assert hero.league_successes == attacker.league_successes + 1
       assert hero.buffed_battles_available == attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus()
       assert hero.gold == attacker.gold + Moba.league_win_gold_bonus()
+      assert hero.total_farm == attacker.total_farm + Moba.league_win_gold_bonus()
     end
   end
 

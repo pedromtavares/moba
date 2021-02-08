@@ -1,7 +1,7 @@
 defmodule MobaWeb.TavernView do
-  alias Moba.Accounts
-  alias MobaWeb.CreateView
   use MobaWeb, :view
+
+  alias MobaWeb.CreateView
 
   def unlocked?(resource, user) do
     user.unlocks

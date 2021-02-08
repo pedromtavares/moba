@@ -68,7 +68,7 @@ defmodule Moba.Conductor do
       |> new_pvp_round!()
       |> server_update!()
 
-    Moba.update_rankings!()
+    Accounts.update_ranking!()
     Engine.read_all_battles()
 
     match
@@ -81,7 +81,8 @@ defmodule Moba.Conductor do
   def server_update!(match \\ Moba.current_match()) do
     skynet!()
 
-    Game.update_ranking!()
+    Game.update_pvp_ranking!()
+    Game.update_pve_ranking!()
 
     match
     |> Game.update_match!(%{last_server_update_at: DateTime.utc_now()})
@@ -110,7 +111,7 @@ defmodule Moba.Conductor do
     active = Moba.current_match()
 
     if active do
-      Game.update_ranking!()
+      Game.update_pvp_ranking!()
 
       active
       |> Game.update_match!(%{active: false})
@@ -173,7 +174,7 @@ defmodule Moba.Conductor do
   defp generate_user_bots!(match) do
     Logger.info("Generating PVP bots...")
 
-    HeroQuery.bots() |> HeroQuery.unarchived() |> Repo.update_all([set: [archived_at: DateTime.utc_now()]])
+    HeroQuery.bots() |> HeroQuery.unarchived() |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
 
     avatars = AvatarQuery.all_current() |> Repo.all()
 
@@ -202,9 +203,9 @@ defmodule Moba.Conductor do
     match
   end
 
-  # Awards winners and saves the top 10 heroes of the match
+  # Awards winners and saves the PVP top 10 heroes of the match
   defp assign_and_award_winners!(match) do
-    top10 = Game.ranking(10)
+    top10 = Game.pvp_ranking(10)
 
     winners =
       Enum.reduce(top10, %{}, fn hero, acc ->

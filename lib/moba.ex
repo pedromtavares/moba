@@ -179,12 +179,14 @@ defmodule Moba do
   end
 
   @doc """
+  Game pvp_ranking is defined by who currently have the highest pvp_points
+  Game pve_ranking is defined by who has the highest total_farm (gold)
   Accounts ranking is defined by who has the highest medal_count
-  Game ranking is defined by who currently have the highest pvp_points
   """
   def update_rankings! do
+    Game.update_pvp_ranking!()
+    Game.update_pve_ranking!()
     Accounts.update_ranking!()
-    Game.update_ranking!()
   end
 
   def basic_attack, do: Game.basic_attack()

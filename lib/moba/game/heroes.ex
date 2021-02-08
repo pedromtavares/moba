@@ -160,7 +160,7 @@ defmodule Moba.Game.Heroes do
 
     hero
     |> add_experience(xp)
-    |> update!(%{pve_points: 24, gold: 99999, pve_battles_available: 1})
+    |> update!(%{pve_points: Moba.pve_points_limit(), gold: 100_000, pve_battles_available: 1})
   end
 
   def pve_win_rate(hero) do
@@ -208,7 +208,7 @@ defmodule Moba.Game.Heroes do
   @doc """
   Retrieves top PVP ranked Heroes
   """
-  def ranking(limit) do
+  def pvp_ranking(limit) do
     HeroQuery.pvp_ranked()
     |> HeroQuery.limit_by(limit)
     |> Repo.all()
@@ -218,21 +218,61 @@ defmodule Moba.Game.Heroes do
   @doc """
   Retrieves PVP ranked Heroes by page
   """
-  def paged_ranking(page) do
-    HeroQuery.paged_ranking(page)
+  def paged_pvp_ranking(page) do
+    HeroQuery.paged_pvp_ranking(page)
     |> Repo.all()
     |> base_preload()
   end
 
   @doc """
-  Grabs all Heroes ordered by their pvp points and updates their ranking in the current match
+  Grabs all Heroes ordered by their pvp points and updates their pvp_ranking in the current match
   """
-  def update_ranking! do
+  def update_pvp_ranking! do
     HeroQuery.with_pvp_points()
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.map(fn {hero, index} ->
       update!(hero, %{pvp_ranking: index})
+    end)
+  end
+
+  @doc """
+  Grabs heroes with pve_rankings close to the target hero
+  """
+  def pve_search(%{pve_ranking: ranking} = hero) do
+    {min, max} =
+      if ranking <= 3 do
+        {1, 5}
+      else
+        {ranking - 2, ranking + 2}
+      end
+
+    HeroQuery.non_bots()
+    |> HeroQuery.by_pve_ranking(min, max)
+    |> Repo.all()
+    |> avatar_preload()
+  end
+
+  @doc """
+  Retrieves top PVE ranked Heroes
+  """
+  def pve_ranking(limit) do
+    HeroQuery.pve_ranked()
+    |> HeroQuery.limit_by(limit)
+    |> Repo.all()
+    |> base_preload()
+  end
+
+  @doc """
+  Grabs all Heroes ordered by their total_farm and updates their pve_ranking
+  """
+  def update_pve_ranking! do
+    HeroQuery.non_bots()
+    |> HeroQuery.finished_pve()
+    |> Repo.all()
+    |> Enum.with_index(1)
+    |> Enum.map(fn {hero, index} ->
+      update!(hero, %{pve_ranking: index})
     end)
   end
 
@@ -332,6 +372,10 @@ defmodule Moba.Game.Heroes do
       struct_or_structs,
       [:user, :avatar, :items, active_build: [skills: Game.ordered_skills_query()]] ++ extras
     )
+  end
+
+  defp avatar_preload(struct_or_structs) do
+    Repo.preload(struct_or_structs, :avatar)
   end
 
   # makes sure Heroes that were recently battled are excluded from searches

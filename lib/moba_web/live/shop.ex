@@ -1,8 +1,7 @@
 defmodule MobaWeb.Shop do
-  use Phoenix.LiveComponent
+  use MobaWeb, :live_component
 
-  alias MobaWeb.{ShopView, Tutorial}
-  alias Moba.Game
+  alias MobaWeb.Tutorial
 
   def mount(socket) do
     {:ok,
@@ -94,7 +93,7 @@ defmodule MobaWeb.Shop do
   end
 
   def render(assigns) do
-    ShopView.render("shop.html", assigns)
+    MobaWeb.ShopView.render("shop.html", assigns)
   end
 
   defp broadcast(%{assigns: assigns} = socket, event) do

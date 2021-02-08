@@ -178,7 +178,7 @@ body{
   justify-content: center;
 }
 
-.card-header{
+.hero-card .card-header{
   background-color: rgba(54, 64, 74, 0.8);
 }
 
@@ -371,6 +371,34 @@ b, strong {
 
 .text-defense{
   color: #F4825D;
+}
+
+.text-league-0{
+  color: rgb(219, 175, 131) !important;
+}
+
+.text-league-1{
+  color: rgb(150, 150, 150) !important;
+}
+
+.text-league-2{
+  color: rgb(206, 163, 0) !important;
+}
+
+.text-league-3{
+  color: rgb(237, 237, 237) !important;
+}
+
+.text-league-4{
+  color: rgb(148, 203, 235) !important;
+}
+
+.text-league-5{
+  color: rgb(22, 224, 252) !important;
+}
+
+.text-league-6{
+  color: rgb(241, 151, 18) !important;
 }
 
 .dont-break-out {
