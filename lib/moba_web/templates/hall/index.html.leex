@@ -46,17 +46,27 @@
                             <h1 class="mb-0">
                                 #<%=hero.pve_ranking%>
                             </h1>
-                            <img src="/images/league_<%=hero.league_tier%>.png" style="width: 30px" class="my-1"/>
-                            <div class="text-center text-warning"><i class="fa fa-coins mr-1"></i><%=hero.total_farm%></div>
                         </td>
                         <td>
                             <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
                                 <%=GH.hero_avatar(hero, false)%><br/>
-                                <h4 class="mb-0"><%=hero.name%></h4>
+                                <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%=hero.name%></h4>
+                                <small class="text-dark">Level <%=hero.level%> <%=hero.avatar.name%></small>
                             <% end %>
                         </td>
                         <td>
-                            <h4 class="text-dark mb-3"><em>Level <%=hero.level%> <%=hero.avatar.name%></em></h4>
+                            <div class="row d-flex mb-3">
+                                <div class="col">
+                                    <h4 class="text-warning"><i class="fa fa-coins mr-1"></i><%=hero.total_farm%></h4>
+                                </div>
+                                <div class="col">
+                                    <h4 class="text-success">WR: <%=GH.pve_win_rate(hero)%>%</h4>
+                                </div>
+                                <div class="col">
+                                    <h4 class="text-danger"><i class="fa fa-cubes mr-1"></i>Streak: <%=if hero.best_pve_streak == 0, do: "?", else: hero.best_pve_streak%></h4>
+                                </div>
+                            </div>
+
                             <%=GH.hero_stats(hero, true)%>
                         </td>
                         <td>
@@ -77,16 +87,23 @@
                                 <h1 class="mb-0">
                                     #<%=hero.pvp_ranking%>
                                 </h1>
-                                <div class="text-center text-danger"><%=hero.pvp_points%> Points</div>
                             </td>
                             <td>
                                 <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.user_id) do %>
                                     <%=GH.hero_avatar(hero)%><br/>
-                                    <h4 class="mb-0"><%=hero.name%></h4>
+                                    <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%=hero.name%></h4>
+                                    <small class="text-dark">Level <%=hero.level%> <%=hero.avatar.name%></small>
                                 <% end %>
                             </td>
                             <td>
-                                <h4 class="text-dark mb-3"><em>Level <%=hero.level%> <%=hero.avatar.name%></em></h4>
+                                <div class="row d-flex mb-3">
+                                    <div class="col">
+                                        <h4 class="text-warning"><%=hero.pvp_points%> Points</h4>
+                                    </div>
+                                    <div class="col">
+                                        <h4 class="text-danger">WR: <%=GH.pvp_win_rate(hero)%>%</h4>
+                                    </div>
+                                </div>
                                 <%=GH.hero_stats(hero, true)%>
                             </td>
                             <td>

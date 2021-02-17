@@ -216,14 +216,14 @@ defmodule Moba.Game.Builds do
     |> Repo.all()
   end
 
-  defp extra_gold(level, _) when level >= 25, do: 999_999
+  defp extra_gold(level, "strong") when level >= 25, do: 999_999
 
   defp extra_gold(level, difficulty) do
     base =
       case difficulty do
-        "weak" -> 600
-        "moderate" -> 1200
-        "strong" -> 2400
+        "weak" -> 1200
+        "moderate" -> 2400
+        "strong" -> 4800
       end
 
     base + Game.league_tier_for(level) * Moba.league_win_gold_bonus()

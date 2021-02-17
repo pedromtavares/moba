@@ -437,6 +437,7 @@ b, strong {
   .skills-container{
     width: 70%;
     float:left;
+    max-height: 90px;
 
     @media (max-width: 999.98px) {
       width: 60%;

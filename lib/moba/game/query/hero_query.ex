@@ -191,6 +191,13 @@ defmodule Moba.Game.Query.HeroQuery do
       order_by: [asc: hero.pve_ranking]
   end
 
+  def by_total_farm(query, min, max) do
+    from hero in query,
+      where: hero.total_farm >= ^min,
+      where: hero.total_farm <= ^max,
+      order_by: [desc: hero.total_farm]
+  end
+
   def limit_by(query, limit, offset \\ 0) do
     from hero in query,
       limit: ^limit,
@@ -223,7 +230,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def pve_ranked(query \\ Hero) do
-    from hero in non_bots(),
+    from hero in non_bots(query),
       where: not is_nil(hero.pve_ranking),
       order_by: [asc: hero.pve_ranking]
   end

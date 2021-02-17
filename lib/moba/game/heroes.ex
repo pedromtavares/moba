@@ -239,7 +239,7 @@ defmodule Moba.Game.Heroes do
   @doc """
   Grabs heroes with pve_rankings close to the target hero
   """
-  def pve_search(%{pve_ranking: ranking} = hero) do
+  def pve_search(%{pve_ranking: ranking}) when not is_nil(ranking) do
     {min, max} =
       if ranking <= 3 do
         {1, 5}
@@ -251,6 +251,22 @@ defmodule Moba.Game.Heroes do
     |> HeroQuery.by_pve_ranking(min, max)
     |> Repo.all()
     |> avatar_preload()
+  end
+
+  def pve_search(%{total_farm: total_farm, id: id}) do
+    by_farm = HeroQuery.non_bots()
+    |> HeroQuery.by_total_farm(total_farm-1000, total_farm+1000)
+    |> Repo.all()
+    |> avatar_preload()
+
+    hero_index = Enum.find_index(by_farm, &(&1.id == id))
+
+    by_farm
+    |> Enum.with_index()
+    |> Enum.filter(fn {_, index} ->
+      index >= hero_index-2 && index <= hero_index+2
+    end)
+    |> Enum.map(fn {elem, _} -> elem end)
   end
 
   @doc """

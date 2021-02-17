@@ -21,7 +21,7 @@
         <img src="<%=GH.image_url(@hero.avatar)%>" style="width: 80px;" class="img-border-xs"><br/>
         <h5 class="mb-0 text-center">
             <img src="/images/league_<%=@hero.league_tier%>.png" style="width: 20px;">
-            <%=@hero.name%>
+            <%= link @hero.name, to: Routes.live_path(@conn, MobaWeb.HeroLiveView, @hero), class: "text-white"%>
 
             <br/>
             <small class="text-dark font-italic"><%=if @hero.bot_difficulty, do: "BOT", else: @hero.user.email %></small>

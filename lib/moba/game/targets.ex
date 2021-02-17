@@ -53,16 +53,42 @@ defmodule Moba.Game.Targets do
     end)
   end
 
-  defp level_range(hero, difficulty) do
+  defp level_range(%{level: level}, difficulty) when level < 10 do
     case difficulty do
       "weak" ->
-        minimum_or_target_level(hero.level - 3)..minimum_or_target_level(hero.level - 2)
+        minimum_or_target_level(level - 3)..minimum_or_target_level(level - 2)
 
       "moderate" ->
-        minimum_or_target_level(hero.level - 1)..hero.level
+        minimum_or_target_level(level - 1)..level
 
       "strong" ->
-        (hero.level + 1)..(hero.level + 3)
+        level..(level + 2)
+    end
+  end
+
+  defp level_range(%{level: level}, difficulty) when level < 20 do
+    case difficulty do
+      "weak" ->
+        (level - 2)..(level - 1)
+
+      "moderate" ->
+        level..(level + 1)
+
+      "strong" ->
+        (level + 1)..(level + 3)
+    end
+  end
+
+  defp level_range(%{level: level}, difficulty) do
+    case difficulty do
+      "weak" ->
+        level..(level + 1)
+
+      "moderate" ->
+        (level + 1)..(level + 3)
+
+      "strong" ->
+        (level + 3)..(level + 6)
     end
   end
 

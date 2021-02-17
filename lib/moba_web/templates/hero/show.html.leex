@@ -80,13 +80,12 @@
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="card">
-                <% current = @hero.league_tier%>
                 <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>Performance</h5>
                 <div class="card-body p-2">
                     <div class="performance">
                         <div class="row">
                             <div class="col d-flex align-items-center">
-                                <%= for {tier, name} <- Moba.leagues() do %>
+                                <%= for {tier, _} <- Moba.leagues() do %>
                                     <img src="/images/league_<%=tier%>.png" class="<%=tier_class(tier, @hero.league_tier)%>"/>
                                     <%= unless tier == Moba.max_league_tier() do %>
                                         <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
@@ -141,7 +140,11 @@
                             <tr>
                                 <td>
                                     <h1 class="<%=if hero.id == @hero.id, do: "text-danger"%>">
+                                        <%=if hero.pve_ranking do %>
                                         #<%=hero.pve_ranking%>
+                                        <% else %>
+                                            ?
+                                        <% end %>
                                     </h1>
                                 </td>
                                 <td>
