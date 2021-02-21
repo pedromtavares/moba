@@ -82,6 +82,7 @@ defmodule Moba.Game.Heroes do
           gold: 100_000,
           pvp_active: user != nil,
           league_tier: league_tier,
+          total_farm: bot_total_farm(level, difficulty),
           pvp_last_picked: user && DateTime.utc_now()
         },
         user,
@@ -375,6 +376,19 @@ defmodule Moba.Game.Heroes do
   end
 
   defp level_to_max(hero), do: hero
+
+  defp bot_total_farm(level, difficulty) do
+    base = Moba.xp_until_hero_level(level)
+    extra =
+      case difficulty do
+        "weak" -> 1000
+        "moderate" -> 2000
+        "strong" -> 4000
+      end
+    league_bonus = Game.league_tier_for(level) * Moba.league_win_gold_bonus()
+
+    base + extra + league_bonus
+  end
 
   defp inactivate_weakest_pvp_bot do
     HeroQuery.weakest_pvp_bot()

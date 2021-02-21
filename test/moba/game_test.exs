@@ -50,7 +50,7 @@ defmodule Moba.GameTest do
 
       hero = Game.create_hero!(%{name: "Foo"}, create_user(), avatar, skills)
       hero = Game.get_hero!(hero.id)
-      targets = Game.list_targets(hero.id)
+      targets = Game.list_targets(hero)
 
       assert hero.active_build.type == "pve"
       assert length(hero.active_build.skills) == 4

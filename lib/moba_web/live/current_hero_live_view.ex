@@ -23,7 +23,7 @@ defmodule MobaWeb.CurrentHeroLiveView do
        show_shop: Enum.member?([3, 7, 8, 9], step),
        tutorial_step: step,
        origin: session["origin"],
-       current_mode: session["current_mode"]
+       current_mode: session["current_mode"] || "pve"
      )}
   end
 

@@ -13,7 +13,7 @@ defmodule MobaWeb.JungleLiveView do
       {:ok,
        assign(socket,
          current_hero: hero,
-         targets: Game.list_targets(hero.id),
+         targets: Game.list_targets(hero),
          tutorial_step: hero.user.tutorial_step,
          pending_battle: Engine.pending_battle(hero.id)
        )}

@@ -123,6 +123,11 @@ defmodule Moba.Game do
 
   def pvp_targets_available(hero), do: Heroes.pvp_targets_available(hero)
 
+  def veteran_hero?(hero) do
+    hero = Repo.preload(hero, :user)
+    hero.user && hero.user.level > 2
+  end
+
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")
     hero_id
@@ -194,7 +199,10 @@ defmodule Moba.Game do
     Targets.generate!(hero, codes)
   end
 
-  def list_targets(hero_id), do: Targets.list(hero_id)
+  def list_targets(hero) do
+    farm_sort = if veteran_hero?(hero), do: :desc, else: :asc
+    Targets.list(hero.id, farm_sort)
+  end
 
   # ITEMS
 

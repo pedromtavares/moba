@@ -75,8 +75,8 @@ defmodule Moba.Game.Builds do
   and strength depending on the difficulty and level. Weak bots have more random skills and less items, whilst
   strong bots have a proper skill build and a high tier inventory
   """
-  def generate_for_bot!(%{level: level, bot_difficulty: difficulty, avatar: avatar} = bot) do
-    lists = get_lists(avatar, level, difficulty)
+  def generate_for_bot!(bot) do
+    lists = get_lists(bot)
 
     bot =
       Enum.reduce(lists.items, bot, fn item, acc ->
@@ -112,7 +112,7 @@ defmodule Moba.Game.Builds do
 
   # --------------------------------
 
-  defp get_lists(%{code: code, ultimate_code: ultimate_code} = _avatar, level, difficulty) do
+  defp get_lists(%{level: level, bot_difficulty: difficulty, total_farm: total_farm, avatar: %{code: code, ultimate_code: ultimate_code}}) do
     {skill_list, item_list, _} =
       lists_for(code)
       |> Enum.fetch!(Enum.random(0..1))
@@ -121,7 +121,7 @@ defmodule Moba.Game.Builds do
 
     %{
       skills: skills,
-      items: items_list(item_list, difficulty, level),
+      items: items_list(item_list, difficulty, level, total_farm),
       skill_order: skill_order(skill_list, skills, ultimate_code),
       item_order: item_list |> Enum.reverse()
     }
@@ -146,8 +146,8 @@ defmodule Moba.Game.Builds do
 
   # item lists go from weak -> strong, so weak bots get this list as is and stronger bots reverse it,
   # first buying stronger items, making them much more challenging at any level
-  defp items_list(item_list, difficulty, level) do
-    gold = Moba.xp_until_hero_level(level) + extra_gold(level, difficulty)
+  defp items_list(item_list, difficulty, level, total_farm) do
+    gold = extra_gold(difficulty, level, total_farm)
 
     {result, _} =
       case difficulty do
@@ -216,18 +216,8 @@ defmodule Moba.Game.Builds do
     |> Repo.all()
   end
 
-  defp extra_gold(level, "strong") when level >= 25, do: 999_999
-
-  defp extra_gold(level, difficulty) do
-    base =
-      case difficulty do
-        "weak" -> 1200
-        "moderate" -> 2400
-        "strong" -> 4800
-      end
-
-    base + Game.league_tier_for(level) * Moba.league_win_gold_bonus()
-  end
+  defp extra_gold("strong", level, _) when level >= 25, do: 999_999
+  defp extra_gold(_, _, total_farm), do: total_farm
 
   defp skills_to_order(skills) do
     skills |> Enum.filter(&(!&1.passive)) |> Enum.map(& &1.code)

@@ -1,6 +1,6 @@
 <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
 
-<div class="user-profile content-with-hero-bar" phx-hook="SetMainWrapper">
+<div class="user-profile content-with-hero-bar" phx-hook="SetMainWrapper" id="user-profile">
     <div class="row mb-2 mt-3">
         <div class="col text-center">
             <div class="title-container">

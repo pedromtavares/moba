@@ -4,7 +4,7 @@
             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic level">Level<br/><span class="font-italic font-20"><%=@last_hero && @last_hero.level || @hero.level%></span></span>
                 <div>
-                    <img src="/images/league_<%=@snapshot && @snapshot.league_tier || @hero.league_tier%>.png" class="league-logo">
+                    <img src="/images/league_<%=@snapshot && @snapshot.league_tier || @hero.league_tier%>.png" class="league-logo mr-1">
                     <%= if @battle.type == "pvp" do %>
                         <%=@hero.name%> <em>#<%=@snapshot && @snapshot.pvp_ranking || @hero.pvp_ranking%></em>
                     <% else %>

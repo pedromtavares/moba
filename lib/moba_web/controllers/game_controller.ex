@@ -6,8 +6,15 @@ defmodule MobaWeb.GameController do
     user = conn.assigns.current_user
 
     if user do
-      path = if user.current_pvp_hero_id, do: "/arena", else: "/jungle"
-      redirect(conn, to: path)
+      if user.current_pvp_hero_id do
+        conn
+        |> put_session(:current_mode, "pvp")
+        |> redirect(to: "/arena")
+      else
+        conn
+        |> put_session(:current_mode, "pve")
+        |> redirect(to: "/jungle")
+      end
     else
       render(conn, "homepage.html", layout: {MobaWeb.LayoutView, "homepage.html"})
     end

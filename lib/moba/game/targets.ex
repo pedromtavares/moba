@@ -16,10 +16,10 @@ defmodule Moba.Game.Targets do
     |> Repo.preload(attacker: [:items, active_build: [:skills]], defender: [:items, active_build: [:skills]])
   end
 
-  def list(hero_id) do
+  def list(hero_id, farm_sort \\ :asc) do
     Repo.all(from t in Target, where: t.attacker_id == ^hero_id)
     |> Repo.preload(defender: [:avatar, :items, active_build: [skills: Game.ordered_skills_query()]])
-    |> Enum.sort_by(fn target -> target.defender.level end)
+    |> Enum.sort_by(fn target -> target.defender.total_farm end, farm_sort)
   end
 
   @doc """
@@ -28,21 +28,22 @@ defmodule Moba.Game.Targets do
   """
   def generate!(hero, unlocked_codes \\ []) do
     Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
+    limit = if Game.veteran_hero?(hero), do: 3, else: 2
 
-    weak = create(hero, "weak", unlocked_codes)
-    moderate = create(hero, "moderate", unlocked_codes, Enum.map(weak, & &1.defender.id))
-    strong = create(hero, "strong", unlocked_codes, Enum.map(weak ++ moderate, & &1.defender.id))
+    weak = create(hero, "weak", unlocked_codes, limit)
+    moderate = create(hero, "moderate", unlocked_codes, limit, Enum.map(weak, & &1.defender.id))
+    strong = create(hero, "strong", unlocked_codes, limit, Enum.map(weak ++ moderate, & &1.defender.id))
 
     Map.put(hero, :targets, weak ++ moderate ++ strong)
   end
 
   # --------------------------------
 
-  defp create(hero, difficulty, unlocked_codes, exclude \\ []) do
+  defp create(hero, difficulty, unlocked_codes, limit, exclude \\ []) do
     exclude_list = [hero.id | exclude]
     level_range = level_range(hero, difficulty)
 
-    HeroQuery.pve_targets(difficulty, level_range, exclude_list, Game.current_match().id, unlocked_codes)
+    HeroQuery.pve_targets(difficulty, level_range, exclude_list, Game.current_match().id, unlocked_codes, limit)
     |> Repo.all()
     |> Enum.map(fn defender ->
       {:ok, target} =

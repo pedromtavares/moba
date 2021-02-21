@@ -26,7 +26,7 @@ defmodule MobaWeb.JungleLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
-    target = Game.list_targets(hero.id) |> List.first()
+    target = Game.list_targets(hero) |> List.first()
 
     {:ok, view, _html} = live(conn, "/jungle")
 

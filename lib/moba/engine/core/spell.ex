@@ -344,14 +344,14 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.remove_turn_atk_by_multiplier()
   end
 
-  defp effects_for(%{resource: %Skill{code: "rearm" = code}} = turn, _options) do
+  defp effects_for(%{resource: %Skill{code: "rearm"} = resource} = turn, _options) do
     turn = Effect.reset_cooldowns(turn)
     last_skill = turn.attacker.last_skill
 
-    if last_skill && last_skill.code != code && turn.attacker.current_mp >= last_skill.mp_cost do
+    if last_skill && last_skill.code != "rearm" && turn.attacker.current_mp >= last_skill.mp_cost do
       turn = Processor.cast_skill(turn, last_skill)
 
-      %{turn | resource: turn.resource, skill: turn.resource}
+      %{turn | resource: resource, skill: resource}
       |> Effect.attacker_bonus(last_skill.name)
     else
       Effect.atk_damage(turn)
@@ -369,7 +369,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.total_mp_damage()
   end
 
-  defp effects_for(%{resource: %Skill{code: "spell_steal"}} = turn, _options) do
+  defp effects_for(%{resource: %Skill{code: "spell_steal"} = resource} = turn, _options) do
     skill = turn.defender.last_skill
 
     if skill && skill != turn.resource do
@@ -379,7 +379,7 @@ defmodule Moba.Engine.Core.Spell do
         |> Effect.add_next_power()
         |> Processor.cast_skill(skill)
 
-      %{turn | resource: turn.resource, skill: turn.resource}
+      %{turn | resource: resource, skill: resource}
       |> Effect.attacker_bonus(skill.name)
     else
       Effect.atk_damage(turn)

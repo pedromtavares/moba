@@ -34,7 +34,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(@ranking_per_page, page_to_offset(page, @ranking_per_page))
   end
 
-  def pve_targets(difficulty, level_range, exclude_list, current_match_id, codes) do
+  def pve_targets(difficulty, level_range, exclude_list, current_match_id, codes, limit) do
     Hero
     |> by_difficulty(difficulty)
     |> pvp_inactive()
@@ -42,7 +42,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> by_match(current_match_id)
     |> by_codes(codes)
     |> exclude(exclude_list)
-    |> limit_by(2)
+    |> limit_by(limit)
     |> random()
   end
 

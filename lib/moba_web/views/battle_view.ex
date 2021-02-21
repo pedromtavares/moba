@@ -364,7 +364,7 @@ defmodule MobaWeb.BattleView do
 
   def hero_mp_costs(hero) do
     Enum.reduce(hero.effects, 0, fn effect, acc ->
-      if effect["key"] == "current_mp" do
+      if effect["key"] == "current_mp" || effect["key"] == :current_mp do
         acc + effect["value"]
       else
         acc
