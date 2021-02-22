@@ -1,105 +1,162 @@
 <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
 
 <div class="user-profile content-with-hero-bar" phx-hook="SetMainWrapper" id="user-profile">
-    <div class="row mb-2 mt-3">
-        <div class="col text-center">
-            <div class="title-container">
-                <h1><%=@user.username%></h1>
+    <div class="row mt-3">
+        <div class="col-md-6 col-xl-4">
+            <div class="row">
+                <%=render("_hero.html", hero: @featured, user: @user, socket: @socket)%>
             </div>
-            <%=if @user == @current_user do %>
-                <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
-                    <i class="fa fa-edit mr-1"></i>Edit Profile
-                <% end %>
-
-                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), class: "font-13 badge badge-pill badge-light-warning py-1 px-2 text-reset" do %>
-                    <i class="fab fa-ethereum mr-1"></i>Redeem Shards (<%=@user.shard_count%>)
-                <% end %>
-            <% else %>
-                <%= if @user.is_bot do %>
-                    <small class="font-italic text-dark">A.I. Player</small>
-                <% else %>
-                    <small class="font-italic text-dark">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
-                <% end %>
-            <% end %>
-        </div>
-    </div>
-
-    <div class="row d-flex justify-content-center">
-        <div class="col-12 col-md-6 col-lg-4 col-xl-2">
-            <div class="widget-simple text-center card-box py-2 px-1">
-                <h3 class="text-danger counter mt-0"><i class="fa fa-crosshairs mr-1"></i> <%=MobaWeb.UserView.win_rate(@user)%>%</h3>
-                <p class="text-muted mb-0">Overall Win Rate</p>
-            </div>
-        </div>
-        <%= if @user.ranking do %>
-            <div class="col-12 col-md-6 col-lg-4 col-xl-2">
-                <div class="widget-simple text-center card-box py-2 px-1">
-                    <h3 class="text-primary counter mt-0"><i class="fa fa-trophy"></i> #<%=@user.ranking%></h3>
-                    <p class="text-muted mb-0">Overall Rank</p>
-                </div>
-            </div>
-        <% end %>
-        <div class="col-12 col-md-6 col-lg-4 col-xl-2">
-            <div class="widget-simple text-center card-box py-2 px-1">
-                <h3 class="text-warning counter mt-0"><i class="fa fa-medal"></i> <%=@user.medal_count%></h3>
-                <p class="text-muted mb-0">Medals</p>
-            </div>
-        </div>
-    </div>
-
-    <%= if @user == @current_user do %>
-        <div class="row">
-            <div class="col text-center text-primary font-italic">
-                Below is your Account Level. Gain Account XP by leveling heroes in the Jungle.
-            </div>
-        </div>
-    <% end %>
-
-    <%= unless @user.is_bot do %>
-        <div class="row mb-2">
-            <div class="col-8 col-xl-6 margin-auto text-center d-flex justify-content-between" title="Your Account Level. Gain Account XP by leveling heroes in the Jungle" data-toggle="tooltip">
-                <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%=@user.level%></div>
-                <div class="progress progress-fixed account-level-bar">
-                    <div style="width:<%=MobaWeb.HallView.xp_percentage(@user)%>%" class="progress-bar">
-                        <span>&nbsp;&nbsp;<%=@user.experience%>/<%=Moba.user_level_xp()%>&nbsp;&nbsp;</span>
-                    </div>
-                </div>
-                <div class="badge badge-primary bg-white text-light font-16" style="padding: 15px"><%=@user.level+1%></div>
-            </div>
-        </div>
-    <% end %>
-
-    <%=if @user != @current_user do %>
-        <div class="row mb-3 mt-3">
-            <div class="col-12 col-lg-6 col-xl-4 margin-auto text-center">
-                <div class="card-box py-2 px-1">
-                    <h3 class="page-title mb-2 text-danger"><i class="fa fa-medal mr-1"></i>Score</h3>
-                    <div class="row">
-                        <div class="col">
-                            <h4 class="text-center">
-                                <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.pvp_score["#{@user.id}"] || 0%></span>
-                                <i class="fa fa-times mx-2"></i>
-                                <span class="badge badge-pill badge-light-danger font-20"><%=@user.pvp_score["#{@current_user.id}"] || 0%></span> <%=@user.username%>
-                            </h4>
+            <div class="row">
+                <div class="col">
+                    <div class="card collection">
+                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-users mr-1"></i>Hero Collection</h5>
+                        <div class="card-body">
+                            <div class="row">
+                                <%= for hero <- @heroes do %>
+                                    <div class="col-3 mb-1">
+                                        <a href="javascript:;" class="<%=if @featured.id == hero.id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=hero.id%>" phx-hook="Loading" id="set-featured-<%=hero.id%>">
+                                            <%=GH.hero_avatar(hero, false)%>
+                                        </a>
+                                    </div>
+                                <% end %>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    <% end %>
+        <div class="col-md-6 col-xl-4">
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>Performance</h5>
+                        <div class="card-body p-2">
+                            <%= unless @user.is_bot do %>
+                                <div class="row mb-4">
+                                    <div class="col text-center d-flex justify-content-between" title="Account Level. Gain Account XP by leveling heroes in the Jungle" data-toggle="tooltip">
+                                        <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%=@user.level%></div>
+                                        <div class="progress progress-fixed account-level-bar">
+                                            <div style="width:<%=MobaWeb.HallView.xp_percentage(@user)%>%" class="progress-bar">
+                                                <span>&nbsp;&nbsp;<%=@user.experience%>/<%=Moba.user_level_xp()%>&nbsp;&nbsp;</span>
+                                            </div>
+                                        </div>
+                                        <div class="badge badge-primary bg-white text-light font-16" style="padding: 15px"><%=@user.level+1%></div>
+                                    </div>
+                                </div>
+                            <% end %>
+                            <div class="performance">
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <h3 class="mb-0 text-danger">
+                                            <i class="fa fa-crosshairs mr-1"></i>
+                                            <%=win_rate(@user)%>%
+                                        </h3>
+                                        <h4 class="text-danger">Overall Win Rate</h4>
+                                    </div>
+                                    <%=if @user.ranking do %>
+                                        <div class="col">
+                                            <h3 class="mb-0 text-info">
+                                                # <%=@user.ranking%>
+                                            </h3>
+                                            <h4 class="text-info">Overall Ranking</h4>
+                                        </div>
+                                    <% end %>
+                                    <%= if @user.medal_count > 0 do %>
+                                        <div class="col">
+                                            <h3 class="mb-0 text-warning">
+                                                <i class="fa fa-medal"></i>
+                                                <%=@user.medal_count%>
+                                            </h3>
+                                            <h4 class="text-warning">Medals</h4>
+                                        </div>
+                                    <% end %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row mt-3">
+                                <div class="col text-center">
+                                    <%=if @user == @current_user do %>
+                                        <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
+                                            <i class="fa fa-edit mr-1"></i>Edit Profile
+                                        <% end %>
 
-    <div class="row mt-3 mb-1">
-        <div class="col text-center">
-            <h3 class="page-title mb-2 text-primary"><i class="fa fa-users mr-1"></i>Recent Heroes</h3>
+                                        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), class: "font-13 badge badge-pill badge-light-warning py-1 px-2 text-reset" do %>
+                                            <i class="fab fa-ethereum mr-1"></i>Redeem Shards (<%=@user.shard_count%>)
+                                        <% end %>
+                                    <% else %>
+                                        <%= if @user.is_bot do %>
+                                            <small class="font-italic text-dark">A.I. Player</small>
+                                        <% else %>
+                                            <small class="font-italic text-dark">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
+                                        <% end %>
+                                    <% end %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <%=if @user != @current_user do %>
+                <div class="row mt-1 mb-3 text-center">
+                    <div class="col">
+                        <div class="card">
+                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-medal mr-1"></i>Score</h5>
+                            <div class="card-body">
+                                <h4 class="text-center">
+                                    <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.pvp_score["#{@user.id}"] || 0%></span>
+                                    <i class="fa fa-times mx-2"></i>
+                                    <span class="badge badge-pill badge-light-danger font-20"><%=@user.pvp_score["#{@current_user.id}"] || 0%></span> <%=@user.username%>
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <% end %>
         </div>
-    </div>
-
-    <div class="row">
-        <%= for hero <- @heroes do %>
-            <%=render("_hero.html", hero: hero, user: @user, socket: @socket)%>
-        <% end %>
-        <%=if Enum.count(@heroes) < 1 do %>
-            <div class="col"><h5 class="text-center">No previous heroes found</h5></div>
-        <% end %>
+        <div class="col-md-6 col-xl-4">
+            <div class="card ranking">
+                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i>Ranking</h5>
+                <div class="card-body p-0">
+                    <table class="table table-dark text-center m-0 table-sm">
+                        <tr>
+                            <th><%=if @user.ranking, do: "Rank", else: "Level" %></th>
+                            <th>User</th>
+                            <th>Medals</th>
+                            <th>Win Rate</th>
+                        </tr>
+                        <%= for user <- @ranking do %>
+                            <tr>
+                                <td>
+                                    <h1 class="<%=if user.id == @user.id, do: "text-info"%>">
+                                        <%=if user.ranking do %>
+                                            #<%=user.ranking%>
+                                        <% else %>
+                                            <%=user.level%>
+                                        <% end %>
+                                    </h1>
+                                </td>
+                                <td>
+                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
+                                        <h5 class="text-primary mb-0 mt-1"><%=user.username%></h5>
+                                    <% end %>
+                                </td>
+                                <td>
+                                    <h3 class="text-warning"><i class="fa fa-medals"></i> <%=user.medal_count%></h3>
+                                </td>
+                                <td>
+                                    <h3 class="text-danger"><%=win_rate(user)%>%</h3>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </table>
+                </div>
+                <div class="card-footer p-0">
+                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
+                        <i class="fa fa-table mr-1"></i>See Top Users
+                    <% end %>
+                </div>
+            </div>
+        </div>
     </div>
 </div>

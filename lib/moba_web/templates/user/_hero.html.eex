@@ -1,4 +1,4 @@
-<div class="col-xl-4 col-md-6 col-12" id="hero_<%=@hero.id%>">
+<div class="col" id="hero_<%=@hero.id%>">
     <div class="hero-card card" style="background-image: url(<%=GH.background_url(@hero.avatar)%>">
         <div class="card-header pt-0 pb-1">
             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
@@ -20,7 +20,7 @@
             <% end %>
         </div>
         <div class="card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
-            <div class="row">
+            <div class="row performance">
                 <div class="col d-flex justify-content-around">
                     <%= unless @hero.bot_difficulty do %>
                         <h2 class="text-success text-center mt-0">

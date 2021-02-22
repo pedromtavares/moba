@@ -11,4 +11,21 @@
   .hero-card{
     min-height: 500px;
   }
+
+  .featured-hero{
+    .card{
+      margin-bottom: 0;
+    }
+  }
+
+  .current-featured img{
+    border: 3px solid white !important;
+  }
+
+  .collection{
+    img{
+      max-width: 100%;
+      border: 0.2rem solid #36404a;
+    }
+  }
 }

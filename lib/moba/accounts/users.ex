@@ -170,6 +170,39 @@ defmodule Moba.Accounts.Users do
     end)
   end
 
+  @doc """
+  Grabs users with rankings close to the target user
+  """
+  def search(%{ranking: ranking}) when not is_nil(ranking) do
+    {min, max} =
+      if ranking <= 5 do
+        {1, 10}
+      else
+        {ranking - 4, ranking + 4}
+      end
+
+    UserQuery.non_bots()
+    |> UserQuery.non_guests()
+    |> UserQuery.by_ranking(min, max)
+    |> Repo.all()
+  end
+
+  def search(%{level: level, id: id}) do
+    by_level = UserQuery.non_bots()
+    |> UserQuery.non_guests()
+    |> UserQuery.by_level(level-1, level+1)
+    |> Repo.all()
+
+    user_index = Enum.find_index(by_level, &(&1.id == id))
+
+    by_level
+    |> Enum.with_index()
+    |> Enum.filter(fn {_, index} ->
+      index >= user_index-4 && index <= user_index+4
+    end)
+    |> Enum.map(fn {elem, _} -> elem end)
+  end
+
   # --------------------------------
 
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do

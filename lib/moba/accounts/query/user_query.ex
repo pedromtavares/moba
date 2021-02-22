@@ -53,6 +53,20 @@ defmodule Moba.Accounts.Query.UserQuery do
     )
   end
 
+  def by_ranking(query, min, max) do
+    from user in query,
+      where: user.ranking >= ^min,
+      where: user.ranking <= ^max,
+      order_by: [asc: user.ranking]
+  end
+
+  def by_level(query, min, max) do
+    from user in query,
+      where: user.level >= ^min,
+      where: user.level <= ^max,
+      order_by: [asc: user.level]
+  end
+
   def by_pvp_points do
     from(u in User, order_by: [desc: u.pvp_points])
   end

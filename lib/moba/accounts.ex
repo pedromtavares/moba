@@ -32,6 +32,8 @@ defmodule Moba.Accounts do
 
   def set_user_online_now(user), do: Users.set_online_now(user)
 
+  def user_search(user), do: Users.search(user)
+
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 
   def set_current_pve_hero!(user, hero_id), do: Users.set_current_pve_hero!(user, hero_id)
