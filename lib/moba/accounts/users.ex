@@ -187,20 +187,14 @@ defmodule Moba.Accounts.Users do
     |> Repo.all()
   end
 
-  def search(%{level: level, id: id}) do
+  def search(%{level: level, id: id} = user) do
     by_level = UserQuery.non_bots()
     |> UserQuery.non_guests()
-    |> UserQuery.by_level(level-1, level+1)
+    |> UserQuery.by_level(level)
+    |> UserQuery.limit_by(9)
     |> Repo.all()
 
-    user_index = Enum.find_index(by_level, &(&1.id == id))
-
-    by_level
-    |> Enum.with_index()
-    |> Enum.filter(fn {_, index} ->
-      index >= user_index-4 && index <= user_index+4
-    end)
-    |> Enum.map(fn {elem, _} -> elem end)
+    [user] ++ Enum.filter(by_level, &(&1.id != id))
   end
 
   # --------------------------------

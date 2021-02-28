@@ -16,7 +16,7 @@ defmodule MobaWeb.UserLiveView do
     featured = Enum.sort_by(heroes, &(&1.total_farm), :desc) |> List.first()
     ranking = Accounts.user_search(user)
 
-    {:noreply, assign(socket, user: user, featured: Game.get_hero!(featured.id), ranking: ranking, heroes: heroes)}
+    {:noreply, assign(socket, user: user, featured: featured && Game.get_hero!(featured.id), ranking: ranking, heroes: heroes)}
   end
 
   def handle_event("set-featured", %{"id" => id}, socket) do

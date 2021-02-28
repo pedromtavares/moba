@@ -60,11 +60,8 @@ defmodule Moba.Accounts.Query.UserQuery do
       order_by: [asc: user.ranking]
   end
 
-  def by_level(query, min, max) do
-    from user in query,
-      where: user.level >= ^min,
-      where: user.level <= ^max,
-      order_by: [asc: user.level]
+  def by_level(query, level) do
+    from user in query, where: user.level == ^level, order_by: fragment("RANDOM()")
   end
 
   def by_pvp_points do
@@ -87,5 +84,9 @@ defmodule Moba.Accounts.Query.UserQuery do
       where: not is_nil(u.current_pve_hero_id) or not is_nil(u.current_pvp_hero_id),
       order_by: [desc: u.last_online_at]
     )
+  end
+
+  def limit_by(query, limit) do
+    from u in query, limit: ^limit
   end
 end
