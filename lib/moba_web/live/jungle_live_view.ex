@@ -7,30 +7,28 @@ defmodule MobaWeb.JungleLiveView do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
     hero = Game.current_pve_hero(socket.assigns.current_user)
 
-    if hero do
-      if connected?(socket), do: Tutorial.subscribe(hero.id)
+    cond do
+      hero && hero.finished_pve ->
+        Game.update_pve_ranking!()
+        {:ok, socket |> redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
+      hero ->
+        if connected?(socket), do: Tutorial.subscribe(hero.id)
 
-      {:ok,
-       assign(socket,
-         current_hero: hero,
-         targets: Game.list_targets(hero),
-         tutorial_step: hero.user.tutorial_step,
-         pending_battle: Engine.pending_battle(hero.id)
-       )}
-    else
-      {:ok, socket |> push_redirect(to: "/game/pve")}
+        {:ok,
+         assign(socket,
+           current_hero: hero,
+           targets: Game.list_targets(hero),
+           tutorial_step: hero.user.tutorial_step,
+           pending_battle: Engine.pending_battle(hero.id)
+         )}
+      true -> {:ok, socket |> redirect(to: "/game/pve")}
     end
   end
 
   def handle_params(_params, _uri, %{assigns: %{current_hero: hero}} = socket) do
     socket = if hero.gold >= 400 && length(hero.items) > 0, do: Tutorial.next_step(socket, 6), else: socket
 
-    if hero.pve_battles_available == 0 && hero.pve_points < Moba.pve_points_limit() do
-      Game.update_pve_ranking!()
-      {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
-    else
-      {:noreply, socket}
-    end
+    {:noreply, socket}
   end
 
   def handle_event("battle", %{"id" => id}, socket) do

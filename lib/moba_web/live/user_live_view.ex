@@ -11,12 +11,19 @@ defmodule MobaWeb.UserLiveView do
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
-    user = Accounts.get_user!(id)
-    heroes = Game.latest_heroes(user.id)
-    featured = Enum.sort_by(heroes, &(&1.total_farm), :desc) |> List.first()
+    user = Accounts.get_user_with_current_heroes!(id)
+    featured = if length(user.hero_collection) > 0 do
+      hero = List.first(user.hero_collection)
+      Game.get_hero!(hero["hero_id"])
+    else
+      Game.current_hero(user)
+    end
+
+    collection_codes = Enum.map(user.hero_collection, &(&1["code"]))
+    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
     ranking = Accounts.user_search(user)
 
-    {:noreply, assign(socket, user: user, featured: featured && Game.get_hero!(featured.id), ranking: ranking, heroes: heroes)}
+    {:noreply, assign(socket, user: user, featured: featured, ranking: ranking, blank_collection: blank_collection)}
   end
 
   def handle_event("set-featured", %{"id" => id}, socket) do

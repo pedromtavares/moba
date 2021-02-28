@@ -176,8 +176,8 @@ defmodule Moba.GameTest do
     end
 
     test "#update_pve_ranking" do
-      hero1 = create_base_hero(%{total_farm: 100, pve_battles_available: 0})
-      hero2 = create_base_hero(%{total_farm: 200, pve_battles_available: 0})
+      hero1 = create_base_hero(%{total_farm: 100, pve_battles_available: 0, finished_pve: true})
+      hero2 = create_base_hero(%{total_farm: 200, pve_battles_available: 0, finished_pve: true})
 
       Game.update_pve_ranking!()
 

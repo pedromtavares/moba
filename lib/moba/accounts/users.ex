@@ -17,6 +17,8 @@ defmodule Moba.Accounts.Users do
 
   def get_with_unlocks!(id), do: get!(id) |> Repo.preload(:unlocks)
 
+  def get_with_current_heroes!(id), do: get!(id) |> Repo.preload([current_pve_hero: :avatar, current_pvp_hero: :avatar])
+
   def get_by_username!(username), do: Repo.get_by!(User, username: username)
 
   def create(attrs \\ %{}) do

@@ -28,17 +28,23 @@
                             <%=GH.pve_win_rate(@hero)%>%
                         </h2>
                     <% end %>
-                    <%=if @hero.pvp_ranking do %>
-                        <h2 class="text-warning text-center mt-0">
-                            <small><%= if @hero.id == @user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</small><br/>
-                            #<%=@hero.pvp_ranking%>
+                    <%=if @hero.pvp_ranking || @hero.pve_ranking do %>
+                        <h2 class="text-info text-center mt-0">
+                            <%= if @hero.id == @user.current_pvp_hero_id do %>
+                                <small>Arena Rank</small><br/>
+                                #<%=@hero.pvp_ranking || "?"%>
+                            <% else %>
+                                <small>Jungle Rank</small><br/>
+                                #<%=@hero.pve_ranking%>
+                            <% end %>
+
                         </h2>
                     <% end %>
                     <%= if GH.pvp_win_rate(@hero) > 0 do %>
-                    <h2 class="text-danger text-center mt-0">
-                        <small>Arena Win Rate</small><br/>
-                        <%=GH.pvp_win_rate(@hero)%>%
-                    </h2>
+                        <h2 class="text-danger text-center mt-0">
+                            <small>Arena Win Rate</small><br/>
+                            <%=GH.pvp_win_rate(@hero)%>%
+                        </h2>
                     <% end %>
                 </div>
             </div>

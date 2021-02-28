@@ -30,6 +30,7 @@ defmodule Moba.Accounts.Schema.User do
     field :pvp_score, :map, default: %{}
     field :medal_count, :integer, default: 0
     field :shard_count, :integer, default: 0
+    field :hero_collection, {:array, :map}
 
     has_many :heroes, Moba.Game.Schema.Hero
     has_many :unlocks, Moba.Accounts.Schema.Unlock
@@ -87,7 +88,8 @@ defmodule Moba.Accounts.Schema.User do
       :pvp_losses,
       :pvp_score,
       :shard_count,
-      :medal_count
+      :medal_count,
+      :hero_collection
     ])
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)

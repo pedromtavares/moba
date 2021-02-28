@@ -41,6 +41,7 @@ defmodule Moba.Game.Schema.Hero do
     field :total_farm, :integer, default: 0
     field :best_pve_streak, :integer, default: 0
     field :pve_ranking, :integer
+    field :finished_pve, :boolean, default: false
 
     # PVP (Arena) related fields
     field :pvp_points, :integer
@@ -110,6 +111,7 @@ defmodule Moba.Game.Schema.Hero do
       :total_farm,
       :best_pve_streak,
       :pve_ranking,
+      :finished_pve,
       :item_hp,
       :item_mp,
       :item_atk,

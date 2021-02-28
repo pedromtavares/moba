@@ -321,6 +321,22 @@ defmodule Moba.Game.Heroes do
     |> Repo.aggregate(:count)
   end
 
+  def collection_for(user_id) do
+    HeroQuery.finished_pve()
+    |> HeroQuery.by_user(user_id)
+    |> Repo.all()
+    |> Repo.preload(:avatar)
+    |> Enum.group_by(&(&1.avatar.code))
+    |> Enum.map(fn {code, heroes} ->
+      {
+        code,
+        Enum.sort_by(heroes, &{&1.league_tier, &1.total_farm}, :desc) |> List.first()
+      }
+    end)
+    |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_farm} end, :desc)
+    |> Enum.map(fn {code, hero} -> %{code: code, hero_id: hero.id, tier: hero.league_tier, avatar: hero.avatar} end)
+  end
+
   # --------------------------------
 
   defp add_experience(hero, experience)

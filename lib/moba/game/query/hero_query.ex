@@ -215,11 +215,8 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def finished_pve(query \\ Hero) do
-    points_limit = Moba.pve_points_limit()
-
     from hero in query,
-      where: hero.pve_battles_available == 0,
-      where: hero.pve_points < ^points_limit,
+      where: hero.finished_pve == true,
       order_by: [desc: hero.total_farm]
   end
 

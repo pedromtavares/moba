@@ -21,6 +21,7 @@ defmodule Moba.Engine.Core.League do
     battle
     |> manage_step()
     |> finalize_attacker()
+    |> maybe_finish_pve()
     |> Engine.generate_attacker_snapshot!()
   end
 
@@ -92,6 +93,12 @@ defmodule Moba.Engine.Core.League do
     if winner && attacker.id == winner.id && attacker.league_step > 0 do
       Engine.create_league_battle!(attacker)
     end
+
+    {battle, attacker}
+  end
+
+  defp maybe_finish_pve({battle, attacker}) do
+    attacker = Game.maybe_finish_pve(attacker)
 
     {battle, attacker}
   end

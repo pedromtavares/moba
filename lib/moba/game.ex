@@ -128,6 +128,22 @@ defmodule Moba.Game do
     hero.user && hero.user.level > 2
   end
 
+  def maybe_finish_pve(hero) do
+    if hero.pve_battles_available == 0 && hero.pve_points < Moba.pve_points_limit() do
+      finish_pve!(hero)
+    else
+      hero
+    end
+  end
+
+  def finish_pve!(hero) do
+    updated = update_hero!(hero, %{finished_pve: true})
+    updated = Repo.preload(updated, :user)
+    collection = Heroes.collection_for(updated.user_id)
+    Accounts.update_hero_collection!(updated.user, collection)
+    updated
+  end
+
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")
     hero_id

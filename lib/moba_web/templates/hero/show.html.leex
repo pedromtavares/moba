@@ -44,6 +44,8 @@
                 <% end %>
             </div>
         </div>
+    <% else %>
+        <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
     <% end %>
 
     <div class="row mt-3">
@@ -100,11 +102,11 @@
                         <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%=Moba.leagues[@hero.league_tier]%></h3>
                         <div class="row text-center">
                             <div class="col">
-                                <h3 class="mb-0 text-danger">
+                                <h3 class="mb-0 text-primary">
                                     <i class="fa fa-cubes"></i>
                                     <%=if @hero.best_pve_streak == 0, do: "?", else: @hero.best_pve_streak%>
                                 </h3>
-                                <h4 class="text-danger">Best Streak</h4>
+                                <h4 class="text-primary">Best Streak</h4>
                             </div>
                             <div class="col">
                                 <h3 class="mb-0 text-warning">
@@ -121,6 +123,24 @@
                                 <h4 class="text-success">Win Rate</h4>
                             </div>
                         </div>
+                        <%= if @hero.pvp_ranking do %>
+                            <h3 class="text-center mt-4 mb-2 text-danger">Arena</h3>
+                            <div class="row text-center">
+                                <div class="col">
+                                    <h3 class="mb-0 text-danger">
+                                        #<%=@hero.pvp_ranking%>
+                                    </h3>
+                                    <h4 class="text-danger"><%= if @hero.id == @hero.user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</h4>
+                                </div>
+                                <div class="col">
+                                    <h3 class="mb-0 text-danger">
+                                        <i class="fa fa-crosshairs"></i>
+                                        <%=GH.pvp_win_rate(@hero)%>%
+                                    </h3>
+                                    <h4 class="text-danger">Win Rate</h4>
+                                </div>
+                            </div>
+                        <% end %>
                     </div>
                 </div>
             </div>

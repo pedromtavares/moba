@@ -11,12 +11,45 @@
                     <div class="card collection">
                         <h5 class="card-header text-center font-17 text-white"><i class="fa fa-users mr-1"></i>Hero Collection</h5>
                         <div class="card-body">
-                            <div class="row">
-                                <%= for hero <- @heroes do %>
-                                    <div class="col-3 mb-1">
-                                        <a href="javascript:;" class="<%=if @featured.id == hero.id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=hero.id%>" phx-hook="Loading" id="set-featured-<%=hero.id%>">
-                                            <%=GH.hero_avatar(hero, false)%>
+                            <div class="row d-flex justify-content-center">
+                                <%=if @user.current_pve_hero do %>
+                                    <div class="col-3 mb-2 text-center">
+                                        <a href="javascript:;" class="<%=if @featured.id == @user.current_pve_hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=@user.current_pve_hero_id%>" phx-hook="Loading" id="set-featured-<%=@user.current_pve_hero_id%>">
+                                            <div class='avatar-container'>
+                                                <img src="<%=GH.image_url(@user.current_pve_hero.avatar)%>" class="avatar"/>
+                                                <span class="badge badge-pill badge-light-success"><i class="fa fa-leaf mr-1"></i>Current Jungle</span>
+                                            </div>
                                         </a>
+                                    </div>
+                                <% end %>
+                                <%=if @user.current_pvp_hero do %>
+                                    <div class="col-3 mb-2 text-center">
+                                        <a href="javascript:;" class="<%=if @featured.id == @user.current_pvp_hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=@user.current_pvp_hero_id%>" phx-hook="Loading" id="set-featured-<%=@user.current_pvp_hero_id%>">
+                                            <div class='avatar-container'>
+                                                <img src="<%=GH.image_url(@user.current_pvp_hero.avatar)%>" class="avatar"/>
+                                                <span class="badge badge-pill badge-light-danger"><i class="fa fa-crosshairs mr-1"></i>Current Arena</span>
+                                            </div>
+                                        </a>
+                                    </div>
+                                <% end %>
+                            </div>
+                            <div class="row">
+                                <%= for hero <- @user.hero_collection do %>
+                                    <div class="col-3 mb-2 text-center">
+                                        <a href="javascript:;" class="<%=if @featured.id == hero["hero_id"], do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=hero["hero_id"]%>" phx-hook="Loading" id="set-featured-<%=hero["hero_id"]%>">
+                                            <div class='avatar-container'>
+                                                <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
+                                                <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
+                                            </div>
+
+                                        </a>
+                                    </div>
+                                <% end %>
+                                <%= for avatar <- @blank_collection do %>
+                                    <div class="col-3 mb-2 text-center">
+                                        <div class='avatar-container'>
+                                            <img src="<%=GH.image_url(avatar)%>" class="avatar blank-avatar"/>
+                                        </div>
                                     </div>
                                 <% end %>
                             </div>
@@ -75,11 +108,12 @@
                         </div>
                         <div class="card-footer">
                             <div class="row mt-3">
-                                <div class="col text-center">
-                                    <%=if @user == @current_user do %>
+                                <div class="col text-center d-flex justify-content-between">
+                                    <%=if @user.id == @current_user.id do %>
                                         <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
                                             <i class="fa fa-edit mr-1"></i>Edit Profile
                                         <% end %>
+                                        <small class="font-italic text-dark float-left mt-1">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
 
                                         <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), class: "font-13 badge badge-pill badge-light-warning py-1 px-2 text-reset" do %>
                                             <i class="fab fa-ethereum mr-1"></i>Redeem Shards (<%=@user.shard_count%>)
@@ -88,7 +122,8 @@
                                         <%= if @user.is_bot do %>
                                             <small class="font-italic text-dark">A.I. Player</small>
                                         <% else %>
-                                            <small class="font-italic text-dark">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
+                                            <small class="font-italic text-dark float-left">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
+                                            <small class="font-italic text-dark float-right">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
                                         <% end %>
                                     <% end %>
                                 </div>

@@ -25,7 +25,7 @@
         <div class="wrapper <%=wrapper_for(@conn)%>" id="main-wrapper">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-12 col-xl-10 margin-auto">
+                    <div class="col-12 col-xl-11 margin-auto">
                         <%= @inner_content %>
                     </div>
                     <%=unless is_nil(@current_user) || @current_user.is_guest, do: live_render(@conn, MobaWeb.ChatLiveView, session: %{"user_id" => @current_user.id})%>

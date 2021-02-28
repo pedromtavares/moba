@@ -2,7 +2,7 @@
     <%=if @unread_count > 0 do %>
         <span class="unread-count badge badge-pill badge-danger"><%=@unread_count%></span>
     <% end %>
-    <button class="btn btn-secondary d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Show Chat</button>
+    <button class="btn btn-outline-secondary text-white d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Chat</button>
 </div>
 
 <div class="right-bar" id="chat" phx-window-keydown="close-chat">

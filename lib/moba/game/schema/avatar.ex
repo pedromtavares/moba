@@ -14,6 +14,8 @@ defmodule Moba.Game.Schema.Avatar do
   import Ecto.Changeset
   alias Moba.Game
 
+  @derive {Jason.Encoder, except: [:__meta__, :match, :ultimate]}
+
   schema "avatars" do
     field :image, Moba.Image.Type
     field :background, Moba.Background.Type

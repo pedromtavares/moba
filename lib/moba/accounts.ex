@@ -18,6 +18,8 @@ defmodule Moba.Accounts do
 
   def get_user_with_unlocks!(id), do: Users.get_with_unlocks!(id)
 
+  def get_user_with_current_heroes!(id), do: Users.get_with_current_heroes!(id)
+
   def create_user(attrs), do: Users.create(attrs)
 
   def update_user!(user, attrs), do: Users.update!(user, attrs)
@@ -62,6 +64,10 @@ defmodule Moba.Accounts do
   def ranking(limit \\ 20), do: Users.ranking(limit)
 
   def update_ranking!, do: Users.update_ranking!()
+
+  def update_hero_collection!(user, collection) do
+    update_user!(user, %{hero_collection: collection})
+  end
 
   # MESSAGES
 
