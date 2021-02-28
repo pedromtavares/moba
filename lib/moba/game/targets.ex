@@ -67,7 +67,7 @@ defmodule Moba.Game.Targets do
     end
   end
 
-  defp level_range(%{level: level}, difficulty) when level < 20 do
+  defp level_range(%{level: level}, difficulty) when level < 25 do
     case difficulty do
       "weak" ->
         (level - 2)..(level - 1)
