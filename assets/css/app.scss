@@ -182,10 +182,6 @@ body{
   justify-content: center;
 }
 
-.hero-card .card-header{
-  background-color: rgba(54, 64, 74, 0.8);
-}
-
 .card-box{
   background-color: rgba(54, 64, 74, 0.8);
 }
@@ -430,6 +426,10 @@ b, strong {
   background-position: center;
   min-height: 400px;
 
+  .card-header{
+    background-color: rgba(54, 64, 74, 0.8);
+  }
+
   .league-logo{
     margin-top: -4px;
   }
@@ -473,7 +473,7 @@ b, strong {
     }
   }
   .item-container{
-    max-height: 50%;
+    max-height: 43px;
   }
   .item-img{
     width: 100%;

@@ -22,7 +22,7 @@
         <%= for avatar <- @avatars do %>
             <div class="col-12 col-md-6 col-lg-4 col-xl-3 text-center mb-3 select-avatar">
                 <div class="card-box">
-                    <img src="<%=GH.image_url(avatar)%>" class="avatar img-border" style="width: 150px;max-width: unset;"/>
+                    <img src="<%=GH.image_url(avatar)%>" class="avatar img-border" style="width: 150px;max-width: unset;"  data-toggle="tooltip" title="<img src='<%=GH.background_url(avatar)%>' style='max-width:500px'/>"/>
 
                     <br/>
                     <div>

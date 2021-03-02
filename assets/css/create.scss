@@ -26,6 +26,29 @@
   .build-box{
     margin: 0.5rem;
   }
+
+  .hero-card{
+    .card-body{
+      background-color: initial !important;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+      min-height: 400px;
+
+      .name{
+        background-color: rgba(54, 64, 74, 0.8);
+      }
+      .ultimate{
+        background-color: rgba(54, 64, 74, 0.8);
+        float: right;
+        padding: 0px 20px;
+        border-bottom-left-radius: 10px;
+      }
+    }
+    .description{
+      min-height: 50px
+    }
+  }
 }
 
 #create-bar{

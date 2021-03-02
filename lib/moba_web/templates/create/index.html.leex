@@ -8,7 +8,7 @@
 
     <div class="row text-center">
         <%= for avatar <- Enum.uniq(@avatars) |> Enum.sort_by(fn avatar -> avatar.role end) do %>
-            <%=render "_avatar.html", avatar: avatar, avatars: @avatars%>
+            <%=render "_background_avatar.html", avatar: avatar, avatars: @avatars%>
         <% end %>
     </div>
 

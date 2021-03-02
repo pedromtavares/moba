@@ -6,7 +6,7 @@
         <div class="wrapper" id="main-wrapper">
             <div class="container-fluid clean-container">
                 <div class="row">
-                    <div class="col">
+                    <div class="col col-xl-11 margin-auto">
                         <%= @inner_content %>
                     </div>
                 </div>
