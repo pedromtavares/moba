@@ -3,39 +3,44 @@ defmodule MobaWeb.CreateLiveView do
 
   def mount(_params, %{"token" => token, "cache_key" => cache_key}, socket) do
     cached = get_cache(cache_key)
+    avatars = Game.list_creation_avatars()
 
     {:ok,
      assign(socket,
        skills: Game.list_creation_skills(1),
-       avatars: Game.list_creation_avatars(),
+       avatars: avatars,
+       all_avatars: avatars,
        custom: false,
        selected_avatar: cached.selected_avatar,
        selected_skills: cached.selected_skills,
        selected_build_index: cached.selected_build_index,
        current_user: nil,
        cache_key: cache_key,
-       token: token
+       token: token,
+       filter: nil
      )}
   end
 
   def mount(_params, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
     user = socket.assigns.current_user
-
     cond do
       Game.can_create_new_hero?(user) ->
         unlocked_codes = Accounts.unlocked_codes_for(user)
         cached = get_cache(user.id)
+        avatars = Game.list_creation_avatars(unlocked_codes)
 
         {:ok,
          assign(socket,
            skills: Game.list_creation_skills(1, unlocked_codes),
-           avatars: Game.list_creation_avatars(unlocked_codes),
+           avatars: avatars,
+           all_avatars: avatars,
            selected_avatar: cached.selected_avatar,
            selected_skills: cached.selected_skills,
            selected_build_index: cached.selected_build_index,
            custom: false,
-           cache_key: user.id
+           cache_key: user.id,
+           filter: nil
          )}
 
       user.current_pvp_hero_id ->
@@ -49,6 +54,23 @@ defmodule MobaWeb.CreateLiveView do
          |> put_flash(:info, "The new match is not ready yet, please wait a few minutes and try again")
          |> push_redirect(to: "/match")}
     end
+  end
+
+  def handle_event("filter", %{"role" => role}, %{assigns: %{all_avatars: all_avatars, filter: filter}} = socket) do
+
+    filter = if filter == role do
+      nil
+    else
+      role
+    end
+
+    avatars = if filter do
+      Enum.filter(all_avatars, &(&1.role == role))
+    else
+      all_avatars
+    end
+
+    {:noreply, assign(socket, filter: filter, avatars: avatars)}
   end
 
   def handle_event("pick-avatar", %{"id" => id}, %{assigns: %{cache_key: cache_key}} = socket) do

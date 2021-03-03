@@ -1,14 +1,17 @@
 <div id="create-new">
     <div class="row mt-2 mb-2">
         <div class="col text-center">
-            <h1>Pick your Hero</h1>
-            <a class="btn btn-outline-dark text-white m-1" phx-click="randomize" phx-hook="AnimateScroll" phx-target-element="#hero-builder" id="randomize-button"><i class="fa fa-dice"></i> Randomize</a>
+            <h1>Pick your Hero<br/><small><em>You can filter by Role below</em></h1>
+            <%= for role <- roles() do %>
+                <a href="#" class="btn btn-outline-dark text-white m-1 <%=if @filter == role, do: "active"%>" phx-click="filter" phx-value-role="<%=role%>"><img src="/images/<%=role%>_icon.png" style="width: 30px" class="text-center mr-1"/><%=String.capitalize(role)%></a>
+            <% end %>
+            <a class="btn btn-outline-dark text-white m-1" phx-click="randomize" phx-hook="AnimateScroll" phx-target-element="#hero-builder" id="randomize-button"><i class="fa fa-dice mr-2" style="font-size: 1.3rem"></i>Randomize</a>
         </div>
     </div>
 
     <div class="row text-center">
-        <%= for avatar <- Enum.uniq(@avatars) |> Enum.sort_by(fn avatar -> avatar.role end) do %>
-            <%=render "_background_avatar.html", avatar: avatar, avatars: @avatars%>
+        <%= for avatar <- Enum.uniq(@avatars) |> Enum.sort_by(fn avatar -> avatar.name end) do %>
+            <%=render "_background_avatar.html", avatar: avatar, avatars: @all_avatars, filter: @filter%>
         <% end %>
     </div>
 

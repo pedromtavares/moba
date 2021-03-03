@@ -1,6 +1,8 @@
 defmodule MobaWeb.CreateView do
   use MobaWeb, :view
 
+  def roles, do: ["tank", "bruiser", "nuker", "carry", "support"]
+
   def selected_skills(skills) do
     skills
     |> Enum.map(fn skill -> skill.name end)
