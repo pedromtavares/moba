@@ -12,14 +12,16 @@ defmodule MobaWeb.UserLiveView do
 
   def handle_params(%{"id" => id}, _uri, socket) do
     user = Accounts.get_user_with_current_heroes!(id)
-    featured = if length(user.hero_collection) > 0 do
-      hero = List.first(user.hero_collection)
-      Game.get_hero!(hero["hero_id"])
-    else
-      Game.current_hero(user)
-    end
 
-    collection_codes = Enum.map(user.hero_collection, &(&1["code"]))
+    featured =
+      if length(user.hero_collection) > 0 do
+        hero = List.first(user.hero_collection)
+        Game.get_hero!(hero["hero_id"])
+      else
+        Game.current_hero(user)
+      end
+
+    collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
     ranking = Accounts.user_search(user)
 

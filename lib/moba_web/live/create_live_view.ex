@@ -24,6 +24,7 @@ defmodule MobaWeb.CreateLiveView do
   def mount(_params, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
     user = socket.assigns.current_user
+
     cond do
       Game.can_create_new_hero?(user) ->
         unlocked_codes = Accounts.unlocked_codes_for(user)
@@ -57,18 +58,19 @@ defmodule MobaWeb.CreateLiveView do
   end
 
   def handle_event("filter", %{"role" => role}, %{assigns: %{all_avatars: all_avatars, filter: filter}} = socket) do
+    filter =
+      if filter == role do
+        nil
+      else
+        role
+      end
 
-    filter = if filter == role do
-      nil
-    else
-      role
-    end
-
-    avatars = if filter do
-      Enum.filter(all_avatars, &(&1.role == role))
-    else
-      all_avatars
-    end
+    avatars =
+      if filter do
+        Enum.filter(all_avatars, &(&1.role == role))
+      else
+        all_avatars
+      end
 
     {:noreply, assign(socket, filter: filter, avatars: avatars)}
   end

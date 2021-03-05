@@ -11,6 +11,7 @@ defmodule MobaWeb.JungleLiveView do
       hero && hero.finished_pve ->
         Game.update_pve_ranking!()
         {:ok, socket |> redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
+
       hero ->
         if connected?(socket), do: Tutorial.subscribe(hero.id)
 
@@ -21,7 +22,9 @@ defmodule MobaWeb.JungleLiveView do
            tutorial_step: hero.user.tutorial_step,
            pending_battle: Engine.pending_battle(hero.id)
          )}
-      true -> {:ok, socket |> redirect(to: "/game/pve")}
+
+      true ->
+        {:ok, socket |> redirect(to: "/game/pve")}
     end
   end
 

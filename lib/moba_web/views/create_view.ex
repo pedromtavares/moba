@@ -1,8 +1,6 @@
 defmodule MobaWeb.CreateView do
   use MobaWeb, :view
 
-  def roles, do: ["tank", "bruiser", "nuker", "carry", "support"]
-
   def selected_skills(skills) do
     skills
     |> Enum.map(fn skill -> skill.name end)
@@ -17,6 +15,8 @@ defmodule MobaWeb.CreateView do
   def passive_skills(skills) do
     Enum.filter(skills, fn skill -> skill.passive end)
   end
+
+  def roles, do: ["tank", "bruiser", "nuker", "carry", "support"]
 
   def role(%{role: role}) when not is_nil(role), do: String.capitalize(role)
   def role(_), do: ""

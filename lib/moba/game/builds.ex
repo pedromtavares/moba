@@ -112,7 +112,12 @@ defmodule Moba.Game.Builds do
 
   # --------------------------------
 
-  defp get_lists(%{level: level, bot_difficulty: difficulty, total_farm: total_farm, avatar: %{code: code, ultimate_code: ultimate_code}}) do
+  defp get_lists(%{
+         level: level,
+         bot_difficulty: difficulty,
+         total_farm: total_farm,
+         avatar: %{code: code, ultimate_code: ultimate_code}
+       }) do
     {skill_list, item_list, _} =
       lists_for(code)
       |> Enum.fetch!(Enum.random(0..1))

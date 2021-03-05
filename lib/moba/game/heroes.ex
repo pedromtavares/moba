@@ -255,17 +255,18 @@ defmodule Moba.Game.Heroes do
   end
 
   def pve_search(%{total_farm: total_farm, id: id}) do
-    by_farm = HeroQuery.non_bots()
-    |> HeroQuery.by_total_farm(total_farm-1000, total_farm+1000)
-    |> Repo.all()
-    |> avatar_preload()
+    by_farm =
+      HeroQuery.non_bots()
+      |> HeroQuery.by_total_farm(total_farm - 1000, total_farm + 1000)
+      |> Repo.all()
+      |> avatar_preload()
 
     hero_index = Enum.find_index(by_farm, &(&1.id == id))
 
     by_farm
     |> Enum.with_index()
     |> Enum.filter(fn {_, index} ->
-      index >= hero_index-2 && index <= hero_index+2
+      index >= hero_index - 2 && index <= hero_index + 2
     end)
     |> Enum.map(fn {elem, _} -> elem end)
   end
@@ -326,7 +327,7 @@ defmodule Moba.Game.Heroes do
     |> HeroQuery.by_user(user_id)
     |> Repo.all()
     |> Repo.preload(:avatar)
-    |> Enum.group_by(&(&1.avatar.code))
+    |> Enum.group_by(& &1.avatar.code)
     |> Enum.map(fn {code, heroes} ->
       {
         code,
@@ -395,12 +396,14 @@ defmodule Moba.Game.Heroes do
 
   defp bot_total_farm(level, difficulty) do
     base = Moba.xp_until_hero_level(level)
+
     extra =
       case difficulty do
         "weak" -> 1000
         "moderate" -> 2000
         "strong" -> 4000
       end
+
     league_bonus = Game.league_tier_for(level) * Moba.league_win_gold_bonus()
 
     base + extra + league_bonus

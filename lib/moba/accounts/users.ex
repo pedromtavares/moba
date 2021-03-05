@@ -17,7 +17,7 @@ defmodule Moba.Accounts.Users do
 
   def get_with_unlocks!(id), do: get!(id) |> Repo.preload(:unlocks)
 
-  def get_with_current_heroes!(id), do: get!(id) |> Repo.preload([current_pve_hero: :avatar, current_pvp_hero: :avatar])
+  def get_with_current_heroes!(id), do: get!(id) |> Repo.preload(current_pve_hero: :avatar, current_pvp_hero: :avatar)
 
   def get_by_username!(username), do: Repo.get_by!(User, username: username)
 
@@ -190,11 +190,12 @@ defmodule Moba.Accounts.Users do
   end
 
   def search(%{level: level, id: id} = user) do
-    by_level = UserQuery.non_bots()
-    |> UserQuery.non_guests()
-    |> UserQuery.by_level(level)
-    |> UserQuery.limit_by(9)
-    |> Repo.all()
+    by_level =
+      UserQuery.non_bots()
+      |> UserQuery.non_guests()
+      |> UserQuery.by_level(level)
+      |> UserQuery.limit_by(9)
+      |> Repo.all()
 
     [user] ++ Enum.filter(by_level, &(&1.id != id))
   end
