@@ -1,4 +1,5 @@
 import Shepherd from 'shepherd.js';
+import mobileCheck from "./mobile_check";
 
 const Tutorial = {
   start: function (hookInstance, step) {
@@ -9,7 +10,9 @@ const Tutorial = {
     tour = this.tourSteps(tour, step, hookInstance)
 
     setTimeout(function () {
-      tour.start();
+      if (!mobileCheck()){
+        tour.start();
+      }
     }, 1000)
   },
   complete: function (hookInstance) {
