@@ -1853,10 +1853,6 @@ Responsive Menu
   -webkit-box-shadow: 0 0 15px 0 rgba(40, 48, 55, 0.6);
           box-shadow: 0 0 15px 0 rgba(40, 48, 55, 0.6); }
 
-.jstree-default .jstree-node,
-.jstree-default .jstree-icon {
-  background-image: url("/images/plugins/jstree.png"); }
-
 .jstree-default .jstree-node {
   background-position: -292px -4px;
   background-repeat: repeat-y; }
@@ -1869,9 +1865,6 @@ Responsive Menu
 .jstree-default .jstree-anchor {
   line-height: 28px;
   height: 28px; }
-
-.jstree-default > .jstree-container-ul .jstree-loading > .jstree-ocl {
-  background: url("/images/plugins/loading.gif") center center no-repeat; }
 
 .jstree-default .jstree-icon:empty {
   width: 24px;
@@ -2036,41 +2029,6 @@ Responsive Menu
 
 .bootstrap-select .inner {
   overflow-y: inherit !important; }
-
-.ms-container {
-  background: transparent url("/images/plugins/multiple-arrow.png") no-repeat 50% 50%;
-  width: auto;
-  max-width: 370px; }
-  .ms-container .ms-list {
-    -webkit-box-shadow: none;
-            box-shadow: none;
-    border: 1px solid #495561; }
-    .ms-container .ms-list.ms-focus {
-      -webkit-box-shadow: none;
-              box-shadow: none;
-      border: 1px solid #546270; }
-  .ms-container .ms-selectable {
-    color: #a8b5c3;
-    background-color: #414d59;
-    border: 1px solid #495561; }
-    .ms-container .ms-selectable li.ms-elem-selectable {
-      border: none;
-      padding: 5px 10px;
-      color: #ced4da; }
-    .ms-container .ms-selectable li.ms-hover {
-      background-color: #3bafda;
-      color: #fff; }
-  .ms-container .ms-selection {
-    color: #a8b5c3;
-    background-color: #414d59;
-    border: 1px solid #495561; }
-    .ms-container .ms-selection li.ms-elem-selection {
-      border: none;
-      padding: 5px 10px;
-      color: #ced4da; }
-    .ms-container .ms-selection li.ms-hover {
-      background-color: #3bafda;
-      color: #fff; }
 
 .search-input {
   margin-bottom: 10px; }
@@ -2305,13 +2263,6 @@ Responsive Menu
 .parsley-success {
   border-color: #1abc9c; }
 
-@font-face {
-  font-family: "summernote";
-  font-style: normal;
-  font-weight: normal;
-  src: url("/fonts/summernote.eot");
-  src: url("/fonts/summernote.eot?#iefix") format("embedded-opentype"), url("/fonts/summernote.woff?") format("woff"), url("/fonts/summernote.ttf?") format("truetype"); }
-
 .note-editor.note-frame {
   border: 1px solid #495561;
   -webkit-box-shadow: none;
@@ -2404,12 +2355,6 @@ Responsive Menu
   border: 2px dashed #495561;
   background: #3b4651;
   border-radius: 6px; }
-
-.editable-clear-x {
-  background: url("/images/plugins/clear.png") center center no-repeat; }
-
-.editableform-loading {
-  background: url("/images/plugins/loading.gif") center center no-repeat; }
 
 .editable-checklist label {
   display: block; }
@@ -2649,52 +2594,6 @@ div.dt-button-info {
     left: auto;
     right: 0; }
 
-@font-face {
-  font-family: 'footable';
-  src: url("/fonts/footable.eot");
-  src: url("/fonts/footable.eot?#iefix") format("embedded-opentype"), url("/fonts/footable.woff") format("woff"), url("/fonts/footable.ttf") format("truetype"), url("/fonts/footable.svg#footable") format("svg");
-  font-weight: normal;
-  font-style: normal; }
-
-@media screen and (-webkit-min-device-pixel-ratio: 0) {
-  @font-face {
-    font-family: 'footable';
-    src: url("/fonts/footable.svg#footable") format("svg");
-    font-weight: normal;
-    font-style: normal; } }
-
-.footable-odd {
-  background-color: #3a4550; }
-
-.footable-row-detail,
-.footable-detail-show {
-  background-color: #3c4853; }
-
-.footable-pagination li {
-  margin-left: 5px;
-  float: left; }
-  .footable-pagination li a {
-    position: relative;
-    display: block;
-    padding: .5rem .75rem;
-    margin-left: -1px;
-    line-height: 1.25;
-    color: #8a929a;
-    background-color: #495561;
-    border: 1px solid #546270;
-    border-radius: 2px; }
-
-.footable-pagination li.active a {
-  color: #fff;
-  background-color: #3bafda;
-  border-color: #3bafda; }
-
-.footable > thead > tr > th > span.footable-sort-indicator {
-  float: right; }
-
-.footable-toggle {
-  color: #8a929a !important;
-  margin-right: 5px; }
 
 .flotTip {
   padding: 8px 12px;
