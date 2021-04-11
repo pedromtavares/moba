@@ -12,7 +12,12 @@ defmodule Moba.EngineTest do
 
     alternate_hero = create_base_hero(attrs, create_user(attrs), strong_avatar())
 
-    %{weak_hero: weak_hero, strong_hero: strong_hero, base_hero: base_hero, alternate_hero: alternate_hero}
+    %{
+      weak_hero: weak_hero,
+      strong_hero: strong_hero,
+      base_hero: base_hero,
+      alternate_hero: alternate_hero
+    }
   end
 
   describe "battles" do
@@ -297,6 +302,38 @@ defmodule Moba.EngineTest do
       assert hero.buffed_battles_available == attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus()
       assert hero.gold == attacker.gold + Moba.league_win_gold_bonus()
       assert hero.total_farm == attacker.total_farm + Moba.league_win_gold_bonus()
+    end
+
+    test "attacker beats boss and ranks up", %{strong_hero: hero} do
+      master_league_tier = Moba.master_league_tier()
+      with_boss = Game.generate_boss!(hero)
+
+      battle =
+        Engine.create_league_battle!(%{with_boss | league_step: 1, league_tier: master_league_tier})
+        |> Engine.auto_finish_battle!()
+
+      assert battle.winner_id == with_boss.id
+
+      with_boss = Game.get_hero!(with_boss.id)
+      assert with_boss.gold == hero.gold + Moba.boss_win_gold_bonus()
+      assert with_boss.league_step == 0
+      assert with_boss.league_tier == master_league_tier + 1
+    end
+
+    test "attacker loses to boss", %{weak_hero: hero} do
+      master_league_tier = Moba.master_league_tier()
+      with_boss = Game.generate_boss!(hero) |> Game.update_hero!(%{league_step: 1, league_tier: master_league_tier})
+      boss = Game.get_hero!(with_boss.boss_id)
+
+      battle =
+        Engine.create_league_battle!(with_boss)
+        |> Engine.auto_finish_battle!()
+
+      assert battle.winner_id == boss.id
+
+      with_boss = Game.get_hero!(with_boss.id)
+      assert with_boss.league_tier == master_league_tier
+      assert with_boss.league_step == 1
     end
   end
 

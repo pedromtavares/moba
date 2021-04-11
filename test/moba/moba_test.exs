@@ -71,7 +71,7 @@ defmodule Moba.MobaTest do
       assert Moba.xp_to_next_hero_level(10) == 280
       assert Moba.xp_to_next_hero_level(15) == 380
       assert Moba.xp_to_next_hero_level(20) == 480
-      assert Moba.xp_to_next_hero_level(25) == 580
+      assert Moba.xp_to_next_hero_level(25) == 870
     end
 
     test "#xp_until_hero_level" do
@@ -79,7 +79,7 @@ defmodule Moba.MobaTest do
       assert Moba.xp_until_hero_level(10) == 1800
       assert Moba.xp_until_hero_level(15) == 3500
       assert Moba.xp_until_hero_level(20) == 5700
-      assert Moba.xp_until_hero_level(25) == 8400
+      assert Moba.xp_until_hero_level(25) == 9750
     end
   end
 

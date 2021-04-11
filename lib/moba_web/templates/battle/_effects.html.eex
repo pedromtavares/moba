@@ -19,7 +19,7 @@
         </div>
         <hr class="mt-1 mb-1">
         <div class="progress progress-fixed">
-            <div style="width:<%=minimal_percentage(current_hp(@hero) * 100 / @hero.total_hp)%>%" class="progress-bar bg-danger">
+            <div style="width:<%=current_hp_percentage(@hero)%>%" class="progress-bar bg-danger" data-toggle="tooltip" title="<%=current_hp_percentage(@hero)%>%">
                 <span>&nbsp;<%=current_hp(@hero)%>&nbsp;</span>
             </div>
             <%= unless @hero.current_hp == @hero.total_hp || hp_result(@hero) == 0 do %>
@@ -29,7 +29,7 @@
             <% end %>
         </div>
         <div class="progress progress-fixed">
-            <div style="width:<%=display_percentage(current_mp(@hero) * 100 / @hero.total_mp)%>%" class="progress-bar bg-primary">
+            <div style="width:<%=current_mp_percentage(@hero)%>%" class="progress-bar bg-primary" data-toggle="tooltip" title="<%=current_mp_percentage(@hero)%>%">
                 <span>&nbsp;<%=current_mp(@hero)%>&nbsp;</span>
             </div>
             <%= unless @hero.current_mp == @hero.total_mp || mp_result(@hero) == 0 do %>

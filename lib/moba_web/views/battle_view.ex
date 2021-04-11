@@ -101,11 +101,17 @@ defmodule MobaWeb.BattleView do
     winner = battle.winner_id == battle.attacker_id
 
     cond do
+      winner && Game.max_league?(hero) ->
+        "GGWP! You have beaten the game by ranking up to the Grandmaster League!"
+
       winner && hero.league_step == 0 ->
         "GG! You have beaten the League Challenge and are now in a higher league!"
 
       winner ->
         "Victory! Proceed to the next battle of the League Challenge."
+
+      Game.master_league?(hero) ->
+        "You have died to Roshan."
 
       true ->
         "You have lost the League Challenge. Farm another <span class='text-success'>#{
@@ -173,6 +179,14 @@ defmodule MobaWeb.BattleView do
 
   def previous_league(%{league_tier: tier}) do
     Moba.leagues()[tier - 1]
+  end
+
+  def league_gold_bonus(%{league_tier: tier}) do
+    if tier == Moba.max_league_tier() do
+      Moba.boss_win_gold_bonus()
+    else
+      Moba.league_win_gold_bonus()
+    end
   end
 
   def show_step(%{league_tier: tier}, step) do
@@ -285,6 +299,10 @@ defmodule MobaWeb.BattleView do
     hero.hp_regen - hero.damage
   end
 
+  def current_hp_percentage(hero) do
+    trunc(current_hp(hero) * 100 / hero.total_hp)
+  end
+
   def hp_result_percentage(hero) do
     result = hp_result(hero) * 100 / hero.total_hp
     display_percentage(result)
@@ -292,6 +310,10 @@ defmodule MobaWeb.BattleView do
 
   def mp_result(hero) do
     hero.mp_regen + hero_mp_costs(hero) - hero.mp_burn
+  end
+
+  def current_mp_percentage(hero) do
+    trunc(current_mp(hero) * 100 / hero.total_mp)
   end
 
   def mp_result_percentage(hero) do
@@ -384,7 +406,8 @@ defmodule MobaWeb.BattleView do
     end
   end
 
-  def link_for(hero, %{type: type}) when type == "pvp", do: "/user/#{hero.name}"
+  def link_for(%{id: id, bot_difficulty: diff}, _) when is_nil(diff), do: "/hero/#{id}"
+  def link_for(_, %{type: "pvp"}), do: "/arena"
   def link_for(_, _), do: "/jungle"
 
   def battler_skill_list(battler) do

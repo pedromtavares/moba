@@ -48,17 +48,6 @@ defmodule MobaWeb.CurrentHeroLiveView do
     {:noreply, assign(socket, current_hero: hero)}
   end
 
-  def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
-    socket = Tutorial.next_step(socket, 10)
-
-    battle =
-      hero
-      |> Game.redeem_league!()
-      |> Engine.create_league_battle!()
-
-    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
-  end
-
   def handle_event("start-edit", _, socket) do
     {:noreply, assign(socket, editing: true)}
   end

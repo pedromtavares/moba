@@ -6,6 +6,8 @@ defmodule Moba.Engine.Core.League do
   alias Moba.{Game, Engine}
   alias Engine.Schema.Battle
 
+  @master_league_tier Moba.master_league_tier()
+
   def create_battle!(%{league_step: step}, _) when step < 1 do
     {:error, "Not available"}
   end
@@ -21,6 +23,7 @@ defmodule Moba.Engine.Core.League do
     battle
     |> manage_step()
     |> finalize_attacker()
+    |> maybe_generate_boss()
     |> maybe_finish_pve()
     |> Engine.generate_attacker_snapshot!()
   end
@@ -67,14 +70,20 @@ defmodule Moba.Engine.Core.League do
             league_step: 0,
             league_tier: league_tier + 1,
             league_successes: successes + 1,
-            gold: attacker.gold + Moba.league_win_gold_bonus(),
-            total_farm: attacker.total_farm + Moba.league_win_gold_bonus(),
-            buffed_battles_available: attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus()
+            gold: attacker.gold + league_bonus(attacker),
+            total_farm: attacker.total_farm + league_bonus(attacker),
+            buffed_battles_available: attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus(),
+            boss_id: nil
           }
 
         win ->
           %{
             league_step: step + 1
+          }
+
+        league_tier == @master_league_tier ->
+          %{
+            league_step: 1
           }
 
         true ->
@@ -97,9 +106,18 @@ defmodule Moba.Engine.Core.League do
     {battle, attacker}
   end
 
+  defp maybe_generate_boss({battle, attacker}) do
+    attacker = Game.maybe_generate_boss(attacker)
+
+    {battle, attacker}
+  end
+
   defp maybe_finish_pve({battle, attacker}) do
     attacker = Game.maybe_finish_pve(attacker)
 
     {battle, attacker}
   end
+
+  defp league_bonus(%{league_tier: @master_league_tier}), do: Moba.boss_win_gold_bonus()
+  defp league_bonus(_), do: Moba.league_win_gold_bonus()
 end

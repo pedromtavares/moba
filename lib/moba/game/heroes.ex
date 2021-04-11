@@ -10,7 +10,7 @@ defmodule Moba.Game.Heroes do
   @pve_to_league_points Moba.redeem_pve_to_league_points_threshold()
   @pve_points_limit Moba.pve_points_limit()
   @max_level Moba.max_hero_level()
-  @max_league_tier Moba.max_league_tier()
+  @master_league_tier Moba.master_league_tier()
 
   # -------------------------------- PUBLIC API
 
@@ -131,7 +131,7 @@ defmodule Moba.Game.Heroes do
     hero
     |> update!(updates)
     |> add_experience(xp)
-    |> max_league_updates()
+    |> master_league_updates()
   end
 
   @doc """
@@ -161,7 +161,14 @@ defmodule Moba.Game.Heroes do
 
     hero
     |> add_experience(xp)
-    |> update!(%{pve_points: Moba.pve_points_limit(), gold: 100_000, pve_battles_available: 1})
+    |> update!(%{
+      pve_points: Moba.pve_points_limit(),
+      gold: 100_000,
+      pve_battles_available: 2,
+      buffed_battles_available: 0
+    })
+
+    # |> Game.generate_boss!()
   end
 
   def pve_win_rate(hero) do
@@ -285,8 +292,11 @@ defmodule Moba.Game.Heroes do
   Grabs all Heroes ordered by their total_farm and updates their pve_ranking
   """
   def update_pve_ranking! do
+    Repo.update_all(Hero, set: [pve_ranking: nil])
+
     HeroQuery.non_bots()
     |> HeroQuery.finished_pve()
+    |> HeroQuery.year_to_date()
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.map(fn {hero, index} ->
@@ -298,6 +308,21 @@ defmodule Moba.Game.Heroes do
   Sets the Hero up for a League Challenge
   """
   def redeem_league!(%{pve_points: points} = hero) when points < @pve_points_limit, do: hero
+
+  def redeem_league!(%{league_tier: @master_league_tier, boss_id: boss_id} = hero) do
+    boss = get!(boss_id)
+
+    base_update = %{league_step: 1}
+
+    updates =
+      if boss.league_attempts == 1 do
+        Map.merge(base_update, %{gold: hero.gold - Moba.buyback_gold_penalty(), total_farm: hero.total_farm - 2000})
+      else
+        base_update
+      end
+
+    update!(hero, updates)
+  end
 
   def redeem_league!(%{pve_points: points} = hero) do
     update!(hero, %{
@@ -441,6 +466,6 @@ defmodule Moba.Game.Heroes do
       end)
   end
 
-  defp max_league_updates(%{league_tier: tier} = hero) when tier == @max_league_tier, do: level_to_max(hero)
-  defp max_league_updates(hero), do: hero
+  defp master_league_updates(%{league_tier: tier} = hero) when tier == @master_league_tier, do: level_to_max(hero)
+  defp master_league_updates(hero), do: hero
 end

@@ -38,7 +38,15 @@ defmodule Moba.Game.Skills do
     current_match = current && Game.current_match()
     match_id = (current_match && current_match.id) || nil
 
-    get_by_match(match_id, code, level)
+    get_by_match!(match_id, code, level)
+  end
+
+  def boss! do
+    [
+      get_by_match!(nil, "boss_slam", 1),
+      get_by_match!(nil, "boss_bash", 1),
+      get_by_match!(nil, "boss_spell_block", 1)
+    ]
   end
 
   @doc """
@@ -146,11 +154,11 @@ defmodule Moba.Game.Skills do
 
   # --------------------------------
 
-  defp get_by_match(nil, code, level) do
+  defp get_by_match!(nil, code, level) do
     Repo.get_by!(SkillQuery.canon(Skill), code: code, level: level)
   end
 
-  defp get_by_match(match_id, code, level) do
+  defp get_by_match!(match_id, code, level) do
     Repo.get_by!(Skill, code: code, match_id: match_id, level: level)
   end
 

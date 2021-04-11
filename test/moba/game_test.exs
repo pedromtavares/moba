@@ -95,7 +95,7 @@ defmodule Moba.GameTest do
 
       assert updated.gold == 15
       assert updated.items |> List.first() == base_item()
-      assert_receive {"hero", %{id: id}}
+      assert_receive {"hero", %{id: _id}}
     end
 
     test "#update_attacker!" do
@@ -146,8 +146,13 @@ defmodule Moba.GameTest do
     end
 
     test "#max_league?" do
-      assert build_base_hero(%{league_tier: 5}) |> Game.max_league?()
-      refute build_base_hero(%{league_tier: 4}) |> Game.max_league?()
+      assert build_base_hero(%{league_tier: 6}) |> Game.max_league?()
+      refute build_base_hero(%{league_tier: 5}) |> Game.max_league?()
+    end
+
+    test "#master_league?" do
+      assert build_base_hero(%{league_tier: 5}) |> Game.master_league?()
+      refute build_base_hero(%{league_tier: 6}) |> Game.master_league?()
     end
 
     test "#pve_win_rate" do
@@ -198,6 +203,22 @@ defmodule Moba.GameTest do
       assert hero.league_step == 1
     end
 
+    test "#redeem_league! when buyback" do
+      hero =
+        create_base_hero(%{league_tier: Moba.master_league_tier(), gold: 10_000, pve_points: Moba.pve_points_limit()})
+        |> Game.generate_boss!()
+        |> Game.redeem_league!()
+
+      assert hero.league_step == 1
+
+      boss = Game.get_hero!(hero.boss_id)
+
+      updated = Game.finalize_boss!(boss, 1000, hero) |> Game.redeem_league!()
+
+      assert updated.gold == hero.gold - Moba.buyback_gold_penalty()
+      assert updated.total_farm == hero.total_farm - Moba.buyback_gold_penalty()
+    end
+
     test "#hero_has_other_build?" do
       hero = create_base_hero()
 
@@ -206,6 +227,72 @@ defmodule Moba.GameTest do
       hero = Game.create_pvp_build!(hero, base_skills())
 
       assert Game.hero_has_other_build?(hero)
+    end
+
+    test "#maybe_finish_pve" do
+      hero = create_base_hero()
+
+      assert Game.maybe_finish_pve(hero) == hero
+
+      hero = create_base_hero() |> Game.generate_boss!()
+
+      assert Game.maybe_finish_pve(hero) == hero
+
+      hero = create_base_hero(%{pve_battles_available: 0, pve_points: 0}) |> Game.maybe_finish_pve()
+
+      assert hero.finished_pve
+
+      hero = create_base_hero(%{pve_battles_available: 0, pve_points: Moba.pve_points_limit(), league_tier: Moba.master_league_tier()})
+
+      assert Game.maybe_finish_pve(hero) == hero
+
+      hero = create_base_hero(%{pve_battles_available: 0, pve_points: Moba.pve_points_limit(), league_tier: Moba.max_league_tier()}) |> Game.maybe_finish_pve()
+
+      assert hero.finished_pve
+    end
+
+    test "#maybe_generate_boss" do
+      hero = create_base_hero(%{pve_battles_available: 0, league_tier: Moba.master_league_tier(), pve_points: Moba.pve_points_limit()})
+
+      assert Game.maybe_generate_boss(hero).boss_id
+
+      hero =
+        create_base_hero(%{pve_battles_available: 0, league_tier: Moba.master_league_tier()}) |> Game.generate_boss!()
+
+      assert Game.maybe_generate_boss(hero) == hero
+
+      hero = create_base_hero()
+
+      refute Game.maybe_generate_boss(hero).boss_id
+    end
+
+    test "#generate_boss!" do
+      hero = create_base_hero() |> Game.generate_boss!()
+
+      hero = Game.get_hero!(hero.id)
+
+      assert hero.boss_id
+
+      boss = Game.get_hero!(hero.boss_id)
+
+      assert boss.boss_id == hero.id
+    end
+
+    test "#finalize_boss!" do
+      hero = create_base_hero() |> Game.generate_boss!()
+      boss = Game.get_hero!(hero.boss_id)
+
+      assert boss.league_attempts == 0
+
+      hero = Game.finalize_boss!(boss, 1000, hero)
+
+      boss = Game.get_hero!(hero.boss_id)
+
+      assert boss.total_hp == 2500
+      assert boss.league_attempts == 1
+
+      hero = Game.finalize_boss!(boss, 0, hero)
+      refute hero.boss_id
     end
   end
 
@@ -280,15 +367,18 @@ defmodule Moba.GameTest do
 
     test "#league_defender_for" do
       first_league_hero = create_base_hero(%{league_tier: 0, league_step: 1})
-      last_league_hero = create_base_hero(%{league_tier: 5, league_step: 5})
+      diamond_league_hero = create_base_hero(%{league_tier: 4, league_step: 5})
+      master_league_hero = create_base_hero(%{league_tier: 5, league_step: 5}) |> Game.generate_boss!()
 
       first_league_defender = Game.league_defender_for(first_league_hero)
-      last_league_defender = Game.league_defender_for(last_league_hero)
+      diamond_league_defender = Game.league_defender_for(diamond_league_hero)
+      master_league_defender = Game.league_defender_for(master_league_hero)
 
       assert first_league_defender.level >= 6
       assert first_league_defender.bot_difficulty == "weak"
-      assert last_league_defender.level >= 25
-      assert last_league_defender.bot_difficulty == "strong"
+      assert diamond_league_defender.level >= 25
+      assert diamond_league_defender.bot_difficulty == "strong"
+      assert master_league_defender.avatar.code == "boss"
     end
   end
 

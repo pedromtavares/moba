@@ -85,6 +85,7 @@ defmodule Moba.Game.Schema.Hero do
     belongs_to :match, Game.Schema.Match
     belongs_to :avatar, Game.Schema.Avatar
     belongs_to :user, Accounts.Schema.User
+    belongs_to :boss, Game.Schema.Hero
 
     timestamps()
   end
@@ -135,7 +136,8 @@ defmodule Moba.Game.Schema.Hero do
       :atk,
       :user_id,
       :active_build_id,
-      :archived_at
+      :archived_at,
+      :boss_id
     ])
   end
 

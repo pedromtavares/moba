@@ -25,6 +25,7 @@ defmodule Moba.Game.Avatars do
   def get!(""), do: nil
   def get!(id), do: Repo.get!(Avatar, id) |> Repo.preload(:ultimate) |> with_extra_stats()
   def get_by_code!(code), do: unlocked_list([code]) |> List.first()
+  def boss!, do: Repo.get_by!(Avatar, code: "boss")
 
   def create!(%Avatar{} = avatar, attrs, match) do
     ultimate_code = Map.get(avatar, :ultimate_code) || attrs["ultimate_code"]

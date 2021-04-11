@@ -53,7 +53,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> by_difficulty(difficulty)
     |> exclude([attacker_id])
     |> random()
-    |> limit_by(3)
+    |> limit_by(1)
   end
 
   def latest(user_id) do
@@ -218,6 +218,13 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query,
       where: hero.finished_pve == true,
       order_by: [desc: hero.total_farm]
+  end
+
+  def year_to_date(query \\ Hero) do
+    start = Timex.now() |> Timex.beginning_of_year()
+
+    from hero in query,
+      where: hero.inserted_at > ^start
   end
 
   def pvp_ranked(query \\ Hero) do

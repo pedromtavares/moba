@@ -44,7 +44,7 @@ defmodule MobaWeb.JungleView do
 
   def next_league(%{league_tier: current_tier}) do
     cond do
-      current_tier == Moba.max_league_tier() -> nil
+      current_tier >= Moba.max_league_tier() -> nil
       true -> current_tier + 1
     end
   end
@@ -85,6 +85,18 @@ defmodule MobaWeb.JungleView do
         ]
       end
     )
+  end
+
+  def boss_available?(hero) do
+    hero.boss_id && Game.get_hero!(hero.boss_id)
+  end
+
+  def boss_percentage(boss) do
+    boss.total_hp * 100 / boss.avatar.total_hp
+  end
+
+  def show_league_challenge?(%{pve_points: pve_points, league_tier: league_tier}) do
+    pve_points >= Moba.pve_points_limit() && league_tier < Moba.master_league_tier()
   end
 
   defp with_display_stats(hero, heroes) do

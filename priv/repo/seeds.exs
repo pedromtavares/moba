@@ -530,6 +530,32 @@ SeedHelper.create_skill(%{
   level_requirement: 3
 })
 
+# BOSS
+
+SeedHelper.create_skill(%{
+  code: "boss_slam",
+  name: "Slam",
+  cooldown: 3,
+  base_damage: 300,
+  enabled: false,
+  mp_cost: 10
+})
+
+SeedHelper.create_skill(%{
+  code: "boss_spell_block",
+  name: "Spell Block",
+  passive: true,
+  cooldown: 3,
+  enabled: false
+})
+
+SeedHelper.create_skill(%{
+  code: "boss_bash",
+  name: "Slam",
+  passive: true,
+  enabled: false
+})
+
 # ULTIMATES
 
 assassinate =
@@ -756,6 +782,18 @@ walrus_punch =
     ultimate: true,
     base_damage: 140,
     atk_multiplier: 1.7
+  })
+
+boss_ult =
+  SeedHelper.create_skill(%{
+    code: "boss_ult",
+    name: "Strength of the Immortal",
+    mp_cost: 0,
+    ultimate: true,
+    passive: true,
+    armor_amount: 10,
+    power_amount: 10,
+    enabled: false
   })
 
 # AVATARS
@@ -1082,6 +1120,21 @@ SeedHelper.create_avatar(
       level_requirement: 4
     },
     carry
+  )
+)
+
+SeedHelper.create_avatar(
+  Map.merge(
+    %{
+      name: "Roshan",
+      code: "boss",
+      ultimate: boss_ult,
+      ultimate_code: "boss_ult",
+      total_hp: 3000,
+      atk: 100,
+      enabled: false
+    },
+    %{}
   )
 )
 

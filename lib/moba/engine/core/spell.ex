@@ -181,6 +181,37 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.remove_turn_atk()
   end
 
+  # BOSS
+
+  defp effects_for(%{resource: %Skill{code: "boss_slam"}} = turn, _options) do
+    turn
+    |> Effect.base_damage()
+  end
+
+  defp effects_for(%{resource: %Skill{code: "boss_bash"}} = turn, is_attacking: true) do
+    turn
+    |> roll(
+      fn turn -> turn |> Effect.stun() |> Effect.add_cooldown() end,
+      fn turn -> turn end
+    )
+  end
+
+  defp effects_for(%{resource: %Skill{code: "boss_spell_block"}} = turn, is_attacking: false) do
+    if Helper.disabled?(turn.defender) do
+      turn
+      |> Effect.inneffectability()
+      |> Effect.add_defender_cooldown()
+    else
+      turn
+    end
+  end
+
+  defp effects_for(%{resource: %Skill{code: "boss_ult"}} = turn, is_attacking: true) do
+    turn
+    |> Effect.add_battle_armor()
+    |> Effect.add_battle_power()
+  end
+
   # ULTIMATES
 
   defp effects_for(%{resource: %Skill{code: "assassinate"}, attacker: %{double_skill: nil}} = turn, _options) do

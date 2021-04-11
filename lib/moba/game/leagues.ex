@@ -7,6 +7,8 @@ defmodule Moba.Game.Leagues do
   alias Moba.{Repo, Game}
   alias Game.Query.HeroQuery
 
+  @master_league_tier Moba.master_league_tier()
+
   # -------------------------------- PUBLIC API
 
   def max_step_for(tier) do
@@ -14,7 +16,9 @@ defmodule Moba.Game.Leagues do
       0 -> 2
       1 -> 3
       2 -> 4
-      _ -> 5
+      3 -> 5
+      4 -> 5
+      _ -> 1
     end
   end
 
@@ -22,6 +26,8 @@ defmodule Moba.Game.Leagues do
   When in a League Challenge, the attacker faces consecutive defenders in order to rank up.
   These defenders get stronger with higher levels and difficulty as the challenge progresses
   """
+  def defender_for(%{league_tier: tier} = attacker) when tier == @master_league_tier, do: boss_defender(attacker)
+
   def defender_for(%{league_step: step} = attacker) do
     case step do
       0 -> easiest_defender(attacker)
@@ -41,10 +47,8 @@ defmodule Moba.Game.Leagues do
 
   # --------------------------------
 
-  # this is a small facilitator: the #league_defender query returns 3 heroes and this makes sure the
-  # one with lowest HP is chosen to avoid unlucky and frustrating battles against super tanks
   defp get_first(query) do
-    query |> Repo.all() |> Enum.sort_by(fn hero -> hero.total_hp end, :asc) |> List.first()
+    query |> Repo.all() |> List.first()
   end
 
   defp easiest_defender(%{id: id, league_tier: league_tier}) do
@@ -66,6 +70,8 @@ defmodule Moba.Game.Leagues do
     HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong", Game.current_match().id)
     |> get_first()
   end
+
+  defp boss_defender(%{boss_id: boss_id}), do: Game.get_hero!(boss_id)
 
   defp base_level(tier) do
     case tier do

@@ -19,7 +19,8 @@ defmodule Moba do
     2 => "Gold League",
     3 => "Platinum League",
     4 => "Diamond League",
-    5 => "Master League"
+    5 => "Master League",
+    6 => "Grandmaster League"
   }
 
   # PVE constants
@@ -39,12 +40,16 @@ defmodule Moba do
   @pvp_round_timeout_in_hours 12
 
   # League constants
-  @max_league_tier 5
+  @master_league_tier 5
+  @max_league_tier 6
   @league_win_gold_bonus 2000
   @league_loss_penalty 5
   @league_step_victory_points 10
   @league_win_buffed_battles_bonus 3
   @league_buff_multiplier 0.5
+  @boss_regeneration_multiplier 0.5
+  @boss_win_gold_bonus 4000
+  @buyback_gold_penalty 2000
 
   def initial_battles, do: @initial_battles
   def xp_boosted_battles, do: @xp_boosted_battles
@@ -73,12 +78,16 @@ defmodule Moba do
   def pvp_round_decay, do: @pvp_round_decay
   def pvp_round_timeout_in_hours, do: @pvp_round_timeout_in_hours
 
+  def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
   def league_win_gold_bonus, do: @league_win_gold_bonus
   def league_loss_penalty, do: @league_loss_penalty
   def league_step_victory_points, do: @league_step_victory_points
   def league_win_buffed_battles_bonus, do: @league_win_buffed_battles_bonus
   def league_buff_multiplier, do: @league_buff_multiplier
+  def boss_regeneration_multiplier, do: @boss_regeneration_multiplier
+  def boss_win_gold_bonus, do: @boss_win_gold_bonus
+  def buyback_gold_penalty, do: @buyback_gold_penalty
 
   def win_streak_xp(streak) when streak > 1 do
     amount = (streak - 1) * 10
@@ -143,7 +152,9 @@ defmodule Moba do
   end
 
   def xp_to_next_hero_level(level) when level < 1, do: 0
-  def xp_to_next_hero_level(level), do: base_xp() + (level - 1) * xp_increment()
+  def xp_to_next_hero_level(level) when level > 20, do: trunc(base_xp_calculation(level) * 1.5)
+  def xp_to_next_hero_level(level), do: base_xp_calculation(level)
+  defp base_xp_calculation(level), do: base_xp() + (level - 1) * xp_increment()
 
   def xp_until_hero_level(level) when level < 2, do: 0
   def xp_until_hero_level(level), do: xp_to_next_hero_level(level) + xp_until_hero_level(level - 1)

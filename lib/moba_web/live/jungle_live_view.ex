@@ -44,6 +44,17 @@ defmodule MobaWeb.JungleLiveView do
      |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
   end
 
+  def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
+    socket = Tutorial.next_step(socket, 10)
+
+    battle =
+      hero
+      |> Game.redeem_league!()
+      |> Engine.create_league_battle!()
+
+    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
+  end
+
   def handle_event("tutorial3", _, socket) do
     {:noreply, socket |> Tutorial.next_step(3) |> Shop.open()}
   end

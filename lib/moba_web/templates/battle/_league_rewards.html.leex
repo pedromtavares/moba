@@ -26,15 +26,17 @@
                     </li>
                     <li class="nav-item ml-4">
                         <div class="ribbon-box streaks">
-                            <div class="ribbon ribbon-warning float-left shape">+<%=Moba.league_win_gold_bonus()%>g</div>
+                            <div class="ribbon ribbon-warning float-left shape">+<%=league_gold_bonus(@hero)%>g</div>
                         </div>
                     </li>
-                    <li class="nav-item ml-4">
-                        <div class="ribbon-box streaks">
-                            <div class="ribbon ribbon-danger float-left shape">+<%=round(Moba.league_buff_multiplier() * 100)%>% buff</div>
-                        </div>
-                    </li>
-                    <%= if @hero.league_tier == Moba.max_league_tier() do %>
+                    <%= if @hero.league_tier < Moba.max_league_tier() do %>
+                        <li class="nav-item ml-4">
+                            <div class="ribbon-box streaks">
+                                <div class="ribbon ribbon-danger float-left shape">+<%=round(Moba.league_buff_multiplier() * 100)%>% buff</div>
+                            </div>
+                        </li>
+                    <% end %>
+                    <%= if @hero.league_tier == Moba.master_league_tier() do %>
                         <li class="nav-item ml-4">
                             <div class="ribbon-box streaks">
                                 <div class="ribbon ribbon-primary float-left shape">MAX level</div>
@@ -63,18 +65,22 @@
 <% else %>
     <div class="row">
         <div class="col center">
-            <ul class="nav nav-pills nav-justified form-wizard-header d-none d-md-flex">
-                <%=render "_loser_league_step.html", hero: @hero, step: 1, label: "Easiest"%>
-                <%=render "_loser_league_step.html", hero: @hero, step: 2, label: "Easy"%>
-                <%=render "_loser_league_step.html", hero: @hero, step: 3, label: "Medium"%>
-                <%=render "_loser_league_step.html", hero: @hero, step: 4, label: "Hard"%>
-                <%=render "_loser_league_step.html", hero: @hero, step: 5, label: "Hardest"%>
-            </ul>
+            <%= if Game.master_league?(@hero) do %>
+                <div class="mt-2"></div>
+            <% else %>
+                <ul class="nav nav-pills nav-justified form-wizard-header d-none d-md-flex">
+                    <%=render "_loser_league_step.html", hero: @hero, step: 1, label: "Easiest"%>
+                    <%=render "_loser_league_step.html", hero: @hero, step: 2, label: "Easy"%>
+                    <%=render "_loser_league_step.html", hero: @hero, step: 3, label: "Medium"%>
+                    <%=render "_loser_league_step.html", hero: @hero, step: 4, label: "Hard"%>
+                    <%=render "_loser_league_step.html", hero: @hero, step: 5, label: "Hardest"%>
+                </ul>
+            <% end %>
         </div>
     </div>
 <% end %>
 
-<%= if @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
+<%= if Game.master_league?(@hero) || @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
     <div class="row battle-border-top pt-1 mt-2">
         <div class="col-6 col-md-4">
             <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView, %{league: true}), class: "btn btn-secondary", "phx-hook": "Loading", id: "load-battles" do %>
@@ -84,7 +90,7 @@
 
         <div class="col-6 col-md-4 center">
             <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-success", "phx-hook": "Loading", id: "load-jungle" do %>
-                <span class="loading-text"><i class="fa fa-leaf"></i> Jungle</span>
+                <span class="loading-text"><i class="fa fa-leaf"></i> Go back to the Jungle</span>
             <% end %>
         </div>
     </div>

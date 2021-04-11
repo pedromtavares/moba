@@ -198,7 +198,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'eleventh-tutorial-second-step',
-          text: "<p class='text-center'>After each rank up you get a buff that makes your hero considerably stronger for 3 battles, use this opportunity to battle against <span class='text-danger'>Strong</span> targets!</p>",
+          text: "<p class='text-center'>After each rank up you get a buff that makes your hero considerably stronger for 3 battles, use this opportunity to battle against <span class='text-danger'>Hard</span> targets!</p>",
           attachTo: {
             element: '#league-buff',
             on: 'bottom'

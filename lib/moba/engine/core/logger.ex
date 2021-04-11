@@ -368,6 +368,28 @@ defmodule Moba.Engine.Core.Logger do
     } physical damage[/damage]!"
   end
 
+  # BOSS
+
+  defp description_for("boss_slam", %{"damage" => {damage, defender}}, heroes) do
+    "#{opponent_for(defender, heroes)} shattered the ground underneath, dealing [damage]#{damage} damage[/damage] to #{
+      defender
+    }!"
+  end
+
+  defp description_for("boss_spell_block", %{"inneffectable" => {_, hero}}, _) do
+    "#{hero} has blocked the effect of [status]stuns, silences and MP burns[/status] this turn."
+  end
+
+  defp description_for("boss_bash", %{"stunned" => {_, hero}}, heroes) do
+    "#{opponent_for(hero, heroes)} brutally smashed #{hero}, who has been [status]stunned[/status]!"
+  end
+
+  defp description_for("boss_ult", %{"battle_armor" => {armor, hero}, "battle_power" => {power, _}}, _) do
+    "Pulsating the essence of [status]The Immortal[/status], #{hero} gained [armor]#{armor} Armor[/armor] and [power]#{
+      power
+    } Power[/power] for the rest of the battle!"
+  end
+
   # ITEMS
 
   defp description_for("magic_stick", %{"hp_regen" => {hp, hero}, "mp_regen" => {mp, _}}, _) do

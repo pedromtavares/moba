@@ -26,6 +26,7 @@ defmodule Moba.Engine.Core.Pve do
     |> manage_streaks()
     |> manage_updates()
     |> update_attacker()
+    |> maybe_generate_boss()
     |> maybe_finish_pve()
     |> Engine.generate_attacker_snapshot!()
   end
@@ -55,6 +56,12 @@ defmodule Moba.Engine.Core.Pve do
     Game.generate_targets!(attacker)
 
     battle
+  end
+
+  defp maybe_generate_boss({battle, attacker}) do
+    attacker = Game.maybe_generate_boss(attacker)
+
+    {battle, attacker}
   end
 
   defp maybe_finish_pve({battle, attacker}) do

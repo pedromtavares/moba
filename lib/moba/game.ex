@@ -93,6 +93,7 @@ defmodule Moba.Game do
     |> Heroes.prepare_for_pvp!()
   end
 
+  def master_league?(%{league_tier: tier}), do: tier == Moba.master_league_tier()
   def max_league?(%{league_tier: tier}), do: tier == Moba.max_league_tier()
 
   def pve_win_rate(hero), do: Heroes.pve_win_rate(hero)
@@ -128,8 +129,16 @@ defmodule Moba.Game do
     hero.user && hero.user.level > 2
   end
 
-  def maybe_finish_pve(hero) do
-    if hero.pve_battles_available == 0 && hero.pve_points < Moba.pve_points_limit() do
+  def maybe_generate_boss(%{pve_battles_available: battles, boss_id: boss_id, pve_points: points} = hero) do
+    if master_league?(hero) && battles == 0 && is_nil(boss_id) && points == Moba.pve_points_limit() do
+      generate_boss!(hero)
+    else
+      hero
+    end
+  end
+
+  def maybe_finish_pve(%{pve_battles_available: battles, pve_points: points, boss_id: boss_id} = hero) do
+    if is_nil(boss_id) && battles == 0 && (max_league?(hero) || points < Moba.pve_points_limit()) do
       finish_pve!(hero)
     else
       hero
@@ -143,6 +152,32 @@ defmodule Moba.Game do
     Accounts.update_hero_collection!(updated.user, collection)
     updated
   end
+
+  def generate_boss!(hero) do
+    boss =
+      Heroes.create!(
+        %{name: "Roshan", league_tier: 6, level: 25, bot_difficulty: "boss", boss_id: hero.id},
+        nil,
+        Avatars.boss!(),
+        current_match()
+      )
+
+    build = Builds.create!("pve", boss, Skills.boss!())
+
+    activate_build!(boss, build)
+
+    update_hero!(hero, %{boss_id: boss.id})
+  end
+
+  def finalize_boss!(%{league_attempts: 0} = boss, boss_current_hp, hero) do
+    maximum_hp = boss.avatar.total_hp
+    new_total = boss_current_hp + Moba.boss_regeneration_multiplier() * maximum_hp
+    new_total = if new_total > maximum_hp, do: maximum_hp, else: trunc(new_total)
+    update_hero!(boss, %{total_hp: new_total, league_attempts: 1})
+    hero
+  end
+
+  def finalize_boss!(_boss, _boss_current_hp, hero), do: update_hero!(hero, %{boss_id: nil})
 
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")

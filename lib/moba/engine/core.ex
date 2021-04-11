@@ -114,13 +114,12 @@ defmodule Moba.Engine.Core do
     finish_battle(turn)
   end
 
-  defp battle_finished?(%{number: turn_number} = turn) when turn_number >= @max_turns do
+  defp battle_finished?(%{number: turn_number, battle: %{type: battle_type}} = turn)
+       when turn_number >= @max_turns and battle_type != "league" do
     finish_battle(turn)
   end
 
-  defp battle_finished?(turn) do
-    battle = turn.battle
-
+  defp battle_finished?(%{battle: battle} = turn) do
     %{battle | turns: battle.turns ++ [turn]}
     |> maybe_skip_next_turn()
   end
@@ -128,8 +127,19 @@ defmodule Moba.Engine.Core do
   defp finish_battle(turn) do
     turn
     |> determine_winner()
+    |> finalize_boss()
     |> Engine.update_battle!(%{finished: true})
   end
+
+  defp finalize_boss(%{type: "league", attacker: %{boss_id: boss_id} = hero, defender: boss, winner: winner} = battle)
+       when winner == boss and not is_nil(boss_id) do
+    last_turn = List.last(battle.turns)
+    boss_battler = if last_turn.attacker.hero_id == boss_id, do: last_turn.attacker, else: last_turn.defender
+    Game.finalize_boss!(boss, boss_battler.current_hp, hero)
+    battle
+  end
+
+  defp finalize_boss(battle), do: battle
 
   # Skips to the next turn if the attacker can't do anything, such as the defender was the initiator
   # or the attacker was disabled

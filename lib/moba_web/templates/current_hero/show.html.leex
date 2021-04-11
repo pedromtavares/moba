@@ -9,7 +9,7 @@
                         </div>
                     </div>
                     <h3 class="mb-0 mt-1 hero-name" phx-click="level">
-                        <img src="/images/league_<%=@current_hero.league_tier%>.png" class="league-logo" style="margin-top:-5px">
+                        <img src="/images/league_<%=@current_hero.league_tier%>.png" class="league-logo" style="margin-top:-3px">
                         <%=@current_hero.name%>
                     </h3>
                     <%= if @current_mode == "pvp" || @current_hero.level == Moba.max_hero_level() do %>
