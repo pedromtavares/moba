@@ -43,9 +43,7 @@ defmodule Moba.Game do
   def can_create_new_hero?(user) do
     match = current_match()
 
-    match &&
-      match.last_server_update_at &&
-      length(current_heroes(user.id, match.id)) <= Moba.daily_hero_limit()
+    match && match.last_server_update_at
   end
 
   def last_pve_hero(user_id), do: Heroes.last_active_pve(user_id)
