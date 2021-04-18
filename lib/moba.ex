@@ -27,8 +27,7 @@ defmodule Moba do
   @base_xp 100
   @xp_increment 20
   @battle_xp 50
-  @redeem_pve_to_league_points_threshold 10
-  @pve_points_limit 20
+  @pve_points_limit 12
   @max_hero_level 25
   @daily_hero_limit 3
 
@@ -43,8 +42,6 @@ defmodule Moba do
   @master_league_tier 5
   @max_league_tier 6
   @league_win_gold_bonus 2000
-  @league_loss_penalty 5
-  @league_step_victory_points 10
   @league_win_buffed_battles_bonus 3
   @league_buff_multiplier 0.5
   @boss_regeneration_multiplier 0.5
@@ -67,7 +64,6 @@ defmodule Moba do
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment
   def battle_xp, do: @battle_xp
-  def redeem_pve_to_league_points_threshold, do: @redeem_pve_to_league_points_threshold
   def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
   def daily_hero_limit, do: @daily_hero_limit
@@ -81,8 +77,6 @@ defmodule Moba do
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
   def league_win_gold_bonus, do: @league_win_gold_bonus
-  def league_loss_penalty, do: @league_loss_penalty
-  def league_step_victory_points, do: @league_step_victory_points
   def league_win_buffed_battles_bonus, do: @league_win_buffed_battles_bonus
   def league_buff_multiplier, do: @league_buff_multiplier
   def boss_regeneration_multiplier, do: @boss_regeneration_multiplier

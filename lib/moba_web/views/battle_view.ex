@@ -115,7 +115,7 @@ defmodule MobaWeb.BattleView do
 
       true ->
         "You have lost the League Challenge. Farm another <span class='text-success'>#{
-          Moba.redeem_pve_to_league_points_threshold()
+          Moba.pve_points_limit()
         } Jungle Points</span> and try again!"
     end
   end

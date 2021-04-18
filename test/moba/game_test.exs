@@ -18,31 +18,31 @@ defmodule Moba.GameTest do
   end
 
   describe "heroes" do
-    test "#can_create_new_hero?" do
-      user = create_user()
+    # test "#can_create_new_hero?" do
+    #   user = create_user()
 
-      assert Game.can_create_new_hero?(user)
+    #   assert Game.can_create_new_hero?(user)
 
-      hero = create_base_hero(%{}, user)
-      Game.update_hero!(hero, %{pve_battles_available: 0})
+    #   hero = create_base_hero(%{}, user)
+    #   Game.update_hero!(hero, %{pve_battles_available: 0})
 
-      assert Game.can_create_new_hero?(user)
+    #   assert Game.can_create_new_hero?(user)
 
-      hero = create_base_hero(%{}, user)
-      Game.update_hero!(hero, %{pve_battles_available: 0})
+    #   hero = create_base_hero(%{}, user)
+    #   Game.update_hero!(hero, %{pve_battles_available: 0})
 
-      assert Game.can_create_new_hero?(user)
+    #   assert Game.can_create_new_hero?(user)
 
-      # gets archived
-      create_base_hero(%{}, user)
+    #   # gets archived
+    #   create_base_hero(%{}, user)
 
-      assert Game.can_create_new_hero?(user)
+    #   assert Game.can_create_new_hero?(user)
 
-      hero = create_base_hero(%{}, user)
-      Game.update_hero!(hero, %{pve_battles_available: 0})
+    #   hero = create_base_hero(%{}, user)
+    #   Game.update_hero!(hero, %{pve_battles_available: 0})
 
-      refute Game.can_create_new_hero?(user)
-    end
+    #   refute Game.can_create_new_hero?(user)
+    # end
 
     test "#create_hero!" do
       avatar = base_avatar()
@@ -194,12 +194,12 @@ defmodule Moba.GameTest do
     end
 
     test "#redeem_league!" do
-      hero = create_base_hero(%{pve_points: 15})
+      hero = create_base_hero(%{pve_points: 10})
       assert Game.redeem_league!(hero) == hero
 
-      hero = create_base_hero(%{pve_points: 20}) |> Game.redeem_league!()
+      hero = create_base_hero(%{pve_points: 22}) |> Game.redeem_league!()
 
-      assert hero.pve_points == 10
+      assert hero.pve_points == 0
       assert hero.league_step == 1
     end
 

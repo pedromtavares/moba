@@ -4,22 +4,22 @@ defmodule MobaWeb.BattleLiveView do
   alias MobaWeb.{BattleView, Tutorial}
 
   def mount(_, session, socket) do
-    socket = assign_new(socket, :current_hero, fn -> Game.get_hero!(session["hero_id"]) end)
-    current_hero = socket.assigns.current_hero
+    current_hero = Game.get_hero!(session["hero_id"])
 
     {:ok,
      assign(socket,
-       battle: nil,
-       hero: nil,
-       skill: nil,
-       item: nil,
-       turn: nil,
-       last_turn: nil,
-       action_turn_number: nil,
-       show_shop: false,
-       unreads: 0,
-       tutorial_step: current_hero && current_hero.user.tutorial_step
-     )}
+      current_hero: current_hero,
+      battle: nil,
+      hero: nil,
+      skill: nil,
+      item: nil,
+      turn: nil,
+      last_turn: nil,
+      action_turn_number: nil,
+      show_shop: false,
+      unreads: 0,
+      tutorial_step: current_hero && current_hero.user.tutorial_step
+    )}
   end
 
   def handle_params(%{"id" => id} = params, _uri, socket) do

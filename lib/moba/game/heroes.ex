@@ -7,7 +7,6 @@ defmodule Moba.Game.Heroes do
   alias Game.Schema.Hero
   alias Game.Query.HeroQuery
 
-  @pve_to_league_points Moba.redeem_pve_to_league_points_threshold()
   @pve_points_limit Moba.pve_points_limit()
   @max_level Moba.max_hero_level()
   @master_league_tier Moba.master_league_tier()
@@ -324,9 +323,9 @@ defmodule Moba.Game.Heroes do
     update!(hero, updates)
   end
 
-  def redeem_league!(%{pve_points: points} = hero) do
+  def redeem_league!(hero) do
     update!(hero, %{
-      pve_points: points - @pve_to_league_points,
+      pve_points: 0,
       league_step: 1
     })
   end

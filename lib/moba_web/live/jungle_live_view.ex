@@ -13,7 +13,11 @@ defmodule MobaWeb.JungleLiveView do
         {:ok, socket |> redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
 
       hero ->
-        if connected?(socket), do: Tutorial.subscribe(hero.id)
+        if connected?(socket) do
+          hero.id
+          |> Game.subscribe_to_hero()
+          |> Tutorial.subscribe()
+        end
 
         {:ok,
          assign(socket,
@@ -69,6 +73,10 @@ defmodule MobaWeb.JungleLiveView do
 
   def handle_info({"tutorial-step", %{step: step}}, socket) do
     {:noreply, assign(socket, tutorial_step: step)}
+  end
+
+  def handle_info({"hero", %{id: id}}, socket) do
+    {:noreply, assign(socket, current_hero: Game.get_hero!(id))}
   end
 
   def render(assigns) do
