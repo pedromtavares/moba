@@ -164,8 +164,7 @@ defmodule Moba.Game.Heroes do
       pve_points: Moba.pve_points_limit(),
       gold: 100_000,
       pve_battles_available: 2,
-      buffed_battles_available: 0,
-      league_tier: 5
+      buffed_battles_available: 0
     })
 
     # |> Game.generate_boss!()

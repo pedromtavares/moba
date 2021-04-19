@@ -6,7 +6,10 @@ defmodule MobaWeb.HeroLiveView do
     hero_id = Map.get(session, "hero_id")
     hero = hero_id && Game.get_hero!(hero_id)
 
-    {:ok, assign(socket, current_hero: hero)}
+    collection_codes = Enum.map(socket.assigns.current_user.hero_collection, & &1["code"])
+    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
+
+    {:ok, assign(socket, current_hero: hero, blank_collection: blank_collection)}
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do

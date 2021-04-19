@@ -104,4 +104,26 @@
       background-color: rgba(54, 64, 74, 0.8);
     }
   }
+
+  .collection{
+    background-color: rgba(54, 64, 74, 0.5);
+
+    .card-header{
+      background-color: rgba(54, 64, 74, 0.5);
+    }
+    .avatar{
+      max-width: 100%;
+    }
+    .blank-avatar{
+      filter: grayscale(100%);
+    }
+    .league-logo{
+      width: 25px;
+      height: auto;
+      margin-top: -30px
+    }
+    .current .avatar{
+      border: 3px solid white !important;
+    }
+  }
 }

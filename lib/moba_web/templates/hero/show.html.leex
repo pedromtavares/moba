@@ -33,7 +33,7 @@
                     <a href="/create" class="btn btn-outline-success btn-block btn-lg">
                         <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
                         <strong class="font-20 d-block">Create another Hero</strong>
-                        <p class="font-15">Head back to the Jungle with a brand new Hero</p>
+                        <p class="font-15">Head back to the Jungle with a brand new Hero to complete your Collection</p>
                     </a>
                 <% else %>
                     <a href="#" class="btn btn-outline-success btn-block btn-lg disabled">
@@ -44,11 +44,37 @@
                 <% end %>
             </div>
         </div>
+        <div class="row mt-3">
+            <div class="col">
+                <div class="card collection">
+                    <h5 class="card-header text-center font-17 text-white"><i class="fa fa-users mr-1" aria-hidden="true"></i>Your Hero Collection</h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <%= for hero <- @current_user.hero_collection do %>
+                                <div class="col-1 mb-2 text-center">
+                                    <div class='avatar-container <%=if hero["hero_id"] == @current_hero.id, do: "current"%>'>
+                                        <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
+                                        <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
+                                    </div>
+                                </div>
+                            <% end %>
+                            <%= for avatar <- @blank_collection do %>
+                                <div class="col-1 mb-2 text-center">
+                                    <div class='avatar-container'>
+                                        <img src="<%=GH.image_url(avatar)%>" class="avatar blank-avatar"/>
+                                    </div>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     <% else %>
         <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
     <% end %>
 
-    <div class="row mt-3">
+    <div class="row">
         <div class="col-md-6 col-xl-4">
             <div class="hero-card card " style="background-image: url(<%=GH.background_url(@hero.avatar)%>">
                 <div class="card-header pt-0 pb-1">
