@@ -26,7 +26,11 @@ defmodule MobaWeb.JungleView do
     with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
     max = Enum.max_by(with_stats, fn hero -> hero.display_offense end) || target.defender
 
-    max.display_offense && with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
+    if max.display_offense && max.display_offense > 0 do
+      with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
+    else
+      100
+    end
   end
 
   def defense_percentage(target, targets) do
@@ -34,7 +38,11 @@ defmodule MobaWeb.JungleView do
     with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
     max = Enum.max_by(with_stats, fn hero -> hero.display_defense end) || target.defender
 
-    max.display_defense && with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
+    if max.display_defense && max.display_defense > 0 do
+      max.display_defense && with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
+    else
+      100
+    end
   end
 
   def next_league_percentage(hero) do

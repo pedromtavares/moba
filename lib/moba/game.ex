@@ -175,7 +175,9 @@ defmodule Moba.Game do
     hero
   end
 
-  def finalize_boss!(_boss, _boss_current_hp, hero), do: update_hero!(hero, %{boss_id: nil, pve_points: 0})
+  def finalize_boss!(_boss, _boss_current_hp, hero) do
+    update_hero!(hero, %{boss_id: nil, pve_points: Moba.pve_points_limit() - 1})
+  end
 
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")

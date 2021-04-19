@@ -346,7 +346,7 @@ defmodule Moba.EngineTest do
       with_boss = Game.get_hero!(with_boss.id)
 
       refute with_boss.boss_id
-      assert with_boss.pve_points == 0
+      assert with_boss.pve_points == 11
     end
   end
 

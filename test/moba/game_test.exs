@@ -292,7 +292,7 @@ defmodule Moba.GameTest do
       assert boss.league_attempts == 1
 
       hero = Game.finalize_boss!(boss, 0, hero)
-      assert hero.pve_points == 0
+      assert hero.pve_points == 11
       refute hero.boss_id
     end
   end
