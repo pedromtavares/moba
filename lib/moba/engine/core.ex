@@ -135,8 +135,8 @@ defmodule Moba.Engine.Core do
        when winner == boss and not is_nil(boss_id) do
     last_turn = List.last(battle.turns)
     boss_battler = if last_turn.attacker.hero_id == boss_id, do: last_turn.attacker, else: last_turn.defender
-    Game.finalize_boss!(boss, boss_battler.current_hp, hero)
-    battle
+    attacker = Game.finalize_boss!(boss, boss_battler.current_hp, hero)
+    %{battle | attacker: attacker}
   end
 
   defp finalize_boss(battle), do: battle

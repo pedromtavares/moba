@@ -334,6 +334,19 @@ defmodule Moba.EngineTest do
       with_boss = Game.get_hero!(with_boss.id)
       assert with_boss.league_tier == master_league_tier
       assert with_boss.league_step == 1
+      assert with_boss.boss_id
+
+      battle =
+        Engine.create_league_battle!(with_boss)
+        |> Engine.auto_finish_battle!()
+
+      assert battle.winner_id == boss.id
+
+      refute battle.attacker.boss_id
+      with_boss = Game.get_hero!(with_boss.id)
+
+      refute with_boss.boss_id
+      assert with_boss.pve_points == 0
     end
   end
 

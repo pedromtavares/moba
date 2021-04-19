@@ -40,7 +40,7 @@ defmodule Moba.Game do
   @doc """
   Users are only allowed to create a limited number of PVE heroes per match
   """
-  def can_create_new_hero?(user) do
+  def can_create_new_hero?(_user) do
     match = current_match()
 
     match && match.last_server_update_at
@@ -175,7 +175,7 @@ defmodule Moba.Game do
     hero
   end
 
-  def finalize_boss!(_boss, _boss_current_hp, hero), do: update_hero!(hero, %{boss_id: nil})
+  def finalize_boss!(_boss, _boss_current_hp, hero), do: update_hero!(hero, %{boss_id: nil, pve_points: 0})
 
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")
