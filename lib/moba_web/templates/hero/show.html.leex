@@ -51,7 +51,7 @@
                     <div class="card-body">
                         <div class="row">
                             <%= for hero <- @current_user.hero_collection do %>
-                                <div class="col-1 mb-2 text-center">
+                                <div class="col-4 col-sm-3 col-md-2 col-lg-1 mb-2 text-center">
                                     <div class='avatar-container <%=if hero["hero_id"] == @current_hero.id, do: "current"%>'>
                                         <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
                                         <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
@@ -59,7 +59,7 @@
                                 </div>
                             <% end %>
                             <%= for avatar <- @blank_collection do %>
-                                <div class="col-1 mb-2 text-center">
+                                <div class="col-4 col-sm-3 col-md-2 col-lg-1 mb-2 text-center">
                                     <div class='avatar-container'>
                                         <img src="<%=GH.image_url(avatar)%>" class="avatar blank-avatar"/>
                                     </div>
