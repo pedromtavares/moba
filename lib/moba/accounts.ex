@@ -40,20 +40,18 @@ defmodule Moba.Accounts do
 
   def set_current_pve_hero!(user, hero_id), do: Users.set_current_pve_hero!(user, hero_id)
 
-  def set_current_pvp_hero!(user, hero_id) do
-    user
-    |> Users.set_current_pvp_hero!(hero_id)
-    |> Users.clear_pve_hero!()
-  end
+  def set_current_pvp_hero!(user, hero_id), do: Users.set_current_pvp_hero!(user, hero_id)
 
   def clear_active_players!, do: Users.clear_active_players!()
 
-  def maybe_archive_current_pve_hero(user) do
-    if user.current_pve_hero_id && !Users.can_clear_pve_hero?(user) do
-      %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)
+  def maybe_archive_current_pve_hero(%{current_pve_hero_id: hero_id} = user) when not is_nil(hero_id) do
+    %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)
+    unless pve_hero.finished_pve do
       Game.update_hero!(pve_hero, %{archived_at: DateTime.utc_now()})
     end
   end
+
+  def maybe_archive_current_pve_hero(user), do: user
 
   def user_pvp_updates!(nil, _), do: nil
 

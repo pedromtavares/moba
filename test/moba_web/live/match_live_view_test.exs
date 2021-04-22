@@ -3,29 +3,17 @@ defmodule MobaWeb.MatchLiveViewTest do
   import Phoenix.LiveViewTest
 
   test "connected mount", %{conn: conn} do
-    hero_with_ganks = create_base_hero()
-    hero_without_ganks = create_base_hero(%{pve_battles_available: 0})
-
-    conn = Pow.Plug.assign_current_user(conn, hero_without_ganks.user, otp_app: :moba)
+    %{user: pvp_user} = create_pvp_hero()
 
     # slows down suite by 1 sec
     Conductor.start_match!(0..0)
 
+    pvp_user = Accounts.get_user!(pvp_user.id)
+    conn = Pow.Plug.assign_current_user(conn, pvp_user, otp_app: :moba) |> init_test_session(current_mode: "pvp")
+
     {:ok, _view, html} = live(conn, "/match")
     assert html =~ "Previous Match"
 
-    # post reset redirects
-    live(conn, "/jungle") |> follow_redirect(conn, "/match")
     live(conn, "/arena") |> follow_redirect(conn, "/match")
-
-    conn = Pow.Plug.assign_current_user(conn, hero_with_ganks.user, otp_app: :moba)
-
-    {:ok, _view, html} = live(conn, "/match")
-    assert html =~ "Previous Match"
-
-    # post reset redirects
-    {:ok, _view, html} = live(conn, "/jungle")
-    assert html =~ "Jungle"
-    live(conn, "/arena") |> follow_redirect(conn, "/jungle")
   end
 end

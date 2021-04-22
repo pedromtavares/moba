@@ -1,34 +1,33 @@
 defmodule Test.GameHelper do
   alias Moba.{Game, Accounts}
+  import Test.AccountsHelper
 
   def create_base_hero(attrs \\ %{}, user \\ create_user(), avatar \\ base_avatar()) do
     base = %{name: "Test"}
 
-    hero =
-      Moba.create_current_pve_hero!(
-        Map.merge(base, attrs),
-        user,
-        avatar,
-        base_skills()
-      )
-
-    hero
+    Moba.create_current_pve_hero!(
+      Map.merge(base, attrs),
+      user,
+      avatar,
+      base_skills()
+    )
   end
 
-  def create_pvp_hero(attrs \\ %{}) do
+  def create_pvp_hero(attrs \\ %{}, pvp_points \\ 0) do
+    user = create_user(%{pvp_points: pvp_points})
+
     hero =
       attrs
-      |> Map.merge(%{pvp_active: true})
-      |> create_base_hero()
+      |> Map.merge(%{pvp_active: true, finished_pve: true})
+      |> create_base_hero(user)
+      |> Game.prepare_hero_for_pvp!()
 
-    user = Accounts.set_current_pvp_hero!(hero.user, hero.id)
+    user = Accounts.set_current_pvp_hero!(user, hero.id)
 
     %{hero | user: user}
   end
 
-  def build_base_hero(attrs \\ %{}) do
-    Map.merge(%Game.Schema.Hero{}, attrs)
-  end
+  def build_base_hero(attrs \\ %{}), do: Map.merge(%Game.Schema.Hero{}, attrs)
 
   def create_bot_hero(pvp_points \\ 0, level \\ 1, difficulty \\ "strong") do
     Game.create_bot_hero!(
@@ -113,6 +112,4 @@ defmodule Test.GameHelper do
   end
 
   def base_rare_item, do: Game.get_item_by_code!("tranquil_boots")
-
-  defp create_user, do: Test.AccountsHelper.create_user()
 end

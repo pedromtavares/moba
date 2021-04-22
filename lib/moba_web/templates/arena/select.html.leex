@@ -6,17 +6,18 @@
                 <i class="fa fa-crosshairs fa-2x text-danger mt-2 mb-2"></i><br/>
                 Enter the Arena
             </h2>
-            <p class="text-danger mb-1">Create a new Hero or pick one of your previously created Heroes to fight for you in the Arena during the current match.</p>
+            <p class="text-danger mb-1">Pick one of your previously created Heroes to fight for you in the Arena during the current match.</p>
             <p class="text-muted font-italic">NOTE: Only heroes in the Diamond League or above are eligible for the Arena.</p>
         </div>
     </div>
 
     <div class="text-center mb-2 mt-2">
-        <%=if can_create_new_hero?(@current_user) do %>
-            <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
-        <% end %>
         <%= if @current_user.current_pve_hero_id do %>
             <a href="/game/pve" class="btn btn-success btn-lg"><i class="fa fa-leaf mr-1"></i>Back to the Jungle</a>
+        <% else %>
+            <%=if can_create_new_hero?(@current_user) do %>
+                <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
+            <% end %>
         <% end %>
     </div>
     <div class="row">

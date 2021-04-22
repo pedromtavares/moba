@@ -12,7 +12,6 @@ defmodule MobaWeb.MatchLiveView do
 
   def handle_params(_params, _uri, %{assigns: %{current_user: current_user}} = socket) do
     match = Game.last_match()
-    last_pve_hero = Game.last_pve_hero(current_user.id)
     last_pvp_hero = Game.last_pvp_hero(current_user.id)
     winners = Game.podium_for(match)
     winner_index = winners && Enum.find_index(winners, fn winner -> winner.user_id == current_user.id end)
@@ -20,8 +19,7 @@ defmodule MobaWeb.MatchLiveView do
     {:noreply,
      assign(socket,
        match: match,
-       last_pve_hero: last_pve_hero,
-       last_pvp_hero: last_pvp_hero,
+       hero: last_pvp_hero,
        winners: winners,
        winner_index: winner_index
      )}

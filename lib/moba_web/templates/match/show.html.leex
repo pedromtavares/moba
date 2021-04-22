@@ -4,7 +4,7 @@
     <div class="row mt-3">
         <div class="col">
             <div class="title-container">
-                <i class="fa fa-history text-info"></i>
+                <i class="fa fa-history text-danger"></i>
                 <h3>Previous Match</h3>
                 <p class="text-muted">
                     Check out your performance and the winners of the previous match.
@@ -13,11 +13,56 @@
         </div>
     </div>
 
-    <%= if @last_pve_hero || @last_pvp_hero do %>
-            <div class="row performance mb-0">
-                <%=@last_pve_hero && render "_pve_hero.html", hero: @last_pve_hero%>
-                <%=@last_pvp_hero && render "_pvp_hero.html", hero: @last_pvp_hero%>
+    <%= if @hero do %>
+        <div class="row performance mb-0">
+            <div class="col-xl-6 col-md-12 mb-4 margin-auto">
+                <div class="card-box border">
+                    <div class="row">
+                        <div class="col-12 col-md-4 d-flex align-items-center justify-content-center">
+                            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero), class: "h4 text-center" do %>
+                                <img src="<%=GH.image_url(@hero.avatar)%>" class="img-border-sm mb-1 avatar"/><br/>
+                                Level <%=@hero.level%> <%=@hero.avatar.name%>
+                            <% end %>
+                        </div>
+                        <div class="col-12 col-md-8 mt-2">
+                            <%=GH.hero_skill_list(@hero)%>
+                            <br/>
+                            <%=GH.hero_item_list(@hero, true)%>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-4 margin-auto text-center mt-2">
+                            <div class="card-box border mb-0">
+                                <h2>
+                                    <i class="fa fa-trophy font-24 text-danger"></i>
+                                    <h3><%=GH.pvp_win_rate(@hero)%>%</h3>
+                                    <p class="text-uppercase mb-1 font-13 font-weight-medium">Win Rate</p>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="col-4 margin-auto text-center mt-2">
+                            <div class="card-box border mb-0">
+                                <h2>
+                                    <i class="fa fa-list-ol font-24 text-danger"></i>
+                                    <h3>#<%=@hero.pvp_ranking%></h3>
+                                    <p class="text-uppercase mb-1 font-13 font-weight-medium">Rank</p>
+                                </h2>
+                            </div>
+                        </div>
+                        <div class="col-4 margin-auto text-center mt-2">
+                            <div class="card-box border mb-0">
+                                <h2>
+                                    <i class="fa fa-ellipsis-h font-24 text-danger"></i>
+                                    <h3><%=@hero.pvp_points%></h3>
+                                    <p class="text-uppercase mb-1 font-13 font-weight-medium">Points</p>
+                                </h2>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
+        </div>
     <% end %>
 
     <%= if @match && @match.next_changelog  do %>

@@ -34,7 +34,6 @@ defmodule Moba.AccountsTest do
       user = Accounts.set_current_pvp_hero!(user, hero.id)
 
       assert user.current_pvp_hero_id == hero.id
-      refute user.current_pve_hero_id
     end
   end
 

@@ -73,8 +73,7 @@
     <% else %>
         <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
     <% end %>
-
-    <div class="row">
+    <div class="row mt-3">
         <div class="col-md-6 col-xl-4">
             <div class="hero-card card " style="background-image: url(<%=GH.background_url(@hero.avatar)%>">
                 <div class="card-header pt-0 pb-1">

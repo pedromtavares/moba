@@ -4,7 +4,7 @@ defmodule Moba.ConductorTest do
   describe "main game loop" do
     test "#start" do
       old = Moba.current_match()
-      winner = create_pvp_hero(%{pvp_points: 10000})
+      winner = create_pvp_hero(%{}, 10000)
 
       current = Conductor.start_match!(0..0)
       old = Admin.get_match!(old.id)

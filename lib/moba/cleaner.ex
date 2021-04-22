@@ -17,11 +17,9 @@ defmodule Moba.Cleaner do
 
     Repo.all(query) |> delete_records()
 
-    query = from h in HeroQuery.bots(), where: not is_nil(h.archived_at), where: h.archived_at <= ^ago, limit: 50
+    query = from h in Hero, where: not is_nil(h.archived_at), where: h.archived_at <= ^ago, where: not h.finished_pve, limit: 50
 
     Repo.all(query) |> delete_records()
-
-    archive_weak_heroes()
   end
 
   defp delete_records(results) when length(results) > 0 do
@@ -34,17 +32,4 @@ defmodule Moba.Cleaner do
   end
 
   defp delete_records(_), do: nil
-
-  defp archive_weak_heroes do
-    base = HeroQuery.non_bots() |> HeroQuery.unarchived()
-
-    query =
-      from hero in base,
-        join: user in User,
-        on: hero.user_id == user.id,
-        where: hero.league_tier < 4 or is_nil(hero.league_tier),
-        where: is_nil(user.current_pve_hero_id) or user.current_pve_hero_id != hero.id
-
-    Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
-  end
 end

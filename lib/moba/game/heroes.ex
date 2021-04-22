@@ -260,10 +260,18 @@ defmodule Moba.Game.Heroes do
     |> avatar_preload()
   end
 
+  def pve_search(%{total_farm: total_farm, bot_difficulty: bot}) when not is_nil(bot) do
+    HeroQuery.non_bots()
+    |> HeroQuery.by_total_farm(total_farm - 200, total_farm + 200)
+    |> HeroQuery.limit_by(5)
+    |> Repo.all()
+    |> avatar_preload()
+  end
+
   def pve_search(%{total_farm: total_farm, id: id}) do
     by_farm =
       HeroQuery.non_bots()
-      |> HeroQuery.by_total_farm(total_farm - 1000, total_farm + 1000)
+      |> HeroQuery.by_total_farm(total_farm - 500, total_farm + 500)
       |> Repo.all()
       |> avatar_preload()
 

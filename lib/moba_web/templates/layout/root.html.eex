@@ -16,7 +16,7 @@
                 <div class="col">
                     <div class="row">
                         <div class="col-4 margin-auto">
-                            <a href="/arena/select" class="btn btn-block btn-primary btn-lg"><i class="fa fa-hand-point-right mr-1"></i>Join the new match</a>
+                            <a href="/arena/select" class="btn btn-block btn-danger btn-lg"><i class="fa fa-crosshairs mr-1"></i>A new Arena match has started, click to join</a>
                         </div>
                     </div>
                 </div>

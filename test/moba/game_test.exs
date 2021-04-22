@@ -168,8 +168,8 @@ defmodule Moba.GameTest do
     end
 
     test "#update_pvp_ranking" do
-      hero1 = create_pvp_hero(%{pvp_points: 1000})
-      hero2 = create_pvp_hero(%{pvp_points: 1020})
+      hero1 = create_pvp_hero(%{}, 1000)
+      hero2 = create_pvp_hero(%{}, 1020)
 
       Game.update_pvp_ranking!()
 
