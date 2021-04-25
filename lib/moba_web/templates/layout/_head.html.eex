@@ -2,7 +2,7 @@
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <meta name="Description" content="Create and level up your own hero to battle against other players in daily matches.">
+    <meta name="Description" content="Create and level up your own hero with custom abilities and items to battle against other players in a free-for-all PvP warzone. All in your browser, for free.">
     <title><%=assigns[:title] || "Browser MOBA - Free RPG"%></title>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
     <link rel="shortcut icon" href="<%= assigns[:favicon] || Routes.static_path(@conn, "/images/favicon.png") %>" />

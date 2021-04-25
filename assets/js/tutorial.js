@@ -56,7 +56,7 @@ const Tutorial = {
       case 2:
         tour.addStep({
           id: 'second-tutorial-first-step',
-          text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>Here in the Jungle is where you will farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by ganking generated targets.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
+          text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>Here in the Jungle is where you will farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by ganking other opponents.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
           buttons: [
             {
               text: 'Open Shop',
@@ -96,7 +96,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'fourth-tutorial-second-step',
-          text: "<p class='text-center'>With every battle, you also gain <span class='text-success'>Jungle Points</span>, which you need to gather to rank up to the next League. Keep battling until you've reached 20 points, good luck!</p>",
+          text: "<p class='text-center'>With every battle, you also gain <span class='text-success'>Jungle Points</span>, which you need to gather to rank up to the next League. Keep battling until you've reached 12 points, good luck!</p>",
           attachTo: {
             element: '#current-hero-league',
             on: 'bottom'
@@ -181,7 +181,7 @@ const Tutorial = {
       case 11:
         tour.addStep({
           id: 'eleventh-tutorial-first-step',
-          text: "<p class='text-center'>You have ranked up to Silver League, congratulations! Now only Gold, Platinum, Diamond and Master Leagues to go ( ͡° ͜ʖ ͡°)</p>",
+          text: "<p class='text-center'>You have ranked up to Silver League, congratulations! Now only Gold, Platinum, Diamond, Master and Grandmaster Leagues to go ( ͡° ͜ʖ ͡°)</p>",
           attachTo: {
             element: '#current-hero-league',
             on: 'bottom'
@@ -215,7 +215,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'eleventh-tutorial-third-step',
-          text: "<p class='text-center'>Keep battling until you finish all of your available Ganks and be allowed into <span class='text-danger'>the Arena</span>, which is where PvP happens and the game <em>really</em> begins. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
+          text: "<p class='text-center'>Keep battling until you finish all of your available Ganks and hopefully reach the Grandmaster League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
           attachTo: {
             element: '#jungle-stats',
             on: 'bottom'
@@ -269,7 +269,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'thirteenth-tutorial-second-step',
-          text: "<p class='text-center'>Your Rank is directly tied to how many Points you have. Finish the match ranked in the Top 3 to receive Shards and unlock new Skills and Heroes.</p>",
+          text: "<p class='text-center'>Your Rank is directly tied to how many Points you have. Finish the match ranked in the Top 3 to receive Medals and be ranked among the best of BrowserMOBA.</p>",
           attachTo: {
             element: '#current-hero-rank',
             on: 'bottom'
@@ -286,7 +286,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'thirteenth-tutorial-third-step',
-          text: "<p class='text-center'>If you want to know more about how the Arena works, you can click View Rules at any time. Have fun!</p>",
+          text: "<p class='text-center'>If you want to know more about how the Arena works, you can click View Tips at any time. Have fun!</p>",
           attachTo: {
             element: '#main-arena-title',
             on: 'bottom'
