@@ -183,6 +183,10 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} phased out of existence and is [status]invulnerable[/status] this turn, negating all damage taken."
   end
 
+  defp description_for("shadow_word", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
+    "Cursed by the shadows, #{defender} took [damage]#{damage} damage[/damage] while #{attacker} regenerated [hp]#{regen} HP[/hp]."
+  end
+
   defp description_for("shadow_word", %{"damage" => {damage, defender}}, _) do
     "Cursed by the shadows, #{defender} took [damage]#{damage} damage[/damage]."
   end
