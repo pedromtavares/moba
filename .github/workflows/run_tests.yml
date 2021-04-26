@@ -23,7 +23,7 @@ jobs:
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-elixir@v1
+      - uses: erlef/setup-beam@v1
         with:
           elixir-version: '1.10.2'
           otp-version: '22.2'
