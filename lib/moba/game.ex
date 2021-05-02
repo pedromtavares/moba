@@ -135,13 +135,14 @@ defmodule Moba.Game do
     end
   end
 
-  def maybe_finish_pve(%{pve_battles_available: battles, pve_points: points, boss_id: boss_id} = hero) do
-    if is_nil(boss_id) && battles == 0 && (max_league?(hero) || points < Moba.pve_points_limit()) do
+  def maybe_finish_pve(%{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false} = hero) do
+    if max_league?(hero) || points < Moba.pve_points_limit() do
       finish_pve!(hero)
     else
       hero
     end
   end
+  def maybe_finish_pve(hero), do: hero
 
   def finish_pve!(hero) do
     updated = update_hero!(hero, %{finished_pve: true})
