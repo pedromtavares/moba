@@ -18,6 +18,8 @@ defmodule MobaWeb.PowControllerCallbacks do
 
         Game.update_hero!(hero, %{name: user.username, user_id: user.id})
 
+        Accounts.update_user!(guest, %{current_pve_hero_id: nil})
+
         Accounts.update_user!(user, %{
           tutorial_step: guest.tutorial_step,
           experience: guest.experience,
