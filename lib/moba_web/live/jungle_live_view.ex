@@ -5,11 +5,11 @@ defmodule MobaWeb.JungleLiveView do
 
   def mount(_, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
-    hero = Game.current_pve_hero(socket.assigns.current_user)
+    hero = Game.current_pve_hero(socket.assigns.current_user) |> Game.maybe_finish_pve()
 
     cond do
       hero && hero.finished_pve ->
-        Game.update_pve_ranking!()
+        if is_nil(hero.pve_ranking), do: Game.update_pve_ranking!()
         {:ok, socket |> redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
 
       hero ->
