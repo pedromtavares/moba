@@ -127,13 +127,14 @@ defmodule Moba.Game do
     hero.user && hero.user.level > 2
   end
 
-  def maybe_generate_boss(%{pve_battles_available: battles, boss_id: boss_id, pve_points: points} = hero) do
-    if master_league?(hero) && battles == 0 && is_nil(boss_id) && points == Moba.pve_points_limit() do
+  def maybe_generate_boss(%{pve_battles_available: 0, boss_id: nil, pve_points: points} = hero) do
+    if master_league?(hero) && points == Moba.pve_points_limit() do
       generate_boss!(hero)
     else
       hero
     end
   end
+  def maybe_generate_boss(hero), do: hero
 
   def maybe_finish_pve(%{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false} = hero) do
     if max_league?(hero) || points < Moba.pve_points_limit() do
