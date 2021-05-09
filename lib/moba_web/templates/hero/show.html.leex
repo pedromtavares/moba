@@ -107,7 +107,12 @@
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="card">
-                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>Performance</h5>
+                <h5 class="card-header text-center font-17 text-white">
+                    <i class="fa fa-poll mr-1"></i>Performance
+                    <%=unless @hero.finished_pve do %>
+                        <small class="text-muted font-italic"> - In Progress (<%=@hero.pve_battles_available%> battles left)</small>
+                    <% end %>
+                </h5>
                 <div class="card-body p-2">
                     <div class="performance">
                         <div class="row">
