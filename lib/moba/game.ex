@@ -78,7 +78,11 @@ defmodule Moba.Game do
     updated
   end
 
-  def update_attacker!(hero, updates), do: Heroes.update_attacker!(hero, updates)
+  def update_attacker!(hero, updates) do
+    updated = Heroes.update_attacker!(hero, updates)
+    broadcast_to_hero(hero.id)
+    updated
+  end
 
   @doc """
   When a Hero is picked for the Arena, it needs to have its inventory and skills updated

@@ -6,11 +6,6 @@ defmodule MobaWeb.HeroLiveView do
     hero_id = Map.get(session, "hero_id")
     hero = hero_id && Game.get_hero!(hero_id)
 
-    if connected?(socket) do
-      hero_id
-      |> Game.subscribe_to_hero()
-    end
-
     collection_codes = Enum.map(socket.assigns.current_user.hero_collection, & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
 
@@ -24,6 +19,10 @@ defmodule MobaWeb.HeroLiveView do
   def handle_params(%{"id" => id}, _uri, socket) do
     hero = Game.get_hero!(id)
     ranking = Game.pve_search(hero)
+
+    if connected?(socket) do
+      Game.subscribe_to_hero(id)
+    end
 
     {:noreply, assign(socket, hero: hero, ranking: ranking, hide_join_new_match_button: true)}
   end
