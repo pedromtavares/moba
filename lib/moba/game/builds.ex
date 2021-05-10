@@ -362,12 +362,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "dazzle" do
     [
       {
-        ["bad_juju", "echo_stomp", "shuriken_toss", "fiery_soul"],
-        ["maelstrom", "boots_of_travel", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
+        ["bad_juju", "blade_fury", "shuriken_toss", "fiery_soul"],
+        ["maelstrom", "linkens_sphere", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
         "Your basic Carry build focused on Attack (ATK) skills to take advantage of Power provided by the ult."
       },
       {
-        ["bad_juju", "illuminate", "fiery_soul", "lightning_bolt"],
+        ["bad_juju", "mana_shield", "fiery_soul", "double_edge"],
         ["maelstrom", "linkens_sphere", "assault_cuirass", "scythe_of_vyse", "boots_of_travel", "daedalus"],
         "Full nuke build to take advantage of Power provided by the ult."
       }
@@ -382,7 +382,7 @@ defmodule Moba.Game.Builds do
         "Power nuker build for ending battles quickly."
       },
       {
-        ["shadow_word", "doom", "illuminate", "mana_burn"],
+        ["doom", "death_pulse", "mana_burn", "phase_shift"],
         ["boots_of_travel", "dagon5", "assault_cuirass", "bkb", "linkens_sphere", "daedalus"],
         "Mixed damage build for a more sustained fight."
       }
@@ -408,12 +408,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["omnislash", "blade_fury", "shuriken_toss", "fiery_soul"],
-        ["tranquil_boots", "silver_edge", "assault_cuirass", "heavens_halberd", "satanic", "daedalus"],
+        ["tranquil_boots", "silver_edge", "assault_cuirass", "orchid_malevolence", "satanic", "daedalus"],
         "Basic Power Carry build to quickly finish a battle."
       },
       {
         ["static_link", "omnislash", "blade_fury", "phase_shift"],
-        ["maelstrom", "boots_of_travel", "assault_cuirass", "scythe_of_vyse", "linkens_sphere", "daedalus"],
+        ["maelstrom", "boots_of_travel", "assault_cuirass", "orchid_malevolence", "linkens_sphere", "daedalus"],
         "A more defensive variant which may need extra Magic (MP) to function well."
       }
     ]
@@ -422,13 +422,13 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "lina" do
     [
       {
-        ["empower", "maledict", "laguna_blade", "fiery_soul"],
+        ["empower", "laguna_blade", "mana_shield", "fiery_soul"],
         ["arcane_boots", "diffusal_blade", "assault_cuirass", "dagon5", "orchid_malevolence", "shivas_guard"],
         "Good balance of offense and defense with support for her ult by the use of Maledict. Will need Magic (MP) items to properly function."
       },
       {
-        ["illuminate", "laguna_blade", "lightning_bolt", "fiery_soul"],
-        ["vanguard", "boots_of_travel", "bkb", "diffusal_blade", "daedalus", "linkens_sphere"],
+        ["laguna_blade", "blade_fury", "phase_shift", "fiery_soul"],
+        ["vanguard", "boots_of_travel", "orchid_malevolence", "diffusal_blade", "daedalus", "linkens_sphere"],
         "A more offensive Power Nuker variant."
       }
     ]
@@ -438,7 +438,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["blink_strike", "feast", "jinada"],
-        ["maelstrom", "assault_cuirass", "diffusal_blade", "orchid_malevolence", "silver_edge", "daedalus"],
+        ["maelstrom", "assault_cuirass", "shivas_guard", "orchid_malevolence", "silver_edge", "daedalus"],
         "Just enough Magic (MP) to cast Sweeping Blade whenever possible, with passives to support Basic Attacks."
       },
       {
@@ -453,12 +453,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["dream_coil", "illuminate", "lightning_bolt", "phase_shift"],
-        ["arcane_boots", "dagon5", "assault_cuirass", "shivas_guard", "orchid_malevolence", "scythe_of_vyse"],
+        ["arcane_boots", "dagon5", "linkens_sphere", "shivas_guard", "orchid_malevolence", "scythe_of_vyse"],
         "Typical Nuker build, Maledict + Bolt after the ult is cast to take advantage of the stun can be quite effective."
       },
       {
         ["dream_coil", "echo_stomp", "phase_shift", "shuriken_toss"],
-        ["maelstrom", "dagon", "heavens_halberd", "diffusal_blade", "orchid_malevolence", "linkens_sphere"],
+        ["maelstrom", "dagon5", "boots_of_travel", "assault_cuirass", "orchid_malevolence", "linkens_sphere"],
         "More versatile Carry build with 3 actives that is made viable due to her extra MP. Make sure to cast Echo Stomp right after the ult."
       }
     ]
@@ -467,7 +467,7 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "pugna" do
     [
       {
-        ["double_edge", "empower", "life_drain", "fiery_soul"],
+        ["empower", "life_drain", "mana_shield", "fiery_soul"],
         ["vanguard", "boots_of_travel", "diffusal_blade", "satanic", "linkens_sphere", "shivas_guard"],
         "Basic carry build with strong regenration."
       },
@@ -483,7 +483,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["guardian_angel", "double_edge", "counter_helix", "shuriken_toss"],
-        ["maelstrom", "boots_of_travel", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
+        ["maelstrom", "boots_of_travel", "satanic", "dagon5", "orchid_malevolence", "daedalus"],
         "Single turn damage focused build."
       },
       {
@@ -497,12 +497,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "rubick" do
     [
       {
-        ["maledict", "spell_steal", "lightning_bolt", "death_pulse"],
+        ["spell_steal", "phase_shift", "lightning_bolt", "death_pulse"],
         ["tranquil_boots", "diffusal_blade", "bkb", "dagon5", "shivas_guard", "daedalus"],
         "Full Nuker with great damage output. May need some Magic (MP) items to be viable."
       },
       {
-        ["maledict", "spell_steal", "mana_shield", "fiery_soul"],
+        ["spell_steal", "death_pulse", "mana_shield", "fiery_soul"],
         ["vanguard", "dagon", "boots_of_travel", "linkens_sphere", "shivas_guard", "daedalus"],
         "A more low-cost Power-focused variant."
       }
@@ -513,7 +513,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["static_link", "assassinate", "blade_fury", "phase_shift"],
-        ["maelstrom", "bkb", "assault_cuirass", "boots_of_travel", "satanic", "silver_edge"],
+        ["maelstrom", "linkens_sphere", "assault_cuirass", "boots_of_travel", "satanic", "silver_edge"],
         "A more defensive build to guarantee survival after the ult is cast."
       },
       {
@@ -572,7 +572,7 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "tinker" do
     [
       {
-        ["maledict", "rearm", "lightning_bolt", "mana_shield"],
+        ["lightning_bolt", "rearm", "counter_helix", "mana_shield"],
         ["maelstrom", "boots_of_travel", "assault_cuirass", "dagon5", "scythe_of_vyse", "daedalus"],
         "Full on offensive Nuker."
       },
@@ -588,12 +588,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["decay", "double_edge", "empower"],
-        ["tranquil_boots", "diffusal_blade", "assault_cuirass", "linkens_sphere", "satanic", "daedalus"],
+        ["tranquil_boots", "orchid_malevolence", "assault_cuirass", "linkens_sphere", "satanic", "daedalus"],
         "Low-cost offensive build with some regeneration to handle longer fights."
       },
       {
         ["feast", "fury_swipes", "jinada"],
-        ["vanguard", "boots_of_travel", "bkb", "shivas_guard", "assault_cuirass", "daedalus"],
+        ["vanguard", "boots_of_travel", "bkb", "shivas_guard", "silver_edge", "daedalus"],
         "Full Basic Attack variant."
       }
     ]
