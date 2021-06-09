@@ -9,8 +9,6 @@ defmodule MobaWeb.HallLiveView do
 
     pve = Game.pve_ranking(20)
 
-    tabs = ["pve", "pvp", "users"]
-
     {:ok, assign(socket, current_hero: hero, pve: pve, pvp: nil, users: nil, active_tab: "pve")}
   end
 

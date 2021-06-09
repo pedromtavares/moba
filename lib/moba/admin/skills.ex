@@ -72,7 +72,8 @@ defmodule Moba.Admin.Skills do
         effects: attrs["effects"],
         enabled: attrs["enabled"],
         name: attrs["name"],
-        level_requirement: attrs["level_requirement"]
+        level_requirement: attrs["level_requirement"],
+        damage_type: attrs["damage_type"]
       }
 
       changes = if attrs["image"], do: Map.put(changes, :image, attrs["image"]), else: changes
@@ -111,6 +112,7 @@ defmodule Moba.Admin.Skills do
       boolean(:enabled)
       text(:name)
       text(:code)
+      text(:damage_type)
       number(:level)
       number(:mp_cost)
       number(:cooldown)

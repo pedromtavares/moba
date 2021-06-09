@@ -37,7 +37,7 @@ defmodule Moba.Engine.Core.Processor do
     Logger.info("Skill cast: #{skill.code}")
 
     %{turn | resource: skill, skill: skill}
-    |> Effect.damage_type(Moba.damage_types().magic)
+    |> Effect.damage_type(skill.damage_type)
     |> apply_spell()
     |> Effect.mp_cost()
     |> Effect.add_cooldown()

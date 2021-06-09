@@ -38,6 +38,11 @@
         </li>
 
         <li>
+          <div class="torch-show-label">Damage Type:</div>
+          <div class="torch-show-data"><%= @skill.damage_type %></div>
+        </li>
+
+        <li>
           <div class="torch-show-label">Mp cost:</div>
           <div class="torch-show-data"><%= @skill.mp_cost %></div>
         </li>

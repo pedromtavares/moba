@@ -334,7 +334,8 @@ SeedHelper.create_skill(%{
   atk_multiplier: 1.4,
   armor_amount: 25,
   mp_cost: 10,
-  cooldown: 2
+  cooldown: 2,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -346,7 +347,8 @@ SeedHelper.create_skill(%{
   other_atk_multiplier: 1.6,
   mp_cost: 11,
   cooldown: 3,
-  power_amount: 4
+  power_amount: 4,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -374,7 +376,8 @@ SeedHelper.create_skill(%{
   atk_multiplier: 0.5,
   hp_regen_multiplier: 0.06,
   mp_cost: 4,
-  cooldown: 2
+  cooldown: 2,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -383,7 +386,8 @@ SeedHelper.create_skill(%{
   atk_multiplier: 1.8,
   other_atk_multiplier: 0.5,
   mp_cost: 0,
-  cooldown: 2
+  cooldown: 2,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -393,7 +397,8 @@ SeedHelper.create_skill(%{
   base_damage: 10,
   mp_cost: 10,
   cooldown: 2,
-  level_requirement: 2
+  level_requirement: 2,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -403,7 +408,8 @@ SeedHelper.create_skill(%{
   power_amount: 40,
   mp_cost: 5,
   cooldown: 2,
-  duration: 3
+  duration: 3,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -412,14 +418,16 @@ SeedHelper.create_skill(%{
   passive: true,
   base_amount: 20,
   hp_regen_multiplier: 0.3,
-  level_requirement: 8
+  level_requirement: 8,
+  damage_type: "none"
 })
 
 SeedHelper.create_skill(%{
   code: "fiery_soul",
   name: "Fiery Soul",
   passive: true,
-  power_amount: 5
+  power_amount: 5,
+  damage_type: "none"
 })
 
 SeedHelper.create_skill(%{
@@ -428,7 +436,8 @@ SeedHelper.create_skill(%{
   duration: 3,
   passive: true,
   base_damage: 14,
-  level_requirement: 7
+  level_requirement: 7,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -445,7 +454,8 @@ SeedHelper.create_skill(%{
   name: "Jinada",
   power_amount: 20,
   passive: true,
-  level_requirement: 6
+  level_requirement: 6,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -471,7 +481,7 @@ SeedHelper.create_skill(%{
   code: "mana_shield",
   name: "Mana Shield",
   mp_multiplier: 0.25,
-  atk_multiplier: 1.2,
+  atk_multiplier: 0,
   base_damage: 30,
   mp_cost: 15,
   cooldown: 3,
@@ -495,7 +505,8 @@ SeedHelper.create_skill(%{
   roll_number: 10,
   mp_cost: 5,
   cooldown: 3,
-  level_requirement: 5
+  level_requirement: 5,
+  damage_type: "none"
 })
 
 SeedHelper.create_skill(%{
@@ -515,7 +526,8 @@ SeedHelper.create_skill(%{
   atk_multiplier: 1.8,
   armor_amount: 10,
   mp_cost: 6,
-  cooldown: 2
+  cooldown: 2,
+  damage_type: "normal"
 })
 
 SeedHelper.create_skill(%{
@@ -527,7 +539,8 @@ SeedHelper.create_skill(%{
   duration: 2,
   base_damage: 30,
   base_amount: 6,
-  level_requirement: 3
+  level_requirement: 3,
+  damage_type: "normal"
 })
 
 # BOSS
@@ -566,7 +579,8 @@ assassinate =
     mp_cost: 10,
     cooldown: 5,
     ultimate: true,
-    roll_number: 40
+    roll_number: 40,
+    damage_type: "normal"
   })
 
 bad_juju =
@@ -623,7 +637,8 @@ culling =
     atk_multiplier: 1.7,
     extra_multiplier: 0.3,
     cooldown: 5,
-    ultimate: true
+    ultimate: true,
+    damage_type: "normal"
   })
 
 doom =
@@ -658,7 +673,8 @@ elder_dragon_form =
     duration: 3,
     base_damage: 20,
     armor_amount: 15,
-    power_amount: 15
+    power_amount: 15,
+    damage_type: "normal"
   })
 
 gods_strength =
@@ -669,7 +685,8 @@ gods_strength =
     mp_cost: 9,
     cooldown: 5,
     ultimate: true,
-    duration: 2
+    duration: 2,
+    damage_type: "normal"
   })
 
 guardian_angel =
@@ -681,7 +698,8 @@ guardian_angel =
     cooldown: 5,
     ultimate: true,
     atk_multiplier: 1.0,
-    duration: 2
+    duration: 2,
+    damage_type: "normal"
   })
 
 laguna =
@@ -713,7 +731,8 @@ omnislash =
     other_atk_multiplier: 4.0,
     mp_cost: 10,
     cooldown: 5,
-    ultimate: true
+    ultimate: true,
+    damage_type: "normal"
   })
 
 psionic_trap =
@@ -781,7 +800,8 @@ walrus_punch =
     cooldown: 5,
     ultimate: true,
     base_damage: 140,
-    atk_multiplier: 1.7
+    atk_multiplier: 1.7,
+    damage_type: "normal"
   })
 
 boss_ult =
@@ -953,7 +973,8 @@ SeedHelper.create_avatar(
       name: "Lina",
       code: "lina",
       ultimate: laguna,
-      ultimate_code: "laguna_blade"
+      ultimate_code: "laguna_blade",
+      damage_type: "pure"
     },
     nuker
   )

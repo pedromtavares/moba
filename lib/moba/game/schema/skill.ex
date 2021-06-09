@@ -32,6 +32,7 @@ defmodule Moba.Game.Schema.Skill do
     field :level, :integer
     field :duration, :integer
     field :level_requirement, :integer
+    field :damage_type, :string
 
     # fields used by effects
     field :base_damage, :integer
@@ -93,7 +94,8 @@ defmodule Moba.Game.Schema.Skill do
       :level,
       :duration,
       :enabled,
-      :level_requirement
+      :level_requirement,
+      :damage_type
     ])
     |> cast_attachments(attrs, [:image])
   end

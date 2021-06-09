@@ -38,6 +38,12 @@
             <%= filter_string_input(:skill, :code, @conn.params) %>
           </div>
 
+          <div class="field">
+            <label>Damage Type</label>
+            <%= filter_select(:skill, :damage_type, @conn.params) %>
+            <%= filter_string_input(:skill, :damage_type, @conn.params) %>
+          </div>
+
 
           <div class="field">
             <label>Passive</label>
@@ -98,6 +104,8 @@
 
               <th><%= table_link(@conn, "Code", :code) %></th>
 
+              <th><%= table_link(@conn, "Type", :damage_type) %></th>
+
               <th><%= table_link(@conn, "Passive", :passive) %></th>
 
               <th><%= table_link(@conn, "Ultimate", :ultimate) %></th>
@@ -114,9 +122,12 @@
             <tr>
                 <td><img src="<%=GH.image_url(skill)%>"/></td>
                 <td><%= skill.name %></td>
+
                 <td><%= skill.level %></td>
 
                 <td><%= skill.code %></td>
+
+                <td><%= skill.damage_type %></td>
 
                 <td><%= skill.passive %></td>
 

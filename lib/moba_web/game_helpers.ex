@@ -189,6 +189,8 @@ defmodule MobaWeb.GameHelpers do
   defp full_skill_description(skill) do
     {:safe, effects} = resource_effects(skill)
 
+    damage_type = damage_type_description(skill)
+
     mp_cost =
       skill.mp_cost && skill.mp_cost > 0 &&
         "<span class='badge badge-light-primary'><i class='fa fa-flask mr-1'></i>#{skill.mp_cost}</span>"
@@ -202,13 +204,23 @@ defmodule MobaWeb.GameHelpers do
         #{mp_cost || ""}
         #{cooldown || ""}
         #{
-      if skill.passive,
-        do: "<span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>",
-        else: ""
-    }
+          if skill.passive,
+          do: "<span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>",
+          else: ""
+        }
+        #{damage_type && "#{damage_type}<br/>"}
       </div>
       #{effects}
     "
+  end
+
+  defp damage_type_description(skill) do
+    case skill.damage_type do
+      "normal" -> "<span class='badge badge-light-success'><i class='fa fa-bahai mr-1'></i>Normal Damage</span>"
+      "pure" -> "<span class='badge badge-light-danger'><i class='fa fa-bahai mr-1'></i>Pure Damage</span>"
+      "magic" -> "<span class='badge badge-light-purple'><i class='fa fa-bahai mr-1'></i>Magic Damage</span>"
+      _ -> nil
+    end
   end
 
   defp resource_effects(resource) do

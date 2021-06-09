@@ -324,7 +324,6 @@ defmodule Moba.Engine.Core.Spell do
     turn
     |> Effect.base_damage()
     |> Effect.atk_damage()
-    |> Effect.damage_type(Moba.damage_types()[:pure])
     |> Effect.null_armor()
   end
 
@@ -428,7 +427,6 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.base_damage()
     |> Effect.atk_damage()
     |> Effect.stun()
-    |> Effect.damage_type(Moba.damage_types()[:normal])
   end
 
   # PASSIVES

@@ -134,7 +134,7 @@ defmodule Moba.Game.Builds do
 
   # random skill set depending on difficulty, the higher the difficulty the less random
   defp skills_list(skill_list, difficulty, ultimate_code) do
-    skill_list = Enum.shuffle(skill_list -- [ultimate_code, "basic_attack"])
+    skill_list = Enum.shuffle(skill_list -- [ultimate_code])
 
     skills =
       case difficulty do
@@ -176,13 +176,11 @@ defmodule Moba.Game.Builds do
 
   # Since skill lists get randomized sometimes, we need to do some handling to make sure
   # that whatever wasn't randomized stays in the same order, so that bots can be as effective
-  # as possible. It's specially important that ultimates are used in the correct turn as well
-  # as Basic Attacks in the case of builds that focus on that.
+  # as possible. It's specially important that ultimates are used in the correct turn as well.
   # In a nutshell, we need to order skills to look as much like skill_list as possible
   defp skill_order(skill_list, skills, ultimate_code) do
     ult_index = Enum.find_index(skill_list, fn code -> code == ultimate_code end)
-    basic_index = Enum.find_index(skill_list, fn code -> code == "basic_attack" end)
-    clean_list = skill_list -- [ultimate_code, "basic_attack"]
+    clean_list = skill_list -- [ultimate_code]
 
     skill_codes =
       skills
@@ -208,9 +206,7 @@ defmodule Moba.Game.Builds do
         if index, do: List.insert_at(acc, index, code), else: acc
       end)
 
-    result = if ult_index, do: List.insert_at(result, ult_index, ultimate_code), else: result
-
-    if basic_index, do: List.insert_at(result, basic_index, "basic_attack"), else: result
+    if ult_index, do: List.insert_at(result, ult_index, ultimate_code), else: result
   end
 
   defp random_skills do
@@ -332,12 +328,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "abaddon" do
     [
       {
-        ["echo_stomp", "borrowed_time", "double_edge", "counter_helix"],
+        ["echo_stomp", "borrowed_time", "double_edge", "jinada"],
         ["maelstrom", "boots_of_travel", "assault_cuirass", "bkb", "linkens_sphere", "daedalus"],
         "Great damage skills for a longer fight. Echo Stomp requires more MP so we need a passive here."
       },
       {
-        ["empower", "borrowed_time", "shuriken_toss", "double_edge"],
+        ["empower", "borrowed_time", "shuriken_toss", "jinada"],
         ["maelstrom", "boots_of_travel", "bkb", "assault_cuirass", "daedalus", "orchid_malevolence"],
         "Less risky and more versatile, just make sure to rotate cooldowns effectively. Empower is great for longer fights."
       }
@@ -352,7 +348,7 @@ defmodule Moba.Game.Builds do
         "Balanced damage build."
       },
       {
-        ["shuriken_toss", "double_edge", "counter_helix", "culling_blade"],
+        ["shuriken_toss", "jinada", "counter_helix", "culling_blade"],
         ["maelstrom", "shivas_guard", "boots_of_travel", "linkens_sphere", "orchid_malevolence", "daedalus"],
         "More versatile if proper cooldown rotation is kept."
       }
@@ -362,12 +358,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "dazzle" do
     [
       {
-        ["bad_juju", "blade_fury", "shuriken_toss", "fiery_soul"],
+        ["bad_juju", "blade_fury", "shuriken_toss", "jinada"],
         ["maelstrom", "linkens_sphere", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
         "Your basic Carry build focused on Attack (ATK) skills to take advantage of Power provided by the ult."
       },
       {
-        ["bad_juju", "mana_shield", "fiery_soul", "double_edge"],
+        ["bad_juju", "mana_burn", "fiery_soul", "lightning_bolt"],
         ["maelstrom", "linkens_sphere", "assault_cuirass", "scythe_of_vyse", "boots_of_travel", "daedalus"],
         "Full nuke build to take advantage of Power provided by the ult."
       }
@@ -392,7 +388,7 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "dragon_knight" do
     [
       {
-        ["elder_dragon_form", "blade_fury", "double_edge", "fiery_soul"],
+        ["elder_dragon_form", "blade_fury", "double_edge", "jinada"],
         ["shadow_blade", "boots_of_travel", "assault_cuirass", "silver_edge", "satanic", "daedalus"],
         "Power-focused Carry build"
       },
@@ -407,7 +403,7 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "juggernaut" do
     [
       {
-        ["omnislash", "blade_fury", "shuriken_toss", "fiery_soul"],
+        ["omnislash", "blade_fury", "shuriken_toss", "jinada"],
         ["tranquil_boots", "silver_edge", "assault_cuirass", "orchid_malevolence", "satanic", "daedalus"],
         "Basic Power Carry build to quickly finish a battle."
       },
@@ -427,7 +423,7 @@ defmodule Moba.Game.Builds do
         "Good balance of offense and defense with support for her ult by the use of Maledict. Will need Magic (MP) items to properly function."
       },
       {
-        ["laguna_blade", "blade_fury", "phase_shift", "fiery_soul"],
+        ["maledict", "laguna_blade", "lightning_bolt", "fiery_soul"],
         ["vanguard", "boots_of_travel", "orchid_malevolence", "diffusal_blade", "daedalus", "linkens_sphere"],
         "A more offensive Power Nuker variant."
       }
@@ -457,7 +453,7 @@ defmodule Moba.Game.Builds do
         "Typical Nuker build, Maledict + Bolt after the ult is cast to take advantage of the stun can be quite effective."
       },
       {
-        ["dream_coil", "echo_stomp", "phase_shift", "shuriken_toss"],
+        ["dream_coil", "mana_burn", "phase_shift", "death_pulse"],
         ["maelstrom", "dagon5", "boots_of_travel", "assault_cuirass", "orchid_malevolence", "linkens_sphere"],
         "More versatile Carry build with 3 actives that is made viable due to her extra MP. Make sure to cast Echo Stomp right after the ult."
       }
@@ -467,7 +463,7 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "pugna" do
     [
       {
-        ["empower", "life_drain", "mana_shield", "fiery_soul"],
+        ["maledict", "life_drain", "mana_shield", "fiery_soul"],
         ["vanguard", "boots_of_travel", "diffusal_blade", "satanic", "linkens_sphere", "shivas_guard"],
         "Basic carry build with strong regenration."
       },
@@ -487,7 +483,7 @@ defmodule Moba.Game.Builds do
         "Single turn damage focused build."
       },
       {
-        ["double_edge", "guardian_angel", "echo_stomp", "fiery_soul"],
+        ["double_edge", "guardian_angel", "echo_stomp", "jinada"],
         ["maelstrom", "boots_of_travel", "daedalus", "scythe_of_vyse", "linkens_sphere", "orchid_malevolence"],
         "A more offensive Carry variant."
       }
@@ -512,13 +508,13 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "sniper" do
     [
       {
-        ["static_link", "assassinate", "blade_fury", "phase_shift"],
-        ["maelstrom", "linkens_sphere", "assault_cuirass", "boots_of_travel", "satanic", "silver_edge"],
+        ["assassinate", "static_link", "feast", "phase_shift"],
+        ["maelstrom", "linkens_sphere", "assault_cuirass", "boots_of_travel", "daedalus", "silver_edge"],
         "A more defensive build to guarantee survival after the ult is cast."
       },
       {
-        ["empower", "assassinate", "decay", "phase_shift"],
-        ["vanguard", "boots_of_travel", "diffusal_blade", "scythe_of_vyse", "shivas_guard", "daedalus"],
+        ["empower", "assassinate", "jinada", "phase_shift"],
+        ["vanguard", "boots_of_travel", "diffusal_blade", "scythe_of_vyse", "shivas_guard", "satanic"],
         "An offensive variant that empowers the ult and provides some regeneration."
       }
     ]
@@ -527,12 +523,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "sven" do
     [
       {
-        ["gods_strength", "basic_attack", "fury_swipes", "feast", "jinada"],
+        ["gods_strength", "fury_swipes", "feast", "jinada"],
         ["maelstrom", "boots_of_travel", "diffusal_blade", "orchid_malevolence", "linkens_sphere", "daedalus"],
         "Full passives to support Basic Attacks."
       },
       {
-        ["double_edge", "gods_strength", "basic_attack", "fury_swipes", "counter_helix"],
+        ["double_edge", "gods_strength", "fury_swipes", "jinada"],
         ["vanguard", "boots_of_travel", "bkb", "shivas_guard", "satanic", "daedalus"],
         "A more offensive variant completely focused on damage output."
       }
@@ -557,12 +553,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "templar_assassin" do
     [
       {
-        ["psionic_trap", "blink_strike", "decay", "fiery_soul"],
+        ["psionic_trap", "blink_strike", "decay", "jinada"],
         ["maelstrom", "boots_of_travel", "silver_edge", "scythe_of_vyse", "linkens_sphere", "daedalus"],
         "Balanced build for constant spellcasting."
       },
       {
-        ["psionic_trap", "maledict", "lightning_bolt", "counter_helix"],
+        ["psionic_trap", "maledict", "lightning_bolt", "fiery_soul"],
         ["vanguard", "boots_of_travel", "heavens_halberd", "diffusal_blade", "shivas_guard", "daedalus"],
         "A more offensive Nuker variant."
       }
@@ -587,12 +583,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "troll_warlord" do
     [
       {
-        ["decay", "double_edge", "empower"],
+        ["decay", "double_edge", "jinada"],
         ["tranquil_boots", "orchid_malevolence", "assault_cuirass", "linkens_sphere", "satanic", "daedalus"],
         "Low-cost offensive build with some regeneration to handle longer fights."
       },
       {
-        ["feast", "fury_swipes", "jinada"],
+        ["empower", "fury_swipes", "jinada"],
         ["vanguard", "boots_of_travel", "bkb", "shivas_guard", "silver_edge", "daedalus"],
         "Full Basic Attack variant."
       }
@@ -617,12 +613,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "weaver" do
     [
       {
-        ["echo_stomp", "time_lapse", "shuriken_toss", "fiery_soul"],
+        ["echo_stomp", "time_lapse", "shuriken_toss", "jinada"],
         ["maelstrom", "boots_of_travel", "assault_cuirass", "scythe_of_vyse", "linkens_sphere", "daedalus"],
         "Large damage output to take maximum advange of the ult."
       },
       {
-        ["blink_strike", "time_lapse", "phase_shift", "fiery_soul"],
+        ["blink_strike", "time_lapse", "phase_shift", "empower"],
         ["tranquil_boots", "diffusal_blade", "assault_cuirass", "dagon5", "satanic", "daedalus"],
         "Basic Power Carry build to quickly finish a battle."
       }

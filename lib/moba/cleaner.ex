@@ -1,11 +1,9 @@
 defmodule Moba.Cleaner do
   import Ecto.Query, only: [from: 2]
 
-  alias Moba.{Repo, Game, Engine, Accounts}
-  alias Game.Query.HeroQuery
+  alias Moba.{Repo, Game, Engine}
   alias Game.Schema.Hero
   alias Engine.Schema.Battle
-  alias Accounts.Schema.User
 
   def cleanup_old_records do
     ago = Timex.now() |> Timex.shift(days: -7)

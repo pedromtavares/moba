@@ -60,6 +60,12 @@
     </div>
 
     <div class="torch-form-group">
+      <%= label f, :damage_type %>
+      <%= select f, :damage_type, [{"Normal", "normal"}, {"Magic", "magic"}, {"Pure", "pure"}, {"None", "none"}] %>
+      <%= error_tag f, :damage_type %>
+    </div>
+
+    <div class="torch-form-group">
       <label>Mp Cost | <%=Enum.map(@skills, fn skill -> skill.mp_cost end) |> Enum.join(" / ")%></label>
       <%= number_input f, :mp_cost %>
       <%= error_tag f, :mp_cost %>
