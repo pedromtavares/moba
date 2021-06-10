@@ -92,7 +92,7 @@ defmodule MobaWeb.CurrentHeroView do
     title = "Total MP: #{hero.total_mp + hero.item_mp}"
 
     sub =
-      "Your total Mana Points. Your 'fuel' in a battle, used to power abilities and active items. When they reach 0 in a battle, you will hit with a Basic Attack, which deals 100% ATK as damage."
+      "Your total Mana Points. Your 'fuel' in a battle, used to power abilities and active items. When they reach 0 in a battle, you will hit with a Basic Attack, which deals 100% ATK as Normal Damage."
 
     main =
       "Current base MP: #{hero.total_mp} <br/>MP given by items: #{hero.item_mp}<br/><br/>MP gain on level up: #{

@@ -120,7 +120,10 @@ defmodule MobaWeb.GameHelpers do
     "
   end
 
-  def basic_attack_description, do: skill_description(Moba.basic_attack())
+  def basic_attack_description do
+    basic = Moba.basic_attack()
+    "#{skill_description(basic)}<br/><br/>#{damage_type_description(basic)}"
+  end
 
   def item_description(item) do
     {:safe, effects} = resource_effects(item)
@@ -214,8 +217,8 @@ defmodule MobaWeb.GameHelpers do
     "
   end
 
-  defp damage_type_description(skill) do
-    case skill.damage_type do
+  defp damage_type_description(%{damage_type: damage_type}) do
+    case damage_type do
       "normal" -> "<span class='badge badge-light-success'><i class='fa fa-bahai mr-1'></i>Normal Damage</span>"
       "pure" -> "<span class='badge badge-light-danger'><i class='fa fa-bahai mr-1'></i>Pure Damage</span>"
       "magic" -> "<span class='badge badge-light-purple'><i class='fa fa-bahai mr-1'></i>Magic Damage</span>"

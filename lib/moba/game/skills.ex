@@ -23,6 +23,7 @@ defmodule Moba.Game.Skills do
       code: "basic_attack",
       atk_multiplier: 1,
       description: "Hit with a Basic Attack for 100% ATK",
+      damage_type: "normal",
       mp_cost: 0,
       cooldown: 0
     }

@@ -289,7 +289,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("gods_strength", %{"next_power_normal" => {power, attacker}}, _) do
-    "Channeling immense rogue strength, #{attacker} will have an extra [power]#{power} Power[/power] for the two next Basic Attacks."
+    "Channeling immense rogue strength, #{attacker} will have an extra [power]#{power} Power[/power] for the two turns that deal Normal Damage."
   end
 
   defp description_for("guardian_angel", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
