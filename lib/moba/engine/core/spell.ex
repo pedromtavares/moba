@@ -450,7 +450,7 @@ defmodule Moba.Engine.Core.Spell do
   end
 
   defp effects_for(%{resource: %Skill{code: "fiery_soul"}} = turn, is_attacking: true) do
-    if Helper.magic_damage?(turn.defender) do
+    if turn.skill && turn.skill.code != "basic_attack" do
       Effect.add_battle_power(turn)
     else
       turn
