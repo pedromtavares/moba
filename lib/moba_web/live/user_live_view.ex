@@ -24,8 +24,9 @@ defmodule MobaWeb.UserLiveView do
     collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
     ranking = Accounts.user_search(user)
+    arena_picks = Game.list_recent_arena_picks(user)
 
-    {:noreply, assign(socket, user: user, featured: featured, ranking: ranking, blank_collection: blank_collection)}
+    {:noreply, assign(socket, user: user, featured: featured, ranking: ranking, blank_collection: blank_collection, arena_picks: arena_picks)}
   end
 
   def handle_event("set-featured", %{"id" => id}, socket) do

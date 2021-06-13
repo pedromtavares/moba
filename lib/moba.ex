@@ -22,6 +22,16 @@ defmodule Moba do
     5 => "Master League",
     6 => "Grandmaster League"
   }
+  @medals %{
+    0 => "Herald",
+    1 => "Guardian",
+    2 => "Crusader",
+    3 => "Archon",
+    4 => "Legend",
+    5 => "Ancient",
+    6 => "Divine",
+    7 => "Immortal"
+  }
 
   # PVE constants
   @base_xp 100
@@ -37,6 +47,8 @@ defmodule Moba do
   @pvp_timeout_in_hours 24
   @pvp_round_decay 25
   @pvp_round_timeout_in_hours 12
+  @season_points_per_medal 25
+  @max_season_tier 7
 
   # League constants
   @master_league_tier 5
@@ -60,6 +72,7 @@ defmodule Moba do
   def damage_types, do: @damage_types
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
+  def medals, do: @medals
 
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment
@@ -73,6 +86,8 @@ defmodule Moba do
   def pvp_timeout_in_hours, do: @pvp_timeout_in_hours
   def pvp_round_decay, do: @pvp_round_decay
   def pvp_round_timeout_in_hours, do: @pvp_round_timeout_in_hours
+  def season_points_per_medal, do: @season_points_per_medal
+  def max_season_tier, do: @max_season_tier
 
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
@@ -111,17 +126,17 @@ defmodule Moba do
 
   # diff = defender.pvp_points - attacker.pvp_points
 
-  def attacker_win_pvp_points(diff) when diff < -40, do: 5
-  def attacker_win_pvp_points(diff), do: round(5 + (diff + 80) * 0.125)
+  def attacker_win_pvp_points(diff) when diff < -40, do: 2
+  def attacker_win_pvp_points(diff), do: round(5 + (diff + 80) * 0.05)
 
-  def attacker_loss_pvp_points(diff) when diff > 40, do: -5
-  def attacker_loss_pvp_points(diff), do: round(-5 + (diff - 80) * 0.125)
+  def attacker_loss_pvp_points(diff) when diff > 40, do: -2
+  def attacker_loss_pvp_points(diff), do: round(-5 + (diff - 80) * 0.05)
 
   def defender_win_pvp_points(diff) when diff > 40, do: 0
-  def defender_win_pvp_points(diff), do: -round((diff - 40) * 0.125)
+  def defender_win_pvp_points(diff), do: -round((diff - 40) * 0.05)
 
   def defender_loss_pvp_points(diff) when diff < -40, do: 0
-  def defender_loss_pvp_points(diff), do: -round((diff + 40) * 0.125)
+  def defender_loss_pvp_points(diff), do: -round((diff + 40) * 0.05)
 
   def avatar_minimum_stats() do
     %{

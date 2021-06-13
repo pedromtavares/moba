@@ -8,7 +8,7 @@ defmodule Moba.Game do
   """
 
   alias Moba.{Repo, Game, Accounts}
-  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds}
+  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks}
 
   # MATCHES
 
@@ -332,4 +332,9 @@ defmodule Moba.Game do
   def list_creation_avatars(codes \\ []), do: Avatars.creation_list(codes)
 
   def list_unlockable_avatars, do: Avatars.unlockable_list()
+
+  # ARENA PICKS
+
+  def create_arena_pick!(user, match), do: ArenaPicks.create!(user, match)
+  def list_recent_arena_picks(user), do: ArenaPicks.list_recent(user)
 end

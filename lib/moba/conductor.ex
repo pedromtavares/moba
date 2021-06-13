@@ -63,7 +63,7 @@ defmodule Moba.Conductor do
       create_match!()
       |> generate_resources!()
       |> generate_hero_bots!(bot_level_range)
-      |> refresh_targets!()
+      |> refresh_pve_targets!()
       |> generate_user_bots!()
       |> new_pvp_round!()
       |> server_update!()
@@ -115,6 +115,7 @@ defmodule Moba.Conductor do
 
       active
       |> Game.update_match!(%{active: false})
+      |> manage_season()
       |> assign_and_award_winners!()
       |> clear_current_heroes!()
     end
@@ -159,7 +160,7 @@ defmodule Moba.Conductor do
   end
 
   # generates new targets for unfinished Jungle heroes
-  defp refresh_targets!(match) do
+  defp refresh_pve_targets!(match) do
     UserQuery.current_players()
     |> Repo.all()
     |> Repo.preload(:current_pve_hero)
@@ -198,6 +199,18 @@ defmodule Moba.Conductor do
         )
 
       Accounts.set_current_pvp_hero!(user, hero.id)
+    end)
+
+    match
+  end
+
+  defp manage_season(match) do
+    UserQuery.with_pvp_heroes()
+    |> Repo.all()
+    |> Repo.preload(:current_pvp_hero)
+    |> Enum.map(fn user ->
+      Game.create_arena_pick!(user, match)
+      Accounts.manage_season_points!(user)
     end)
 
     match

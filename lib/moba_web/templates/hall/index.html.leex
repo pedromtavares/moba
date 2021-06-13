@@ -33,7 +33,7 @@
             </li>
             <li class="nav-item">
                 <a href="javascript:;" class="nav-link <%=if @active_tab == "users", do: "active"%>" phx-click="show-users" phx-hook="Loading" id="show-users-link">
-                    <span class="loading-text"><i class="fa fa-users text-primary mr-1"></i>User Ranking</span>
+                    <span class="loading-text"><i class="fa fa-globe text-primary mr-1"></i>Season Ranking</span>
                 </a>
             </li>
         </ul>
@@ -119,7 +119,7 @@
             <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "users", do: "d-none"%>">
                 <tbody id="hall-of-users">
                     <tr>
-                        <td colspan="4" class='text-warning'>Ranked by number of Medals <i class="fa fa-medal"></i> - You win medals by finishing in the top 3 of the Arena</td>
+                        <td colspan="4" class='text-success'>Ranked by Season Points - Play in the Arena to win Season Points</td>
                     </tr>
                     <%=for {user, index} <- Enum.with_index(@users, 1) do %>
                         <tr id="user-<%=user.id%>">
@@ -129,9 +129,7 @@
                                 </h1>
                             </td>
                             <td>
-                                <span class="font-15 badge badge-pill badge-light-warning py-1 px-2 text-reset">
-                                    <i class="fa fa-medal mr-1"></i><%=user.medal_count%>
-                                </span>
+                                <img src="/images/pvp/<%=user.season_tier%>.png" style="max-height: 120px;max-width: 150px"/>
                             </td>
                             <td>
                                 <h2>
@@ -139,6 +137,12 @@
                                     <br/>
                                     <small class="text-dark"><em>Last online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
                                 </h2>
+                                <span class="font-15 badge badge-pill badge-light-success py-1 px-2 text-reset">
+                                    <i class="fa fa-globe mr-1"></i><%=user.season_points%>
+                                </span>
+                                <span class="font-15 badge badge-pill badge-light-warning py-1 px-2 text-reset">
+                                    <i class="fa fa-medal mr-1"></i><%=user.medal_count%>
+                                </span>
                             </td>
                             <td style="width: 50%">
                                 <div class="row">

@@ -1,24 +1,35 @@
 <%= if @hero do %>
-    <div class="card-box px-0 pt-2 border pb-2">
-        <h1 class="text-center border-bottom pt-0 pb-2 mt-0 mb-3 text-warning border-warning">#<%=@ranking%></h1>
-        <div class="row">
-            <div class="col text-center">
-                <img src="<%=GH.image_url(@hero.avatar)%>" class="avatar img-border"/><br/>
-                <h4 class="mb-0">
-                    <%=live_redirect @hero.name, to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero.id), class: "text-reset"%>
-                    <br/>
-                    <small class="font-italic text-muted">Level <%=@hero.level%> <%=@hero.avatar.name%></small>
+    <div class="col" id="hero_<%=@hero.id%>">
+        <div class="hero-card card" style="background-image: url(<%=GH.background_url(@hero.avatar)%>">
+            <div class="card-header pt-0 pb-1">
+                <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+                    <span class="font-italic level">Level<br/><span class="font-italic font-20"><%=@hero.level%></span></span>
+                    <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero) do %>
+                        <img src="/images/league_<%=@hero.league_tier%>.png" class="league-logo">
+                        <%=@hero.name%>
+                    <% end%>
+                    <span class="font-15 font-italic"><%=@hero.avatar.name%></span>
                 </h4>
+
             </div>
-            <div class="col-xl-7 col-12">
-                <%=GH.hero_skill_list(@hero)%>
-                <br/>
-                <%=GH.hero_item_list(@hero, true)%>
+            <div class="card-body text-center p-0">
+                <div class="rewards border border-warning">
+                    <h1 class="mt-0 text-warning">#<%=@ranking%></h1>
+                    <h3 class="mb-0 text-warning"><%=rewards_for(@ranking)%></small></h3>
+                </div>
+            </div>
+            <div class="card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="skills-container d-flex justify-content-between">
+                            <%=GH.hero_skill_list(@hero)%>
+                        </div>
+                        <div class="items-container row no-gutters">
+                            <%=GH.hero_item_list(@hero)%>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="row mt-3 text-center">
-            <div class="col"><%=GH.hero_stats(@hero, true)%></div>
-        </div>
-        <h5 class="text-center border-top pt-3 pb-0 mt-3 mb-0 text-warning border-warning">Rewards: <%=rewards_for(@ranking)%></h5>
     </div>
 <% end %>

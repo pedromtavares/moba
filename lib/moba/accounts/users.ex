@@ -55,17 +55,18 @@ defmodule Moba.Accounts.Users do
   Given to the top 3 of the Arena when the match ends
   medal_count is what ultimately ranks who is the best player in the game
   """
-  def award_medals_and_shards(user, ranking) do
+  def award_medals_and_shards(user, ranking) when ranking > 0 and ranking < 4 do
     total =
       case ranking do
         1 -> 3
         2 -> 2
         3 -> 1
-        _ -> 0
       end
 
     update!(user, %{medal_count: user.medal_count + total, shard_count: user.shard_count + total})
   end
+
+  def award_medals_and_shards(user, _), do: user
 
   @doc """
   Guests are used after a Hero is created from the homepage, so the user
@@ -102,11 +103,7 @@ defmodule Moba.Accounts.Users do
   Clears all active PVP heroes from the current players in the match.
   """
   def clear_active_players! do
-    UserQuery.current_players()
-    |> Repo.all()
-    |> Enum.map(fn user ->
-      set_current_pvp_hero!(user, nil)
-    end)
+    Repo.update_all(User, set: [current_pvp_hero_id: nil])
   end
 
   @doc """
@@ -186,6 +183,35 @@ defmodule Moba.Accounts.Users do
     [user] ++ Enum.filter(by_level, &(&1.id != id))
   end
 
+  def manage_season_points!(%{current_pvp_hero: hero, season_points: current_points} = user) do
+    new_points = if hero do
+      current_points + hero.pvp_points
+    else
+      current_points
+    end
+
+    minimum = mininum_season_points_for(user)
+
+    new_points = if new_points < minimum, do: minimum, else: new_points
+
+    season_tier = Enum.find((1..7), 1, fn tier -> season_points_for(tier) > new_points end) - 1
+
+    update!(user, %{season_tier: season_tier, season_points: new_points})
+  end
+
+  def season_points_for(tier) do
+    case tier do
+      1 -> 100
+      2 -> 200
+      3 -> 300
+      4 -> 500
+      5 -> 1000
+      6 -> 2000
+      7 -> 4000
+      _ -> 0
+    end
+  end
+
   # --------------------------------
 
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do
@@ -211,4 +237,6 @@ defmodule Moba.Accounts.Users do
   end
 
   defp level_up_alert(current_level), do: %{level: current_level + 1, type: "battle"}
+
+  defp mininum_season_points_for(%{medal_count: medals}), do: medals * Moba.season_points_per_medal()
 end

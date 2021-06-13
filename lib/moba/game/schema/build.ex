@@ -1,6 +1,6 @@
 defmodule Moba.Game.Schema.Build do
   @moduledoc """
-  Build represent a battle strategy one can use to defeat oppoennts.
+  A Build represents a battle strategy one can use to defeat oppoennts.
 
   Hero -> Build -> Skills
 

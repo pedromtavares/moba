@@ -227,8 +227,8 @@ defmodule Moba.EngineTest do
       hero = Game.get_hero!(attacker.id)
       defender = Game.get_hero!(defender.id)
 
-      assert hero.pvp_points == attacker.pvp_points + 15
-      assert hero.user.pvp_points == attacker.user.pvp_points + 15
+      assert hero.pvp_points == attacker.pvp_points + 9
+      assert hero.user.pvp_points == attacker.user.pvp_points + 9
 
       assert hero.pvp_wins == attacker.pvp_wins + 1
       assert hero.user.pvp_wins == attacker.user.pvp_wins + 1
@@ -243,8 +243,8 @@ defmodule Moba.EngineTest do
       updated_attacker = Game.get_hero!(attacker.id)
       updated_defender = Game.get_hero!(defender.id)
 
-      assert updated_attacker.pvp_points == attacker.pvp_points - 15
-      assert updated_defender.pvp_points == defender.pvp_points + 5
+      assert updated_attacker.pvp_points == attacker.pvp_points - 9
+      assert updated_defender.pvp_points == defender.pvp_points + 2
       assert updated_attacker.pvp_losses == attacker.pvp_losses + 1
       assert updated_defender.pvp_wins == defender.pvp_wins + 1
       assert updated_defender.user.pvp_wins == defender.user.pvp_wins + 1

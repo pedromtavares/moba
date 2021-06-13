@@ -38,11 +38,15 @@ defmodule Moba.Accounts do
 
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 
-  def set_current_pve_hero!(user, hero_id), do: Users.set_current_pve_hero!(user, hero_id)
+  defdelegate set_current_pve_hero!(user, hero_id), to: Users
 
-  def set_current_pvp_hero!(user, hero_id), do: Users.set_current_pvp_hero!(user, hero_id)
+  defdelegate set_current_pvp_hero!(user, hero_id), to: Users
 
-  def clear_active_players!, do: Users.clear_active_players!()
+  defdelegate clear_active_players!, to: Users
+
+  defdelegate manage_season_points!(user), to: Users
+
+  defdelegate season_points_for(tier), to: Users
 
   def maybe_archive_current_pve_hero(%{current_pve_hero_id: hero_id} = user) when not is_nil(hero_id) do
     %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)

@@ -46,7 +46,7 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def eligible_for_ranking(limit) do
     from(u in User,
-      order_by: [desc: [u.medal_count, u.level, u.experience]],
+      order_by: [desc: [u.season_points, u.medal_count, u.level, u.experience]],
       where: u.is_bot == false,
       where: u.is_guest == false,
       limit: ^limit
@@ -70,6 +70,10 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def with_pvp_points do
     from(u in by_pvp_points(), where: u.pvp_points > 0)
+  end
+
+  def with_pvp_heroes(query \\ User) do
+    from(u in query, where: not is_nil(u.current_pvp_hero_id))
   end
 
   def eligible_arena_bots do

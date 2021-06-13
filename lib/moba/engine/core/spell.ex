@@ -21,10 +21,6 @@ defmodule Moba.Engine.Core.Spell do
     effects_for(turn, is_attacking: Map.get(options, :is_attacking))
   end
 
-  defp effects_for(turn) do
-    effects_for(turn, [])
-  end
-
   # ACTIVES
 
   defp effects_for(%{resource: %Skill{code: "blade_fury"}, attacker: %{double_skill: nil}} = turn, _options) do

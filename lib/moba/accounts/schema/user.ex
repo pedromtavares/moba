@@ -11,6 +11,8 @@ defmodule Moba.Accounts.Schema.User do
 
   import Ecto.Changeset
 
+  alias Moba.{Game, Accounts}
+
   schema "users" do
     pow_user_fields()
 
@@ -31,12 +33,16 @@ defmodule Moba.Accounts.Schema.User do
     field :medal_count, :integer, default: 0
     field :shard_count, :integer, default: 0
     field :hero_collection, {:array, :map}
+    field :season_tier, :integer, default: 0
+    field :season_points, :integer, default: 0
 
-    has_many :heroes, Moba.Game.Schema.Hero
-    has_many :unlocks, Moba.Accounts.Schema.Unlock
+    has_many :heroes, Game.Schema.Hero
+    has_many :arena_picks, Game.Schema.ArenaPick
+    has_many :unlocks, Accounts.Schema.Unlock
 
-    belongs_to :current_pve_hero, Moba.Game.Schema.Hero
-    belongs_to :current_pvp_hero, Moba.Game.Schema.Hero
+
+    belongs_to :current_pve_hero, Game.Schema.Hero
+    belongs_to :current_pvp_hero, Game.Schema.Hero
 
     timestamps()
   end
@@ -89,7 +95,9 @@ defmodule Moba.Accounts.Schema.User do
       :pvp_score,
       :shard_count,
       :medal_count,
-      :hero_collection
+      :hero_collection,
+      :season_points,
+      :season_tier
     ])
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)

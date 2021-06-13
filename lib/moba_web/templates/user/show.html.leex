@@ -62,10 +62,10 @@
             <div class="row">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>Performance</h5>
+                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-user mr-1"></i>Account</h5>
                         <div class="card-body p-2">
                             <%= unless @user.is_bot do %>
-                                <div class="row mb-4">
+                                <div class="row">
                                     <div class="col text-center d-flex justify-content-between" title="Account Level. Gain Account XP by leveling heroes in the Jungle" data-toggle="tooltip">
                                         <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%=@user.level%></div>
                                         <div class="progress progress-fixed account-level-bar">
@@ -77,37 +77,9 @@
                                     </div>
                                 </div>
                             <% end %>
-                            <div class="performance">
-                                <div class="row text-center">
-                                    <div class="col">
-                                        <h3 class="mb-0 text-danger">
-                                            <i class="fa fa-crosshairs mr-1"></i>
-                                            <%=win_rate(@user)%>%
-                                        </h3>
-                                        <h4 class="text-danger">Overall Win Rate</h4>
-                                    </div>
-                                    <%=if @user.ranking do %>
-                                        <div class="col">
-                                            <h3 class="mb-0 text-info">
-                                                # <%=@user.ranking%>
-                                            </h3>
-                                            <h4 class="text-info">Overall Ranking</h4>
-                                        </div>
-                                    <% end %>
-                                    <%= if @user.medal_count > 0 do %>
-                                        <div class="col">
-                                            <h3 class="mb-0 text-warning">
-                                                <i class="fa fa-medal"></i>
-                                                <%=@user.medal_count%>
-                                            </h3>
-                                            <h4 class="text-warning">Medals</h4>
-                                        </div>
-                                    <% end %>
-                                </div>
-                            </div>
                         </div>
                         <div class="card-footer">
-                            <div class="row mt-3">
+                            <div class="row">
                                 <div class="col text-center d-flex justify-content-between">
                                     <%=if @user.id == @current_user.id do %>
                                         <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
@@ -132,11 +104,11 @@
                     </div>
                 </div>
             </div>
-            <%=if @user != @current_user do %>
-                <div class="row mt-1 mb-3 text-center">
+            <%=if @user.id != @current_user.id do %>
+                <div class="row text-center">
                     <div class="col">
                         <div class="card">
-                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-medal mr-1"></i>Score</h5>
+                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-user-friends mr-1"></i>Score</h5>
                             <div class="card-body">
                                 <h4 class="text-center">
                                     <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.pvp_score["#{@user.id}"] || 0%></span>
@@ -148,6 +120,69 @@
                     </div>
                 </div>
             <% end %>
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>Arena Performance</h5>
+                        <div class="card-body p-2">
+                            <div class="performance">
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <img src="/images/pvp/<%=@user.season_tier%>.png" style="max-height: 150px"/>
+                                        <h2 class="text-medal-<%=@user.season_tier%>"><%=Moba.medals[@user.season_tier]%></h2>
+                                    </div>
+                                </div>
+                                <div class="row text-center">
+                                    <%=if @user.ranking do %>
+                                        <div class="col">
+                                            <h3 class="mb-0 text-info">
+                                                # <%=@user.ranking%>
+                                            </h3>
+                                            <h4 class="text-info">Season Ranking</h4>
+                                        </div>
+                                    <% end %>
+                                    <%= if @user.medal_count > 0 do %>
+                                        <div class="col">
+                                            <h3 class="mb-0 text-warning">
+                                                <i class="fa fa-medal"></i>
+                                                <%=@user.medal_count%>
+                                            </h3>
+                                            <h4 class="text-warning">Medals</h4>
+                                        </div>
+                                    <% end %>
+                                    <div class="col">
+                                        <h3 class="mb-0 text-success">
+                                            <i class="fa fa-globe mr-1"></i>
+                                            <%=@user.season_points%>
+                                        </h3>
+                                        <h4 class="text-success">Season Points</h4>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <%= if length(@arena_picks) > 0 do %>
+                            <div class="card-footer p-0">
+                                <table class="table table-dark text-center table-sm m-0 mt-2">
+                                    <tr>
+                                        <th>Recent Pick</th>
+                                        <th>Ranking</th>
+                                        <th>Win Rate</th>
+                                        <th>Season Points</th>
+                                    </tr>
+                                    <%= for pick <- @arena_picks do %>
+                                        <tr>
+                                            <td><img src="<%=GH.image_url(pick.hero.avatar)%>" class="avatar" style="width: 80px"/></td>
+                                            <td><h2 class="text-info">#<%=pick.ranking%></h2></td>
+                                            <td><h2 class="text-danger"><%=win_rate(pick)%>%</h2></td>
+                                            <td><h2 class="text-success">+<%=pick.points%></h2></td>
+                                        </tr>
+                                    <% end %>
+                                </table>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="card ranking">
@@ -157,8 +192,8 @@
                         <tr>
                             <th><%=if @user.ranking, do: "Rank", else: "Level" %></th>
                             <th>User</th>
+                            <th>Season Points</th>
                             <th>Medals</th>
-                            <th>Win Rate</th>
                         </tr>
                         <%= for user <- @ranking do %>
                             <tr>
@@ -173,14 +208,15 @@
                                 </td>
                                 <td>
                                     <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
+                                        <img src="/images/pvp/<%=user.season_tier%>.png" style="max-height:  50px"/>
                                         <h5 class="text-primary mb-0 mt-1"><%=user.username%></h5>
                                     <% end %>
                                 </td>
                                 <td>
-                                    <h3 class="text-warning"><i class="fa fa-medals"></i> <%=user.medal_count%></h3>
+                                    <h3 class="text-success"><%=user.season_points%></h3>
                                 </td>
                                 <td>
-                                    <h3 class="text-danger"><%=win_rate(user)%>%</h3>
+                                    <h3 class="text-warning"><i class="fa fa-medals"></i> <%=user.medal_count%></h3>
                                 </td>
                             </tr>
                         <% end %>

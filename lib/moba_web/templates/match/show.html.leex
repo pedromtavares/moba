@@ -14,51 +14,91 @@
     </div>
 
     <%= if @hero do %>
-        <div class="row performance mb-0">
-            <div class="col-xl-6 col-md-12 mb-4 margin-auto">
-                <div class="card-box border">
-                    <div class="row">
-                        <div class="col-12 col-md-4 d-flex align-items-center justify-content-center">
-                            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero), class: "h4 text-center" do %>
-                                <img src="<%=GH.image_url(@hero.avatar)%>" class="img-border-sm mb-1 avatar"/><br/>
-                                Level <%=@hero.level%> <%=@hero.avatar.name%>
-                            <% end %>
-                        </div>
-                        <div class="col-12 col-md-8 mt-2">
-                            <%=GH.hero_skill_list(@hero)%>
-                            <br/>
-                            <%=GH.hero_item_list(@hero, true)%>
+        <div class="row">
+            <div class="col-md-6 col-xl-4 offset-xl-2">
+                <div class="hero-card card" style="background-image: url(<%=GH.background_url(@hero.avatar)%>">
+                    <div class="card-header pt-0 pb-1">
+                        <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+                            <span class="font-italic level">Level<br/><span class="font-italic font-20"><%=@hero.level%></span></span>
+                            <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero) do %>
+                                <img src="/images/league_<%=@hero.league_tier%>.png" class="league-logo">
+                                <%=@hero.name%>
+                            <% end%>
+                            <span class="font-15 font-italic"><%=@hero.avatar.name%></span>
+                        </h4>
+
+                    </div>
+                    <div class="card-body text-center">
+                    </div>
+                    <div class="card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="skills-container d-flex justify-content-between">
+                                    <%=GH.hero_skill_list(@hero)%>
+                                </div>
+                                <div class="items-container row no-gutters">
+                                    <%=GH.hero_item_list(@hero)%>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-4 margin-auto text-center mt-2">
-                            <div class="card-box border mb-0">
-                                <h2>
-                                    <i class="fa fa-trophy font-24 text-danger"></i>
-                                    <h3><%=GH.pvp_win_rate(@hero)%>%</h3>
-                                    <p class="text-uppercase mb-1 font-13 font-weight-medium">Win Rate</p>
-                                </h2>
+                </div>
+            </div>
+            <div class="col-md-6 col-xl-4">
+                <div class="card">
+                    <h5 class="card-header text-center font-17 text-white">
+                        <i class="fa fa-poll mr-1"></i>Performance
+                    </h5>
+                    <div class="card-body p-2">
+                        <div class="row mt-2 d-flex align-items-center justify-content-between">
+                            <%= if next = next_medal(@hero.user) do %>
+                                <div class="text-right mx-2">
+                                    <img src="/images/pvp/<%=@hero.user.season_tier%>.png" style="max-width: 100px" data-toggle="tooltip" title="<%=Moba.medals[@hero.user.season_tier]%> (Current)"/>
+                                </div>
+                                <div class="col">
+                                    <div class="progress" style="height:30px;">
+                                        <div style="width:<%=current_points_percentage(@hero)%>%" class="progress-bar bg-dark">
+                                        </div>
+                                        <div style="width:<%=next_medal_percentage(@hero)%>%" class="progress-bar bg-success">
+                                        </div>
+                                        <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%=@hero.user.season_points%>/<%=next_medal_points(@hero.user)%></small>
+                                    </div>
+                                </div>
+                                <div class="text-left mx-2">
+                                    <img src="/images/pvp/<%=next%>.png" style="max-width: 100px" data-toggle="tooltip" title="<%=Moba.medals[next]%>"/>
+                                </div>
+                            <% else %>
+                                <div class="col text-center">
+                                    <img src="/images/pvp/<%=@hero.user.season_tier%>.png" style="width: 120px"/>
+                                </div>
+                            <% end %>
+                        </div>
+                        <div class="performance">
+                            <h3 class="text-center mt-0 mb-2 text-league-<%=@hero.user.season_tier%>"><%=Moba.medals[@hero.user.season_tier]%></h3>
+                            <div class="row text-center">
+                                <div class="col">
+                                    <h3 class="mb-0 text-primary">
+                                        <i class="fa fa-hashtag"></i>
+                                        <%=@hero.pvp_ranking%>
+                                    </h3>
+                                    <h4 class="text-primary">Ranking</h4>
+                                </div>
+                                <div class="col">
+                                    <h3 class="mb-0 text-success">
+                                        <i class="fa fa-globe"></i>
+                                        +<%=@hero.pvp_points%>
+                                    </h3>
+                                    <h4 class="text-success">Season Points</h4>
+                                </div>
+                                <div class="col">
+                                    <h3 class="mb-0 text-danger">
+                                        <i class="fa fa-crosshairs"></i>
+                                        <%=GH.pvp_win_rate(@hero)%>%
+                                    </h3>
+                                    <h4 class="text-danger">Win Rate</h4>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-4 margin-auto text-center mt-2">
-                            <div class="card-box border mb-0">
-                                <h2>
-                                    <i class="fa fa-list-ol font-24 text-danger"></i>
-                                    <h3>#<%=@hero.pvp_ranking%></h3>
-                                    <p class="text-uppercase mb-1 font-13 font-weight-medium">Rank</p>
-                                </h2>
-                            </div>
-                        </div>
-                        <div class="col-4 margin-auto text-center mt-2">
-                            <div class="card-box border mb-0">
-                                <h2>
-                                    <i class="fa fa-ellipsis-h font-24 text-danger"></i>
-                                    <h3><%=@hero.pvp_points%></h3>
-                                    <p class="text-uppercase mb-1 font-13 font-weight-medium">Points</p>
-                                </h2>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -96,15 +136,9 @@
         <% end %>
 
         <div class="row winners">
-            <div class="col mt-2">
-                <%=render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket%>
-            </div>
-            <div class="col">
-                <%=render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket%>
-            </div>
-            <div class="col mt-2">
-                <%=render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket%>
-            </div>
+            <%=render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket%>
+            <%=render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket%>
+            <%=render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket%>
         </div>
     <% end %>
 </div>
