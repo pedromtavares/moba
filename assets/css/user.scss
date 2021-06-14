@@ -30,9 +30,24 @@
       filter: grayscale(100%);
     }
     .league-logo{
-      width: 25px;
+      max-width: 25px;
       height: auto;
       margin-top: -30px
+    }
+  }
+
+  .arena-picks{
+
+    .avatar{
+      max-width: 100px;
+    }
+    .league-logo{
+      max-width: 50px;
+      height: auto;
+      max-height: 25px;
+      position: absolute;
+      top: 70%;
+      left: 40%;
     }
   }
 }

@@ -162,7 +162,7 @@
                         </div>
                         <%= if length(@arena_picks) > 0 do %>
                             <div class="card-footer p-0">
-                                <table class="table table-dark text-center table-sm m-0 mt-2">
+                                <table class="table table-dark text-center table-sm m-0 mt-2 arena-picks">
                                     <tr>
                                         <th>Recent Pick</th>
                                         <th>Ranking</th>
@@ -171,7 +171,15 @@
                                     </tr>
                                     <%= for pick <- @arena_picks do %>
                                         <tr>
-                                            <td><img src="<%=GH.image_url(pick.hero.avatar)%>" class="avatar" style="width: 80px"/></td>
+                                            <td>
+                                                <a href="javascript:;" class="<%=if @featured.id == pick.hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=pick.hero_id%>" phx-hook="Loading" id="set-ap-featured-<%=pick.hero_id%>">
+                                                    <div class='avatar-container'>
+                                                        <img src="<%=GH.image_url(pick.hero.avatar)%>" class="avatar"/>
+                                                        <img src="/images/league_<%=pick.hero.league_tier%>.png" class="league-logo">
+                                                    </div>
+
+                                                </a>
+                                            </td>
                                             <td><h2 class="text-info">#<%=pick.ranking%></h2></td>
                                             <td><h2 class="text-danger"><%=win_rate(pick)%>%</h2></td>
                                             <td><h2 class="text-success">+<%=pick.points%></h2></td>
