@@ -95,8 +95,8 @@ defmodule Moba.Engine.Core.Pve do
       win_streak_xp: win_streak_xp,
       loss_streak_xp: loss_streak_xp,
       difficulty_percentage: percentage,
-      total_xp: total,
-      total_gold: total,
+      total_xp: final_rewards(total, attacker),
+      total_gold: final_rewards(total, attacker),
       total_pve_points: pve_points || 0
     }
 
@@ -169,4 +169,7 @@ defmodule Moba.Engine.Core.Pve do
 
   defp zero_limit(number) when number < 0, do: 0
   defp zero_limit(number), do: number
+
+  defp final_rewards(_, %{easy_mode: true, total_farm: farm}) when farm >= 20_000, do: 0
+  defp final_rewards(total, _), do: total
 end

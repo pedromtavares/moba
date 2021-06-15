@@ -69,8 +69,8 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in by_user(Hero, user_id),
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.id]],
-      where: hero.pve_battles_available == 0,
-      where: hero.league_tier >= 4
+      where: hero.finished_pve == true,
+      where: hero.league_tier >= 5
     )
   end
 

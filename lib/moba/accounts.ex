@@ -36,6 +36,8 @@ defmodule Moba.Accounts do
 
   def user_search(user), do: Users.search(user)
 
+  defdelegate easy_mode?(user), to: Users
+
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 
   defdelegate set_current_pve_hero!(user, hero_id), to: Users

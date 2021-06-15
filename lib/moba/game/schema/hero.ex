@@ -27,6 +27,7 @@ defmodule Moba.Game.Schema.Hero do
     field :gold, :integer
     field :bot_difficulty, :string
     field :archived_at, :utc_datetime
+    field :easy_mode, :boolean, default: false
 
     # PVE (Jungle) related fields
     field :pve_points, :integer
@@ -137,7 +138,8 @@ defmodule Moba.Game.Schema.Hero do
       :user_id,
       :active_build_id,
       :archived_at,
-      :boss_id
+      :boss_id,
+      :easy_mode
     ])
   end
 

@@ -32,6 +32,7 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
+  @easy_mode_count 2
 
   # PVE constants
   @base_xp 100
@@ -73,6 +74,7 @@ defmodule Moba do
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
   def medals, do: @medals
+  def easy_mode_count, do: @easy_mode_count
 
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment
@@ -176,7 +178,13 @@ defmodule Moba do
 
   def current_match, do: Game.current_match()
 
-  def create_current_pve_hero!(attrs, user, avatar, skills, match \\ current_match()) do
+  def create_current_pve_hero!(attrs, %{easy_mode_count: easy_mode_count} = user, avatar, skills, match \\ current_match()) do
+    attrs = if easy_mode_count > 0 do
+      Map.merge(attrs, %{easy_mode: true, pve_battles_available: 1000})
+    else
+      attrs
+    end
+
     Accounts.maybe_archive_current_pve_hero(user)
     hero = Game.create_hero!(attrs, user, avatar, skills, match)
     Accounts.set_current_pve_hero!(user, hero.id)

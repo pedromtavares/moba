@@ -83,6 +83,7 @@ defmodule Moba.Accounts.Users do
            username: name,
            email: email,
            is_guest: true,
+           easy_mode_count: Moba.easy_mode_count(),
            password: pass,
            confirm_password: pass
          }) do
@@ -182,6 +183,8 @@ defmodule Moba.Accounts.Users do
 
     [user] ++ Enum.filter(by_level, &(&1.id != id))
   end
+
+  def easy_mode?(user), do: user.easy_mode_count > 0
 
   def manage_season_points!(%{current_pvp_hero: hero, season_points: current_points} = user) do
     new_points = if hero do

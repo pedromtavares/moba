@@ -20,17 +20,29 @@
                             <div class="col-lg col-12 mt-3" id="jungle-stats">
                                 <div class="row align-items-center">
                                     <div class="col-lg">
-                                        <div class="text-white text-center">
-                                            <h2 class="text-white mb-0"><%=@current_hero.pve_battles_available%></h2>
-                                            <p>Ganks available</p>
-                                            <p class="mb-0" data-toggle="tooltip" title="<%=streak_title(@current_hero)%>">
+                                        <%= if @current_hero.easy_mode do %>
+                                            <div class="text-white text-center">
                                                 <%=if @current_hero.loss_streak > 1 do %>
-                                                    <span class="text-dark"><i class="fa fa-skull-crossbones mr-1"></i>Loss Streak: <strong><%=@current_hero.loss_streak%></strong></span>
+                                                    <h2 class="text-dark mb-0"><i class="fa fa-skull-crossbones mr-1"></i><%=@current_hero.loss_streak%></h2>
+                                                    <h3>Loss Streak</h3>
                                                 <% else %>
-                                                    <span class="text-warning"><i class="fa fa-angle-double-up mr-1"></i>Undefeated Streak: <strong><%=@current_hero.win_streak%></strong></span>
+                                                    <h2 class="text-warning mb-0"><i class="fa fa-angle-double-up mr-1"></i><%=@current_hero.win_streak%></h2>
+                                                    <h3>Undefeated Streak</h3>
                                                 <% end %>
-                                            </p>
-                                        </div>
+                                            </div>
+                                        <% else %>
+                                            <div class="text-white text-center">
+                                                <h2 class="text-white mb-0"><%=@current_hero.pve_battles_available%></h2>
+                                                <p>Ganks available</p>
+                                                <p class="mb-0" data-toggle="tooltip" title="<%=streak_title(@current_hero)%>">
+                                                    <%=if @current_hero.loss_streak > 1 do %>
+                                                        <span class="text-dark"><i class="fa fa-skull-crossbones mr-1"></i>Loss Streak: <strong><%=@current_hero.loss_streak%></strong></span>
+                                                    <% else %>
+                                                        <span class="text-warning"><i class="fa fa-angle-double-up mr-1"></i>Undefeated Streak: <strong><%=@current_hero.win_streak%></strong></span>
+                                                    <% end %>
+                                                </p>
+                                            </div>
+                                        <% end %>
                                     </div>
                                 </div>
                             </div>

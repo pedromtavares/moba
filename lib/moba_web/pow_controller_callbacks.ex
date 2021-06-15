@@ -23,6 +23,7 @@ defmodule MobaWeb.PowControllerCallbacks do
         Accounts.update_user!(user, %{
           tutorial_step: guest.tutorial_step,
           experience: guest.experience,
+          easy_mode_count: guest.easy_mode_count,
           level: guest.level,
           current_pve_hero_id: hero.id
         })

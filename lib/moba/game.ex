@@ -126,10 +126,8 @@ defmodule Moba.Game do
 
   def pvp_targets_available(hero), do: Heroes.pvp_targets_available(hero)
 
-  def veteran_hero?(hero) do
-    hero = Repo.preload(hero, :user)
-    hero.user && hero.user.level > 2
-  end
+  def veteran_hero?(%{easy_mode: true}), do: false
+  def veteran_hero?(_), do: true
 
   def maybe_generate_boss(%{pve_battles_available: 0, boss_id: nil, pve_points: points} = hero) do
     if master_league?(hero) && points == Moba.pve_points_limit() do
@@ -154,6 +152,7 @@ defmodule Moba.Game do
     updated = Repo.preload(updated, :user)
     collection = Heroes.collection_for(updated.user_id)
     Accounts.update_hero_collection!(updated.user, collection)
+    if hero.easy_mode, do: Accounts.update_user!(updated.user, %{easy_mode_count: updated.user.easy_mode_count - 1})
     updated
   end
 

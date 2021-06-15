@@ -35,6 +35,7 @@ defmodule Moba.Accounts.Schema.User do
     field :hero_collection, {:array, :map}
     field :season_tier, :integer, default: 0
     field :season_points, :integer, default: 0
+    field :easy_mode_count, :integer, default: 0
 
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick
@@ -61,7 +62,8 @@ defmodule Moba.Accounts.Schema.User do
       :status,
       :current_pve_hero_id,
       :current_pvp_hero_id,
-      :pvp_points
+      :pvp_points,
+      :easy_mode_count
     ])
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
@@ -97,7 +99,8 @@ defmodule Moba.Accounts.Schema.User do
       :medal_count,
       :hero_collection,
       :season_points,
-      :season_tier
+      :season_tier,
+      :easy_mode_count
     ])
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)

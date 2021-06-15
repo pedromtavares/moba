@@ -245,8 +245,12 @@ defmodule Moba.Engine.Core do
     end)
   end
 
+  # Heroes in easy_mode are constantly buffed for PVE and League battles
+  defp buffed_total(%{easy_mode: true}, %{type: type}, total) when type != "pvp",
+    do: total + round(Moba.league_buff_multiplier() * total)
+
   # Heroes receive a buff (stat increase) when they rank up to a new league -- only applied in PVE
-  defp buffed_total(%{buffed_battles_available: battles}, %{type: type}, total) when type == "pve" and battles > 0,
+  defp buffed_total(%{buffed_battles_available: battles}, %{type: "pve"}, total) when battles > 0,
     do: total + round(Moba.league_buff_multiplier() * total)
 
   defp buffed_total(_, _, total), do: total

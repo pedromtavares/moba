@@ -181,7 +181,7 @@ const Tutorial = {
       case 11:
         tour.addStep({
           id: 'eleventh-tutorial-first-step',
-          text: "<p class='text-center'>You have ranked up to Silver League, congratulations! Now only Gold, Platinum, Diamond, Master and Grandmaster Leagues to go ( ͡° ͜ʖ ͡°)</p>",
+          text: "<p class='text-center'>You have ranked up to Silver League, congratulations! Now only Gold, Platinum, Diamond and Master Leagues to go ( ͡° ͜ʖ ͡°)</p>",
           attachTo: {
             element: '#current-hero-league',
             on: 'bottom'
@@ -215,7 +215,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'eleventh-tutorial-third-step',
-          text: "<p class='text-center'>Keep battling until you finish all of your available Ganks and hopefully reach the Grandmaster League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
+          text: "<p class='text-center'>Keep ganking until you reach the Master League, you're doing realy well! Keeping a high Undefeated Streak will get your more XP and Gold per battle. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
           attachTo: {
             element: '#jungle-stats',
             on: 'bottom'
