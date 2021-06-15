@@ -118,6 +118,7 @@ defmodule Moba.Engine.Core.League do
     {battle, attacker}
   end
 
+  defp league_bonus(%{easy_mode: true, total_farm: farm}) when farm >= 20_000, do: 0
   defp league_bonus(%{league_tier: @master_league_tier}), do: Moba.boss_win_gold_bonus()
   defp league_bonus(_), do: Moba.league_win_gold_bonus()
 end
