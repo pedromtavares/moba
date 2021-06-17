@@ -187,17 +187,18 @@ defmodule Moba.Accounts.Users do
   def easy_mode?(user), do: user.easy_mode_count > 0
 
   def manage_season_points!(%{current_pvp_hero: hero, season_points: current_points} = user) do
-    new_points = if hero do
-      current_points + hero.pvp_points
-    else
-      current_points
-    end
+    new_points =
+      if hero do
+        current_points + hero.pvp_points
+      else
+        current_points
+      end
 
     minimum = mininum_season_points_for(user)
 
     new_points = if new_points < minimum, do: minimum, else: new_points
 
-    season_tier = Enum.find((1..7), 1, fn tier -> season_points_for(tier) > new_points end) - 1
+    season_tier = Enum.find(1..7, 1, fn tier -> season_points_for(tier) > new_points end) - 1
 
     update!(user, %{season_tier: season_tier, season_points: new_points})
   end

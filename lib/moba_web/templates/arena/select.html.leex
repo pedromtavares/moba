@@ -15,9 +15,7 @@
         <%= if @current_user.current_pve_hero_id do %>
             <a href="/game/pve" class="btn btn-success btn-lg"><i class="fa fa-leaf mr-1"></i>Back to the Jungle</a>
         <% else %>
-            <%=if can_create_new_hero?(@current_user) do %>
-                <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
-            <% end %>
+            <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
         <% end %>
     </div>
     <div class="row">

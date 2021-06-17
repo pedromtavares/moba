@@ -37,15 +37,6 @@ defmodule Moba.Game do
 
   def current_heroes(user_id, match_id), do: Heroes.current(user_id, match_id)
 
-  @doc """
-  Users are only allowed to create a limited number of PVE heroes per match
-  """
-  def can_create_new_hero?(_user) do
-    match = current_match()
-
-    match && match.last_server_update_at
-  end
-
   def last_pve_hero(user_id), do: Heroes.last_active_pve(user_id)
 
   def last_pvp_hero(user_id), do: Heroes.last_active_pvp(user_id)
@@ -136,6 +127,7 @@ defmodule Moba.Game do
       hero
     end
   end
+
   def maybe_generate_boss(hero), do: hero
 
   def maybe_finish_pve(%{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false} = hero) do
@@ -145,6 +137,7 @@ defmodule Moba.Game do
       hero
     end
   end
+
   def maybe_finish_pve(hero), do: hero
 
   def finish_pve!(hero) do
@@ -207,6 +200,7 @@ defmodule Moba.Game do
   """
   def create_pvp_build!(hero, skills) do
     %{hero: hero} = build = Builds.create!("pvp", hero, skills)
+
     hero
     |> activate_build!(build)
     |> level_active_build_to_max!()

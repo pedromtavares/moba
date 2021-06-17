@@ -112,13 +112,15 @@ defmodule Moba.Game.Builds do
     Map.put(hero, :builds, updated_builds)
   end
 
-  def level_active_to_max!(%{active_build: %{skills: skills} = build, level: level} = hero) when level >= @max_hero_level do
+  def level_active_to_max!(%{active_build: %{skills: skills} = build, level: level} = hero)
+      when level >= @max_hero_level do
     updated = replace_skills!(build, Game.max_leveled_skills(skills))
 
     hero
     |> Game.update_hero!(%{skill_levels_available: 0})
     |> Map.put(:active_build, updated)
   end
+
   def level_active_to_max!(hero), do: hero
 
   # --------------------------------

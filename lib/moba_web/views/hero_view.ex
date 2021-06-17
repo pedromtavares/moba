@@ -8,8 +8,6 @@ defmodule MobaWeb.HeroView do
     end
   end
 
-  def can_create_new_hero?(user), do: Game.can_create_new_hero?(user)
-
   def can_join_arena?(user), do: length(Game.eligible_heroes_for_pvp(user.id)) > 0
 
   def next_match_description, do: MobaWeb.CurrentHeroView.next_match_description()

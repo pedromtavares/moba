@@ -26,7 +26,14 @@ defmodule MobaWeb.UserLiveView do
     ranking = Accounts.user_search(user)
     arena_picks = Game.list_recent_arena_picks(user)
 
-    {:noreply, assign(socket, user: user, featured: featured, ranking: ranking, blank_collection: blank_collection, arena_picks: arena_picks)}
+    {:noreply,
+     assign(socket,
+       user: user,
+       featured: featured,
+       ranking: ranking,
+       blank_collection: blank_collection,
+       arena_picks: arena_picks
+     )}
   end
 
   def handle_event("set-featured", %{"id" => id}, socket) do

@@ -6,7 +6,7 @@
     </div>
 <% end %>
 <%= if @origin == "arena" do %>
-    <%=if @current_user.current_pve_hero_id || Game.can_create_new_hero?(@current_user) do %>
+    <%=if @current_user.current_pve_hero_id do %>
         <div class="col-4">
             <%=link to: "/game/pve", class: "h3 jungle-box nav-box" do %>
                 <span class="loading-text">

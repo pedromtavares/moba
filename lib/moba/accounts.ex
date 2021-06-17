@@ -52,6 +52,7 @@ defmodule Moba.Accounts do
 
   def maybe_archive_current_pve_hero(%{current_pve_hero_id: hero_id} = user) when not is_nil(hero_id) do
     %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)
+
     unless pve_hero.finished_pve do
       Game.update_hero!(pve_hero, %{archived_at: DateTime.utc_now()})
     end

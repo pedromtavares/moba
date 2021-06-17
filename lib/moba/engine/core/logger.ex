@@ -184,7 +184,9 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("shadow_word", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
-    "Cursed by the shadows, #{defender} took [damage]#{damage} damage[/damage] while #{attacker} regenerated [hp]#{regen} HP[/hp]."
+    "Cursed by the shadows, #{defender} took [damage]#{damage} damage[/damage] while #{attacker} regenerated [hp]#{
+      regen
+    } HP[/hp]."
   end
 
   defp description_for("shadow_word", %{"damage" => {damage, defender}}, _) do

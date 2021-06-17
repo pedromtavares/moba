@@ -475,10 +475,13 @@ defmodule Moba.Game.Heroes do
     master_league_updates(%{hero | easy_mode: false})
     |> Game.finish_pve!()
   end
-  defp master_league_updates(%{league_tier: tier, level: level} = hero) when tier == @master_league_tier and level < @max_level do
+
+  defp master_league_updates(%{league_tier: tier, level: level} = hero)
+       when tier == @master_league_tier and level < @max_level do
     hero
     |> level_to_max()
     |> Game.level_active_build_to_max!()
   end
+
   defp master_league_updates(hero), do: hero
 end

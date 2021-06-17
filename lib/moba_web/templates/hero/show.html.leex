@@ -29,19 +29,11 @@
             </div>
 
             <div class="col">
-                <%= if can_create_new_hero?(@current_user) do %>
-                    <a href="/create" class="btn btn-outline-success btn-block btn-lg">
-                        <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
-                        <strong class="font-20 d-block">Create another Hero</strong>
-                        <p class="font-15">Head back to the Jungle with a brand new Hero to complete your Collection</p>
-                    </a>
-                <% else %>
-                    <a href="#" class="btn btn-outline-success btn-block btn-lg disabled">
-                        <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
-                        <strong class="font-20 d-block">Create another Hero</strong>
-                        <p class="font-15">The match is restarting, please wait a few minutes and refresh the page.</p>
-                    </a>
-                <% end %>
+                <a href="/create" class="btn btn-outline-success btn-block btn-lg">
+                    <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Create another Hero</strong>
+                    <p class="font-15">Head back to the Jungle with a brand new Hero to complete your Collection</p>
+                </a>
             </div>
         </div>
         <div class="row mt-3">

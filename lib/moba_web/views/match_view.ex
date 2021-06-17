@@ -39,5 +39,4 @@ defmodule MobaWeb.MatchView do
 
     Moba.Accounts.season_points_for(next)
   end
-
 end

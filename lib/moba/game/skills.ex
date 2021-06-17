@@ -93,7 +93,7 @@ defmodule Moba.Game.Skills do
 
   def can_level?(_, _), do: false
 
-  def max_levels(skills), do: Enum.map(skills, &(get_by_code!(&1.code, true, max_level(&1))))
+  def max_levels(skills), do: Enum.map(skills, &get_by_code!(&1.code, true, max_level(&1)))
 
   def max_level(skill) do
     cond do

@@ -180,12 +180,19 @@ defmodule Moba do
 
   def current_match, do: Game.current_match()
 
-  def create_current_pve_hero!(attrs, %{easy_mode_count: easy_mode_count} = user, avatar, skills, match \\ current_match()) do
-    attrs = if easy_mode_count > 0 do
-      Map.merge(attrs, %{easy_mode: true, pve_battles_available: 1000})
-    else
-      attrs
-    end
+  def create_current_pve_hero!(
+        attrs,
+        %{easy_mode_count: easy_mode_count} = user,
+        avatar,
+        skills,
+        match \\ current_match()
+      ) do
+    attrs =
+      if easy_mode_count > 0 do
+        Map.merge(attrs, %{easy_mode: true, pve_battles_available: 1000})
+      else
+        attrs
+      end
 
     Accounts.maybe_archive_current_pve_hero(user)
     hero = Game.create_hero!(attrs, user, avatar, skills, match)

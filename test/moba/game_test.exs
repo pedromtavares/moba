@@ -216,17 +216,33 @@ defmodule Moba.GameTest do
 
       assert hero.finished_pve
 
-      hero = create_base_hero(%{pve_battles_available: 0, pve_points: Moba.pve_points_limit(), league_tier: Moba.master_league_tier()})
+      hero =
+        create_base_hero(%{
+          pve_battles_available: 0,
+          pve_points: Moba.pve_points_limit(),
+          league_tier: Moba.master_league_tier()
+        })
 
       assert Game.maybe_finish_pve(hero) == hero
 
-      hero = create_base_hero(%{pve_battles_available: 0, pve_points: Moba.pve_points_limit(), league_tier: Moba.max_league_tier()}) |> Game.maybe_finish_pve()
+      hero =
+        create_base_hero(%{
+          pve_battles_available: 0,
+          pve_points: Moba.pve_points_limit(),
+          league_tier: Moba.max_league_tier()
+        })
+        |> Game.maybe_finish_pve()
 
       assert hero.finished_pve
     end
 
     test "#maybe_generate_boss" do
-      hero = create_base_hero(%{pve_battles_available: 0, league_tier: Moba.master_league_tier(), pve_points: Moba.pve_points_limit()})
+      hero =
+        create_base_hero(%{
+          pve_battles_available: 0,
+          league_tier: Moba.master_league_tier(),
+          pve_points: Moba.pve_points_limit()
+        })
 
       assert Game.maybe_generate_boss(hero).boss_id
 
@@ -288,7 +304,7 @@ defmodule Moba.GameTest do
       hero = create_base_hero(%{level: 25}) |> Game.create_pvp_build!(alternate_skills())
       skills = hero.active_build.skills
       normals = Enum.filter(skills, &(!&1.ultimate))
-      ultimate = Enum.find(skills, &(&1.ultimate))
+      ultimate = Enum.find(skills, & &1.ultimate)
 
       assert List.first(normals).level == 5
       assert ultimate.level == 3

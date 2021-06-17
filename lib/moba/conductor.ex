@@ -165,7 +165,7 @@ defmodule Moba.Conductor do
     |> Repo.all()
     |> Repo.preload(:current_pve_hero)
     |> Enum.map(fn %{current_pve_hero: hero} = user ->
-      Game.generate_targets!(%{hero | user: user})
+      hero && Game.generate_targets!(%{hero | user: user})
     end)
 
     match

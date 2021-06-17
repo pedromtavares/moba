@@ -114,9 +114,7 @@ defmodule MobaWeb.BattleView do
         "You have died to Roshan."
 
       true ->
-        "You have lost the League Challenge. Farm another <span class='text-success'>#{
-          Moba.pve_points_limit()
-        } Jungle Points</span> and try again!"
+        "You have lost the League Challenge. Farm another <span class='text-success'>#{Moba.pve_points_limit()} Jungle Points</span> and try again!"
     end
   end
 

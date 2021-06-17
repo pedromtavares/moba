@@ -41,7 +41,6 @@ defmodule Moba.Accounts.Schema.User do
     has_many :arena_picks, Game.Schema.ArenaPick
     has_many :unlocks, Accounts.Schema.Unlock
 
-
     belongs_to :current_pve_hero, Game.Schema.Hero
     belongs_to :current_pvp_hero, Game.Schema.Hero
 
