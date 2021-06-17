@@ -20,7 +20,8 @@ defmodule MobaWeb.GameHelpers do
       img_tag(image_url(skill),
         data: [toggle: "tooltip"],
         title: skill_description(skill),
-        class: "skill-img img-border-sm #{if skill.passive, do: "passive"} tooltip-mobile"
+        class: "skill-img img-border-sm #{if skill.passive, do: "passive"} tooltip-mobile",
+        id: "skill-#{skill.id}"
       )
     end)
   end
@@ -34,7 +35,8 @@ defmodule MobaWeb.GameHelpers do
         img_tag(image_url(item),
           data: [toggle: "tooltip"],
           title: item_description(item),
-          class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"
+          class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile",
+          id: "item-#{item.id}"
         )
 
       content_tag(:div, image, class: "item-container col-4")
@@ -47,7 +49,8 @@ defmodule MobaWeb.GameHelpers do
       img_tag(image_url(item),
         data: [toggle: "tooltip"],
         title: item_description(item),
-        class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"
+        class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile",
+        id: "item-#{item.id}"
       )
     end)
   end
