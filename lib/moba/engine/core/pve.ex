@@ -6,6 +6,7 @@ defmodule Moba.Engine.Core.Pve do
   alias Engine.Schema.Battle
 
   @pve_points_limit Moba.pve_points_limit()
+  @easy_mode_max_farm Moba.easy_mode_max_farm()
 
   def create_battle!(%{attacker: %{pve_battles_available: battles}}) when battles < 1 do
     {:error, "Not enough available battles"}
@@ -170,6 +171,6 @@ defmodule Moba.Engine.Core.Pve do
   defp zero_limit(number) when number < 0, do: 0
   defp zero_limit(number), do: number
 
-  defp final_rewards(_, %{easy_mode: true, total_farm: farm}) when farm >= 20_000, do: 0
+  defp final_rewards(_, %{easy_mode: true, total_farm: farm}) when farm >= @easy_mode_max_farm, do: 0
   defp final_rewards(total, _), do: total
 end

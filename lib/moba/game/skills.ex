@@ -8,8 +8,6 @@ defmodule Moba.Game.Skills do
   alias Game.Schema.Skill
   alias Game.Query.SkillQuery
 
-  @max_level Moba.max_hero_level()
-
   # -------------------------------- PUBLIC API
 
   @doc """
@@ -95,15 +93,14 @@ defmodule Moba.Game.Skills do
 
   def can_level?(_, _), do: false
 
+  def max_levels(skills), do: Enum.map(skills, &(get_by_code!(&1.code, true, max_level(&1))))
+
   def max_level(skill) do
     cond do
       skill.ultimate -> 3
       true -> 5
     end
   end
-
-  def levels_available_for(hero_level) when hero_level == @max_level, do: 14
-  def levels_available_for(hero_level), do: div(hero_level, 2)
 
   def get_current_from(skills) do
     Enum.map(skills, fn old ->

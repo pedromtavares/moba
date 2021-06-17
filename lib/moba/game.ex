@@ -206,10 +206,10 @@ defmodule Moba.Game do
   for it to level up its new Skills
   """
   def create_pvp_build!(hero, skills) do
-    levels = Skills.levels_available_for(hero.level)
-    hero = update_hero!(hero, %{skill_levels_available: levels})
-    build = Builds.create!("pvp", hero, skills)
-    activate_build!(build.hero, build)
+    %{hero: hero} = build = Builds.create!("pvp", hero, skills)
+    hero
+    |> activate_build!(build)
+    |> level_active_build_to_max!()
   end
 
   @doc """
@@ -236,6 +236,8 @@ defmodule Moba.Game do
   def skill_build_for(avatar, index), do: Builds.skill_build_for(avatar, index)
 
   def reset_item_orders!(hero), do: Builds.reset_item_orders!(hero)
+
+  def level_active_build_to_max!(hero), do: Builds.level_active_to_max!(hero)
 
   # LEAGUES
 
@@ -303,6 +305,8 @@ defmodule Moba.Game do
   def can_level_skill?(hero, skill), do: Skills.can_level?(hero, skill)
 
   def max_skill_level(skill), do: Skills.max_level(skill)
+
+  def max_leveled_skills(skills), do: Skills.max_levels(skills)
 
   def get_current_skills_from(skills), do: Skills.get_current_from(skills)
 

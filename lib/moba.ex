@@ -33,6 +33,7 @@ defmodule Moba do
     7 => "Immortal"
   }
   @easy_mode_count 2
+  @easy_mode_max_farm 20_000
 
   # PVE constants
   @base_xp 100
@@ -75,6 +76,7 @@ defmodule Moba do
   def leagues, do: @leagues
   def medals, do: @medals
   def easy_mode_count, do: @easy_mode_count
+  def easy_mode_max_farm, do: @easy_mode_max_farm
 
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment

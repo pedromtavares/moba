@@ -304,6 +304,37 @@ defmodule Moba.EngineTest do
       assert hero.total_farm == attacker.total_farm + Moba.league_win_gold_bonus()
     end
 
+    test "attacker wins and reaches master league", %{strong_hero: attacker} do
+      diamond_league_tier = Moba.master_league_tier() - 1
+
+      battle =
+        Engine.create_league_battle!(%{attacker | league_step: 5, league_tier: diamond_league_tier})
+        |> Engine.auto_finish_battle!()
+
+      %{active_build: active_build} = hero = Game.get_hero!(attacker.id)
+      assert battle.winner_id == attacker.id
+      assert hero.league_step == 0
+      assert hero.league_tier == Moba.master_league_tier()
+      assert hero.level == Moba.max_hero_level()
+      assert Enum.find(active_build.skills, &(&1.ultimate)).level == 3
+    end
+
+    test "attacker wins reaches master league in easy mode", %{strong_hero: attacker} do
+      diamond_league_tier = Moba.master_league_tier() - 1
+
+      battle =
+        Engine.create_league_battle!(%{attacker | league_step: 5, league_tier: diamond_league_tier, easy_mode: true})
+        |> Engine.auto_finish_battle!()
+
+      %{active_build: active_build} = hero = Game.get_hero!(attacker.id)
+      assert battle.winner_id == attacker.id
+      assert hero.league_step == 0
+      assert hero.league_tier == Moba.master_league_tier()
+      assert hero.level == Moba.max_hero_level()
+      assert Enum.find(active_build.skills, &(&1.ultimate)).level == 3
+      assert hero.finished_pve
+    end
+
     test "attacker beats boss and ranks up", %{strong_hero: hero} do
       master_league_tier = Moba.master_league_tier()
       with_boss = Game.generate_boss!(hero)
@@ -322,7 +353,7 @@ defmodule Moba.EngineTest do
 
     test "attacker loses to boss", %{weak_hero: hero} do
       master_league_tier = Moba.master_league_tier()
-      with_boss = Game.generate_boss!(hero) |> Game.update_hero!(%{league_step: 1, league_tier: master_league_tier})
+      with_boss = Game.generate_boss!(hero) |> Game.update_hero!(%{level: 25, league_step: 1, league_tier: master_league_tier})
       boss = Game.get_hero!(with_boss.boss_id)
 
       battle =

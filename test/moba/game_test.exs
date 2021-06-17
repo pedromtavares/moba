@@ -18,32 +18,6 @@ defmodule Moba.GameTest do
   end
 
   describe "heroes" do
-    # test "#can_create_new_hero?" do
-    #   user = create_user()
-
-    #   assert Game.can_create_new_hero?(user)
-
-    #   hero = create_base_hero(%{}, user)
-    #   Game.update_hero!(hero, %{pve_battles_available: 0})
-
-    #   assert Game.can_create_new_hero?(user)
-
-    #   hero = create_base_hero(%{}, user)
-    #   Game.update_hero!(hero, %{pve_battles_available: 0})
-
-    #   assert Game.can_create_new_hero?(user)
-
-    #   # gets archived
-    #   create_base_hero(%{}, user)
-
-    #   assert Game.can_create_new_hero?(user)
-
-    #   hero = create_base_hero(%{}, user)
-    #   Game.update_hero!(hero, %{pve_battles_available: 0})
-
-    #   refute Game.can_create_new_hero?(user)
-    # end
-
     test "#create_hero!" do
       avatar = base_avatar()
       skills = base_skills()
@@ -311,9 +285,13 @@ defmodule Moba.GameTest do
     end
 
     test "#create_pvp_build!" do
-      hero = create_base_hero(%{level: 10}) |> Game.create_pvp_build!(alternate_skills())
+      hero = create_base_hero(%{level: 25}) |> Game.create_pvp_build!(alternate_skills())
+      skills = hero.active_build.skills
+      normals = Enum.filter(skills, &(!&1.ultimate))
+      ultimate = Enum.find(skills, &(&1.ultimate))
 
-      assert hero.skill_levels_available == 5
+      assert List.first(normals).level == 5
+      assert ultimate.level == 3
       assert hero.active_build.type == "pvp"
     end
 
