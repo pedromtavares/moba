@@ -7,7 +7,7 @@ defmodule Moba.Admin.Server do
 
   alias Moba.{Admin, Game}
 
-  @timeout 1000 * Application.get_env(:moba, :admin_refresh_seconds)
+  @timeout 1000 * String.to_integer(Application.get_env(:moba, :admin_refresh_seconds))
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 

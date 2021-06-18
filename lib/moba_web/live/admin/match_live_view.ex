@@ -37,7 +37,8 @@ defmodule MobaWeb.Admin.MatchLiveView do
       bots: bots,
       normal_rates: normal_rates,
       ult_rates: ult_rates,
-      user_stats: user_stats)
+      user_stats: user_stats
+    )
   end
 
   defp rates_by_list(rates, list) do

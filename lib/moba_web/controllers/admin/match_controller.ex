@@ -1,7 +1,7 @@
 defmodule MobaWeb.Admin.MatchController do
   use MobaWeb, :controller
 
-  alias Moba.{Game, Admin}
+  alias Moba.Admin
 
   plug(:put_layout, {MobaWeb.LayoutView, "admin.html"})
 

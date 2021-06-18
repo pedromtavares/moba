@@ -87,10 +87,10 @@ defmodule Moba.Admin.Matches do
     |> UserQuery.non_guests()
     |> UserQuery.online_users(48)
     |> Repo.all()
-    |> Repo.preload([
+    |> Repo.preload(
       current_pve_hero: [:avatar, :items, active_build: [skills: Game.ordered_skills_query()]],
       current_pvp_hero: [:avatar, :items, active_build: [skills: Game.ordered_skills_query()]]
-    ])
+    )
   end
 
   defp skill_winrates(heroes) do
