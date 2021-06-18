@@ -24,8 +24,9 @@ defmodule Moba.Admin.Server do
 
   def handle_info(:server_update, _state) do
     schedule_update()
+    state = current_state()
     MobaWeb.broadcast("admin", "server", %{})
-    {:noreply, current_state()}
+    {:noreply, state}
   end
 
   @doc """
