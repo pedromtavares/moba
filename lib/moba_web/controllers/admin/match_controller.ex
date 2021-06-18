@@ -17,31 +17,7 @@ defmodule MobaWeb.Admin.MatchController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    match = Admin.get_match!(id)
-    matches = Admin.list_recent_matches()
-
-    data = Admin.get_server_data(match)
-    user_stats = Admin.get_user_stats()
-
-    rates = data.rates
-    normal_rates = rates_by_list(rates, Game.list_normal_skills())
-    ult_rates = rates_by_list(rates, Game.list_ultimate_skills())
-
-    arena = data.arena
-    bots = Enum.filter(arena, fn hero -> hero.bot_difficulty end)
-
-    render(conn, "show.html",
-      match: match,
-      players: data.players,
-      arena: Enum.sort_by(arena, & &1.pvp_ranking, :asc),
-      bots: bots,
-      normal_rates: normal_rates,
-      ult_rates: ult_rates,
-      matches: matches,
-      user_stats: user_stats
-    )
-  end
+  def show(conn, %{"id" => id}), do: live_render(conn, MobaWeb.Admin.MatchLiveView, session: %{"match_id" => id})
 
   def edit(conn, %{"id" => id}) do
     match = Admin.get_match!(id)
@@ -61,13 +37,5 @@ defmodule MobaWeb.Admin.MatchController do
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", match: match, changeset: changeset)
     end
-  end
-
-  defp rates_by_list(rates, list) do
-    codes = list |> Enum.map(fn skill -> skill.code end)
-
-    rates
-    |> Enum.sort_by(fn {_, {rate, _count}} -> rate end, :desc)
-    |> Enum.filter(fn {skill, _} -> Enum.member?(codes, skill.code) end)
   end
 end

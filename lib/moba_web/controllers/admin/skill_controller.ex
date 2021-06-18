@@ -20,7 +20,7 @@ defmodule MobaWeb.Admin.SkillController do
   end
 
   def root(conn, _) do
-    redirect(conn, to: "/admin/matches/#{Moba.Game.current_match().id}")
+    redirect(conn, to: "/admin/matches/current")
   end
 
   def new(conn, _params) do

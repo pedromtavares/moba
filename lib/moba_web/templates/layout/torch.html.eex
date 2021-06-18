@@ -42,7 +42,7 @@
             <a href="/admin/matches">
               <h3>Matches</h3>
             </a>
-            <a href="/admin/matches/<%=Moba.Game.current_match().id%>">
+            <a href="/admin/matches/current">
               <h3>Current Match</h3>
             </a>
           </nav>

@@ -1,0 +1,87 @@
+<tr id="user-<%=@user.id%>">
+    <td class="text-center">
+        <img src="/images/pvp/<%=@user.season_tier%>.png" style="max-height:  50px"/>
+        <br/>
+        <%= live_redirect @user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @user), class: "text-white"%>
+        <br/>
+        <small class="text-dark font-italic">
+            <%=unless @user.is_bot do %>
+                Online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                <br/>
+                Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)%>
+            <% end %>
+        </small>
+    </td>
+    <td class="text-center">
+        <%=if @user.current_pvp_hero do %>
+            <h1>#<%=@user.current_pvp_hero.pvp_ranking%></h1>
+        <% end %>
+    </td>
+    <td class="text-center">
+        <%=if @user.current_pvp_hero do %>
+            <img src="<%=GH.image_url(@user.current_pvp_hero.avatar)%>" style="width: 80px;" class="img-border-xs"><br/>
+            <h5 class="mb-0 text-center">
+                <img src="/images/league_<%=@user.current_pvp_hero.league_tier%>.png" style="width: 20px;">
+                <%= live_redirect @user.current_pvp_hero.avatar.name, to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @user.current_pvp_hero), class: "text-white"%>
+            </h5>
+            <span class="text-center text-success"><%=@user.current_pvp_hero.pvp_points%> Points</span>
+            |
+            <span class="text-danger">WR: <strong><%=GH.pvp_win_rate(@user.current_pvp_hero)%>%</strong></span>
+            |
+            <span class="text-warning"><%=@user.current_pvp_hero.total_farm%></span>
+            |
+            <span class="text-primary">#<%=@user.current_pvp_hero.pve_ranking%></span>
+        <% end %>
+    </td>
+    <td class="text-center">
+        <%=if @user.current_pvp_hero do %>
+            <%=for skill <- @user.current_pvp_hero.active_build.skills do %>
+                <img src="<%=GH.image_url(skill)%>" style="width: 50px;">
+            <% end %>
+            <br/>
+            <%=for item <- @user.current_pvp_hero.items do %>
+                <img src="<%=GH.image_url(item)%>" style="width: 35px;">
+            <% end %>
+            <br/>
+            <small class="text-dark"><%=Enum.join(@user.current_pvp_hero.active_build.skill_order, ", ")%></small>
+            <br/>
+            <small class="text-dark"><%=Enum.join(@user.current_pvp_hero.active_build.item_order, ", ")%></small>
+        <% end %>
+    </td>
+    <td class="text-center">
+        <%=if @user.current_pve_hero do %>
+            <img src="<%=GH.image_url(@user.current_pve_hero.avatar)%>" style="width: 80px;" class="img-border-xs"><br/>
+            <h5 class="mb-0 text-center">
+                <img src="/images/league_<%=@user.current_pve_hero.league_tier%>.png" style="width: 20px;">
+                <%= live_redirect "Lv #{@user.current_pve_hero.level} #{@user.current_pve_hero.avatar.name}", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @user.current_pve_hero), class: "text-white"%>
+            </h5>
+            <span class="text-center text-success">
+                <%=if @user.current_pve_hero.easy_mode do %>
+                    <%=1000-@user.current_pve_hero.pve_battles_available%> <span class="text-muted">easy</span>
+                <% else %>
+                    <%=30-@user.current_pve_hero.pve_battles_available %>
+                <% end %>
+                battles (<%=@user.current_pve_hero.win_streak%>)
+            </span>
+            |
+            <span class="text-danger">WR: <strong><%=GH.pve_win_rate(@user.current_pve_hero)%>%</strong></span>
+            |
+            <span class="text-warning"><%=@user.current_pve_hero.total_farm%></span>
+        <% end %>
+    </td>
+    <td class="text-center">
+        <%=if @user.current_pve_hero do %>
+            <%=for skill <- @user.current_pve_hero.active_build.skills do %>
+                <img src="<%=GH.image_url(skill)%>" style="width: 50px;">
+            <% end %>
+            <br/>
+            <%=for item <- @user.current_pve_hero.items do %>
+                <img src="<%=GH.image_url(item)%>" style="width: 35px;">
+            <% end %>
+            <br/>
+            <small class="text-dark"><%=Enum.join(@user.current_pve_hero.active_build.skill_order, ", ")%></small>
+            <br/>
+            <small class="text-dark"><%=Enum.join(@user.current_pve_hero.active_build.item_order, ", ")%></small>
+        <% end %>
+    </td>
+</tr>

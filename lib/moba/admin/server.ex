@@ -7,8 +7,7 @@ defmodule Moba.Admin.Server do
 
   alias Moba.{Admin, Game}
 
-  # 60 secs
-  @timeout 1000 * 60
+  @timeout 1000 * Application.get_env(:moba, :admin_refresh_seconds)
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
@@ -25,6 +24,7 @@ defmodule Moba.Admin.Server do
 
   def handle_info(:server_update, _state) do
     schedule_update()
+    MobaWeb.broadcast("admin", "server", %{})
     {:noreply, current_state()}
   end
 

@@ -10,7 +10,8 @@ use Mix.Config
 config :moba,
   ecto_repos: [Moba.Repo],
   env: Mix.env(),
-  arena_difficulty: System.get_env("ARENA_DIFFICULTY") || "ultimate"
+  arena_difficulty: System.get_env("ARENA_DIFFICULTY") || "ultimate",
+  admin_refresh_seconds: System.get_env("ADMIN_REFRESH_SECONDS") || 1_000_000_000
 
 # Configures the endpoint
 config :moba, MobaWeb.Endpoint,

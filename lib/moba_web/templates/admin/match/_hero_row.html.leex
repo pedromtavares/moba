@@ -1,0 +1,46 @@
+<tr id="hero-<%=@hero.id%>">
+    <td class="text-center">
+        <img src="/images/pvp/<%=@hero.user.season_tier%>.png" style="max-height:  50px"/>
+        <br/>
+        <strong><%= live_redirect @hero.user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user), class: "text-white"%></strong>
+        <br/>
+        <small class="text-dark font-italic">
+            <%=if @hero.user.is_bot do %>
+                BOT
+            <% else %>
+                Online <%= @hero.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+            <% end %>
+        </small>
+    </td>
+    <td class="text-center" width="10%">
+        <h1 class="mb-0">
+            #<%=@hero.pvp_ranking%>
+        </h1>
+    </td>
+    <td class="text-center">
+        <img src="<%=GH.image_url(@hero.avatar)%>" style="width: 80px;" class="img-border-xs"><br/>
+        <h5 class="mb-0 text-center">
+            <img src="/images/league_<%=@hero.league_tier%>.png" style="width: 20px;">
+            <%= live_redirect @hero.avatar.name, to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero), class: "text-white"%>
+        </h5>
+        <span class="text-center text-success"><%=@hero.pvp_points%> Points</span>
+        |
+        <span class="text-danger">WR: <strong><%=GH.pvp_win_rate(@hero)%>%</strong></span>
+        |
+        <span class="text-warning"><%=@hero.total_farm%></span>
+    </td>
+    <td>
+        <%=for skill <- @hero.active_build.skills do %>
+            <img src="<%=GH.image_url(skill)%>" style="width: 50px;">
+        <% end %>
+        <br/>
+        <%=for item <- @hero.items do %>
+            <img src="<%=GH.image_url(item)%>" style="width: 35px;">
+        <% end %>
+    </td>
+    <td>
+        <%=@hero.active_build.skill_order |> Enum.join(", ")%>
+        <br/>
+        <%=@hero.active_build.item_order |> Enum.join(", ")%>
+    </td>
+</tr>

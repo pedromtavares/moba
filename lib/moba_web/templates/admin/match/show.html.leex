@@ -41,7 +41,7 @@
         <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
             <tbody id="hall-of-jungle">
                 <%=for user <- @players do %>
-                    <%=render "_hero_row.html", hero: user.current_hero, conn: @conn %>
+                    <%=render "_user_row.html", user: user, socket: @socket %>
                 <% end %>
             </tbody>
         </table>
@@ -59,9 +59,11 @@
             <% end %>
             <%=for match <- @matches do%>
                 <li class="page-item  <%=if match == @match, do: "active"%>">
-                    <a class="page-link" href="/admin/matches/<%=match.id%>">
-                        <%=if match == Moba.Game.current_match, do: "Current Match", else: match.id%>
-                    </a>
+                    <%= if match == Moba.Game.current_match() do %>
+                        <%=live_redirect "Current Match", to: "/admin/matches/current", class: "page-link" %>
+                    <% else %>
+                        <%=live_redirect match.id, to: "/admin/matches/#{match.id}", class: "page-link" %>
+                    <% end %>
                 </li>
             <% end %>
             <li class="page-item">
@@ -125,7 +127,7 @@
         <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
             <tbody id="hall-of-heroes">
                 <%=for hero <- @arena do %>
-                    <%=render "_hero_row.html", hero: hero, conn: @conn %>
+                    <%=render "_hero_row.html", hero: hero, socket: @socket %>
                 <% end %>
             </tbody>
         </table>
