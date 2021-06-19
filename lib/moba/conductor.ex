@@ -191,7 +191,7 @@ defmodule Moba.Conductor do
       Logger.info("New PVP hero for #{user.username}")
 
       avatars = if length(user.bot_codes) > 0 do
-        Enum.map(user.bot_codes, fn code -> Enum.find(all_avatars, &(&1.code == code)) end)
+        Enum.map(user.bot_codes, fn code -> Enum.find(all_avatars, &(&1.code == code)) end) |> Enum.filter(& &1)
       else
         all_avatars
       end
