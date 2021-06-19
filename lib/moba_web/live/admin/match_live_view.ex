@@ -8,11 +8,12 @@ defmodule MobaWeb.Admin.MatchLiveView do
 
     match_id = Map.get(session, "match_id")
 
-    match = case match_id do
-      nil -> Game.current_match()
-      "current" -> Game.current_match()
-      _ -> Admin.get_match!(match_id)
-    end
+    match =
+      case match_id do
+        nil -> Game.current_match()
+        "current" -> Game.current_match()
+        _ -> Admin.get_match!(match_id)
+      end
 
     matches = Admin.list_recent_matches()
 
