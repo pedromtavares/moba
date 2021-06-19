@@ -1,4 +1,4 @@
-<%=if @match == Game.current_match() do %>
+<%=if @match.id == Game.current_match().id do %>
     <div class="row mt-3">
         <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box">
@@ -31,7 +31,7 @@
 
     <div class="row mt-0 mb-2">
         <div class="col">
-            <h2 class="text-center text-success">Active Players: <%=length(@players)%></h2>
+            <h2 class="text-center text-success">Active Players: <%=length(@players)%> <br/><small class="text-dark font-italic">(last updated: <%= Timex.format!(@last_updated, "%H:%M:%S", :strftime) %>)</small></h2>
         </div>
     </div>
 <% end %>

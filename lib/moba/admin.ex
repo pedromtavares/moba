@@ -88,9 +88,10 @@ defmodule Moba.Admin do
   def change_match(match), do: Matches.change(match)
 
   def get_server_data(match), do: Server.get_data(match)
-  def recent_winrates(match_time), do: Matches.recent_winrates(match_time)
 
-  def current_arena_heroes, do: Matches.current_arena_heroes()
+  defdelegate recent_winrates(match_time), to: Matches
 
-  def current_active_players, do: Matches.current_active_players()
+  defdelegate current_active_players, to: Matches
+
+  defdelegate current_arena_heroes, to: Matches
 end

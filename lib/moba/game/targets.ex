@@ -42,8 +42,9 @@ defmodule Moba.Game.Targets do
   defp create(hero, difficulty, unlocked_codes, limit, exclude \\ []) do
     exclude_list = [hero.id | exclude]
     level_range = level_range(hero, difficulty)
+    match_id = Game.current_match().id - 1 # use heroes from previous match to avoid 0 targets mid-restart
 
-    HeroQuery.pve_targets(difficulty, level_range, exclude_list, Game.current_match().id, unlocked_codes, limit)
+    HeroQuery.pve_targets(difficulty, level_range, exclude_list, match_id, unlocked_codes, limit)
     |> Repo.all()
     |> Enum.map(fn defender ->
       {:ok, target} =
