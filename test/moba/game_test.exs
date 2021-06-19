@@ -236,6 +236,17 @@ defmodule Moba.GameTest do
       assert hero.finished_pve
     end
 
+    test "#finish_pve!" do
+      user = create_user(%{easy_mode_count: 2})
+      hero = create_base_hero(%{}, user)
+      finished = Game.finish_pve!(hero)
+
+      assert finished.finished_pve
+
+      user = Accounts.get_user!(finished.user_id)
+      assert user.easy_mode_count == 1
+    end
+
     test "#maybe_generate_boss" do
       hero =
         create_base_hero(%{

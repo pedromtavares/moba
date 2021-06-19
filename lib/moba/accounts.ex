@@ -70,8 +70,11 @@ defmodule Moba.Accounts do
 
   def update_ranking!, do: Users.update_ranking!()
 
-  def update_hero_collection!(user, collection) do
-    update_user!(user, %{hero_collection: collection})
+  def finish_pve!(user, hero_collection) do
+    update_user!(user, %{
+      hero_collection: hero_collection,
+      easy_mode_count: user.easy_mode_count - 1
+    })
   end
 
   # MESSAGES

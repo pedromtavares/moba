@@ -141,11 +141,13 @@ defmodule Moba.Game do
   def maybe_finish_pve(hero), do: hero
 
   def finish_pve!(hero) do
-    updated = update_hero!(hero, %{finished_pve: true})
-    updated = Repo.preload(updated, :user)
+    updated =
+      hero
+      |> update_hero!(%{finished_pve: true})
+      |> Repo.preload(:user)
+
     collection = Heroes.collection_for(updated.user_id)
-    Accounts.update_hero_collection!(updated.user, collection)
-    if hero.easy_mode, do: Accounts.update_user!(updated.user, %{easy_mode_count: updated.user.easy_mode_count - 1})
+    Accounts.finish_pve!(updated.user, collection)
     updated
   end
 
