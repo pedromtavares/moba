@@ -303,6 +303,12 @@ defmodule Moba.Game.Query.HeroQuery do
     random(query)
   end
 
+  def created_recently(query \\ non_bots(), hours_ago \\ 24) do
+    ago = Timex.now() |> Timex.shift(hours: -hours_ago)
+
+    from(hero in query, where: hero.inserted_at > ^ago)
+  end
+
   defp page_to_offset(page, per_page) do
     result = (page - 1) * per_page
 

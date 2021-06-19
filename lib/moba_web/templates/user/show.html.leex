@@ -62,7 +62,13 @@
             <div class="row">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-user mr-1"></i>Account</h5>
+                        <h5 class="card-header text-center font-17 text-white">
+                            <i class="fa fa-user mr-1"></i>Account
+                            <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "float-right text-white" do %>
+                                <i class="fa fa-sign-out-alt"></i>
+                                <span class="d-none d-md-inline">Sign Out</span>
+                            <% end %>
+                        </h5>
                         <div class="card-body p-2">
                             <%= unless @user.is_bot do %>
                                 <div class="row">
