@@ -34,7 +34,7 @@ defmodule Moba.Admin.Server do
   """
   def handle_call({:data, match}, _from, state) do
     data =
-      if match == Game.current_match() do
+      if match.id == Game.current_match().id do
         state
       else
         get_cached_data(match)
