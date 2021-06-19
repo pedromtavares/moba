@@ -36,6 +36,7 @@ defmodule Moba.Accounts.Schema.User do
     field :season_tier, :integer, default: 0
     field :season_points, :integer, default: 0
     field :easy_mode_count, :integer, default: 0
+    field :bot_codes, {:array, :string}
 
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick

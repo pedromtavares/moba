@@ -64,6 +64,7 @@ defmodule Moba.Conductor do
       |> generate_resources!()
       |> generate_hero_bots!(bot_level_range)
       |> refresh_pve_targets!()
+      |> archive_bots!()
       |> generate_user_bots!()
       |> new_pvp_round!()
       |> server_update!()
@@ -171,18 +172,29 @@ defmodule Moba.Conductor do
     match
   end
 
+  # Archives all current bots so they can be removed later by Cleaner
+  defp archive_bots!(match) do
+    HeroQuery.bots() |> HeroQuery.unarchived() |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
+
+    match
+  end
+
   # Generates a new PVP hero for every bot User with random avatars and levels
   defp generate_user_bots!(match) do
     Logger.info("Generating PVP bots...")
 
-    HeroQuery.bots() |> HeroQuery.unarchived() |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
-
-    avatars = AvatarQuery.all_current() |> Repo.all()
+    all_avatars = AvatarQuery.all_current() |> Repo.all()
 
     UserQuery.eligible_arena_bots()
     |> Repo.all()
     |> Enum.map(fn user ->
       Logger.info("New PVP hero for #{user.username}")
+
+      avatars = if length(user.bot_codes) > 0 do
+        Enum.map(user.bot_codes, fn code -> Enum.find(all_avatars, &(&1.code == code)) end)
+      else
+        all_avatars
+      end
 
       avatar = Enum.random(avatars)
       difficulty = Application.get_env(:moba, :arena_difficulty)

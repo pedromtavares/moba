@@ -71,7 +71,7 @@ defmodule Moba.Admin.Users do
 
   def get_stats do
     online_today = UserQuery.online_users(User, 24) |> UserQuery.non_guests() |> Repo.aggregate(:count)
-    online_recently = UserQuery.online_users(User, 1) |> UserQuery.non_guests() |> Repo.aggregate(:count)
+    # online_recently = UserQuery.online_users(User, 1) |> UserQuery.non_guests() |> Repo.aggregate(:count)
     new_users = UserQuery.new_users(User, 24) |> UserQuery.non_guests() |> Repo.aggregate(:count)
     new_guests = UserQuery.new_users(User, 24) |> UserQuery.guests() |> Repo.aggregate(:count)
     new_heroes = HeroQuery.created_recently() |> Repo.aggregate(:count)
@@ -80,7 +80,7 @@ defmodule Moba.Admin.Users do
       new_guests: new_guests,
       new_users: new_users,
       online_today: online_today,
-      online_recently: online_recently,
+      # online_recently: online_recently,
       new_heroes: new_heroes
     }
   end
