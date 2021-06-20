@@ -32,26 +32,22 @@ defmodule MobaWeb.Admin.MatchLiveView do
     data = Admin.get_server_data(socket.assigns.match)
     user_stats = Admin.get_user_stats()
 
-    if length(data.players) > 0 do
-      rates = data.rates
-      normal_rates = rates_by_list(rates, Game.list_normal_skills())
-      ult_rates = rates_by_list(rates, Game.list_ultimate_skills())
+    rates = data.rates
+    normal_rates = rates_by_list(rates, Game.list_normal_skills())
+    ult_rates = rates_by_list(rates, Game.list_ultimate_skills())
 
-      arena = data.arena
-      bots = Enum.filter(arena, fn hero -> hero.bot_difficulty end)
+    arena = data.arena
+    bots = Enum.filter(arena, fn hero -> hero.bot_difficulty end)
 
-      assign(socket,
-        players: data.players,
-        arena: Enum.sort_by(arena, & &1.pvp_ranking, :asc),
-        bots: bots,
-        normal_rates: normal_rates,
-        ult_rates: ult_rates,
-        user_stats: user_stats,
-        last_updated: Timex.now()
-      )
-    else
-      socket
-    end
+    assign(socket,
+      players: data.players,
+      arena: Enum.sort_by(arena, & &1.pvp_ranking, :asc),
+      bots: bots,
+      normal_rates: normal_rates,
+      ult_rates: ult_rates,
+      user_stats: user_stats,
+      last_updated: Timex.now()
+    )
   end
 
   defp rates_by_list(rates, list) do
