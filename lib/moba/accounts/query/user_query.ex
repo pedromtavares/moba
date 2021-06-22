@@ -14,6 +14,10 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(user in non_bots(query), where: user.inserted_at > ^ago)
   end
 
+  def bots(query \\ User) do
+    from(user in query, where: user.is_bot == true)
+  end
+
   def non_bots(query \\ User) do
     from(user in query, where: user.is_bot == false)
   end
