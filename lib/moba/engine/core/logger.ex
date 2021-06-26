@@ -307,7 +307,7 @@ defmodule Moba.Engine.Core.Logger do
   defp description_for("life_drain", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
     "#{attacker} is channeling the vital essence out of #{defender}, dealing [damage]#{damage} damage[/damage] and [hp]regenerating #{
       regen
-    } HP[/hp]."
+    } HP[/hp] while being [status]invulnerable to Normal Damage[/status]."
   end
 
   defp description_for("omnislash", %{"damage" => {damage, defender}, "extra" => {true, attacker}}, _) do

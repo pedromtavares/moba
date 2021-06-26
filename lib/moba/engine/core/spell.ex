@@ -329,6 +329,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.add_double_skill()
     |> Effect.hp_regen_by_total_mp()
     |> Effect.hp_regen_by_base_amount()
+    |> Effect.physical_invulnerability()
   end
 
   defp effects_for(%{resource: %Skill{code: "life_drain"}} = turn, _options) do
@@ -337,6 +338,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.hp_regen_by_total_mp()
     |> Effect.hp_regen_by_base_amount()
     |> Effect.remove_double_skill()
+    |> Effect.physical_invulnerability()
   end
 
   defp effects_for(%{resource: %Skill{code: "omnislash"}} = turn, _options) do
