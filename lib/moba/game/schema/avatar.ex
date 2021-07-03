@@ -48,8 +48,8 @@ defmodule Moba.Game.Schema.Avatar do
     timestamps()
   end
 
-  def changeset(hero, attrs) do
-    hero
+  def changeset(avatar, attrs) do
+    avatar
     |> cast(attrs, [
       :name,
       :code,

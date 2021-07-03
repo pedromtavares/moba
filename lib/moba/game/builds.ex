@@ -447,12 +447,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["blink_strike", "feast", "jinada"],
-        ["maelstrom", "assault_cuirass", "shivas_guard", "orchid_malevolence", "silver_edge", "daedalus"],
+        ["maelstrom", "assault_cuirass", "shivas_guard", "linkens_sphere", "silver_edge", "daedalus"],
         "Just enough Magic (MP) to cast Sweeping Blade whenever possible, with passives to support Basic Attacks."
       },
       {
-        ["echo_stomp", "fury_swipes", "jinada"],
-        ["shadow_blade", "diffusal_blade", "silver_edge", "linkens_sphere", "satanic", "daedalus"],
+        ["death_pulse", "lightning_bolt", "phase_shift"],
+        ["arcane_boots", "diffusal_blade", "silver_edge", "orchid_malevolence", "satanic", "daedalus"],
         "A more offensive variant with a strong Attack skill. Great damage if the ult activates on Echo Stomp."
       }
     ]
@@ -566,13 +566,13 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "templar_assassin" do
     [
       {
-        ["psionic_trap", "blink_strike", "decay", "jinada"],
+        ["psionic_trap", "static_link", "decay", "shuriken_toss"],
         ["maelstrom", "boots_of_travel", "silver_edge", "scythe_of_vyse", "linkens_sphere", "daedalus"],
         "Balanced build for constant spellcasting."
       },
       {
         ["psionic_trap", "maledict", "lightning_bolt", "fiery_soul"],
-        ["vanguard", "boots_of_travel", "heavens_halberd", "diffusal_blade", "shivas_guard", "daedalus"],
+        ["dagon5", "boots_of_travel", "heavens_halberd", "diffusal_blade", "shivas_guard", "daedalus"],
         "A more offensive Nuker variant."
       }
     ]
