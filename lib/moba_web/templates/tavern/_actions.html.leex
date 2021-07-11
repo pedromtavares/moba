@@ -1,11 +1,12 @@
-<div class="card-footer text-center">
+<hr/>
+<div class="text-center">
     <%= if can_unlock?(@resource, @user) do %>
-        <a href="javascript:;" class="btn btn-outline-warning" phx-click="<%=@action%>" phx-value-code="<%=@resource.code%>" phx-hook="Loading" id="unlock-<%=@resource.id%>">
+        <a href="javascript:;" class="btn btn-outline-warning" phx-click="<%=@action%>" phx-value-code="<%=@resource.code%>" phx-hook="Loading" id="unlock-<%=@resource.code%>">
             <span class="loading-text">
-                <i class="fab fa-ethereum mr-1"></i>Unlock for <%=price = price_to_unlock(@resource)%> Shard<%=if price > 1, do: "s"%>
+                <i class="fab fa-ethereum mr-1"></i>Unlock for <%= price_to_unlock(@resource) %> Shards
             </span>
         </a>
     <% else %>
-        <a href="javascript:;" class="btn btn-secondary no-action" data-toggle="tooltip" title="<%=unlock_error_description(@resource, @user)%>"><i class="fa fa-lock mr-1"></i><%=unlock_error_message(@resource, @user)%></a>
+        <a href="javascript:;" class="btn btn-secondary no-action"><i class="fa fa-lock mr-1"></i><%=unlock_error_message(@resource, @user)%></a>
     <% end %>
 </div>

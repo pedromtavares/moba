@@ -1,0 +1,56 @@
+<%= form_for @changeset, @action, [multipart: true, id: "torch-form"], fn f -> %>
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+
+    <div class="torch-form-group">
+      <%= label f, :name %>
+      <%= text_input f, :name %>
+      <%= error_tag f, :name %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :background %>
+      <%= file_input f, :background %>
+      <%= error_tag f, :background %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :code %>
+      <%= text_input f, :code %>
+      <%= error_tag f, :code %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :avatar_code %>
+      <%= text_input f, :avatar_code %>
+      <%= error_tag f, :avatar_code %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :author_name %>
+      <%= text_input f, :author_name %>
+      <%= error_tag f, :author_name %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :author_link %>
+      <%= text_input f, :author_link %>
+      <%= error_tag f, :author_link %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :league_tier %>
+      <%= number_input f, :league_tier %>
+      <%= error_tag f, :league_tier %>
+    </div>
+
+    <div class="torch-submit-form">
+      <%= submit "Submit", class: "torch-submit-button" %>
+    </div>
+  </fieldset>
+<% end %>

@@ -43,6 +43,7 @@ defmodule Moba.Game.Schema.Hero do
     field :best_pve_streak, :integer, default: 0
     field :pve_ranking, :integer
     field :finished_pve, :boolean, default: false
+    field :shards_reward, :integer, default: 0
 
     # PVP (Arena) related fields
     field :pvp_points, :integer
@@ -87,6 +88,7 @@ defmodule Moba.Game.Schema.Hero do
     belongs_to :avatar, Game.Schema.Avatar
     belongs_to :user, Accounts.Schema.User
     belongs_to :boss, Game.Schema.Hero
+    belongs_to :skin, Game.Schema.Skin
 
     timestamps()
   end
@@ -139,7 +141,9 @@ defmodule Moba.Game.Schema.Hero do
       :active_build_id,
       :archived_at,
       :boss_id,
-      :easy_mode
+      :easy_mode,
+      :skin_id,
+      :shards_reward
     ])
   end
 

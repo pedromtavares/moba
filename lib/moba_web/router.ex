@@ -96,6 +96,7 @@ defmodule MobaWeb.Router do
     resources "/avatars", Admin.AvatarController
     resources "/users", Admin.UserController
     resources "/matches", Admin.MatchController
+    resources "/skins", Admin.SkinController
 
     live_dashboard "/dashboard", metrics: MobaWeb.Telemetry
 

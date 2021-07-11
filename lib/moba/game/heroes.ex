@@ -368,6 +368,9 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, hero} -> %{code: code, hero_id: hero.id, tier: hero.league_tier, avatar: hero.avatar} end)
   end
 
+  def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
+  def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
+
   # --------------------------------
 
   defp add_experience(hero, experience)
@@ -449,7 +452,7 @@ defmodule Moba.Game.Heroes do
   defp base_preload(struct_or_structs, extras \\ []) do
     Repo.preload(
       struct_or_structs,
-      [:user, :avatar, :items, active_build: [skills: Game.ordered_skills_query()]] ++ extras
+      [:user, :avatar, :items, :skin, active_build: [skills: Game.ordered_skills_query()]] ++ extras
     )
   end
 

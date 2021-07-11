@@ -37,6 +37,7 @@ defmodule Moba.Accounts.Schema.User do
     field :season_points, :integer, default: 0
     field :easy_mode_count, :integer, default: 0
     field :bot_codes, {:array, :string}
+    field :shard_limit, :integer, default: 100
 
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick
@@ -63,7 +64,8 @@ defmodule Moba.Accounts.Schema.User do
       :current_pve_hero_id,
       :current_pvp_hero_id,
       :pvp_points,
-      :easy_mode_count
+      :easy_mode_count,
+      :shard_limit
     ])
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
@@ -100,7 +102,8 @@ defmodule Moba.Accounts.Schema.User do
       :hero_collection,
       :season_points,
       :season_tier,
-      :easy_mode_count
+      :easy_mode_count,
+      :shard_limit
     ])
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)
@@ -114,12 +117,11 @@ defmodule Moba.Accounts.Schema.User do
     |> cast(attrs, [:is_admin, :is_bot])
   end
 
-  def level_up(changeset, level, xp, shard_count) do
+  def level_up(changeset, level, xp) do
     changeset
     |> change(%{
       level: level + 1,
-      experience: xp,
-      shard_count: shard_count + 1
+      experience: xp
     })
   end
 end

@@ -26,7 +26,7 @@
                                 <div class="col" id="current-hero-arena-points">
                                     <div class="text-white text-center">
                                         <h2 class="text-white mb-0"><%=@current_hero.pvp_points%></h2>
-                                        <p>Points</p>
+                                        <p>Season Points</p>
                                     </div>
                                 </div>
                                 <div class="col" id="current-hero-rank">
@@ -65,7 +65,7 @@
                         <div class="row">
                             <div class="col">
                                 <form class="form-inline flex-center" phx-change="search">
-                                    <div class="form-group filter" data-toggle="tooltip" title="Target difficulty. Based on difference between your Arena Points and theirs.">
+                                    <div class="form-group filter" data-toggle="tooltip" title="Target difficulty. Based on difference between your Season Points and theirs.">
                                         <select class="custom-select" name="filter">
                                             <option value="easy" <%=if @filter == "easy", do: "selected"%> >Easy</option>
                                             <option value="normal" <%=if @filter == "normal", do: "selected"%> >Normal</option>

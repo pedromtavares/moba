@@ -9,25 +9,36 @@ defmodule MobaWeb.TavernView do
     |> Enum.member?(resource.code)
   end
 
-  def can_unlock?(resource, user) do
-    user.level >= resource.level_requirement && user.shard_count >= price_to_unlock(resource)
+  def can_unlock?(%Game.Schema.Skin{league_tier: league_tier, avatar_code: avatar_code} = resource, user) do
+    has_hero_in_collection?(avatar_code, league_tier, user) && has_enough_shards?(resource, user)
   end
 
-  def unlock_error_message(resource, user) do
-    price = price_to_unlock(resource)
+  def can_unlock?(resource, user), do: has_enough_shards?(resource, user)
 
-    cond do
-      user.level < resource.level_requirement -> "This resource requires Account Level #{resource.level_requirement}"
-      true -> "Not enough Shards to unlock (#{user.shard_count}/#{price})"
+  def unlock_error_message(%Game.Schema.Skin{league_tier: league_tier, avatar_code: avatar_code} = resource, user) do
+    if has_enough_shards?(resource, user) do
+      league = Moba.leagues()[league_tier]
+      avatar = Game.get_avatar_by_code!(avatar_code)
+      "You need to have #{avatar.name} in the #{league} to unlock this Skin"
+    else
+      price_error_message(resource, user)
     end
   end
 
-  def unlock_error_description(resource, user) do
-    cond do
-      user.level < resource.level_requirement -> "You can level your Account by leveling heroes in the Jungle"
-      true -> "You can acquire Shards by leveling heroes in the Jungle or finishing in the top 3 of the Arena."
-    end
-  end
+  def unlock_error_message(resource, user), do: price_error_message(resource, user)
 
   def price_to_unlock(resource), do: Accounts.price_to_unlock(resource)
+
+  defp has_hero_in_collection?(avatar_code, league_tier, %{hero_collection: collection}) do
+    Enum.find(collection, fn %{"code" => code, "tier" => tier} ->
+      avatar_code == code && tier >= league_tier
+    end)
+  end
+
+  defp has_enough_shards?(resource, user), do: user.shard_count >= price_to_unlock(resource)
+
+  defp price_error_message(resource, user) do
+    price = price_to_unlock(resource)
+    "Not enough Shards to unlock (#{user.shard_count}/#{price})"
+  end
 end

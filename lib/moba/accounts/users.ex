@@ -53,17 +53,17 @@ defmodule Moba.Accounts.Users do
 
   @doc """
   Given to the top 3 of the Arena when the match ends
-  medal_count is what ultimately ranks who is the best player in the game
+  Medals are displayed on the Arena and Shards are used for unlocking new content
   """
   def award_medals_and_shards(user, ranking) when ranking > 0 and ranking < 4 do
-    total =
+    {medals, shards} =
       case ranking do
-        1 -> 3
-        2 -> 2
-        3 -> 1
+        1 -> {3, 200}
+        2 -> {2, 150}
+        3 -> {1, 100}
       end
 
-    update!(user, %{medal_count: user.medal_count + total, shard_count: user.shard_count + total})
+    update!(user, %{medal_count: user.medal_count + medals, shard_count: user.shard_count + shards})
   end
 
   def award_medals_and_shards(user, _), do: user
@@ -157,6 +157,14 @@ defmodule Moba.Accounts.Users do
   end
 
   @doc """
+  Updates all Users' shard_limit to the default daily amount
+  """
+  def reset_shard_limits! do
+    limit = Moba.shard_limit()
+    Repo.update_all(UserQuery.non_guests(), set: [shard_limit: limit])
+  end
+
+  @doc """
   Grabs users with rankings close to the target user
   """
   def search(%{ranking: ranking}) when not is_nil(ranking) do
@@ -216,19 +224,46 @@ defmodule Moba.Accounts.Users do
     end
   end
 
+  def finish_pve!(user, hero_collection, shards) do
+    update!(user, %{
+      hero_collection: hero_collection,
+      easy_mode_count: user.easy_mode_count - 1,
+      shard_count: user.shard_count + shards,
+      shard_limit: user.shard_limit - shards
+    })
+  end
+
+  def pve_shards_for(%{shard_limit: shard_limit}, league_tier) do
+    reward =
+      case league_tier do
+        6 -> 100
+        5 -> 50
+        4 -> 40
+        3 -> 30
+        2 -> 20
+        1 -> 10
+        _ -> 0
+      end
+
+    if shard_limit - reward >= 0 do
+      reward
+    else
+      shard_limit
+    end
+  end
+
   # --------------------------------
 
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do
     current_level = changes[:level] || data.level
     xp = changes[:experience] || 0
-    shard_count = changes[:shard_count] || data.shard_count
     diff = Moba.user_level_xp() - xp
 
     if diff <= 0 do
-      broadcast_level_up(data.id, current_level)
+      # broadcast_level_up(data.id, current_level)
 
       changeset
-      |> User.level_up(current_level, diff * -1, shard_count)
+      |> User.level_up(current_level, diff * -1)
       |> check_if_leveled()
     else
       changeset

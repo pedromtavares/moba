@@ -1,7 +1,13 @@
 .tavern{
+
+
   .avatar{
-    width: 180px;
-    max-width: unset
+    filter: grayscale(100%);
+  }
+
+  .avatar.current{
+    filter: unset !important;
+    border-image-source: radial-gradient(white, white);
   }
 
   .hero-card{

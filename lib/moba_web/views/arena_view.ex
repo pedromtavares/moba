@@ -35,4 +35,28 @@ defmodule MobaWeb.ArenaView do
       |> Timex.format("{relative}", :relative)
       |> elem(1)
   end
+
+  def has_previous_skin?(hero, selections) do
+    selection = Enum.find(selections, fn selection -> selection.hero_id == hero.id end)
+    selection.index > 0
+  end
+
+  def has_next_skin?(hero, selections) do
+    selection = Enum.find(selections, fn selection -> selection.hero_id == hero.id end)
+    length(selection.skins) > selection.index + 1
+  end
+
+  def next_skin_for(hero, selections) do
+    selection = Enum.find(selections, fn selection -> selection.hero_id == hero.id end)
+    next_index = selection.index + 1
+    skin = Enum.at(selection.skins, next_index)
+    skin.code
+  end
+
+  def previous_skin_for(hero, selections) do
+    selection = Enum.find(selections, fn selection -> selection.hero_id == hero.id end)
+    next_index = selection.index - 1
+    skin = Enum.at(selection.skins, next_index)
+    skin.code
+  end
 end

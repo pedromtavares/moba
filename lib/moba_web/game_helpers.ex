@@ -12,6 +12,8 @@ defmodule MobaWeb.GameHelpers do
   def image_url(%{image: image} = resource), do: get_url(image, resource)
   def image_url(%{"image" => image} = resource), do: get_url(image, resource)
 
+  def background_url(%{skin: %{background: background} = skin}), do: get_background_url(background, skin)
+  def background_url(%{avatar: %{background: background} = avatar}), do: get_background_url(background, avatar)
   def background_url(%{background: background} = resource), do: get_background_url(background, resource)
   def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
 

@@ -14,8 +14,8 @@ defmodule Moba.Engine.Battles do
       :initiator,
       :winner,
       turns: ordered_turns_query(),
-      attacker: [:items, :avatar, :user, active_build: [skills: skills_query]],
-      defender: [:items, :avatar, :user, active_build: [skills: skills_query]]
+      attacker: [:items, :avatar, :skin, :user, active_build: [skills: skills_query]],
+      defender: [:items, :avatar, :skin, :user, active_build: [skills: skills_query]]
     ])
   end
 

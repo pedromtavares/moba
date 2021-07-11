@@ -5,15 +5,14 @@
             <br/>
             <small>
                 <%= if @battle.rewards.attacker_pvp_points > 0 do %>
-                    <span class="badge badge-pill badge-light-primary">+<%=@battle.rewards.attacker_pvp_points%> Arena Points</span>
+                    <span class="badge badge-pill badge-light-success"><%=@battle.attacker.name%>: +<%=@battle.rewards.attacker_pvp_points%> Season Points</span>
                 <% else %>
-                    <span class="badge badge-pill badge-light-dark"><%=@battle.attacker.name%>: <%=@battle.rewards.attacker_pvp_points%> Arena Points</span>
+                    <span class="badge badge-pill badge-light-dark"><%=@battle.attacker.name%>: <%=@battle.rewards.attacker_pvp_points%> Season Points</span>
                 <% end %>
                 <%= if @battle.rewards.defender_pvp_points > 0 do %>
-                    <span class="badge badge-pill badge-light-info"><%=@battle.defender.name%>: +<%=@battle.rewards.defender_pvp_points%> Arena Points</span>
-                <% end %>
-                <%= if @battle.rewards.defender_pvp_points < 0 do %>
-                    <span class="badge badge-pill badge-light-dark"><%=@battle.defender.name%>: <%=@battle.rewards.defender_pvp_points%> Arena Points</span>
+                    <span class="badge badge-pill badge-light-success"><%=@battle.defender.name%>: +<%=@battle.rewards.defender_pvp_points%> Season Points</span>
+                <% else %>
+                    <span class="badge badge-pill badge-light-dark"><%=@battle.defender.name%>: <%=@battle.rewards.defender_pvp_points%> Season Points</span>
                 <% end %>
             </small>
         </h3>
@@ -26,15 +25,15 @@
                 <div class="progress progress-fixed victory-xp-bar">
                     <% points = pvp_points_for(@battle, @current_hero.id == @battle.attacker_id) %>
                     <div style="width:<%=current_arena_percentage(points, @hero)%>%" class="progress-bar bg-danger">
-                        <span><%=final_points(@hero.pvp_points, points)%> AP</span>
+                        <span><%=final_points(@hero.pvp_points, points)%> SP</span>
                     </div>
                     <%= if points > 0 do %>
-                        <div style="width:<%=victory_arena_percentage(points, @hero)%>%" class="progress-bar">
-                            <span>+<%=points%> AP</span>
+                        <div style="width:<%=victory_arena_percentage(points, @hero)%>%" class="progress-bar bg-success">
+                            <span>+<%=points%> SP</span>
                         </div>
                     <% else %>
                         <div style="width:<%=defeat_arena_percentage(points, @hero)%>%" class="progress-bar bg-dark">
-                            <span><%=points%> AP</span>
+                            <span><%=points%> SP</span>
                         </div>
                     <% end %>
                 </div>

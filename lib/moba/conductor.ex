@@ -70,6 +70,7 @@ defmodule Moba.Conductor do
       |> server_update!()
 
     Accounts.update_ranking!()
+    Accounts.reset_shard_limits!()
     Engine.read_all_battles()
 
     match

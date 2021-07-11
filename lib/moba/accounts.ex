@@ -66,16 +66,15 @@ defmodule Moba.Accounts do
 
   def user_pvp_decay!(user), do: Users.pvp_decay!(user)
 
-  def ranking(limit \\ 20), do: Users.ranking(limit)
+  defdelegate ranking(limit), to: Users
 
-  def update_ranking!, do: Users.update_ranking!()
+  defdelegate update_ranking!, to: Users
 
-  def finish_pve!(user, hero_collection) do
-    update_user!(user, %{
-      hero_collection: hero_collection,
-      easy_mode_count: user.easy_mode_count - 1
-    })
-  end
+  defdelegate reset_shard_limits!, to: Users
+
+  defdelegate finish_pve!(user, hero_collection, shards), to: Users
+
+  defdelegate pve_shards_for(user, league_tier), to: Users
 
   # MESSAGES
 

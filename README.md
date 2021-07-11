@@ -81,7 +81,7 @@ Having a strong build along with a sinergizing inventory is the key to winning b
 
 Once all available battles in the Jungle are depleted, players are then invited to join the Arena. Here, players battle against each other for a spot on the match podium, where medals are awarded and used to ultimately rank the best players of the game overall. In order to join the Arena, the player must pick one of their existing heroes, meaning that once you have a few that you feel comfortable playing with, you essentially don't need to play through the Jungle phase anymore.
 
-Unlike the Jungle, heroes in the Arena can no longer level up or gain gold, and the match ranking is decided solely by who has the most Arena Points (AP). APs are awarded on every battle based on a simple implementation of the ELO system, where battling lower-ranked players give you less points and battling higher-ranked players give you more.
+Unlike the Jungle, heroes in the Arena can no longer level up or gain gold, and the match ranking is decided solely by who has the most Season Points (SP). SPs are awarded on every battle based on a simple implementation of the ELO system, where battling lower-ranked players give you less points and battling higher-ranked players give you more.
 
 The Arena is currently organized in 2 rounds (12 hrs each), where in each round every player can battle every other player exactly once. Also unlike the Jungle, these battles cannot end in a tie, awarding a victory to the defender if they manage to stay alive.
 

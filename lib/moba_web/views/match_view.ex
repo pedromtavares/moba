@@ -9,12 +9,12 @@ defmodule MobaWeb.MatchView do
         acc <> "<i class='fa fa-medal'></i>"
       end)
 
-    shards =
-      Enum.reduce(1..number, "", fn _n, acc ->
-        acc <> "<i class='fab fa-ethereum'></i>"
-      end)
+    raw(medals)
+  end
 
-    raw(medals <> "" <> shards)
+  def shards_for(ranking) do
+    number = round(3 / ranking)
+    50 + number * 50
   end
 
   def next_medal(%{season_tier: current_tier}) do

@@ -8,7 +8,7 @@ defmodule Moba.Game do
   """
 
   alias Moba.{Repo, Game, Accounts}
-  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks}
+  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks, Skins}
 
   # MATCHES
 
@@ -117,6 +117,8 @@ defmodule Moba.Game do
 
   def pvp_targets_available(hero), do: Heroes.pvp_targets_available(hero)
 
+  def set_hero_skin!(hero, skin), do: Heroes.set_skin!(hero, skin)
+
   def veteran_hero?(%{easy_mode: true}), do: false
   def veteran_hero?(_), do: true
 
@@ -140,16 +142,16 @@ defmodule Moba.Game do
 
   def maybe_finish_pve(hero), do: hero
 
-  def finish_pve!(hero) do
-    updated =
-      hero
-      |> update_hero!(%{finished_pve: true})
-      |> Repo.preload(:user)
+  def finish_pve!(%{finished_pve: false} = hero) do
+    hero = Repo.preload(hero, :user)
+    shards = Accounts.pve_shards_for(hero.user, hero.league_tier)
+    updated = update_hero!(hero, %{finished_pve: true, shards_reward: shards})
 
     collection = Heroes.collection_for(updated.user_id)
-    Accounts.finish_pve!(updated.user, collection)
+    Accounts.finish_pve!(updated.user, collection, shards)
     updated
   end
+  def finish_pve!(hero), do: hero
 
   def generate_boss!(hero) do
     boss =
@@ -335,5 +337,16 @@ defmodule Moba.Game do
   # ARENA PICKS
 
   def create_arena_pick!(user, match), do: ArenaPicks.create!(user, match)
+
   def list_recent_arena_picks(user), do: ArenaPicks.list_recent(user)
+
+  # SKINS
+
+  def list_skins_for(avatar_code), do: Skins.list_for(avatar_code)
+
+  def list_skins_with_codes(codes), do: Skins.list_with_codes(codes)
+
+  def get_skin_by_code!(code), do: Skins.get_by_code!(code)
+
+  def default_skin(avatar_code), do: Skins.default(avatar_code)
 end

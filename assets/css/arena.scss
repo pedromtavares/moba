@@ -17,7 +17,16 @@
     color: #f1556c;
   }
   .hero-card{
-    min-height: 500px;
+    .card-header{
+      min-height: 45px;
+    }
+    .card-body{
+      background-color: initial !important;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: 80%;
+      min-height: 400px;
+    }
   }
   .btn-success {
     color: #1abc9c;
@@ -29,6 +38,10 @@
   margin-bottom: 180px;
 
   .hero-card{
+
+    .card-body{
+      min-height: 300px;
+    }
 
     .attack {
       color: #f1556c;

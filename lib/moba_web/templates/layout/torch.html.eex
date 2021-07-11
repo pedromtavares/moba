@@ -33,6 +33,9 @@
             <a href="/admin/avatars?sort_direction=desc&sort_field=enabled">
               <h3>Avatars</h3>
             </a>
+            <a href="/admin/skins">
+              <h3>Skins</h3>
+            </a>
             <a href="/admin/users?_utf8=✓&filters%5B%5D=user%5Busername_contains%5D&filters%5B%5D=user%5Bemail_contains%5D&user%5Bis_bot_equals%5D=false&filters%5B%5D=user%5Blevel_equals%5D&filters%5B%5D=user%5Bexperience_equals%5D&user%5Bis_guest_equals%5D=false">
               <h3>Users</h3>
             </a>

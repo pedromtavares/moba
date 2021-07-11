@@ -24,8 +24,11 @@ defmodule Moba.Accounts.Unlocks do
     Enum.map(user.unlocks, fn unlock -> unlock.resource_code end)
   end
 
-  def price(%Game.Schema.Avatar{}), do: 2
-  def price(_), do: 1
+  def price(%Game.Schema.Avatar{}), do: 50
+  def price(%Game.Schema.Skill{}), do: 30
+  def price(%Game.Schema.Skin{league_tier: 5}), do: 100
+  def price(%Game.Schema.Skin{league_tier: 6}), do: 200
+  def price(_), do: 100
 
   defp do_create!(attrs) do
     %Unlock{}

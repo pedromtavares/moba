@@ -41,7 +41,7 @@ defmodule Moba do
   @battle_xp 50
   @pve_points_limit 12
   @max_hero_level 25
-  @daily_hero_limit 3
+  @shard_limit 200
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -83,7 +83,7 @@ defmodule Moba do
   def battle_xp, do: @battle_xp
   def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
-  def daily_hero_limit, do: @daily_hero_limit
+  def shard_limit, do: @shard_limit
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
