@@ -33,7 +33,7 @@ defmodule Moba do
     7 => "Immortal"
   }
   @easy_mode_count 2
-  @easy_mode_max_farm 20_000
+  @easy_mode_max_farm 22_000
 
   # PVE constants
   @base_xp 100
