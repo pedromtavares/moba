@@ -197,7 +197,7 @@ defmodule Moba.Engine.Core.Processor do
   defp defend_damage(turn), do: turn
 
   defp defend_effects(%{defender: %{inneffectable: true} = defender} = turn) do
-    %{turn | defender: %{defender | mp_burn: 0, stunned: false, silenced: false}}
+    %{turn | defender: %{defender | mp_burn: 0, stunned: false, silenced: false, disarmed: false}}
   end
 
   defp defend_effects(turn), do: turn

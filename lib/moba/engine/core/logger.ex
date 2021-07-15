@@ -295,7 +295,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}}, _) do
-    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and granted immunity to Normal Damage, stuns, silences and MP burns."
+    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and granted invunerability to Normal Damage."
   end
 
   defp description_for("laguna_blade", %{"damage" => {damage, defender}}, heroes) do
@@ -377,7 +377,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("boss_spell_block", %{"inneffectable" => {_, hero}}, _) do
-    "#{hero} has blocked the effect of [status]stuns, silences and MP burns[/status] this turn."
+    "#{hero} has blocked the effect of [status]stuns, silences, disarms and MP burns[/status] this turn."
   end
 
   defp description_for("boss_bash", %{"stunned" => {_, hero}}, heroes) do
@@ -463,15 +463,15 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("bkb", %{"extra" => {true, hero}}, _) do
-    "#{hero} activated BKB and will be [status]imune to stuns, silences and MP burns[/status] for the next defending turn."
+    "#{hero} activated BKB and will be [status]imune to stuns, silences, disarms and MP burns[/status] for the next defending turn."
   end
 
   defp description_for("bkb", %{"inneffectable" => {_, hero}}, _) do
-    "#{hero} is [status]imune to stuns, silences and MP burns[/status] this turn."
+    "#{hero} is [status]imune to stuns, silences, disarms MP burns[/status] this turn."
   end
 
   defp description_for("linkens_sphere", %{"inneffectable" => {_, hero}}, _) do
-    "#{hero} is [status]imune to stuns, silences and MP burns[/status] this turn."
+    "#{hero} is [status]imune to stuns, silences, disarms and MP burns[/status] this turn."
   end
 
   defp description_for("scythe_of_vyse", %{"stunned" => {_, hero}}, heroes) do

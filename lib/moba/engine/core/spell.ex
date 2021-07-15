@@ -250,7 +250,7 @@ defmodule Moba.Engine.Core.Spell do
   end
 
   defp effects_for(%{resource: %Skill{code: "culling_blade"}} = turn, _options) do
-    if turn.defender.current_hp <= turn.defender.total_hp * turn.resource.extra_multiplier do
+    if turn.defender.current_hp <= turn.defender.total_hp * (turn.resource.extra_multiplier + 0.01) do
       Effect.execute(turn)
     else
       turn
@@ -313,7 +313,6 @@ defmodule Moba.Engine.Core.Spell do
     turn
     |> Effect.hp_regen_by_base_amount()
     |> Effect.physical_invulnerability()
-    |> Effect.attacker_inneffectability()
   end
 
   defp effects_for(%{resource: %Skill{code: "laguna_blade"}} = turn, _options) do

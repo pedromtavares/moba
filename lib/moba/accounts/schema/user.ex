@@ -69,6 +69,7 @@ defmodule Moba.Accounts.Schema.User do
     ])
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
+    |> change(%{easy_mode_count: attrs[:easy_mode_count] || 2})
     |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 15)
     |> unique_constraint(:email)
