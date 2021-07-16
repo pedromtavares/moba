@@ -17,20 +17,20 @@ defmodule MobaWeb.GameHelpers do
   def background_url(%{background: background} = resource), do: get_background_url(background, resource)
   def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
 
-  def hero_skill_list(%{active_build: %{skills: skills}}) do
+  def hero_skill_list(%{active_build: %{skills: skills}, id: id}) do
     Enum.map(skills, fn skill ->
       img_tag(image_url(skill),
         data: [toggle: "tooltip"],
         title: skill_description(skill),
         class: "skill-img img-border-sm #{if skill.passive, do: "passive"} tooltip-mobile",
-        id: "skill-#{skill.id}"
+        id: "skill-#{skill.id}-#{id}"
       )
     end)
   end
 
   def hero_item_list(hero, legacy \\ false)
 
-  def hero_item_list(%{items: items}, false) do
+  def hero_item_list(%{items: items, id: id}, false) do
     Moba.Game.sort_items(items)
     |> Enum.map(fn item ->
       image =
@@ -38,21 +38,21 @@ defmodule MobaWeb.GameHelpers do
           data: [toggle: "tooltip"],
           title: item_description(item),
           class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile",
-          id: "item-#{item.id}"
+          id: "item-#{item.id}-#{id}"
         )
 
       content_tag(:div, image, class: "item-container col-4")
     end)
   end
 
-  def hero_item_list(%{items: items}, true) do
+  def hero_item_list(%{items: items, id: id}, true) do
     Moba.Game.sort_items(items)
     |> Enum.map(fn item ->
       img_tag(image_url(item),
         data: [toggle: "tooltip"],
         title: item_description(item),
         class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile",
-        id: "item-#{item.id}"
+        id: "item-#{item.id}-#{id}"
       )
     end)
   end

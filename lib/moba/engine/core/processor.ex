@@ -40,6 +40,7 @@ defmodule Moba.Engine.Core.Processor do
     |> Effect.damage_type(skill.damage_type)
     |> apply_spell()
     |> Effect.mp_cost()
+    |> Effect.turn_mp_regen()
     |> Effect.add_cooldown()
     |> Effect.add_last_skill()
     |> Effect.increment_spell_count()
@@ -316,6 +317,7 @@ defmodule Moba.Engine.Core.Processor do
     %{turn | resource: basic_attack, skill: basic_attack}
     |> Effect.damage_type(Moba.damage_types().normal)
     |> Effect.atk_damage()
+    |> Effect.turn_mp_regen()
     |> Effect.remove_last_skill()
   end
 

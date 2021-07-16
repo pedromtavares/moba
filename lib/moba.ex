@@ -34,6 +34,7 @@ defmodule Moba do
   }
   @easy_mode_count 2
   @easy_mode_max_farm 22_000
+  @turn_mp_regen_multiplier 0.01
 
   # PVE constants
   @base_xp 100
@@ -77,6 +78,7 @@ defmodule Moba do
   def medals, do: @medals
   def easy_mode_count, do: @easy_mode_count
   def easy_mode_max_farm, do: @easy_mode_max_farm
+  def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
 
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment

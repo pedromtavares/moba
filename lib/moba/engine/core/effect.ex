@@ -159,10 +159,6 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker_number(turn, :current_mp, -resource.mp_cost)
   end
 
-  def mp_uncost(%{resource: resource} = turn) do
-    update_attacker_number(turn, :current_mp, resource.mp_cost)
-  end
-
   def mp_steal_by_defender_total_mp(%{defender: defender, resource: resource} = turn) do
     steal = defender.total_mp * resource.mp_regen_multiplier
 
@@ -173,6 +169,10 @@ defmodule Moba.Engine.Core.Effect do
 
   def mp_regen_by_total_mp(%{attacker: attacker, resource: resource} = turn) do
     update_attacker_number(turn, :mp_regen, attacker.total_mp * resource.mp_regen_multiplier)
+  end
+
+  def turn_mp_regen(%{attacker: attacker} = turn) do
+    update_attacker_number(turn, :mp_regen, attacker.total_mp * Moba.turn_mp_regen_multiplier())
   end
 
   # ARMOR
