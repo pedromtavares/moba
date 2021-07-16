@@ -151,6 +151,7 @@ defmodule Moba.Game do
     Accounts.finish_pve!(updated.user, collection, shards)
     updated
   end
+
   def finish_pve!(hero), do: hero
 
   def generate_boss!(hero) do

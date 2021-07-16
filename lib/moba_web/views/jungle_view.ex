@@ -21,6 +21,23 @@ defmodule MobaWeb.JungleView do
     end
   end
 
+  def difficulty_reward_label(difficulty) do
+    number =
+      case difficulty do
+        "weak" -> 1
+        "moderate" -> 2
+        "strong" -> 3
+        _ -> 0
+      end
+
+    coins =
+      Enum.reduce(1..number, "", fn _n, acc ->
+        acc <> "<i class='fa fa-coins'></i>"
+      end)
+
+    raw(coins)
+  end
+
   def offense_percentage(target, targets) do
     heroes = Enum.map(targets, & &1.defender)
     with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
