@@ -24,7 +24,7 @@
             <div class="col-12 col-md-8 center margin-auto">
                 <div class="progress progress-fixed victory-xp-bar">
                     <% points = pvp_points_for(@battle, @current_hero.id == @battle.attacker_id) %>
-                    <div style="width:<%=current_arena_percentage(points, @hero)%>%" class="progress-bar bg-danger">
+                    <div style="width:<%=current_arena_percentage(points, @hero)%>%" class="progress-bar bg-dark">
                         <span><%=final_points(@hero.pvp_points, points)%> SP</span>
                     </div>
                     <%= if points > 0 do %>

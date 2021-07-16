@@ -5,8 +5,12 @@
         <div class="row mt-3 mb-3">
             <div class="col">
                 <div class="card-box border border-danger p-2 bg-danger-dark mb-0" id="arena-info">
-                    <div class="row align-items-center">
-                        <div class="col-lg col-12 mt-3">
+                    <div class="row align-items-center d-flex justify-content-around">
+                        <div class="col-md text-center" id="main-arena-title">
+                            <h2 class="text-danger"><i class="fa fa-crosshairs fa-2x"></i><br/>Arena</h2>
+                            <a href="javascript:;" data-toggle="modal" data-target="#arena-rules" class="text-white font-italic" phx-hook="CompleteTutorial" id="view-rules"><i class="fa fa-star font-italic mr-1"></i>View Tips</a>
+                        </div>
+                        <div class="col-md">
                             <div class="text-white text-center">
                                 <h2 class="text-white mb-0"><%=arena_targets_available(@current_hero)%></h2>
                                 <p>Targets available this round</p>
@@ -17,30 +21,16 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="col-lg-2 col-12 text-center" id="main-arena-title">
-                            <h2 class="text-danger"><i class="fa fa-crosshairs fa-2x"></i><br/>Arena</h2>
-                            <a href="javascript:;" data-toggle="modal" data-target="#arena-rules" class="text-white font-italic" phx-hook="CompleteTutorial" id="view-rules"><i class="fa fa-star font-italic mr-1"></i>View Tips</a>
-                        </div>
-                        <div class="col-lg col-12">
-                            <div class="row mt-3">
-                                <div class="col" id="current-hero-arena-points">
-                                    <div class="text-white text-center">
-                                        <h2 class="text-white mb-0"><%=@current_hero.pvp_points%></h2>
-                                        <p>Season Points</p>
-                                    </div>
-                                </div>
-                                <div class="col" id="current-hero-rank">
-                                    <div class="text-white text-center">
-                                        <h2 class="text-white mb-0">
-                                            <%= if @current_hero.pvp_ranking do %>
-                                                #<%=@current_hero.pvp_ranking%>
-                                            <% else %>
-                                                Unranked
-                                            <% end %>
-                                        </h2>
-                                        <p>Rank</p>
-                                    </div>
-                                </div>
+                        <div class="col-md">
+                            <div class="text-white text-center">
+                                <h2 class="text-white mb-0" id="current-hero-rank">
+                                    <%= if @current_hero.pvp_ranking do %>
+                                        Rank #<%=@current_hero.pvp_ranking%>
+                                    <% else %>
+                                        Unranked
+                                    <% end %>
+                                </h2>
+                                <p id="current-hero-arena-points" class="mt-2"><%=@current_hero.pvp_points%> Season Points</p>
                             </div>
                         </div>
 
