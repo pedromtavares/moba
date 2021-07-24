@@ -32,7 +32,6 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
-  @easy_mode_count 2
   @easy_mode_max_farm 22_000
   @turn_mp_regen_multiplier 0.01
 
@@ -76,7 +75,6 @@ defmodule Moba do
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
   def medals, do: @medals
-  def easy_mode_count, do: @easy_mode_count
   def easy_mode_max_farm, do: @easy_mode_max_farm
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
 
@@ -175,12 +173,6 @@ defmodule Moba do
         skills,
         match \\ current_match()
       ) do
-    attrs =
-      if Accounts.easy_mode?(user) do
-        Map.merge(attrs, %{easy_mode: true, pve_battles_available: 1000})
-      else
-        attrs
-      end
 
     Accounts.maybe_archive_current_pve_hero(user)
     hero = Game.create_hero!(attrs, user, avatar, skills, match)

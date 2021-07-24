@@ -32,6 +32,12 @@ Hooks.ScrollToBottom = {
   }
 }
 
+Hooks.ScrollToTop = {
+  mounted(){
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
 Hooks.AnimateScroll = {
   mounted(){
     let el = this.el;

@@ -231,7 +231,7 @@ defmodule Moba.GameTest do
     end
 
     test "#finish_pve!" do
-      user = create_user(%{easy_mode_count: 2})
+      user = create_user()
       hero = create_base_hero(%{league_tier: 4}, user)
       finished = Game.finish_pve!(hero)
 
@@ -239,7 +239,6 @@ defmodule Moba.GameTest do
       assert finished.shards_reward == 40
 
       user = Accounts.get_user!(finished.user_id)
-      assert user.easy_mode_count == 1
     end
 
     test "#maybe_generate_boss" do

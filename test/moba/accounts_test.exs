@@ -2,7 +2,7 @@ defmodule Moba.AccountsTest do
   use Moba.DataCase
 
   setup do
-    %{user: create_user(%{easy_mode_count: 2})}
+    %{user: create_user()}
   end
 
   describe "user updates" do
@@ -38,27 +38,22 @@ defmodule Moba.AccountsTest do
 
     test "#finish_pve!", %{user: user} do
       assert user.shard_limit == 100
-      assert user.easy_mode_count == 2
       master = Accounts.finish_pve!(user, [], Accounts.pve_shards_for(user, 5))
 
       assert master.shard_limit == 50
       assert master.shard_count == 50
-      assert master.easy_mode_count == 1
 
       diamond = Accounts.finish_pve!(master, [], Accounts.pve_shards_for(master, 4))
       assert diamond.shard_limit == 10
       assert diamond.shard_count == 90
-      assert diamond.easy_mode_count == 0
 
       grandmaster = Accounts.finish_pve!(diamond, [], Accounts.pve_shards_for(diamond, 6))
       assert grandmaster.shard_limit == 0
       assert grandmaster.shard_count == 100
-      assert grandmaster.easy_mode_count == -1
 
       diamond = Accounts.finish_pve!(grandmaster, [], Accounts.pve_shards_for(grandmaster, 4))
       assert diamond.shard_limit == 0
       assert diamond.shard_count == 100
-      assert diamond.easy_mode_count == -2
     end
   end
 

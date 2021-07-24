@@ -64,12 +64,10 @@ defmodule Moba.Accounts.Schema.User do
       :current_pve_hero_id,
       :current_pvp_hero_id,
       :pvp_points,
-      :easy_mode_count,
       :shard_limit
     ])
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
-    |> change(%{easy_mode_count: attrs[:easy_mode_count] || 2})
     |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 15)
     |> unique_constraint(:email)
@@ -103,7 +101,6 @@ defmodule Moba.Accounts.Schema.User do
       :hero_collection,
       :season_points,
       :season_tier,
-      :easy_mode_count,
       :shard_limit
     ])
     |> validate_required([:username, :email])

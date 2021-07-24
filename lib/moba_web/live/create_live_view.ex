@@ -68,6 +68,12 @@ defmodule MobaWeb.CreateLiveView do
     {:noreply, assign(socket, selected_avatar: avatar, selected_skills: [], selected_build_index: nil)}
   end
 
+  def handle_event("repick-avatar", _, %{assigns: %{cache_key: cache_key}} = socket) do
+    put_cache(cache_key, nil, [], nil)
+
+    {:noreply, assign(socket, selected_avatar: nil, selected_skills: [], selected_build_index: nil)}
+  end
+
   def handle_event(
         "pick-skill",
         %{"id" => id},
@@ -120,27 +126,32 @@ defmodule MobaWeb.CreateLiveView do
     {:noreply, assign(socket, selected_avatar: selected_avatar, selected_skills: [])}
   end
 
-  def handle_event(
-        "create",
-        _,
-        %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills}} = socket
-      ) do
+  def handle_event("create-easy", _, socket), do: create_hero(true, socket)
+  def handle_event("create-veteran", _, socket), do: create_hero(false, socket)
+
+  def render(assigns) do
+    MobaWeb.CreateView.render("index.html", assigns)
+  end
+
+  defp create_hero(easy_mode, %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills}} = socket) do
     skills =
       selected_skills
       |> Enum.map(fn skill -> skill.id end)
       |> Game.list_chosen_skills()
 
-    name = if user.is_guest, do: avatar.name, else: user.username
+    attrs = %{name: user.username}
 
-    Moba.create_current_pve_hero!(%{name: name}, user, avatar, skills)
+    attrs = if easy_mode do
+      Map.merge(attrs, %{easy_mode: true, pve_battles_available: 1000})
+    else
+      attrs
+    end
+
+    Moba.create_current_pve_hero!(attrs, user, avatar, skills)
 
     delete_cache(socket)
 
     {:noreply, socket |> redirect(to: "/game/pve")}
-  end
-
-  def render(assigns) do
-    MobaWeb.CreateView.render("index.html", assigns)
   end
 
   defp add_skill(selected, skill) when length(selected) < 3 do

@@ -16,8 +16,7 @@ defmodule Test.AccountsHelper do
       password: pass,
       confirm_password: pass,
       is_bot: is_bot,
-      is_guest: is_guest,
-      easy_mode_count: 0
+      is_guest: is_guest
     }
 
     case Accounts.create_user(creds) do
