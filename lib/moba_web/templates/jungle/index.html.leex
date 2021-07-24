@@ -3,17 +3,9 @@
         <%= MobaWeb.GameView.render "_pending_battle.html", battle: @pending_battle %>
     <% else %>
         <%= if @current_hero.user.is_guest && @current_hero.level >= 10 do %>
-            <div class="row" style="margin-top: 300px">
-              <div class="col-12 text-center">
-                  <div class="alert alert-warning bg-light border-warning text-warning">
-                    <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-warning" do %>
-                        <i class="fa fa-sign-out-alt"></i> Enjoying the game? Click to create an account and continue leveling your hero!
-                    <% end %>
-                  </div>
-              </div>
-          </div>
+            <%= render "_guest_signup.html", socket: @socket %>
         <% else %>
-            <div class="row mt-3">
+            <div class="row mt-3 jungle-header">
                 <div class="col">
                     <div class="card-box border border-success p-2 bg-success-dark mb-0">
                         <div class="row">
@@ -21,36 +13,23 @@
                                 <h2 class="text-success"><i class="fa fa-leaf fa-2x"></i><br/>Jungle</h2>
                                 <a href="javascript:;" data-toggle="modal" data-target="#jungle-rules" class="text-white font-italic"><i class="fa fa-star font-italic mr-1"></i>View Tips</a>
                             </div>
-                            <div class="col-lg col-12 mt-3" id="jungle-stats">
-                                <div class="row align-items-center">
-                                    <div class="col-lg">
-                                        <%= if @current_hero.easy_mode do %>
-                                            <div class="text-white text-center">
-                                                <%=if @current_hero.loss_streak > 1 do %>
-                                                    <h2 class="text-dark mb-0"><i class="fa fa-skull-crossbones mr-1"></i><%=@current_hero.loss_streak%></h2>
-                                                    <h3>Loss Streak</h3>
-                                                <% else %>
-                                                    <h2 class="text-warning mb-0"><i class="fa fa-angle-double-up mr-1"></i><%=@current_hero.win_streak%></h2>
-                                                    <h3>Undefeated Streak</h3>
-                                                <% end %>
-                                            </div>
-                                        <% else %>
-                                            <div class="text-white text-center">
-                                                <h2 class="text-white mb-0"><%=@current_hero.pve_battles_available%></h2>
-                                                <p>Ganks available</p>
-                                                <p class="mb-0" data-toggle="tooltip" title="<%=streak_title(@current_hero)%>">
-                                                    <%=if @current_hero.loss_streak > 1 do %>
-                                                        <span class="text-dark"><i class="fa fa-skull-crossbones mr-1"></i>Loss Streak: <strong><%=@current_hero.loss_streak%></strong></span>
-                                                    <% else %>
-                                                        <span class="text-warning"><i class="fa fa-angle-double-up mr-1"></i>Undefeated Streak: <strong><%=@current_hero.win_streak%></strong></span>
-                                                    <% end %>
-                                                </p>
-                                            </div>
+                            <div class="col-lg col-12 mt-3" id="current-hero-league">
+                                <div class="row">
+                                    <div class="col d-flex align-items-center justify-content-center">
+                                        <%= for {tier, _} <- Moba.leagues() do %>
+                                            <%= unless @current_hero.easy_mode && tier == 6 do %>
+                                                <img src="/images/league_<%=tier%>.png" class="<%=MobaWeb.HeroView.tier_class(tier, @current_hero.league_tier)%>" data-toggle="tooltip" title="<%=Moba.leagues[tier]%>"/>
+                                            <% end %>
+                                            <%= unless tier == Moba.max_league_tier() || (tier == Moba.master_league_tier() && @current_hero.easy_mode)  do %>
+                                                <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
+                                                    <div style="width:100%" class="progress-bar <%=if tier >= @current_hero.league_tier, do: "bg-dark", else: "bg-primary"%>">
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            <% end %>
                                         <% end %>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="col-lg col-12 mt-3" id="current-hero-league">
                                 <div class="row mt-2 d-flex align-items-center">
                                     <%= if next = next_league(@current_hero) do %>
                                         <div class="col">
@@ -76,51 +55,91 @@
                                         </div>
                                     <% end %>
                                 </div>
-                                <div class="row">
-                                    <div class="col text-center">
-                                        <h3 class="text-white mb-0 mt-1"><%=Moba.leagues[@current_hero.league_tier]%></h3>
+
+                            </div>
+                            <div class="col-lg col-12 mt-3" id="jungle-stats">
+                                <div class="row align-items-center">
+                                    <div class="col-lg">
+                                        <%= unless @current_hero.easy_mode do %>
+                                            <div class="text-white text-center">
+                                                <h2 class="text-white mb-0"><%=@current_hero.pve_battles_available%></h2>
+                                                <p>Ganks available</p>
+                                                <p class="mb-0">
+                                                    <%=if @current_hero.buybacks > 0 do %>
+                                                        <span class="text-warning"><i class="fa fa-street-view mr-1"></i>Buybacks: <strong><%=@current_hero.buybacks%></strong></span>
+                                                    <% end %>
+                                                </p>
+                                            </div>
+                                        <% end %>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
             </div>
 
-            <%=if @current_hero.buffed_battles_available > 0 && @current_hero.pve_battles_available > 0 do %>
-                <div class="row text-center mt-1">
-                    <div class="col">
-                        <h3 class="m-0">
-                            <span class="badge badge-pill badge-light-danger mt-3 p-2" id="league-buff">
-                                <i class="fa fa-plus mr-1"></i>League buff active: +<%=round(Moba.league_buff_multiplier() * 100)%>% stats
-                                (<%=@current_hero.buffed_battles_available%>/<%=Moba.league_win_buffed_battles_bonus()%>)
-                            </span>
-                        </h3>
-                    </div>
-                </div>
-            <% end %>
-
-            <%= if show_league_challenge?(@current_hero) do %>
-                <% next = next_league(@current_hero) %>
+            <%= if @current_hero.dead do %>
                 <div class="row mt-3">
-                    <div class="col text-center">
-                        <img src="/images/league_<%=next%>.png" style="height: 100px"/>
-                        <h3><%=Moba.leagues[next]%> Challenge</h3>
-                        <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
-                                <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
-                            </button>
-                        <p class="text-muted font-italic">
-                            Click above to start your <span class="text-league-<%=next%>"><%=Moba.leagues[next]%> Challenge</span>.<br/>You will face consecutive opponents <span class="text-danger">to the death</span> and must win all the battles in order to <span class="text-success">rank up</span> to the <span class="text-league-<%=next%>"><%=Moba.leagues[next]%></span>.
-                        </p>
+                    <div class="col">
+                        <div class="card-box border border-light bg-light" style="height: 400px">
+                            <p class="text-center mt-3"><i class="fa fa-skull-crossbones fa-3x text-dark"></i></p>
+                            <h2 class="text-center mb-4">
+                                You are DEAD<br/>
+                                <small class="text-muted">You can continue ganking by buying back your hero</small>
+                            </h2>
+                            <div class="text-center mt-2 mb-2">
+                                <%=if @current_hero.gold >= Game.buyback_price(@current_hero) do %>
+                                    <button class="btn btn-warning btn-lg" phx-hook="Loading" loading="Respawning..." phx-click="buyback" id="buyback-hero">
+                                        <span class="loading-text"><i class="fa fa-street-view mr-1"></i> Buyback for <%=Game.buyback_price(@current_hero)%>g</span>
+                                    </button>
+                                <% else %>
+                                    <button class="btn btn-warning btn-lg disabled no-action">
+                                        <span class="loading-text"><i class="fa fa-street-view mr-1"></i> You do not have <%=Game.buyback_price(@current_hero)%>g to Buyback, try selling one of your items on the Shop</span>
+                                    </button>
+                                <% end %>
+                            </div>
+                            <div class="text-center mt-2">
+                                <a href="/create" class="btn btn-danger" data-confirm="WARNING: This will replace your current hero with the newly created one."><i class="fa fa-refresh mr-1"></i>Change Hero</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            <% end %>
+            <% else %>
+                <%=if @current_hero.buffed_battles_available > 0 && @current_hero.pve_battles_available > 0 do %>
+                    <div class="row text-center mt-1">
+                        <div class="col">
+                            <h3 class="m-0">
+                                <span class="badge badge-pill badge-light-danger mt-3 p-2" id="league-buff">
+                                    <i class="fa fa-plus mr-1"></i>League buff active: +<%=round(Moba.league_buff_multiplier() * 100)%>% stats
+                                    (<%=@current_hero.buffed_battles_available%> battles remaining)
+                                </span>
+                            </h3>
+                        </div>
+                    </div>
+                <% end %>
 
-            <%= if boss = boss_available?(@current_hero) do %>
-                <div class="row mt-3 margin-auto">
-                    <%= render "_boss.html", boss: boss %>
-                </div>
-                <%= if boss.league_attempts == 0 do %>
+                <%= if show_league_challenge?(@current_hero) do %>
+                    <% next = next_league(@current_hero) %>
+                    <div class="row mt-3">
+                        <div class="col text-center">
+                            <img src="/images/league_<%=next%>.png" style="height: 100px"/>
+                            <h3><%=Moba.leagues[next]%> Challenge</h3>
+                            <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
+                                    <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
+                                </button>
+                            <p class="text-muted font-italic">
+                                Click above to start your <span class="text-league-<%=next%>"><%=Moba.leagues[next]%> Challenge</span>.<br/>You will face consecutive opponents <span class="text-danger">to the death</span> and must win all the battles in order to <span class="text-success">rank up</span> to the <span class="text-league-<%=next%>"><%=Moba.leagues[next]%></span>.
+                            </p>
+                        </div>
+                    </div>
+                <% end %>
+
+                <%= if boss = boss_available?(@current_hero) do %>
+                    <div class="row mt-3 margin-auto">
+                        <%= render "_boss.html", boss: boss %>
+                    </div>
                     <div class="row">
                         <div class="col text-center">
                             <img src="/images/league_6.png" style="height: 100px"/>
@@ -128,47 +147,37 @@
                             <button class="btn btn-warning btn-lg mt-1 mb-1 btn-boss" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
                                 <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Boss Fight</span>
                             </button>
-                            <p class="text-muted font-italic">
-                                Click above to start your Boss Fight.<br/>You will face Roshan <span class="text-danger">to the death</span> and must win in order to <span class="text-success">rank up</span> to the <span class="text-league-6"><%=Moba.leagues[6]%></span>.
-                            </p>
+                            <%= if boss.league_attempts == 0 do %>
+                                <p class="text-muted font-italic">
+                                    Click above to start your Boss Fight.<br/>You will face Roshan <span class="text-danger">to the death</span> and must win in order to <span class="text-success">rank up</span> to the <span class="text-league-6"><%=Moba.leagues[6]%></span>.
+                                </p>
+                            <% else %>
+                                <p class="text-muted font-italic">
+                                    Roshan has <span class="text-success">regenerated <%=trunc(Moba.boss_regeneration_multiplier * boss.avatar.total_hp )%> HP</span>.<br/>You may try to beat him one last time.
+                                </p>
+                            <% end %>
                         </div>
                     </div>
-                <% else %>
-                    <div class="row">
-                        <div class="col text-center">
-                            <img src="/images/league_6.png" style="height: 100px"/>
-                            <br/>
-                            <%=if @current_hero.gold >= Moba.buyback_gold_penalty() do %>
-                                <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
-                                    <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Buyback for <%=Moba.buyback_gold_penalty()%>g and Fight</span>
-                                </button>
-                            <% else %>
-                                <button class="btn btn-warning btn-lg mt-1 mb-1 disabled">
-                                    <span class="loading-text"><i class="fa fa-trophy mr-1"></i> You do not have <%=Moba.buyback_gold_penalty()%>g to Buyback, maybe sell one of your items?</span>
-                                </button>
-                            <% end %>
-                            <p class="text-muted font-italic">
-                                Roshan has <span class="text-success">regenerated <%=trunc(Moba.boss_regeneration_multiplier * boss.avatar.total_hp )%> HP</span>.<br/>You may try to beat him one last time by buying your life back for <span class="text-warning"><%=Moba.buyback_gold_penalty()%>g</span>.
-                            </p>
+                <% end %>
+
+                <%= if @current_hero.pve_battles_available > 0 do %>
+                    <div class="row mt-3">
+                        <div class="col">
+                            <div class="row d-flex align-items-center targets">
+                                <%=for target <- @targets do %>
+                                    <%=render "_jungle_target.html", target: target, targets: @targets, current_hero: @current_hero%>
+                                <% end %>
+                            </div>
                         </div>
                     </div>
                 <% end %>
             <% end %>
-
-            <%= if @current_hero.pve_battles_available > 0 do %>
-                <div class="row mt-3">
-                    <div class="col">
-                        <div class="row d-flex align-items-center targets">
-                            <%=for target <- @targets do %>
-                                <%=render "_jungle_target.html", target: target, targets: @targets, current_hero: @current_hero%>
-                            <% end %>
-                        </div>
-                    </div>
-                </div>
-            <% end %>
         <% end %>
     <% end %>
 </div>
+
 <%= live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id, "origin" => "jungle", "tutorial_step" => @tutorial_step}, id: "current-hero-live-view") %>
+
 <%= render "_jungle_rules.html"%>
+
 <%= Phoenix.LiveView.Helpers.live_component(@socket, MobaWeb.Tutorial, step: @tutorial_step) %>

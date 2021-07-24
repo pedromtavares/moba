@@ -48,23 +48,6 @@ defmodule Moba.MobaTest do
   end
 
   describe "xp calculations" do
-    test "#win_streak_xp" do
-      assert Moba.win_streak_xp(1) == 0
-      assert Moba.win_streak_xp(2) == 10
-      assert Moba.win_streak_xp(5) == 40
-      assert Moba.win_streak_xp(10) == 90
-      assert Moba.win_streak_xp(11) == 100
-      assert Moba.win_streak_xp(12) == 100
-    end
-
-    test "#loss_streak_xp" do
-      assert Moba.loss_streak_xp(1) == 0
-      assert Moba.loss_streak_xp(2) == 30
-      assert Moba.loss_streak_xp(5) == 120
-      assert Moba.loss_streak_xp(10) == 270
-      assert Moba.loss_streak_xp(15) == 420
-    end
-
     test "#xp_to_next_hero_level" do
       assert Moba.xp_to_next_hero_level(2) == 120
       assert Moba.xp_to_next_hero_level(5) == 180

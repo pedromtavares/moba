@@ -111,8 +111,6 @@ defmodule Moba.Engine.Battles do
       experience: hero.experience,
       leveled_up: hero.level != battle_hero.level,
       gold: hero.gold,
-      win_streak: hero.win_streak,
-      loss_streak: hero.loss_streak,
       skill_levels_available: hero.skill_levels_available,
       wins: hero.wins,
       losses: hero.losses,

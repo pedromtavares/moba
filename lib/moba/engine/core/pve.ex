@@ -24,7 +24,7 @@ defmodule Moba.Engine.Core.Pve do
   def finalize_battle(battle) do
     battle
     |> manage_rewards()
-    |> manage_streaks()
+    |> manage_score()
     |> manage_updates()
     |> update_attacker()
     |> maybe_generate_boss()
@@ -75,26 +75,21 @@ defmodule Moba.Engine.Core.Pve do
   defp manage_rewards(%{winner: winner, difficulty: difficulty, attacker: attacker} = battle) do
     base_xp = battle_xp(attacker)
     percentage = Moba.xp_percentage(difficulty)
-    streak_percentage = Moba.streak_percentage(difficulty)
 
     win = winner && attacker.id == winner.id
     alive = win || is_nil(winner)
 
     battle_xp = (alive && base_xp |> final_xp_value(percentage)) || 0
-    loss_streak_xp = (alive && loss_streak_xp(attacker) |> final_xp_value(streak_percentage)) || 0
 
     win_xp = (win && base_xp |> final_xp_value(percentage)) || 0
-    win_streak_xp = (alive && win_streak_xp(attacker) |> final_xp_value(streak_percentage)) || 0
 
     pve_points = !Game.max_league?(attacker) && difficulty_pve_points(difficulty, win, alive)
 
-    total = battle_xp + win_xp + win_streak_xp + loss_streak_xp
+    total = battle_xp + win_xp
 
     rewards = %{
       battle_xp: battle_xp,
       win_xp: win_xp,
-      win_streak_xp: win_streak_xp,
-      loss_streak_xp: loss_streak_xp,
       difficulty_percentage: percentage,
       total_xp: final_rewards(total, attacker),
       total_gold: final_rewards(total, attacker),
@@ -110,23 +105,17 @@ defmodule Moba.Engine.Core.Pve do
     |> trunc()
   end
 
-  # Streaks are an exclusive to PVE battles and are used to give bonus rewards.
-  defp manage_streaks(%{winner: winner, attacker: attacker, defender: defender} = battle) do
+  defp manage_score(%{winner: winner, attacker: attacker, defender: defender} = battle) do
     updates =
       if winner && winner.id == defender.id do
-        %{loss_streak: attacker.loss_streak + 1, win_streak: 0, losses: attacker.losses + 1}
+        %{losses: attacker.losses + 1, dead: !attacker.easy_mode}
       else
-        new_streak = attacker.win_streak + 1
-        best_streak = if new_streak > attacker.best_pve_streak, do: new_streak, else: attacker.best_pve_streak
         wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
         ties = if !winner, do: attacker.ties + 1, else: attacker.ties
 
         %{
-          win_streak: new_streak,
-          loss_streak: 0,
           wins: wins,
-          ties: ties,
-          best_pve_streak: best_streak
+          ties: ties
         }
       end
 
@@ -159,11 +148,6 @@ defmodule Moba.Engine.Core.Pve do
   end
 
   defp difficulty_pve_points(_, _, _), do: 0
-
-  defp loss_streak_xp(hero), do: Moba.loss_streak_xp(hero.loss_streak)
-
-  # we give the XP for an extra win since XP is given before the streak manager actually adds a win
-  defp win_streak_xp(hero), do: Moba.win_streak_xp(hero.win_streak + 1)
 
   defp points_limit(result) when result > @pve_points_limit, do: @pve_points_limit
   defp points_limit(result), do: result

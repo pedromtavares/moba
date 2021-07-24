@@ -177,20 +177,14 @@ defmodule Moba.GameTest do
       assert hero.league_step == 1
     end
 
-    test "#redeem_league! when buyback" do
+    test "#redeem_league! when in master league" do
       hero =
-        create_base_hero(%{league_tier: Moba.master_league_tier(), gold: 10_000, pve_points: Moba.pve_points_limit()})
+        create_base_hero(%{league_tier: Moba.master_league_tier(), pve_points: Moba.pve_points_limit()})
         |> Game.generate_boss!()
         |> Game.redeem_league!()
 
       assert hero.league_step == 1
-
-      boss = Game.get_hero!(hero.boss_id)
-
-      updated = Game.finalize_boss!(boss, 1000, hero) |> Game.redeem_league!()
-
-      assert updated.gold == hero.gold - Moba.buyback_gold_penalty()
-      assert updated.total_farm == hero.total_farm - Moba.buyback_gold_penalty()
+      assert hero.pve_points == Moba.pve_points_limit()
     end
 
     test "#hero_has_other_build?" do
@@ -297,6 +291,22 @@ defmodule Moba.GameTest do
       assert hero.pve_points == 11
       refute hero.boss_id
     end
+
+    test "#buyback!" do
+      hero = create_base_hero()
+
+      assert Game.buyback!(hero) == hero
+
+      hero = create_base_hero(%{gold: 1000, level: 10, dead: true, total_farm: 1000})
+      updated = Game.buyback!(hero)
+
+      price = Game.buyback_price(hero)
+
+      refute updated.dead
+      assert updated.buybacks == 1
+      assert updated.gold == hero.gold - price
+      assert updated.total_farm == hero.total_farm - price
+    end
   end
 
   describe "builds" do
@@ -344,12 +354,9 @@ defmodule Moba.GameTest do
     end
 
     test "#reset_item_orders!" do
-      hero = create_bot_hero(0, 25)
-      previous_order = hero.active_build.item_order
-      build = Game.update_build!(hero.active_build, %{item_order: ["whatever"]})
-      assert build.item_order == ["whatever"]
-      hero = Game.reset_item_orders!(hero)
-      assert List.first(hero.builds).item_order == previous_order
+      base_hero = create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999}) |> Game.generate_bot_build!()
+      reset_hero = Game.reset_item_orders!(base_hero, [base_rare_item()])
+      assert List.first(reset_hero.builds).item_order == ["tranquil_boots"]
     end
 
     test "#skill_builds_for" do

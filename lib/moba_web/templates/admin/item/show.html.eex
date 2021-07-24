@@ -14,7 +14,7 @@
 
         <li>
           <div class="torch-show-label"></div>
-          <div class="torch-show-data">><img src="<%=GH.image_url(@item)%>"/></div>
+          <div class="torch-show-data"><img src="<%=GH.image_url(@item)%>"/></div>
         </li>
 
         <li>

@@ -37,29 +37,6 @@ defmodule MobaWeb.CurrentHeroView do
 
   def xp_to_next_level(hero), do: Moba.xp_to_next_hero_level(hero.level + 1)
 
-  def xp_bar_color(hero) do
-    cond do
-      hero.win_streak > 1 -> "bg-warning-light"
-      hero.loss_streak > 1 -> "bg-dark"
-      true -> "bg-white"
-    end
-  end
-
-  def bonus_xp_title(hero) do
-    cond do
-      hero.win_streak > 1 ->
-        "You are on a Win Streak (#{hero.win_streak})! Bonus XP on next win/tie: #{Moba.win_streak_xp(hero.win_streak)}"
-
-      hero.loss_streak > 1 ->
-        "You are on a Loss Streak (#{hero.loss_streak})! Bonus XP on next win/tie: #{
-          Moba.loss_streak_xp(hero.loss_streak)
-        }"
-
-      true ->
-        ""
-    end
-  end
-
   def edit_orders_description("pve") do
     "Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle."
   end

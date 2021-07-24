@@ -43,6 +43,7 @@ defmodule Moba do
   @pve_points_limit 12
   @max_hero_level 25
   @shard_limit 200
+  @buyback_multiplier 30
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -56,12 +57,11 @@ defmodule Moba do
   # League constants
   @master_league_tier 5
   @max_league_tier 6
-  @league_win_gold_bonus 2000
+  @league_win_gold_bonus 2500
   @league_win_buffed_battles_bonus 3
   @league_buff_multiplier 0.5
   @boss_regeneration_multiplier 0.5
-  @boss_win_gold_bonus 4000
-  @buyback_gold_penalty 2000
+  @boss_win_gold_bonus 5000
 
   def initial_battles, do: @initial_battles
   def xp_boosted_battles, do: @xp_boosted_battles
@@ -86,6 +86,7 @@ defmodule Moba do
   def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
   def shard_limit, do: @shard_limit
+  def buyback_multiplier, do: @buyback_multiplier
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
@@ -102,25 +103,10 @@ defmodule Moba do
   def league_buff_multiplier, do: @league_buff_multiplier
   def boss_regeneration_multiplier, do: @boss_regeneration_multiplier
   def boss_win_gold_bonus, do: @boss_win_gold_bonus
-  def buyback_gold_penalty, do: @buyback_gold_penalty
-
-  def win_streak_xp(streak) when streak > 1 do
-    amount = (streak - 1) * 10
-    if amount > 100, do: 100, else: amount
-  end
-
-  def win_streak_xp(_), do: 0
-
-  def loss_streak_xp(streak) when streak > 1, do: (streak - 1) * 30
-  def loss_streak_xp(_), do: 0
 
   def xp_percentage("weak"), do: 70
   def xp_percentage("moderate"), do: 100
   def xp_percentage("strong"), do: 200
-
-  def streak_percentage("weak"), do: 50
-  def streak_percentage("moderate"), do: 100
-  def streak_percentage("strong"), do: 150
 
   def victory_pve_points("weak"), do: 2
   def victory_pve_points("moderate"), do: 4

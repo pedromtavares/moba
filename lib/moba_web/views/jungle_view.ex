@@ -1,8 +1,6 @@
 defmodule MobaWeb.JungleView do
   use MobaWeb, :view
 
-  def streak_title(hero), do: MobaWeb.CurrentHeroView.bonus_xp_title(hero)
-
   def difficulty_color(difficulty) do
     case difficulty do
       "weak" -> "success"
@@ -98,15 +96,12 @@ defmodule MobaWeb.JungleView do
         )
       end
 
-    streak_xp = round(Moba.win_streak_xp(2) * Moba.streak_percentage(difficulty) / 100)
-
     safe_to_string(
       content_tag :div do
         [
           xp_reward,
           content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1"),
-          points,
-          content_tag(:span, "+#{streak_xp} XP/Gold per Undefeated Streak", class: "badge badge-pill badge-light-purple")
+          points
         ]
       end
     )

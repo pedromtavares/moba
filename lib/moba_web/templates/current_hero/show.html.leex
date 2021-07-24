@@ -24,14 +24,14 @@
                                 <div class="float-left center">
                                     <ul class="pagination pagination-rounded mb-0">
                                         <li class="page-item">
-                                            <div class="page-link hero-level <%=xp_bar_color(@current_hero)%>" data-toggle="tooltip" title="Level">
+                                            <div class="page-link hero-level bg-white" data-toggle="tooltip" title="Level">
                                                 <%=@current_hero.level%>
                                             </div>
                                         </li>
                                     </ul>
                                 </div>
-                                <div class="progress progress-fixed xp-bar" data-toggle="tooltip" title="Experience: <%=@current_hero.experience%>/<%=xp_to_next_level(@current_hero)%> <%=bonus_xp_title(@current_hero)%>">
-                                    <div style="width:<%=xp_percentage(@current_hero)%>%" class="progress-bar <%=xp_bar_color(@current_hero)%>">
+                                <div class="progress progress-fixed xp-bar" data-toggle="tooltip" title="Experience: <%=@current_hero.experience%>/<%=xp_to_next_level(@current_hero)%>">
+                                    <div style="width:<%=xp_percentage(@current_hero)%>%" class="progress-bar bg-white">
                                         <span></span>
                                     </div>
                                 </div>
@@ -175,8 +175,8 @@
                     </div>
                 <% else %>
                     <div class="col-5 pr-0">
-                        <div class="progress progress-fixed xp-bar border border-white tooltip-mobile" data-toggle="tooltip" title="Experience: <%=@current_hero.experience%>/<%=xp_to_next_level(@current_hero)%> <%=bonus_xp_title(@current_hero)%>" style="margin-top:0.3rem">
-                            <div style="width:<%=xp_percentage(@current_hero)%>%" class="progress-bar <%=xp_bar_color(@current_hero)%>">
+                        <div class="progress progress-fixed xp-bar border border-white tooltip-mobile" data-toggle="tooltip" title="Experience: <%=@current_hero.experience%>/<%=xp_to_next_level(@current_hero)%>" style="margin-top:0.3rem">
+                            <div style="width:<%=xp_percentage(@current_hero)%>%" class="progress-bar bg-white">
                                 <span><%=@current_hero.level%></span>
                             </div>
                         </div>

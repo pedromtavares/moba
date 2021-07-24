@@ -91,7 +91,7 @@ defmodule Moba.EngineTest do
 
     test "battle ties and attacker gains xp", %{strong_hero: attacker, alternate_hero: defender} do
       battle =
-        Engine.create_pve_battle!(%{attacker: %{attacker | win_streak: 1}, defender: defender, difficulty: "weak"})
+        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "weak"})
         |> Engine.auto_finish_battle!()
 
       assert battle.type == "pve"
@@ -100,8 +100,7 @@ defmodule Moba.EngineTest do
       assert rewards.battle_xp == 70
       assert rewards.difficulty_percentage == 70
       assert rewards.win_xp == 0
-      assert rewards.win_streak_xp == 5
-      assert rewards.total_xp == 75
+      assert rewards.total_xp == 70
       assert rewards.total_pve_points == 1
 
       reloaded_attacker = Game.get_hero!(attacker.id)
@@ -110,16 +109,13 @@ defmodule Moba.EngineTest do
       assert reloaded_attacker.experience != attacker.experience
       assert reloaded_defender.experience == defender.experience
       assert reloaded_attacker.ties == 1
-      assert reloaded_attacker.win_streak == 2
-      assert reloaded_attacker.best_pve_streak == 2
-      assert reloaded_attacker.loss_streak == 0
 
       assert reloaded_attacker.pve_battles_available == attacker.pve_battles_available - 1
       assert reloaded_defender.pve_battles_available == defender.pve_battles_available
 
-      assert reloaded_attacker.experience == 75
-      assert reloaded_attacker.gold == attacker.gold + 75
-      assert reloaded_attacker.total_farm == attacker.total_farm + 75
+      assert reloaded_attacker.experience == 70
+      assert reloaded_attacker.gold == attacker.gold + 70
+      assert reloaded_attacker.total_farm == attacker.total_farm + 70
       assert reloaded_attacker.pve_points == attacker.pve_points + 1
     end
 
@@ -145,18 +141,15 @@ defmodule Moba.EngineTest do
 
       assert updated_attacker.experience != attacker.experience
       assert updated_attacker.level != attacker.level
-      assert updated_attacker.win_streak == 1
       assert updated_attacker.wins == 1
-      assert updated_attacker.loss_streak == 0
       assert updated_attacker.buffed_battles_available == 0
       assert updated_attacker.xp_boosted_battles_available == attacker.xp_boosted_battles_available - 1
 
       assert defender.experience == 0
-      assert defender.loss_streak == 0
-      assert defender.win_streak == 0
+      refute attacker.dead
     end
 
-    test "battle loss for attacker, no xp, loss streak", %{weak_hero: attacker, strong_hero: defender} do
+    test "battle loss for attacker, no xp", %{weak_hero: attacker, strong_hero: defender} do
       battle =
         Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
         |> Engine.auto_finish_battle!()
@@ -168,36 +161,11 @@ defmodule Moba.EngineTest do
 
       assert attacker.experience == 0
       assert attacker.level == 1
-      assert attacker.win_streak == 0
-      assert attacker.loss_streak == 1
       assert attacker.losses == 1
+      assert attacker.dead
       assert battle.rewards.total_pve_points == 0
 
       assert defender.experience == 0
-      assert defender.loss_streak == 0
-      assert defender.win_streak == 0
-    end
-
-    test "win streak xp for attacker", %{weak_hero: defender, strong_hero: strong} do
-      attacker = Game.update_hero!(strong, %{win_streak: 20})
-
-      battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "weak"})
-        |> Engine.auto_finish_battle!()
-
-      assert battle.winner.id == attacker.id
-      assert battle.rewards.win_streak_xp == 50
-    end
-
-    test "loss streak xp for attacker", %{weak_hero: defender, strong_hero: strong} do
-      attacker = Game.update_hero!(strong, %{loss_streak: 2})
-
-      battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "weak"})
-        |> Engine.auto_finish_battle!()
-
-      assert battle.winner.id == attacker.id
-      assert battle.rewards.loss_streak_xp == 15
     end
   end
 

@@ -10,8 +10,6 @@ defmodule Moba.Engine.Schema.HeroSnapshot do
     field :experience, :integer
     field :level, :integer
     field :leveled_up, :boolean, default: false
-    field :win_streak, :integer
-    field :loss_streak, :integer
     field :wins, :integer
     field :losses, :integer
     field :ties, :integer
@@ -34,8 +32,6 @@ defmodule Moba.Engine.Schema.HeroSnapshot do
       :experience,
       :level,
       :leveled_up,
-      :win_streak,
-      :loss_streak,
       :wins,
       :losses,
       :ties,

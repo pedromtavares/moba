@@ -172,7 +172,7 @@ defmodule Moba.Engine.Core.Effect do
   end
 
   def turn_mp_regen(%{attacker: attacker} = turn) do
-    update_attacker_number(turn, :mp_regen, attacker.total_mp * Moba.turn_mp_regen_multiplier())
+    update_attacker_number(turn, :mp_regen, Float.ceil(attacker.total_mp * Moba.turn_mp_regen_multiplier()))
   end
 
   # ARMOR
@@ -341,9 +341,11 @@ defmodule Moba.Engine.Core.Effect do
     update_defender(turn, :invulnerable, true)
   end
 
-  def damage_type(turn, type) do
+  def damage_type(%{defender: %{damage_type: defender_type}} = turn, type) when defender_type != "pure" do
     update_defender(turn, :damage_type, type)
   end
+
+  def damage_type(turn, _), do: turn
 
   def physical_invulnerability(turn) do
     update_attacker(turn, :physically_invulnerable, true)

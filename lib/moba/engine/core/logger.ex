@@ -295,7 +295,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}}, _) do
-    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and granted invunerability to Normal Damage."
+    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and granted invulnerability to Normal Damage."
   end
 
   defp description_for("laguna_blade", %{"damage" => {damage, defender}}, heroes) do

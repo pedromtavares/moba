@@ -53,7 +53,7 @@
             </div>
         </div>
 
-        <div class="row mb-3">
+        <div class="row mb-1">
             <div class="col">
                 <a href="/create" class="btn btn-outline-success btn-block btn-lg">
                     <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
@@ -80,7 +80,7 @@
     <% else %>
         <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
     <% end %>
-    <div class="row">
+    <div class="row mt-3">
         <div class="col-md-6 col-xl-4">
             <div class="hero-card card " style="background-image: url(<%=GH.background_url(@hero)%>">
                 <div class="card-header pt-0 pb-1">
@@ -140,10 +140,10 @@
                         <div class="row text-center">
                             <div class="col">
                                 <h3 class="mb-0 text-primary">
-                                    <i class="fa fa-cubes"></i>
-                                    <%=if @hero.best_pve_streak == 0, do: "?", else: @hero.best_pve_streak%>
+                                    <i class="fa fa-street-view"></i>
+                                    <%= @hero.buybacks %>
                                 </h3>
-                                <h4 class="text-primary">Best Streak</h4>
+                                <h4 class="text-primary">Buybacks</h4>
                             </div>
                             <div class="col">
                                 <h3 class="mb-0 text-warning">

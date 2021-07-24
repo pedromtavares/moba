@@ -76,6 +76,28 @@
   }
 }
 
+.jungle-header{
+  .previous-tier{
+    max-width: 30px;
+    filter: grayscale(100%);
+  }
+  .current-tier{
+    max-width: 30px;
+  }
+  .next-tier{
+    max-width: 30px;
+    opacity: 0.5;
+  }
+  .ranking{
+    img{
+      width: 60px;
+      border: 1px solid;
+      border-image-source: radial-gradient(white, rgb(47, 60, 74));
+      border-image-slice: 1;
+    }
+  }
+}
+
 .hero-review{
   .previous-tier{
     width: 10%;

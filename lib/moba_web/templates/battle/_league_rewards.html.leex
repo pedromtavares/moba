@@ -25,20 +25,20 @@
                         </a>
                     </li>
                     <li class="nav-item ml-4">
-                        <div class="ribbon-box streaks">
+                        <div class="ribbon-box reward-box">
                             <div class="ribbon ribbon-warning float-left shape">+<%=league_gold_bonus(@hero)%>g</div>
                         </div>
                     </li>
                     <%= if @hero.league_tier < Moba.max_league_tier() do %>
                         <li class="nav-item ml-4">
-                            <div class="ribbon-box streaks">
+                            <div class="ribbon-box reward-box">
                                 <div class="ribbon ribbon-danger float-left shape">+<%=round(Moba.league_buff_multiplier() * 100)%>% buff</div>
                             </div>
                         </li>
                     <% end %>
                     <%= if @hero.league_tier == Moba.master_league_tier() do %>
                         <li class="nav-item ml-4">
-                            <div class="ribbon-box streaks">
+                            <div class="ribbon-box reward-box">
                                 <div class="ribbon ribbon-primary float-left shape">MAX level</div>
                             </div>
                         </li>

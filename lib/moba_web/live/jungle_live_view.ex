@@ -59,6 +59,12 @@ defmodule MobaWeb.JungleLiveView do
     {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
   end
 
+  def handle_event("buyback", _, %{assigns: %{current_hero: hero}} = socket) do
+    hero = Game.buyback!(hero)
+    Game.broadcast_to_hero(hero.id)
+    {:noreply, assign(socket, current_hero: hero)}
+  end
+
   def handle_event("tutorial3", _, socket) do
     {:noreply, socket |> Tutorial.next_step(3) |> Shop.open()}
   end

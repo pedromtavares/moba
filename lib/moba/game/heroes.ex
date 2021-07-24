@@ -314,27 +314,9 @@ defmodule Moba.Game.Heroes do
   """
   def redeem_league!(%{pve_points: points} = hero) when points < @pve_points_limit, do: hero
 
-  def redeem_league!(%{league_tier: @master_league_tier, boss_id: boss_id} = hero) do
-    boss = get!(boss_id)
+  def redeem_league!(%{league_tier: @master_league_tier} = hero), do: update!(hero, %{league_step: 1})
 
-    base_update = %{league_step: 1}
-
-    updates =
-      if boss.league_attempts == 1 do
-        Map.merge(base_update, %{gold: hero.gold - Moba.buyback_gold_penalty(), total_farm: hero.total_farm - 2000})
-      else
-        base_update
-      end
-
-    update!(hero, updates)
-  end
-
-  def redeem_league!(hero) do
-    update!(hero, %{
-      pve_points: 0,
-      league_step: 1
-    })
-  end
+  def redeem_league!(hero), do: update!(hero, %{pve_points: 0, league_step: 1})
 
   def has_other_build?(hero) do
     builds =
@@ -370,6 +352,25 @@ defmodule Moba.Game.Heroes do
 
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
   def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
+
+  def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
+
+  def buyback!(%{dead: true} = hero) do
+    price = buyback_price(hero)
+
+    if hero.gold >= price do
+      update!(hero, %{
+        dead: false,
+        buybacks: hero.buybacks + 1,
+        gold: hero.gold - price,
+        total_farm: hero.total_farm - price
+      })
+    else
+      hero
+    end
+  end
+
+  def buyback!(hero), do: hero
 
   # --------------------------------
 

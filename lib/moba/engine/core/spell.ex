@@ -357,11 +357,7 @@ defmodule Moba.Engine.Core.Spell do
   end
 
   defp effects_for(%{resource: %Skill{code: "psionic_trap", debuff: nil}} = turn, _options) do
-    turn
-    |> roll(
-      fn turn -> turn |> Effect.add_debuff() |> Effect.remove_permanent_skill() end,
-      fn turn -> turn end
-    )
+    turn |> Effect.add_debuff() |> Effect.remove_permanent_skill()
   end
 
   defp effects_for(%{resource: %Skill{code: "psionic_trap"}} = turn, _options) do
@@ -622,6 +618,7 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Item{code: code}} = turn, _options) when code in ["dagon", "dagon5"] do
     turn
     |> Effect.base_amount_damage()
+    |> Effect.damage_type(Moba.damage_types().magic)
   end
 
   defp effects_for(%{resource: %Item{code: "heavens_halberd"}} = turn, _options) do

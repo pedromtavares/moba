@@ -37,10 +37,9 @@ defmodule Moba.Game.Schema.Hero do
     field :wins, :integer, default: 0
     field :losses, :integer, default: 0
     field :ties, :integer, default: 0
-    field :win_streak, :integer, default: 0
-    field :loss_streak, :integer, default: 0
+    field :buybacks, :integer, default: 0
+    field :dead, :boolean, default: false
     field :total_farm, :integer, default: 0
-    field :best_pve_streak, :integer, default: 0
     field :pve_ranking, :integer
     field :finished_pve, :boolean, default: false
     field :shards_reward, :integer, default: 0
@@ -99,8 +98,6 @@ defmodule Moba.Game.Schema.Hero do
       :experience,
       :name,
       :level,
-      :win_streak,
-      :loss_streak,
       :wins,
       :losses,
       :ties,
@@ -113,7 +110,8 @@ defmodule Moba.Game.Schema.Hero do
       :bot_difficulty,
       :gold,
       :total_farm,
-      :best_pve_streak,
+      :buybacks,
+      :dead,
       :pve_ranking,
       :finished_pve,
       :item_hp,

@@ -140,10 +140,10 @@ defmodule Moba.Game.Items do
   defp equip(hero, item) do
     new_inventory = hero.items ++ [item]
 
-    if item.active, do: Game.reset_item_orders!(hero)
+    updated = if item.active, do: Game.reset_item_orders!(hero, new_inventory), else: hero
 
     Game.update_hero!(
-      hero,
+      updated,
       new_inventory_stats(new_inventory),
       new_inventory
     )
@@ -153,7 +153,7 @@ defmodule Moba.Game.Items do
     items_codes = Enum.map(items, & &1.code)
     new_inventory = Enum.filter(hero.items, fn item -> !Enum.member?(items_codes, item.code) end)
 
-    if Enum.find(items, fn item -> item.active end), do: Game.reset_item_orders!(hero)
+    if Enum.find(items, fn item -> item.active end), do: Game.reset_item_orders!(hero, new_inventory)
 
     Game.update_hero!(
       hero,

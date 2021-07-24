@@ -61,7 +61,7 @@
                 <% else %>
                     <%=30-@user.current_pve_hero.pve_battles_available %>
                 <% end %>
-                battles (<%=@user.current_pve_hero.win_streak%>)
+                battles (<%=@user.current_pve_hero.buybacks%>)
             </span>
             |
             <span class="text-danger">WR: <strong><%=GH.pve_win_rate(@user.current_pve_hero)%>%</strong></span>

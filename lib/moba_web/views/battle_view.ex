@@ -223,7 +223,7 @@ defmodule MobaWeb.BattleView do
     end
   end
 
-  def reward_badges(%{rewards: rewards, attacker_snapshot: snapshot} = battle, current_hero) do
+  def reward_badges(%{rewards: rewards} = battle, current_hero) do
     xp =
       if rewards.total_xp > 0 do
         content_tag(:span, "#{rewards.total_xp} XP", class: "badge badge-light-info")
@@ -234,20 +234,6 @@ defmodule MobaWeb.BattleView do
     gold =
       if rewards.total_gold > 0 do
         content_tag(:span, "#{rewards.total_xp}g", class: "badge badge-light-warning")
-      else
-        ""
-      end
-
-    win_streak =
-      if snapshot.win_streak > 1 && battle.type == "pve" do
-        content_tag(:span, "Undefeated: #{snapshot.win_streak}", class: "badge badge-light-purple")
-      else
-        ""
-      end
-
-    loss_streak =
-      if snapshot.loss_streak > 1 && battle.type == "pve" do
-        content_tag(:span, "Loss Streak: #{snapshot.loss_streak}", class: "badge badge-light-dark")
       else
         ""
       end
@@ -274,7 +260,7 @@ defmodule MobaWeb.BattleView do
         ""
       end
 
-    content_tag(:div, [xp, gold, pve, pvp, win_streak, loss_streak])
+    content_tag(:div, [xp, gold, pve, pvp])
   end
 
   def current_hp(hero) do
@@ -298,7 +284,7 @@ defmodule MobaWeb.BattleView do
   end
 
   def current_hp_percentage(hero) do
-    trunc(current_hp(hero) * 100 / hero.total_hp)
+    trunc((current_hp(hero) + hero.hp_regen) * 100 / hero.total_hp)
   end
 
   def hp_result_percentage(hero) do
@@ -326,7 +312,7 @@ defmodule MobaWeb.BattleView do
   def minimal_percentage(original), do: original
 
   def hp_description(hero) do
-    damage = (hero.damage != 0 && "Total damage: #{hero.damage}. ") || ""
+    damage = (hero.damage != 0 && "Total #{hero.damage_type} damage: #{hero.damage}. ") || ""
     regen = (hero.hp_regen != 0 && "Total HP regeneration: #{hero.hp_regen}. ") || ""
     "#{damage}#{regen}"
   end

@@ -11,8 +11,6 @@ defmodule Moba.Engine.Schema.Rewards do
     field :total_xp, :integer, default: 0
     field :battle_xp, :integer, default: 0
     field :win_xp, :integer, default: 0
-    field :win_streak_xp, :integer, default: 0
-    field :loss_streak_xp, :integer, default: 0
     field :difficulty_percentage, :integer, default: 0
     field :total_gold, :integer, default: 0
     field :total_pve_points, :integer, default: 0
@@ -28,8 +26,6 @@ defmodule Moba.Engine.Schema.Rewards do
       :total_xp,
       :battle_xp,
       :win_xp,
-      :win_streak_xp,
-      :loss_streak_xp,
       :difficulty_percentage,
       :total_pve_points,
       :total_pvp_battles,

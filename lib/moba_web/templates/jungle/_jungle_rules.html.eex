@@ -15,7 +15,6 @@
                 <h5 class="text-center">Shop</h5>
                 <p>Ganking also rewards you with <span class="text-warning">gold</span> which you can use to buy items in the Shop, located in the bottom right corner. You can either buy items directly or transmute weaker ones to form stronger ones. Make sure to always spend your <span class="text-warning">gold</span>, as items make your hero considerably stronger.</p>
                 <h5 class="text-center">Tips</h5>
-                <i class="fa fa-hand-point-right mr-1"></i> Keeping a Win Streak is very important, if you're not sure you can beat a target, try a weaker one.<br/>
                 <i class="fa fa-hand-point-right mr-1"></i> After winning a <span class="text-danger">League Challenge</span>, you gain a <span class="text-pink"><%=round(Moba.league_buff_multiplier() * 100)%>% stats boost</span>, so use that advantage to fight stronger targets.<br/>
             </div>
         </div>

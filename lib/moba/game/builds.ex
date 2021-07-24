@@ -99,14 +99,14 @@ defmodule Moba.Game.Builds do
   end
 
   @doc """
-  Resets the item_order for all of the Hero's builds when their inventory gets updated
+  Resets the item_order for all of the Hero's builds with a new inventory
   """
-  def reset_item_orders!(%{items: items} = hero) do
+  def reset_item_orders!(hero, new_inventory) do
     %{builds: builds} = Repo.preload(hero, :builds)
 
     updated_builds =
       Enum.map(builds, fn build ->
-        update!(build, %{item_order: items_to_order(items)})
+        update!(build, %{item_order: items_to_order(new_inventory)})
       end)
 
     Map.put(hero, :builds, updated_builds)

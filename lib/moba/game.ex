@@ -175,12 +175,13 @@ defmodule Moba.Game do
     new_total = boss_current_hp + Moba.boss_regeneration_multiplier() * maximum_hp
     new_total = if new_total > maximum_hp, do: maximum_hp, else: trunc(new_total)
     update_hero!(boss, %{total_hp: new_total, league_attempts: 1})
-    hero
+    update_hero!(hero, %{dead: true})
   end
 
-  def finalize_boss!(_boss, _boss_current_hp, hero) do
-    update_hero!(hero, %{boss_id: nil, pve_points: Moba.pve_points_limit() - 1})
-  end
+  def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil, pve_points: Moba.pve_points_limit() - 1})
+
+  defdelegate buyback!(hero), to: Heroes
+  defdelegate buyback_price(hero), to: Heroes
 
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")
@@ -230,11 +231,11 @@ defmodule Moba.Game do
     |> Map.put(:active_build, build)
   end
 
-  def skill_builds_for(role), do: Builds.skill_builds_for(role)
+  defdelegate skill_builds_for(role), to: Builds
 
-  def skill_build_for(avatar, index), do: Builds.skill_build_for(avatar, index)
+  defdelegate skill_build_for(avatar, index), to: Builds
 
-  def reset_item_orders!(hero), do: Builds.reset_item_orders!(hero)
+  defdelegate reset_item_orders!(hero, new_inventory), to: Builds
 
   def level_active_build_to_max!(hero), do: Builds.level_active_to_max!(hero)
 
