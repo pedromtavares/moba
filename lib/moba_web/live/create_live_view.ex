@@ -139,15 +139,7 @@ defmodule MobaWeb.CreateLiveView do
       |> Enum.map(fn skill -> skill.id end)
       |> Game.list_chosen_skills()
 
-    attrs = %{name: user.username}
-
-    attrs = if easy_mode do
-      Map.merge(attrs, %{easy_mode: true, pve_battles_available: 1000})
-    else
-      attrs
-    end
-
-    Moba.create_current_pve_hero!(attrs, user, avatar, skills)
+    Moba.create_current_pve_hero!(%{name: user.username, easy_mode: easy_mode}, user, avatar, skills)
 
     delete_cache(socket)
 

@@ -65,6 +65,12 @@ defmodule MobaWeb.JungleLiveView do
     {:noreply, assign(socket, current_hero: hero)}
   end
 
+  def handle_event("restart", _, %{assigns: %{current_hero: hero, current_user: user}} = socket) do
+    Moba.create_current_pve_hero!(%{easy_mode: hero.easy_mode, name: hero.name}, user, hero.avatar, hero.active_build.skills)
+
+    {:noreply, socket |> redirect(to: "/game/pve")}
+  end
+
   def handle_event("tutorial3", _, socket) do
     {:noreply, socket |> Tutorial.next_step(3) |> Shop.open()}
   end

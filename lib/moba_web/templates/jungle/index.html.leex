@@ -91,17 +91,20 @@
                             </h2>
                             <div class="text-center mt-2 mb-2">
                                 <%=if @current_hero.gold >= Game.buyback_price(@current_hero) do %>
-                                    <button class="btn btn-warning btn-lg" phx-hook="Loading" loading="Respawning..." phx-click="buyback" id="buyback-hero">
+                                    <button class="btn btn-primary btn-lg" phx-hook="Loading" loading="Respawning..." phx-click="buyback" id="buyback-hero">
                                         <span class="loading-text"><i class="fa fa-street-view mr-1"></i> Buyback for <%=Game.buyback_price(@current_hero)%>g</span>
                                     </button>
                                 <% else %>
-                                    <button class="btn btn-warning btn-lg disabled no-action">
+                                    <button class="btn btn-primary btn-lg disabled no-action">
                                         <span class="loading-text"><i class="fa fa-street-view mr-1"></i> You do not have <%=Game.buyback_price(@current_hero)%>g to Buyback, try selling one of your items on the Shop</span>
                                     </button>
                                 <% end %>
                             </div>
+                            <div class="text-center mt-4">
+                                <button phx-click="restart" id="restart-hero" class="btn btn-warning" data-confirm="WARNING: This reset your hero to level 1."><i class="fa fa-user-plus mr-1"></i>Restart Hero</button>
+                            </div>
                             <div class="text-center mt-2">
-                                <a href="/create" class="btn btn-danger" data-confirm="WARNING: This will replace your current hero with the newly created one."><i class="fa fa-refresh mr-1"></i>Change Hero</a>
+                                <a href="/create" class="btn btn-danger btn-sm" data-confirm="WARNING: This will replace your current hero with the newly created one."><i class="fa fa-refresh mr-1"></i>Change Hero</a>
                             </div>
                         </div>
                     </div>

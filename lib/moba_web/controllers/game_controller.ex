@@ -39,7 +39,7 @@ defmodule MobaWeb.GameController do
     avatar = Game.get_avatar!(selected_avatar)
     skills = Game.list_chosen_skills(selected_skills)
 
-    Moba.create_current_pve_hero!(%{name: avatar.name, easy_mode: true, pve_battles_available: 1000}, user, avatar, skills)
+    Moba.create_current_pve_hero!(%{name: avatar.name, easy_mode: true}, user, avatar, skills)
 
     conn
     |> put_session(:guest_user_id, user.id)
