@@ -72,9 +72,8 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def reward_badges_for(%{xp_boosted_battles_available: xp_boost} = hero, difficulty) do
-    battle_xp = if xp_boost > 0, do: Moba.battle_xp() * 2, else: Moba.battle_xp()
-    base_xp = round(battle_xp * Moba.xp_percentage(difficulty) / 100)
+  def reward_badges_for(hero, difficulty) do
+    base_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty) / 100)
     double_xp = base_xp * 2
 
     xp_reward =

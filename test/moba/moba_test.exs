@@ -47,25 +47,6 @@ defmodule Moba.MobaTest do
     end
   end
 
-  describe "xp calculations" do
-    test "#xp_to_next_hero_level" do
-      assert Moba.xp_to_next_hero_level(2) == 120
-      assert Moba.xp_to_next_hero_level(5) == 180
-      assert Moba.xp_to_next_hero_level(10) == 280
-      assert Moba.xp_to_next_hero_level(15) == 380
-      assert Moba.xp_to_next_hero_level(20) == 480
-      assert Moba.xp_to_next_hero_level(25) == 870
-    end
-
-    test "#xp_until_hero_level" do
-      assert Moba.xp_until_hero_level(5) == 600
-      assert Moba.xp_until_hero_level(10) == 1800
-      assert Moba.xp_until_hero_level(15) == 3500
-      assert Moba.xp_until_hero_level(20) == 5700
-      assert Moba.xp_until_hero_level(25) == 9750
-    end
-  end
-
   describe "cross-domain functions" do
     test "#create_current_pve_hero!" do
       user = create_user()

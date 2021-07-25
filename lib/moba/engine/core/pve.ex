@@ -73,7 +73,7 @@ defmodule Moba.Engine.Core.Pve do
 
   # Calculates XP, gold and points given, all depending on battle difficulty and outcome (victory/tie/loss)
   defp manage_rewards(%{winner: winner, difficulty: difficulty, attacker: attacker} = battle) do
-    base_xp = battle_xp(attacker)
+    base_xp = Moba.battle_xp()
     percentage = Moba.xp_percentage(difficulty)
 
     win = winner && attacker.id == winner.id
@@ -130,14 +130,10 @@ defmodule Moba.Engine.Core.Pve do
         gold: attacker.gold + rewards.total_gold,
         total_farm: attacker.total_farm + rewards.total_gold,
         buffed_battles_available: zero_limit(attacker.buffed_battles_available - 1),
-        xp_boosted_battles_available: attacker.xp_boosted_battles_available - 1,
         pve_points: points_limit(attacker.pve_points + rewards.total_pve_points)
       })
     }
   end
-
-  defp battle_xp(%{xp_boosted_battles_available: xp_boost}) when xp_boost > 0, do: Moba.battle_xp() * 2
-  defp battle_xp(_), do: Moba.battle_xp()
 
   defp difficulty_pve_points(difficulty, win, _) when win == true do
     Moba.victory_pve_points(difficulty)

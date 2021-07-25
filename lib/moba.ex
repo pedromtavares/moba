@@ -7,7 +7,6 @@ defmodule Moba do
 
   # General constants
   @initial_battles 30
-  @xp_boosted_battles 30
   @initial_gold 1000
   @items_base_price 400
   @max_battle_turns 12
@@ -36,13 +35,13 @@ defmodule Moba do
   @turn_mp_regen_multiplier 0.01
 
   # PVE constants
-  @base_xp 100
+  @base_xp 150
   @xp_increment 20
-  @battle_xp 50
+  @battle_xp 150
   @pve_points_limit 12
   @max_hero_level 25
   @shard_limit 200
-  @buyback_multiplier 30
+  @buyback_multiplier 20
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -56,14 +55,13 @@ defmodule Moba do
   # League constants
   @master_league_tier 5
   @max_league_tier 6
-  @league_win_gold_bonus 2500
+  @league_win_gold_bonus 2000
   @league_win_buffed_battles_bonus 3
   @league_buff_multiplier 0.5
   @boss_regeneration_multiplier 0.5
-  @boss_win_gold_bonus 5000
+  @boss_win_gold_bonus 2000
 
   def initial_battles, do: @initial_battles
-  def xp_boosted_battles, do: @xp_boosted_battles
   def initial_gold, do: @initial_gold
   def items_base_price, do: @items_base_price
   def normal_items_price, do: @items_base_price * 1

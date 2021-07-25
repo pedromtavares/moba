@@ -78,7 +78,7 @@ defmodule Moba.GameTest do
       updated = Game.update_attacker!(hero, updates)
       assert updated.level == 2
       assert updated.gold == 50
-      assert updated.experience == 80
+      assert updated.experience == 30
       assert updated.skill_levels_available == 1
       assert updated.total_hp > hero.total_hp
       assert updated.total_mp > hero.total_mp

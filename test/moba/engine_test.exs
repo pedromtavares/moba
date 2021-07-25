@@ -97,10 +97,10 @@ defmodule Moba.EngineTest do
       assert battle.type == "pve"
 
       rewards = battle.rewards
-      assert rewards.battle_xp == 70
+      assert rewards.battle_xp == 105
       assert rewards.difficulty_percentage == 70
       assert rewards.win_xp == 0
-      assert rewards.total_xp == 70
+      assert rewards.total_xp == 105
       assert rewards.total_pve_points == 1
 
       reloaded_attacker = Game.get_hero!(attacker.id)
@@ -113,9 +113,9 @@ defmodule Moba.EngineTest do
       assert reloaded_attacker.pve_battles_available == attacker.pve_battles_available - 1
       assert reloaded_defender.pve_battles_available == defender.pve_battles_available
 
-      assert reloaded_attacker.experience == 70
-      assert reloaded_attacker.gold == attacker.gold + 70
-      assert reloaded_attacker.total_farm == attacker.total_farm + 70
+      assert reloaded_attacker.experience == 105
+      assert reloaded_attacker.gold == attacker.gold + 105
+      assert reloaded_attacker.total_farm == attacker.total_farm + 105
       assert reloaded_attacker.pve_points == attacker.pve_points + 1
     end
 
@@ -130,10 +130,10 @@ defmodule Moba.EngineTest do
       assert battle.winner.id == attacker.id
 
       rewards = battle.rewards
-      assert rewards.battle_xp == 200
+      assert rewards.battle_xp == 300
       assert rewards.difficulty_percentage == 200
-      assert rewards.win_xp == 200
-      assert rewards.total_xp == 400
+      assert rewards.win_xp == 300
+      assert rewards.total_xp == 600
       assert rewards.total_pve_points == 6
 
       updated_attacker = Game.get_hero!(attacker.id)
@@ -143,7 +143,6 @@ defmodule Moba.EngineTest do
       assert updated_attacker.level != attacker.level
       assert updated_attacker.wins == 1
       assert updated_attacker.buffed_battles_available == 0
-      assert updated_attacker.xp_boosted_battles_available == attacker.xp_boosted_battles_available - 1
 
       assert defender.experience == 0
       refute attacker.dead

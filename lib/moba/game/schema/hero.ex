@@ -104,7 +104,6 @@ defmodule Moba.Game.Schema.Hero do
       :pve_battles_available,
       :pvp_battles_available,
       :buffed_battles_available,
-      :xp_boosted_battles_available,
       :pve_points,
       :pvp_points,
       :bot_difficulty,
@@ -157,7 +156,6 @@ defmodule Moba.Game.Schema.Hero do
     })
     |> change(%{
       pve_battles_available: Moba.initial_battles(),
-      xp_boosted_battles_available: Moba.xp_boosted_battles(),
       pve_points: 0,
       pvp_points: 0,
       league_step: 0,
