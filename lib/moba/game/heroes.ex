@@ -353,7 +353,7 @@ defmodule Moba.Game.Heroes do
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
   def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
 
-  def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
+  def buyback_price(%{level: level, user: user}), do: level * Moba.buyback_multiplier(user)
 
   def buyback!(%{dead: true} = hero) do
     price = buyback_price(hero)

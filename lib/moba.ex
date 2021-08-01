@@ -8,6 +8,7 @@ defmodule Moba do
   # General constants
   @initial_battles 30
   @initial_gold 1000
+  @veteran_initial_gold 3000
   @items_base_price 400
   @max_battle_turns 12
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
@@ -31,7 +32,7 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
-  @easy_mode_max_farm 22_000
+  @easy_mode_max_farm 21_000
   @turn_mp_regen_multiplier 0.01
 
   # PVE constants
@@ -42,6 +43,7 @@ defmodule Moba do
   @max_hero_level 25
   @shard_limit 200
   @buyback_multiplier 20
+  @veteran_buyback_multiplier 10
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -62,7 +64,8 @@ defmodule Moba do
   @boss_win_gold_bonus 2000
 
   def initial_battles, do: @initial_battles
-  def initial_gold, do: @initial_gold
+  def initial_gold(%{pve_tier: tier}) when tier > 0, do: @veteran_initial_gold
+  def initial_gold(_), do: @initial_gold
   def items_base_price, do: @items_base_price
   def normal_items_price, do: @items_base_price * 1
   def rare_items_price, do: @items_base_price * 3
@@ -82,7 +85,8 @@ defmodule Moba do
   def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
   def shard_limit, do: @shard_limit
-  def buyback_multiplier, do: @buyback_multiplier
+  def buyback_multiplier(%{pve_tier: tier}) when tier > 1, do: @veteran_buyback_multiplier
+  def buyback_multiplier(_), do: @buyback_multiplier
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
@@ -171,7 +175,6 @@ defmodule Moba do
         skills,
         match \\ current_match()
       ) do
-
     Accounts.maybe_archive_current_pve_hero(user)
     hero = Game.create_hero!(attrs, user, avatar, skills, match)
     Accounts.set_current_pve_hero!(user, hero.id)

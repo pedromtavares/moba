@@ -250,7 +250,7 @@ defmodule Moba.Engine.Core do
     do: total + round(Moba.league_buff_multiplier() * total)
 
   # Heroes in easy_mode get buffed for league battles after a lot of attempts
-  defp buffed_total(%{easy_mode: true, league_attempts: attempts}, %{type: "league"}, total) when attempts > 8,
+  defp buffed_total(%{easy_mode: true, league_attempts: attempts}, %{type: "league"}, total) when attempts > 6,
     do: total + round(Moba.league_buff_multiplier() * total)
 
   # Heroes receive a buff (stat increase) when they rank up to a new league -- only applied in PVE

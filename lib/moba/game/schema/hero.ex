@@ -160,7 +160,7 @@ defmodule Moba.Game.Schema.Hero do
       pvp_points: 0,
       league_step: 0,
       league_tier: 0,
-      gold: Moba.initial_gold()
+      gold: Moba.initial_gold(user)
     })
     |> changeset(attrs)
     |> put_assoc(:match, match)

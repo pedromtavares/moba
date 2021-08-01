@@ -50,11 +50,13 @@ defmodule Moba.Game do
   and generating its first Jungle targets
   """
   def create_hero!(attrs, user, avatar, skills, match \\ current_match()) do
-    attrs = if Map.get(attrs, :easy_mode) do
-      Map.merge(attrs, %{pve_battles_available: 1000})
-    else
-      attrs
-    end
+    attrs =
+      if Map.get(attrs, :easy_mode) do
+        Map.merge(attrs, %{pve_battles_available: 1000})
+      else
+        attrs
+      end
+
     hero = Heroes.create!(attrs, user, avatar, match)
     build = Builds.create!("pve", hero, skills)
 

@@ -133,7 +133,10 @@ defmodule MobaWeb.CreateLiveView do
     MobaWeb.CreateView.render("index.html", assigns)
   end
 
-  defp create_hero(easy_mode, %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills}} = socket) do
+  defp create_hero(
+         easy_mode,
+         %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills}} = socket
+       ) do
     skills =
       selected_skills
       |> Enum.map(fn skill -> skill.id end)

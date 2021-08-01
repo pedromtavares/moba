@@ -49,6 +49,7 @@ defmodule Moba.Engine.Core.Pve do
 
   defp update_attacker({battle, updates}) do
     attacker = Moba.update_attacker!(battle.attacker, updates)
+    battle = Map.put(battle, :attacker, attacker)
 
     {battle, attacker}
   end
@@ -108,7 +109,10 @@ defmodule Moba.Engine.Core.Pve do
   defp manage_score(%{winner: winner, attacker: attacker, defender: defender} = battle) do
     updates =
       if winner && winner.id == defender.id do
-        %{losses: attacker.losses + 1, dead: !attacker.easy_mode}
+        battles =
+          if attacker.user.pve_tier > 2, do: attacker.pve_battles_available + 1, else: attacker.pve_battles_available
+
+        %{losses: attacker.losses + 1, dead: !attacker.easy_mode, pve_battles_available: battles}
       else
         wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
         ties = if !winner, do: attacker.ties + 1, else: attacker.ties

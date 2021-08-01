@@ -27,8 +27,12 @@ defmodule Moba.GameTest do
       targets = Game.list_targets(hero)
 
       assert hero.active_build.type == "pve"
+      assert hero.gold == 1000
       assert length(hero.active_build.skills) == 4
       assert length(targets) > 0
+
+      veteran_hero = Game.create_hero!(%{name: "Foo"}, create_user(%{pve_tier: 1}), avatar, skills)
+      assert veteran_hero.gold == 3000
     end
 
     test "#create_bot_hero! pve" do
@@ -237,8 +241,6 @@ defmodule Moba.GameTest do
 
       assert finished.finished_pve
       assert finished.shards_reward == 40
-
-      user = Accounts.get_user!(finished.user_id)
     end
 
     test "#maybe_generate_boss" do
@@ -305,6 +307,13 @@ defmodule Moba.GameTest do
       assert updated.buybacks == 1
       assert updated.gold == hero.gold - price
       assert updated.total_farm == hero.total_farm - price
+
+      veteran_hero =
+        create_base_hero(%{gold: 1000, level: 10, dead: true, total_farm: 1000}, create_user(%{pve_tier: 2}))
+
+      veteran_price = Game.buyback_price(veteran_hero)
+
+      assert veteran_price == price / 2
     end
   end
 
@@ -396,12 +405,36 @@ defmodule Moba.GameTest do
   end
 
   describe "targets" do
-    test "#generate_targets!" do
-      hero = create_base_hero() |> Game.generate_targets!()
+    test "#generate_targets! user tier 0" do
+      hero = create_base_hero(%{}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
+      assert length(hero.targets) == 6
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 2
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 2
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 2
+    end
+
+    test "#generate_targets! user tier 1" do
+      hero = create_base_hero(%{}, create_user(%{pve_tier: 1})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
+    end
+
+    test "#generate_targets! user tier 2" do
+      hero = create_base_hero(%{}, create_user(%{pve_tier: 2})) |> Game.generate_targets!()
+      assert length(hero.targets) == 9
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 6
+    end
+
+    test "#generate_targets! user tier 3" do
+      hero = create_base_hero(%{}, create_user(%{pve_tier: 3})) |> Game.generate_targets!()
+      assert length(hero.targets) == 9
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 9
     end
   end
 

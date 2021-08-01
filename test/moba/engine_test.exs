@@ -166,6 +166,17 @@ defmodule Moba.EngineTest do
 
       assert defender.experience == 0
     end
+
+    test "battle loss for veteran attacker, gets gank back", %{weak_hero: attacker, strong_hero: defender} do
+      attacker = %{attacker | user: %{attacker.user | pve_tier: 3}}
+
+      battle =
+        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
+        |> Engine.auto_finish_battle!()
+
+      assert battle.winner.id == defender.id
+      assert battle.attacker.pve_battles_available == attacker.pve_battles_available
+    end
   end
 
   describe "pvp" do

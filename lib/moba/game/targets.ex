@@ -26,13 +26,23 @@ defmodule Moba.Game.Targets do
   Generates Target records by picking pre-generated bots according to their difficulty and Hero level.
   Currently 2 Targets of each difficulty is generated after every PVE battle.
   """
-  def generate!(hero, unlocked_codes \\ []) do
-    Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
-    limit = if Game.veteran_hero?(hero), do: 3, else: 2
+  def generate!(hero, unlocked_codes \\ [])
+  def generate!(%{user: user} = hero, _) when is_nil(user), do: hero
 
-    weak = create(hero, "weak", unlocked_codes, limit)
-    moderate = create(hero, "moderate", unlocked_codes, limit, Enum.map(weak, & &1.defender.id))
-    strong = create(hero, "strong", unlocked_codes, limit, Enum.map(weak ++ moderate, & &1.defender.id))
+  def generate!(%{user: user} = hero, unlocked_codes) do
+    Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
+
+    {weak_count, moderate_count, strong_count} =
+      case user.pve_tier do
+        0 -> {2, 2, 2}
+        1 -> {3, 3, 3}
+        2 -> {0, 3, 6}
+        3 -> {0, 0, 9}
+      end
+
+    weak = create(hero, "weak", unlocked_codes, weak_count)
+    moderate = create(hero, "moderate", unlocked_codes, moderate_count, Enum.map(weak, & &1.defender.id))
+    strong = create(hero, "strong", unlocked_codes, strong_count, Enum.map(weak ++ moderate, & &1.defender.id))
 
     Map.put(hero, :targets, weak ++ moderate ++ strong)
   end

@@ -221,7 +221,7 @@ defmodule Moba.Engine.Core.Logger do
   # ULTIMATES
 
   defp description_for("assassinate", %{"inneffectable" => {true, hero}}, _) do
-    "#{hero} is taking aim with exclusive protection and will be immune to stuns and silences until the next turn."
+    "#{hero} is taking aim with exclusive protection and will be immune to stuns, silences and disarms until the next turn."
   end
 
   defp description_for("assassinate", %{"charging" => {true, hero}}, _) do
