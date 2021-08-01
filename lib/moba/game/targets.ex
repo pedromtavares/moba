@@ -32,13 +32,13 @@ defmodule Moba.Game.Targets do
   def generate!(%{user: user} = hero, unlocked_codes) do
     Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
 
-    {weak_count, moderate_count, strong_count} =
-      case user.pve_tier do
-        0 -> {2, 2, 2}
-        1 -> {3, 3, 3}
-        2 -> {0, 3, 6}
-        3 -> {0, 0, 9}
-      end
+    {weak_count, moderate_count, strong_count} = cond do
+      hero.easy_mode && user.pve_tier == 0 -> {2, 2, 2}
+      user.pve_tier < 2 -> {3, 3, 3}
+      user.pve_tier < 3 -> {0, 3, 6}
+      true -> {0, 0, 9}
+    end
+
 
     weak = create(hero, "weak", unlocked_codes, weak_count)
     moderate = create(hero, "moderate", unlocked_codes, moderate_count, Enum.map(weak, & &1.defender.id))
