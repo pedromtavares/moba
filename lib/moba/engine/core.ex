@@ -114,8 +114,12 @@ defmodule Moba.Engine.Core do
     finish_battle(turn)
   end
 
+  defp battle_finished?(%{number: turn_number} = turn) when turn_number >= 100 do
+    finish_battle(turn)
+  end
+
   defp battle_finished?(%{number: turn_number, battle: %{type: battle_type}} = turn)
-       when turn_number >= @max_turns and battle_type != "league" do
+       when turn_number >= @max_turns and battle_type == "pve" do
     finish_battle(turn)
   end
 
