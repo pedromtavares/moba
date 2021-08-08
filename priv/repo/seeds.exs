@@ -1184,4 +1184,4 @@ Repo.update_all(Skill, [set: [current: true]])
 Repo.update_all(Avatar, [set: [current: true]])
 
 Moba.start!()
-Moba.regenerate_resources!()
+Moba.regenerate_resources!(0..5)
