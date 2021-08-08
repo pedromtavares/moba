@@ -113,78 +113,87 @@
             </div>
         </div>
         <div class="col-md-6 col-xl-4">
-            <div class="card">
-                <h5 class="card-header text-center font-17 text-white">
-                    <i class="fa fa-poll mr-1"></i>Performance
-                    <%=unless @hero.finished_pve do %>
-                        <small class="text-muted font-italic"> - In Progress <%=unless @hero.easy_mode do %>(<%=@hero.pve_battles_available%> battles left) <% end %></small>
-                    <% end %>
-                </h5>
-                <div class="card-body p-2">
-                    <div class="performance">
-                        <div class="row">
-                            <div class="col d-flex align-items-center">
-                                <%= for {tier, _} <- Moba.leagues() do %>
-                                    <img src="/images/league_<%=tier%>.png" class="<%=tier_class(tier, @hero.league_tier)%>"/>
-                                    <%= unless tier == Moba.max_league_tier() do %>
-                                        <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
-                                            <div style="width:100%" class="progress-bar <%=if tier >= @hero.league_tier, do: "bg-dark", else: "bg-primary"%>">
-                                                <span></span>
-                                            </div>
+            <div class="row">
+                <div class="col">
+                    <%=live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<%end%>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <h5 class="card-header text-center font-17 text-white">
+                            <i class="fa fa-poll mr-1"></i>Hero Performance
+                            <%=unless @hero.finished_pve do %>
+                                <small class="text-muted font-italic"> - In Progress <%=unless @hero.easy_mode do %>(<%=@hero.pve_battles_available%> battles left) <% end %></small>
+                            <% end %>
+                        </h5>
+                        <div class="card-body p-2">
+                            <div class="performance">
+                                <div class="row">
+                                    <div class="col d-flex align-items-center">
+                                        <%= for {tier, _} <- Moba.leagues() do %>
+                                            <img src="/images/league_<%=tier%>.png" class="<%=tier_class(tier, @hero.league_tier)%>"/>
+                                            <%= unless tier == Moba.max_league_tier() do %>
+                                                <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
+                                                    <div style="width:100%" class="progress-bar <%=if tier >= @hero.league_tier, do: "bg-dark", else: "bg-primary"%>">
+                                                        <span></span>
+                                                    </div>
+                                                </div>
+                                            <% end %>
+                                        <% end %>
+                                    </div>
+                                </div>
+                                <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%=Moba.leagues[@hero.league_tier]%></h3>
+                                <div class="row text-center">
+                                    <div class="col">
+                                        <h3 class="mb-0 text-primary">
+                                            <i class="fa fa-street-view"></i>
+                                            <%= @hero.buybacks %>
+                                        </h3>
+                                        <h4 class="text-primary">Buybacks</h4>
+                                    </div>
+                                    <div class="col">
+                                        <h3 class="mb-0 text-warning">
+                                            <i class="fa fa-coins"></i>
+                                            <%=@hero.total_farm%>
+                                        </h3>
+                                        <h4 class="text-warning">Total Farm</h4>
+                                    </div>
+                                    <div class="col">
+                                        <h3 class="mb-0 text-success">
+                                            <i class="fa fa-leaf"></i>
+                                            <%=GH.pve_win_rate(@hero)%>%
+                                        </h3>
+                                        <h4 class="text-success">Win Rate</h4>
+                                    </div>
+                                </div>
+                                <%= if @hero.pvp_ranking do %>
+                                    <h3 class="text-center mt-4 mb-2 text-danger">Arena</h3>
+                                    <div class="row text-center">
+                                        <div class="col">
+                                            <h3 class="mb-0 text-danger">
+                                                #<%=@hero.pvp_ranking%>
+                                            </h3>
+                                            <h4 class="text-danger"><%= if @hero.id == @hero.user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</h4>
                                         </div>
-                                    <% end %>
+                                        <div class="col">
+                                            <h3 class="mb-0 text-danger">
+                                                <i class="fa fa-crosshairs"></i>
+                                                <%=GH.pvp_win_rate(@hero)%>%
+                                            </h3>
+                                            <h4 class="text-danger">Win Rate</h4>
+                                        </div>
+                                    </div>
                                 <% end %>
                             </div>
                         </div>
-                        <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%=Moba.leagues[@hero.league_tier]%></h3>
-                        <div class="row text-center">
-                            <div class="col">
-                                <h3 class="mb-0 text-primary">
-                                    <i class="fa fa-street-view"></i>
-                                    <%= @hero.buybacks %>
-                                </h3>
-                                <h4 class="text-primary">Buybacks</h4>
-                            </div>
-                            <div class="col">
-                                <h3 class="mb-0 text-warning">
-                                    <i class="fa fa-coins"></i>
-                                    <%=@hero.total_farm%>
-                                </h3>
-                                <h4 class="text-warning">Total Farm</h4>
-                            </div>
-                            <div class="col">
-                                <h3 class="mb-0 text-success">
-                                    <i class="fa fa-leaf"></i>
-                                    <%=GH.pve_win_rate(@hero)%>%
-                                </h3>
-                                <h4 class="text-success">Win Rate</h4>
-                            </div>
-                        </div>
-                        <%= if @hero.pvp_ranking do %>
-                            <h3 class="text-center mt-4 mb-2 text-danger">Arena</h3>
-                            <div class="row text-center">
-                                <div class="col">
-                                    <h3 class="mb-0 text-danger">
-                                        #<%=@hero.pvp_ranking%>
-                                    </h3>
-                                    <h4 class="text-danger"><%= if @hero.id == @hero.user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</h4>
-                                </div>
-                                <div class="col">
-                                    <h3 class="mb-0 text-danger">
-                                        <i class="fa fa-crosshairs"></i>
-                                        <%=GH.pvp_win_rate(@hero)%>%
-                                    </h3>
-                                    <h4 class="text-danger">Win Rate</h4>
-                                </div>
-                            </div>
-                        <% end %>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="card ranking">
-                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i>Ranking</h5>
+                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i>Hero Ranking</h5>
                 <div class="card-body p-0">
                     <table class="table table-dark text-center m-0 table-sm">
                         <tr>
