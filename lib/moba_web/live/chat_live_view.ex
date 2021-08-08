@@ -9,26 +9,44 @@ defmodule MobaWeb.ChatLiveView do
 
     user = Accounts.get_user!(user_id)
 
+    messages = Accounts.latest_messages()
+
+    IO.inspect(messages)
+
+    count = if length(messages) > 0 do
+      user.unread_messages_count
+    else
+      Accounts.reset_unread_messages_count(user)
+      0
+    end
+
     {:ok,
      assign(socket,
        messages: Accounts.latest_messages(),
        changeset: Accounts.change_message(),
        user: user,
        visible: false,
-       unread_count: 0
+       unread_count: count
      ), temporary_assigns: [alerts: []]}
   end
 
   def handle_event("show-chat", _, socket) do
+    Accounts.reset_unread_messages_count(socket.assigns.user)
     {:noreply, assign(socket, visible: true, unread_count: 0)}
   end
 
-  def handle_event("close-chat", %{"key" => "Escape"}, socket) do
+  def handle_event("close-chat", %{"key" => "Escape"}, %{assigns: %{visible: true}} = socket) do
+    Accounts.reset_unread_messages_count(socket.assigns.user)
+    {:noreply, assign(socket, visible: false, unread_count: 0)}
+  end
+
+  def handle_event("close-chat", _, %{assigns: %{visible: true}} = socket) do
+    Accounts.reset_unread_messages_count(socket.assigns.user)
     {:noreply, assign(socket, visible: false, unread_count: 0)}
   end
 
   def handle_event("close-chat", _, socket) do
-    {:noreply, assign(socket, visible: false, unread_count: 0)}
+    {:noreply, socket}
   end
 
   def handle_event("send", params, %{assigns: %{user: user}} = socket) do
@@ -50,6 +68,8 @@ defmodule MobaWeb.ChatLiveView do
           is_admin: user.is_admin
         })
 
+      Accounts.increment_unread_messages_count_for_all_online_except(user)
+
       {:noreply,
        assign(socket,
          changeset: Accounts.change_message(%{user_id: Timex.now()}),
@@ -68,17 +88,17 @@ defmodule MobaWeb.ChatLiveView do
 
   def handle_info(
         {"message", message},
-        %{assigns: %{messages: messages, unread_count: count, visible: visible, alerts: alerts}} = socket
+        %{assigns: %{messages: messages, unread_count: count, visible: visible, alerts: alerts, user: user}} = socket
       ) do
-    alerts =
-      if visible do
-        alerts
+    {alerts, new_count} =
+      if message.user_id == user.id do
+        {alerts, 0}
       else
         alert = Map.put(message, :type, "message")
-        [alert] ++ alerts
+        {[alert] ++ alerts, count + 1}
       end
 
-    {:noreply, assign(socket, messages: [message] ++ messages, unread_count: count + 1, alerts: alerts)}
+    {:noreply, assign(socket, messages: [message] ++ messages, unread_count: new_count, alerts: alerts)}
   end
 
   def handle_info({"alert", alert}, socket) do

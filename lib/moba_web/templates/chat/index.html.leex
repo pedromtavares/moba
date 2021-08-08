@@ -1,8 +1,11 @@
 <div class="chat-button-container">
     <%=if @unread_count > 0 do %>
         <span class="unread-count badge badge-pill badge-danger"><%=@unread_count%></span>
+        <button class="btn btn-outline-danger red-glow d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Chat</button>
+    <% else %>
+        <button class="btn btn-outline-secondary text-white d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Chat</button>
     <% end %>
-    <button class="btn btn-outline-secondary text-white d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Chat</button>
+
 </div>
 
 <div class="right-bar" id="chat" phx-window-keydown="close-chat">

@@ -47,6 +47,10 @@
   background: #07382E !important;
 }
 
+.red-glow{
+  animation: 1s ultimate-glow infinite;
+}
+
 #hero-bar{
   background: #38414a;
   border: 0;
@@ -120,10 +124,6 @@
 
   .can-level.ultimate{
     border-image-source: radial-gradient(black, rgba(241,85,108, 0.6)) !important;
-    animation: 1s ultimate-glow infinite;
-  }
-
-  .red-glow{
     animation: 1s ultimate-glow infinite;
   }
 

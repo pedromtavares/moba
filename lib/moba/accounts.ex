@@ -74,6 +74,10 @@ defmodule Moba.Accounts do
 
   defdelegate pve_shards_for(user, league_tier), to: Users
 
+  defdelegate reset_unread_messages_count(user), to: Users
+
+  defdelegate increment_unread_messages_count_for_all_online_except(user), to: Users
+
   # MESSAGES
 
   def latest_messages(limit \\ 10), do: Messages.latest(limit)

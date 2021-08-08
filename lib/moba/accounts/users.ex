@@ -36,7 +36,7 @@ defmodule Moba.Accounts.Users do
   def update_tutorial_step!(user, step), do: update!(user, %{tutorial_step: step})
 
   def set_online_now(user) do
-    UserQuery.set_online_query(user)
+    UserQuery.by_user(User, user)
     |> Repo.update_all(set: [last_online_at: DateTime.utc_now()])
   end
 
@@ -246,6 +246,16 @@ defmodule Moba.Accounts.Users do
     else
       shard_limit
     end
+  end
+
+  def increment_unread_messages_count_for_all_online_except(user) do
+    query = UserQuery.online_users(User, 24) |> UserQuery.exclude_user(user)
+    Repo.update_all(query, inc: [unread_messages_count: 1])
+  end
+
+  def reset_unread_messages_count(user) do
+    UserQuery.by_user(user)
+    |> Repo.update_all(set: [unread_messages_count: 0])
   end
 
   # --------------------------------

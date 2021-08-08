@@ -36,8 +36,12 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(user in non_bots(query), where: user.last_online_at > ^ago)
   end
 
-  def set_online_query(user) do
-    from(u in User, where: u.id == ^user.id)
+  def by_user(query \\ User, user) do
+    from(u in query, where: u.id == ^user.id)
+  end
+
+  def exclude_user(query \\ User, user) do
+    from(u in query, where: u.id != ^user.id)
   end
 
   def ranking(limit) do

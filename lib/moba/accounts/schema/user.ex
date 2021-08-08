@@ -38,6 +38,7 @@ defmodule Moba.Accounts.Schema.User do
     field :bot_codes, {:array, :string}
     field :shard_limit, :integer, default: 100
     field :pve_tier, :integer, default: 0
+    field :unread_messages_count, :integer, default: 0
 
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick
