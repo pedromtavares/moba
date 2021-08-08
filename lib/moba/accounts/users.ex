@@ -249,7 +249,7 @@ defmodule Moba.Accounts.Users do
   end
 
   def increment_unread_messages_count_for_all_online_except(user) do
-    query = UserQuery.online_users(User, 24) |> UserQuery.exclude_user(user)
+    query = UserQuery.online_users(User, 24) |> UserQuery.non_guests() |> UserQuery.exclude_user(user)
     Repo.update_all(query, inc: [unread_messages_count: 1])
   end
 

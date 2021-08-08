@@ -11,8 +11,6 @@ defmodule MobaWeb.ChatLiveView do
 
     messages = Accounts.latest_messages()
 
-    IO.inspect(messages)
-
     count = if length(messages) > 0 do
       user.unread_messages_count
     else
