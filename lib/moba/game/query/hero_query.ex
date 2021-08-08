@@ -34,25 +34,25 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(@ranking_per_page, page_to_offset(page, @ranking_per_page))
   end
 
-  def pve_targets(difficulty, level_range, exclude_list, current_match_id, codes, limit) do
+  def pve_targets(difficulty, level_range, exclude_list, codes, limit) do
     Hero
     |> by_difficulty(difficulty)
     |> pvp_inactive()
     |> by_level(level_range)
-    |> by_match(current_match_id)
     |> by_codes(codes)
     |> exclude(exclude_list)
     |> limit_by(limit)
+    |> unarchived()
     |> random()
   end
 
-  def league_defender(attacker_id, base_level, difficulty, current_match_id) do
+  def league_defender(attacker_id, base_level, difficulty) do
     bots()
     |> by_level(base_level..base_level)
-    |> by_match(current_match_id)
     |> by_difficulty(difficulty)
     |> exclude([attacker_id])
     |> random()
+    |> unarchived()
     |> limit_by(1)
   end
 
@@ -84,16 +84,6 @@ defmodule Moba.Game.Query.HeroQuery do
       where: h.inserted_at > ^ago,
       where: h.pvp_points > 0,
       where: not is_nil(h.pvp_points)
-    )
-  end
-
-  def last_active_pve(user_id, current_match_id) do
-    base = by_user(Hero, user_id)
-
-    from(hero in base,
-      where: hero.match_id != ^current_match_id,
-      order_by: [desc: hero.id],
-      limit: 1
     )
   end
 
@@ -252,6 +242,10 @@ defmodule Moba.Game.Query.HeroQuery do
   def exclude(query, ids) do
     from hero in query,
       where: hero.id not in ^ids
+  end
+
+  def exclude_match(%{id: id} = _match) do
+    from hero in Hero, where: hero.match_id != ^id
   end
 
   def pvp_active(query \\ Hero) do

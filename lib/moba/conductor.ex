@@ -52,20 +52,15 @@ defmodule Moba.Conductor do
   end
 
   @doc """
-  The game's starting point. Creates all necessary resources and locks them against
-  further edits in the admin panel. Also creates PVE and PVP bots.
+  The game's starting point. Also creates PVP bots.
   Matches last for 24h and will automatically be restarted by Moba.Game.Server
   """
-  def start_match!(bot_level_range \\ 0..28) do
+  def start_match! do
     end_active_match!()
 
     match =
       create_match!()
-      |> generate_resources!()
-      |> generate_hero_bots!(bot_level_range)
-      |> refresh_pve_targets!()
-      |> archive_bots!()
-      |> generate_user_bots!()
+      |> generate_pvp_bots!()
       |> new_pvp_round!()
       |> server_update!()
 
@@ -108,6 +103,18 @@ defmodule Moba.Conductor do
     |> Game.update_match!(%{last_pvp_round_at: DateTime.utc_now()})
   end
 
+  @doc """
+  Creates all necessary resources and locks them against
+  further edits in the admin panel. Also creates PVE bots.
+  """
+  def regenerate_resources!(bot_level_range \\ 0..28) do
+    Game.current_match()
+    |> generate_resources!()
+    |> generate_pve_bots!(bot_level_range)
+    |> archive_previous_bots!()
+    |> refresh_pve_targets!()
+  end
+
   # Deactivates the current match and all pvp heroes, also assigning its winners and clearing all current heroes
   defp end_active_match! do
     active = Moba.current_match()
@@ -135,18 +142,23 @@ defmodule Moba.Conductor do
   defp generate_resources!(match) do
     Logger.info("Generating resources...")
 
-    SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(match)
-    ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(match)
-    AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match)
+    ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
+    Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), [set: [current: false]])
+
+    ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
+    Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), [set: [current: false]])
+
+    ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
+    Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), [set: [current: false]])
 
     match
   end
 
   # generates PVE bots for every eligible Avatar, every difficulty and every level in the range provided
-  defp generate_hero_bots!(match, level_range) do
+  defp generate_pve_bots!(match, level_range) do
     Logger.info("Generating PVE bots...")
 
-    AvatarQuery.all_current()
+    AvatarQuery.base_canon()
     |> Repo.all()
     |> Enum.each(fn avatar ->
       Logger.info("Generating #{avatar.name}s...")
@@ -154,6 +166,8 @@ defmodule Moba.Conductor do
       Enum.each(level_range, fn level ->
         Game.create_bot_hero!(avatar, level, "weak", match)
         Game.create_bot_hero!(avatar, level, "moderate", match)
+        Game.create_bot_hero!(avatar, level, "strong", match)
+        Game.create_bot_hero!(avatar, level, "strong", match)
         Game.create_bot_hero!(avatar, level, "strong", match)
       end)
     end)
@@ -174,17 +188,21 @@ defmodule Moba.Conductor do
   end
 
   # Archives all current bots so they can be removed later by Cleaner
-  defp archive_bots!(match) do
-    HeroQuery.bots() |> HeroQuery.unarchived() |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
+  defp archive_previous_bots!(match) do
+    match
+    |> HeroQuery.exclude_match()
+    |> HeroQuery.bots()
+    |> HeroQuery.unarchived()
+    |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
 
     match
   end
 
   # Generates a new PVP hero for every bot User with random avatars and levels
-  defp generate_user_bots!(match) do
+  defp generate_pvp_bots!(match) do
     Logger.info("Generating PVP bots...")
 
-    all_avatars = AvatarQuery.all_current() |> Repo.all()
+    all_avatars = AvatarQuery.base_canon() |> Repo.all()
 
     UserQuery.eligible_arena_bots()
     |> Repo.all()
@@ -243,8 +261,8 @@ defmodule Moba.Conductor do
     Game.update_match!(match, %{winners: winners})
   end
 
-  # Clears all active heroes from the current players in the match
-  # Users will need to create new Heroes for the Jungle and/or pick a new Hero for the Arena
+  # Clears all active PVP heroes from the current match
+  # Users will need to pick a new Hero for the Arena
   defp clear_current_heroes!(match) do
     Logger.info("Clearing active players...")
     Accounts.clear_active_players!()
@@ -278,6 +296,7 @@ defmodule Moba.Conductor do
       resource
       |> Repo.preload(:match)
       |> Map.put(:id, nil)
+      |> Map.put(:current, true)
       |> Map.put(:match_id, match.id)
       |> Repo.insert!()
     end)
@@ -285,9 +304,9 @@ defmodule Moba.Conductor do
 
   # because of intricasies of ultimates, we can't use the above function for Avatars
   defp duplicate_avatars!(list, match) do
-    Enum.each(list, fn avatar ->
+    Enum.map(list, fn avatar ->
       Game.create_avatar!(
-        Map.merge(avatar, %{ultimate_id: nil, match_id: nil, match: nil, ultimate: nil, id: nil}),
+        Map.merge(avatar, %{ultimate_id: nil, match_id: nil, match: nil, ultimate: nil, id: nil, current: true}),
         %{},
         match
       )

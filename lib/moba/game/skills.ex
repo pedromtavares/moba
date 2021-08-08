@@ -34,17 +34,16 @@ defmodule Moba.Game.Skills do
   def get_by_code!("", _, _), do: nil
 
   def get_by_code!(code, current, level) do
-    current_match = current && Game.current_match()
-    match_id = (current_match && current_match.id) || nil
+    query = if current, do: SkillQuery.single_current(), else: SkillQuery.canon()
 
-    get_by_match!(match_id, code, level)
+    Repo.get_by!(query, code: code, level: level)
   end
 
   def boss! do
     [
-      get_by_match!(nil, "boss_slam", 1),
-      get_by_match!(nil, "boss_bash", 1),
-      get_by_match!(nil, "boss_spell_block", 1)
+      get_by_code!("boss_slam", false, 1),
+      get_by_code!("boss_bash", false, 1),
+      get_by_code!("boss_spell_block", false, 1)
     ]
   end
 
@@ -151,14 +150,6 @@ defmodule Moba.Game.Skills do
   def ordered_query, do: SkillQuery.ordered()
 
   # --------------------------------
-
-  defp get_by_match!(nil, code, level) do
-    Repo.get_by!(SkillQuery.canon(Skill), code: code, level: level)
-  end
-
-  defp get_by_match!(match_id, code, level) do
-    Repo.get_by!(Skill, code: code, match_id: match_id, level: level)
-  end
 
   defp max_level?(skill), do: skill.level >= max_level(skill)
 

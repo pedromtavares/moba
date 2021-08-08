@@ -166,6 +166,11 @@ defmodule Moba do
     Cleaner.cleanup_old_records()
   end
 
+  def regenerate_resources! do
+    IO.puts("Regenerating resources...")
+    Conductor.regenerate_resources!()
+  end
+
   def current_match, do: Game.current_match()
 
   def create_current_pve_hero!(

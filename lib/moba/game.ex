@@ -37,8 +37,6 @@ defmodule Moba.Game do
 
   def current_heroes(user_id, match_id), do: Heroes.current(user_id, match_id)
 
-  def last_pve_hero(user_id), do: Heroes.last_active_pve(user_id)
-
   def last_pvp_hero(user_id), do: Heroes.last_active_pvp(user_id)
 
   def latest_heroes(user_id), do: Heroes.list_latest(user_id)

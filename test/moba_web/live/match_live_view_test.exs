@@ -6,7 +6,7 @@ defmodule MobaWeb.MatchLiveViewTest do
     %{user: pvp_user} = create_pvp_hero()
 
     # slows down suite by 1 sec
-    Conductor.start_match!(0..0)
+    Conductor.start_match!()
 
     pvp_user = Accounts.get_user!(pvp_user.id)
     conn = Pow.Plug.assign_current_user(conn, pvp_user, otp_app: :moba) |> init_test_session(current_mode: "pvp")

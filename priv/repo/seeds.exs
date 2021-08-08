@@ -1179,4 +1179,9 @@ Game.Query.SkillQuery.base_canon()
   end)
 end)
 
+Repo.update_all(Item, [set: [current: true]])
+Repo.update_all(Skill, [set: [current: true]])
+Repo.update_all(Avatar, [set: [current: true]])
+
 Moba.start!()
+Moba.regenerate_resources!()

@@ -25,6 +25,7 @@ defmodule Moba.Game.Schema.Skill do
     field :effects, :string
     field :code, :string
     field :enabled, :boolean
+    field :current, :boolean
     field :mp_cost, :integer
     field :name, :string
     field :passive, :boolean, default: false
@@ -95,7 +96,8 @@ defmodule Moba.Game.Schema.Skill do
       :duration,
       :enabled,
       :level_requirement,
-      :damage_type
+      :damage_type,
+      :current
     ])
     |> cast_attachments(attrs, [:image])
   end

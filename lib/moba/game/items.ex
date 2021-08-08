@@ -18,7 +18,7 @@ defmodule Moba.Game.Items do
   def get!(id), do: Repo.get!(Item, id)
 
   def get_by_code!(code) when code == "", do: nil
-  def get_by_code!(code), do: Repo.get_by!(Item, code: code, match_id: Game.current_match().id)
+  def get_by_code!(code), do: Repo.get_by!(ItemQuery.single_current(), code: code)
 
   def shop_list, do: ItemQuery.base_current() |> Repo.all()
 

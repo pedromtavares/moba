@@ -25,6 +25,7 @@ defmodule Moba.Game.Schema.Item do
     field :rarity, :string
     field :active, :boolean, default: false
     field :enabled, :boolean
+    field :current, :boolean
     field :mp_cost, :integer, default: 0
     field :cooldown, :integer, default: 0
     field :duration, :integer, default: 0
@@ -98,7 +99,8 @@ defmodule Moba.Game.Schema.Item do
       :roll_number,
       :extra_amount,
       :base_amount,
-      :enabled
+      :enabled,
+      :current
     ])
     |> cast_attachments(attrs, [:image])
   end

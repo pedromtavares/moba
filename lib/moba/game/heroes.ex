@@ -29,15 +29,6 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def last_active_pve(user_id) do
-    current_match = Game.current_match()
-
-    HeroQuery.last_active_pve(user_id, current_match.id)
-    |> Repo.all()
-    |> List.first()
-    |> base_preload()
-  end
-
   def last_active_pvp(user_id) do
     HeroQuery.last_active_pvp(user_id)
     |> Repo.all()

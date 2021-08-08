@@ -25,8 +25,11 @@ defmodule Moba.Game.Query.SkillQuery do
   end
 
   def current(query \\ Skill) do
-    match = Game.current_match()
-    from s in query, where: s.match_id == ^match.id
+    from s in query, where: s.current == true
+  end
+
+  def single_current(query \\ Skill) do
+    from s in current(query), order_by: [desc: s.id], limit: 1
   end
 
   def get_all(query, ids) do
@@ -87,5 +90,9 @@ defmodule Moba.Game.Query.SkillQuery do
   def ordered(query \\ Skill) do
     from s in query,
       order_by: [asc: s.ultimate, asc: s.passive, asc: s.name]
+  end
+
+  def exclude(query, ids) do
+    from s in query, where: s.id not in ^ids
   end
 end

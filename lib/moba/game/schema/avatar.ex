@@ -25,6 +25,7 @@ defmodule Moba.Game.Schema.Avatar do
     field :role, :string
     field :enabled, :boolean
     field :description, :string
+    field :current, :boolean
 
     field :level_requirement, :integer
 
@@ -66,7 +67,8 @@ defmodule Moba.Game.Schema.Avatar do
       :role,
       :enabled,
       :level_requirement,
-      :description
+      :description,
+      :current
     ])
     |> cast_attachments(attrs, [:image, :background])
   end

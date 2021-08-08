@@ -29,12 +29,19 @@ defmodule Moba.Game.Query.ItemQuery do
   end
 
   def current(query \\ Item) do
-    match = Game.current_match() || Game.last_match()
-    from s in query, where: s.match_id == ^match.id
+    from s in query, where: s.current == true
+  end
+
+  def single_current(query \\ Item) do
+    from s in current(query), order_by: [desc: s.id], limit: 1
   end
 
   def by_name(query) do
     from item in query,
       order_by: item.name
+  end
+
+  def exclude(query, ids) do
+    from s in query, where: s.id not in ^ids
   end
 end

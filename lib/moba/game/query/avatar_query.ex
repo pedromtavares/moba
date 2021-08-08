@@ -25,8 +25,11 @@ defmodule Moba.Game.Query.AvatarQuery do
   end
 
   def current(query \\ Avatar) do
-    match = Game.current_match()
-    from avatar in query, where: avatar.match_id == ^match.id
+    from avatar in query, where: avatar.current == true
+  end
+
+  def single_current(query \\ Avatar) do
+    from avatar in current(query), order_by: [desc: avatar.id], limit: 1
   end
 
   def enabled(query \\ Avatar) do
@@ -49,5 +52,9 @@ defmodule Moba.Game.Query.AvatarQuery do
 
   def by_name(query) do
     from avatar in query, order_by: avatar.name
+  end
+
+  def exclude(query, ids) do
+    from avatar in query, where: avatar.id not in ^ids
   end
 end

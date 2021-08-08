@@ -52,22 +52,22 @@ defmodule Moba.Game.Leagues do
   end
 
   defp easiest_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier), "weak", Game.current_match().id)
+    HeroQuery.league_defender(id, base_level(league_tier), "weak")
     |> get_first()
   end
 
   defp easy_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 1, "weak", Game.current_match().id)
+    HeroQuery.league_defender(id, base_level(league_tier) + 1, "weak")
     |> get_first()
   end
 
   defp moderate_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 2, "moderate", Game.current_match().id)
+    HeroQuery.league_defender(id, base_level(league_tier) + 2, "moderate")
     |> get_first()
   end
 
   defp hard_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong", Game.current_match().id)
+    HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong")
     |> get_first()
   end
 

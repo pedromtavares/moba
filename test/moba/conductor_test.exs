@@ -6,7 +6,7 @@ defmodule Moba.ConductorTest do
       old = Moba.current_match()
       winner = create_pvp_hero(%{}, 10000)
 
-      current = Conductor.start_match!(0..0)
+      current = Conductor.start_match!()
       old = Admin.get_match!(old.id)
       winner_user = Accounts.get_user!(winner.user_id)
 
