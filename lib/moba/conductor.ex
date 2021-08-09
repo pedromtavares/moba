@@ -60,6 +60,7 @@ defmodule Moba.Conductor do
 
     match =
       create_match!()
+      |> maybe_redistribute_pvp_points()
       |> generate_pvp_bots!()
       |> new_pvp_round!()
       |> server_update!()
@@ -194,6 +195,22 @@ defmodule Moba.Conductor do
     |> HeroQuery.bots()
     |> HeroQuery.unarchived()
     |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
+
+    match
+  end
+
+  defp maybe_redistribute_pvp_points(match) do
+    players = UserQuery.with_pvp_points() |> Repo.all()
+    %{pvp_points: points} = List.first(players)
+    ideal = Moba.max_ideal_pvp_points()
+
+    if points > ideal do
+      ratio = ideal / points
+      Enum.map(players, fn player ->
+        new_points = round(player.pvp_points * ratio)
+        Accounts.update_user!(player, %{pvp_points: new_points})
+      end)
+    end
 
     match
   end
