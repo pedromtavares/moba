@@ -11,12 +11,13 @@ defmodule MobaWeb.ChatLiveView do
 
     messages = Accounts.latest_messages()
 
-    count = if length(messages) > 0 do
-      user.unread_messages_count
-    else
-      Accounts.reset_unread_messages_count(user)
-      0
-    end
+    count =
+      if length(messages) > 0 do
+        user.unread_messages_count
+      else
+        Accounts.reset_unread_messages_count(user)
+        0
+      end
 
     {:ok,
      assign(socket,

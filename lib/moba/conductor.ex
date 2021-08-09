@@ -144,13 +144,13 @@ defmodule Moba.Conductor do
     Logger.info("Generating resources...")
 
     ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
-    Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), [set: [current: false]])
+    Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), set: [current: false])
 
     ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
-    Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), [set: [current: false]])
+    Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), set: [current: false])
 
     ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
-    Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), [set: [current: false]])
+    Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
 
     match
   end
@@ -201,15 +201,19 @@ defmodule Moba.Conductor do
 
   defp maybe_redistribute_pvp_points(match) do
     players = UserQuery.with_pvp_points() |> Repo.all()
-    %{pvp_points: points} = List.first(players)
-    ideal = Moba.max_ideal_pvp_points()
 
-    if points > ideal do
-      ratio = ideal / points
-      Enum.map(players, fn player ->
-        new_points = round(player.pvp_points * ratio)
-        Accounts.update_user!(player, %{pvp_points: new_points})
-      end)
+    if length(players) > 0 do
+      %{pvp_points: points} = List.first(players)
+      ideal = Moba.max_ideal_pvp_points()
+
+      if points > ideal do
+        ratio = ideal / points
+
+        Enum.map(players, fn player ->
+          new_points = round(player.pvp_points * ratio)
+          Accounts.update_user!(player, %{pvp_points: new_points})
+        end)
+      end
     end
 
     match
