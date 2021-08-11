@@ -75,6 +75,7 @@ defmodule Moba.Engine.Schema.Battler do
     field :buffs, {:array, :map}, default: []
     field :debuffs, {:array, :map}, default: []
     field :defender_buffs, {:array, :map}, default: []
+    field :attacker_debuffs, {:array, :map}, default: []
 
     field :null_armor, :boolean, default: false
     field :stunned, :boolean, default: false

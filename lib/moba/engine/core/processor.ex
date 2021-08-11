@@ -21,6 +21,7 @@ defmodule Moba.Engine.Core.Processor do
     |> tick_cooldowns()
     |> passives()
     |> increases_and_reductions()
+    |> apply_attacker_debuffs()
     |> apply_defender_buffs()
     |> defend()
     |> final_effects()
@@ -163,6 +164,14 @@ defmodule Moba.Engine.Core.Processor do
     %{turn | attacker: attacker, defender: defender}
   end
 
+  # Attacker Debuffs are malevolent effects that are applied on the attacker's turn.
+  # They are applied every turn until their duration wears off.
+  defp apply_attacker_debuffs(%{attacker: %{attacker_debuffs: buffs}} = turn) do
+    Enum.reduce(buffs, turn, fn %{resource: buff, duration: duration}, acc ->
+      acc |> apply_attacker_debuff(buff, duration)
+    end)
+  end
+
   # Defender Buffs are benevolent effects that the attacker casts on itself to be applied on the next turn.
   # They are applied every turn until their duration wears off.
   defp apply_defender_buffs(%{defender: %{defender_buffs: buffs}} = turn) do
@@ -275,6 +284,17 @@ defmodule Moba.Engine.Core.Processor do
 
   defp apply_defender_buff(turn, _, _), do: turn
 
+  defp apply_attacker_debuff(%{attacker: attacker} = turn, debuff, duration) when duration > 0 do
+    resource = %{debuff | attacker_debuff: true}
+
+    turn
+    |> Map.put(:attacker, %{attacker | attacker_debuffs: tick_buff_duration(attacker.attacker_debuffs, debuff)})
+    |> apply_resource(resource)
+    |> Map.put(:resource, %{debuff | attacker_debuff: nil})
+  end
+
+  defp apply_attacker_debuff(turn, _, _), do: turn
+
   # Updates a buff, reducing its duration by 1
   defp tick_buff_duration(list, resource) do
     existing =
@@ -342,7 +362,7 @@ defmodule Moba.Engine.Core.Processor do
     Logger.info("Item cast: #{item.code}")
 
     %{turn | resource: item, item: item}
-    |> apply_spell()
+    |> apply_spell(%{active: true})
     |> Effect.mp_cost()
     |> Effect.add_cooldown()
   end

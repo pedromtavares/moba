@@ -74,6 +74,12 @@
     </div>
 
     <div class="torch-form-group">
+      <%= label f, :passive %>
+      <%= checkbox f, :passive %>
+      <%= error_tag f, :passive %>
+    </div>
+
+    <div class="torch-form-group">
       <%= label f, :base_hp %>
       <%= number_input f, :base_hp %>
       <%= error_tag f, :base_hp %>

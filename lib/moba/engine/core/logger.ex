@@ -328,7 +328,7 @@ defmodule Moba.Engine.Core.Logger do
          _
        ) do
     "#{hero} has been psyqued, taking [damage]#{damage} damage[/damage], losing [armor]#{armor * -1} armor[/armor] and [hp]#{
-      atk
+      atk * - 1
     } ATK[/hp]."
   end
 
@@ -414,10 +414,22 @@ defmodule Moba.Engine.Core.Logger do
     }."
   end
 
+  defp description_for("silver_edge", %{"damage" => {damage, defender}, "extra" => {true, attacker}}, _) do
+    "#{attacker} initiated the battle through the shadows by impaling #{defender} with the Edge, dealing [damage]#{damage} damage[/damage] this turn and [armor]reducing HP regeneration[/armor] for the next 2 turns."
+  end
+
   defp description_for("silver_edge", %{"damage" => {damage, hero}}, heroes) do
     "#{opponent_for(hero, heroes)} initiated the battle through the shadows, dealing [damage]#{damage} extra damage[/damage] to #{
       hero
     }."
+  end
+
+  defp description_for("silver_edge", %{"extra" => {true, hero}}, heroes) do
+    "#{hero} has impaled #{opponent_for(hero, heroes)} with the Edge, [damage]reducing HP regeneration[/damage] for the next 2 turns."
+  end
+
+  defp description_for("silver_edge", %{"hp_regen" => {regen, hero}}, heroes) do
+    "#{opponent_for(hero, heroes)}'s Edge is still deep in the flesh of #{hero}, [damage]reducing HP regeneration by #{regen * -1}[/damage]."
   end
 
   defp description_for("tranquil_boots", %{"hp_regen" => {hp, hero}}, _) do

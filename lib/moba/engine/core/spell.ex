@@ -8,7 +8,8 @@ defmodule Moba.Engine.Core.Spell do
    - permanent_skill: spell is applied every turn until set otherwise
    - buff: spell is applied on the attacker every turn until the duration ends (positive fx)
    - debuff: spell is applied on the defender every turn until the duration ends (negative fx)
-   - defender_buff: spell is applied on the defener every turn until the duration ends (positive fx)
+   - defender_buff: spell is applied on the defender every turn until the duration ends (positive fx)
+   - attacker_debuff: spell is applied on the attacker every turn until the duration ends (negative fx)
    - final: spell is applied at the end of the turn (after buffs and reductions are applied)
   """
 
@@ -18,7 +19,7 @@ defmodule Moba.Engine.Core.Spell do
   alias Core.{Effect, Helper, Processor}
 
   def apply(turn, options \\ %{}) do
-    effects_for(turn, is_attacking: Map.get(options, :is_attacking))
+    effects_for(turn, options)
   end
 
   # ACTIVES
@@ -184,7 +185,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.base_damage()
   end
 
-  defp effects_for(%{resource: %Skill{code: "boss_bash"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "boss_bash"}} = turn, %{is_attacking: true}) do
     turn
     |> roll(
       fn turn -> turn |> Effect.stun() |> Effect.add_cooldown() end,
@@ -192,7 +193,7 @@ defmodule Moba.Engine.Core.Spell do
     )
   end
 
-  defp effects_for(%{resource: %Skill{code: "boss_spell_block"}} = turn, is_attacking: false) do
+  defp effects_for(%{resource: %Skill{code: "boss_spell_block"}} = turn, %{is_attacking: false}) do
     if Helper.disabled?(turn.defender) do
       turn
       |> Effect.inneffectability()
@@ -202,7 +203,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "boss_ult"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "boss_ult"}} = turn, %{is_attacking: true}) do
     turn
     |> Effect.add_battle_armor()
     |> Effect.add_battle_power()
@@ -424,7 +425,7 @@ defmodule Moba.Engine.Core.Spell do
 
   # PASSIVES
 
-  defp effects_for(%{resource: %Skill{code: "counter_helix"}} = turn, is_attacking: false) do
+  defp effects_for(%{resource: %Skill{code: "counter_helix"}} = turn, %{is_attacking: false}) do
     turn
     |> roll(
       fn turn -> Effect.self_base_damage(turn) end,
@@ -432,7 +433,7 @@ defmodule Moba.Engine.Core.Spell do
     )
   end
 
-  defp effects_for(%{resource: %Skill{code: "feast"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "feast"}} = turn, %{is_attacking: true}) do
     if Helper.normal_damage?(turn.defender) do
       turn
       |> Effect.hp_regen_by_base_amount()
@@ -442,7 +443,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "fiery_soul"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "fiery_soul"}} = turn, %{is_attacking: true}) do
     if turn.skill && turn.skill.code != "basic_attack" do
       Effect.add_battle_power(turn)
     else
@@ -450,7 +451,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "fury_swipes"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "fury_swipes"}} = turn, %{is_attacking: true}) do
     if Helper.normal_damage?(turn.defender) do
       turn
       |> Effect.refresh_debuff()
@@ -464,7 +465,7 @@ defmodule Moba.Engine.Core.Spell do
     Effect.base_damage(turn)
   end
 
-  defp effects_for(%{resource: %Skill{code: "jinada"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "jinada"}} = turn, %{is_attacking: true}) do
     if Helper.normal_damage?(turn.defender) do
       turn
       |> Effect.add_turn_power()
@@ -474,9 +475,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "phase_shift"}} = turn,
-         is_attacking: false
-       ) do
+  defp effects_for(%{resource: %Skill{code: "phase_shift"}} = turn, %{is_attacking: false}) do
     turn
     |> roll(
       fn turn ->
@@ -488,9 +487,7 @@ defmodule Moba.Engine.Core.Spell do
 
   # ULTIMATES
 
-  defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn,
-         is_attacking: false
-       ) do
+  defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn, %{is_attacking: false}) do
     result = turn.defender.current_hp - Helper.calculate_final_defender_damage(turn.attacker, turn.defender)
 
     if result / turn.defender.total_hp * 100 <= turn.resource.base_amount do
@@ -505,7 +502,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn, %{is_attacking: true}) do
     result = turn.attacker.current_hp - turn.attacker.damage
 
     if result / turn.attacker.total_hp * 100 <= turn.resource.base_amount do
@@ -520,7 +517,7 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "coup"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Skill{code: "coup"}} = turn, %{is_attacking: true}) do
     turn
     |> roll(
       fn turn -> turn |> Effect.add_turn_power() end,
@@ -530,12 +527,12 @@ defmodule Moba.Engine.Core.Spell do
 
   # BASIC
 
-  defp effects_for(%{resource: %Item{code: "ring_of_tarrasque"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Item{code: "ring_of_tarrasque"}} = turn, %{is_attacking: true}) do
     turn
     |> Effect.hp_regen_by_base_amount()
   end
 
-  defp effects_for(%{resource: %Item{code: "sages_mask"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Item{code: "sages_mask"}} = turn, %{is_attacking: true}) do
     turn
     |> Effect.mp_regen_by_base_amount()
   end
@@ -548,22 +545,12 @@ defmodule Moba.Engine.Core.Spell do
 
   # RARE
 
-  defp effects_for(%{resource: %Item{code: "shadow_blade"}, number: 1} = turn,
-         is_attacking: true
-       ) do
+  defp effects_for(%{resource: %Item{code: "shadow_blade"}, number: 1} = turn, %{is_attacking: true}) do
     turn
     |> Effect.base_amount_damage()
   end
 
-  defp effects_for(%{resource: %Item{code: "crystalys"}} = turn, is_attacking: true) do
-    turn
-    |> roll(
-      fn turn -> turn |> Effect.add_turn_power() |> Effect.add_cooldown() end,
-      fn turn -> turn end
-    )
-  end
-
-  defp effects_for(%{resource: %Item{code: "vanguard"}} = turn, is_attacking: false) do
+  defp effects_for(%{resource: %Item{code: "vanguard"}} = turn, %{is_attacking: false}) do
     turn
     |> roll(
       fn turn -> turn |> Effect.block_damage() end,
@@ -586,20 +573,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.mp_regen_by_base_amount()
   end
 
-  # EPIC
-
-  defp effects_for(%{resource: %Item{code: "assault_cuirass"}} = turn, is_attacking: true) do
-    turn
-    |> Effect.pierce_turn_armor()
-  end
-
-  defp effects_for(%{resource: %Item{code: "diffusal_blade"}} = turn, is_attacking: true) do
-    turn
-    |> Effect.mp_burn_by_defender_total_mp()
-    |> Effect.damage_by_defender_total_mp()
-  end
-
-  defp effects_for(%{resource: %Item{code: "maelstrom"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Item{code: "maelstrom"}} = turn, %{is_attacking: true}) do
     turn
     |> roll(
       fn turn -> turn |> Effect.base_amount_damage() end,
@@ -607,12 +581,17 @@ defmodule Moba.Engine.Core.Spell do
     )
   end
 
-  defp effects_for(%{resource: %Item{code: "mkb"}} = turn, is_attacking: true) do
+  # EPIC
+
+  defp effects_for(%{resource: %Item{code: "assault_cuirass"}} = turn, %{is_attacking: true}) do
     turn
-    |> roll(
-      fn turn -> turn |> Effect.void_invulnerability() |> Effect.null_armor() end,
-      fn turn -> turn end
-    )
+    |> Effect.pierce_turn_armor()
+  end
+
+  defp effects_for(%{resource: %Item{code: "diffusal_blade"}} = turn, %{is_attacking: true}) do
+    turn
+    |> Effect.mp_burn_by_defender_total_mp()
+    |> Effect.damage_by_defender_total_mp()
   end
 
   defp effects_for(%{resource: %Item{code: code}} = turn, _options) when code in ["dagon", "dagon5"] do
@@ -626,37 +605,42 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.disarm()
   end
 
-  defp effects_for(%{resource: %{code: "bkb", defender_buff: nil}} = turn, _options) do
+  defp effects_for(%{resource: %Item{code: "bkb", defender_buff: nil}} = turn, _options) do
     turn
     |> Effect.attacker_extra()
     |> Effect.add_defender_buff()
   end
 
-  defp effects_for(%{resource: %{code: "bkb"}} = turn, _options) do
+  defp effects_for(%{resource: %Item{code: "bkb"}} = turn, _options) do
     turn
     |> Effect.inneffectability()
   end
 
   # LEGENDARY
 
-  defp effects_for(%{resource: %Item{code: "silver_edge"}, number: 1} = turn,
-         is_attacking: true
-       ) do
+  defp effects_for(%{resource: %Item{code: "silver_edge"}, number: 1} = turn, %{is_attacking: true}) do
     turn
     |> Effect.base_amount_damage()
   end
 
-  defp effects_for(%{resource: %Item{code: "daedalus"}} = turn, is_attacking: true) do
+  defp effects_for(%{resource: %Item{code: "silver_edge", attacker_debuff: nil}} = turn, %{active: true}) do
+    turn
+    |> Effect.attacker_extra()
+    |> Effect.add_attacker_debuff()
+    |> effects_for(%{is_attacking: true})
+  end
+
+  defp effects_for(%{resource: %Item{code: "silver_edge", attacker_debuff: true}} = turn, _options) do
+    turn
+    |> Effect.cut_hp_regen()
+  end
+
+  defp effects_for(%{resource: %Item{code: "daedalus"}} = turn, %{is_attacking: true}) do
     turn
     |> roll(
       fn turn -> turn |> Effect.add_turn_power() end,
       fn turn -> turn end
     )
-  end
-
-  defp effects_for(%{resource: %Item{code: "radiance"}} = turn, is_attacking: true) do
-    turn
-    |> Effect.atk_damage()
   end
 
   defp effects_for(%{resource: %Item{code: "scythe_of_vyse"}} = turn, _options) do
@@ -686,7 +670,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.silence()
   end
 
-  defp effects_for(%{resource: %Item{code: "linkens_sphere"}} = turn, is_attacking: false) do
+  defp effects_for(%{resource: %Item{code: "linkens_sphere"}} = turn, %{is_attacking: false}) do
     if Helper.disabled?(turn.defender) do
       turn
       |> Effect.inneffectability()

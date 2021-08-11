@@ -229,7 +229,7 @@ defmodule Moba.Engine.Core do
       active_skills: skills |> Enum.filter(&(!&1.passive)),
       passive_skills: skills |> Enum.filter(& &1.passive),
       active_items: items |> Enum.filter(& &1.active),
-      passive_items: items |> Enum.filter(&(!&1.active)),
+      passive_items: items |> Enum.filter(& &1.passive),
       skill_order: codes_to_resources(hero.active_build.skill_order, [Moba.basic_attack() | skills]),
       item_order: codes_to_resources(hero.active_build.item_order, items)
     }
@@ -322,7 +322,8 @@ defmodule Moba.Engine.Core do
         last_skill: load_skill(battler.last_skill),
         buffs: load_buffs(battler.buffs),
         debuffs: load_buffs(battler.debuffs),
-        defender_buffs: load_buffs(battler.defender_buffs)
+        defender_buffs: load_buffs(battler.defender_buffs),
+        attacker_debuffs: load_buffs(battler.attacker_debuffs)
     }
   end
 
@@ -330,7 +331,13 @@ defmodule Moba.Engine.Core do
     Enum.map(buffs, fn buff ->
       resource = buff[:resource] || buff["resource"]
       duration = buff[:duration] || buff["duration"]
-      %{resource: load_skill(resource), duration: duration}
+      loaded_resource = if Map.get(resource, :rarity) || Map.get(resource, "rarity") do
+        load_item(resource)
+      else
+        load_skill(resource)
+      end
+
+      %{resource: loaded_resource, duration: duration}
     end)
   end
 
@@ -338,9 +345,9 @@ defmodule Moba.Engine.Core do
 
   defp load_skills(list), do: Enum.map(list, &load_skill(&1))
 
-  defp load_items(list) do
-    Enum.map(list, fn map -> load_resource(map, %Game.Schema.Item{}) end)
-  end
+  defp load_item(map), do: load_resource(map, %Game.Schema.Item{})
+
+  defp load_items(list), do: Enum.map(list, &load_item(&1))
 
   defp load_resource(nil, _), do: nil
   defp load_resource(map, struct), do: Moba.struct_from_map(map, as: struct)

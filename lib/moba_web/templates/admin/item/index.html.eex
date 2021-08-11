@@ -44,6 +44,11 @@
           </div>
 
           <div class="field">
+            <label>Passive</label>
+            <%= filter_boolean_input(:item, :passive, @conn.params) %>
+          </div>
+
+          <div class="field">
             <label>Mp cost</label>
             <%= number_filter_select(:item, :mp_cost, @conn.params) %>
             <%= filter_number_input(:item, :mp_cost, @conn.params) %>
@@ -141,6 +146,8 @@
 
               <th><%= table_link(@conn, "Active", :active) %></th>
 
+              <th><%= table_link(@conn, "Passive", :passive) %></th>
+
               <th><%= table_link(@conn, "Enabled", :enabled) %></th>
 
             <th><span>Actions</span></th>
@@ -158,6 +165,8 @@
                 <td><%= item.rarity %></td>
 
                 <td><%= item.active %></td>
+
+                <td><%= item.passive %></td>
 
                 <td><%= item.enabled %></td>
 

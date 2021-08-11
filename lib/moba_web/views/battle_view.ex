@@ -4,8 +4,8 @@ defmodule MobaWeb.BattleView do
   defdelegate difficulty_color(diff), to: MobaWeb.JungleView
   defdelegate difficulty_label(diff), to: MobaWeb.JungleView
 
-  def can_use?(_, %{active: false}), do: false
-  def can_use?(_, %{passive: true}), do: false
+  def can_use?(_, %Moba.Game.Schema.Item{active: false}), do: false
+  def can_use?(_, %Moba.Game.Schema.Skill{passive: true}), do: false
   def can_use?(turn, resource), do: Engine.can_use_resource?(turn, resource)
 
   def preselected_skill(%{double_skill: skill}, _) when not is_nil(skill), do: skill
@@ -28,8 +28,8 @@ defmodule MobaWeb.BattleView do
   def item_activated(item), do: item && item["name"]
 
   def cooldown_for(nil, _), do: nil
-  def cooldown_for(%{passive: true}, _), do: nil
-  def cooldown_for(%{active: false}, _), do: nil
+  def cooldown_for(%Moba.Game.Schema.Item{active: false}, _), do: nil
+  def cooldown_for(%Moba.Game.Schema.Skill{passive: true}, _), do: nil
 
   def cooldown_for(resource, battler) do
     cd = battler.cooldowns[resource.code]
@@ -397,6 +397,7 @@ defmodule MobaWeb.BattleView do
   def battler_skill_list(battler) do
     (battler.active_skills ++ battler.passive_skills)
     |> Enum.map(fn skill -> Moba.struct_from_map(skill, as: %Game.Schema.Skill{}) end)
+    |> Enum.uniq_by(& &1.code)
     |> Enum.sort_by(fn skill -> skill.ultimate end)
     |> Enum.map(fn skill ->
       img_tag(GH.image_url(skill),
@@ -410,6 +411,7 @@ defmodule MobaWeb.BattleView do
   def battler_item_list(battler) do
     (battler.active_items ++ battler.passive_items)
     |> Enum.map(fn item -> Moba.struct_from_map(item, as: %Game.Schema.Item{}) end)
+    |> Enum.uniq_by(& &1.code)
     |> Game.sort_items()
     |> Enum.map(fn item ->
       image =

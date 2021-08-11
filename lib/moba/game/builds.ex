@@ -372,12 +372,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["bad_juju", "blade_fury", "shuriken_toss", "jinada"],
-        ["maelstrom", "linkens_sphere", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
+        ["maelstrom", "linkens_sphere", "orchid_malevolence", "dagon5", "shivas_guard", "daedalus"],
         "Your basic Carry build focused on Attack (ATK) skills to take advantage of Power provided by the ult."
       },
       {
-        ["bad_juju", "mana_burn", "fiery_soul", "lightning_bolt"],
-        ["maelstrom", "linkens_sphere", "assault_cuirass", "scythe_of_vyse", "boots_of_travel", "daedalus"],
+        ["bad_juju", "lightning_bolt", "death_pulse", "decay"],
+        ["maelstrom", "linkens_sphere", "assault_cuirass", "silver_edge", "shivas_guard", "daedalus"],
         "Full nuke build to take advantage of Power provided by the ult."
       }
     ]
@@ -392,7 +392,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["doom", "death_pulse", "mana_burn", "phase_shift"],
-        ["boots_of_travel", "dagon5", "assault_cuirass", "bkb", "linkens_sphere", "daedalus"],
+        ["silver_edge", "dagon5", "assault_cuirass", "bkb", "linkens_sphere", "daedalus"],
         "Mixed damage build for a more sustained fight."
       }
     ]
@@ -432,12 +432,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["empower", "laguna_blade", "mana_shield", "fiery_soul"],
-        ["arcane_boots", "diffusal_blade", "assault_cuirass", "dagon5", "orchid_malevolence", "shivas_guard"],
+        ["arcane_boots", "silver_edge", "assault_cuirass", "dagon5", "orchid_malevolence", "shivas_guard"],
         "Good balance of offense and defense with support for her ult by the use of Maledict. Will need Magic (MP) items to properly function."
       },
       {
         ["maledict", "laguna_blade", "lightning_bolt", "fiery_soul"],
-        ["vanguard", "boots_of_travel", "orchid_malevolence", "diffusal_blade", "daedalus", "linkens_sphere"],
+        ["vanguard", "boots_of_travel", "orchid_malevolence", "silver_edge", "daedalus", "linkens_sphere"],
         "A more offensive Power Nuker variant."
       }
     ]
@@ -447,7 +447,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["blink_strike", "feast", "jinada"],
-        ["maelstrom", "assault_cuirass", "shivas_guard", "linkens_sphere", "silver_edge", "daedalus"],
+        ["maelstrom", "assault_cuirass", "silver_edge", "linkens_sphere", "shivas_guard", "daedalus"],
         "Just enough Magic (MP) to cast Sweeping Blade whenever possible, with passives to support Basic Attacks."
       },
       {
@@ -467,7 +467,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["dream_coil", "mana_burn", "phase_shift", "death_pulse"],
-        ["maelstrom", "dagon5", "boots_of_travel", "assault_cuirass", "orchid_malevolence", "linkens_sphere"],
+        ["maelstrom", "dagon5", "silver_edge", "assault_cuirass", "orchid_malevolence", "linkens_sphere"],
         "More versatile Carry build with 3 actives that is made viable due to her extra MP. Make sure to cast Echo Stomp right after the ult."
       }
     ]
@@ -477,7 +477,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["maledict", "life_drain", "mana_shield", "fiery_soul"],
-        ["vanguard", "boots_of_travel", "diffusal_blade", "satanic", "linkens_sphere", "shivas_guard"],
+        ["vanguard", "boots_of_travel", "diffusal_blade", "silver_edge", "linkens_sphere", "shivas_guard"],
         "Basic carry build with strong regenration."
       },
       {
@@ -492,7 +492,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["guardian_angel", "double_edge", "counter_helix", "shuriken_toss"],
-        ["maelstrom", "boots_of_travel", "satanic", "dagon5", "orchid_malevolence", "daedalus"],
+        ["maelstrom", "boots_of_travel", "silver_edge", "dagon5", "orchid_malevolence", "daedalus"],
         "Single turn damage focused build."
       },
       {
@@ -512,7 +512,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["spell_steal", "death_pulse", "mana_shield", "fiery_soul"],
-        ["vanguard", "dagon", "boots_of_travel", "linkens_sphere", "shivas_guard", "daedalus"],
+        ["vanguard", "dagon", "silver_edge", "linkens_sphere", "shivas_guard", "daedalus"],
         "A more low-cost Power-focused variant."
       }
     ]
@@ -522,12 +522,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["assassinate", "static_link", "feast", "phase_shift"],
-        ["maelstrom", "linkens_sphere", "assault_cuirass", "boots_of_travel", "daedalus", "silver_edge"],
+        ["maelstrom", "linkens_sphere", "silver_edge", "boots_of_travel", "daedalus", "shivas_guard"],
         "A more defensive build to guarantee survival after the ult is cast."
       },
       {
         ["empower", "assassinate", "jinada", "phase_shift"],
-        ["vanguard", "boots_of_travel", "diffusal_blade", "scythe_of_vyse", "shivas_guard", "satanic"],
+        ["vanguard", "boots_of_travel", "diffusal_blade", "silver_edge", "satanic", "shivas_guard"],
         "An offensive variant that empowers the ult and provides some regeneration."
       }
     ]
@@ -537,7 +537,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["gods_strength", "fury_swipes", "feast", "jinada"],
-        ["maelstrom", "boots_of_travel", "diffusal_blade", "orchid_malevolence", "linkens_sphere", "daedalus"],
+        ["maelstrom", "boots_of_travel", "silver_edge", "orchid_malevolence", "linkens_sphere", "daedalus"],
         "Full passives to support Basic Attacks."
       },
       {
@@ -552,7 +552,7 @@ defmodule Moba.Game.Builds do
     [
       {
         ["remote_mines", "lightning_bolt", "mana_shield", "death_pulse"],
-        ["maelstrom", "boots_of_travel", "diffusal_blade", "dagon5", "orchid_malevolence", "daedalus"],
+        ["maelstrom", "boots_of_travel", "silver_edge", "dagon5", "orchid_malevolence", "daedalus"],
         "Sustained damage build for longer fights."
       },
       {
@@ -602,7 +602,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["empower", "fury_swipes", "jinada"],
-        ["vanguard", "boots_of_travel", "bkb", "shivas_guard", "silver_edge", "daedalus"],
+        ["vanguard", "boots_of_travel", "bkb", "silver_edge", "shivas_guard", "daedalus"],
         "Full Basic Attack variant."
       }
     ]
@@ -617,7 +617,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["shuriken_toss", "walrus_punch", "fury_swipes", "jinada"],
-        ["vanguard", "boots_of_travel", "bkb", "shivas_guard", "orchid_malevolence", "daedalus"],
+        ["vanguard", "boots_of_travel", "silver_edge", "shivas_guard", "orchid_malevolence", "daedalus"],
         "A more offensive variant that can be effective against opponents with high Armor."
       }
     ]
@@ -632,7 +632,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["blink_strike", "time_lapse", "phase_shift", "empower"],
-        ["tranquil_boots", "diffusal_blade", "assault_cuirass", "dagon5", "satanic", "daedalus"],
+        ["tranquil_boots", "silver_edge", "assault_cuirass", "dagon5", "satanic", "daedalus"],
         "Basic Power Carry build to quickly finish a battle."
       }
     ]

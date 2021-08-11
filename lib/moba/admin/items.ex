@@ -85,6 +85,7 @@ defmodule Moba.Admin.Items do
       number(:mp_cost)
       number(:cooldown)
       boolean(:active)
+      boolean(:passive)
     end
   end
 end

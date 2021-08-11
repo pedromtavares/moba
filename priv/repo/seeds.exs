@@ -127,7 +127,8 @@ SeedHelper.create_item(%{
   name: "Sage's Mask",
   rarity: "normal",
   base_mp: 10,
-  base_amount: 5
+  base_amount: 5,
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -135,7 +136,8 @@ SeedHelper.create_item(%{
   name: "Ring of Tarrasque",
   rarity: "normal",
   base_hp: 20,
-  base_amount: 7
+  base_amount: 7,
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -166,7 +168,8 @@ SeedHelper.create_item(%{
   rarity: "rare",
   base_hp: 11,
   base_mp: 6,
-  base_atk: 2
+  base_atk: 2,
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -176,7 +179,8 @@ SeedHelper.create_item(%{
   roll_number: 30,
   rarity: "rare",
   base_hp: 21,
-  base_mp: 6
+  base_mp: 6,
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -184,7 +188,8 @@ SeedHelper.create_item(%{
   name: "Maelstrom",
   base_atk: 14,
   base_amount: 30,
-  rarity: "rare"
+  rarity: "rare",
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -194,7 +199,8 @@ SeedHelper.create_item(%{
   base_hp: 15,
   base_atk: 2,
   base_armor: 20,
-  rarity: "epic"
+  rarity: "epic",
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -228,7 +234,8 @@ SeedHelper.create_item(%{
   mp_multiplier: 0.06,
   other_mp_multiplier: 0.06,
   cooldown: 3,
-  rarity: "epic"
+  rarity: "epic",
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -237,7 +244,8 @@ SeedHelper.create_item(%{
   roll_number: 25,
   power_amount: 50,
   base_atk: 21,
-  rarity: "legendary"
+  rarity: "legendary",
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -300,7 +308,8 @@ SeedHelper.create_item(%{
   name: "Linken's Sphere",
   base_hp: 100,
   cooldown: 5,
-  rarity: "legendary"
+  rarity: "legendary",
+  passive: true
 })
 
 SeedHelper.create_item(%{
@@ -323,7 +332,9 @@ SeedHelper.create_item(%{
   base_hp: 11,
   base_mp: 6,
   base_atk: 2,
-  base_speed: 20
+  base_speed: 20,
+  passive: true,
+  active: true
 })
 
 # SKILLS

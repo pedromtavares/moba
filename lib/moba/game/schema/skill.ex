@@ -58,6 +58,7 @@ defmodule Moba.Game.Schema.Skill do
     field :buff, :boolean, virtual: true
     field :debuff, :boolean, virtual: true
     field :defender_buff, :boolean, virtual: true
+    field :attacker_debuff, :boolean, virtual: true
 
     belongs_to :match, Moba.Game.Schema.Match
 

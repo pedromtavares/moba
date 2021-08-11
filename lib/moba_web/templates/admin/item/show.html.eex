@@ -58,6 +58,11 @@
         </li>
 
         <li>
+          <div class="torch-show-label">Passive:</div>
+          <div class="torch-show-data"><%= @item.passive %></div>
+        </li>
+
+        <li>
           <div class="torch-show-label">Base hp:</div>
           <div class="torch-show-data"><%= @item.base_hp %></div>
         </li>

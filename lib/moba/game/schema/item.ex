@@ -24,6 +24,7 @@ defmodule Moba.Game.Schema.Item do
     field :name, :string
     field :rarity, :string
     field :active, :boolean, default: false
+    field :passive, :boolean, default: false
     field :enabled, :boolean
     field :current, :boolean
     field :mp_cost, :integer, default: 0
@@ -60,6 +61,7 @@ defmodule Moba.Game.Schema.Item do
     field :buff, :boolean, virtual: true
     field :debuff, :boolean, virtual: true
     field :defender_buff, :boolean, virtual: true
+    field :attacker_debuff, :boolean, virtual: true
 
     belongs_to :match, Moba.Game.Schema.Match
 
@@ -75,6 +77,7 @@ defmodule Moba.Game.Schema.Item do
       :code,
       :rarity,
       :active,
+      :passive,
       :mp_cost,
       :cooldown,
       :duration,
