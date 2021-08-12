@@ -331,11 +331,13 @@ defmodule Moba.Engine.Core do
     Enum.map(buffs, fn buff ->
       resource = buff[:resource] || buff["resource"]
       duration = buff[:duration] || buff["duration"]
-      loaded_resource = if Map.get(resource, :rarity) || Map.get(resource, "rarity") do
-        load_item(resource)
-      else
-        load_skill(resource)
-      end
+
+      loaded_resource =
+        if Map.get(resource, :rarity) || Map.get(resource, "rarity") do
+          load_item(resource)
+        else
+          load_skill(resource)
+        end
 
       %{resource: loaded_resource, duration: duration}
     end)
