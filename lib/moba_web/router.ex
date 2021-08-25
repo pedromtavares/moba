@@ -60,6 +60,8 @@ defmodule MobaWeb.Router do
 
     live "/hall", HallLiveView
 
+    live "/about", AboutLiveView
+
     live "/tavern", TavernLiveView
 
     live "/user/:id", UserLiveView
