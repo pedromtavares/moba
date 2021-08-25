@@ -129,7 +129,7 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker_number(turn, :hp_regen, defender.damage * resource.hp_regen_multiplier)
   end
 
-  def cut_hp_regen(%{attacker: %{hp_regen: regen} = attacker, resource: resource} = turn) when regen > 0 do
+  def cut_hp_regen(%{attacker: %{hp_regen: regen}, resource: resource} = turn) when regen > 0 do
     update_attacker_number(turn, :hp_regen, -(regen * resource.hp_regen_multiplier))
   end
 
