@@ -23,7 +23,7 @@
                                     <%= live_redirect to: Routes.live_path(@conn, MobaWeb.AboutLiveView), class: "nav-link" do %>
                                         <i class="fa fa-users"></i>
                                         <br/>
-                                        About Us
+                                        <span class="d-none d-md-inline">About Us</span>
                                     <% end %>
                                     <div class="d-flex justify-content-end">
                                         <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), class: "nav-link" do %>

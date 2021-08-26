@@ -35,10 +35,11 @@ defmodule Moba.Engine.Core.Processor do
   def cast_skill(turn, %{code: "basic_attack"}), do: basic_attack(turn)
 
   def cast_skill(turn, skill) do
-    Logger.info("Skill cast: #{skill.code}")
+    damage_type = skill.damage_type || Moba.damage_types().magic
+    Logger.info("Skill cast: #{skill.code}, type: #{damage_type}")
 
     %{turn | resource: skill, skill: skill}
-    |> Effect.damage_type(skill.damage_type)
+    |> Effect.damage_type(damage_type)
     |> apply_spell()
     |> Effect.mp_cost()
     |> Effect.turn_mp_regen()

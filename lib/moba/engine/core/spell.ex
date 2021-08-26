@@ -314,6 +314,7 @@ defmodule Moba.Engine.Core.Spell do
     turn
     |> Effect.hp_regen_by_base_amount()
     |> Effect.physical_invulnerability()
+    |> Effect.add_next_armor()
   end
 
   defp effects_for(%{resource: %Skill{code: "laguna_blade"}} = turn, _options) do

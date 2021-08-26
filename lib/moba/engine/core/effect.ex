@@ -352,11 +352,9 @@ defmodule Moba.Engine.Core.Effect do
     update_defender(turn, :invulnerable, true)
   end
 
-  def damage_type(%{defender: %{damage_type: defender_type}} = turn, type) when defender_type != "pure" do
+  def damage_type(turn, type) do
     update_defender(turn, :damage_type, type)
   end
-
-  def damage_type(turn, _), do: turn
 
   def physical_invulnerability(turn) do
     update_attacker(turn, :physically_invulnerable, true)

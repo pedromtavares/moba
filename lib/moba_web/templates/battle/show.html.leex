@@ -1,4 +1,4 @@
-<%=if @action_turn_number do %>
+<%=if @action_turn_number && !@battle.finished do %>
     <div id="scroll-to-turn" phx-hook="ScrollToTarget" phx-target-element="#turn-<%=@action_turn_number%>"/>
 <% end %>
 

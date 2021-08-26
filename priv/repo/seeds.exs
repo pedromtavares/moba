@@ -709,6 +709,7 @@ guardian_angel =
     cooldown: 5,
     ultimate: true,
     atk_multiplier: 1.0,
+    armor_amount: 30,
     duration: 2,
     damage_type: "normal"
   })
@@ -720,7 +721,8 @@ laguna =
     atk_multiplier: 1.8,
     mp_cost: 15,
     cooldown: 5,
-    ultimate: true
+    ultimate: true,
+    damage_type: "pure"
   })
 
 life_drain =
