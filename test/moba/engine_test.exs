@@ -199,7 +199,7 @@ defmodule Moba.EngineTest do
     end
 
     test "attacker wins", %{strong_hero: attacker, weak_hero: defender} do
-      Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
+      Engine.create_pvp_battle!(%{attacker: %{attacker | league_tier: 6}, defender: %{defender | league_tier: 6}})
       |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -215,7 +215,7 @@ defmodule Moba.EngineTest do
     end
 
     test "defender wins", %{strong_hero: defender, weak_hero: attacker} do
-      Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
+      Engine.create_pvp_battle!(%{attacker: %{attacker | league_tier: 6}, defender: %{defender | league_tier: 6}})
       |> Engine.auto_finish_battle!()
 
       updated_attacker = Game.get_hero!(attacker.id)

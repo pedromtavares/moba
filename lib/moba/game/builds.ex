@@ -79,13 +79,14 @@ defmodule Moba.Game.Builds do
   """
   def generate_for_bot!(bot) do
     lists = get_lists(bot)
+    name = if bot.user, do: "pvp", else: "pve"
 
     bot =
       Enum.reduce(lists.items, bot, fn item, acc ->
         Game.buy_item!(acc, item)
       end)
 
-    create!("pve", bot, lists.skills, lists.skill_order, items_to_order(lists.items))
+    create!(name, bot, lists.skills, lists.skill_order, items_to_order(lists.items))
   end
 
   def skill_builds_for(role) do
@@ -172,6 +173,8 @@ defmodule Moba.Game.Builds do
         "weak" -> item_list
         "moderate" -> Enum.shuffle(item_list)
         "strong" -> Enum.reverse(item_list)
+        "master" -> Enum.reverse(item_list)
+        "grandmaster" -> random_legendaries() ++ random_epics()
       end
       |> Enum.map(fn item_code -> Game.get_item_by_code!(item_code) end)
       |> Enum.reduce({[], gold}, fn item, {items, remaining} ->
@@ -228,6 +231,20 @@ defmodule Moba.Game.Builds do
     |> SkillQuery.with_level(1)
     |> SkillQuery.random()
     |> Repo.all()
+  end
+
+  defp random_epics do
+    ["diffusal_blade", "heavens_halberd", "assault_cuirass"] |> Enum.shuffle()
+  end
+
+  defp random_legendaries do
+    [
+      "silver_edge", "dagon5", "linkens_sphere",
+      "boots_of_travel", "orchid_malevolence", "shivas_guard",
+      "scythe_of_vyse", "daedalus", "satanic"
+    ]
+    |> Enum.shuffle()
+    |> Enum.take(6)
   end
 
   defp extra_gold("strong", level, _) when level >= 25, do: 999_999

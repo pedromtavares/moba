@@ -146,10 +146,10 @@ defmodule Moba.GameTest do
     end
 
     test "#update_pvp_ranking" do
-      hero1 = create_pvp_hero(%{}, 1000)
-      hero2 = create_pvp_hero(%{}, 1020)
+      hero1 = create_pvp_hero(%{league_tier: 5}, 1000)
+      hero2 = create_pvp_hero(%{league_tier: 5}, 1020)
 
-      Game.update_pvp_ranking!()
+      Game.update_pvp_rankings!()
 
       hero1 = Game.get_hero!(hero1.id)
       hero2 = Game.get_hero!(hero2.id)
@@ -355,7 +355,7 @@ defmodule Moba.GameTest do
         create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999})
         |> Game.generate_bot_build!()
 
-      assert hero.active_build.type == "pve"
+      assert hero.active_build.type == "pvp"
       assert hero.active_build.item_order
       assert hero.active_build.skill_order
       assert length(hero.items) > 0

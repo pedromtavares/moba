@@ -20,11 +20,11 @@ defmodule MobaWeb.ArenaLiveViewTest do
   end
 
   test "battle event", %{conn: conn} do
-    create_pvp_hero()
-    create_pvp_hero()
-    create_pvp_hero()
+    create_pvp_hero(%{league_tier: 5})
+    create_pvp_hero(%{league_tier: 5})
+    create_pvp_hero(%{league_tier: 5})
 
-    hero = create_pvp_hero()
+    hero = create_pvp_hero(%{league_tier: 5})
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 

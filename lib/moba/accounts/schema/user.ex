@@ -36,6 +36,7 @@ defmodule Moba.Accounts.Schema.User do
     field :season_tier, :integer, default: 0
     field :season_points, :integer, default: 0
     field :bot_codes, {:array, :string}
+    field :bot_tier, :integer, default: 6
     field :shard_limit, :integer, default: 100
     field :pve_tier, :integer, default: 0
     field :unread_messages_count, :integer, default: 0
@@ -113,7 +114,7 @@ defmodule Moba.Accounts.Schema.User do
   def admin_changeset(user, attrs) do
     user
     |> update_changeset(attrs)
-    |> cast(attrs, [:is_admin, :is_bot])
+    |> cast(attrs, [:is_admin, :is_bot, :bot_tier])
   end
 
   def level_up(changeset, level, xp) do

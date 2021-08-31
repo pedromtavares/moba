@@ -36,13 +36,15 @@ defmodule MobaWeb.Admin.MatchLiveView do
     normal_rates = rates_by_list(rates, Game.list_normal_skills())
     ult_rates = rates_by_list(rates, Game.list_ultimate_skills())
 
-    arena = data.arena
-    bots = Enum.filter(arena, fn hero -> hero.bot_difficulty end)
+    arena_master = data.arena_master
+    arena_grandmaster = data.arena_grandmaster
 
     assign(socket,
       players: data.players,
-      arena: Enum.sort_by(arena, & &1.pvp_ranking, :asc),
-      bots: bots,
+      arena_master: sort_arena(arena_master),
+      arena_grandmaster: sort_arena(arena_grandmaster),
+      bots_master: filter_bots(arena_master),
+      bots_grandmaster: filter_bots(arena_grandmaster),
       normal_rates: normal_rates,
       ult_rates: ult_rates,
       user_stats: user_stats,
@@ -57,4 +59,7 @@ defmodule MobaWeb.Admin.MatchLiveView do
     |> Enum.sort_by(fn {_, {rate, _count}} -> rate end, :desc)
     |> Enum.filter(fn {skill, _} -> Enum.member?(codes, skill.code) end)
   end
+
+  defp sort_arena(heroes), do: Enum.sort_by(heroes, & &1.pvp_ranking, :asc)
+  defp filter_bots(heroes), do: Enum.filter(heroes, fn hero -> hero.bot_difficulty end)
 end

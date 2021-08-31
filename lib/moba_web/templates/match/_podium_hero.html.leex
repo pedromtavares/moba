@@ -3,7 +3,7 @@
         <%=live_redirect class: "hero-card card", style: "background-image: url(#{GH.background_url(@hero)})", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user) do %>
             <div class="card-header pt-0 pb-1">
                 <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-                    <span class="font-20 text-primary"><i class="fab fa-ethereum"></i> +<%=shards_for(@ranking)%></span>
+                    <span class="font-20 text-primary"><i class="fab fa-ethereum"></i> +<%=shards_for(@ranking, @hero.league_tier)%></span>
                     <div>
                         <img src="/images/league_<%=@hero.league_tier%>.png" class="league-logo">
                         <%=@hero.name%>
@@ -15,7 +15,7 @@
             <div class="card-body text-center p-0">
                 <div class="rewards border border-warning">
                     <h1 class="mt-0 text-warning">#<%=@ranking%></h1>
-                    <h3 class="mb-0 text-warning"><%=rewards_for(@ranking)%></small></h3>
+                    <h3 class="mb-0 text-warning"><%=if @hero.league_tier == Moba.max_league_tier() do %> <%=rewards_for(@ranking)%> <% end %></small></h3>
                 </div>
             </div>
             <div class="card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">

@@ -4,10 +4,15 @@
         <div class="col-12 text-center">
             <h2 class="page-title mb-2 text-white">
                 <i class="fa fa-crosshairs fa-2x text-danger mt-2 mb-2"></i><br/>
-                Enter the Arena
+                Enter the
+                <%=if @mode == "grandmaster" do %>
+                    <span class="text-league-6">Grandmaster </span>
+                <% else %>
+                    <span class="text-league-5">Master </span>
+                <% end %>
+                Arena
             </h2>
-            <p class="text-danger mb-1">Pick one of your previously created Heroes to fight for you in the Arena during the current match.</p>
-            <p class="text-muted font-italic">NOTE: Only heroes in the Master League or above are eligible for the Arena.</p>
+            <p class="text-danger mb-1">Pick one of your Heroes to fight for you in the current match which ends <%=MobaWeb.CurrentHeroView.next_match_description()%>. You can only play in one Arena match at a time.</p>
         </div>
     </div>
 
@@ -16,6 +21,15 @@
             <a href="/game/pve" class="btn btn-success btn-lg"><i class="fa fa-leaf mr-1"></i>Back to the Jungle</a>
         <% else %>
             <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
+        <% end %>
+        <%= if @mode == "grandmaster" do %>
+            <button type="button" phx-click="switch-mode" class="btn btn-primary btn-lg"><img src="/images/league_5.png" class="league-logo mr-1">Switch to Master Arena</a>
+        <% else %>
+            <%= if can_join_grandmaster?(@all_heroes) do %>
+                <button type="button" phx-click="switch-mode" class="btn btn-warning btn-lg"><img src="/images/league_6.png" class="league-logo mr-1">Switch to Grandmaster Arena</button>
+            <% else %>
+                <button type="button" class="btn btn-warning btn-lg disabled no-action" data-toggle="tooltip" title="You need at least one hero in the Grandmaster League to join the Grandmaster Arena."><img src="/images/league_6.png" class="league-logo mr-1">Switch to Grandmaster Arena</button>
+            <% end %>
         <% end %>
     </div>
     <div class="row">

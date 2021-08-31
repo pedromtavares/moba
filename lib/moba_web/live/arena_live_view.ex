@@ -17,7 +17,7 @@ defmodule MobaWeb.ArenaLiveView do
          search_results: results,
          current_hero: hero,
          filter: filter,
-         sort: "level",
+         sort: "hp",
          page: 1,
          tutorial_step: hero.user.tutorial_step,
          pending_battle: Engine.pending_battle(hero.id)

@@ -1,5 +1,5 @@
 <div class="col-xl-4 col-md-6 col-12">
-    <div class="hero-card card" id="arena_target_<%=@target.id%>" style="background-image: url(<%=GH.background_url(@target)%>">
+    <div class="hero-card card mb-0" id="arena_target_<%=@target.id%>" style="background-image: url(<%=GH.background_url(@target)%>">
         <div class="card-header pt-0 pb-1">
             <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, @target.user_id)do %>
                 <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">

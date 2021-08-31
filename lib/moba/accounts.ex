@@ -28,9 +28,9 @@ defmodule Moba.Accounts do
 
   def add_user_experience(user, experience), do: Users.add_experience(user, experience)
 
-  def create_guest(conn), do: Users.create_guest(conn)
+  defdelegate create_guest(conn), to: Users
 
-  def award_medals_and_shards(user, ranking), do: Users.award_medals_and_shards(user, ranking)
+  defdelegate award_medals_and_shards(user, ranking, league_tier), to: Users
 
   def set_user_online_now(user), do: Users.set_online_now(user)
 

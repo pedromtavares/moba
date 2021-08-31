@@ -74,7 +74,7 @@ defmodule Moba.AccountsTest do
     test "first place" do
       user =
         create_user()
-        |> Accounts.award_medals_and_shards(1)
+        |> Accounts.award_medals_and_shards(1, 6)
 
       assert user.medal_count == 3
       assert user.shard_count == 200

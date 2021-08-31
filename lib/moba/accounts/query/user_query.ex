@@ -84,6 +84,10 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in query, where: not is_nil(u.current_pvp_hero_id))
   end
 
+  def by_bot_tier(query, tier) do
+    from(u in query, where: u.bot_tier == ^tier)
+  end
+
   def eligible_arena_bots do
     from(u in by_pvp_points(),
       where: u.is_bot == true,

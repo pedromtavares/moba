@@ -9,7 +9,8 @@ defmodule MobaWeb.Ranking do
     {:ok,
      assign(socket,
        hero: hero,
-       ranking: Game.paged_pvp_ranking(1)
+       league_tier: hero.league_tier,
+       ranking: Game.paged_pvp_ranking(hero.league_tier, 1)
      )}
   end
 
@@ -20,7 +21,7 @@ defmodule MobaWeb.Ranking do
 
   def handle_event("page", %{"number" => number}, socket) do
     page = process_page(number)
-    results = Game.paged_pvp_ranking(page)
+    results = Game.paged_pvp_ranking(socket.assigns.league_tier, page)
     {:noreply, assign(socket, page: page, ranking: results)}
   end
 

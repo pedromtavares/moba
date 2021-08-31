@@ -154,7 +154,7 @@ body{
 }
 
 .wrapper {
-  padding-top: 5px;
+  padding-top: 0px; //5px
   overflow-y: hidden;
 }
 
@@ -203,6 +203,10 @@ body{
 
 .no-action{
   cursor: default !important;
+}
+
+.action-cursor{
+  cursor: pointer !important;
 }
 
 .no-wrap{

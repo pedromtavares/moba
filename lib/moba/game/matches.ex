@@ -30,12 +30,23 @@ defmodule Moba.Game.Matches do
   end
 
   def load_podium(%{winners: winners}) do
+    if winners["master"] do
+      %{
+        "master" => load_heroes(winners["master"]),
+        "grandmaster" => load_heroes(winners["grandmaster"])
+      }
+    else
+      load_heroes(winners)
+    end
+  end
+
+  def load_podium(_), do: nil
+
+  defp load_heroes(winners) do
     [winners["1"], winners["2"], winners["3"]]
     |> Enum.map(fn hero_id ->
       Game.get_hero!(hero_id)
     end)
     |> Enum.reject(fn hero -> is_nil(hero) end)
   end
-
-  def load_podium(_), do: nil
 end

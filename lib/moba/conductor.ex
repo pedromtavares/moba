@@ -79,7 +79,7 @@ defmodule Moba.Conductor do
   def server_update!(match \\ Moba.current_match()) do
     skynet!()
 
-    Game.update_pvp_ranking!()
+    Game.update_pvp_rankings!()
     Game.update_pve_ranking!()
 
     match
@@ -121,7 +121,7 @@ defmodule Moba.Conductor do
     active = Moba.current_match()
 
     if active do
-      Game.update_pvp_ranking!()
+      Game.update_pvp_rankings!()
 
       active
       |> Game.update_match!(%{active: false})
@@ -219,7 +219,7 @@ defmodule Moba.Conductor do
     match
   end
 
-  # Generates a new PVP hero for every bot User with random avatars and levels
+  # Generates a new PVP hero for every bot User with random avatars
   defp generate_pvp_bots!(match) do
     Logger.info("Generating PVP bots...")
 
@@ -238,18 +238,8 @@ defmodule Moba.Conductor do
         end
 
       avatar = Enum.random(avatars)
-      difficulty = Application.get_env(:moba, :arena_difficulty)
-      level = arena_bot_level(difficulty)
 
-      hero =
-        Game.create_bot_hero!(
-          avatar,
-          level,
-          "strong",
-          match,
-          user,
-          user.pvp_points
-        )
+      hero = Game.create_pvp_bot_hero!(user, avatar, match)
 
       Accounts.set_current_pvp_hero!(user, hero.id)
     end)
@@ -271,15 +261,23 @@ defmodule Moba.Conductor do
 
   # Awards winners and saves the PVP top 10 heroes of the match
   defp assign_and_award_winners!(match) do
-    top10 = Game.pvp_ranking(10)
+    top10_master = Game.pvp_ranking(5, 10)
 
-    winners =
-      Enum.reduce(top10, %{}, fn hero, acc ->
-        unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking)
+    master =
+      Enum.reduce(top10_master, %{}, fn hero, acc ->
+        unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking, hero.league_tier)
         Map.put(acc, hero.pvp_ranking, hero.id)
       end)
 
-    Game.update_match!(match, %{winners: winners})
+    top10_grandmaster = Game.pvp_ranking(6, 10)
+
+    grandmaster =
+      Enum.reduce(top10_grandmaster, %{}, fn hero, acc ->
+        unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking, hero.league_tier)
+        Map.put(acc, hero.pvp_ranking, hero.id)
+      end)
+
+    Game.update_match!(match, %{winners: %{"master" => master, "grandmaster" => grandmaster}})
   end
 
   # Clears all active PVP heroes from the current match
@@ -299,6 +297,7 @@ defmodule Moba.Conductor do
 
     if attacker do
       HeroQuery.with_pvp_points()
+      |> HeroQuery.by_league_tier(attacker.league_tier)
       |> Repo.all()
       |> Enum.each(fn defender ->
         defender &&
@@ -332,18 +331,6 @@ defmodule Moba.Conductor do
         match
       )
     end)
-  end
-
-  defp arena_bot_level(difficulty) do
-    range =
-      case difficulty do
-        "moderate" -> 18..25
-        "strong" -> 22..25
-        "ultimate" -> 25..25
-        _ -> 15..22
-      end
-
-    Enum.random(range)
   end
 
   defp time_diff_in_seconds(nil), do: 0

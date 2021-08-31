@@ -5,7 +5,12 @@ defmodule MobaWeb.ArenaSelectLiveView do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
     user = socket.assigns.current_user
 
-    heroes = Game.eligible_heroes_for_pvp(user_id)
+    all_heroes = Game.eligible_heroes_for_pvp(user_id)
+
+    mode = if Enum.find(all_heroes, &(&1.league_tier == Moba.max_league_tier())), do: "grandmaster", else: "master"
+    mode_tier = if mode == "grandmaster", do: 6, else: 5
+
+    mode_heroes = Enum.filter(all_heroes, &(&1.league_tier == mode_tier))
 
     skins =
       user
@@ -13,7 +18,7 @@ defmodule MobaWeb.ArenaSelectLiveView do
       |> Game.list_skins_with_codes()
 
     selections =
-      Enum.map(heroes, fn hero ->
+      Enum.map(all_heroes, fn hero ->
         avatar_code = hero.avatar.code
         avatar_skins = [Game.default_skin(hero.avatar.code)] ++ Enum.filter(skins, &(&1.avatar_code == avatar_code))
         index = Enum.find_index(avatar_skins, fn skin -> skin.id == hero.skin_id end)
@@ -40,9 +45,11 @@ defmodule MobaWeb.ArenaSelectLiveView do
       true ->
         {:ok,
          assign(socket,
-           heroes: heroes,
+           all_heroes: all_heroes,
+           heroes: mode_heroes,
            selections: selections,
-           hide_join_new_match_button: true
+           hide_join_new_match_button: true,
+           mode: mode
          )}
     end
   end
@@ -53,6 +60,16 @@ defmodule MobaWeb.ArenaSelectLiveView do
     Moba.prepare_current_pvp_hero!(hero)
 
     {:noreply, socket |> redirect(to: "/game/pvp")}
+  end
+
+  def handle_event("switch-mode", _, socket) do
+    current_mode = socket.assigns.mode
+
+    new_mode = if current_mode == "master", do: "grandmaster", else: "master"
+    mode_tier = if new_mode == "grandmaster", do: 6, else: 5
+    mode_heroes = Enum.filter(socket.assigns.all_heroes, &(&1.league_tier == mode_tier))
+
+    {:noreply, assign(socket, mode: new_mode, heroes: mode_heroes)}
   end
 
   def handle_event(

@@ -120,17 +120,23 @@ defmodule Moba do
 
   # diff = defender.pvp_points - attacker.pvp_points
 
-  def attacker_win_pvp_points(diff) when diff < -40, do: 2
-  def attacker_win_pvp_points(diff), do: round(5 + (diff + 80) * 0.05)
+  def attacker_win_pvp_points(diff, 6) when diff < -40, do: 2
+  def attacker_win_pvp_points(diff, 6), do: round(5 + (diff + 80) * 0.05)
+  def attacker_win_pvp_points(diff, _), do: div(attacker_win_pvp_points(diff, 6), 2)
 
-  def attacker_loss_pvp_points(diff) when diff > 40, do: -2
-  def attacker_loss_pvp_points(diff), do: round(-5 + (diff - 80) * 0.05)
 
-  def defender_win_pvp_points(diff) when diff > 40, do: 0
-  def defender_win_pvp_points(diff), do: -round((diff - 40) * 0.05)
+  def attacker_loss_pvp_points(diff, 6) when diff > 40, do: -2
+  def attacker_loss_pvp_points(diff, 6), do: round(-5 + (diff - 80) * 0.05)
+  def attacker_loss_pvp_points(diff, _), do: div(attacker_loss_pvp_points(diff, 6), 2)
 
-  def defender_loss_pvp_points(diff) when diff < -40, do: 0
-  def defender_loss_pvp_points(diff), do: -round((diff + 40) * 0.05)
+
+  def defender_win_pvp_points(diff, 6) when diff > 40, do: 0
+  def defender_win_pvp_points(diff, 6), do: -round((diff - 40) * 0.05)
+  def defender_win_pvp_points(diff, _), do: div(defender_win_pvp_points(diff, 6), 2)
+
+  def defender_loss_pvp_points(diff, 6) when diff < -40, do: 0
+  def defender_loss_pvp_points(diff, 6), do: -round((diff + 40) * 0.05)
+  def defender_loss_pvp_points(diff, _), do: div(defender_loss_pvp_points(diff, 6), 2)
 
   def avatar_minimum_stats() do
     %{
@@ -209,7 +215,7 @@ defmodule Moba do
   Accounts ranking is defined by who has the highest medal_count
   """
   def update_rankings! do
-    Game.update_pvp_ranking!()
+    Game.update_pvp_rankings!()
     Game.update_pve_ranking!()
     Accounts.update_ranking!()
   end

@@ -19,9 +19,10 @@ defmodule Moba.Game.Query.HeroQuery do
     bots() |> pvp_active()
   end
 
-  def pvp_search(exclude_list, filter, pvp_points, sort, page) do
+  def pvp_search(exclude_list, filter, pvp_points, league_tier, sort, page) do
     Hero
     |> pvp_active()
+    |> by_league_tier(league_tier)
     |> exclude(exclude_list)
     |> pvp_filter(filter, pvp_points)
     |> pvp_sort(sort)
@@ -165,6 +166,11 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query,
       where: hero.pvp_points >= ^min,
       where: hero.pvp_points <= ^max
+  end
+
+  def by_league_tier(query, league_tier) do
+    from hero in query,
+      where: hero.league_tier == ^league_tier
   end
 
   def by_codes(query, codes) do

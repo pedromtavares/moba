@@ -129,7 +129,7 @@ defmodule Moba.Game.Heroes do
   To keep the same amount of Heroes in the Arena, the weakest PVP bot will be inactivated.
   """
   def prepare_for_pvp!(hero) do
-    inactivate_weakest_pvp_bot()
+    inactivate_weakest_pvp_bot(hero.league_tier)
 
     update!(hero, %{
       pvp_points: hero.user.pvp_points,
@@ -184,7 +184,7 @@ defmodule Moba.Game.Heroes do
   @doc """
   Returns valid PVP targets for a Hero, prioritizing ones with equivalent points
   """
-  def pvp_search(hero, sort \\ "level") do
+  def pvp_search(hero, sort \\ "hp") do
     ["normal", "easy", "hard", "hardest", nil]
     |> Enum.reduce_while([], fn filter, _ ->
       results = pvp_search(hero, filter, sort)
@@ -197,8 +197,8 @@ defmodule Moba.Game.Heroes do
     end)
   end
 
-  def pvp_search(%{pvp_points: pvp_points} = hero, filter, sort, page \\ 1) do
-    HeroQuery.pvp_search(pvp_exclusions(hero), filter, pvp_points, sort, page)
+  def pvp_search(%{pvp_points: pvp_points, league_tier: league_tier} = hero, filter, sort, page \\ 1) do
+    HeroQuery.pvp_search(pvp_exclusions(hero), filter, pvp_points, league_tier, sort, page)
     |> Repo.all()
     |> base_preload()
   end
@@ -206,8 +206,9 @@ defmodule Moba.Game.Heroes do
   @doc """
   Retrieves top PVP ranked Heroes
   """
-  def pvp_ranking(limit) do
+  def pvp_ranking(league_tier, limit) do
     HeroQuery.pvp_ranked()
+    |> HeroQuery.by_league_tier(league_tier)
     |> HeroQuery.limit_by(limit)
     |> Repo.all()
     |> base_preload()
@@ -216,8 +217,9 @@ defmodule Moba.Game.Heroes do
   @doc """
   Retrieves PVP ranked Heroes by page
   """
-  def paged_pvp_ranking(page) do
+  def paged_pvp_ranking(league_tier, page) do
     HeroQuery.paged_pvp_ranking(page)
+    |> HeroQuery.by_league_tier(league_tier)
     |> Repo.all()
     |> base_preload()
   end
@@ -225,8 +227,9 @@ defmodule Moba.Game.Heroes do
   @doc """
   Grabs all Heroes ordered by their pvp points and updates their pvp_ranking in the current match
   """
-  def update_pvp_ranking! do
+  def update_pvp_ranking!(league_tier) do
     HeroQuery.with_pvp_points()
+    |> HeroQuery.by_league_tier(league_tier)
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.map(fn {hero, index} ->
@@ -322,6 +325,7 @@ defmodule Moba.Game.Heroes do
 
     HeroQuery.pvp_active()
     |> HeroQuery.exclude(list)
+    |> HeroQuery.by_league_tier(hero.league_tier)
     |> Repo.aggregate(:count)
   end
 
@@ -419,6 +423,10 @@ defmodule Moba.Game.Heroes do
 
   defp level_to_max(hero), do: hero
 
+  defp bot_total_farm(_, "master"), do: Enum.random(20_000..25_000)
+
+  defp bot_total_farm(_, "grandmaster"), do: Enum.random(27_000..30_000)
+
   defp bot_total_farm(level, difficulty) do
     base = Moba.xp_until_hero_level(level)
 
@@ -434,8 +442,9 @@ defmodule Moba.Game.Heroes do
     base + extra + league_bonus
   end
 
-  defp inactivate_weakest_pvp_bot do
+  defp inactivate_weakest_pvp_bot(league_tier) do
     HeroQuery.weakest_pvp_bot()
+    |> HeroQuery.by_league_tier(league_tier)
     |> Repo.all()
     |> List.first()
     |> update!(%{pvp_active: false})

@@ -34,6 +34,7 @@
                             </div>
                         </div>
 
+
                     </div>
                 </div>
             </div>
@@ -46,6 +47,12 @@
                 </div>
             </div>
         <% else %>
+
+            <div class="row">
+                <%=for target <- @search_results do %>
+                    <%=render "_arena_target.html", target: target, current_hero: @current_hero, socket: @socket%>
+                <% end %>
+            </div>
             <div class="row">
                 <div class="col-12 info-box margin-auto">
                     <%=if Enum.count(@search_results) == 0 do %>
@@ -69,14 +76,14 @@
                                 <ul class="pagination flex-center">
                                     <%= unless @page == 1 do %>
                                         <li class="page-item">
-                                            <a class="page-link" phx-click="page" phx-value-number="<%=@page-1%>" phx-hook="Loading" id="prev-targets-<%=@page+1%>" >
+                                            <a class="page-link action-cursor" phx-click="page" phx-value-number="<%=@page-1%>" phx-hook="Loading" id="prev-targets-<%=@page+1%>" >
                                                 <span class="loading-text"><i class="fa fa-chevron-left mr-1"></i> Previous</span>
                                             </a>
                                         </li>
                                     <% end %>
                                     <%= if Enum.count(@search_results) == Moba.pvp_heroes_per_page() do %>
                                         <li class="page-item">
-                                            <a class="page-link" phx-click="page" phx-value-number="<%=@page+1%>" phx-hook="Loading" id="next-targets-<%=@page+1%>" >
+                                            <a class="page-link action-cursor" phx-click="page" phx-value-number="<%=@page+1%>" phx-hook="Loading" id="next-targets-<%=@page+1%>" >
                                                 <span class="loading-text">Next <%=if @page == 1, do: "Targets"%><i class="fa fa-chevron-right ml-1"></i></span>
                                             </a>
                                         </li>
@@ -87,7 +94,6 @@
                                 <form class="form-inline flex-center" phx-change="search">
                                     <div class="form-group sort" data-toggle="tooltip" title="Order which targets are sorted by">
                                         <select class="custom-select" name="sort">
-                                            <option value="level" <%=if @sort == "level", do: "selected"%> >Lowest Level</option>
                                             <option value="hp" <%=if @sort == "hp", do: "selected"%> >Lowest HP</option>
                                             <option value="atk" <%=if @sort == "atk", do: "selected"%> >Lowest ATK</option>
                                         </select>
@@ -97,11 +103,6 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div class="row">
-                <%=for target <- @search_results do %>
-                    <%=render "_arena_target.html", target: target, current_hero: @current_hero, socket: @socket%>
-                <% end %>
             </div>
         <% end %>
 

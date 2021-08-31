@@ -3,47 +3,47 @@ defmodule Moba.MobaTest do
 
   describe "pvp_points" do
     test "attacker win" do
-      assert Moba.attacker_win_pvp_points(200) == 19
-      assert Moba.attacker_win_pvp_points(100) == 14
-      assert Moba.attacker_win_pvp_points(80) == 13
-      assert Moba.attacker_win_pvp_points(40) == 11
-      assert Moba.attacker_win_pvp_points(0) == 9
-      assert Moba.attacker_win_pvp_points(-40) == 7
-      assert Moba.attacker_win_pvp_points(-80) == 2
-      assert Moba.attacker_win_pvp_points(-100) == 2
+      assert Moba.attacker_win_pvp_points(200, 6) == 19
+      assert Moba.attacker_win_pvp_points(100, 6) == 14
+      assert Moba.attacker_win_pvp_points(80, 6) == 13
+      assert Moba.attacker_win_pvp_points(40, 6) == 11
+      assert Moba.attacker_win_pvp_points(0, 6) == 9
+      assert Moba.attacker_win_pvp_points(-40, 6) == 7
+      assert Moba.attacker_win_pvp_points(-80, 6) == 2
+      assert Moba.attacker_win_pvp_points(-100, 6) == 2
     end
 
     test "attacker loss" do
-      assert Moba.attacker_loss_pvp_points(100) == -2
-      assert Moba.attacker_loss_pvp_points(80) == -2
-      assert Moba.attacker_loss_pvp_points(40) == -7
-      assert Moba.attacker_loss_pvp_points(0) == -9
-      assert Moba.attacker_loss_pvp_points(-40) == -11
-      assert Moba.attacker_loss_pvp_points(-80) == -13
-      assert Moba.attacker_loss_pvp_points(-100) == -14
-      assert Moba.attacker_loss_pvp_points(-200) == -19
+      assert Moba.attacker_loss_pvp_points(100, 6) == -2
+      assert Moba.attacker_loss_pvp_points(80, 6) == -2
+      assert Moba.attacker_loss_pvp_points(40, 6) == -7
+      assert Moba.attacker_loss_pvp_points(0, 6) == -9
+      assert Moba.attacker_loss_pvp_points(-40, 6) == -11
+      assert Moba.attacker_loss_pvp_points(-80, 6) == -13
+      assert Moba.attacker_loss_pvp_points(-100, 6) == -14
+      assert Moba.attacker_loss_pvp_points(-200, 6) == -19
     end
 
     test "defender win" do
-      assert Moba.defender_win_pvp_points(100) == 0
-      assert Moba.defender_win_pvp_points(80) == 0
-      assert Moba.defender_win_pvp_points(40) == 0
-      assert Moba.defender_win_pvp_points(0) == 2
-      assert Moba.defender_win_pvp_points(-40) == 4
-      assert Moba.defender_win_pvp_points(-80) == 6
-      assert Moba.defender_win_pvp_points(-100) == 7
-      assert Moba.defender_win_pvp_points(-200) == 12
+      assert Moba.defender_win_pvp_points(100, 6) == 0
+      assert Moba.defender_win_pvp_points(80, 6) == 0
+      assert Moba.defender_win_pvp_points(40, 6) == 0
+      assert Moba.defender_win_pvp_points(0, 6) == 2
+      assert Moba.defender_win_pvp_points(-40, 6) == 4
+      assert Moba.defender_win_pvp_points(-80, 6) == 6
+      assert Moba.defender_win_pvp_points(-100, 6) == 7
+      assert Moba.defender_win_pvp_points(-200, 6) == 12
     end
 
     test "defender loss" do
-      assert Moba.defender_loss_pvp_points(200) == -12
-      assert Moba.defender_loss_pvp_points(100) == -7
-      assert Moba.defender_loss_pvp_points(80) == -6
-      assert Moba.defender_loss_pvp_points(40) == -4
-      assert Moba.defender_loss_pvp_points(0) == -2
-      assert Moba.defender_loss_pvp_points(-40) == 0
-      assert Moba.defender_loss_pvp_points(-80) == 0
-      assert Moba.defender_loss_pvp_points(-100) == 0
+      assert Moba.defender_loss_pvp_points(200, 6) == -12
+      assert Moba.defender_loss_pvp_points(100, 6) == -7
+      assert Moba.defender_loss_pvp_points(80, 6) == -6
+      assert Moba.defender_loss_pvp_points(40, 6) == -4
+      assert Moba.defender_loss_pvp_points(0, 6) == -2
+      assert Moba.defender_loss_pvp_points(-40, 6) == 0
+      assert Moba.defender_loss_pvp_points(-80, 6) == 0
+      assert Moba.defender_loss_pvp_points(-100, 6) == 0
     end
   end
 

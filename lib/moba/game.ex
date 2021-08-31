@@ -68,6 +68,11 @@ defmodule Moba.Game do
     Heroes.create_bot!(avatar, level, difficulty, match, user, pvp_points, league_tier)
   end
 
+  def create_pvp_bot_hero!(user, avatar, match) do
+    difficulty = if user.bot_tier == Moba.master_league_tier(), do: "master", else: "grandmaster"
+    Heroes.create_bot!(avatar, 25, difficulty, match, user, user.pvp_points, user.bot_tier)
+  end
+
   def update_hero!(hero, attrs, items \\ nil) do
     updated = Heroes.update!(hero, attrs, items)
     broadcast_to_hero(hero.id)
@@ -102,11 +107,13 @@ defmodule Moba.Game do
 
   def pvp_search(hero, filter, sort, page), do: Heroes.pvp_search(hero, filter, sort, page)
 
-  def pvp_ranking(limit \\ 20), do: Heroes.pvp_ranking(limit)
+  def pvp_ranking(league_tier, limit), do: Heroes.pvp_ranking(league_tier, limit)
 
-  def paged_pvp_ranking(page), do: Heroes.paged_pvp_ranking(page)
+  def paged_pvp_ranking(league_tier, page), do: Heroes.paged_pvp_ranking(league_tier, page)
 
-  def update_pvp_ranking!, do: Heroes.update_pvp_ranking!()
+  defdelegate update_pvp_ranking!(league_tier), to: Heroes
+
+  def update_pvp_rankings!, do: update_pvp_ranking!(5) && update_pvp_ranking!(6)
 
   def pve_search(hero), do: Heroes.pve_search(hero)
 

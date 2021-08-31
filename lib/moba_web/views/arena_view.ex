@@ -5,8 +5,8 @@ defmodule MobaWeb.ArenaView do
 
   def points_for_arena_battle(attacker, defender) do
     diff = defender.pvp_points - attacker.pvp_points
-    victory = Moba.attacker_win_pvp_points(diff)
-    defeat = Moba.attacker_loss_pvp_points(diff)
+    victory = Moba.attacker_win_pvp_points(diff, attacker.league_tier)
+    defeat = Moba.attacker_loss_pvp_points(diff, attacker.league_tier)
     "(+#{victory}/#{defeat})"
   end
 
@@ -35,6 +35,8 @@ defmodule MobaWeb.ArenaView do
       |> Timex.format("{relative}", :relative)
       |> elem(1)
   end
+
+  def can_join_grandmaster?(heroes), do: Enum.find(heroes, &(&1.league_tier == Moba.max_league_tier()))
 
   def has_previous_skin?(hero, selections) do
     selection = Enum.find(selections, fn selection -> selection.hero_id == hero.id end)

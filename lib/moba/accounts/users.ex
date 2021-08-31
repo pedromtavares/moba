@@ -55,7 +55,7 @@ defmodule Moba.Accounts.Users do
   Given to the top 3 of the Arena when the match ends
   Medals are displayed on the Arena and Shards are used for unlocking new content
   """
-  def award_medals_and_shards(user, ranking) when ranking > 0 and ranking < 4 do
+  def award_medals_and_shards(user, ranking, league_tier) when ranking > 0 and ranking < 4 do
     {medals, shards} =
       case ranking do
         1 -> {3, 200}
@@ -63,10 +63,15 @@ defmodule Moba.Accounts.Users do
         3 -> {1, 100}
       end
 
-    update!(user, %{medal_count: user.medal_count + medals, shard_count: user.shard_count + shards})
+    shards = if league_tier == Moba.master_league_tier(), do: div(shards, 2), else: shards
+
+    total_medals = if league_tier == Moba.max_league_tier(), do: user.medal_count + medals, else: user.medal_count
+    total_shards = user.shard_count + shards
+
+    update!(user, %{medal_count: total_medals, shard_count: total_shards})
   end
 
-  def award_medals_and_shards(user, _), do: user
+  def award_medals_and_shards(user, _, _), do: user
 
   @doc """
   Guests are used after a Hero is created from the homepage, so the user

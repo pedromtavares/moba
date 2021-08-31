@@ -14,13 +14,16 @@ defmodule MobaWeb.MatchLiveView do
     match = Game.last_match()
     last_pvp_hero = Game.last_pvp_hero(current_user.id)
     winners = Game.podium_for(match)
-    winner_index = winners && Enum.find_index(winners, fn winner -> winner.user_id == current_user.id end)
+
+    tier_winners = if last_pvp_hero && last_pvp_hero.league_tier == Moba.master_league_tier(), do: winners["master"] || winners, else: winners["grandmaster"] || winners
+
+    winner_index = tier_winners && Enum.find_index(tier_winners, fn winner -> winner.user_id == current_user.id end)
 
     {:noreply,
      assign(socket,
        match: match,
        hero: last_pvp_hero,
-       winners: winners,
+       winners: tier_winners,
        winner_index: winner_index
      )}
   end

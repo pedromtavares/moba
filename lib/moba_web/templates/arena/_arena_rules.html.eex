@@ -7,9 +7,9 @@
             </div>
             <div class="modal-body">
                 <h5 class="text-center">Objective</h5>
-                <p>Finish the match being #1 on the Ranking by acculumating Points. You will be awarded Medals if you manage to get in the Top 3, which are used to rank you against all other players in BrowserMOBA.</p>
+                <p>Finish the match being #1 on the Ranking by acculumating Season Points, which will be awarded to your account permanently and used to rank you against all other players in BrowserMOBA.</p>
                 <h5 class="text-center">Battles & Points</h5>
-                <p>Unlike the Jungle, battles in the Arena cannot end in a tie, so you must kill your opponent in order to win Points. The amount of points won/lost depends on the difference of points between you and your opponent at the start of the battle. Note that you can also win/lose points when defending an attack.</p>
+                <p>Unlike the Jungle, battles in the Arena cannot end in a tie and last until one of the heroes die. The amount of points won/lost depends on the difference of points between you and your opponent at the start of the battle. Note that you can also win/lose points when defending an attack.</p>
                 <h5 class="text-center">Rounds</h5>
                 <p>Each match is broken up into 2 rounds. In each round, you can attack every other opponent in the Arena once. You don't have to attack all of them, but all of them can (and probably will) attack you.</p>
                 <h5 class="text-center">Skill Actions</h5>

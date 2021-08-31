@@ -15,11 +15,11 @@ alias Game.Schema.{Item, Skill, Avatar}
 alias Accounts.Schema.User
 
 defmodule SeedHelper do
-  def create_bot do
+  def create_bot(bot_tier \\ 5) do
     name = Faker.Superhero.name()
     email = Faker.Internet.email()
 
-    case Admin.create_user(%{username: name, email: email, is_bot: true}) do
+    case Admin.create_user(%{username: name, email: email, is_bot: true, bot_tier: bot_tier}) do
       {:ok, user} -> user
       {:error, _} -> create_bot()
     end

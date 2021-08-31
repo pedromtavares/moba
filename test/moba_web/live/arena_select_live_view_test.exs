@@ -8,7 +8,7 @@ defmodule MobaWeb.ArenaSelectLiveViewTest do
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
     {:ok, _view, html} = live(conn, "/arena/select")
-    assert html =~ "Enter the Arena"
+    assert html =~ "Enter the"
   end
 
   test "connected mount, redirects to arena if there is pvp hero", %{conn: conn} do

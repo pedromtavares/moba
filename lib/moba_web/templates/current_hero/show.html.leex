@@ -118,7 +118,7 @@
                                     <% end %>
                                     <%= if @current_mode == "pvp" do %>
                                         <%= if can_create_extra_build?(@current_hero) do %>
-                                            <a href="/build" data-toggle="tooltip" title="Create an extra build for your Hero. You will be able to switch back and forth between builds at any time." class="badge badge-pill badge-light-danger py-1 px-3 red-glow font-14"><i class="fa fa-dice-d20 mr-1"></i>Create Extra Build</a>
+                                            <a href="/build" data-toggle="tooltip" title="Create an extra build for your Hero. You will be able to switch back and forth between builds at any time." class="badge badge-pill badge-light-danger py-1 px-3 font-14 <%=if @current_hero.pvp_picks <= 1, do: "red-glow"%>"><i class="fa fa-dice-d20 mr-1"></i>Create Extra Build</a>
                                         <% else %>
                                             <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-3 font-14" phx-click="switch-build"><i class="fa fa-sync mr-1"></i>Switch Build</a>
                                         <% end %>

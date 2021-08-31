@@ -44,4 +44,8 @@ defmodule Moba.Game.Query.ItemQuery do
   def exclude(query, ids) do
     from s in query, where: s.id not in ^ids
   end
+
+  def by_rarity(query, rarity) do
+    from i in query, where: i.rarity == ^rarity
+  end
 end

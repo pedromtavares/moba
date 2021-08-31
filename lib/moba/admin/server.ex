@@ -53,13 +53,15 @@ defmodule Moba.Admin.Server do
 
       %{
         players: players,
-        arena: arena,
+        arena_master: Enum.filter(arena, &(&1.league_tier == Moba.master_league_tier())),
+        arena_grandmaster: Enum.filter(arena, &(&1.league_tier == Moba.max_league_tier())),
         rates: rates
       }
     else
       %{
         players: [],
-        arena: [],
+        arena_master: [],
+        arena_grandmaster: [],
         rates: []
       }
     end
@@ -78,15 +80,24 @@ defmodule Moba.Admin.Server do
     key = "admin-match-#{match.id}"
     rates = Admin.recent_winrates(match.inserted_at)
 
-    arena =
-      Enum.map(match.winners, fn {ranking, winner_id} ->
+    master_winners = if match.winners["master"], do: match.winners["master"], else: match.winners
+    grandmaster_winners = if match.winners["grandmaster"], do: match.winners["grandmaster"], else: match.winners
+
+    arena_master =
+      Enum.map(master_winners, fn {ranking, winner_id} ->
+        Map.put(Game.get_hero!(winner_id), :pvp_ranking, String.to_integer(ranking))
+      end)
+
+    arena_grandmaster =
+      Enum.map(grandmaster_winners, fn {ranking, winner_id} ->
         Map.put(Game.get_hero!(winner_id), :pvp_ranking, String.to_integer(ranking))
       end)
 
     data = %{
       rates: rates,
       players: [],
-      arena: arena
+      arena_master: arena_master,
+      arena_grandmaster: arena_grandmaster
     }
 
     Cachex.put(:game_cache, key, data)

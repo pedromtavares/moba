@@ -12,9 +12,15 @@ defmodule MobaWeb.MatchView do
     raw(medals)
   end
 
-  def shards_for(ranking) do
+  def shards_for(ranking, league_tier) do
     number = round(3 / ranking)
-    50 + number * 50
+    total = 50 + number * 50
+
+    if league_tier == Moba.max_league_tier() do
+      total
+    else
+      div(total, 2)
+    end
   end
 
   def next_medal(%{season_tier: current_tier}) do

@@ -17,7 +17,7 @@
                                 <div class="row">
                                     <div class="col d-flex align-items-center justify-content-center">
                                         <%= for {tier, _} <- Moba.leagues() do %>
-                                            <%= unless @current_hero.easy_mode && tier == 6 do %>
+                                            <%= unless @current_hero.easy_mode && tier == Moba.max_league_tier() do %>
                                                 <img src="/images/league_<%=tier%>.png" class="<%=MobaWeb.HeroView.tier_class(tier, @current_hero.league_tier)%>" data-toggle="tooltip" title="<%=Moba.leagues[tier]%>"/>
                                             <% end %>
                                             <%= unless tier == Moba.max_league_tier() || (tier == Moba.master_league_tier() && @current_hero.easy_mode)  do %>

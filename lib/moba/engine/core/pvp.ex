@@ -75,10 +75,12 @@ defmodule Moba.Engine.Core.Pvp do
 
     diff = defender.pvp_points - attacker.pvp_points
 
+    tier = attacker.league_tier
+
     {attacker_points, defender_points} =
       cond do
-        win -> {Moba.attacker_win_pvp_points(diff), Moba.defender_loss_pvp_points(diff)}
-        true -> {Moba.attacker_loss_pvp_points(diff), Moba.defender_win_pvp_points(diff)}
+        win -> {Moba.attacker_win_pvp_points(diff, tier), Moba.defender_loss_pvp_points(diff, tier)}
+        true -> {Moba.attacker_loss_pvp_points(diff, tier), Moba.defender_win_pvp_points(diff, tier)}
       end
 
     rewards = %{
@@ -145,7 +147,7 @@ defmodule Moba.Engine.Core.Pvp do
 
   defp update_ranking(battle) do
     unless battle.attacker.bot_difficulty do
-      Moba.run_async(fn -> Game.update_pvp_ranking!() end)
+      Moba.run_async(fn -> Game.update_pvp_ranking!(battle.attacker.league_tier) end)
     end
 
     battle
