@@ -77,7 +77,8 @@ defmodule Moba.Conductor do
   so Moba.Game.Server knows when to run this again, currently every 10 mins.
   """
   def server_update!(match \\ Moba.current_match()) do
-    skynet!()
+    skynet!(5)
+    skynet!(6)
 
     Game.update_pvp_rankings!()
     Game.update_pve_ranking!()
@@ -291,13 +292,13 @@ defmodule Moba.Conductor do
   # Picks one PVP bot to battle someone in the Arena. Over the period of a PVP round, bots should attempt to battle
   # each Hero twice (although only the first will be allowed), considering the current max bot number of 30
   # We use the pvp_last_picked field here to tell skynet that this bot shouldn't be picked to battle again for another 6 hours
-  defp skynet! do
+  defp skynet!(league_tier) do
     now = Timex.now()
-    attacker = HeroQuery.skynet_bot(now) |> Repo.all() |> List.first()
+    attacker = HeroQuery.skynet_bot(now) |> HeroQuery.by_league_tier(league_tier) |> Repo.all() |> List.first()
 
     if attacker do
       HeroQuery.with_pvp_points()
-      |> HeroQuery.by_league_tier(attacker.league_tier)
+      |> HeroQuery.by_league_tier(league_tier)
       |> Repo.all()
       |> Enum.each(fn defender ->
         defender &&
