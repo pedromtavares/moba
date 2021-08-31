@@ -147,7 +147,7 @@ defmodule Moba.Engine.Core.Pvp do
 
   defp update_ranking(battle) do
     unless battle.attacker.bot_difficulty do
-      Moba.run_async(fn -> Game.update_pvp_ranking!(battle.attacker.league_tier) end)
+      # Moba.run_async(fn -> Game.update_pvp_ranking!(battle.attacker.league_tier) end)
     end
 
     battle
