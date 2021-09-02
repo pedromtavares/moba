@@ -239,9 +239,15 @@ defmodule Moba.Game.Builds do
 
   defp random_legendaries do
     [
-      "silver_edge", "dagon5", "linkens_sphere",
-      "boots_of_travel", "orchid_malevolence", "shivas_guard",
-      "scythe_of_vyse", "daedalus", "satanic"
+      "silver_edge",
+      "dagon5",
+      "linkens_sphere",
+      "boots_of_travel",
+      "orchid_malevolence",
+      "shivas_guard",
+      "scythe_of_vyse",
+      "daedalus",
+      "satanic"
     ]
     |> Enum.shuffle()
     |> Enum.take(6)

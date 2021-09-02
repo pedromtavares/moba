@@ -32,7 +32,7 @@ defmodule Moba.GameTest do
       assert length(targets) > 0
 
       veteran_hero = Game.create_hero!(%{name: "Foo"}, create_user(%{pve_tier: 1}), avatar, skills)
-      assert veteran_hero.gold == 3000
+      assert veteran_hero.gold == 2000
     end
 
     test "#create_bot_hero! pve" do

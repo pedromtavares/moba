@@ -73,7 +73,8 @@ defmodule Moba.Engine.Core.League do
             league_successes: successes + 1,
             gold: attacker.gold + league_bonus(attacker),
             total_farm: attacker.total_farm + league_bonus(attacker),
-            buffed_battles_available: attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus(),
+            buffed_battles_available:
+              attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus(attacker.user),
             boss_id: nil
           }
 

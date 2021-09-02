@@ -423,7 +423,7 @@ defmodule Moba.Game.Heroes do
 
   defp level_to_max(hero), do: hero
 
-  defp bot_total_farm(_, "master"), do: Enum.random(20_000..25_000)
+  defp bot_total_farm(_, "master"), do: Enum.random(18_000..23_000)
 
   defp bot_total_farm(_, "grandmaster"), do: Enum.random(27_000..30_000)
 

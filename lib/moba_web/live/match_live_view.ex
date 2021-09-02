@@ -15,7 +15,10 @@ defmodule MobaWeb.MatchLiveView do
     last_pvp_hero = Game.last_pvp_hero(current_user.id)
     winners = Game.podium_for(match)
 
-    tier_winners = if last_pvp_hero && last_pvp_hero.league_tier == Moba.master_league_tier(), do: winners["master"] || winners, else: winners["grandmaster"] || winners
+    tier_winners =
+      if last_pvp_hero && last_pvp_hero.league_tier == Moba.master_league_tier(),
+        do: winners["master"],
+        else: winners["grandmaster"]
 
     winner_index = tier_winners && Enum.find_index(tier_winners, fn winner -> winner.user_id == current_user.id end)
 

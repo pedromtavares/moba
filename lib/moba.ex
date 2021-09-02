@@ -8,7 +8,7 @@ defmodule Moba do
   # General constants
   @initial_battles 30
   @initial_gold 1000
-  @veteran_initial_gold 3000
+  @veteran_initial_gold 2000
   @items_base_price 400
   @max_battle_turns 12
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
@@ -60,6 +60,7 @@ defmodule Moba do
   @max_league_tier 6
   @league_win_gold_bonus 2000
   @league_win_buffed_battles_bonus 3
+  @veteran_league_win_buffed_battles_bonus 2
   @league_buff_multiplier 0.5
   @boss_regeneration_multiplier 0.5
   @boss_win_gold_bonus 2000
@@ -101,7 +102,8 @@ defmodule Moba do
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
   def league_win_gold_bonus, do: @league_win_gold_bonus
-  def league_win_buffed_battles_bonus, do: @league_win_buffed_battles_bonus
+  def league_win_buffed_battles_bonus(%{pve_tier: tier}) when tier > 2, do: @veteran_league_win_buffed_battles_bonus
+  def league_win_buffed_battles_bonus(_), do: @league_win_buffed_battles_bonus
   def league_buff_multiplier, do: @league_buff_multiplier
   def boss_regeneration_multiplier, do: @boss_regeneration_multiplier
   def boss_win_gold_bonus, do: @boss_win_gold_bonus
@@ -124,11 +126,9 @@ defmodule Moba do
   def attacker_win_pvp_points(diff, 6), do: round(5 + (diff + 80) * 0.05)
   def attacker_win_pvp_points(diff, _), do: div(attacker_win_pvp_points(diff, 6), 2)
 
-
   def attacker_loss_pvp_points(diff, 6) when diff > 40, do: -2
   def attacker_loss_pvp_points(diff, 6), do: round(-5 + (diff - 80) * 0.05)
   def attacker_loss_pvp_points(diff, _), do: div(attacker_loss_pvp_points(diff, 6), 2)
-
 
   def defender_win_pvp_points(diff, 6) when diff > 40, do: 0
   def defender_win_pvp_points(diff, 6), do: -round((diff - 40) * 0.05)
@@ -212,7 +212,7 @@ defmodule Moba do
   @doc """
   Game pvp_ranking is defined by who currently have the highest pvp_points
   Game pve_ranking is defined by who has the highest total_farm (gold)
-  Accounts ranking is defined by who has the highest medal_count
+  Accounts ranking is defined by who has the highest season_points
   """
   def update_rankings! do
     Game.update_pvp_rankings!()

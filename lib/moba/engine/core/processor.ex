@@ -5,7 +5,7 @@ defmodule Moba.Engine.Core.Processor do
 
   alias Moba.Engine.Core
   alias Core.{Effect, Helper, Spell}
-  require Logger
+  # require Logger
 
   @doc """
   Processes a turn in the specified order of events. Each function needs to return
@@ -34,13 +34,24 @@ defmodule Moba.Engine.Core.Processor do
   """
   def cast_skill(turn, %{code: "basic_attack"}), do: basic_attack(turn)
 
-  def cast_skill(turn, skill) do
+  def cast_skill(turn, skill, apply_base_effects \\ true) do
     damage_type = skill.damage_type || Moba.damage_types().magic
-    Logger.info("Skill cast: #{skill.code}, type: #{damage_type}")
+    # Logger.info("Skill cast: #{skill.code}, type: #{damage_type}")
 
-    %{turn | resource: skill, skill: skill}
-    |> Effect.damage_type(damage_type)
-    |> apply_spell()
+    turn =
+      %{turn | resource: skill, skill: skill}
+      |> Effect.damage_type(damage_type)
+      |> apply_spell()
+
+    if apply_base_effects do
+      base_cast_effects(turn)
+    else
+      turn
+    end
+  end
+
+  defp base_cast_effects(turn) do
+    turn
     |> Effect.mp_cost()
     |> Effect.turn_mp_regen()
     |> Effect.add_cooldown()
@@ -123,7 +134,10 @@ defmodule Moba.Engine.Core.Processor do
 
   # Applies passive spells, which cannot be activated and generally do not cost MP
   # Not triggered if the attacker is stunned
-  defp passives(%{attacker: %{stunned: true}} = turn), do: turn
+  defp passives(%{attacker: %{stunned: true}, defender: defender} = turn) do
+    turn
+    |> use_passives(%{owner: defender, is_attacking: false})
+  end
 
   defp passives(%{attacker: attacker, defender: defender} = turn) do
     turn
@@ -360,7 +374,7 @@ defmodule Moba.Engine.Core.Processor do
 
   # Casts an active Item. Like Skills, some have cooldowns and mp_costs
   defp cast_item(item, turn) do
-    Logger.info("Item cast: #{item.code}")
+    # Logger.info("Item cast: #{item.code}")
 
     %{turn | resource: item, item: item}
     |> apply_spell(%{active: true})

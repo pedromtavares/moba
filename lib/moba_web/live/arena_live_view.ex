@@ -67,9 +67,10 @@ defmodule MobaWeb.ArenaLiveView do
   defp redirect_to_battle(id, build_id, socket) do
     build = Game.get_build!(build_id)
     defender = Game.get_hero!(id) |> Map.put(:active_build, build)
+    attacker = Game.get_hero!(socket.assigns.current_hero.id)
 
     battle =
-      %{attacker: socket.assigns.current_hero, defender: defender}
+      %{attacker: attacker, defender: defender}
       |> Engine.create_pvp_battle!()
 
     {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}

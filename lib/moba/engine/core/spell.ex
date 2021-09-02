@@ -372,8 +372,9 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Skill{code: "rearm"} = resource} = turn, _options) do
     turn = Effect.reset_cooldowns(turn)
     last_skill = turn.attacker.last_skill
+    mp_needed = last_skill && last_skill.mp_cost + resource.mp_cost
 
-    if last_skill && last_skill.code != "rearm" && turn.attacker.current_mp >= last_skill.mp_cost do
+    if last_skill && last_skill.code != "rearm" && turn.attacker.current_mp >= mp_needed do
       turn = Processor.cast_skill(turn, last_skill)
 
       %{turn | resource: resource, skill: resource}
@@ -402,7 +403,7 @@ defmodule Moba.Engine.Core.Spell do
         turn
         |> Effect.add_turn_power()
         |> Effect.add_next_power()
-        |> Processor.cast_skill(skill)
+        |> Processor.cast_skill(skill, false)
 
       %{turn | resource: resource, skill: resource}
       |> Effect.attacker_bonus(skill.name)
