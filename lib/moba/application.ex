@@ -21,6 +21,7 @@ defmodule Moba.Application do
       # {Moba.Worker, arg},
       Moba.Conductor,
       Moba.Admin.Server,
+      Moba.Ranker,
       {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
     ]
 

@@ -10,7 +10,11 @@ defmodule MobaWeb.ArenaLiveView do
     if hero do
       {filter, results} = Game.pvp_search(hero)
 
-      if connected?(socket), do: Tutorial.subscribe(hero.id)
+      if connected?(socket) do
+        hero.id
+        |> Game.subscribe_to_hero()
+        |> Tutorial.subscribe()
+      end
 
       {:ok,
        assign(socket,
@@ -59,6 +63,12 @@ defmodule MobaWeb.ArenaLiveView do
   def handle_info({"tutorial-step", %{step: step}}, socket) do
     {:noreply, assign(socket, tutorial_step: step)}
   end
+
+  def handle_info({"hero", %{id: id}}, socket) do
+    {:noreply, assign(socket, current_hero: Game.get_hero!(id))}
+  end
+
+  def handle_info({"unread", _}, socket), do: {:noreply, socket}
 
   def render(assigns) do
     MobaWeb.ArenaView.render("index.html", assigns)

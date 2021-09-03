@@ -36,16 +36,6 @@ defmodule MobaWeb.ArenaView do
       |> elem(1)
   end
 
-  def next_update_description do
-    match = Game.current_match()
-
-    match &&
-      match.last_server_update_at
-      |> Timex.shift(minutes: 10)
-      |> Timex.format("{relative}", :relative)
-      |> elem(1)
-  end
-
   def can_join_grandmaster?(heroes), do: Enum.find(heroes, &(&1.league_tier == Moba.max_league_tier()))
 
   def has_previous_skin?(hero, selections) do

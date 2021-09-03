@@ -3,7 +3,7 @@ defmodule Moba.Engine.Core.Pvp do
   Encapsulates all logic for PVP battles - the ones fought in the Arena
   """
 
-  alias Moba.{Game, Engine}
+  alias Moba.{Engine, Ranker}
   alias Engine.Schema.Battle
 
   use Timex
@@ -146,9 +146,7 @@ defmodule Moba.Engine.Core.Pvp do
   end
 
   defp update_ranking(battle) do
-    unless battle.attacker.bot_difficulty do
-      # Moba.run_async(fn -> Game.update_pvp_ranking!(battle.attacker.league_tier) end)
-    end
+    if battle.attacker.league_tier == Moba.master_league_tier(), do: Ranker.master(), else: Ranker.grandmaster()
 
     battle
   end
