@@ -66,6 +66,7 @@ defmodule MobaWeb.JungleLiveView do
   end
 
   def handle_event("restart", _, %{assigns: %{current_hero: hero, current_user: user}} = socket) do
+    Game.archive_hero!(hero)
     skills = Enum.map(hero.active_build.skills, &Game.get_skill_by_code!(&1.code, true, 1))
     Moba.create_current_pve_hero!(%{easy_mode: hero.easy_mode, name: hero.name}, user, hero.avatar, skills)
 

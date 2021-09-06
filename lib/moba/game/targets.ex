@@ -73,7 +73,7 @@ defmodule Moba.Game.Targets do
         minimum_or_target_level(level - 1)..level
 
       "strong" ->
-        level..(level + 2)
+        level..(level + 3)
     end
   end
 
@@ -86,7 +86,7 @@ defmodule Moba.Game.Targets do
         level..(level + 1)
 
       "strong" ->
-        (level + 1)..(level + 3)
+        (level + 1)..(level + 4)
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Moba.Game.Targets do
         (level + 1)..(level + 3)
 
       "strong" ->
-        (level + 3)..(level + 6)
+        (level + 3)..(level + 7)
     end
   end
 

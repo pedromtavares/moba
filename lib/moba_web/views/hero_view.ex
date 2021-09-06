@@ -1,10 +1,10 @@
 defmodule MobaWeb.HeroView do
   use MobaWeb, :view
 
-  def finished_jungle?(user) do
+  def finished_jungle?(user, hero) do
     if user.current_pve_hero_id do
-      hero = Game.get_hero!(user.current_pve_hero_id)
-      hero.finished_pve
+      current_hero = Game.get_hero!(user.current_pve_hero_id)
+      current_hero.finished_pve && hero == current_hero && hero
     end
   end
 

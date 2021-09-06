@@ -6,15 +6,8 @@ defmodule MobaWeb.GameController do
     user = conn.assigns.current_user
 
     if user do
-      if user.current_pvp_hero_id do
-        conn
-        |> put_session(:current_mode, "pvp")
-        |> redirect(to: "/arena")
-      else
-        conn
-        |> put_session(:current_mode, "pve")
-        |> redirect(to: "/jungle")
-      end
+      conn
+      |> redirect(to: "/base")
     else
       render(conn, "homepage.html", layout: {MobaWeb.LayoutView, "homepage.html"})
     end
@@ -54,12 +47,19 @@ defmodule MobaWeb.GameController do
     |> redirect(to: path)
   end
 
-  def join(conn, _) do
-    mode = get_session(conn, :current_mode)
+  def continue(conn, %{"hero_id" => hero_id}) do
+    hero = Game.get_hero!(hero_id)
+    user = conn.assigns.current_user
 
-    path = if mode == "pvp", do: "/arena/select", else: "/create"
+    if hero.user_id == user.id do
+      Accounts.set_current_pve_hero!(user, hero_id)
 
-    conn
-    |> redirect(to: path)
+      conn
+      |> put_session(:current_mode, "pve")
+      |> redirect(to: "/jungle")
+    else
+      conn
+      |> redirect(to: "/base")
+    end
   end
 end

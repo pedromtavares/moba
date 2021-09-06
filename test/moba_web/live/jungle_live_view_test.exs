@@ -18,7 +18,7 @@ defmodule MobaWeb.JungleLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, user, otp_app: :moba)
 
-    live(conn, "/jungle") |> follow_redirect(conn, "/join")
+    live(conn, "/jungle") |> follow_redirect(conn, "/base")
   end
 
   test "battle event", %{conn: conn} do

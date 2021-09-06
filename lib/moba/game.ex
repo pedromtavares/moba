@@ -96,6 +96,11 @@ defmodule Moba.Game do
     |> Heroes.prepare_for_pvp!()
   end
 
+  def archive_hero!(%{user: user} = hero) do
+    if user.current_pve_hero_id == hero.id, do: Accounts.set_current_pve_hero!(user, nil)
+    update_hero!(hero, %{archived_at: DateTime.utc_now()})
+  end
+
   def master_league?(%{league_tier: tier}), do: tier == Moba.master_league_tier()
   def max_league?(%{league_tier: tier}), do: tier == Moba.max_league_tier()
 

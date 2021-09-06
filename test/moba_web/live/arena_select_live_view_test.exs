@@ -26,6 +26,6 @@ defmodule MobaWeb.ArenaSelectLiveViewTest do
 
     Admin.update_match(Game.current_match(), %{last_server_update_at: nil})
 
-    live(conn, "/arena/select") |> follow_redirect(conn, "/match")
+    live(conn, "/arena/select") |> follow_redirect(conn, "/base")
   end
 end

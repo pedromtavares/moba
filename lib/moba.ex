@@ -188,7 +188,6 @@ defmodule Moba do
         skills,
         match \\ current_match()
       ) do
-    Accounts.maybe_archive_current_pve_hero(user)
     hero = Game.create_hero!(attrs, user, avatar, skills, match)
     Accounts.set_current_pve_hero!(user, hero.id)
     hero

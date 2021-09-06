@@ -109,7 +109,7 @@ defmodule Moba.Conductor do
   Creates all necessary resources and locks them against
   further edits in the admin panel. Also creates PVE bots.
   """
-  def regenerate_resources!(bot_level_range \\ 0..28) do
+  def regenerate_resources!(bot_level_range \\ 0..30) do
     Game.current_match()
     |> generate_resources!()
     |> generate_pve_bots!(bot_level_range)

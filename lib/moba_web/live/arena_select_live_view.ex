@@ -35,7 +35,7 @@ defmodule MobaWeb.ArenaSelectLiveView do
         {:ok,
          socket
          |> put_flash(:info, "The new match is not ready yet, please wait a few minutes and try again")
-         |> push_redirect(to: "/match")}
+         |> push_redirect(to: "/base")}
 
       user.current_pvp_hero_id ->
         {:ok,
@@ -48,7 +48,6 @@ defmodule MobaWeb.ArenaSelectLiveView do
            all_heroes: all_heroes,
            heroes: mode_heroes,
            selections: selections,
-           hide_join_new_match_button: true,
            mode: mode
          )}
     end

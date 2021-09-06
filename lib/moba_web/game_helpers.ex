@@ -52,7 +52,7 @@ defmodule MobaWeb.GameHelpers do
         data: [toggle: "tooltip"],
         title: item_description(item),
         class: "item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile",
-        id: "item-#{item.id}-#{id}"
+        id: "legacy-item-#{item.id}-#{id}"
       )
     end)
   end

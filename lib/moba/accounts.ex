@@ -48,16 +48,6 @@ defmodule Moba.Accounts do
 
   defdelegate season_points_for(tier), to: Users
 
-  def maybe_archive_current_pve_hero(%{current_pve_hero_id: hero_id} = user) when not is_nil(hero_id) do
-    %{current_pve_hero: pve_hero} = Repo.preload(user, :current_pve_hero)
-
-    unless pve_hero.finished_pve do
-      Game.update_hero!(pve_hero, %{archived_at: DateTime.utc_now()})
-    end
-  end
-
-  def maybe_archive_current_pve_hero(user), do: user
-
   def user_pvp_updates!(nil, _), do: nil
 
   def user_pvp_updates!(user_id, updates), do: get_user!(user_id) |> Users.pvp_updates!(updates)

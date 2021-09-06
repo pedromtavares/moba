@@ -43,10 +43,8 @@ defmodule Moba.Ranker do
     key = if tier == Moba.master_league_tier(), do: :master, else: :grandmaster
     heroes = Game.update_pvp_ranking!(tier)
 
-    Enum.each(heroes, &(Game.broadcast_to_hero(&1.id)))
+    Enum.each(heroes, &Game.broadcast_to_hero(&1.id))
 
     Map.put(state, key, 0)
   end
-
-
 end

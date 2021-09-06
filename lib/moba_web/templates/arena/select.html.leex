@@ -17,11 +17,7 @@
     </div>
 
     <div class="text-center mb-2 mt-2">
-        <%= if @current_user.current_pve_hero_id do %>
-            <a href="/game/pve" class="btn btn-success btn-lg"><i class="fa fa-leaf mr-1"></i>Back to the Jungle</a>
-        <% else %>
-            <a href="/create" class="btn btn-success btn-lg"><i class="fa fa-user-plus mr-1"></i>Create a New Hero</a>
-        <% end %>
+        <a href="/base" class="btn btn-success btn-lg"><i class="fa fa-home mr-1"></i>Back to Base</a>
         <%= if @mode == "grandmaster" do %>
             <button type="button" phx-click="switch-mode" class="btn btn-primary btn-lg"><img src="/images/league_5.png" class="league-logo mr-1">Switch to Master Arena</a>
         <% else %>

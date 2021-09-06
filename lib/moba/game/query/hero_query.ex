@@ -61,8 +61,9 @@ defmodule Moba.Game.Query.HeroQuery do
     base = Hero |> by_user(user_id)
 
     from(hero in base,
-      limit: 20,
-      order_by: [desc: [hero.pvp_picks, hero.id]]
+      limit: 50,
+      order_by: [desc: [hero.id]],
+      where: is_nil(hero.archived_at)
     )
   end
 

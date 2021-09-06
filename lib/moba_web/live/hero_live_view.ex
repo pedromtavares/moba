@@ -24,7 +24,7 @@ defmodule MobaWeb.HeroLiveView do
       Game.subscribe_to_hero(id)
     end
 
-    {:noreply, assign(socket, hero: hero, ranking: ranking, hide_join_new_match_button: true)}
+    {:noreply, assign(socket, hero: hero, ranking: ranking)}
   end
 
   def render(assigns) do

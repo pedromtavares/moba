@@ -1,0 +1,225 @@
+<div class="dashboard mt-3">
+  <div class="row">
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="row">
+            <div class="col">
+              <h4 class="header-title pt-3 pl-3">Your Heroes</h4>
+            </div>
+            <div class="col">
+              <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
+                <div class="btn-group">
+                  <button type="button" class="btn btn-xs <%=if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light"%>" phx-click="show-unfinished">In Progress</button>
+                  <button type="button" class="btn btn-xs <%=if @pve_display == "finished", do: "btn-secondary", else: "btn-light"%>" phx-click="show-finished">Completed</button>
+              </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3 mx-2">
+            <div class="col">
+              <a href="/create" class="btn btn-block btn-lg btn-success d-block"><i class="fa fa-user-plus mr-1"></i>Create New Hero</a>
+            </div>
+          </div>
+          <div class="w-100 hero-list fixed-panel" style="overflow: auto;">
+            <table class="table table-dark mb-0">
+              <%=for hero <- @visible_heroes do %>
+                <tr>
+                  <td class="text-center" width="20%">
+                    <h4><%=hero.name%><%=if hero.finished_pve do %><span class="text-success">#<%=hero.pve_ranking%></span><%end%></h4>
+                    <%=GH.hero_avatar(hero, false)%>
+
+                    <h5 class="text-muted font-italic">Level <%=hero.level%> <%=hero.avatar.name%></h5>
+                  </td>
+                  <td class="p-0 text-center">
+                    <%=GH.hero_skill_list(hero)%>
+                    <br/>
+                    <%=GH.hero_item_list(hero, true)%>
+                  </td>
+                  <td class="text-center" width="25%">
+                    <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
+                    <h5 class="text-success"><%=GH.pve_win_rate(hero)%>% Win Rate</h5>
+                    <%=if hero.easy_mode do %>
+                      <h5 class="text-primary">Easy Mode</h5>
+                    <% else %>
+                      <h5 class="text-warning"><%=hero.buybacks%> Buybacks</h5>
+                      <h5 class="text-danger">Veteran Mode</h5>
+                    <% end %>
+                  </td>
+                  <td class="text-center" width="20%">
+                    <%= if hero.finished_pve do %>
+                      <%=live_redirect class: "btn btn-primary btn-lg btn-block", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
+                        <i class="fa fa-address-card fa-2x"></i>
+                        <br/>
+                        View Details
+                      <% end %>
+                    <% else %>
+                      <%= link to: "/game/continue?hero_id=#{hero.id}", class: "btn btn-success btn-lg btn-block", method: :post do %>
+                        <i class="fa fa-leaf fa-2x"></i>
+                        <br/>
+                        Continue
+                        <%= unless hero.easy_mode do %>
+                          <br/>
+                          <small><em>(<%=hero.pve_battles_available%> ganks left)</em>
+                        <% end %>
+                      <% end %>
+                    <% end %>
+                    <%= unless hero.id == @current_user.current_pvp_hero_id do %>
+                      <button type="button" class="btn btn-warning mt-1 btn-block" data-confirm="Are you sure?" phx-click="archive" phx-value-id="<%=hero.id%>">
+                        <i class="fa fa-trash-alt mr-1"></i>Delete
+                      </button>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-xl-6">
+      <div class="card">
+        <div class="card-body p-0">
+          <div class="row">
+            <div class="col">
+              <h4 class="header-title pt-3 pl-3">Arena</h4>
+            </div>
+            <div class="col">
+              <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#season-rankings"><i class="fa fa-list-ul mr-1"></i>Season Rankings</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3 mx-2">
+            <div class="col">
+              <a href="/game/pvp" class="btn btn-lg btn-danger btn-block"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
+            </div>
+          </div>
+          <div class="w-100 border-top fixed-panel">
+            <div class="row mt-3 mb-3">
+              <%= if next = next_medal(@current_user) do %>
+                  <div class="col">
+                      <div class="text-right">
+                          <img src="/images/pvp/<%=@current_user.season_tier%>.png" class="user-rank"/>
+                          <h5 class="text-medal-<%=@current_user.season_tier%> mb-0 mr-3"><%=Moba.medals[@current_user.season_tier]%></h5>
+                      </div>
+                  </div>
+                  <div class="col-5">
+                      <h5 class="text-center mb-0 mt-0">Season Progression</h5>
+                      <div class="progress mt-3" style="height:30px;">
+                          <div style="width:<%=next_medal_percentage(@current_user)%>%" class="progress-bar bg-primary">
+                          </div>
+                          <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%=@current_user.season_points%>/<%=Accounts.season_points_for(next)%> Season Points</small>
+                      </div>
+                  </div>
+                  <div class="col">
+                      <div class="text-left">
+                          <img src="/images/pvp/<%=next%>.png" class="user-rank"/>
+                          <h5 class="text-medal-<%=next%> mb-0 ml-3"><%=Moba.medals[next]%></h5>
+                      </div>
+                  </div>
+              <% else %>
+                  <div class="col text-center">
+                      <img src="/images/pvp/<%=@current_user.season_tier%>.png" class="user-rank"/>
+                      <h5 class="text-medal-<%=@current_user.season_tier%> mb-0 mr-3"><%=Moba.medals[@current_user.season_tier]%></h5>
+                  </div>
+              <% end %>
+            </div>
+            <hr/>
+            <%= cond do %>
+              <% @current_pvp_hero && @last_pvp_hero -> %>
+                <div class="row m-3">
+                  <div class="col text-center">
+                      <div class="btn-group">
+                          <button type="button" class="btn btn-xs <%=if @pvp_display == "current", do: "btn-secondary", else: "btn-light"%>" phx-click="show-current">Current Match</button>
+                          <button type="button" class="btn btn-xs <%=if @pvp_display == "previous", do: "btn-secondary", else: "btn-light"%>" phx-click="show-previous">Previous Match</button>
+                      </div>
+                  </div>
+                </div>
+              <% @current_pvp_hero -> %>
+                <div class="row">
+                  <div class="col text-center">
+                    <h3 class="m-3">Current Match</h3>
+                  </div>
+                </div>
+              <% @last_pvp_hero -> %>
+                <div class="row">
+                  <div class="col text-center">
+                    <h3 class="m-3">Previous Match</h3>
+                  </div>
+                </div>
+              <% true -> %>
+                <div></div>
+            <% end %>
+            <div class="row no-gutters">
+              <%= if @pvp_hero do %>
+                <div class="col" id="hero_<%=@pvp_hero.id%>">
+                    <%=render "_hero_card.html", hero: @pvp_hero, socket: @socket%>
+                </div>
+                <div class="col-5">
+                  <table class="table table-dark">
+                    <tr>
+                      <td><i class="fa fa-hashtag fa-2x text-info"></i></td>
+                      <td class="font-20 text-center">Ranking</td>
+                      <td class="text-info font-24"><%=@pvp_hero.pvp_ranking%></td>
+                    </tr>
+                    <tr>
+                      <td><i class="fa fa-globe fa-2x text-success"></i></td>
+                      <td class="font-20 text-center">Season Points</td>
+                      <td class="text-success font-24"><%=if @pvp_display == "previous", do: "+"%><%=@pvp_hero.pvp_points%></td>
+                    </tr>
+                    <tr>
+                      <td><i class="fa fa-percent fa-2x text-danger"></i></td>
+                      <td class="font-20 text-center">Win Rate</td>
+                      <td class="text-danger font-24"><%=GH.pvp_win_rate(@pvp_hero)%>%</td>
+                    </tr>
+                    <%= if @pvp_display == "current" do %>
+                      <tr>
+                        <td><i class="fa fa-crosshairs fa-2x text-primary"></i></td>
+                        <td class="font-20 text-center">Available Targets</td>
+                        <td class="text-primary font-24"><%=MobaWeb.ArenaView.arena_targets_available(@pvp_hero)%></td>
+                      </tr>
+                      <tr>
+                        <td><i class="fa fa-clock fa-2x text-warning"></i></td>
+                        <td class="font-20 text-center" colspan=2>Next Round <span class="text-warning"><%=MobaWeb.ArenaView.next_round_description()%></span></td>
+                      </tr>
+                    <% end %>
+                  </table>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <%= if @winners do %>
+      <div class="row">
+          <div class="col">
+              <h3 class="page-title mb-3 text-center">
+                  <i class="fa fa-medal mr-2"></i>Winners of the Previous Match
+              </h3>
+          </div>
+      </div>
+
+      <%= if @winner_index do %>
+          <div class="row">
+              <div class="col">
+                  <div class="alert alert-warning alert-dismissible bg-warning border-0 fade show text-center" role="alert">
+                      Congratulations, you've finished the previous match at #<%=@winner_index+1%>, enjoy your Rewards!
+                  </div>
+              </div>
+          </div>
+      <% end %>
+
+      <div class="row winners">
+          <%=render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket%>
+          <%=render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket%>
+          <%=render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket%>
+      </div>
+  <% end %>
+</div>
+
+<%=render "_season_rankings.html"%>

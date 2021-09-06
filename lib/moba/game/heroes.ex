@@ -39,7 +39,7 @@ defmodule Moba.Game.Heroes do
   def list_latest(user_id) do
     HeroQuery.latest(user_id)
     |> Repo.all()
-    |> avatar_preload()
+    |> base_preload()
   end
 
   def list_pvp_eligible(user_id) do

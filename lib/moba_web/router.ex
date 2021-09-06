@@ -56,7 +56,7 @@ defmodule MobaWeb.Router do
   scope "/", MobaWeb do
     pipe_through [:browser, :root_layout, :protected, :user_helper]
 
-    live "/match", MatchLiveView
+    live "/base", DashboardLiveView
 
     live "/hall", HallLiveView
 
@@ -73,7 +73,7 @@ defmodule MobaWeb.Router do
     live "/create", CreateLiveView, layout: {MobaWeb.LayoutView, :clean}
 
     get "/game/:mode", GameController, :switch_mode
-    get "/join", GameController, :join
+    post "/game/continue", GameController, :continue
 
     live "/arena/select", ArenaSelectLiveView
   end

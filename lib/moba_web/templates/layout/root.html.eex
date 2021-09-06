@@ -11,17 +11,6 @@
                 <i class="fa fa-info-circle mr-1"></i><%= get_flash(@conn, :info)%>
             </div>
         <% end %>
-        <%=if @current_user && !assigns[:current_hero] && !assigns[:hide_join_new_match_button] do %>
-            <div class="row mb-2 mt-2">
-                <div class="col">
-                    <div class="row">
-                        <div class="col-10 col-xl-4 col-lg-6 col-md-8 margin-auto">
-                            <a href="/arena/select" class="btn btn-block btn-danger btn-lg"><i class="fa fa-crosshairs mr-1"></i>A new Arena match has started, click to join</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        <% end %>
         <div class="wrapper <%=wrapper_for(@conn)%>" id="main-wrapper">
             <div class="container-fluid">
                 <div class="row">

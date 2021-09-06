@@ -1,5 +1,5 @@
 <div class="hero-review" phx-hook="SetMainWrapper" id="hero-review">
-    <%=if finished_jungle?(@current_user) do %>
+    <%=if finished_hero = finished_jungle?(@current_user, @hero) do %>
         <div class="row mt-3 d-flex">
             <div class="col-xl-4 col-md-6">
                 <div class="card border border-primary" style="background-color: rgba(54, 64, 74, 0.5);">
@@ -7,15 +7,15 @@
                         <h3 class="text-uppercase text-center m-0 text-white">Congratulations!</h3>
                     </div>
                     <div class="card-body text-center">
-                        <img src="/images/league_<%=@hero.league_tier%>.png" class="float-left" style="max-width: 100px;"/>
+                        <img src="/images/league_<%=finished_hero.league_tier%>.png" class="float-left" style="max-width: 100px;"/>
                         <div class="rewards-text w-100">
                             <strong class="mb-3">You have finished the Jungle in the</strong>
-                            <h4 class="text-league-<%=@hero.league_tier%>"><%=Moba.leagues[@hero.league_tier]%></h4>
+                            <h4 class="text-league-<%=finished_hero.league_tier%>"><%=Moba.leagues[finished_hero.league_tier]%></h4>
                             <strong class="mb-3">and have been rewarded</strong>
                             <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
-                                <h4 class="mb-0 text-league-<%=@hero.league_tier%>">
+                                <h4 class="mb-0 text-league-<%=finished_hero.league_tier%>">
                                     <i class="fab fa-ethereum"></i>
-                                    <u><%=@hero.shards_reward%> Shards</u>
+                                    <u><%=finished_hero.shards_reward%> Shards</u>
                                 </h4>
                             <% end %>
                         </div>
@@ -54,6 +54,13 @@
         </div>
 
         <div class="row mb-1">
+            <div class="col">
+                <a href="/base" class="btn btn-outline-info btn-block btn-lg">
+                    <i class="fa fa-home fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Back to Base</strong>
+                    <p class="font-15">Decide what to do later</p>
+                </a>
+            </div>
             <div class="col">
                 <a href="/create" class="btn btn-outline-success btn-block btn-lg">
                     <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>

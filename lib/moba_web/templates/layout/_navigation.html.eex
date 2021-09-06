@@ -39,7 +39,7 @@
                                     </div>
                                 </div>
                                 <div class="col-1 flex-center d-none d-md-flex">
-                                    <a href="/">
+                                    <a href="/base">
                                         <img src="/images/favlogo.png" style="height:50px;" />
                                     </a>
                                 </div>

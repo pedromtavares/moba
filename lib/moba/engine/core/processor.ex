@@ -325,8 +325,8 @@ defmodule Moba.Engine.Core.Processor do
   defp use_skill(%{attacker: %{double_skill: double_skill} = attacker} = turn)
        when double_skill != nil do
     %{turn | attacker: attacker, resource: double_skill, skill: double_skill}
-    |> apply_spell()
     |> Effect.damage_type(double_skill.damage_type)
+    |> apply_spell()
   end
 
   # Uses a skill from the pre-defined skill_order, this happens when defending
