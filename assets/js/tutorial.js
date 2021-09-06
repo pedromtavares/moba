@@ -82,7 +82,7 @@ const Tutorial = {
       case 4:
         tour.addStep({
           id: 'fourth-tutorial-first-step',
-          text: "<p class='text-center'>Cool, now you're a bit stronger with those items. You can check all of your stats by hovering each of them for more detailed information.</p>",
+          text: "<p class='text-center'>Cool, now you're a bit stronger with those items. You can check all of your stats by mousing over each of them for more detailed information.</p>",
           attachTo: {
             element: '#current-hero-stats',
             on: 'right'

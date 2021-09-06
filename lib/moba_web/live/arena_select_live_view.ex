@@ -31,6 +31,10 @@ defmodule MobaWeb.ArenaSelectLiveView do
       end)
 
     cond do
+      user.current_pvp_hero_id ->
+        {:ok,
+         socket
+         |> push_redirect(to: "/arena")}
       length(all_heroes) == 0 ->
         {:ok,
          socket
@@ -41,11 +45,6 @@ defmodule MobaWeb.ArenaSelectLiveView do
          socket
          |> put_flash(:info, "The new match is not ready yet, please wait a few minutes and try again")
          |> push_redirect(to: "/base")}
-
-      user.current_pvp_hero_id ->
-        {:ok,
-         socket
-         |> push_redirect(to: "/arena")}
 
       true ->
         {:ok,
