@@ -18,7 +18,7 @@
           </div>
           <div class="row mb-3 mx-2">
             <div class="col">
-              <a href="/create" class="btn btn-block btn-lg btn-success d-block"><i class="fa fa-user-plus mr-1"></i>Create New Hero</a>
+              <a href="/create" class="btn btn-block btn-lg btn-success d-block <%=if @current_user.is_guest, do: "disabled"%>"><i class="fa fa-user-plus mr-1"></i>Create New Hero</a>
             </div>
           </div>
           <div class="w-100 hero-list fixed-panel" style="overflow: auto;">
@@ -64,7 +64,7 @@
                         <% end %>
                       <% end %>
                     <% end %>
-                    <%= unless hero.id == @current_user.current_pvp_hero_id do %>
+                    <%= unless hero.id == @current_user.current_pvp_hero_id || length(@visible_heroes) == 1 do %>
                       <button type="button" class="btn btn-warning mt-1 btn-block" data-confirm="Are you sure?" phx-click="archive" phx-value-id="<%=hero.id%>">
                         <i class="fa fa-trash-alt mr-1"></i>Delete
                       </button>
@@ -94,7 +94,7 @@
           </div>
           <div class="row mb-3 mx-2">
             <div class="col">
-              <a href="/arena/select" class="btn btn-lg btn-danger btn-block"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
+              <a href="/game/pvp" class="btn btn-lg btn-danger btn-block <%=if @current_user.is_guest, do: "disabled"%>"><i class="fa fa-crosshairs mr-1"></i>Enter the Arena</a>
             </div>
           </div>
           <div class="w-100 border-top fixed-panel">

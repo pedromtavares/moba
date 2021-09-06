@@ -27,7 +27,7 @@ defmodule MobaWeb.ArenaLiveView do
          pending_battle: Engine.pending_battle(hero.id)
        )}
     else
-      {:ok, socket |> push_redirect(to: "/jungle")}
+      {:ok, socket |> push_redirect(to: "/arena/select")}
     end
   end
 
