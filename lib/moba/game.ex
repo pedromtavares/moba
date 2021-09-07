@@ -70,7 +70,7 @@ defmodule Moba.Game do
 
   def create_pvp_bot_hero!(user, avatar, match) do
     difficulty = if user.bot_tier == Moba.master_league_tier(), do: "master", else: "grandmaster"
-    Heroes.create_bot!(avatar, 25, difficulty, match, user, user.pvp_points, user.bot_tier)
+    Heroes.create_bot!(avatar, 25, difficulty, match, user, 0, user.bot_tier)
   end
 
   def update_hero!(hero, attrs, items \\ nil) do

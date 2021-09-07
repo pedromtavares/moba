@@ -94,17 +94,6 @@ defmodule Moba.AccountsTest do
 
       assert user.pvp_wins == winner.pvp_wins + 1
       assert user.pvp_losses == winner.pvp_losses + 1
-      assert user.pvp_points == 10
-    end
-  end
-
-  describe "#user_pvp_decay!" do
-    test "removes points correctly, never below 0" do
-      user = create_bot(50) |> Accounts.user_pvp_decay!()
-      assert user.pvp_points == 50 - Moba.pvp_round_decay()
-
-      user = create_bot(1) |> Accounts.user_pvp_decay!()
-      assert user.pvp_points == 0
     end
   end
 

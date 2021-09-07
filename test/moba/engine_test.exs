@@ -206,7 +206,6 @@ defmodule Moba.EngineTest do
       defender = Game.get_hero!(defender.id)
 
       assert hero.pvp_points == attacker.pvp_points + 9
-      assert hero.user.pvp_points == attacker.user.pvp_points + 9
 
       assert hero.pvp_wins == attacker.pvp_wins + 1
       assert hero.user.pvp_wins == attacker.user.pvp_wins + 1

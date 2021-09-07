@@ -7,7 +7,7 @@ defmodule Moba.Accounts do
   siblings.
   """
 
-  alias Moba.{Repo, Game, Accounts}
+  alias Moba.Accounts
   alias Accounts.{Users, Messages, Unlocks}
 
   # USERS
@@ -51,8 +51,6 @@ defmodule Moba.Accounts do
   def user_pvp_updates!(nil, _), do: nil
 
   def user_pvp_updates!(user_id, updates), do: get_user!(user_id) |> Users.pvp_updates!(updates)
-
-  def user_pvp_decay!(user), do: Users.pvp_decay!(user)
 
   defdelegate ranking(limit), to: Users
 

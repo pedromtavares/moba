@@ -14,13 +14,14 @@ defmodule Test.GameHelper do
   end
 
   def create_pvp_hero(attrs \\ %{}, pvp_points \\ 0) do
-    user = create_user(%{pvp_points: pvp_points})
+    user = create_user()
 
     hero =
       attrs
       |> Map.merge(%{pvp_active: true, finished_pve: true})
       |> create_base_hero(user)
       |> Game.prepare_hero_for_pvp!()
+      |> Game.update_hero!(%{pvp_points: pvp_points})
 
     user = Accounts.set_current_pvp_hero!(user, hero.id)
 

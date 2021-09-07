@@ -125,20 +125,9 @@ defmodule Moba.Accounts.Users do
 
     update!(user, %{
       pvp_score: pvp_score || user.pvp_score,
-      pvp_points: updates[:pvp_points] || user.pvp_points,
       pvp_wins: user.pvp_wins + extra_win,
       pvp_losses: user.pvp_losses + extra_loss
     })
-  end
-
-  @doc """
-  Users lose PVP points if they don't play in a round. This is to avoid having users
-  stay on top of the ranking without playing, not giving others a chance to beat them.
-  """
-  def pvp_decay!(user) do
-    diff = user.pvp_points - Moba.pvp_round_decay()
-    points = if diff < 0, do: 0, else: diff
-    update!(user, %{pvp_points: points})
   end
 
   @doc """

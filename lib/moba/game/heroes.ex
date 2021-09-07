@@ -132,7 +132,7 @@ defmodule Moba.Game.Heroes do
     inactivate_weakest_pvp_bot(hero.league_tier)
 
     update!(hero, %{
-      pvp_points: hero.user.pvp_points,
+      pvp_points: 0,
       pvp_ranking: nil,
       pvp_active: true,
       pvp_last_picked: Timex.now(),

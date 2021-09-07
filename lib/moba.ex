@@ -53,7 +53,6 @@ defmodule Moba do
   @pvp_round_timeout_in_hours 12
   @season_points_per_medal 25
   @max_season_tier 7
-  @max_ideal_pvp_points 100
 
   # League constants
   @master_league_tier 5
@@ -97,7 +96,6 @@ defmodule Moba do
   def pvp_round_timeout_in_hours, do: @pvp_round_timeout_in_hours
   def season_points_per_medal, do: @season_points_per_medal
   def max_season_tier, do: @max_season_tier
-  def max_ideal_pvp_points, do: @max_ideal_pvp_points
 
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier

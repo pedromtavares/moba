@@ -113,7 +113,7 @@ defmodule Moba.GameTest do
       assert Enum.map(hero_skills, fn skill -> skill.level end) |> Enum.sum() ==
                Enum.map(prepared_skills, fn skill -> skill.level end) |> Enum.sum()
 
-      assert prepared.pvp_points == 100
+      assert prepared.pvp_points == 0
       assert prepared.pvp_wins == 0
       assert prepared.pvp_losses == 0
       assert prepared.pvp_picks == 1
