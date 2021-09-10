@@ -79,19 +79,28 @@
         </div>
     </div>
 <% end %>
+<%= if @current_user do %>
+    <%= if Game.master_league?(@hero) || @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
+        <div class="row battle-border-top pt-1 mt-2">
+            <div class="col-4">
+                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView, %{league: true}), class: "btn btn-outline-secondary btn-lg btn-block", "phx-hook": "Loading", id: "load-battles" do %>
+                    <span class="loading-text"><i class="fa fa-history"></i> Battle History</span>
+                <% end %>
+            </div>
 
-<%= if Game.master_league?(@hero) || @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
-    <div class="row battle-border-top pt-1 mt-2">
-        <div class="col-6 col-md-4">
-            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView, %{league: true}), class: "btn btn-secondary", "phx-hook": "Loading", id: "load-battles" do %>
-                <span class="loading-text"><i class="fa fa-history"></i> Battle History</span>
-            <% end %>
+            <div class="col">
+                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-outline-success btn-lg btn-block", "phx-hook": "Loading", id: "load-jungle" do %>
+                    <span class="loading-text"><i class="fa fa-leaf"></i> Go back to the Jungle</span>
+                <% end %>
+            </div>
         </div>
-
-        <div class="col-6 col-md-4 center">
-            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-success", "phx-hook": "Loading", id: "load-jungle" do %>
-                <span class="loading-text"><i class="fa fa-leaf"></i> Go back to the Jungle</span>
-            <% end %>
+    <% end %>
+<% else %>
+    <div class="row battle-border-top pt-1 mt-1">
+        <div class="col">
+            <a href="/start" class="btn btn-primary btn-block btn-lg">
+                <i class="fa fa-user-plus"></i> Create your Hero</span>
+            </a>
         </div>
     </div>
 <% end %>

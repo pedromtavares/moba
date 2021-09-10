@@ -79,15 +79,26 @@
         </div>
     </div>
 </div>
-<div class="row battle-border-top pt-1 mt-1">
-    <div class="col-6 col-md-4">
-        <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-secondary", "phx-hook": "Loading", id: "load-battles" do %>
-            <span class="loading-text"><i class="fa fa-history"></i> Battle History</span>
-        <% end %>
+<%= if @current_user do %>
+    <div class="row battle-border-top pt-1 mt-1">
+        <div class="col-4">
+            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-outline-secondary btn-lg btn-block", "phx-hook": "Loading", id: "load-battles" do %>
+                <span class="loading-text"><i class="fa fa-history"></i> View Battle History</span>
+            <% end %>
+        </div>
+        <div class="col">
+            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-outline-success btn-lg btn-block", "phx-hook": "Loading", id: "load-jungle" do %>
+                <span class="loading-text"><i class="fa fa-leaf"></i> Back to the Jungle</span>
+            <% end %>
+        </div>
     </div>
-    <div class="col-6 col-md-4 center">
-        <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-success", "phx-hook": "Loading", id: "load-jungle" do %>
-            <span class="loading-text"><i class="fa fa-leaf"></i> Jungle</span>
-        <% end %>
+<% else %>
+    <div class="row battle-border-top pt-1 mt-1">
+        <div class="col">
+            <a href="/start" class="btn btn-success btn-block btn-lg">
+                <i class="fa fa-user-plus"></i> Create your Hero</span>
+            </a>
+        </div>
     </div>
-</div>
+<% end %>
+

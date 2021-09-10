@@ -5,6 +5,7 @@ defmodule MobaWeb.BattleLiveView do
 
   def mount(_, session, socket) do
     current_hero = Game.get_hero!(session["hero_id"])
+    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
 
     {:ok,
      assign(socket,
