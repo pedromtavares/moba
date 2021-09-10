@@ -97,20 +97,18 @@ defmodule Moba.Engine.Core.Processor do
     |> attack()
   end
 
-  # Stunned attackers cannot attack and get their current double_skill canceled
-  defp attack(%{attacker: %{stunned: true} = attacker} = turn) do
-    attacker = %{attacker | stun_count: attacker.stun_count + 1}
-
+  # Stunned attackers cannot attack and get their current double_skill interrupted
+  defp attack(%{attacker: %{stunned: true, double_skill: double_skill} = attacker} = turn) do
     %{turn | attacker: attacker, resource: %{code: "stunned"}}
-    |> Effect.remove_double_skill()
+    |> apply_resource_special(double_skill)
   end
 
   # Silenced attackers must attack with a basic_attack and also get their current
-  # double_skill canceled
-  defp attack(%{attacker: %{silenced: true}} = turn) do
+  # double_skill interrupted
+  defp attack(%{attacker: %{silenced: true, double_skill: double_skill}} = turn) do
     turn
     |> basic_attack()
-    |> Effect.remove_double_skill()
+    |> apply_resource_special(double_skill)
   end
 
   # Default attack case, using the skill and item chosen on the UI
@@ -201,6 +199,20 @@ defmodule Moba.Engine.Core.Processor do
     |> defend_damage()
   end
 
+  defp defend_effects(%{defender: %{inneffectable: true} = defender} = turn) do
+    %{turn | defender: %{defender | stunned: false, silenced: false, disarmed: false}}
+  end
+
+  defp defend_effects(%{defender: %{undisarmable: true} = defender} = turn) do
+    %{turn | defender: %{defender | disarmed: false}}
+  end
+
+  defp defend_effects(turn), do: turn
+
+  defp defend_damage(%{defender: %{executed: true} = defender} = turn) do
+    %{turn | defender: %{defender | current_hp: 0, hp_regen: 0}}
+  end
+
   defp defend_damage(%{attacker: %{disarmed: true}, defender: %{damage_type: type} = defender} = turn)
        when type == "normal" do
     %{turn | defender: %{defender | damage: 0}}
@@ -220,12 +232,6 @@ defmodule Moba.Engine.Core.Processor do
   end
 
   defp defend_damage(turn), do: turn
-
-  defp defend_effects(%{defender: %{inneffectable: true} = defender} = turn) do
-    %{turn | defender: %{defender | mp_burn: 0, stunned: false, silenced: false, disarmed: false}}
-  end
-
-  defp defend_effects(turn), do: turn
 
   # Applies a list of final_effects that ignore all increases, reductions and defenses
   defp final_effects(%{final_effects: effects} = turn) when length(effects) > 0 do
@@ -318,7 +324,7 @@ defmodule Moba.Engine.Core.Processor do
         buff.code == resource.code
       end)
 
-    List.delete(list, existing) ++ [%{resource: buff, duration: duration - 1}]
+    List.delete(list, existing) ++ [%{existing | duration: duration - 1}]
   end
 
   # If the attacker has a current double_skill, it is the one that gets cast
@@ -430,6 +436,11 @@ defmodule Moba.Engine.Core.Processor do
   defp apply_resource(turn, resource) do
     %{turn | resource: resource}
     |> Spell.apply(%{})
+  end
+
+  defp apply_resource_special(turn, resource) do
+    %{turn | resource: resource}
+    |> Spell.apply_special(%{})
   end
 
   defp get_resource_from_order(order, battler) do

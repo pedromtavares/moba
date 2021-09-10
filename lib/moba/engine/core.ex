@@ -329,17 +329,16 @@ defmodule Moba.Engine.Core do
 
   defp load_buffs(buffs) do
     Enum.map(buffs, fn buff ->
-      resource = buff[:resource] || buff["resource"]
-      duration = buff[:duration] || buff["duration"]
+      if Map.get(buff, :resource) do
+        buff
+      else
+        resource = Map.get(buff, "resource")
+        loaded_resource = if Map.get(resource, "rarity"), do: load_item(resource), else: load_skill(resource)
 
-      loaded_resource =
-        if Map.get(resource, :rarity) || Map.get(resource, "rarity") do
-          load_item(resource)
-        else
-          load_skill(resource)
-        end
-
-      %{resource: loaded_resource, duration: duration}
+        buff
+        |> keys_to_atoms()
+        |> Map.put(:resource, loaded_resource)
+      end
     end)
   end
 
@@ -353,4 +352,10 @@ defmodule Moba.Engine.Core do
 
   defp load_resource(nil, _), do: nil
   defp load_resource(map, struct), do: Moba.struct_from_map(map, as: struct)
+
+  def keys_to_atoms(string_key_map) when is_map(string_key_map) do
+    for {key, val} <- string_key_map, into: %{}, do: {String.to_atom(key), keys_to_atoms(val)}
+  end
+
+  def keys_to_atoms(value), do: value
 end

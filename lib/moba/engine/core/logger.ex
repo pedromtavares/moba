@@ -220,10 +220,6 @@ defmodule Moba.Engine.Core.Logger do
 
   # ULTIMATES
 
-  defp description_for("assassinate", %{"inneffectable" => {true, hero}}, _) do
-    "#{hero} is taking aim with exclusive protection and will be immune to stuns, silences and disarms until the next turn."
-  end
-
   defp description_for("assassinate", %{"charging" => {true, hero}}, _) do
     "#{hero} is taking aim..."
   end
@@ -232,8 +228,12 @@ defmodule Moba.Engine.Core.Logger do
     "#{opponent_for(defender, heroes)} shot a massive bullet right in the face of #{defender}, dealing [damage]#{damage} damage[/damage]!"
   end
 
-  defp description_for("bad_juju", %{"battle_armor" => {armor, hero}, "battle_power" => {power, _}}, _) do
-    "Dark incantations gave #{hero} [armor]#{armor} Armor[/armor] and [power]#{power} Power[/power] for the rest of the battle!"
+  defp description_for("assassinate", %{"charging" => {_, hero}}, _) do
+    "#{hero} was interrupted but immediately reloaded the gun, ready to fire again."
+  end
+
+  defp description_for("bad_juju", %{"turn_armor" => {armor, hero}, "turn_power" => {power, _}}, _) do
+    "Dark incantations gave #{hero} extra [armor]#{armor} Armor[/armor] and [power]#{power} Power[/power] this turn!"
   end
 
   defp description_for(
@@ -247,7 +247,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("borrowed_time", %{"invulnerable" => {true, hero}}, _) do
-    "Evocating powers of undeath, #{hero} has become [status]invulnerable[/status] until the next turn."
+    "Evoking powers of undeath, #{hero} has become [status]invulnerable[/status] until the next turn."
   end
 
   defp description_for("borrowed_time", %{"hp_regen" => {regen, hero}}, heroes) do
@@ -260,7 +260,12 @@ defmodule Moba.Engine.Core.Logger do
     "Merciful blow! #{hero}'s [power]Power significantly increased by #{power}[/power] this turn."
   end
 
+  # TODO: Remove later
   defp description_for("culling_blade", %{"extra" => {true, hero}}, heroes) do
+    "#{hero} has been instantly executed by #{opponent_for(hero, heroes)}. [status]RIP[/status]"
+  end
+
+  defp description_for("culling_blade", %{"executed" => {true, hero}}, heroes) do
     "#{hero} has been instantly executed by #{opponent_for(hero, heroes)}. [status]RIP[/status]"
   end
 
@@ -296,10 +301,6 @@ defmodule Moba.Engine.Core.Logger do
 
   defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}, "next_armor" => {armor, _}}, _) do
     "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp], gaining [armor]#{armor} Armor[/armor] and invulnerability to Normal Damage."
-  end
-
-  defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}}, _) do
-    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and granted invulnerability to Normal Damage."
   end
 
   defp description_for("laguna_blade", %{"damage" => {damage, defender}}, heroes) do
@@ -381,7 +382,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("boss_spell_block", %{"inneffectable" => {_, hero}}, _) do
-    "#{hero} has blocked the effect of [status]stuns, silences, disarms and MP burns[/status] this turn."
+    "#{hero} has blocked the effect of [status]stuns, silences and disarms[/status] this turn."
   end
 
   defp description_for("boss_bash", %{"stunned" => {_, hero}}, heroes) do
@@ -483,15 +484,15 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("bkb", %{"extra" => {true, hero}}, _) do
-    "#{hero} activated BKB and will be [status]imune to stuns, silences, disarms and MP burns[/status] for the next defending turn."
+    "#{hero} activated BKB and will be [status]imune to stuns, silences and disarms[/status] for the next defending turn."
   end
 
   defp description_for("bkb", %{"inneffectable" => {_, hero}}, _) do
-    "#{hero} is [status]imune to stuns, silences, disarms MP burns[/status] this turn."
+    "#{hero} is [status]imune to stuns, silences and disarms[/status] this turn."
   end
 
   defp description_for("linkens_sphere", %{"inneffectable" => {_, hero}}, _) do
-    "#{hero} is [status]imune to stuns, silences, disarms and MP burns[/status] this turn."
+    "#{hero} is [status]imune to stuns, silences and disarms[/status] this turn."
   end
 
   defp description_for("scythe_of_vyse", %{"stunned" => {_, hero}}, heroes) do

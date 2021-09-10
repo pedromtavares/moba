@@ -6,6 +6,8 @@ defmodule Moba.Engine.Schema.Battler do
 
   use Ecto.Schema
 
+  @derive Jason.Encoder
+
   @primary_key false
   embedded_schema do
     field :hero_id, :integer
@@ -64,7 +66,6 @@ defmodule Moba.Engine.Schema.Battler do
     field :mp_regen, :integer, default: 0
     field :mp_burn, :integer, default: 0
 
-    field :stun_count, :integer, default: 0
     field :spell_count, :integer, default: 0
 
     field :double_skill, :map
@@ -85,6 +86,8 @@ defmodule Moba.Engine.Schema.Battler do
     field :inneffectable, :boolean, default: false
     field :miss, :boolean, default: false
     field :disarmed, :boolean, default: false
+    field :undisarmable, :boolean, default: false
+    field :executed, :boolean, default: false
     field :charging, :boolean, default: false
     field :extra, :boolean, default: false
     field :bonus, :string

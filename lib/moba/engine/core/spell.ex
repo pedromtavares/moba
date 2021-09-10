@@ -2,7 +2,7 @@ defmodule Moba.Engine.Core.Spell do
   @moduledoc """
   Handles the chains of both active and passive effects for each Skill and Item, defined by codes
 
-  Certain Spells have special modifiers:
+  Certain Spells have specific modifiers:
    - double_skill: spell is applied in two consecutive turns, hero cannot cast another until it finishes
    - delayed_skill: spell is cast on the first turn but applied on the next, hero can cast another next turn
    - permanent_skill: spell is applied every turn until set otherwise
@@ -20,6 +20,10 @@ defmodule Moba.Engine.Core.Spell do
 
   def apply(turn, options \\ %{}) do
     effects_for(turn, options)
+  end
+
+  def apply_special(turn, options \\ %{}) do
+    special_effects_for(turn, options)
   end
 
   # ACTIVES
@@ -215,10 +219,7 @@ defmodule Moba.Engine.Core.Spell do
     turn
     |> Effect.add_double_skill()
     |> Effect.charging()
-    |> roll(
-      fn turn -> turn |> Effect.attacker_inneffectability() end,
-      fn turn -> turn end
-    )
+    |> Effect.undisarmable()
   end
 
   defp effects_for(%{resource: %Skill{code: "assassinate"}} = turn, _options) do
@@ -235,8 +236,8 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(%{resource: %Skill{code: "bad_juju"}} = turn, _options) do
     turn
-    |> Effect.add_battle_armor()
-    |> Effect.add_battle_power()
+    |> Effect.add_buff_armor()
+    |> Effect.add_buff_power()
   end
 
   defp effects_for(%{resource: %Skill{code: "borrowed_time", defender_buff: nil}} = turn, _options) do
@@ -683,9 +684,28 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(turn, _options) do
+  defp effects_for(turn, _options), do: turn
+
+  defp special_effects_for(%{resource: %Skill{code: "echo_stomp"}} = turn, _options) do
     turn
+    |> Effect.base_amount_damage()
+    |> Effect.other_atk_damage()
+    |> Effect.remove_double_skill()
   end
+
+  defp special_effects_for(%{resource: %Skill{code: "illuminate"}} = turn, _options) do
+    turn
+    |> Effect.base_amount_damage()
+    |> Effect.remove_double_skill()
+  end
+
+  defp special_effects_for(%{resource: %Skill{code: "assassinate"}} = turn, _options) do
+    turn
+    |> Effect.reset_cooldown()
+    |> Effect.remove_double_skill()
+  end
+
+  defp special_effects_for(turn, _options), do: turn
 
   defp roll(%{resource: resource} = turn, success, failure, roll_number \\ nil) do
     number = roll_number || resource.roll_number

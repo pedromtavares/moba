@@ -4,6 +4,8 @@ defmodule Moba.Engine.Core.Effect do
   apply battle effects that can manipulate properties of a Battler.
   """
 
+  alias Moba.Engine.Core.Buff
+
   # BASE DAMAGE
 
   def base_damage(%{resource: %{base_damage: base_damage}} = turn) do
@@ -215,6 +217,13 @@ defmodule Moba.Engine.Core.Effect do
     update_defender_number(turn, :turn_armor, -resource.armor_amount)
   end
 
+  def add_buff_armor(%{resource: resource} = turn) do
+    {turn, buff} = update_buff(turn, :armor, resource.armor_amount)
+
+    turn
+    |> update_attacker_number(:turn_armor, buff.armor)
+  end
+
   # POWER
 
   def add_battle_power(%{resource: resource} = turn) do
@@ -257,6 +266,13 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker_number(turn, :turn_power, -resource.power_amount)
   end
 
+  def add_buff_power(%{resource: resource} = turn) do
+    {turn, buff} = update_buff(turn, :power, resource.power_amount)
+
+    turn
+    |> update_attacker_number(:turn_power, buff.power)
+  end
+
   # ATK
 
   def add_turn_atk(%{resource: resource} = turn) do
@@ -279,24 +295,24 @@ defmodule Moba.Engine.Core.Effect do
 
   def add_buff(%{resource: %{duration: duration} = resource, attacker: attacker} = turn) do
     turn
-    |> update_attacker(:buffs, attacker.buffs ++ [%{resource: resource, duration: duration}])
+    |> update_attacker(:buffs, attacker.buffs ++ [%Buff{resource: resource, duration: duration}])
     |> Map.put(:resource, %{resource | buff: true})
   end
 
   def add_debuff(%{resource: %{duration: duration} = resource, defender: defender} = turn) do
     turn
-    |> update_defender(:debuffs, defender.debuffs ++ [%{resource: resource, duration: duration}])
+    |> update_defender(:debuffs, defender.debuffs ++ [%Buff{resource: resource, duration: duration}])
     |> Map.put(:resource, %{resource | debuff: true})
   end
 
   def add_defender_buff(%{resource: %{duration: duration} = resource, attacker: attacker} = turn) do
     turn
-    |> update_attacker(:defender_buffs, attacker.defender_buffs ++ [%{resource: resource, duration: duration}])
+    |> update_attacker(:defender_buffs, attacker.defender_buffs ++ [%Buff{resource: resource, duration: duration}])
   end
 
   def add_attacker_debuff(%{resource: %{duration: duration} = resource, defender: defender} = turn) do
     turn
-    |> update_defender(:attacker_debuffs, defender.attacker_debuffs ++ [%{resource: resource, duration: duration}])
+    |> update_defender(:attacker_debuffs, defender.attacker_debuffs ++ [%Buff{resource: resource, duration: duration}])
   end
 
   def refresh_debuff(%{resource: %{duration: duration} = resource, defender: defender} = turn) do
@@ -304,8 +320,8 @@ defmodule Moba.Engine.Core.Effect do
     |> update_defender(
       :debuffs,
       Enum.map(defender.debuffs, fn debuff ->
-        if debuff.resource == resource do
-          %{resource: resource, duration: duration}
+        if debuff.resource.code == resource.code do
+          %{debuff | duration: duration}
         else
           debuff
         end
@@ -400,10 +416,12 @@ defmodule Moba.Engine.Core.Effect do
     update_defender(turn, :disarmed, true)
   end
 
+  def undisarmable(turn) do
+    update_defender(turn, :undisarmable, true)
+  end
+
   def execute(turn) do
-    turn
-    |> update_defender(:extra, true)
-    |> update_defender(:current_hp, 0)
+    update_defender(turn, :executed, true)
   end
 
   def charging(turn) do
@@ -456,6 +474,16 @@ defmodule Moba.Engine.Core.Effect do
     }
   end
 
+  def reset_cooldown(%{attacker: attacker, resource: resource} = turn) do
+    %{
+      turn
+      | attacker: %{
+          attacker
+          | future_cooldowns: Map.put(attacker.future_cooldowns, resource.code, -1)
+        }
+    }
+  end
+
   def reset_cooldowns(%{attacker: attacker} = turn) do
     %{turn | attacker: %{attacker | future_cooldowns: %{}}}
   end
@@ -503,6 +531,14 @@ defmodule Moba.Engine.Core.Effect do
   end
 
   # HELPERS
+
+  def update_buff(%{attacker: %{buffs: buffs}, resource: resource} = turn, key, value) do
+    buff = Enum.find(buffs, fn %{resource: br} -> br.code == resource.code end)
+    new_value = Map.get(buff, key, 0) + value
+    updated_buff = Map.put(buff, key, new_value)
+    updated_buffs = List.delete(buffs, buff) ++ [updated_buff]
+    {update_attacker(turn, :buffs, updated_buffs), updated_buff}
+  end
 
   defp update_attacker_number(%{attacker: attacker} = turn, key, value) do
     update_attacker(turn, key, Map.get(attacker, key) + (value || 0), value || 0)

@@ -405,6 +405,8 @@ SeedHelper.create_skill(%{
   code: "echo_stomp",
   name: "Echo Stomp",
   atk_multiplier: 2.5,
+  other_atk_multiplier: 1.5,
+  base_amount: 5,
   base_damage: 10,
   mp_cost: 10,
   cooldown: 2,
@@ -455,6 +457,7 @@ SeedHelper.create_skill(%{
   code: "illuminate",
   name: "Illuminate",
   base_damage: 300,
+  base_amount: 150,
   mp_cost: 10,
   cooldown: 2,
   level_requirement: 10

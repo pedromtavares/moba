@@ -21,10 +21,12 @@ defmodule MobaWeb.HeroAuth do
         conn
         |> assign(:current_hero, hero)
         |> put_session(:hero_id, hero.id)
+
       mode == "pvp" ->
         conn
         |> redirect(to: "/arena/select")
         |> halt()
+
       true ->
         conn
         |> assign(:current_hero, nil)
