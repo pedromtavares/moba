@@ -15,8 +15,8 @@ defmodule Moba.Game.Query.HeroQuery do
     non_bots() |> pvp_active()
   end
 
-  def current_arena_bots do
-    bots() |> pvp_active()
+  def current_arena_bots(league_tier) do
+    bots() |> pvp_active() |> by_league_tier(league_tier)
   end
 
   def pvp_search(exclude_list, filter, pvp_points, league_tier, sort, page) do
@@ -108,15 +108,15 @@ defmodule Moba.Game.Query.HeroQuery do
     )
   end
 
-  def skynet_bot(time) do
-    from(hero in current_arena_bots(),
+  def skynet_bot(league_tier, time) do
+    from(hero in current_arena_bots(league_tier),
       where: hero.pvp_last_picked <= ^time,
       limit: 1
     )
   end
 
-  def weakest_pvp_bot do
-    from(hero in current_arena_bots(),
+  def weakest_pvp_bot(league_tier) do
+    from(hero in current_arena_bots(league_tier),
       order_by: [asc: hero.pvp_points],
       limit: 1
     )

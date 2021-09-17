@@ -269,7 +269,7 @@ defmodule Moba.Conductor do
   # We use the pvp_last_picked field here to tell skynet that this bot shouldn't be picked to battle again for another 6 hours
   defp skynet!(league_tier) do
     now = Timex.now()
-    attacker = HeroQuery.skynet_bot(now) |> HeroQuery.by_league_tier(league_tier) |> Repo.all() |> List.first()
+    attacker = HeroQuery.skynet_bot(league_tier, now) |> Repo.all() |> List.first()
 
     if attacker do
       HeroQuery.with_pvp_points()

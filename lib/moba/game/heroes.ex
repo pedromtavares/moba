@@ -443,8 +443,7 @@ defmodule Moba.Game.Heroes do
   end
 
   defp inactivate_weakest_pvp_bot(league_tier) do
-    HeroQuery.weakest_pvp_bot()
-    |> HeroQuery.by_league_tier(league_tier)
+    HeroQuery.weakest_pvp_bot(league_tier)
     |> Repo.all()
     |> List.first()
     |> update!(%{pvp_active: false})
