@@ -128,7 +128,7 @@
         <div class="row">
             <%= if @duel.opponent_second_pick do %>
                 <div class="col-md-4">
-                    <%=render "_picked_hero.html", hero: @duel.opponent_first_pick, socket: @socket %>
+                    <%=render "_picked_hero.html", hero: @duel.opponent_second_pick, socket: @socket %>
                 </div>
             <% end %>
             <%= if @duel.user_second_pick do %>
