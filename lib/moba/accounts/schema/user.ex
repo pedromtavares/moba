@@ -26,17 +26,16 @@ defmodule Moba.Accounts.Schema.User do
     field :last_online_at, :utc_datetime
     field :status, :string
     field :ranking, :integer
-    field :pvp_points, :integer, default: 0
-    field :pvp_wins, :integer, default: 0
-    field :pvp_losses, :integer, default: 0
-    field :pvp_score, :map, default: %{}
+    field :duel_score, :map, default: %{}
+    field :duel_wins, :integer, default: 0
+    field :duel_count, :integer, default: 0
     field :medal_count, :integer, default: 0
     field :shard_count, :integer, default: 0
     field :hero_collection, {:array, :map}
     field :season_tier, :integer, default: 0
     field :season_points, :integer, default: 0
     field :bot_codes, {:array, :string}
-    field :bot_tier, :integer, default: 6
+    field :bot_tier, :integer
     field :shard_limit, :integer, default: 100
     field :pve_tier, :integer, default: 0
     field :unread_messages_count, :integer, default: 0
@@ -44,6 +43,7 @@ defmodule Moba.Accounts.Schema.User do
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick
     has_many :unlocks, Accounts.Schema.Unlock
+    has_many :duels, Game.Schema.Duel
 
     belongs_to :current_pve_hero, Game.Schema.Hero
     belongs_to :current_pvp_hero, Game.Schema.Hero
@@ -64,8 +64,7 @@ defmodule Moba.Accounts.Schema.User do
       :tutorial_step,
       :status,
       :current_pve_hero_id,
-      :current_pvp_hero_id,
-      :pvp_points
+      :current_pvp_hero_id
     ])
     |> pow_changeset(attrs)
     |> pow_extension_changeset(attrs)
@@ -93,10 +92,9 @@ defmodule Moba.Accounts.Schema.User do
       :ranking,
       :current_pve_hero_id,
       :current_pvp_hero_id,
-      :pvp_points,
-      :pvp_wins,
-      :pvp_losses,
-      :pvp_score,
+      :duel_wins,
+      :duel_count,
+      :duel_score,
       :shard_count,
       :medal_count,
       :hero_collection,

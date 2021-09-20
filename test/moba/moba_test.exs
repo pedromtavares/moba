@@ -61,28 +61,6 @@ defmodule Moba.MobaTest do
       assert user.current_pve_hero_id == hero.id
     end
 
-    test "#update_attacker!" do
-      hero = create_base_hero()
-      updates = %{total_xp: 200, gold: 50}
-      updated = Moba.update_attacker!(hero, updates)
-      assert updated.level == 2
-      assert updated.gold == 50
-
-      user = Accounts.get_user!(updated.user_id)
-      assert user.experience == 200
-    end
-
-    test "#update_defender!" do
-      hero = create_base_hero()
-      updates = %{gold: 50}
-      updated = Moba.update_defender!(hero, updates)
-
-      assert updated.gold == 50
-
-      user = Accounts.get_user!(updated.user_id)
-      assert user.experience == 0
-    end
-
     test "#prepare_current_pvp_hero!" do
       user = create_user(%{pvp_points: 100})
       hero = create_base_hero(%{}, user)

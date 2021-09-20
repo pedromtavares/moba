@@ -36,6 +36,8 @@ defmodule Moba.Accounts do
 
   def user_search(user), do: Users.search(user)
 
+  def list_duel_users(user), do: Users.duel_list(user)
+
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 
   defdelegate set_current_pve_hero!(user, hero_id), to: Users
@@ -48,9 +50,9 @@ defmodule Moba.Accounts do
 
   defdelegate season_points_for(tier), to: Users
 
-  def user_pvp_updates!(nil, _), do: nil
+  def user_duel_updates!(nil, _), do: nil
 
-  def user_pvp_updates!(user_id, updates), do: get_user!(user_id) |> Users.pvp_updates!(updates)
+  def user_duel_updates!(user, updates), do: Users.duel_updates!(user, updates)
 
   defdelegate ranking(limit), to: Users
 

@@ -5,7 +5,7 @@ defmodule Moba.Engine.Core do
 
   alias Moba.{Engine, Repo, Game}
   alias Engine.Schema.{Turn, Battler}
-  alias Engine.Core.{Processor, Pve, Pvp, League, Logger, Helper}
+  alias Engine.Core.{Processor, Pve, Pvp, League, Duel, Logger, Helper}
 
   @max_turns Moba.max_battle_turns()
 
@@ -14,6 +14,8 @@ defmodule Moba.Engine.Core do
   def create_pvp_battle!(attrs), do: Pvp.create_battle!(attrs)
 
   def create_league_battle!(attacker, defender), do: League.create_battle!(attacker, defender)
+
+  def create_duel_battle!(attrs), do: Duel.create_battle!(attrs)
 
   @doc """
   Creates a battle and jumps to a state where the attacker can start (case they are not the initiator)
@@ -99,6 +101,7 @@ defmodule Moba.Engine.Core do
   defp maybe_finalize_battle(%{finished: true, type: "pve"} = battle), do: Pve.finalize_battle(battle)
   defp maybe_finalize_battle(%{finished: true, type: "pvp"} = battle), do: Pvp.finalize_battle(battle)
   defp maybe_finalize_battle(%{finished: true, type: "league"} = battle), do: League.finalize_battle(battle)
+  defp maybe_finalize_battle(%{finished: true, type: "duel"} = battle), do: Duel.finalize_battle(battle)
   defp maybe_finalize_battle(battle), do: battle
 
   # Creates and processes a turn, finishing a battle if someone dies or it reaches the max turns count
@@ -147,14 +150,15 @@ defmodule Moba.Engine.Core do
 
   # Skips to the next turn if the attacker can't do anything, such as the defender was the initiator
   # or the attacker was disabled
-  defp maybe_skip_next_turn(battle) do
+  defp maybe_skip_next_turn(%{type: type} = battle) do
     battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
     last_turn = List.last(battle.turns)
+    not_duel = type != "duel"
 
     cond do
-      is_nil(last_turn) && battle.initiator == battle.defender -> create_turn!(battle, %{auto: true})
+      not_duel && is_nil(last_turn) && battle.initiator == battle.defender -> create_turn!(battle, %{auto: true})
+      not_duel && last_turn && last_turn.defender.hero_id != battle.attacker_id -> create_turn!(battle, %{auto: true})
       last_turn && Helper.disabled?(last_turn.defender) -> create_turn!(battle, %{auto: true})
-      last_turn && last_turn.defender.hero_id != battle.attacker_id -> create_turn!(battle, %{auto: true})
       true -> battle
     end
   end

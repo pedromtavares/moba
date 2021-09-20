@@ -5,11 +5,17 @@ defmodule Moba.Game.Query.HeroQuery do
 
   alias Moba.Game
   alias Game.Schema.{Hero, Avatar}
+  alias Game.Query.SkillQuery
 
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
 
   @pvp_per_page Moba.pvp_heroes_per_page()
   @ranking_per_page Moba.ranking_heroes_per_page()
+
+  def load(queryable \\ Hero) do
+    queryable
+    |> preload([:items, :avatar, :skin, :user, active_build: [skills: ^SkillQuery.ordered()]])
+  end
 
   def current_arena_players do
     non_bots() |> pvp_active()
@@ -23,7 +29,7 @@ defmodule Moba.Game.Query.HeroQuery do
     Hero
     |> pvp_active()
     |> by_league_tier(league_tier)
-    |> exclude(exclude_list)
+    |> exclude_ids(exclude_list)
     |> pvp_filter(filter, pvp_points)
     |> pvp_sort(sort)
     |> limit_by(@pvp_per_page, page_to_offset(page, @pvp_per_page))
@@ -41,7 +47,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> pvp_inactive()
     |> by_level(level_range)
     |> by_codes(codes)
-    |> exclude(exclude_list)
+    |> exclude_ids(exclude_list)
     |> limit_by(limit)
     |> unarchived()
     |> random()
@@ -51,7 +57,7 @@ defmodule Moba.Game.Query.HeroQuery do
     bots()
     |> by_level(base_level..base_level)
     |> by_difficulty(difficulty)
-    |> exclude([attacker_id])
+    |> exclude_ids([attacker_id])
     |> random()
     |> unarchived()
     |> limit_by(1)
@@ -246,7 +252,7 @@ defmodule Moba.Game.Query.HeroQuery do
       order_by: [desc: hero.pvp_points]
   end
 
-  def exclude(query, ids) do
+  def exclude_ids(query, ids) do
     from hero in query,
       where: hero.id not in ^ids
   end

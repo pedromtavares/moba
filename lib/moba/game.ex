@@ -8,7 +8,7 @@ defmodule Moba.Game do
   """
 
   alias Moba.{Repo, Game, Accounts}
-  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks, Skins}
+  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks, Skins, Duels}
 
   # MATCHES
 
@@ -337,8 +337,6 @@ defmodule Moba.Game do
 
   def list_unlockable_skills, do: Skills.list_unlockable()
 
-  def ordered_skills_query, do: Skills.ordered_query()
-
   # AVATARS
 
   def get_avatar!(avatar_id), do: Avatars.get!(avatar_id)
@@ -368,4 +366,30 @@ defmodule Moba.Game do
   def get_skin_by_code!(code), do: Skins.get_by_code!(code)
 
   def default_skin(avatar_code), do: Skins.default(avatar_code)
+
+  # DUELS
+
+  def get_duel!(id), do: Duels.get!(id)
+
+  def create_duel!(user, opponent) do
+    duel = Duels.create!(user, opponent)
+    MobaWeb.broadcast("user-#{user.id}", "duel", %{id: duel.id})
+    MobaWeb.broadcast("user-#{opponent.id}", "duel", %{id: duel.id})
+    duel
+  end
+
+  def next_duel_phase!(duel, hero_id \\ nil) do
+    updated = Duels.next_phase!(duel, hero_id)
+    MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
+    updated
+  end
+
+  def finish_duel!(duel, winner, rewards), do: Duels.finish!(duel, winner, rewards)
+
+  def duel_challenge(%{id: user_id}, %{id: opponent_id}) do
+    attrs = %{user_id: user_id, opponent_id: opponent_id}
+
+    MobaWeb.broadcast("user-#{user_id}", "challenge", attrs)
+    MobaWeb.broadcast("user-#{opponent_id}", "challenge", attrs)
+  end
 end

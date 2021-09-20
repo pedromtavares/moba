@@ -15,7 +15,7 @@ defmodule Moba.Game.Builds do
   # -------------------------------- PUBLIC API
 
   def get!(id) do
-    Repo.get(Build, id) |> Repo.preload(skills: Game.ordered_skills_query())
+    Repo.get(Build, id) |> Repo.preload(skills: SkillQuery.ordered())
   end
 
   def update!(build, attrs) do
@@ -66,7 +66,7 @@ defmodule Moba.Game.Builds do
   currently active.
   """
   def other_build_for(%{active_build_id: active_build_id} = hero) do
-    %{builds: builds} = Repo.preload(hero, builds: [skills: Game.ordered_skills_query()])
+    %{builds: builds} = Repo.preload(hero, builds: [skills: SkillQuery.ordered()])
 
     other = Enum.find(builds, fn build -> build.id != active_build_id end)
     other || List.first(builds)

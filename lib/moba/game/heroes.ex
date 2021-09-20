@@ -5,7 +5,7 @@ defmodule Moba.Game.Heroes do
   """
   alias Moba.{Repo, Game}
   alias Game.Schema.Hero
-  alias Game.Query.HeroQuery
+  alias Game.Query.{HeroQuery, SkillQuery}
 
   @pve_points_limit Moba.pve_points_limit()
   @max_level Moba.max_hero_level()
@@ -324,7 +324,7 @@ defmodule Moba.Game.Heroes do
     list = pvp_exclusions(hero)
 
     HeroQuery.pvp_active()
-    |> HeroQuery.exclude(list)
+    |> HeroQuery.exclude_ids(list)
     |> HeroQuery.by_league_tier(hero.league_tier)
     |> Repo.aggregate(:count)
   end
@@ -452,7 +452,7 @@ defmodule Moba.Game.Heroes do
   defp base_preload(struct_or_structs, extras \\ []) do
     Repo.preload(
       struct_or_structs,
-      [:user, :avatar, :items, :skin, active_build: [skills: Game.ordered_skills_query()]] ++ extras
+      [:user, :avatar, :items, :skin, active_build: [skills: SkillQuery.ordered()]] ++ extras
     )
   end
 

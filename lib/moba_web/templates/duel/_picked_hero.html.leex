@@ -1,0 +1,32 @@
+<%=live_redirect class: "hero-card card", style: "background-image: url(#{GH.background_url(@hero)})", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero) do %>
+    <div class="card-header pt-0 pb-1">
+        <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+            <span class="font-italic font-20">#<%=@hero.pvp_ranking%></span>
+            <div>
+                <img src="/images/league_<%=@hero.league_tier%>.png" class="league-logo">
+                <%=@hero.name%>
+            </div>
+            <span class="font-15 font-italic"><%=@hero.avatar.name%></span>
+        </h4>
+
+    </div>
+    <div class="card-body text-center">
+    </div>
+    <div class="card-footer p-0 text-center">
+        <div class="row">
+            <div class="col">
+                <%=GH.hero_stats(@hero, true)%>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="skills-container d-flex justify-content-between">
+                    <%=GH.hero_skill_list(@hero)%>
+                </div>
+                <div class="items-container row no-gutters">
+                    <%=GH.hero_item_list(@hero)%>
+                </div>
+            </div>
+        </div>
+    </div>
+<% end %>

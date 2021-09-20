@@ -1,0 +1,40 @@
+<% turn = Engine.last_turn(@battle) %>
+
+<%= if @battle.finished do %>
+    <div class="row mb-2">
+        <div class="col">
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-lg btn-block btn-danger" do %>
+                <i class="fa fa-eye"></i> View Battle
+            <% end %>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header">
+            <h1 class="text-center">
+                <%=MobaWeb.BattleView.battle_result(@battle)%>
+            </h1>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col center pr-4">
+                    <%=render "_turn_hero.html", battle: @battle, turn: Engine.last_turn(@battle), hero: @battle.attacker, turn_hero: if turn.attacker.hero_id == @battle.attacker_id, do: turn.attacker, else: turn.defender%>
+                </div>
+            </div>
+            <hr class="mt-2 mb-1" />
+            <div class="row">
+                <div class="col center pr-4">
+                    <%=render "_turn_hero.html", battle: @battle, turn: Engine.last_turn(@battle), hero: @battle.defender, turn_hero: if turn.attacker.hero_id == @battle.attacker_id, do: turn.defender, else: turn.attacker%>
+                </div>
+            </div>
+        </div>
+    </div>
+<% else %>
+    <div class="row">
+        <div class="col">
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-outline-danger btn-block btn-lg" do %>
+                <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
+                <strong class="font-20 d-block">Enter Battle</strong>
+            <% end %>
+        </div
+    </div>
+<% end %>

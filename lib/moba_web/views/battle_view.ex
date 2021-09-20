@@ -4,6 +4,28 @@ defmodule MobaWeb.BattleView do
   defdelegate difficulty_color(diff), to: MobaWeb.JungleView
   defdelegate difficulty_label(diff), to: MobaWeb.JungleView
 
+  def active_attacker?(%{attacker: attacker} = battle, last_turn, %{id: user_id}) do
+    is_current? = attacker.user_id == user_id
+
+    cond do
+      is_current? && is_nil(last_turn) && battle.attacker_id == battle.initiator_id -> true
+      is_current? && last_turn && last_turn.attacker.hero_id == battle.defender_id -> true
+      true -> false
+    end
+  end
+  def active_attacker?(_,_, _), do: false
+
+  def active_defender?(%{defender: defender} = battle, last_turn, %{id: user_id}) do
+    is_current? = defender.user_id == user_id
+
+    cond do
+      is_current? && is_nil(last_turn) && battle.defender_id == battle.initiator_id -> true
+      is_current? && last_turn && last_turn.attacker.hero_id == battle.attacker_id -> true
+      true -> false
+    end
+  end
+  def active_defender?(_,_, _), do: false
+
   def can_use?(_, %Moba.Game.Schema.Item{active: false}), do: false
   def can_use?(_, %Moba.Game.Schema.Skill{passive: true}), do: false
   def can_use?(turn, resource), do: Engine.can_use_resource?(turn, resource)
@@ -59,16 +81,8 @@ defmodule MobaWeb.BattleView do
   def display_cooldown(result) when result < 0, do: 0
   def display_cooldown(result), do: result
 
-  def render_rewards(%{type: "pve"}, assigns) do
-    render("_pve_rewards.html", assigns)
-  end
-
-  def render_rewards(%{type: "pvp"}, assigns) do
-    render("_pvp_rewards.html", assigns)
-  end
-
-  def render_rewards(%{type: "league"}, assigns) do
-    render("_league_rewards.html", assigns)
+  def render_rewards(%{type: type}, assigns) do
+    render("_#{type}_rewards.html", assigns)
   end
 
   def battle_result(%{type: "pve"} = battle) do
@@ -87,7 +101,7 @@ defmodule MobaWeb.BattleView do
     end
   end
 
-  def battle_result(%{type: "pvp"} = battle) do
+  def battle_result(battle) do
     cond do
       battle.winner_id == battle.attacker_id ->
         "Winner: #{battle.attacker.name}"

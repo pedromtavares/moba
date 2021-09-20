@@ -76,6 +76,8 @@ defmodule MobaWeb.Router do
     post "/game/continue", GameController, :continue
 
     live "/arena/select", ArenaSelectLiveView
+
+    live "/duels/:id", DuelLiveView
   end
 
   scope "/", MobaWeb do

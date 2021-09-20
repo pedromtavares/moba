@@ -8,7 +8,7 @@ defmodule Moba.Admin.Matches do
   alias Game.Query.HeroQuery
   alias Accounts.Query.UserQuery
 
-  import Ecto.Query, warn: false
+  import Ecto.Query
   import Torch.Helpers, only: [sort: 1, paginate: 4]
   import Filtrex.Type.Config
 
@@ -76,8 +76,8 @@ defmodule Moba.Admin.Matches do
 
   def current_arena_heroes do
     HeroQuery.pvp_active()
+    |> HeroQuery.load()
     |> Repo.all()
-    |> Repo.preload([:avatar, :items, :user, active_build: [skills: Game.ordered_skills_query()]])
     |> Enum.sort_by(fn hero -> [hero.pvp_ranking] end)
   end
 
@@ -88,8 +88,8 @@ defmodule Moba.Admin.Matches do
     |> UserQuery.online_users(48)
     |> Repo.all()
     |> Repo.preload(
-      current_pve_hero: [:avatar, :items, active_build: [skills: Game.ordered_skills_query()]],
-      current_pvp_hero: [:avatar, :items, active_build: [skills: Game.ordered_skills_query()]]
+      current_pve_hero: HeroQuery.load(),
+      current_pvp_hero: HeroQuery.load()
     )
   end
 

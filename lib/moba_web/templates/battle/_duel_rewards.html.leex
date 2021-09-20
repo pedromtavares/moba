@@ -1,0 +1,42 @@
+<div class="row">
+    <div class="col-12 col-md-8 center victory-title margin-auto">
+        <h3>
+            <%=battle_result(@battle)%>
+        </h3>
+        <%= if @battle.duel.rewards do %>
+            <h3 class="mb-2">
+                <%= if @battle.duel.rewards.attacker_pvp_points != 0 do %>
+                    <%= if @battle.rewards.attacker_pvp_points > 0 do %>
+                        <span class="badge badge-pill badge-light-success"><%=@battle.duel.user.username%>: +<%=@battle.duel.rewards.attacker_pvp_points%> Season Points</span>
+                    <% else %>
+                        <span class="badge badge-pill badge-light-dark"><%=@battle.duel.user.username%>: <%=@battle.duel.rewards.attacker_pvp_points%> Season Points</span>
+                    <% end %>
+                <% end %>
+                <%= if @battle.duel.rewards.defender_pvp_points != 0 do %>
+                    <%= if @battle.duel.rewards.defender_pvp_points > 0 do %>
+                        <span class="badge badge-pill badge-light-success"><%=@battle.duel.opponent.username%>: +<%=@battle.duel.rewards.defender_pvp_points%> Season Points</span>
+                    <% else %>
+                        <span class="badge badge-pill badge-light-dark"><%=@battle.duel.opponent.username%>: <%=@battle.duel.rewards.defender_pvp_points%> Season Points</span>
+                    <% end %>
+                <% end %>
+            </h3>
+        <% end %>
+    </div>
+</div>
+<%= if @current_user do %>
+    <div class="row battle-border-top pt-1 mt-1">
+        <div class="col">
+            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @battle.duel_id), class: "btn btn-outline-primary btn-lg btn-block text-white", "phx-hook": "Loading", id: "load-battles" do %>
+                <span class="loading-text"><i class="fa fa-history"></i> View Duel</span>
+            <% end %>
+        </div>
+    </div>
+<% else %>
+    <div class="row battle-border-top pt-1 mt-1">
+        <div class="col">
+            <a href="/start" class="btn btn-danger btn-block btn-lg">
+                <i class="fa fa-user-plus"></i> Create your Hero</span>
+            </a>
+        </div>
+    </div>
+<% end %>

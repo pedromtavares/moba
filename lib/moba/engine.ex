@@ -10,11 +10,11 @@ defmodule Moba.Engine do
   alias Moba.{Game, Engine}
   alias Engine.{Battles, Core}
 
-  def battle_types, do: %{pve: "pve", pvp: "pvp", league: "league"}
+  def battle_types, do: %{pve: "pve", pvp: "pvp", league: "league", duel: "duel"}
 
   # BATTLES MANAGEMENT
 
-  def get_battle!(id), do: Battles.get!(id, Game.ordered_skills_query())
+  def get_battle!(id), do: Battles.get!(id)
 
   def update_battle!(battle, attrs), do: Battles.update!(battle, attrs)
 
@@ -22,9 +22,15 @@ defmodule Moba.Engine do
     Battles.list(hero, type, page, limit)
   end
 
+  def first_duel_battle(duel), do: Battles.first_from_duel(duel)
+
+  def last_duel_battle(duel), do: Battles.last_from_duel(duel)
+
   def pending_battle(hero_id), do: Battles.pending_for(hero_id)
 
   def latest_battle(hero_id), do: Battles.latest_for(hero_id)
+
+  def latest_duel_battle(duel_id), do: Battles.latest_for_duel(duel_id)
 
   def read_battle!(battle), do: Battles.read!(battle)
 
@@ -47,27 +53,29 @@ defmodule Moba.Engine do
 
   # CORE MECHANICS
 
-  def create_pve_battle!(target), do: Core.create_pve_battle!(target)
+  defdelegate create_pve_battle!(target), to: Core
 
-  def create_pvp_battle!(attrs), do: Core.create_pvp_battle!(attrs)
+  defdelegate create_pvp_battle!(attrs), to: Core
 
   def create_league_battle!(attacker) do
     Core.create_league_battle!(attacker, Game.league_defender_for(attacker))
   end
 
-  def start_battle!(battle), do: Core.start_battle!(battle)
+  defdelegate create_duel_battle!(attrs), to: Core
 
-  def continue_battle!(battle, orders), do: Core.continue_battle!(battle, orders)
+  defdelegate start_battle!(battle), to: Core
 
-  def auto_finish_battle!(battle, orders \\ %{auto: true}), do: Core.auto_finish_battle!(battle, orders)
+  defdelegate continue_battle!(battle, orders), to: Core
+
+  defdelegate auto_finish_battle!(battle, orders \\ %{auto: true}), to: Core
 
   def next_battle_turn(battle), do: Core.build_turn(battle, %{})
 
-  def last_turn(battle), do: Core.last_turn(battle)
+  defdelegate last_turn(battle), to: Core
 
   def can_pvp?(attacker, defender), do: Core.can_pvp?(%{attacker: attacker, defender: defender})
 
-  def effect_descriptions(turn), do: Core.effect_descriptions(turn)
+  defdelegate effect_descriptions(turn), to: Core
 
-  def can_use_resource?(turn, resource), do: Core.can_use_resource?(turn, resource)
+  defdelegate can_use_resource?(turn, resource), to: Core
 end

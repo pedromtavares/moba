@@ -6,6 +6,7 @@ defmodule MobaWeb.BattleLiveView do
   def mount(_, session, socket) do
     current_hero = Game.get_hero!(session["hero_id"])
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
+    current_user = socket.assigns.current_user
 
     {:ok,
      assign(socket,
@@ -19,7 +20,7 @@ defmodule MobaWeb.BattleLiveView do
        action_turn_number: nil,
        show_shop: false,
        unreads: 0,
-       tutorial_step: current_hero && current_hero.user.tutorial_step
+       tutorial_step: current_user && current_user.tutorial_step
      )}
   end
 
@@ -27,6 +28,10 @@ defmodule MobaWeb.BattleLiveView do
     current_hero = socket.assigns.current_hero
     battle = Engine.get_battle!(id)
     current_hero && Engine.read_battle!(battle)
+
+    if connected?(socket) && battle.type == "duel" do
+      MobaWeb.subscribe("battle-#{battle.id}")
+    end
 
     snapshot =
       if current_hero && current_hero.id != battle.attacker_id && battle.type == "pvp" do
@@ -49,28 +54,24 @@ defmodule MobaWeb.BattleLiveView do
      )}
   end
 
+  def handle_info({"turn", %{battle_id: battle_id, turn_number: turn_number}}, socket) do
+    battle = Engine.get_battle!(battle_id)
+    turn = Engine.next_battle_turn(battle)
+
+    {:noreply, turn_assigns(socket, battle, turn, turn_number)}
+  end
+
   def handle_event("next-turn", %{"skill" => skill_id, "item" => item_id}, %{assigns: %{battle: battle}} = socket) do
     skill = skill_id != "" && Game.get_skill!(skill_id)
     item = item_id != "" && Game.get_item!(item_id)
     current_turn = Engine.last_turn(battle)
     battle = battle |> Engine.continue_battle!(%{skill: skill, item: item})
-
-    last_turn = Engine.last_turn(battle)
-
-    socket = check_tutorial(battle, socket)
-
     next_turn = Engine.next_battle_turn(battle)
+    turn_number = (current_turn && current_turn.number + 1) || 1
 
-    {:noreply,
-     assign(socket,
-       skill: BattleView.preselected_skill(next_turn.attacker, next_turn),
-       item: nil,
-       battle: battle,
-       turn: next_turn,
-       last_turn: last_turn,
-       action_turn_number: (current_turn && current_turn.number + 1) || 1,
-       hero: battle.attacker_snapshot
-     )}
+    MobaWeb.broadcast("battle-#{battle.id}", "turn", %{battle_id: battle.id, turn_number: turn_number})
+
+    {:noreply, socket |> check_tutorial(battle) |> turn_assigns(battle, next_turn, turn_number)}
   end
 
   def handle_event("next-battle", %{"id" => id}, socket) do
@@ -89,7 +90,7 @@ defmodule MobaWeb.BattleLiveView do
     BattleView.render("show.html", assigns)
   end
 
-  defp check_tutorial(battle, socket) do
+  defp check_tutorial(socket, battle) do
     snapshot = battle.attacker_snapshot
 
     if battle.type == "league" && snapshot.league_step == 0 && battle.winner &&
@@ -98,5 +99,16 @@ defmodule MobaWeb.BattleLiveView do
     else
       socket
     end
+  end
+
+  defp turn_assigns(socket, battle, turn, turn_number) do
+    assign(socket,
+      battle: battle,
+      action_turn_number: turn_number,
+      last_turn: Engine.last_turn(battle),
+      turn: turn,
+      skill: BattleView.preselected_skill(turn.attacker, turn),
+      item: nil
+    )
   end
 end

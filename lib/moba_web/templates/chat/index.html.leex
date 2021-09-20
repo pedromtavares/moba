@@ -65,3 +65,7 @@
 <%= for alert <- battle_alerts(@alerts) do %>
     <%=render("_battle_alert.html", alert: alert, socket: @socket)%>
 <% end %>
+
+<%= if @challenge do %>
+    <div phx-hook="<%=if @challenge.challenger, do: "DuelChallenger", else: "DuelChallenged"%>" id="duel-challenge" data-other="<%=@challenge.other.username%>"/>
+<% end %>

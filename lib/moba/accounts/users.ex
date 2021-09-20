@@ -40,6 +40,13 @@ defmodule Moba.Accounts.Users do
     |> Repo.update_all(set: [last_online_at: DateTime.utc_now()])
   end
 
+  def duel_list(user) do
+    UserQuery.online_users()
+    |> UserQuery.with_status("available")
+    |> UserQuery.exclude_user(user)
+    |> Repo.all()
+  end
+
   @doc """
   Users gain experience from PVE battles (along with their Hero)
   When they level up, they increment their shard_count, which can be used for Unlocks
@@ -112,21 +119,20 @@ defmodule Moba.Accounts.Users do
   end
 
   @doc """
-  Increments PVP counts and sets the pvp_score map that is displayed on the user's profile
-  Each user holds the score count of every other user they have battled against
+  Increments duel counts and sets the duel_score map that is displayed on the user's profile
+  Each user holds the score count of every other user they have dueled against
   """
-  def pvp_updates!(user, updates) do
-    loser_id = updates[:loser_user_id] && Integer.to_string(updates[:loser_user_id])
-    current_score = user.pvp_score[loser_id] || 0
-    pvp_score = loser_id && Map.put(user.pvp_score, loser_id, current_score + 1)
-
-    extra_win = if updates[:pvp_wins], do: 1, else: 0
-    extra_loss = if updates[:pvp_losses], do: 1, else: 0
+  def duel_updates!(user, updates) do
+    loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
+    current_score = user.duel_score[loser_id] || 0
+    duel_score = loser_id && Map.put(user.duel_score, loser_id, current_score + 1)
+    extra_win = if updates[:duel_winner], do: 1, else: 0
 
     update!(user, %{
-      pvp_score: pvp_score || user.pvp_score,
-      pvp_wins: user.pvp_wins + extra_win,
-      pvp_losses: user.pvp_losses + extra_loss
+      duel_score: duel_score || user.duel_score,
+      duel_wins: user.duel_wins + extra_win,
+      duel_count: user.duel_count + 1,
+      season_points: updates[:season_points] || user.season_points
     })
   end
 

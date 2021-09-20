@@ -28,6 +28,8 @@ defmodule MobaWeb.DashboardLiveView do
     pvp_display = if current_pvp_hero, do: "current", else: "previous"
     pvp_hero = if current_pvp_hero, do: current_pvp_hero, else: last_pvp_hero
 
+    duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
+
     {:ok,
      assign(socket,
        current_pvp_hero: current_pvp_hero,
@@ -38,7 +40,8 @@ defmodule MobaWeb.DashboardLiveView do
        pve_display: pve_display,
        pvp_display: pvp_display,
        winners: tier_winners,
-       winner_index: winner_index
+       winner_index: winner_index,
+       duel_users: duel_users
      )}
   end
 
@@ -62,6 +65,13 @@ defmodule MobaWeb.DashboardLiveView do
     hero = Game.get_hero!(id)
     Game.archive_hero!(hero)
     {:noreply, assign(socket, visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id)))}
+  end
+
+  def handle_event("challenge", %{"id" => opponent_id}, socket) do
+    opponent = Accounts.get_user!(opponent_id)
+    Game.duel_challenge(socket.assigns.current_user, opponent)
+
+    {:noreply, socket}
   end
 
   def render(assigns) do

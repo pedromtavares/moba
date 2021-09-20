@@ -3,7 +3,7 @@ defmodule Moba.Engine.Core.Pvp do
   Encapsulates all logic for PVP battles - the ones fought in the Arena
   """
 
-  alias Moba.{Engine, Ranker}
+  alias Moba.{Engine, Ranker, Game}
   alias Engine.Schema.Battle
 
   use Timex
@@ -63,7 +63,7 @@ defmodule Moba.Engine.Core.Pvp do
   end
 
   defp update_attacker({%{attacker: attacker} = battle, updates}) do
-    Moba.update_attacker!(attacker, updates)
+    Game.update_attacker!(attacker, updates)
 
     battle
   end
@@ -98,20 +98,19 @@ defmodule Moba.Engine.Core.Pvp do
     Engine.update_battle!(battle, %{unread_id: defender.id})
   end
 
-  # This passes score information along to be updated in the User's pvp_score
   defp manage_score(%{winner: winner, attacker: attacker, defender: defender} = battle) do
     win = winner && attacker.id == winner.id
 
     {attacker_updates, defender_updates} =
       if win do
         {
-          %{pvp_wins: attacker.pvp_wins + 1, loser_user_id: defender.user_id},
+          %{pvp_wins: attacker.pvp_wins + 1},
           %{pvp_losses: defender.pvp_losses + 1}
         }
       else
         {
           %{pvp_losses: attacker.pvp_losses + 1},
-          %{pvp_wins: defender.pvp_wins + 1, loser_user_id: attacker.user_id}
+          %{pvp_wins: defender.pvp_wins + 1}
         }
       end
 
@@ -134,8 +133,8 @@ defmodule Moba.Engine.Core.Pvp do
         pvp_points: points_limits(defender.pvp_points + rewards.defender_pvp_points, defender)
       })
 
-    attacker = Moba.update_attacker!(attacker, attacker_updates)
-    defender = Moba.update_defender!(defender, defender_updates)
+    attacker = Game.update_hero!(attacker, attacker_updates)
+    defender = Game.update_hero!(defender, defender_updates)
 
     {battle, attacker, defender}
   end

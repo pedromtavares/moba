@@ -48,7 +48,7 @@ defmodule Moba.Engine.Core.Pve do
   end
 
   defp update_attacker({battle, updates}) do
-    attacker = Moba.update_attacker!(battle.attacker, updates)
+    attacker = Game.update_attacker!(battle.attacker, updates)
     battle = Map.put(battle, :attacker, attacker)
 
     {battle, attacker}

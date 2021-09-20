@@ -1,0 +1,43 @@
+<div class="row mt-2">
+    <div class="col center">
+        <%= if @last_turn && @last_turn.skill do %>
+            <div class="btn btn-outline-danger">
+                Attacked you with <%=skill_name(@last_turn.skill)%> <%=item_name(@last_turn.item)%>
+            </div>
+        <% end %>
+    </div>
+</div>
+<div class="row mb-1">
+    <div class="col mt-1">
+        <div class="skills-container">
+            <div class="img-container mr-4 float-left inactive">
+                <img src="/images/basic_attack.png" data-toggle="tooltip" title="<%=GH.basic_attack_description()%>" class="skill-img <%=if @last_turn && @last_turn.skill && @last_turn.skill.code == "basic_attack", do: "last-skill"%>""/>
+            </div>
+            <%= for skill <- @hero.active_build.skills do %>
+                <div class="img-container float-left inactive skill-container">
+                    <img src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" class="skill-img <%=if @last_turn && @last_turn.skill && @last_turn.skill.id == skill.id, do: "last-skill"%>"/>
+                    <%= resource_status(skill, @turn.defender) %>
+                </div>
+            <% end %>
+
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="items-container">
+            <%= for item <- @hero.items do %>
+                <div class="img-container float-left inactive">
+                    <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class="item-img <%=if @last_turn && @last_turn.item == item, do: "last-item"%>"/>
+                </div>
+            <% end %>
+            <%= if Enum.count(@hero.items) < 6 do %>
+                <%= for _ <- (Enum.count(@hero.items)..5) do %>
+                    <div class="img-container item-container float-left">
+                        <div class="item-img empty-item"></div>
+                    </div>
+                <% end %>
+            <% end %>
+        </div>
+    </div>
+</div>

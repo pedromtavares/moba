@@ -2,7 +2,7 @@ defmodule Moba.EngineTest do
   use Moba.DataCase
 
   setup do
-    attrs = %{pvp_points: 50}
+    attrs = %{pvp_points: 50, season_points: 50}
 
     base_hero = create_base_hero(attrs)
     weak_hero = create_base_hero(attrs, create_user(attrs), weak_avatar())
@@ -203,14 +203,9 @@ defmodule Moba.EngineTest do
       |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
-      defender = Game.get_hero!(defender.id)
 
       assert hero.pvp_points == attacker.pvp_points + 9
-
       assert hero.pvp_wins == attacker.pvp_wins + 1
-      assert hero.user.pvp_wins == attacker.user.pvp_wins + 1
-      assert hero.user.pvp_score == %{"#{defender.user.id}" => 1}
-      assert defender.user.pvp_score == %{}
     end
 
     test "defender wins", %{strong_hero: defender, weak_hero: attacker} do
@@ -222,10 +217,6 @@ defmodule Moba.EngineTest do
 
       assert updated_attacker.pvp_points == attacker.pvp_points - 9
       assert updated_defender.pvp_points == defender.pvp_points + 2
-      assert updated_attacker.pvp_losses == attacker.pvp_losses + 1
-      assert updated_defender.pvp_wins == defender.pvp_wins + 1
-      assert updated_defender.user.pvp_wins == defender.user.pvp_wins + 1
-      assert updated_defender.user.pvp_score == %{"#{attacker.user.id}" => 1}
     end
   end
 
@@ -361,6 +352,43 @@ defmodule Moba.EngineTest do
 
       refute with_boss.boss_id
       assert with_boss.pve_points == 11
+    end
+  end
+
+  describe "duel" do
+    test "full cycle", %{strong_hero: attacker, weak_hero: defender} do
+      duel = Game.create_duel!(attacker.user, defender.user)
+      Game.next_duel_phase!(duel, attacker.id)
+      duel = Game.get_duel!(duel.id)
+      Game.next_duel_phase!(duel, defender.id)
+      Engine.first_duel_battle(duel) |> Engine.auto_finish_battle!()
+
+      hero = Game.get_hero!(attacker.id)
+      defender = Game.get_hero!(defender.id)
+
+      assert hero.user.season_points == attacker.user.season_points
+
+      duel = Game.get_duel!(duel.id)
+      Game.next_duel_phase!(duel, defender.id)
+      duel = Game.get_duel!(duel.id)
+      Game.next_duel_phase!(duel, attacker.id)
+
+      last_battle = Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
+
+      %{user: user} = Game.get_hero!(attacker.id)
+      %{user: opponent} = Game.get_hero!(defender.id)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.rewards == last_battle.rewards
+      assert duel.winner_id == attacker.user_id
+      assert user.duel_count == attacker.user.duel_count + 1
+      assert opponent.duel_count == defender.user.duel_count + 1
+      assert user.duel_wins == attacker.user.duel_wins + 1
+      assert user.duel_score == %{"#{opponent.id}" => 1}
+      assert opponent.duel_score == %{}
+
+      assert user.season_points == attacker.user.season_points + 18
+      assert opponent.season_points == defender.user.season_points - 4
     end
   end
 

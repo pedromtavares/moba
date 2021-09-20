@@ -196,16 +196,6 @@ defmodule Moba do
     Game.prepare_hero_for_pvp!(hero)
   end
 
-  def update_attacker!(hero, updates) do
-    Accounts.user_pvp_updates!(hero.user_id, updates)
-    Game.update_attacker!(hero, updates)
-  end
-
-  def update_defender!(hero, updates) do
-    Accounts.user_pvp_updates!(hero.user_id, updates)
-    Game.update_hero!(hero, updates)
-  end
-
   @doc """
   Game pvp_ranking is defined by who currently have the highest pvp_points
   Game pve_ranking is defined by who has the highest total_farm (gold)

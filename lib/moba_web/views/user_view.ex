@@ -12,11 +12,9 @@ defmodule MobaWeb.UserView do
     end
   end
 
-  def win_rate(user) do
-    sum = user.pvp_wins + user.pvp_losses
-
-    if sum > 0 do
-      round(user.pvp_wins * 100 / sum)
+  def win_rate(%{duel_count: count, duel_wins: wins}) do
+    if count > 0 do
+      round(wins * 100 / count)
     else
       0
     end

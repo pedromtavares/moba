@@ -260,4 +260,39 @@ Hooks.LeagueChallengeAlert = {
   }
 }
 
+Hooks.DuelChallenger = {
+  mounted(){
+    swal(`You have challenged ${this.el.dataset.other}, waiting for response...`, {
+      title: "Duel Challenge",
+      buttons: {
+        confirm: {
+          className: "btn btn-danger btn-block challenge-button",
+          text: "Close",
+        }
+      }
+    })
+  }
+}
+
+Hooks.DuelChallenged = {
+  mounted(){
+    swal(`You are being challenged to a Duel by ${this.el.dataset.other}.`, {
+      title: "Duel Challenge",
+      buttons: {
+        confirm: {
+          className: "btn btn-danger btn-block challenge-button",
+          text: "Accept Challenge",
+          value: "start"
+        }
+      }
+    }).then((value) => {
+      switch(value){
+        case "start":
+        this.pushEventTo("#chat", "accept", {});
+        break;
+      }
+    });
+  }
+}
+
 export default Hooks;

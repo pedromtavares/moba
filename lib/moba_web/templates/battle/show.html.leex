@@ -54,6 +54,13 @@
                                         <span class="loading-text">Battle Over!</span>
                                     </a>
                                 <% end %>
+                                <%= if @battle.type == "duel" do %>
+                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @battle.duel_id), "phx-hook": "Loading", id: "battle-over-duel" do %>
+                                        <button class="btn btn-danger width-lg text-white">
+                                            <span class="loading-text">Battle Over!</span>
+                                        </button>
+                                    <% end %>
+                                <% end %>
                             </div>
                         </div>
                         <div class="row mt-5">
@@ -82,7 +89,7 @@
                 <%= if @battle.finished do %>
                     <%=render_rewards(@battle, assigns)%>
                 <% else %>
-                    <%=render "_active_battle.html", battle: @battle, turn: @turn, skill: @skill, item: @item, last_turn: @last_turn%>
+                    <%=render "_active_battle.html", battle: @battle, turn: @turn, skill: @skill, item: @item, last_turn: @last_turn, current_user: @current_user%>
                 <% end %>
             </div>
             <%=render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.defender, turn_hero: if @turn.attacker.hero_id == @battle.attacker_id, do: @turn.defender, else: @turn.attacker%>

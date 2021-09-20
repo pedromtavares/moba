@@ -570,4 +570,61 @@ defmodule Moba.GameTest do
       assert avatar.ultimate == base_ultimate()
     end
   end
+
+  describe "duels" do
+    test "#next_duel_phase!" do
+      user = create_user()
+      opponent = create_user()
+      skills = base_skills()
+
+      user_hero = Game.create_hero!(%{name: "User"}, user, strong_avatar(), skills)
+      opp_hero = Game.create_hero!(%{name: "Opponent"}, opponent, weak_avatar(), skills)
+
+      duel = Game.create_duel!(user, opponent)
+
+      assert duel.phase == "user_first_pick"
+
+      Game.next_duel_phase!(duel, user_hero.id)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.phase == "opponent_first_pick"
+      assert duel.user_first_pick_id == user_hero.id
+
+      Game.next_duel_phase!(duel, opp_hero.id)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.phase == "user_battle"
+      assert duel.opponent_first_pick_id == opp_hero.id
+
+      battle = Engine.first_duel_battle(duel)
+
+      assert battle.attacker_id == user_hero.id
+      assert battle.defender_id == opp_hero.id
+
+      Engine.auto_finish_battle!(battle)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.phase == "opponent_second_pick"
+
+      Game.next_duel_phase!(duel, opp_hero.id)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.phase == "user_second_pick"
+
+      Game.next_duel_phase!(duel, user_hero.id)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.phase == "opponent_battle"
+
+      battle = Engine.last_duel_battle(duel)
+
+      assert battle.attacker_id == opp_hero.id
+      assert battle.defender_id == user_hero.id
+
+      Engine.auto_finish_battle!(battle)
+      duel = Game.get_duel!(duel.id)
+
+      assert duel.phase == "finished"
+    end
+  end
 end

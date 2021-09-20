@@ -40,6 +40,10 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in query, where: u.id == ^user.id)
   end
 
+  def with_status(query \\ User, status) do
+    from(u in query, where: u.status == ^status)
+  end
+
   def exclude_user(query \\ User, user) do
     from(u in query, where: u.id != ^user.id)
   end
@@ -72,12 +76,8 @@ defmodule Moba.Accounts.Query.UserQuery do
     from user in query, where: user.level == ^level, order_by: fragment("RANDOM()")
   end
 
-  def by_pvp_points do
-    from(u in User, order_by: [desc: u.pvp_points])
-  end
-
-  def with_pvp_points do
-    from(u in by_pvp_points(), where: u.pvp_points > 0)
+  def by_season_points do
+    from(u in User, order_by: [desc: u.season_points])
   end
 
   def with_pvp_heroes(query \\ User) do
@@ -89,7 +89,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   end
 
   def eligible_arena_bots do
-    from(u in by_pvp_points(),
+    from(u in by_season_points(),
       where: u.is_bot == true,
       where: is_nil(u.current_pvp_hero_id)
     )

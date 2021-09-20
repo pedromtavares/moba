@@ -81,19 +81,19 @@ defmodule Moba.AccountsTest do
     end
   end
 
-  describe "#user_pvp_updates!" do
+  describe "#user_duel_updates!" do
     test "sets score correctly", %{user: winner} do
       loser = create_user()
-      user = Accounts.user_pvp_updates!(winner.id, %{loser_user_id: loser.id})
+      user = Accounts.user_duel_updates!(winner, %{loser_id: loser.id})
 
-      assert user.pvp_score["#{loser.id}"] == 1
+      assert user.duel_score["#{loser.id}"] == 1
     end
 
     test "sets wins/losses/points correctly", %{user: winner} do
-      user = Accounts.user_pvp_updates!(winner.id, %{pvp_wins: 1, pvp_losses: 1, pvp_points: 10})
+      user = Accounts.user_duel_updates!(winner, %{duel_winner: winner, pvp_points: 10})
 
-      assert user.pvp_wins == winner.pvp_wins + 1
-      assert user.pvp_losses == winner.pvp_losses + 1
+      assert user.duel_wins == winner.duel_wins + 1
+      assert user.duel_count == winner.duel_count + 1
     end
   end
 

@@ -7,11 +7,7 @@ defmodule Moba.Cleaner do
 
   def cleanup_old_records do
     ago = Timex.now() |> Timex.shift(days: -7)
-    query = from b in Battle, where: b.inserted_at <= ^ago, order_by: b.id, limit: 50
-
-    Repo.all(query) |> delete_records()
-
-    query = from h in Hero, where: h.inserted_at <= ^ago, where: is_nil(h.user_id), limit: 50
+    query = from b in Battle, where: b.inserted_at <= ^ago, where: b.type != "duel", order_by: b.id, limit: 50
 
     Repo.all(query) |> delete_records()
 

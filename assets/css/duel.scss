@@ -1,0 +1,40 @@
+.duel{
+  .pick-button{
+    background: rgba(54, 64, 74, 0.8);
+    color: #f1556c;
+  }
+  .hero-card{
+    .card-header{
+      min-height: 45px;
+    }
+    .card-body{
+      background-color: initial !important;
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: 80%;
+      min-height: 300px;
+    }
+  }
+  .btn-success {
+    color: #1abc9c;
+    background: rgba(26,188,156, 0.2) !important;
+  }
+  .btn-primary {
+    color: #3bafda;
+    background: rgba(59,175,218, 0.2) !important;
+  }
+  .btn-warning {
+    color: #f7b84b;
+    background: rgba(247, 184, 75, 0.2) !important;
+  }
+  .btn-danger {
+    color: #f1556c;
+    background: rgba(241,85,108, 0.2) !important;
+  }
+  .progress{
+    height: 20px;
+  }
+  .dead{
+    height: 30px;
+  }
+}

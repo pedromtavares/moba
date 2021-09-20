@@ -119,9 +119,9 @@
                             <h5 class="card-header text-center font-17 text-white"><i class="fa fa-user-friends mr-1"></i>Score</h5>
                             <div class="card-body">
                                 <h4 class="text-center">
-                                    <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.pvp_score["#{@user.id}"] || 0%></span>
+                                    <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.duel_score["#{@user.id}"] || 0%></span>
                                     <i class="fa fa-times mx-2"></i>
-                                    <span class="badge badge-pill badge-light-danger font-20"><%=@user.pvp_score["#{@current_user.id}"] || 0%></span> <%=@user.username%>
+                                    <span class="badge badge-pill badge-light-danger font-20"><%=@user.duel_score["#{@current_user.id}"] || 0%></span> <%=@user.username%>
                                 </h4>
                             </div>
                         </div>

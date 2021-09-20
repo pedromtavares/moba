@@ -25,7 +25,8 @@ defmodule MobaWeb.ChatLiveView do
        changeset: Accounts.change_message(),
        user: user,
        visible: false,
-       unread_count: count
+       unread_count: count,
+       challenge: nil
      ), temporary_assigns: [alerts: []]}
   end
 
@@ -85,9 +86,22 @@ defmodule MobaWeb.ChatLiveView do
     {:noreply, assign(socket, messages: socket.assigns.messages -- [message])}
   end
 
+  def handle_event("accept", _, %{assigns: %{challenge: challenge, user: current_user}} = socket) do
+    {user, opponent} =
+      if challenge.challenger do
+        {current_user, challenge.other}
+      else
+        {challenge.other, current_user}
+      end
+
+    Game.create_duel!(user, opponent)
+
+    {:noreply, assign(socket, challenge: nil)}
+  end
+
   def handle_info(
         {"message", message},
-        %{assigns: %{messages: messages, unread_count: count, visible: visible, alerts: alerts, user: user}} = socket
+        %{assigns: %{messages: messages, unread_count: count, alerts: alerts, user: user}} = socket
       ) do
     {alerts, new_count} =
       if message.user_id == user.id do
@@ -102,6 +116,21 @@ defmodule MobaWeb.ChatLiveView do
 
   def handle_info({"alert", alert}, socket) do
     {:noreply, assign(socket, alerts: [alert] ++ socket.assigns.alerts)}
+  end
+
+  def handle_info({"duel", %{id: id}}, socket) do
+    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.DuelLiveView, id))}
+  end
+
+  def handle_info({"challenge", %{user_id: user_id, opponent_id: opponent_id}}, %{assigns: %{user: user}} = socket) do
+    challenge =
+      if user.id == user_id do
+        %{challenger: true, other: Accounts.get_user!(opponent_id), other_id: opponent_id}
+      else
+        %{challenger: false, other: Accounts.get_user!(user_id), other_id: user_id}
+      end
+
+    {:noreply, assign(socket, challenge: challenge)}
   end
 
   def render(assigns) do

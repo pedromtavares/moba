@@ -12,6 +12,7 @@
 @import "./shop.scss";
 @import "./user.scss";
 @import "./tavern.scss";
+@import "./duel.scss";
 @import "./shared.scss";
 
 @import "../node_modules/nprogress/nprogress.css";
@@ -36,6 +37,11 @@ body{
 
 .progress-bar{
   min-width: 10%;
+}
+
+hr{
+  border-color: #424e5a;
+  margin: 0;
 }
 
 .black-bar{
@@ -189,6 +195,10 @@ body{
 
 .card-footer{
   background-color: rgba(54, 64, 74, 0.8);
+}
+
+.original-bg{
+  background-color: #414d59 !important;
 }
 
 .card-border{
