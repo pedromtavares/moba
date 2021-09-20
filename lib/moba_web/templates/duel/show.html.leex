@@ -29,9 +29,9 @@
                         <% end %>
                         <%= if @duel.rewards.defender_pvp_points != 0 do %>
                             <%= if @duel.rewards.defender_pvp_points > 0 do %>
-                                <span class="badge badge-pill badge-light-success"><%=@duel.opponent.name%>: +<%=@duel.rewards.defender_pvp_points%> Season Points</span>
+                                <span class="badge badge-pill badge-light-success"><%=@duel.opponent.username%>: +<%=@duel.rewards.defender_pvp_points%> Season Points</span>
                             <% else %>
-                                <span class="badge badge-pill badge-light-dark"><%=@duel.opponent.name%>: <%=@duel.rewards.defender_pvp_points%> Season Points</span>
+                                <span class="badge badge-pill badge-light-dark"><%=@duel.opponent.username%>: <%=@duel.rewards.defender_pvp_points%> Season Points</span>
                             <% end %>
                         <% end %>
                     </h3>
