@@ -48,6 +48,16 @@
   margin-bottom: 100px;
   min-height: 700px;
 
+  .btn-danger {
+    color: #f1556c;
+    background: rgba(241,85,108, 0.2) !important;
+  }
+
+  .btn-primary {
+    color: #3bafda;
+    background: rgba(59,175,218, 0.2) !important;
+  }
+
   .hero-card{
     min-height: 500px;
 
@@ -365,6 +375,12 @@
   padding: 0 12px 0 12px;
   box-shadow: inset 0px 0px 300px black;
   z-index: 1000;
+
+  .btn-outline-danger {
+    color: #f1556c;
+    background: rgba(241,85,108, 0.2) !important;
+  }
+
 
   .inner-content{
     min-height: 180px;

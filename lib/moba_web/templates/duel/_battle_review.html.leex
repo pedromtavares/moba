@@ -3,7 +3,7 @@
 <%= if @battle.finished do %>
     <div class="row mb-2">
         <div class="col">
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-lg btn-block btn-danger" do %>
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-lg btn-block btn-warning" do %>
                 <i class="fa fa-eye"></i> View Battle
             <% end %>
         </div>

@@ -4,4 +4,7 @@ defmodule MobaWeb.DuelView do
   def can_switch_build?(hero), do: Game.hero_has_other_build?(hero)
   def phase_class(%{phase: phase}, current_phase) when phase == current_phase, do: "active"
   def phase_class(_, _), do: ""
+
+  def finished?(%{phase: "finished"}), do: true
+  def finished?(_), do: false
 end

@@ -1,9 +1,15 @@
 <div class="row mt-2">
     <div class="col center">
         <%= if @last_turn && @last_turn.skill do %>
-            <div class="btn btn-outline-danger">
-                Attacked you with <%=skill_name(@last_turn.skill)%> <%=item_name(@last_turn.item)%>
-            </div>
+            <%= if @last_turn.attacker.hero_id == @hero.id do %>
+                <div class="btn btn-outline-danger">
+                    Attacked with <%=skill_name(@last_turn.skill)%> <%=item_name(@last_turn.item)%>
+                </div>
+            <% else %>
+                <div class="btn btn-outline-danger">
+                    Thinking...
+                </div>
+            <% end %>
         <% end %>
     </div>
 </div>

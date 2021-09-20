@@ -10,14 +10,14 @@
             <h2 class="center">DUEL #<%=@duel.id%></h2>
             <h1 class="text-center"><%=live_redirect @duel.user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @duel.user)%> vs <%=live_redirect @duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @duel.opponent)%> </h1>
             <h2 class="center"><%=@duel.user.duel_score["#{@duel.opponent_id}"] || 0 %> x <%=@duel.opponent.duel_score["#{@duel.user_id}"] || 0 %></h2>
-            <%= if @duel.phase == "finished" && (@current_user.id == @duel.user_id || @current_user.id == @duel.opponent_id) do %>
+            <%= if finished?(@duel) && (@current_user.id == @duel.user_id || @current_user.id == @duel.opponent_id) do %>
                 <div class="text-center">
                     <button type="button" class="btn btn-danger text-center btn-lg" phx-click="rematch"><i class="fa fa-refresh mr-1"></i>Rematch</button>
                 </div>
             <% end %>
         </div>
         <div class="col-4">
-            <%= if @duel.phase == "finished" do %>
+            <%= if finished?(@duel) do %>
                 <%= if @duel.winner do %>
                     <h1 class="text-center text-warning"><i class="fa fa-trophy fa-2x"></i></h1>
                     <h1 class="text-center text-warning">Winner: <%=@duel.winner.username%></h1>
@@ -40,11 +40,12 @@
                     <h1 class="text-center text-dark">Tie</h1>
                     <h2 class="center text-dark">No winners</h2>
                 <% end %>
-
             <% end %>
         </div>
-
     </div>
+    <%= unless @duel.phase == "user_first_pick" do %>
+        <hr style="border-width: 10px;" class="mb-3 mt-3"/>
+    <% end %>
     <div class="duel-details">
         <%= if @first_battle && @first_battle.finished do %>
             <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2">
@@ -67,45 +68,6 @@
                     </a>
                 </li>
             </ul>
-        <% else %>
-            <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2">
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "user_first_pick")%>">
-                        <span class="number">1</span>
-                        <span class="d-none d-sm-inline"><%=@duel.user.username%> First Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "opponent_first_pick")%>">
-                        <span class="number">2</span>
-                        <span class="d-none d-sm-inline"><%=@duel.opponent.username%> First Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "user_battle")%>">
-                        <span class="number">3</span>
-                        <span class="d-none d-sm-inline">First Battle</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "opponent_second_pick")%>">
-                        <span class="number">4</span>
-                        <span class="d-none d-sm-inline"><%=@duel.opponent.username%> Final Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "user_second_pick")%>">
-                        <span class="number">5</span>
-                        <span class="d-none d-sm-inline"><%=@duel.user.username%> Final Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "opponent_battle")%>">
-                        <span class="number">6</span>
-                        <span class="d-none d-sm-inline">Final Battle</span>
-                    </a>
-                </li>
-            </ul>
         <% end %>
         <div class="row">
             <%= if @duel.user_first_pick do %>
@@ -125,6 +87,7 @@
             <% end %>
         </div>
         <%= if @duel.phase == "user_first_pick" && @duel.user_id == @current_user.id do %>
+            <hr style="border-width: 10px;" class="mb-3"/>
             <div class="row">
                 <%=for hero <- @heroes do %>
                     <%= render "_eligible_hero.html", hero: hero%>
@@ -132,14 +95,13 @@
             </div>
         <% end %>
 
-        <%= if @duel.phase == "opponent_first_pick" do %>
-            <%= if @duel.opponent_id == @current_user.id do %>
-                <div class="row">
-                    <%=for hero <- @heroes do %>
-                        <%= render "_eligible_hero.html", hero: hero%>
-                    <% end %>
-                </div>
-            <% end %>
+        <%= if @duel.phase == "opponent_first_pick" && @duel.opponent_id == @current_user.id  do %>
+            <hr style="border-width: 10px;" class="mb-3"/>
+            <div class="row">
+                <%=for hero <- @heroes do %>
+                    <%= render "_eligible_hero.html", hero: hero%>
+                <% end %>
+            </div>
         <% end %>
         <%= if @first_battle && @first_battle.finished do %>
             <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2">
@@ -190,6 +152,7 @@
 
         <%= if @duel.phase == "user_second_pick" do %>
             <%= if @duel.user_id == @current_user.id do %>
+                <hr style="border-width: 10px;" class="mb-3"/>
                 <div class="row">
                     <%=for hero <- @heroes do %>
                         <%= render "_eligible_hero.html", hero: hero%>
@@ -199,3 +162,50 @@
         <% end %>
     </div>
 </div>
+
+<%= unless finished?(@duel) do %>
+    <div id="battle-bar">
+        <div class="container-fluid">
+            <div class="row">
+                <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2 w-100">
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "user_first_pick")%>">
+                            <span class="number">1</span>
+                            <span class="d-none d-sm-inline"><%=@duel.user.username%> First Pick</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "opponent_first_pick")%>">
+                            <span class="number">2</span>
+                            <span class="d-none d-sm-inline"><%=@duel.opponent.username%> First Pick</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "user_battle")%>">
+                            <span class="number">3</span>
+                            <span class="d-none d-sm-inline">First Battle</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "opponent_second_pick")%>">
+                            <span class="number">4</span>
+                            <span class="d-none d-sm-inline"><%=@duel.opponent.username%> Final Pick</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "user_second_pick")%>">
+                            <span class="number">5</span>
+                            <span class="d-none d-sm-inline"><%=@duel.user.username%> Final Pick</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="javascript:;" class="nav-link no-action <%=phase_class(@duel, "opponent_battle")%>">
+                            <span class="number">6</span>
+                            <span class="d-none d-sm-inline">Final Battle</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+<% end %>
