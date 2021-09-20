@@ -26,7 +26,7 @@
             <%= if Enum.count(@battle.turns) > 0 do %>
                 <div class="timeline mt-3" dir="ltr" style="margin-bottom: 0">
                     <div class="text-center battle-initiated">
-                        <div class='btn btn-<%=if @battle.initiator_id == @battle.attacker_id, do: "danger", else: "primary"%> width-lg' phx-hook="Scroll" id="battle-initiated">Battle initiated by <%=@battle.initiator.name%></div>
+                        <div class='btn btn-outline-<%=if @battle.initiator_id == @battle.attacker_id, do: "danger", else: "primary"%> width-lg' phx-hook="Scroll" id="battle-initiated">Battle initiated by <%=@battle.initiator.name%></div>
                     </div>
                     <%= for turn <- @battle.turns do %>
                         <%=render "_turn.html", turn: turn, is_attacker: turn.attacker.hero_id == @battle.attacker_id, debug: @debug%>

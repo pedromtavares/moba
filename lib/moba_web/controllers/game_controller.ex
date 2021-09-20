@@ -46,6 +46,7 @@ defmodule MobaWeb.GameController do
     |> put_session(:current_mode, mode)
     |> redirect(to: path)
   end
+  def switch_mode(conn, _), do: redirect(conn, to: "/base")
 
   def continue(conn, %{"hero_id" => hero_id}) do
     hero = Game.get_hero!(hero_id)

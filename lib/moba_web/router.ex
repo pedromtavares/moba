@@ -41,7 +41,7 @@ defmodule MobaWeb.Router do
   end
 
   scope "/" do
-    pipe_through :browser
+    pipe_through [:browser, :user_helper]
 
     pow_routes()
     pow_extension_routes()
@@ -72,8 +72,8 @@ defmodule MobaWeb.Router do
 
     live "/create", CreateLiveView, layout: {MobaWeb.LayoutView, :clean}
 
-    get "/game/:mode", GameController, :switch_mode
     post "/game/continue", GameController, :continue
+    get "/game/:mode", GameController, :switch_mode
 
     live "/arena/select", ArenaSelectLiveView
 

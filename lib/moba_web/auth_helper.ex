@@ -7,10 +7,8 @@ defmodule MobaWeb.AuthHelper do
   def init(_) do
   end
 
-  def call(conn, _) do
-    user = conn.assigns.current_user
-
-    conn
-    |> put_session(:user_id, user.id)
+  def call(%{assigns: %{current_user: current_user}} = conn, _) when not is_nil(current_user) do
+    put_session(conn, :user_id, current_user.id)
   end
+  def call(conn, _), do: conn
 end
