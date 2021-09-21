@@ -71,7 +71,12 @@ defmodule MobaWeb.BattleLiveView do
 
     MobaWeb.broadcast("battle-#{battle.id}", "turn", %{battle_id: battle.id, turn_number: turn_number})
 
-    {:noreply, socket |> check_tutorial(battle) |> turn_assigns(battle, next_turn, turn_number)}
+    {:noreply,
+      socket
+      |> check_tutorial(battle)
+      |> turn_assigns(battle, next_turn, turn_number)
+      |> assign(hero: battle.attacker_snapshot)
+    }
   end
 
   def handle_event("next-battle", %{"id" => id}, socket) do
