@@ -102,27 +102,33 @@ defmodule Moba.Game do
   end
 
   def summon_hero!(user, avatar, skills, items) do
-    hero =
-      create_hero!(
-        %{
-          name: user.username,
-          league_tier: Moba.master_league_tier(),
-          gold: Moba.summon_total_gold(),
-          pve_battles_available: 0,
-          finished_pve: true,
-          summoned: true
-        },
-        user,
-        avatar,
-        skills,
-        Game.current_match()
-      )
+    if user.shard_count >= Moba.summon_cost() do
+      hero =
+        create_hero!(
+          %{
+            name: user.username,
+            league_tier: Moba.master_league_tier(),
+            gold: Moba.summon_total_gold(),
+            pve_battles_available: 0,
+            finished_pve: true,
+            summoned: true
+          },
+          user,
+          avatar,
+          skills,
+          Game.current_match()
+        )
 
-    Enum.reduce(items, hero, fn item, acc ->
-      buy_item!(acc, item)
-    end)
-    |> Heroes.level_to_max!()
-    |> level_active_build_to_max!()
+      Enum.reduce(items, hero, fn item, acc ->
+        buy_item!(acc, item)
+      end)
+      |> Heroes.level_to_max!()
+      |> level_active_build_to_max!()
+
+      Accounts.update_user!(user, %{shard_count: user.shard_count - Moba.summon_cost()})
+    else
+      user
+    end
   end
 
   def master_league?(%{league_tier: tier}), do: tier == Moba.master_league_tier()

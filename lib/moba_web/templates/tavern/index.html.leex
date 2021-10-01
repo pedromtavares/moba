@@ -23,6 +23,16 @@
         </div>
     </div>
 
+    <div class="row mt-2 mb-2">
+        <div class="col text-center">
+            <%= live_redirect to: "/summon", class: "btn btn-outline-primary btn-lg #{if @current_user.shard_count < Moba.summon_cost(), do: "disabled"}" do %>
+                <i class="fa fa-user fa-2x mr-1 mt-2"></i>
+                <strong class="font-20 d-block">Summon Hero (100 Shards)</strong>
+                <p class="font-15">Create a level 25 Master League Hero to use in PVP</p>
+            <% end %>
+        </div>
+    </div>
+
     <%= if @current_skin do %>
         <div class="row">
             <div class="col">
