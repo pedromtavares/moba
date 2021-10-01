@@ -24,7 +24,8 @@ defmodule MobaWeb.DuelLiveView do
     {:noreply, assign(socket, duel: duel)}
   end
 
-  def handle_info({"phase", phase}, %{assigns: %{duel: duel}} = socket) when phase in ["user_battle", "opponent_battle"] do
+  def handle_info({"phase", phase}, %{assigns: %{duel: duel}} = socket)
+      when phase in ["user_battle", "opponent_battle"] do
     duel = Game.get_duel!(duel.id)
     battle = Engine.latest_duel_battle(duel.id)
     {:noreply, push_redirect(socket, to: "/battles/#{battle.id}")}

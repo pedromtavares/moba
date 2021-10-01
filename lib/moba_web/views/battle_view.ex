@@ -13,7 +13,8 @@ defmodule MobaWeb.BattleView do
       true -> false
     end
   end
-  def active_attacker?(_,_, _), do: false
+
+  def active_attacker?(_, _, _), do: false
 
   def active_defender?(%{defender: defender} = battle, last_turn, %{id: user_id}) do
     is_current? = defender.user_id == user_id
@@ -24,7 +25,8 @@ defmodule MobaWeb.BattleView do
       true -> false
     end
   end
-  def active_defender?(_,_, _), do: false
+
+  def active_defender?(_, _, _), do: false
 
   def can_use?(_, %Moba.Game.Schema.Item{active: false}), do: false
   def can_use?(_, %Moba.Game.Schema.Skill{passive: true}), do: false

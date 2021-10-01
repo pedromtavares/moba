@@ -21,6 +21,34 @@ defmodule MobaWeb.CreateLiveView do
      )}
   end
 
+  def mount(_params, %{"summon" => true, "user_id" => user_id}, socket) do
+    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
+    user = socket.assigns.current_user
+    unlocked_codes = Accounts.unlocked_codes_for(user)
+    cached = get_cache(user.id)
+    avatars = Game.list_creation_avatars(unlocked_codes)
+    items = cached_items()
+
+    {:ok,
+     assign(socket,
+       skills: Game.list_creation_skills(5, unlocked_codes),
+       avatars: avatars,
+       all_avatars: avatars,
+       selected_avatar: cached.selected_avatar,
+       selected_skills: cached.selected_skills,
+       selected_items: cached.selected_items,
+       custom: true,
+       cache_key: user.id,
+       filter: nil,
+       summoning?: true,
+       items: items,
+       total_gold:
+         Moba.summon_total_gold() - (Enum.map(cached.selected_items, &(&1 && Game.item_price(&1))) |> Enum.sum()),
+       epic_items: Enum.filter(items, fn item -> item.rarity == "epic" end),
+       legendary_items: Enum.filter(items, fn item -> item.rarity == "legendary" end)
+     )}
+  end
+
   def mount(_params, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
     user = socket.assigns.current_user
@@ -129,6 +157,49 @@ defmodule MobaWeb.CreateLiveView do
   def handle_event("create-easy", _, socket), do: create_hero(true, socket)
   def handle_event("create-veteran", _, socket), do: create_hero(false, socket)
 
+  def handle_event(
+        "select-item",
+        %{"code" => code},
+        %{assigns: %{selected_skills: skills, cache_key: cache_key, selected_avatar: avatar} = assigns} = socket
+      ) do
+    item = get_item(code, socket)
+
+    {items, gold} =
+      if Enum.member?(assigns.selected_items, item) do
+        remove_item(assigns, item)
+      else
+        add_item(assigns, item)
+      end
+
+    put_cache(cache_key, avatar, skills, nil, items)
+
+    {:noreply, assign(socket, selected_items: items, total_gold: gold)}
+  end
+
+  def handle_event(
+        "summon",
+        _,
+        %{
+          assigns: %{
+            current_user: user,
+            selected_avatar: avatar,
+            selected_skills: selected_skills,
+            selected_items: selected_items
+          }
+        } = socket
+      ) do
+    skills =
+      selected_skills
+      |> Enum.map(fn skill -> skill.id end)
+      |> Game.list_chosen_skills()
+
+    Game.summon_hero!(user, avatar, skills, selected_items)
+
+    delete_cache(socket)
+
+    {:noreply, socket |> redirect(to: "/base")}
+  end
+
   def render(assigns) do
     MobaWeb.CreateView.render("index.html", assigns)
   end
@@ -159,22 +230,58 @@ defmodule MobaWeb.CreateLiveView do
     selected -- [skill]
   end
 
+  defp add_item(%{selected_items: selected, total_gold: total_gold}, item) when length(selected) < 6 do
+    price = Game.item_price(item)
+
+    if total_gold >= price do
+      {selected ++ [item], total_gold - price}
+    else
+      {selected, total_gold}
+    end
+  end
+
+  defp add_item(%{selected_items: selected, total_gold: total_gold}, _), do: {selected, total_gold}
+
+  defp remove_item(%{selected_items: selected, total_gold: total_gold}, item) do
+    {selected -- [item], total_gold + Game.item_price(item)}
+  end
+
   def get_cache(cache_key) do
     case Cachex.get(:game_cache, cache_key) do
-      {:ok, nil} -> %{selected_avatar: nil, selected_skills: [], selected_build_index: nil}
+      {:ok, nil} -> %{selected_avatar: nil, selected_skills: [], selected_build_index: nil, selected_items: []}
       {:ok, attrs} -> attrs
     end
   end
 
-  def put_cache(cache_key, avatar, skills, selected_build_index) do
+  def put_cache(cache_key, avatar, skills, selected_build_index, selected_items \\ []) do
     Cachex.put(:game_cache, cache_key, %{
       selected_avatar: avatar,
       selected_skills: skills,
-      selected_build_index: selected_build_index
+      selected_build_index: selected_build_index,
+      selected_items: selected_items
     })
   end
 
   def delete_cache(%{assigns: %{cache_key: key}}) do
     Cachex.del(:game_cache, key)
+  end
+
+  defp cached_items do
+    match_id = Game.current_match().id
+
+    case Cachex.get(:game_cache, "items-#{match_id}") do
+      {:ok, nil} -> put_cache(match_id)
+      {:ok, items} -> items
+    end
+  end
+
+  defp put_cache(match_id) do
+    items = Game.shop_list()
+    Cachex.put(:game_cache, "items-#{match_id}", items)
+    items
+  end
+
+  defp get_item(code, socket) do
+    Enum.find(socket.assigns.items, fn item -> item.code == code end)
   end
 end

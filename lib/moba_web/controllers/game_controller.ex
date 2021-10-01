@@ -21,10 +21,13 @@ defmodule MobaWeb.GameController do
         put_session(conn, :cache_key, UUID.uuid1())
       end
 
-    conn
-    |> live_render(MobaWeb.CreateLiveView,
+    live_render(conn, MobaWeb.CreateLiveView,
       session: %{"token" => get_csrf_token(), "cache_key" => get_session(conn, :cache_key)}
     )
+  end
+
+  def summon(conn, _params) do
+    live_render(conn, MobaWeb.CreateLiveView, session: %{"summon" => true})
   end
 
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
@@ -46,6 +49,7 @@ defmodule MobaWeb.GameController do
     |> put_session(:current_mode, mode)
     |> redirect(to: path)
   end
+
   def switch_mode(conn, _), do: redirect(conn, to: "/base")
 
   def continue(conn, %{"hero_id" => hero_id}) do

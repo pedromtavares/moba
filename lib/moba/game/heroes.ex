@@ -84,7 +84,7 @@ defmodule Moba.Game.Heroes do
       xp = Moba.xp_until_hero_level(level)
 
       bot
-      |> add_experience(xp)
+      |> add_experience!(xp)
       |> Game.generate_bot_build!()
       |> level_up_skills()
     else
@@ -98,6 +98,19 @@ defmodule Moba.Game.Heroes do
       })
     end
   end
+
+  def level_to_max!(%{level: current_level} = hero) when current_level < @max_level do
+    diff = @max_level - current_level
+
+    xp =
+      Enum.reduce(1..diff, 0, fn level, acc ->
+        acc + Moba.xp_to_next_hero_level(current_level + level)
+      end)
+
+    add_experience!(hero, xp)
+  end
+
+  def level_to_max!(hero), do: hero
 
   def update!(nil, _), do: nil
 
@@ -120,7 +133,7 @@ defmodule Moba.Game.Heroes do
 
     hero
     |> update!(updates)
-    |> add_experience(xp)
+    |> add_experience!(xp)
     |> master_league_updates()
   end
 
@@ -150,7 +163,7 @@ defmodule Moba.Game.Heroes do
     xp = Moba.xp_to_next_hero_level(hero.level + 1)
 
     hero
-    |> add_experience(xp)
+    |> add_experience!(xp)
     |> update!(%{
       pve_points: Moba.pve_points_limit(),
       gold: 100_000,
@@ -295,6 +308,7 @@ defmodule Moba.Game.Heroes do
   def update_pve_ranking! do
     HeroQuery.non_bots()
     |> HeroQuery.finished_pve()
+    |> HeroQuery.non_summoned()
     |> HeroQuery.year_to_date()
     |> Repo.all()
     |> Enum.with_index(1)
@@ -369,11 +383,11 @@ defmodule Moba.Game.Heroes do
 
   # --------------------------------
 
-  defp add_experience(hero, experience)
-  defp add_experience(hero, nil), do: hero
-  defp add_experience(%{level: level} = hero, _) when level >= @max_level, do: hero
+  defp add_experience!(hero, experience)
+  defp add_experience!(hero, nil), do: hero
+  defp add_experience!(%{level: level} = hero, _) when level >= @max_level, do: hero
 
-  defp add_experience(hero, experience) do
+  defp add_experience!(hero, experience) do
     hero = Repo.preload(hero, :user)
     if hero.user, do: Moba.add_user_experience(hero.user, experience)
 
@@ -408,20 +422,6 @@ defmodule Moba.Game.Heroes do
       Game.level_up_skill!(acc, skill.code)
     end)
   end
-
-  # when a Hero reaches the highest League, it gets leveled automatically to the max level
-  defp level_to_max(%{level: current_level} = hero) when current_level < @max_level do
-    diff = @max_level - current_level
-
-    xp =
-      Enum.reduce(1..diff, 0, fn level, acc ->
-        acc + Moba.xp_to_next_hero_level(current_level + level)
-      end)
-
-    add_experience(hero, xp)
-  end
-
-  defp level_to_max(hero), do: hero
 
   defp bot_total_farm(_, "master"), do: Enum.random(18_000..23_000)
 
@@ -482,7 +482,7 @@ defmodule Moba.Game.Heroes do
   defp master_league_updates(%{league_tier: tier, level: level} = hero)
        when tier == @master_league_tier and level < @max_level do
     hero
-    |> level_to_max()
+    |> level_to_max!()
     |> Game.level_active_build_to_max!()
   end
 

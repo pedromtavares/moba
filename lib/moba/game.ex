@@ -101,6 +101,30 @@ defmodule Moba.Game do
     update_hero!(hero, %{archived_at: DateTime.utc_now()})
   end
 
+  def summon_hero!(user, avatar, skills, items) do
+    hero =
+      create_hero!(
+        %{
+          name: user.username,
+          league_tier: Moba.master_league_tier(),
+          gold: Moba.summon_total_gold(),
+          pve_battles_available: 0,
+          finished_pve: true,
+          summoned: true
+        },
+        user,
+        avatar,
+        skills,
+        Game.current_match()
+      )
+
+    Enum.reduce(items, hero, fn item, acc ->
+      buy_item!(acc, item)
+    end)
+    |> Heroes.level_to_max!()
+    |> level_active_build_to_max!()
+  end
+
   def master_league?(%{league_tier: tier}), do: tier == Moba.master_league_tier()
   def max_league?(%{league_tier: tier}), do: tier == Moba.max_league_tier()
 

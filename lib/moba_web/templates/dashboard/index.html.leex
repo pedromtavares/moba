@@ -48,7 +48,7 @@
               <%=for hero <- @visible_heroes do %>
                 <tr>
                   <td class="text-center" width="20%">
-                    <h4><%=hero.name%><%=if hero.finished_pve do %><span class="text-success">#<%=hero.pve_ranking%></span><%end%></h4>
+                    <h4><%=hero.name%><%=if hero.finished_pve && !hero.summoned do %><span class="text-success">#<%=hero.pve_ranking%></span><%end%></h4>
                     <%=GH.hero_avatar(hero, false)%>
 
                     <h5 class="text-muted font-italic">Level <%=hero.level%> <%=hero.avatar.name%></h5>
@@ -58,16 +58,23 @@
                     <br/>
                     <%=GH.hero_item_list(hero, true)%>
                   </td>
-                  <td class="text-center" width="25%">
-                    <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
-                    <h5 class="text-success"><%=GH.pve_win_rate(hero)%>% Win Rate</h5>
-                    <%=if hero.easy_mode do %>
-                      <h5 class="text-primary">Easy Mode</h5>
-                    <% else %>
-                      <h5 class="text-warning"><%=hero.buybacks%> Buybacks</h5>
-                      <h5 class="text-danger">Veteran Mode</h5>
-                    <% end %>
-                  </td>
+                  <%= if hero.summoned do %>
+                    <td class="text-center" width="25%">
+                      <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
+                      <h5 class="text-primary">Summoned</h5>
+                    </td>
+                  <% else %>
+                    <td class="text-center" width="25%">
+                      <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
+                      <h5 class="text-success"><%=GH.pve_win_rate(hero)%>% Win Rate</h5>
+                      <%=if hero.easy_mode do %>
+                        <h5 class="text-primary">Easy Mode</h5>
+                      <% else %>
+                        <h5 class="text-warning"><%=hero.buybacks%> Buybacks</h5>
+                        <h5 class="text-danger">Veteran Mode</h5>
+                      <% end %>
+                    </td>
+                  <% end %>
                   <td class="text-center" width="20%">
                     <%= if hero.finished_pve do %>
                       <%=live_redirect class: "btn btn-primary btn-lg btn-block", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>

@@ -47,6 +47,7 @@ defmodule MobaWeb.Router do
     pow_extension_routes()
 
     get "/start", MobaWeb.GameController, :start
+    get "/summon", MobaWeb.GameController, :summon
     post "/start", MobaWeb.GameController, :create
     get "/", MobaWeb.GameController, :index
 

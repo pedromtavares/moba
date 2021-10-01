@@ -223,6 +223,14 @@ defmodule Moba.Game.Query.HeroQuery do
       order_by: [desc: hero.total_farm]
   end
 
+  def summoned(query \\ Hero) do
+    from hero in query, where: hero.summoned == true
+  end
+
+  def non_summoned(query \\ Hero) do
+    from hero in query, where: hero.summoned == false
+  end
+
   def year_to_date(query \\ Hero) do
     start = Timex.now() |> Timex.beginning_of_year()
 

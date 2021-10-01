@@ -43,6 +43,7 @@ defmodule Moba.Game.Schema.Hero do
     field :pve_ranking, :integer
     field :finished_pve, :boolean, default: false
     field :shards_reward, :integer, default: 0
+    field :summoned, :boolean, default: false
 
     # PVP (Arena) related fields
     field :pvp_points, :integer
@@ -140,7 +141,8 @@ defmodule Moba.Game.Schema.Hero do
       :boss_id,
       :easy_mode,
       :skin_id,
-      :shards_reward
+      :shards_reward,
+      :summoned
     ])
   end
 

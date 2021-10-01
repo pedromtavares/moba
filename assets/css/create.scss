@@ -47,6 +47,22 @@
       min-height: 50px
     }
   }
+
+  .item-img{
+    border: 3px solid #2c333a;
+    margin: 1px;
+    max-width: 70px;
+    max-height: 55px;
+    cursor: pointer;
+    text-align: center;
+    float:left;
+    background: black;
+  }
+  .active{
+    border: 2px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+  }
 }
 
 #create-bar{
