@@ -17,7 +17,8 @@ defmodule MobaWeb.CreateLiveView do
        current_user: nil,
        cache_key: cache_key,
        token: token,
-       filter: nil
+       filter: nil,
+       summoning?: false
      )}
   end
 
@@ -66,7 +67,8 @@ defmodule MobaWeb.CreateLiveView do
        selected_build_index: cached.selected_build_index,
        custom: false,
        cache_key: user.id,
-       filter: nil
+       filter: nil,
+       summoning?: false
      )}
   end
 
