@@ -736,6 +736,9 @@ life_drain =
     hp_regen_multiplier: 0.2,
     mp_cost: 18,
     cooldown: 5,
+    extra_amount: 100,
+    base_amount: 30,
+    base_damage: 30,
     ultimate: true
   })
 

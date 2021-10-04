@@ -240,10 +240,14 @@ defmodule Moba.Engine.Core.Logger do
          "battle_trance",
          %{"battle_power" => {power, hero}, "battle_armor" => {armor, _}},
          _
-       ) do
+       ) when power > 0 or armor > 0 do
     "#{hero} refuses to die and has negated all further damage this turn, also gaining [power]#{power} Power[/power] and [armor]#{
       armor
     } Armor[/armor] for the rest of the battle."
+  end
+
+  defp description_for("battle_trance", %{"battle_power" => {_, hero}}, _) do
+    "#{hero} refuses to die and has negated all further damage this turn."
   end
 
   defp description_for("borrowed_time", %{"invulnerable" => {true, hero}}, _) do
@@ -300,7 +304,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}, "next_armor" => {armor, _}}, _) do
-    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp], gaining [armor]#{armor} Armor[/armor] and invulnerability to Normal Damage."
+    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and gaining [armor]#{armor} Armor[/armor]."
   end
 
   defp description_for("laguna_blade", %{"damage" => {damage, defender}}, heroes) do
@@ -312,7 +316,11 @@ defmodule Moba.Engine.Core.Logger do
   defp description_for("life_drain", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
     "#{attacker} is channeling the vital essence out of #{defender}, dealing [damage]#{damage} damage[/damage] and [hp]regenerating #{
       regen
-    } HP[/hp] while being [status]invulnerable to Normal Damage[/status]."
+    } HP[/hp]."
+  end
+
+  defp description_for("life_drain", %{"damage" => {damage, defender}}, heroes) do
+    "#{opponent_for(defender, heroes)} was abrutly interrupted while channeling the vital essence out of #{defender}, dealing [damage]#{damage} damage[/damage]."
   end
 
   defp description_for("omnislash", %{"damage" => {damage, defender}, "extra" => {true, attacker}}, _) do

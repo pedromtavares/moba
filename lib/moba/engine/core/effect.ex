@@ -123,12 +123,8 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker_number(turn, :hp_regen, missing * resource.hp_multiplier)
   end
 
-  def hp_regen_by_damage_taken(%{defender: defender, resource: resource} = turn) do
+  def hp_regen_by_defender_damage(%{defender: defender, resource: resource} = turn) do
     update_defender_number(turn, :hp_regen, defender.damage * resource.hp_regen_multiplier)
-  end
-
-  def damage_regen(%{defender: defender, resource: resource} = turn) do
-    update_attacker_number(turn, :hp_regen, defender.damage * resource.hp_regen_multiplier)
   end
 
   def cut_hp_regen(%{attacker: %{hp_regen: regen}, resource: resource} = turn) when regen > 0 do
@@ -424,8 +420,11 @@ defmodule Moba.Engine.Core.Effect do
     update_defender(turn, :executed, true)
   end
 
-  def charging(turn) do
-    update_attacker(turn, :charging, true)
+  def charging(%{attacker: attacker} = turn) do
+    turn
+    |> update_attacker(:charging, true)
+    |> update_attacker_number(:next_power_magic, attacker.turn_power_magic)
+    |> update_attacker_number(:next_power_normal, attacker.turn_power_normal)
   end
 
   # EXTRAS

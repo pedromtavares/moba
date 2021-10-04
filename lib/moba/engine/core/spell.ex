@@ -22,8 +22,8 @@ defmodule Moba.Engine.Core.Spell do
     effects_for(turn, options)
   end
 
-  def apply_special(turn, options \\ %{}) do
-    special_effects_for(turn, options)
+  def apply_interruption(turn, options \\ %{}) do
+    interruption_effects_for(turn, options)
   end
 
   # ACTIVES
@@ -248,7 +248,7 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(%{resource: %Skill{code: "borrowed_time"}} = turn, _options) do
     turn
-    |> Effect.hp_regen_by_damage_taken()
+    |> Effect.hp_regen_by_defender_damage()
   end
 
   defp effects_for(%{resource: %Skill{code: "culling_blade"}} = turn, _options) do
@@ -314,7 +314,6 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Skill{code: "guardian_angel"}} = turn, _options) do
     turn
     |> Effect.hp_regen_by_base_amount()
-    |> Effect.physical_invulnerability()
     |> Effect.add_next_armor()
   end
 
@@ -331,7 +330,6 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.add_double_skill()
     |> Effect.hp_regen_by_total_mp()
     |> Effect.hp_regen_by_base_amount()
-    |> Effect.physical_invulnerability()
   end
 
   defp effects_for(%{resource: %Skill{code: "life_drain"}} = turn, _options) do
@@ -340,7 +338,6 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.hp_regen_by_total_mp()
     |> Effect.hp_regen_by_base_amount()
     |> Effect.remove_double_skill()
-    |> Effect.physical_invulnerability()
   end
 
   defp effects_for(%{resource: %Skill{code: "omnislash"}} = turn, _options) do
@@ -653,7 +650,7 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(%{resource: %Item{code: "satanic", final: true}} = turn, _options) do
     turn
-    |> Effect.damage_regen()
+    |> Effect.hp_regen_by_defender_damage()
   end
 
   defp effects_for(%{resource: %Item{code: "satanic"}} = turn, _options) do
@@ -686,26 +683,33 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(turn, _options), do: turn
 
-  defp special_effects_for(%{resource: %Skill{code: "echo_stomp"}} = turn, _options) do
+  defp interruption_effects_for(%{resource: %Skill{code: "echo_stomp"}} = turn, _options) do
     turn
     |> Effect.base_amount_damage()
     |> Effect.other_atk_damage()
     |> Effect.remove_double_skill()
   end
 
-  defp special_effects_for(%{resource: %Skill{code: "illuminate"}} = turn, _options) do
+  defp interruption_effects_for(%{resource: %Skill{code: "illuminate"}} = turn, _options) do
     turn
     |> Effect.base_amount_damage()
     |> Effect.remove_double_skill()
   end
 
-  defp special_effects_for(%{resource: %Skill{code: "assassinate"}} = turn, _options) do
+  defp interruption_effects_for(%{resource: %Skill{code: "assassinate"}} = turn, _options) do
     turn
     |> Effect.reset_cooldown()
     |> Effect.remove_double_skill()
   end
 
-  defp special_effects_for(turn, _options), do: turn
+  defp interruption_effects_for(%{resource: %Skill{code: "life_drain"}} = turn, _options) do
+    turn
+    |> Effect.extra_damage()
+    |> Effect.remove_double_skill()
+  end
+
+  defp interruption_effects_for(%{resource: resource} = turn, _) when not is_nil(resource), do: Effect.remove_double_skill(turn)
+  defp interruption_effects_for(turn, _), do: turn
 
   defp roll(%{resource: resource} = turn, success, failure, roll_number \\ nil) do
     number = roll_number || resource.roll_number

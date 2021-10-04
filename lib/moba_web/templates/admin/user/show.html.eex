@@ -43,18 +43,8 @@
         </li>
 
         <li>
-          <div class="torch-show-label">PVE hero:</div>
-          <div class="torch-show-data"><%= @user.current_pve_hero_id %></div>
-        </li>
-
-        <li>
-          <div class="torch-show-label">PVP hero:</div>
-          <div class="torch-show-data"><%= @user.current_pvp_hero_id %></div>
-        </li>
-
-        <li>
-          <div class="torch-show-label">PVP Points:</div>
-          <div class="torch-show-data"><%= @user.pvp_points %></div>
+          <div class="torch-show-label">Shards:</div>
+          <div class="torch-show-data"><%= @user.shard_count %></div>
         </li>
 
         <li>

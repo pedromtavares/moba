@@ -100,7 +100,7 @@ defmodule Moba.Engine.Core.Processor do
   # Stunned attackers cannot attack and get their current double_skill interrupted
   defp attack(%{attacker: %{stunned: true, double_skill: double_skill} = attacker} = turn) do
     %{turn | attacker: attacker, resource: %{code: "stunned"}}
-    |> apply_resource_special(double_skill)
+    |> apply_resource_interruption(double_skill)
   end
 
   # Silenced attackers must attack with a basic_attack and also get their current
@@ -108,7 +108,7 @@ defmodule Moba.Engine.Core.Processor do
   defp attack(%{attacker: %{silenced: true, double_skill: double_skill}} = turn) do
     turn
     |> basic_attack()
-    |> apply_resource_special(double_skill)
+    |> apply_resource_interruption(double_skill)
   end
 
   # Default attack case, using the skill and item chosen on the UI
@@ -319,7 +319,7 @@ defmodule Moba.Engine.Core.Processor do
   # Updates a buff, reducing its duration by 1
   defp tick_buff_duration(list, resource) do
     existing =
-      %{resource: buff, duration: duration} =
+      %{duration: duration} =
       Enum.find(list, fn %{resource: buff, duration: _} ->
         buff.code == resource.code
       end)
@@ -438,9 +438,9 @@ defmodule Moba.Engine.Core.Processor do
     |> Spell.apply(%{})
   end
 
-  defp apply_resource_special(turn, resource) do
+  defp apply_resource_interruption(turn, resource) do
     %{turn | resource: resource}
-    |> Spell.apply_special(%{})
+    |> Spell.apply_interruption(%{})
   end
 
   defp get_resource_from_order(order, battler) do
