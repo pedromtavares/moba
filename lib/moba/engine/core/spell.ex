@@ -248,7 +248,7 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(%{resource: %Skill{code: "borrowed_time"}} = turn, _options) do
     turn
-    |> Effect.hp_regen_by_defender_damage()
+    |> Effect.defender_hp_regen_by_defender_damage()
   end
 
   defp effects_for(%{resource: %Skill{code: "culling_blade"}} = turn, _options) do
@@ -650,7 +650,7 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(%{resource: %Item{code: "satanic", final: true}} = turn, _options) do
     turn
-    |> Effect.hp_regen_by_defender_damage()
+    |> Effect.attacker_hp_regen_by_defender_damage()
   end
 
   defp effects_for(%{resource: %Item{code: "satanic"}} = turn, _options) do
