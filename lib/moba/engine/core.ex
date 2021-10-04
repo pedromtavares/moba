@@ -283,7 +283,8 @@ defmodule Moba.Engine.Core do
         next_power_normal: 0,
         next_power_magic: 0,
         double_skill: load_skill(attacker.double_skill),
-        delayed_skill: load_skill(attacker.delayed_skill)
+        delayed_skill: load_skill(attacker.delayed_skill),
+        permanent_skill: load_skill(attacker.permanent_skill)
     }
     |> flush()
   end
