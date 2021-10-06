@@ -20,15 +20,15 @@ defmodule Moba.Cleaner do
 
     Repo.all(query) |> delete_records()
 
-    query = from s in Avatar, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id)
+    query = from s in Avatar, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id), limit: 50
 
     Repo.all(query) |> delete_records()
 
-    query = from s in Skill, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id)
+    query = from s in Skill, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id), limit: 50
 
     Repo.all(query) |> delete_records()
 
-    query = from s in Item, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id)
+    query = from s in Item, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id), limit: 50
 
     Repo.all(query) |> delete_records()
   end

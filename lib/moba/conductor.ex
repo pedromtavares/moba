@@ -146,17 +146,26 @@ defmodule Moba.Conductor do
   defp generate_resources!(match) do
     Logger.info("Generating resources...")
 
+    Logger.info("Generating skills...")
+
     ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
     Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), set: [current: false])
+
+    Logger.info("Generating items...")
 
     ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
     Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), set: [current: false])
 
+    Logger.info("Generating avatars...")
+
     ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
     Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
 
+    Logger.info("Updating build skills...")
     update_build_skills()
+    Logger.info("Updating hero items...")
     update_hero_items()
+    Logger.info("Updating hero avatars...")
     update_hero_avatars()
 
     match
