@@ -85,16 +85,7 @@ defmodule Moba.Game do
     updated
   end
 
-  @doc """
-  When a Hero is picked for the Arena, it needs to have its inventory and skills updated
-  to reflect current values in the admin panel, since Heroes can stay "benched" for a long time
-  """
-  def prepare_hero_for_pvp!(hero) do
-    hero
-    |> Builds.update_all_with_current_skills!()
-    |> Items.replace_inventory_with_current!()
-    |> Heroes.prepare_for_pvp!()
-  end
+  def prepare_hero_for_pvp!(hero), do: Heroes.prepare_for_pvp!(hero)
 
   def archive_hero!(%{user: user} = hero) do
     if user.current_pve_hero_id == hero.id, do: Accounts.set_current_pve_hero!(user, nil)

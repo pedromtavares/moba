@@ -1205,4 +1205,4 @@ Repo.update_all(Avatar, set: [current: true])
 Moba.start!()
 
 (Enum.to_list(0..10) ++ Enum.to_list(25..28))
-|> Moba.regenerate_resources!()
+|> Moba.generate_bots!()

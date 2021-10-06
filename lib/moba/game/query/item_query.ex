@@ -4,7 +4,7 @@ defmodule Moba.Game.Query.ItemQuery do
   """
 
   alias Moba.Game
-  alias Game.Schema.Item
+  alias Game.Schema.{Item, HeroItem}
 
   import Ecto.Query, only: [from: 2]
 
@@ -32,6 +32,10 @@ defmodule Moba.Game.Query.ItemQuery do
     from s in query, where: s.current == true
   end
 
+  def non_current(query \\ Item) do
+    from s in query, where: s.current == false
+  end
+
   def single_current(query \\ Item) do
     from s in current(query), order_by: [desc: s.id], limit: 1
   end
@@ -41,11 +45,15 @@ defmodule Moba.Game.Query.ItemQuery do
       order_by: item.name
   end
 
+  def with_code(query, code) do
+    from item in query, where: item.code == ^code
+  end
+
   def exclude(query, ids) do
     from s in query, where: s.id not in ^ids
   end
 
-  def by_rarity(query, rarity) do
-    from i in query, where: i.rarity == ^rarity
+  def hero_items_by_item_ids(ids) do
+    from hi in HeroItem, where: hi.item_id in ^ids
   end
 end

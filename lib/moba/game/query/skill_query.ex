@@ -4,7 +4,7 @@ defmodule Moba.Game.Query.SkillQuery do
   """
 
   alias Moba.Game
-  alias Game.Schema.Skill
+  alias Game.Schema.{Skill, BuildSkill}
 
   import Ecto.Query, only: [from: 2]
 
@@ -26,6 +26,10 @@ defmodule Moba.Game.Query.SkillQuery do
 
   def current(query \\ Skill) do
     from s in query, where: s.current == true
+  end
+
+  def non_current(query \\ Skill) do
+    from s in query, where: s.current == false
   end
 
   def single_current(query \\ Skill) do
@@ -94,5 +98,9 @@ defmodule Moba.Game.Query.SkillQuery do
 
   def exclude(query, ids) do
     from s in query, where: s.id not in ^ids
+  end
+
+  def build_skills_by_skill_ids(ids) do
+    from bs in BuildSkill, where: bs.skill_id in ^ids
   end
 end

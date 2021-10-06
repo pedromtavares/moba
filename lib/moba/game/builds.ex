@@ -23,22 +23,6 @@ defmodule Moba.Game.Builds do
     |> Repo.update!()
   end
 
-  @doc """
-  When a Hero is picked for the Arena, it needs to have its Skills updated
-  with the most recent values that may have been changed in the admin panel
-  """
-  def update_all_with_current_skills!(hero) do
-    %{builds: builds} = Repo.preload(hero, builds: [:skills])
-
-    builds =
-      Enum.map(builds, fn build ->
-        new_skills = Game.get_current_skills_from(build.skills)
-        replace_skills!(build, new_skills)
-      end)
-
-    Map.put(hero, :builds, builds)
-  end
-
   def replace_skills!(build, new_skills) do
     Build.replace_skills(build, new_skills)
     |> Repo.update!()

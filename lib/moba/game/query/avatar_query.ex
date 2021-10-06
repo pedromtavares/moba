@@ -28,6 +28,10 @@ defmodule Moba.Game.Query.AvatarQuery do
     from avatar in query, where: avatar.current == true
   end
 
+  def non_current(query \\ Avatar) do
+    from avatar in query, where: avatar.current == false
+  end
+
   def single_current(query \\ Avatar) do
     from avatar in current(query), order_by: [desc: avatar.id], limit: 1
   end
@@ -44,6 +48,10 @@ defmodule Moba.Game.Query.AvatarQuery do
     from avatar in query,
       where: not is_nil(avatar.level_requirement),
       order_by: [asc: avatar.level_requirement]
+  end
+
+  def with_code(query, code) do
+    from avatar in query, where: avatar.code == ^code
   end
 
   def with_codes(query, codes) do

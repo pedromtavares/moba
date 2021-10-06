@@ -176,9 +176,14 @@ defmodule Moba do
     Cleaner.cleanup_old_records()
   end
 
-  def regenerate_resources!(bot_level_range \\ 0..28) do
+  def regenerate_resources! do
     IO.puts("Regenerating resources...")
-    Conductor.regenerate_resources!(bot_level_range)
+    Conductor.regenerate_resources!()
+  end
+
+  def generate_bots!(bot_level_range \\ 0..30) do
+    IO.puts("Generating new bots...")
+    Conductor.generate_bots!(bot_level_range)
   end
 
   def current_match, do: Game.current_match()

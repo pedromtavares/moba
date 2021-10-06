@@ -52,7 +52,7 @@ defmodule Moba.Conductor do
   end
 
   @doc """
-  The game's starting point. Also creates PVP bots.
+  The game's starting point. Also creates PVP bots and generates new resources
   Matches last for 24h and will automatically be restarted by Moba.Game.Server
   """
   def start_match! do
@@ -62,6 +62,7 @@ defmodule Moba.Conductor do
       create_match!()
       |> generate_pvp_bots!()
       |> new_pvp_round!()
+      |> generate_resources!()
       |> server_update!()
 
     Accounts.update_ranking!()
@@ -104,9 +105,15 @@ defmodule Moba.Conductor do
   Creates all necessary resources and locks them against
   further edits in the admin panel. Also creates PVE bots.
   """
-  def regenerate_resources!(bot_level_range \\ 0..30) do
+  def regenerate_resources! do
+    Game.current_match() |> generate_resources!()
+  end
+
+  @doc """
+  Creates PVE bots
+  """
+  def generate_bots!(bot_level_range) do
     Game.current_match()
-    |> generate_resources!()
     |> generate_pve_bots!(bot_level_range)
     |> archive_previous_bots!()
     |> refresh_pve_targets!()
@@ -135,7 +142,7 @@ defmodule Moba.Conductor do
     Game.create_match!(attrs)
   end
 
-  # generates match-specific resources so edits in admin panel wont affect current match
+  # Generates new resources based on canon so edits in the admin panel doesn't affect the current match (only the next)
   defp generate_resources!(match) do
     Logger.info("Generating resources...")
 
@@ -147,6 +154,10 @@ defmodule Moba.Conductor do
 
     ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
     Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
+
+    update_build_skills()
+    update_hero_items()
+    update_hero_avatars()
 
     match
   end
@@ -311,4 +322,49 @@ defmodule Moba.Conductor do
 
   defp time_diff_in_seconds(nil), do: 0
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
+
+  defp update_build_skills do
+    canon = SkillQuery.base_canon() |> Repo.all()
+    all_current = SkillQuery.base_current() |> Repo.all()
+
+    Enum.each(canon, fn skill ->
+      current = Enum.find(all_current, &(&1.level == skill.level && &1.code == skill.code))
+      if current do
+        query = SkillQuery.non_current() |> SkillQuery.with_level(skill.level) |> SkillQuery.with_code(skill.code)
+        skill_ids = Repo.all(query) |> Enum.map(& &1.id)
+        query = SkillQuery.build_skills_by_skill_ids(skill_ids)
+        Repo.update_all(query, set: [skill_id: current.id])
+      end
+    end)
+  end
+
+  defp update_hero_items do
+    canon = ItemQuery.base_canon() |> Repo.all()
+    all_current = ItemQuery.base_current() |> Repo.all()
+
+    Enum.each(canon, fn item ->
+      current = Enum.find(all_current, &(&1.code == item.code))
+      if current do
+        query = ItemQuery.non_current() |> ItemQuery.with_code(item.code)
+        item_ids = Repo.all(query) |> Enum.map(& &1.id)
+        query = ItemQuery.hero_items_by_item_ids(item_ids)
+        Repo.update_all(query, set: [item_id: current.id])
+      end
+    end)
+  end
+
+  defp update_hero_avatars do
+    canon = AvatarQuery.base_canon() |> Repo.all()
+    all_current = AvatarQuery.all_current() |> Repo.all()
+
+    Enum.each(canon, fn avatar ->
+      current = Enum.find(all_current, &(&1.code == avatar.code))
+      if current do
+        query = AvatarQuery.non_current() |> AvatarQuery.with_code(avatar.code)
+        avatar_ids = Repo.all(query) |> Enum.map(& &1.id)
+        query = HeroQuery.with_avatar_ids(avatar_ids)
+        Repo.update_all(query, set: [avatar_id: current.id])
+      end
+    end)
+  end
 end

@@ -60,7 +60,7 @@ defmodule Moba.Engine.Battles do
   def ordered_turns_query, do: from(t in Turn, order_by: t.number)
 
   def pending_for(hero_id) do
-    from(b in Battle, where: b.attacker_id == ^hero_id, where: b.finished == false, limit: 1)
+    from(b in Battle, where: b.attacker_id == ^hero_id, where: b.finished == false, limit: 1, where: b.type != "duel")
     |> Repo.all()
     |> List.first()
   end

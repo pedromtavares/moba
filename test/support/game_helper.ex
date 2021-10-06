@@ -20,7 +20,6 @@ defmodule Test.GameHelper do
       attrs
       |> Map.merge(%{pvp_active: true, finished_pve: true})
       |> create_base_hero(user)
-      |> Game.prepare_hero_for_pvp!()
       |> Game.update_hero!(%{pvp_points: pvp_points})
 
     user = Accounts.set_current_pvp_hero!(user, hero.id)

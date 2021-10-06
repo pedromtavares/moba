@@ -2,7 +2,7 @@ defmodule Moba.Cleaner do
   import Ecto.Query, only: [from: 2]
 
   alias Moba.{Repo, Game, Engine}
-  alias Game.Schema.Hero
+  alias Game.Schema.{Hero, Skill, Item, Avatar}
   alias Engine.Schema.Battle
 
   def cleanup_old_records do
@@ -17,6 +17,18 @@ defmodule Moba.Cleaner do
         where: h.archived_at <= ^ago,
         where: not h.finished_pve,
         limit: 50
+
+    Repo.all(query) |> delete_records()
+
+    query = from s in Avatar, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id)
+
+    Repo.all(query) |> delete_records()
+
+    query = from s in Skill, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id)
+
+    Repo.all(query) |> delete_records()
+
+    query = from s in Item, where: s.inserted_at <= ^ago, where: s.current == false, where: not is_nil(s.match_id)
 
     Repo.all(query) |> delete_records()
   end

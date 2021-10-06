@@ -324,6 +324,10 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in query, where: hero.inserted_at > ^ago)
   end
 
+  def with_avatar_ids(avatar_ids) do
+    from hero in Hero, where: hero.avatar_id in ^avatar_ids
+  end
+
   defp page_to_offset(page, per_page) do
     result = (page - 1) * per_page
 

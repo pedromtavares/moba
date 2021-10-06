@@ -71,21 +71,6 @@ defmodule Moba.Game.Items do
     end
   end
 
-  @doc """
-  When a Hero is picked for the Arena, it needs to have its inventory updated
-  with the most recent values that may have been changed in the admin panel
-  """
-  def replace_inventory_with_current!(hero) do
-    %{items: old_items} = hero = Repo.preload(hero, :items)
-    current_items = Enum.map(old_items, fn old -> get_by_code!(old.code) end)
-
-    hero = unequip(hero, old_items)
-
-    Enum.reduce(current_items, hero, fn item, acc ->
-      equip(acc, item)
-    end)
-  end
-
   def previous_rarity_for(item) do
     cond do
       rare?(item) -> "normal"

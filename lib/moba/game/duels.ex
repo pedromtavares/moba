@@ -33,7 +33,7 @@ defmodule Moba.Game.Duels do
 
       "opponent_first_pick" ->
         updated = update!(duel, %{opponent_first_pick_id: hero_id, phase: "user_battle"})
-        defender = Game.get_hero!(hero_id) |> Game.prepare_hero_for_pvp!()
+        defender = Game.get_hero!(hero_id)
         Engine.create_duel_battle!(%{attacker: duel.user_first_pick, defender: defender, duel_id: duel.id})
         updated
 
@@ -45,7 +45,7 @@ defmodule Moba.Game.Duels do
 
       "user_second_pick" ->
         updated = update!(duel, %{user_second_pick_id: hero_id, phase: "opponent_battle"})
-        defender = Game.get_hero!(hero_id) |> Game.prepare_hero_for_pvp!()
+        defender = Game.get_hero!(hero_id)
         Engine.create_duel_battle!(%{attacker: duel.opponent_second_pick, defender: defender, duel_id: duel.id})
         updated
 
