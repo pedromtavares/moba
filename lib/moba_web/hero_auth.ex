@@ -20,6 +20,8 @@ defmodule MobaWeb.HeroAuth do
 
     cond do
       last_pvp_hero && last_pvp_hero.match_id == last_match.id ->
+        Game.update_hero!(last_pvp_hero, %{match_id: nil})
+
         conn
         |> assign(:current_hero, nil)
         |> put_session(:hero_id, nil)
