@@ -14,14 +14,16 @@
 <% end %>
 
 <%= if @origin do %>
-    <div class="col-4">
-        <%=link to: "/base", class: "h3 history-box nav-box" do %>
-            <span class="loading-text">
-                <i class="fa fa-home font-18 align-middle mr-1"></i>
-                Base
-            </span>
-        <%end%>
-    </div>
+    <%= if length(@current_user.hero_collection) != 0 do %>
+        <div class="col-4">
+            <%=link to: "/base", class: "h3 history-box nav-box" do %>
+                <span class="loading-text">
+                    <i class="fa fa-home font-18 align-middle mr-1"></i>
+                    Base
+                </span>
+            <%end%>
+        </div>
+    <% end %>
     <div class="col">
         <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), loading: " ", "phx-hook": "Loading", class: "h3 #{@origin}-box nav-box", id: "load-battles" do %>
             <span class="loading-text">

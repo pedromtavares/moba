@@ -13,19 +13,19 @@ defmodule MobaWeb.PowControllerCallbacks do
     conn =
       if guest_user_id do
         guest = Accounts.get_user!(guest_user_id)
-        hero = guest && Game.current_pve_hero(guest)
-        guest = hero.user
 
-        Game.update_hero!(hero, %{name: user.username, user_id: user.id})
+        if guest do
+          hero = Game.current_pve_hero(guest)
+          Game.update_hero!(hero, %{name: user.username, user_id: user.id})
+          Accounts.update_user!(guest, %{current_pve_hero_id: nil})
 
-        Accounts.update_user!(guest, %{current_pve_hero_id: nil})
-
-        Accounts.update_user!(user, %{
-          tutorial_step: guest.tutorial_step,
-          experience: guest.experience,
-          level: guest.level,
-          current_pve_hero_id: hero.id
-        })
+          Accounts.update_user!(user, %{
+            tutorial_step: guest.tutorial_step,
+            experience: guest.experience,
+            level: guest.level,
+            current_pve_hero_id: hero.id
+          })
+        end
 
         Plug.Conn.put_session(conn, :guest_user_id, nil)
       else

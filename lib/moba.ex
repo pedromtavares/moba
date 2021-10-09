@@ -222,6 +222,17 @@ defmodule Moba do
 
   def update_user!(user, updates), do: Accounts.update_user!(user, updates)
 
+  def restarting?, do: is_nil(Game.current_match().last_server_update_at)
+
+  def cached_items do
+    match_id = if restarting?(), do: Game.last_match().id, else: Game.current_match().id
+
+    case Cachex.get(:game_cache, "items-#{match_id}") do
+      {:ok, nil} -> put_items_cache(match_id)
+      {:ok, items} -> items
+    end
+  end
+
   def struct_from_map(a_map, as: a_struct) do
     # Find the keys within the map
     keys =
@@ -245,5 +256,11 @@ defmodule Moba do
     else
       Task.start(fun)
     end
+  end
+
+  defp put_items_cache(match_id) do
+    items = Game.shop_list()
+    Cachex.put(:game_cache, "items-#{match_id}", items)
+    items
   end
 end

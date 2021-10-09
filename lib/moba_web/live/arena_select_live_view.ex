@@ -39,10 +39,10 @@ defmodule MobaWeb.ArenaSelectLiveView do
       length(all_heroes) == 0 ->
         {:ok,
          socket
-         |> put_flash(:info, "You need to finish at least one hero in the Jungle before playing the Arena.")
+         |> put_flash(:info, "You need to finish at least one hero before playing the Arena.")
          |> push_redirect(to: "/base")}
 
-      !Game.current_match().last_server_update_at ->
+      Moba.restarting?() ->
         {:ok,
          socket
          |> put_flash(:info, "The new match is not ready yet, please wait a few minutes and try again")

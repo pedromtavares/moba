@@ -28,7 +28,7 @@ defmodule MobaWeb.CreateLiveView do
     unlocked_codes = Accounts.unlocked_codes_for(user)
     cached = get_cache(user.id)
     avatars = Game.list_creation_avatars(unlocked_codes)
-    items = cached_items()
+    items = Moba.cached_items()
 
     {:ok,
      assign(socket,
@@ -248,14 +248,14 @@ defmodule MobaWeb.CreateLiveView do
     {selected -- [item], total_gold + Game.item_price(item)}
   end
 
-  def get_cache(cache_key) do
+  defp get_cache(cache_key) do
     case Cachex.get(:game_cache, cache_key) do
       {:ok, nil} -> %{selected_avatar: nil, selected_skills: [], selected_build_index: nil, selected_items: []}
       {:ok, attrs} -> attrs
     end
   end
 
-  def put_cache(cache_key, avatar, skills, selected_build_index, selected_items \\ []) do
+  defp put_cache(cache_key, avatar, skills, selected_build_index, selected_items \\ []) do
     Cachex.put(:game_cache, cache_key, %{
       selected_avatar: avatar,
       selected_skills: skills,
@@ -264,26 +264,7 @@ defmodule MobaWeb.CreateLiveView do
     })
   end
 
-  def delete_cache(%{assigns: %{cache_key: key}}) do
-    Cachex.del(:game_cache, key)
-  end
+  defp delete_cache(%{assigns: %{cache_key: key}}), do: Cachex.del(:game_cache, key)
 
-  defp cached_items do
-    match_id = Game.current_match().id
-
-    case Cachex.get(:game_cache, "items-#{match_id}") do
-      {:ok, nil} -> put_cache(match_id)
-      {:ok, items} -> items
-    end
-  end
-
-  defp put_cache(match_id) do
-    items = Game.shop_list()
-    Cachex.put(:game_cache, "items-#{match_id}", items)
-    items
-  end
-
-  defp get_item(code, socket) do
-    Enum.find(socket.assigns.items, fn item -> item.code == code end)
-  end
+  defp get_item(code, socket), do: Enum.find(socket.assigns.items, fn item -> item.code == code end)
 end

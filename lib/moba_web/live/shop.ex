@@ -17,7 +17,7 @@ defmodule MobaWeb.Shop do
   def update(%{current_hero: hero, tutorial_step: step}, socket) do
     {:ok,
      assign(socket,
-       items: cached_items(),
+       items: Moba.cached_items(),
        current_hero: hero,
        tutorial_step: step
      )}
@@ -129,20 +129,5 @@ defmodule MobaWeb.Shop do
     else
       socket |> Tutorial.next_step(7)
     end
-  end
-
-  defp cached_items do
-    match_id = Game.current_match().id
-
-    case Cachex.get(:game_cache, "items-#{match_id}") do
-      {:ok, nil} -> put_cache(match_id)
-      {:ok, items} -> items
-    end
-  end
-
-  defp put_cache(match_id) do
-    items = Game.shop_list()
-    Cachex.put(:game_cache, "items-#{match_id}", items)
-    items
   end
 end
