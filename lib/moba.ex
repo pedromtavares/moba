@@ -36,6 +36,7 @@ defmodule Moba do
   @turn_mp_regen_multiplier 0.01
   @summon_total_gold 24_000
   @summon_cost 100
+  @final_tutorial_step 14
 
   # PVE constants
   @base_xp 150
@@ -83,6 +84,7 @@ defmodule Moba do
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
   def summon_total_gold, do: @summon_total_gold
   def summon_cost, do: @summon_cost
+  def final_tutorial_step, do: @final_tutorial_step
 
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment

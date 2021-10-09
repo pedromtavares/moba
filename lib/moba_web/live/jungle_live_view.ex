@@ -85,6 +85,10 @@ defmodule MobaWeb.JungleLiveView do
     {:noreply, socket |> Tutorial.next_step(12)}
   end
 
+  def handle_event("finish-tutorial", _, socket) do
+    {:noreply, Tutorial.finish(socket)}
+  end
+
   def handle_info({"tutorial-step", %{step: step}}, socket) do
     {:noreply, assign(socket, tutorial_step: step)}
   end

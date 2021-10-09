@@ -17,7 +17,7 @@ const Tutorial = {
   },
   complete: function (hookInstance) {
     if (Shepherd.activeTour) {
-      hookInstance.pushEvent("tutorial14", {});
+      hookInstance.pushEvent("finish-tutorial", {});
       Shepherd.activeTour.complete();
     }
   },
@@ -59,6 +59,11 @@ const Tutorial = {
           text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>Here in the Jungle is where you will farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by ganking other opponents.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
           buttons: [
             {
+              text: 'Skip Tutorial',
+              secondary: true,
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            },
+            {
               text: 'Open Shop',
               action: function () { hookInstance.pushEvent("tutorial3", {}); this.complete() }
             }
@@ -89,6 +94,11 @@ const Tutorial = {
           },
           buttons: [
             {
+              text: 'Skip Tutorial',
+              secondary: true,
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            },
+            {
               text: 'Next',
               action: tour.next
             }
@@ -114,6 +124,11 @@ const Tutorial = {
           id: 'sixth-tutorial-first-step',
           text: "<p class='text-center'>You're doing great! Looks like you have enough gold to transmute your first Rare item, let's head to the Shop to learn how to do that.</p>",
           buttons: [
+            {
+              text: 'Skip Tutorial',
+              secondary: true,
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            },
             {
               text: 'Open Shop',
               action: function () { hookInstance.pushEventTo("#hero-bar", "toggle-shop", {}); setTimeout(this.next, 500) }
@@ -188,6 +203,11 @@ const Tutorial = {
           },
           buttons: [
             {
+              text: 'Skip Tutorial',
+              secondary: true,
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            },
+            {
               text: 'Next',
               action: tour.next
             }
@@ -215,7 +235,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'eleventh-tutorial-third-step',
-          text: "<p class='text-center'>Keep ganking until you reach the Master League, you're doing realy well! Keeping a high Undefeated Streak will get your more XP and Gold per battle. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
+          text: "<p class='text-center'>Keep ganking until you reach the Master League, you're doing realy well! Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
           attachTo: {
             element: '#jungle-stats',
             on: 'bottom'
@@ -241,6 +261,11 @@ const Tutorial = {
           },
           buttons: [
             {
+              text: 'Skip Tutorial',
+              secondary: true,
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            },
+            {
               text: 'Next',
               action: tour.next
             }
@@ -252,7 +277,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'thirteenth-tutorial-first-step',
-          text: "<p class='text-center'>Instead of XP and Gold, here you fight for Points, which you can also lose from being attacked by other players.</p>",
+          text: "<p class='text-center'>Instead of XP and Gold, here you fight for Season Points, which you can also lose from being attacked by other players.</p>",
           attachTo: {
             element: '#current-hero-arena-points',
             on: 'bottom'
@@ -269,7 +294,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'thirteenth-tutorial-second-step',
-          text: "<p class='text-center'>Your Rank is directly tied to how many Points you have. Finish the match ranked in the Top 3 to receive Medals and be ranked among the best of BrowserMOBA.</p>",
+          text: "<p class='text-center'>Your Rank is directly tied to how many Season Points you have. Finish the match ranked in the Top 3 to receive Medals and be ranked among the best of BrowserMOBA.</p>",
           attachTo: {
             element: '#current-hero-rank',
             on: 'bottom'
@@ -294,7 +319,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'Finish Tutorial',
-              action: function () { hookInstance.pushEvent("tutorial14", {}); this.complete() }
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
           popperOptions: {

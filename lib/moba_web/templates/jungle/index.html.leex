@@ -127,14 +127,19 @@
                     <% next = next_league(@current_hero) %>
                     <div class="row mt-3">
                         <div class="col text-center">
-                            <img src="/images/league_<%=next%>.png" style="height: 100px"/>
-                            <h3><%=Moba.leagues[next]%> Challenge</h3>
-                            <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
-                                    <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
-                                </button>
-                            <p class="text-muted font-italic">
-                                Click above to start your <span class="text-league-<%=next%>"><%=Moba.leagues[next]%> Challenge</span>.<br/>You will face consecutive opponents <span class="text-danger">to the death</span> and must win all the battles in order to <span class="text-success">rank up</span> to the <span class="text-league-<%=next%>"><%=Moba.leagues[next]%></span>.
-                            </p>
+                            <div class="card-box mb-0 pt-2 p-1">
+                                <img src="/images/league_<%=next%>.png" style="height: 100px"/>
+                                <h3><%=Moba.leagues[next]%> Challenge</h3>
+                                <h3 class="text-warning"><i class="fa fa-coins"></i> <%=Moba.league_win_gold_bonus()%></h3>
+                                <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
+                                        <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
+                                    </button>
+                                <p class="text-muted font-italic">
+                                    Click above to start your <span class="text-league-<%=next%>"><%=Moba.leagues[next]%> Challenge</span>.
+                                    <br/>
+                                    You will face consecutive opponents <span class="text-danger">to the death</span> and must win all the battles in order to rank up to the <span class="text-league-<%=next%>"><%=Moba.leagues[next]%></span> and <span class="text-warning">win <i class="fa fa-coins"></i> <%=Moba.league_win_gold_bonus()%> gold.</span>
+                                </p>
+                            </div>
                         </div>
                     </div>
                 <% end %>
