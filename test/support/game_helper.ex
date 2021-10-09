@@ -35,7 +35,6 @@ defmodule Test.GameHelper do
       base_avatar(),
       level,
       difficulty,
-      Game.current_match(),
       create_user(),
       pvp_points
     )

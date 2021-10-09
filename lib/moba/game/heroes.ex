@@ -21,16 +21,8 @@ defmodule Moba.Game.Heroes do
     |> base_preload()
   end
 
-  def current(user_id, match_id) do
-    Hero
-    |> HeroQuery.by_user(user_id)
-    |> HeroQuery.by_match(match_id)
-    |> HeroQuery.unarchived()
-    |> Repo.all()
-  end
-
-  def last_active_pvp(user_id) do
-    HeroQuery.last_active_pvp(user_id)
+  def pvp_last_picked(user_id) do
+    HeroQuery.pvp_last_picked(user_id)
     |> Repo.all()
     |> List.first()
     |> base_preload()
@@ -48,9 +40,9 @@ defmodule Moba.Game.Heroes do
     |> base_preload()
   end
 
-  def create!(attrs, user, avatar, match) do
+  def create!(attrs, user, avatar) do
     %Hero{}
-    |> Hero.create_changeset(attrs, user, avatar, match)
+    |> Hero.create_changeset(attrs, user, avatar)
     |> Repo.insert!()
   end
 
@@ -60,7 +52,7 @@ defmodule Moba.Game.Heroes do
   and thus have their stats greatly reduced
   If a user is passed, the bot will be automatically assigned to PVP (Arena).
   """
-  def create_bot!(avatar, level, difficulty, match, user \\ nil, pvp_points \\ 0, league_tier \\ 0) do
+  def create_bot!(avatar, level, difficulty, user \\ nil, pvp_points \\ 0, league_tier \\ 0) do
     name = if user, do: user.username, else: avatar.name
 
     bot =
@@ -76,8 +68,7 @@ defmodule Moba.Game.Heroes do
           pvp_last_picked: user && DateTime.utc_now()
         },
         user,
-        avatar,
-        match
+        avatar
       )
 
     if level > 0 do
@@ -152,7 +143,8 @@ defmodule Moba.Game.Heroes do
       pvp_picks: hero.pvp_picks + 1,
       pvp_wins: 0,
       pvp_losses: 0,
-      pvp_history: %{}
+      pvp_history: %{},
+      match_id: Game.current_match().id
     })
   end
 
@@ -238,7 +230,7 @@ defmodule Moba.Game.Heroes do
   end
 
   @doc """
-  Grabs all Heroes ordered by their pvp points and updates their pvp_ranking in the current match
+  Grabs all Heroes ordered by their pvp points and updates their pvp_ranking in the current Arena match
   """
   def update_pvp_ranking!(league_tier) do
     HeroQuery.with_pvp_points()

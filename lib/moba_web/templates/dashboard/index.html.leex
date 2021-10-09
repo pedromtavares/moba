@@ -162,21 +162,21 @@
                 <div class="row m-3">
                   <div class="col text-center">
                       <div class="btn-group">
-                          <button type="button" class="btn btn-xs <%=if @pvp_display == "current", do: "btn-secondary", else: "btn-light"%>" phx-click="show-current">Current Match</button>
-                          <button type="button" class="btn btn-xs <%=if @pvp_display == "previous", do: "btn-secondary", else: "btn-light"%>" phx-click="show-previous">Previous Match</button>
+                          <button type="button" class="btn btn-xs <%=if @pvp_display == "current", do: "btn-secondary", else: "btn-light"%>" phx-click="show-current">Current Pick</button>
+                          <button type="button" class="btn btn-xs <%=if @pvp_display == "previous", do: "btn-secondary", else: "btn-light"%>" phx-click="show-previous">Previous Pick</button>
                       </div>
                   </div>
                 </div>
               <% @current_pvp_hero -> %>
                 <div class="row">
                   <div class="col text-center">
-                    <h5 class="m-3">Current Match</h3>
+                    <h5 class="m-3">Current Pick</h3>
                   </div>
                 </div>
               <% @last_pvp_hero -> %>
                 <div class="row">
                   <div class="col text-center">
-                    <h5 class="m-3">Previous Match</h3>
+                    <h5 class="m-3">Previous Pick</h3>
                   </div>
                 </div>
               <% true -> %>

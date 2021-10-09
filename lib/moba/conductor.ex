@@ -235,7 +235,7 @@ defmodule Moba.Conductor do
 
       avatar = Enum.random(avatars)
 
-      hero = Game.create_pvp_bot_hero!(user, avatar, match)
+      hero = Game.create_pvp_bot_hero!(user, avatar)
 
       Accounts.set_current_pvp_hero!(user, hero.id)
     end)
@@ -338,6 +338,7 @@ defmodule Moba.Conductor do
 
     Enum.each(canon, fn skill ->
       current = Enum.find(all_current, &(&1.level == skill.level && &1.code == skill.code))
+
       if current do
         query = SkillQuery.non_current() |> SkillQuery.with_level(skill.level) |> SkillQuery.with_code(skill.code)
         skill_ids = Repo.all(query) |> Enum.map(& &1.id)
@@ -353,6 +354,7 @@ defmodule Moba.Conductor do
 
     Enum.each(canon, fn item ->
       current = Enum.find(all_current, &(&1.code == item.code))
+
       if current do
         query = ItemQuery.non_current() |> ItemQuery.with_code(item.code)
         item_ids = Repo.all(query) |> Enum.map(& &1.id)
@@ -368,6 +370,7 @@ defmodule Moba.Conductor do
 
     Enum.each(canon, fn avatar ->
       current = Enum.find(all_current, &(&1.code == avatar.code))
+
       if current do
         query = AvatarQuery.non_current() |> AvatarQuery.with_code(avatar.code)
         avatar_ids = Repo.all(query) |> Enum.map(& &1.id)

@@ -708,7 +708,9 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.remove_double_skill()
   end
 
-  defp interruption_effects_for(%{resource: resource} = turn, _) when not is_nil(resource), do: Effect.remove_double_skill(turn)
+  defp interruption_effects_for(%{resource: resource} = turn, _) when not is_nil(resource),
+    do: Effect.remove_double_skill(turn)
+
   defp interruption_effects_for(turn, _), do: turn
 
   defp roll(%{resource: resource} = turn, success, failure, roll_number \\ nil) do

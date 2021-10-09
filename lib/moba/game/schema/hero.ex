@@ -142,11 +142,12 @@ defmodule Moba.Game.Schema.Hero do
       :easy_mode,
       :skin_id,
       :shards_reward,
-      :summoned
+      :summoned,
+      :match_id
     ])
   end
 
-  def create_changeset(hero, attrs, user, avatar, match) do
+  def create_changeset(hero, attrs, user, avatar) do
     hero
     |> change(%{
       atk: avatar.atk,
@@ -165,7 +166,6 @@ defmodule Moba.Game.Schema.Hero do
       gold: Moba.initial_gold(user)
     })
     |> changeset(attrs)
-    |> put_assoc(:match, match)
     |> put_assoc(:user, user)
     |> put_assoc(:avatar, avatar)
   end

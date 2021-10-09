@@ -240,7 +240,8 @@ defmodule Moba.Engine.Core.Logger do
          "battle_trance",
          %{"battle_power" => {power, hero}, "battle_armor" => {armor, _}},
          _
-       ) when power > 0 or armor > 0 do
+       )
+       when power > 0 or armor > 0 do
     "#{hero} refuses to die and has negated all further damage this turn, also gaining [power]#{power} Power[/power] and [armor]#{
       armor
     } Armor[/armor] for the rest of the battle."
@@ -320,7 +321,9 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("life_drain", %{"damage" => {damage, defender}}, heroes) do
-    "#{opponent_for(defender, heroes)} was abrutly interrupted while channeling the vital essence out of #{defender}, dealing [damage]#{damage} damage[/damage]."
+    "#{opponent_for(defender, heroes)} was abrutly interrupted while channeling the vital essence out of #{defender}, dealing [damage]#{
+      damage
+    } damage[/damage]."
   end
 
   defp description_for("omnislash", %{"damage" => {damage, defender}, "extra" => {true, attacker}}, _) do

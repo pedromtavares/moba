@@ -15,7 +15,7 @@ defmodule MobaWeb.DashboardLiveView do
     current_pvp_hero = Game.current_pvp_hero(user)
 
     last_match = Game.last_match()
-    last_pvp_hero = Game.last_pvp_hero(user.id)
+    last_pvp_hero = Game.last_picked_pvp_hero(user.id)
     winners = Game.podium_for(last_match)
 
     tier_winners =

@@ -15,8 +15,18 @@ defmodule MobaWeb.HeroAuth do
     user = conn.assigns.current_user
     mode = get_session(conn, :current_mode) || "pve"
     hero = Game.current_hero(user, mode)
+    last_match = Game.last_match()
+    last_pvp_hero = Game.last_picked_pvp_hero(user.id)
 
     cond do
+      last_pvp_hero && last_pvp_hero.match_id == last_match.id ->
+        conn
+        |> assign(:current_hero, nil)
+        |> put_session(:hero_id, nil)
+        |> put_flash(:info, "A new match has started, check out your performance and the winners below.")
+        |> redirect(to: "/base")
+        |> halt()
+
       hero ->
         conn
         |> assign(:current_hero, hero)

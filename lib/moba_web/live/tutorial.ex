@@ -14,11 +14,11 @@ defmodule MobaWeb.Tutorial do
     hero_id
   end
 
-  def next_step(%{assigns: %{tutorial_step: current_step, current_hero: hero}} = socket, step)
+  def next_step(%{assigns: %{tutorial_step: current_step}} = socket, step)
       when current_step == step - 1 do
-
     set_step(socket, step)
   end
+
   def next_step(socket, _), do: socket
 
   def set_step(%{assigns: %{current_hero: hero}} = socket, step) do

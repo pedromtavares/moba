@@ -95,7 +95,7 @@ defmodule Moba.Game.Query.HeroQuery do
     )
   end
 
-  def last_active_pvp(user_id) do
+  def pvp_last_picked(user_id) do
     base = by_user(Hero, user_id) |> pvp_inactive()
 
     from(hero in base,
@@ -147,16 +147,6 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query,
       where: hero.level >= ^first,
       where: hero.level <= ^last
-  end
-
-  def by_match(query, match_id) do
-    from hero in query,
-      where: hero.match_id == ^match_id
-  end
-
-  def by_matches(match_ids, query \\ Hero) do
-    from hero in query,
-      where: hero.match_id in ^match_ids
   end
 
   def by_user(query, user_id) do

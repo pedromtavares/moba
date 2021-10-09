@@ -35,9 +35,7 @@ defmodule Moba.Game do
   def current_pve_hero(%{current_pve_hero_id: hero_id}), do: get_hero!(hero_id)
   def current_pvp_hero(%{current_pvp_hero_id: hero_id}), do: get_hero!(hero_id)
 
-  def current_heroes(user_id, match_id), do: Heroes.current(user_id, match_id)
-
-  def last_pvp_hero(user_id), do: Heroes.last_active_pvp(user_id)
+  def last_picked_pvp_hero(user_id), do: Heroes.pvp_last_picked(user_id)
 
   def latest_heroes(user_id), do: Heroes.list_latest(user_id)
 
@@ -47,7 +45,7 @@ defmodule Moba.Game do
   Orchestrates the creation of a Hero, which involves creating its initial build, activating it
   and generating its first Jungle targets
   """
-  def create_hero!(attrs, user, avatar, skills, match \\ current_match()) do
+  def create_hero!(attrs, user, avatar, skills) do
     attrs =
       if Map.get(attrs, :easy_mode) do
         Map.merge(attrs, %{pve_battles_available: 1000})
@@ -55,7 +53,7 @@ defmodule Moba.Game do
         attrs
       end
 
-    hero = Heroes.create!(attrs, user, avatar, match)
+    hero = Heroes.create!(attrs, user, avatar)
     build = Builds.create!("pve", hero, skills)
 
     hero
@@ -63,14 +61,14 @@ defmodule Moba.Game do
     |> generate_targets!()
   end
 
-  def create_bot_hero!(avatar, level, difficulty, match, user \\ nil, pvp_points \\ 0) do
+  def create_bot_hero!(avatar, level, difficulty, user \\ nil, pvp_points \\ 0) do
     league_tier = Leagues.tier_for(level)
-    Heroes.create_bot!(avatar, level, difficulty, match, user, pvp_points, league_tier)
+    Heroes.create_bot!(avatar, level, difficulty, user, pvp_points, league_tier)
   end
 
-  def create_pvp_bot_hero!(user, avatar, match) do
+  def create_pvp_bot_hero!(user, avatar) do
     difficulty = if user.bot_tier == Moba.master_league_tier(), do: "master", else: "grandmaster"
-    Heroes.create_bot!(avatar, 25, difficulty, match, user, 0, user.bot_tier)
+    Heroes.create_bot!(avatar, 25, difficulty, user, 0, user.bot_tier)
   end
 
   def update_hero!(hero, attrs, items \\ nil) do
@@ -106,8 +104,7 @@ defmodule Moba.Game do
           },
           user,
           avatar,
-          skills,
-          Game.current_match()
+          skills
         )
 
       Enum.reduce(items, hero, fn item, acc ->
@@ -197,8 +194,7 @@ defmodule Moba.Game do
       Heroes.create!(
         %{name: "Roshan", league_tier: 6, level: 25, bot_difficulty: "boss", boss_id: hero.id},
         nil,
-        Avatars.boss!(),
-        current_match()
+        Avatars.boss!()
       )
 
     build = Builds.create!("pve", boss, Skills.boss!())
