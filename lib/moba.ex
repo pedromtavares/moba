@@ -32,7 +32,7 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
-  @easy_mode_max_farm 21_000
+  @easy_mode_max_farm 22_000
   @turn_mp_regen_multiplier 0.01
   @summon_total_gold 24_000
   @summon_cost 100

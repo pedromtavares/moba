@@ -60,10 +60,22 @@
                             <div class="col-lg col-12 mt-3" id="jungle-stats">
                                 <div class="row align-items-center">
                                     <div class="col-lg">
-                                        <%= unless @current_hero.easy_mode do %>
+                                        <%= if @current_hero.easy_mode do %>
+                                            <% farm_left = Moba.easy_mode_max_farm() - @current_hero.total_farm %>
                                             <div class="text-white text-center">
-                                                <h2 class="text-white mb-0"><%=@current_hero.pve_battles_available%></h2>
-                                                <p>Ganks available</p>
+                                                <h2 class="text-success">Easy Mode</h2>
+                                                <h5 class="text-white mb-0">+50% Stats</h5>
+                                                <%= if farm_left <= 0 do %>
+                                                    <h5 class="text-danger"><i class="fa fa-exclamation-triangle"></i> You have farmed all of your available gold and will no longer win gold from ganks and League Challenges.</h5>
+                                                <% else %>
+                                                    <h5 class="text-warning"><i class="fa fa-coins"></i> <%=farm_left%> gold farm remaining</h5>
+                                                <% end %>
+                                            </div>
+                                        <% else %>
+                                            <div class="text-white text-center">
+                                                <h2 class="text-success mt-0">Veteran Mode</h2>
+                                                <h5 class="text-white mb-0"><%=@current_hero.pve_battles_available%> ganks available</h5>
+                                                <h5 class="text-warning">Total farm: <i class="fa fa-coins"></i> <%= @current_hero.total_farm %></h5>
                                                 <p class="mb-0">
                                                     <%=if @current_hero.buybacks > 0 do %>
                                                         <span class="text-warning"><i class="fa fa-street-view mr-1"></i>Buybacks: <strong><%=@current_hero.buybacks%></strong></span>
