@@ -457,7 +457,7 @@ defmodule Moba.GameTest do
       assert hero.item_mp > base_hero.item_mp
       assert hero.item_atk > base_hero.item_atk
 
-      catch_error(Game.buy_item!(hero, base_item()))
+      assert hero == Game.buy_item!(hero, base_item())
 
       Game.buy_item!(%{hero | gold: 10000}, base_item())
       tranquil_boots = base_rare_item()

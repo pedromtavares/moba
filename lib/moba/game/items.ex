@@ -34,7 +34,7 @@ defmodule Moba.Game.Items do
         gold: hero.gold - price(item)
       })
     else
-      raise "Not enough gold"
+      hero
     end
   end
 
@@ -50,7 +50,7 @@ defmodule Moba.Game.Items do
         gold: hero.gold + sell_price(item)
       })
     else
-      raise "Item not in inventory"
+      hero
     end
   end
 

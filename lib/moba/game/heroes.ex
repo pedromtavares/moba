@@ -415,6 +415,8 @@ defmodule Moba.Game.Heroes do
     end)
   end
 
+  defp bot_total_farm(level, _) when level > 25, do: 30_000
+
   defp bot_total_farm(_, "master"), do: Enum.random(18_000..23_000)
 
   defp bot_total_farm(_, "grandmaster"), do: Enum.random(27_000..30_000)
