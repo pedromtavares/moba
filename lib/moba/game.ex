@@ -167,7 +167,7 @@ defmodule Moba.Game do
 
   def maybe_generate_boss(hero), do: hero
 
-  def maybe_finish_pve(%{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false} = hero) do
+  def maybe_finish_pve(%{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false, finished_at: nil} = hero) do
     if max_league?(hero) || points < Moba.pve_points_limit() do
       finish_pve!(hero)
     else
@@ -177,10 +177,10 @@ defmodule Moba.Game do
 
   def maybe_finish_pve(hero), do: hero
 
-  def finish_pve!(%{finished_pve: false} = hero) do
+  def finish_pve!(%{finished_pve: false, finished_at: nil} = hero) do
     hero = Repo.preload(hero, :user)
     shards = Accounts.pve_shards_for(hero.user, hero.league_tier)
-    updated = update_hero!(hero, %{finished_pve: true, shards_reward: shards})
+    updated = update_hero!(hero, %{finished_pve: true, finished_at: Timex.now(), shards_reward: shards})
 
     collection = Heroes.collection_for(updated.user_id)
     Accounts.finish_pve!(updated.user, collection, shards)

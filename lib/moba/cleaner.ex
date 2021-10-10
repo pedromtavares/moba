@@ -16,6 +16,7 @@ defmodule Moba.Cleaner do
         where: not is_nil(h.archived_at),
         where: h.archived_at <= ^ago,
         where: not h.finished_pve,
+        where: h.bot_difficulty != "boss",
         limit: 50
 
     Repo.all(query) |> delete_records()

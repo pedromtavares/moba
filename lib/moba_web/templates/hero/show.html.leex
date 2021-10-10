@@ -207,7 +207,7 @@
                             <th>Rank</th>
                             <th>Hero</th>
                             <th>Total Farm</th>
-                            <th>Win Rate</th>
+                            <th>Finished in</th>
                         </tr>
                         <%= for hero <- @ranking do %>
                             <tr>
@@ -231,7 +231,14 @@
                                     <h3 class="text-warning"><i class="fa fa-coins"></i> <%=hero.total_farm%></h3>
                                 </td>
                                 <td>
-                                    <h3 class="text-success"><%=GH.pve_win_rate(hero)%>%</h3>
+                                    <h3 class="text-success">
+                                        <i class="fa fa-clock-o"></i>
+                                        <%=if hero.finished_at do %>
+                                            <%=GH.finished_time(hero)%> min
+                                        <% else %>
+                                            ??
+                                        <% end %>
+                                    </h3>
                                 </td>
                             </tr>
                         <% end %>

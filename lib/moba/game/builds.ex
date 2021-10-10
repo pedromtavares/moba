@@ -153,7 +153,7 @@ defmodule Moba.Game.Builds do
     gold = extra_gold(difficulty, level, total_farm)
 
     {result, _} =
-      case difficulty do
+      case items_difficulty(difficulty, level) do
         "weak" -> item_list
         "moderate" -> Enum.shuffle(item_list)
         "strong" -> Enum.reverse(item_list)
@@ -247,6 +247,9 @@ defmodule Moba.Game.Builds do
   defp items_to_order(items) do
     items |> Enum.filter(& &1.active) |> Enum.map(& &1.code)
   end
+
+  defp items_difficulty("strong", level) when level > 27, do: "grandmaster"
+  defp items_difficulty(difficulty, _), do: difficulty
 
   defp codes_to_skills(lists) do
     lists

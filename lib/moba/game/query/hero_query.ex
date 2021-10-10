@@ -210,7 +210,7 @@ defmodule Moba.Game.Query.HeroQuery do
   def finished_pve(query \\ Hero) do
     from hero in query,
       where: hero.finished_pve == true,
-      order_by: [desc: hero.total_farm]
+      order_by: [desc: hero.total_farm, desc: fragment("? - ?", hero.inserted_at, hero.finished_at)]
   end
 
   def summoned(query \\ Hero) do

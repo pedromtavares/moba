@@ -181,11 +181,11 @@ defmodule Moba.Conductor do
       Logger.info("Generating #{avatar.name}s...")
 
       Enum.each(level_range, fn level ->
-        Game.create_bot_hero!(avatar, level, "weak", match)
-        Game.create_bot_hero!(avatar, level, "moderate", match)
-        Game.create_bot_hero!(avatar, level, "strong", match)
-        Game.create_bot_hero!(avatar, level, "strong", match)
-        Game.create_bot_hero!(avatar, level, "strong", match)
+        Game.create_bot_hero!(avatar, level, "weak")
+        Game.create_bot_hero!(avatar, level, "moderate")
+        Game.create_bot_hero!(avatar, level, "strong")
+        Game.create_bot_hero!(avatar, level, "strong")
+        Game.create_bot_hero!(avatar, level, "strong")
       end)
     end)
 

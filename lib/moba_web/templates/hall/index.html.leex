@@ -56,13 +56,24 @@
                         <td>
                             <div class="row d-flex mb-3">
                                 <div class="col">
-                                    <h4 class="text-warning"><i class="fa fa-coins mr-1"></i><%=hero.total_farm%></h4>
+                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Farm">
+                                        <i class="fa fa-coins mr-1"></i><%=hero.total_farm%>
+                                    </h4>
                                 </div>
                                 <div class="col">
-                                    <h4 class="text-success">WR: <%=GH.pve_win_rate(hero)%>%</h4>
+                                    <h4 class="text-success" data-toggle="tooltip" title="Win Rate">
+                                        <i class="fa fa-crosshairs mr-1"></i><%=GH.pve_win_rate(hero)%>%
+                                    </h4>
                                 </div>
                                 <div class="col">
-                                    <h4 class="text-danger"><i class="fa fa-street-view mr-1"></i>Buybacks: <%=hero.buybacks%></h4>
+                                    <h4 class="text-danger" data-toggle="tooltip" title="Time it took to finish the Jungle">
+                                        <i class="fa fa-clock-o mr-1"></i>
+                                        <%= if hero.finished_at do %>
+                                            <%=GH.finished_time(hero)%> minutes
+                                        <% else %>
+                                            ??
+                                        <% end %>
+                                    </h4>
                                 </div>
                             </div>
 

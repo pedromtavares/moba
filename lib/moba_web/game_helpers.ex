@@ -92,6 +92,9 @@ defmodule MobaWeb.GameHelpers do
 
   def pve_win_rate(hero), do: Moba.Game.pve_win_rate(hero)
 
+  def finished_time(%{finished_at: nil}), do: nil
+  def finished_time(hero), do: Timex.diff(hero.finished_at, hero.inserted_at, :minutes)
+
   def formatted_effect(effect) do
     effect
     |> String.replace(~r/\n/, "<br/>")

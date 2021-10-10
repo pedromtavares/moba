@@ -42,6 +42,7 @@ defmodule Moba.Game.Schema.Hero do
     field :total_farm, :integer, default: 0
     field :pve_ranking, :integer
     field :finished_pve, :boolean, default: false
+    field :finished_at, :utc_datetime
     field :shards_reward, :integer, default: 0
     field :summoned, :boolean, default: false
 
@@ -114,6 +115,7 @@ defmodule Moba.Game.Schema.Hero do
       :dead,
       :pve_ranking,
       :finished_pve,
+      :finished_at,
       :item_hp,
       :item_mp,
       :item_atk,
