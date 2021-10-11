@@ -18,7 +18,9 @@ defmodule MobaWeb.CreateLiveView do
        cache_key: cache_key,
        token: token,
        filter: nil,
-       summoning?: false
+       summoning?: false,
+       error: nil,
+       name: nil
      )}
   end
 
@@ -29,6 +31,7 @@ defmodule MobaWeb.CreateLiveView do
     cached = get_cache(user.id)
     avatars = Game.list_creation_avatars(unlocked_codes)
     items = Moba.cached_items()
+    total_gold = Moba.summon_total_gold() - (Enum.map(cached.selected_items, &(&1 && Game.item_price(&1))) |> Enum.sum())
 
     {:ok,
      assign(socket,
@@ -43,10 +46,11 @@ defmodule MobaWeb.CreateLiveView do
        filter: nil,
        summoning?: true,
        items: items,
-       total_gold:
-         Moba.summon_total_gold() - (Enum.map(cached.selected_items, &(&1 && Game.item_price(&1))) |> Enum.sum()),
+       total_gold: total_gold,
        epic_items: Enum.filter(items, fn item -> item.rarity == "epic" end),
-       legendary_items: Enum.filter(items, fn item -> item.rarity == "legendary" end)
+       legendary_items: Enum.filter(items, fn item -> item.rarity == "legendary" end),
+       error: nil,
+       name: nil
      )}
   end
 
@@ -68,7 +72,9 @@ defmodule MobaWeb.CreateLiveView do
        custom: false,
        cache_key: user.id,
        filter: nil,
-       summoning?: false
+       summoning?: false,
+       error: nil,
+       name: user.username
      )}
   end
 
@@ -202,20 +208,26 @@ defmodule MobaWeb.CreateLiveView do
     {:noreply, socket |> redirect(to: "/base")}
   end
 
+  def handle_event("validate", %{"name" => name}, socket) do
+    {:noreply, assign(socket, error: validation_error(name, socket), name: name)}
+  end
+
   def render(assigns) do
     MobaWeb.CreateView.render("index.html", assigns)
   end
 
   defp create_hero(
          easy_mode,
-         %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills}} = socket
+         %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills, name: name}} = socket
        ) do
     skills =
       selected_skills
       |> Enum.map(fn skill -> skill.id end)
       |> Game.list_chosen_skills()
 
-    Moba.create_current_pve_hero!(%{name: user.username, easy_mode: easy_mode}, user, avatar, skills)
+    hero_name = if !is_nil(name) && is_nil(validation_error(name, socket)), do: name, else: user.username
+
+    Moba.create_current_pve_hero!(%{name: hero_name, easy_mode: easy_mode}, user, avatar, skills)
 
     delete_cache(socket)
 
@@ -267,4 +279,17 @@ defmodule MobaWeb.CreateLiveView do
   defp delete_cache(%{assigns: %{cache_key: key}}), do: Cachex.del(:game_cache, key)
 
   defp get_item(code, socket), do: Enum.find(socket.assigns.items, fn item -> item.code == code end)
+
+  defp validation_error(name, %{assigns: %{current_user: user}}) do
+    length = String.length(name)
+    if length >= 3 and length <= 15 do
+      if name == user.username || is_nil(Accounts.get_user_by_username(name)) do
+        nil
+      else
+        "Name already taken."
+      end
+    else
+      "Invalid name size, minimum is 3 characters."
+    end
+  end
 end

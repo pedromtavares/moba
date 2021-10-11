@@ -14,7 +14,7 @@ defmodule Moba.Accounts do
 
   def get_user!(id), do: Users.get!(id)
 
-  def get_user_by_username!(username), do: Users.get_by_username!(username)
+  def get_user_by_username(username), do: Users.get_by_username(username)
 
   def get_user_with_unlocks!(id), do: Users.get_with_unlocks!(id)
 

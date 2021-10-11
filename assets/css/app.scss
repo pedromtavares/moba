@@ -44,6 +44,11 @@ hr{
   margin: 0;
 }
 
+.silver-bar{
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+}
+
 .black-bar{
   background: #38414a;
   border-image-source: radial-gradient(white, rgb(47, 60, 74));

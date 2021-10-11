@@ -44,17 +44,6 @@
                         <div class="row no-gutters boxes">
                             <%=render "_navigation.html", origin: @origin, current_user: @current_hero.user, socket: @socket, current_mode: @current_mode, unreads: @unreads %>
                         </div>
-                        <%=if @current_mode == "pvp" do %>
-                            <div class="row mb-1 mt-1">
-                                <div class="col">
-                                    <div class="progress border border-dark" style="height:30px;border-radius:0">
-                                        <div style="width:<%=match_progress_percentage()%>%" class="progress-bar bg-dark progress-bar-striped progress-bar-animated">
-                                        </div>
-                                        <small class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top:6px">Current match will end <%=next_match_description()%></small>
-                                    </div>
-                                </div>
-                            </div>
-                        <% end %>
                         <div class="row d-none d-md-block no-gutters" id="current-hero-stats">
                             <div class="col flex no-wrap pl-0" style="overflow: visible;">
                                 <%=render "_stats.html", current_hero: @current_hero%>

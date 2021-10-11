@@ -1,6 +1,6 @@
 <div id="create-new">
     <%= unless @selected_avatar do %>
-        <div class="row mt-2 mb-2">
+        <div class="row mt-2 mb-3">
             <div class="col text-center">
                 <h1>Pick your <%=if @filter do %><span class="text-danger"><%=String.capitalize(@filter)%> </span><% end %>Hero<br/><small><em>You can filter by Role below</em></h1>
                 <%= for role <- roles() do %>
@@ -16,11 +16,56 @@
             <% end %>
         </div>
     <% else %>
-        <div class="row mt-3 text-center" phx-hook="ScrollToTop" id="scroll-to-top">
+        <div class="row mt-3" phx-hook="ScrollToTop" id="scroll-to-top">
             <%=render "_background_avatar.html", avatar: @selected_avatar, avatars: @all_avatars, selected: true%>
 
             <div class="col">
-                <div class="border py-3 mb-2" id="create-bar">
+                <%= if @custom do %>
+                    <div class="row text-center mb-3">
+                        <div class="col">
+                            <h2><i class="fa fa-cogs mr-1"></i>Custom Build: Choose 3 Skills</h2>
+                            <%= unless @summoning? do %>
+                                <a class="btn btn-outline-dark text-white" phx-click="toggle-custom" id="back-to-builds-button"><i class="fa fa-arrow-left"></i> Back to Builds</a>
+                            <% end %>
+                        </div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <div class="card-box margin-auto mb-0">
+                                <div class="row">
+                                    <%= for skill <- @skills do %>
+                                        <div class="col-12 col-sm-6 col-md-3 col-lg-2 col-xl-2 text-center mb-3">
+                                            <img phx-click="pick-skill" phx-value-id="<%=skill.id%>" src="<%=GH.image_url(skill)%>" class="d-none d-md-inline skill img-border-sm <%=if Enum.member?(@selected_skills, skill), do: "current"%> <%=if skill.passive, do: "passive"%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>"/>
+                                            <img phx-click="pick-skill" phx-value-id="<%=skill.id%>" src="<%=GH.image_url(skill)%>" class="d-inline d-md-none skill img-border-sm <%=if Enum.member?(@selected_skills, skill), do: "current"%> <%=if skill.passive, do: "passive"%>"/>
+                                            <br/>
+                                            <h5 class="mt-0 mb-0"><%=skill.name%></h5>
+                                            <%= if skill.mp_cost && skill.mp_cost > 0 do %>
+                                                <span class="badge badge-light-primary" data-toggle="tooltip" title="MP Cost"><i class="fa fa-flask mr-1"></i><%=skill.mp_cost%></span>
+                                            <% end %>
+                                            <%= if skill.passive do %>
+                                                <span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>
+                                            <% end %>
+                                            <p class="d-block d-md-none text-dark"><em><%=skill.description%></em></p>
+                                        </div>
+                                    <% end %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% else %>
+                    <div class="row text-center mb-3">
+                        <div class="col">
+                            <h2><i class="fa fa-dice-d20 mr-1"></i>Pick a Skill Build</h2>
+                            <a class="btn btn-outline-dark text-white" phx-click="toggle-custom" id="custom-build-button"><i class="fa fa-cogs mr-1"></i>Or create a Custom Build</a>
+                        </div>
+                    </div>
+                    <div class="row d-flex align-items-stretch justify-content-around mb-3">
+                        <%= for {build, index} <- builds_for(@selected_avatar.role) |> Enum.with_index() do %>
+                            <%=render "_build.html", build: elem(build, 0), title: elem(build, 1), index: index, selected_build_index: @selected_build_index %>
+                        <% end %>
+                    </div>
+                <% end %>
+                <div class="border py-3 mb-3" id="create-bar">
                     <div class="row justify-content-center align-items-center">
                         <div class="col">
                             <%= unless @summoning? do %>
@@ -64,105 +109,14 @@
                         </div>
                     </div>
                 </div>
-                <%= unless @summoning? do %>
-                    <%= if Enum.count(@selected_skills) == 3 && @selected_avatar do %>
-                        <%= if @current_user do %>
-                            <div class="row mb-2">
-                                <div class="col">
-                                    <button class="btn btn-outline-success btn-block btn-lg" phx-click="create-easy" phx-hook="Loading" loading="Creating..." id="create-easy-button">
-                                        <i class="fa fa-user fa-2x mr-1 mt-2"></i>
-                                        <strong class="font-20 d-block loading-text">Create Hero in Easy Mode</strong>
-                                        <p class="font-15">Great for learning the game. Unlimited ganks with limited farm.<br/>Objective: reach the <span class="text-league-5">Master League</span>.</p>
-                                    </button>
-                                </div>
-                                <div class="col">
-                                    <button class="btn btn-outline-danger btn-block btn-lg" phx-click="create-veteran" phx-hook="Loading" loading="Creating..." id="create-veteran-button">
-                                        <i class="fa fa-user-ninja fa-2x mr-1 mt-2"></i>
-                                        <strong class="font-20 d-block loading-text">Create Hero in Veteran Mode</strong>
-                                        <p class="font-15">For experienced players. Limited ganks with unlimited farm.<br/>Objective: reach the <span class="text-league-6">Grandmaster League</span>.</p>
-                                    </button>
-                                </div>
-                            </div>
-                        <% else %>
-                            <form action="/start" method="post" class="mb-2">
-                                <input type="hidden" name="avatar" value="<%= @selected_avatar.id %>"/>
-                                <input type="hidden" value="<%= @token %>" name="_csrf_token"/>
-                                <%= for skill <- @selected_skills do %>
-                                    <input type="hidden" name="skills[]" value="<%= skill.id %>"/>
-                                <% end %>
-                                <div class="row">
-                                    <div class="col">
-                                        <button class="btn btn-outline-success btn-block btn-lg" type="submit">
-                                            <i class="fa fa-user fa-2x mr-1 mt-2"></i>
-                                            <strong class="font-20 d-block loading-text">Create Hero in Easy Mode</strong>
-                                            <p class="font-15">Great for learning the game. Unlimited ganks with limited farm.<br/>Objective: reach the <span class="text-league-5">Master League</span>.</p>
-                                        </button>
-                                    </div>
-                                    <div class="col">
-                                        <button class="btn btn-outline-danger btn-block btn-lg disabled no-action">
-                                            <i class="fa fa-user-ninja fa-2x mr-1 mt-2"></i>
-                                            <strong class="font-20 d-block loading-text">Create Hero in Veteran Mode <em class="text-muted">(Unavailable)</em></strong>
-                                            <p class="font-15">For experienced players. Limited ganks with unlimited farm.<br/>Objective: reach the <span class="text-league-6">Grandmaster League</span>.</p>
-                                        </button>
-                                    </div>
-                                </div>
-                            </form>
-                        <% end %>
-                    <% end %>
-                <% end %>
-                <%= if @custom do %>
-                    <div class="row text-center mb-2">
-                        <div class="col">
-                            <h2><i class="fa fa-cogs mr-1"></i>Choose 3 Skills</h2>
-                            <%= unless @summoning? do %>
-                                <a class="btn btn-outline-dark text-white" phx-click="toggle-custom" id="back-to-builds-button"><i class="fa fa-arrow-left"></i> Back to Builds</a>
-                            <% end %>
-                        </div>
-                    </div>
-                    <div class="row mt-2">
-                        <div class="col">
-                            <div class="card-box margin-auto">
-                                <div class="row">
-                                    <%= for skill <- @skills do %>
-                                        <div class="col-12 col-sm-6 col-md-3 col-lg-2 col-xl-2 text-center mb-3">
-                                            <img phx-click="pick-skill" phx-value-id="<%=skill.id%>" src="<%=GH.image_url(skill)%>" class="d-none d-md-inline skill img-border-sm <%=if Enum.member?(@selected_skills, skill), do: "current"%> <%=if skill.passive, do: "passive"%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>"/>
-                                            <img phx-click="pick-skill" phx-value-id="<%=skill.id%>" src="<%=GH.image_url(skill)%>" class="d-inline d-md-none skill img-border-sm <%=if Enum.member?(@selected_skills, skill), do: "current"%> <%=if skill.passive, do: "passive"%>"/>
-                                            <br/>
-                                            <h5 class="mt-0 mb-0"><%=skill.name%></h5>
-                                            <%= if skill.mp_cost && skill.mp_cost > 0 do %>
-                                                <span class="badge badge-light-primary" data-toggle="tooltip" title="MP Cost"><i class="fa fa-flask mr-1"></i><%=skill.mp_cost%></span>
-                                            <% end %>
-                                            <%= if skill.passive do %>
-                                                <span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>
-                                            <% end %>
-                                            <p class="d-block d-md-none text-dark"><em><%=skill.description%></em></p>
-                                        </div>
-                                    <% end %>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <% else %>
-                    <div class="row text-center mb-3">
-                        <div class="col">
-                            <h2><i class="fa fa-dice-d20 mr-1"></i>Pick a Skill Build</h2>
-                            <a class="btn btn-outline-dark text-white" phx-click="toggle-custom" id="custom-build-button"><i class="fa fa-cogs mr-1"></i>Custom Build</a>
-                        </div>
-                    </div>
-                    <div class="row mt-2 d-flex align-items-stretch justify-content-around">
-                        <%= for {build, index} <- builds_for(@selected_avatar.role) |> Enum.with_index() do %>
-                            <%=render "_build.html", build: elem(build, 0), title: elem(build, 1), index: index, selected_build_index: @selected_build_index %>
-                        <% end %>
-                    </div>
-                <% end %>
                 <%= if @summoning? do %>
-                    <div class="row text-center mb-2 mt-2">
+                    <div class="row text-center mb-3 mt-2">
                         <div class="col">
                             <h2><i class="fa fa-cubes mr-1"></i>Choose your Items</h2>
                             <em class="text-warning"><i class="fa fa-coins"></i> <%=@total_gold%> remaining</em>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row text-center">
                         <div class="col-5">
                             <div class="card-box margin-auto">
                                 <h3 class="page-title center">
@@ -200,6 +154,64 @@
                                 </button>
                             </div>
                         </div>
+                    <% end %>
+                <% else %>
+                    <%= if Enum.count(@selected_skills) == 3 && @selected_avatar do %>
+                        <%= if @current_user do %>
+                            <div class="row mb-3">
+                                <div class="col text-center">
+                                    <h2><i class="fa fa-signature mr-1"></i>Hero Name</h2>
+                                    <form phx-change="validate">
+                                        <input type="text" maxlength="15" minlength="3" class="form-control text-center" name="name" value="<%=@current_user.username%>" style="max-width: 300px; margin:auto"/>
+                                        <%= if @error do %>
+                                            <span class="text-danger"><%=@error%></span>
+                                        <% end %>
+                                    </form>
+                                </div>
+                            </div>
+                            <%= unless @error do %>
+                                <div class="row mb-3">
+                                    <div class="col">
+                                        <button class="btn btn-outline-success btn-block btn-lg" phx-click="create-easy" phx-hook="Loading" loading="Creating..." id="create-easy-button">
+                                            <i class="fa fa-user fa-2x mr-1 mt-2"></i>
+                                            <strong class="font-20 d-block loading-text">Create Hero in Easy Mode</strong>
+                                            <p class="font-15">Great for learning the game. Unlimited ganks with limited farm.<br/>Objective: reach the <span class="text-league-5">Master League</span>.</p>
+                                        </button>
+                                    </div>
+                                    <div class="col">
+                                        <button class="btn btn-outline-danger btn-block btn-lg" phx-click="create-veteran" phx-hook="Loading" loading="Creating..." id="create-veteran-button">
+                                            <i class="fa fa-user-ninja fa-2x mr-1 mt-2"></i>
+                                            <strong class="font-20 d-block loading-text">Create Hero in Veteran Mode</strong>
+                                            <p class="font-15">For experienced players. Limited ganks with unlimited farm.<br/>Objective: reach the <span class="text-league-6">Grandmaster League</span>.</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            <% end %>
+                        <% else %>
+                            <form action="/start" method="post" class="mb-3">
+                                <input type="hidden" name="avatar" value="<%= @selected_avatar.id %>"/>
+                                <input type="hidden" value="<%= @token %>" name="_csrf_token"/>
+                                <%= for skill <- @selected_skills do %>
+                                    <input type="hidden" name="skills[]" value="<%= skill.id %>"/>
+                                <% end %>
+                                <div class="row">
+                                    <div class="col">
+                                        <button class="btn btn-outline-success btn-block btn-lg" type="submit">
+                                            <i class="fa fa-user fa-2x mr-1 mt-2"></i>
+                                            <strong class="font-20 d-block loading-text">Create Hero in Easy Mode</strong>
+                                            <p class="font-15">Great for learning the game. Unlimited ganks with limited farm.<br/>Objective: reach the <span class="text-league-5">Master League</span>.</p>
+                                        </button>
+                                    </div>
+                                    <div class="col">
+                                        <button class="btn btn-outline-danger btn-block btn-lg disabled no-action">
+                                            <i class="fa fa-user-ninja fa-2x mr-1 mt-2"></i>
+                                            <strong class="font-20 d-block loading-text">Create Hero in Veteran Mode <em class="text-muted">(Unavailable)</em></strong>
+                                            <p class="font-15">For experienced players. Limited ganks with unlimited farm.<br/>Objective: reach the <span class="text-league-6">Grandmaster League</span>.</p>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        <% end %>
                     <% end %>
                 <% end %>
             </div>

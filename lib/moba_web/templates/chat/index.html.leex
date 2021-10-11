@@ -50,7 +50,7 @@
                 <h5>No messages today, be the first one to say hi!</h5>
             </div>
         <% end %>
-        <hr>
+        <hr class="my-2">
         <%= f = form_for @changeset, "#", [phx_submit: :send, class: "form-horizontal"] %>
         <%= text_input f, :body, class: "form-control", placeholder: "Type and press enter to send", maxlength: 250, minlength: 2 %>
     </div>
