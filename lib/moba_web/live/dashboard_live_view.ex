@@ -30,6 +30,9 @@ defmodule MobaWeb.DashboardLiveView do
 
     duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
 
+    current_master_collection = Enum.filter(user.hero_collection, fn hero -> hero["tier"] >= 5 end)
+    current_season_progression = Game.current_quest_progression("season", user.id)
+
     {:ok,
      assign(socket,
        current_pvp_hero: current_pvp_hero,
@@ -41,15 +44,17 @@ defmodule MobaWeb.DashboardLiveView do
        pvp_display: pvp_display,
        winners: tier_winners,
        winner_index: winner_index,
-       duel_users: duel_users
+       duel_users: duel_users,
+       current_master_collection: current_master_collection,
+       current_season_progression: current_season_progression
      )}
   end
 
-  def handle_event("show-finished", _, socket) do
+  def handle_event("pve-show-finished", _, socket) do
     {:noreply, assign(socket, visible_heroes: finished_heroes(socket.assigns.all_heroes), pve_display: "finished")}
   end
 
-  def handle_event("show-unfinished", _, socket) do
+  def handle_event("pve-show-unfinished", _, socket) do
     {:noreply, assign(socket, visible_heroes: unfinished_heroes(socket.assigns.all_heroes), pve_display: "unfinished")}
   end
 

@@ -8,7 +8,7 @@ defmodule Moba.Game do
   """
 
   alias Moba.{Repo, Game, Accounts}
-  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks, Skins, Duels}
+  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks, Skins, Duels, Quests}
 
   # MATCHES
 
@@ -49,6 +49,13 @@ defmodule Moba.Game do
     attrs =
       if Map.get(attrs, :easy_mode) do
         Map.merge(attrs, %{pve_battles_available: 1000})
+      else
+        attrs
+      end
+
+    attrs =
+      if user && user.pve_tier == 4 do
+        Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count())
       else
         attrs
       end
@@ -119,6 +126,14 @@ defmodule Moba.Game do
     end
   end
 
+  def refresh_targets!(%{refresh_targets_count: count} = hero) when count > 0 do
+    generate_targets!(hero)
+
+    update_hero!(hero, %{refresh_targets_count: count - 1})
+  end
+
+  def refresh_targets!(hero), do: hero
+
   def master_league?(%{league_tier: tier}), do: tier == Moba.master_league_tier()
   def max_league?(%{league_tier: tier}), do: tier == Moba.max_league_tier()
 
@@ -167,7 +182,9 @@ defmodule Moba.Game do
 
   def maybe_generate_boss(hero), do: hero
 
-  def maybe_finish_pve(%{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false, finished_at: nil} = hero) do
+  def maybe_finish_pve(
+        %{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false, finished_at: nil} = hero
+      ) do
     if max_league?(hero) || points < Moba.pve_points_limit() do
       finish_pve!(hero)
     else
@@ -184,6 +201,9 @@ defmodule Moba.Game do
 
     collection = Heroes.collection_for(updated.user_id)
     Accounts.finish_pve!(updated.user, collection, shards)
+
+    track_quest("season", %{user_id: hero.user_id})
+
     updated
   end
 
@@ -409,4 +429,16 @@ defmodule Moba.Game do
     MobaWeb.broadcast("user-#{user_id}", "challenge", attrs)
     MobaWeb.broadcast("user-#{opponent_id}", "challenge", attrs)
   end
+
+  # QUESTS
+
+  def current_quest_progression(code, user_id), do: Quests.current_progression_for(code, user_id)
+
+  def last_completed_quest(hero), do: Quests.last_completed_for(hero)
+
+  def list_quest_progressions(user_id), do: Quests.list_progressions(user_id)
+
+  def list_title_quests(user_id), do: Quests.list_title_for(user_id)
+
+  def track_quest(code, opts), do: Quests.track(code, opts)
 end

@@ -10,6 +10,5 @@ defmodule MobaWeb.ChatView do
     |> raw()
   end
 
-  def battle_alerts(alerts), do: alerts |> Enum.filter(fn alert -> alert.type == "battle" end)
   def message_alerts(alerts), do: alerts |> Enum.filter(fn alert -> alert.type == "message" end)
 end

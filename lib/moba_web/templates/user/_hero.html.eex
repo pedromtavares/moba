@@ -19,7 +19,7 @@
                 <div class="ribbon ribbon-danger float-right"><i class="fa fa-crosshairs mr-1"></i> Current Arena</div>
             <% end %>
         </div>
-        <div class="card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
+        <div class="transparent card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
             <div class="row performance">
                 <div class="col d-flex justify-content-around">
                     <%= unless @hero.bot_difficulty do %>

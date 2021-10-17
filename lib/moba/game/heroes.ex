@@ -154,16 +154,19 @@ defmodule Moba.Game.Heroes do
   def level_cheat(hero) do
     xp = Moba.xp_to_next_hero_level(hero.level + 1)
 
-    hero
-    |> add_experience!(xp)
-    |> update!(%{
-      pve_points: Moba.pve_points_limit(),
-      gold: 100_000,
-      pve_battles_available: 2,
-      buffed_battles_available: 0
-    })
+    updated =
+      hero
+      |> add_experience!(xp)
+      |> update!(%{
+        pve_points: Moba.pve_points_limit(),
+        gold: 100_000,
+        pve_battles_available: 2,
+        buffed_battles_available: 0
+      })
 
     # |> Game.generate_boss!()
+
+    if updated.level == 25, do: update!(updated, %{league_tier: 5}), else: updated
   end
 
   def pve_win_rate(hero) do
@@ -337,7 +340,7 @@ defmodule Moba.Game.Heroes do
 
   def collection_for(user_id) do
     HeroQuery.finished_pve()
-    |> HeroQuery.by_user(user_id)
+    |> HeroQuery.with_user(user_id)
     |> Repo.all()
     |> Repo.preload(:avatar)
     |> Enum.group_by(& &1.avatar.code)

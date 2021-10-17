@@ -30,13 +30,15 @@ defmodule MobaWeb.ArenaView do
     match = Game.current_match()
     created = Timex.shift(match.inserted_at, hours: 1)
 
-    label = if Timex.before?(match.last_pvp_round_at, created) do
-      "Next round"
-    else
-      "Next match"
-    end
+    label =
+      if Timex.before?(match.last_pvp_round_at, created) do
+        "Next round"
+      else
+        "Next match"
+      end
 
-    time = match.last_pvp_round_at
+    time =
+      match.last_pvp_round_at
       |> Timex.shift(hours: Moba.pvp_round_timeout_in_hours())
       |> Timex.format("{relative}", :relative)
       |> elem(1)

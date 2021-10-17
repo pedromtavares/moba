@@ -47,6 +47,7 @@ defmodule Moba do
   @shard_limit 200
   @buyback_multiplier 20
   @veteran_buyback_multiplier 10
+  @refresh_targets_count 5
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -94,6 +95,7 @@ defmodule Moba do
   def shard_limit, do: @shard_limit
   def buyback_multiplier(%{pve_tier: tier}) when tier > 1, do: @veteran_buyback_multiplier
   def buyback_multiplier(_), do: @buyback_multiplier
+  def refresh_targets_count, do: @refresh_targets_count
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
@@ -183,7 +185,7 @@ defmodule Moba do
     Conductor.regenerate_resources!()
   end
 
-  def generate_bots!(bot_level_range \\ 0..30) do
+  def generate_bots!(bot_level_range \\ 0..35) do
     IO.puts("Generating new bots...")
     Conductor.generate_bots!(bot_level_range)
   end

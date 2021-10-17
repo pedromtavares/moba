@@ -18,7 +18,7 @@
                     <h3 class="mb-0 text-warning"><%=if @hero.league_tier == Moba.max_league_tier() do %> <%=rewards_for(@ranking)%> <% end %></small></h3>
                 </div>
             </div>
-            <div class="card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
+            <div class="transparent card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
                 <div class="row">
                     <div class="col-12">
                         <div class="skills-container d-flex justify-content-between">

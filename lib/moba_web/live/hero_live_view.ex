@@ -3,13 +3,22 @@ defmodule MobaWeb.HeroLiveView do
 
   def mount(_, %{"user_id" => user_id} = session, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
+    user = socket.assigns.current_user
     hero_id = Map.get(session, "hero_id")
     hero = hero_id && Game.get_hero!(hero_id)
 
-    collection_codes = Enum.map(socket.assigns.current_user.hero_collection, & &1["code"])
+    collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
+    completed_quest = Game.last_completed_quest(hero)
+    current_master_collection = Enum.filter(user.hero_collection, fn hero -> hero["tier"] >= 5 end)
 
-    {:ok, assign(socket, current_hero: hero, blank_collection: blank_collection)}
+    {:ok,
+     assign(socket,
+       current_hero: hero,
+       blank_collection: blank_collection,
+       completed_quest: completed_quest,
+       current_master_collection: current_master_collection
+     )}
   end
 
   def handle_info({"hero", %{id: id}}, socket) do

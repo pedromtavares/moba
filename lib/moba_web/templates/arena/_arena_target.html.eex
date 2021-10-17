@@ -24,7 +24,7 @@
                     </button>
                 </div>
         </div>
-        <div class="card-footer p-0 text-center">
+        <div class="transparent card-footer p-0 text-center">
             <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
                 <div class="col">
                     <%=GH.hero_stats(@target)%>

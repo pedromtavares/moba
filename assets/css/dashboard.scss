@@ -17,6 +17,20 @@
     background: rgba(241,85,108, 0.2) !important;
   }
 
+  .collection{
+    .avatar{
+      max-width: 100%;
+    }
+    .blank-avatar{
+      filter: grayscale(100%);
+    }
+    .league-logo{
+      max-width: 25px;
+      height: auto;
+      margin-top: -30px
+    }
+  }
+
   .hero-list{
     .skill-img{
       width:23%;
@@ -60,6 +74,9 @@
 
   }
 
+  .half-fixed-panel{
+    height: 220px;
+  }
 
   .fixed-panel{
     height: 640px;

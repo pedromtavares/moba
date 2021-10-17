@@ -5,6 +5,7 @@
     <!--<link rel="stylesheet" href="<%= Routes.static_path(@conn, "/torch/base.css") %>">-->
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/torch/theme.css") %>">
     <link rel="shortcut icon" href="<%= Routes.static_path(@conn, "/images/league_5.png") %>" />
+    <script src="https://kit.fontawesome.com/26d6de301e.js"></script>
   </head>
 
   <body class="<%= Torch.PageView.body_classes(@conn) %>">
@@ -35,6 +36,9 @@
             </a>
             <a href="/admin/skins">
               <h3>Skins</h3>
+            </a>
+            <a href="/admin/quests">
+              <h3>Quests</h3>
             </a>
             <a href="/admin/users?_utf8=✓&filters%5B%5D=user%5Busername_contains%5D&filters%5B%5D=user%5Bemail_contains%5D&user%5Bis_bot_equals%5D=false&filters%5B%5D=user%5Blevel_equals%5D&filters%5B%5D=user%5Bexperience_equals%5D&user%5Bis_guest_equals%5D=false">
               <h3>Users</h3>

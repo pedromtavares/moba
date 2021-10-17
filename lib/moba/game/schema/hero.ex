@@ -45,6 +45,7 @@ defmodule Moba.Game.Schema.Hero do
     field :finished_at, :utc_datetime
     field :shards_reward, :integer, default: 0
     field :summoned, :boolean, default: false
+    field :refresh_targets_count, :integer, default: 0
 
     # PVP (Arena) related fields
     field :pvp_points, :integer
@@ -145,7 +146,8 @@ defmodule Moba.Game.Schema.Hero do
       :skin_id,
       :shards_reward,
       :summoned,
-      :match_id
+      :match_id,
+      :refresh_targets_count
     ])
   end
 

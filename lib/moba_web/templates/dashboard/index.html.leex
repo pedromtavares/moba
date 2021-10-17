@@ -1,6 +1,59 @@
 <div class="dashboard mt-3">
-  <%=if length(@duel_users) > 0 do %>
-    <div class="row">
+  <div class="row">
+    <%= if @current_season_progression do %>
+      <div class="col-xl-6">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="text-center"><i class="fa fa-globe text-success fa-2x"></i></h3>
+            <h3 class="text-center m-0">Season Quest</h3>
+          </div>
+          <div class="card-body pt-0">
+            <h4 class="text-success text-center">Level <%= @current_season_progression.quest.level %></h4>
+            <h5 class="text-center text-muted font-italic"><%= @current_season_progression.quest.description %></h5>
+            <div class="progress mt-3" style="height:30px;">
+                <div style="width:<%=progression_percentage(@current_season_progression)%>%" class="progress-bar bg-success">
+                </div>
+                <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%= @current_season_progression.current_value %>/<%= @current_season_progression.quest.final_value %> Avatars</small>
+            </div>
+            <div class="row collection mt-3">
+                <%= for hero <- @current_master_collection do %>
+                  <div style="width: 100px;" class='avatar-container text-center mx-1'>
+                      <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
+                      <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
+                  </div>
+                <% end %>
+            </div>
+            <h4 class="text-center my-3"><i class="fa fa-gift mr-1 text-warning"></i>Rewards upon completion</h4>
+            <div class="d-flex w-100 justify-content-between text-center">
+              <div class="row d-block">
+                <div class="col">
+                  <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
+                      <h4><i class="fab fa-ethereum text-info fa-2x"></i></h4>
+                      <h4>Shards</h4>
+                      <h5 class="text-info">+<%= @current_season_progression.quest.shard_prize %></h5>
+                  <% end %>
+                </div>
+              </div>
+              <div class="row d-block">
+                <div class="col">
+                  <h4><i class="fa fa-leaf text-success fa-2x"></i></h4>
+                  <h4>Jungle Bonus</h4>
+                  <h5 class="text-success"><%=jungle_bonus_for(@current_season_progression)%></h5>
+                </div>
+              </div>
+              <div class="row d-block">
+                <div class="col">
+                  <h4><i class="fa fa-user text-muted fa-2x"></i></h4>
+                  <h4>Profile Title</h4>
+                  <h5 class="text-muted"><%= @current_season_progression.quest.title %></h5>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+    <%=if length(@duel_users) > 0 do %>
       <div class="col-6">
         <div class="card">
           <div class="card-body p-0">
@@ -19,8 +72,8 @@
           </div>
         </div>
       </div>
-    </div>
-  <% end %>
+    <% end %>
+  </div>
   <div class="row">
     <div class="col-xl-6">
       <div class="card">
@@ -32,8 +85,8 @@
             <div class="col">
               <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
                 <div class="btn-group">
-                  <button type="button" class="btn btn-xs <%=if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light"%>" phx-click="show-unfinished">In Progress</button>
-                  <button type="button" class="btn btn-xs <%=if @pve_display == "finished", do: "btn-secondary", else: "btn-light"%>" phx-click="show-finished">Completed</button>
+                  <button type="button" class="btn btn-xs <%=if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light"%>" phx-click="pve-show-unfinished">In Progress</button>
+                  <button type="button" class="btn btn-xs <%=if @pve_display == "finished", do: "btn-secondary", else: "btn-light"%>" phx-click="pve-show-finished">Completed</button>
               </div>
               </div>
             </div>
@@ -138,7 +191,7 @@
                   <div class="col-5">
                       <h5 class="text-center mb-0 mt-0">Season Progression</h5>
                       <div class="progress mt-3" style="height:30px;">
-                          <div style="width:<%=next_medal_percentage(@current_user)%>%" class="progress-bar bg-primary">
+                          <div style="width:<%=next_medal_percentage(@current_user)%>%" class="progress-bar bg-danger">
                           </div>
                           <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%=@current_user.season_points%>/<%=Accounts.season_points_for(next)%> Season Points</small>
                       </div>
@@ -212,7 +265,7 @@
                       </tr>
                       <tr>
                         <td><i class="fa fa-clock fa-2x text-warning"></i></td>
-                        <td class="font-20 text-center" colspan=2>Next Round <span class="text-warning"><%=MobaWeb.ArenaView.next_round_description()%></span></td>
+                        <td class="font-20 text-center" colspan=2><span class="text-warning"><%=MobaWeb.ArenaView.next_round_description()%></span></td>
                       </tr>
                     <% end %>
                   </table>

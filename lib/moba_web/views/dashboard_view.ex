@@ -36,4 +36,15 @@ defmodule MobaWeb.DashboardView do
       div(total, 2)
     end
   end
+
+  def progression_percentage(%{quest: quest} = progression) do
+    total = quest.final_value
+
+    progression.current_value * 100 / total
+  end
+
+  def jungle_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
+  def jungle_bonus_for(%{quest: %{level: 2}}), do: "50% gold discount on Buybacks"
+  def jungle_bonus_for(%{quest: %{level: 3}}), do: "Gank is reimbursed on death (+1 available Ganks)"
+  def jungle_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
 end

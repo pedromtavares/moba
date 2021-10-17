@@ -64,7 +64,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def latest(user_id) do
-    base = Hero |> by_user(user_id)
+    base = Hero |> with_user(user_id)
 
     from(hero in base,
       limit: 50,
@@ -74,7 +74,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def eligible_for_pvp(user_id) do
-    from(hero in by_user(Hero, user_id),
+    from(hero in with_user(Hero, user_id),
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.id]],
       where: hero.finished_pve == true,
@@ -96,7 +96,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def pvp_last_picked(user_id) do
-    base = by_user(Hero, user_id) |> pvp_inactive()
+    base = with_user(Hero, user_id) |> pvp_inactive()
 
     from(hero in base,
       order_by: [desc: hero.pvp_last_picked],
@@ -149,14 +149,9 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.level <= ^last
   end
 
-  def by_user(query, user_id) do
+  def with_user(query, user_id) do
     from hero in query,
       where: hero.user_id == ^user_id
-  end
-
-  def by_users(query, user_ids) do
-    from hero in query,
-      where: hero.user_id in ^user_ids
   end
 
   def by_pvp_points(query, min, max) do

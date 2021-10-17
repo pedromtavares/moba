@@ -8,7 +8,7 @@
         <div class="card-body p-0 d-flex align-items-center justify-content-center">
 
         </div>
-        <div class="card-footer p-0">
+        <div class="transparent card-footer p-0">
             <div class="row align-items-center d-flex ml-1 mt-1 mr-1" data-toggle="tooltip" title="<%=GH.hero_stats_string(@boss, false)%>">
                 <div class="col-2 text-right text-danger font-weight-bold no-wrap">
                     <i class="fa fa-heart mr-1"></i> HP

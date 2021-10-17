@@ -26,12 +26,6 @@ Hooks.Scroll = {
   }
 }
 
-Hooks.ScrollToBottom = {
-  mounted(){
-    window.scrollTo(0, document.body.scrollHeight);
-  }
-}
-
 Hooks.ScrollToTop = {
   mounted(){
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -215,17 +209,6 @@ Hooks.ToggleShop = {
   }
 }
 
-Hooks.BattleToast = {
-  mounted(){
-    let el = this.el;
-    $(el).toast("show");
-
-    el.addEventListener("click", e => {
-      $(el).toast("hide");
-    });
-  }
-}
-
 Hooks.MessageToast = {
   mounted(){
     let el = this.el;
@@ -239,30 +222,10 @@ Hooks.MessageToast = {
   }
 }
 
-Hooks.LeagueChallengeAlert = {
-  mounted(){
-    swal("Click below to start your League Challenge. You will face consecutive opponents and must win all the battles in order to rank up to the next League.", {
-      title: "League Challenge",
-      buttons: {
-        confirm: {
-          className: "btn btn-danger btn-block challenge-button",
-          text: "Start League Challenge",
-          value: "start"
-        }
-      }
-    }).then((value) => {
-      switch(value){
-        case "start":
-        this.pushEventTo("#hero-bar", "league", {});
-        break;
-      }
-    });
-  }
-}
-
 Hooks.DuelChallenger = {
   mounted(){
     swal(`You have challenged ${this.el.dataset.other}, waiting for response...`, {
+      closeOnClickOutside: false,
       title: "Duel Challenge",
       buttons: {
         confirm: {
@@ -277,6 +240,7 @@ Hooks.DuelChallenger = {
 Hooks.DuelChallenged = {
   mounted(){
     swal(`You are being challenged to a Duel by ${this.el.dataset.other}.`, {
+      closeOnClickOutside: false,
       title: "Duel Challenge",
       buttons: {
         confirm: {

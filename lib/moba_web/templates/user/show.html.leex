@@ -62,12 +62,30 @@
             <div class="row">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header text-center font-17 text-white">
-                            <i class="fa fa-user mr-1"></i><%=@user.username%>
-                            <%= if @user.id == @current_user.id do %>
+                        <h5 class="card-header font-17 text-white d-flex justify-content-around">
+                            <span>
+                                <%= if @editing do %>
+                                    <form phx-change="update">
+                                        <select name="quest_id" class="form-control d-inline">
+                                            <option value="" <%=if is_nil(@user.title_quest_id), do: "selected"%>>None (Remove)</option>
+                                            <%=for progression <- @available_title_quests do %>
+                                                <option value="<%=progression.quest_id%>" <%=if @user.title_quest_id == progression.quest_id, do: "selected"%>><%=progression.quest.title%></option>
+                                            <% end %>
+                                        </select>
+                                    </form>
+                                <% else %>
+                                    <i class="fa fa-user mr-1"></i><%= if @user.title_quest, do: @user.title_quest.title%> <%=@user.username%>
+                                <% end %>
+                            </span>
+                            <%= if @user.id == @current_user.id && !@editing do %>
+                                <%= if length(@available_title_quests) > 1 do %>
+                                    <span>
+                                        <a href="javascript:;" class="text-white" phx-click="start-editing"><i class="fa fa-edit mr-1"></i>Change Title</a>
+                                    </span>
+                                <% end %>
                                 <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "float-right text-white" do %>
                                     <i class="fa fa-sign-out-alt"></i>
-                                    <span class="d-none d-md-inline">Sign Out</span>
+                                    <span class="d-none d-md-inline">Log out</span>
                                 <% end %>
                             <% end %>
                         </h5>
@@ -86,7 +104,7 @@
                                 </div>
                             <% end %>
                         </div>
-                        <div class="card-footer">
+                        <div class="transparent card-footer">
                             <div class="row">
                                 <div class="col text-center d-flex justify-content-between">
                                     <%=if @user.id == @current_user.id do %>
@@ -169,7 +187,7 @@
                             </div>
                         </div>
                         <%= if length(@arena_picks) > 0 do %>
-                            <div class="card-footer p-0">
+                            <div class="transparent card-footer p-0">
                                 <table class="table table-dark text-center table-sm m-0 mt-2 arena-picks">
                                     <tr>
                                         <th>Recent Pick</th>
@@ -225,7 +243,7 @@
                                 <td>
                                     <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
                                         <img src="/images/pvp/<%=user.season_tier%>.png" style="max-height:  50px"/>
-                                        <h5 class="text-primary mb-0 mt-1"><%=user.username%></h5>
+                                        <h5 class="text-primary mb-0 mt-1"><%=if user.title_quest, do: user.title_quest.title%> <%=user.username%></h5>
                                     <% end %>
                                 </td>
                                 <td>
@@ -238,7 +256,7 @@
                         <% end %>
                     </table>
                 </div>
-                <div class="card-footer p-0">
+                <div class="transparent card-footer p-0">
                     <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
                         <i class="fa fa-table mr-1"></i>See Top Users
                     <% end %>

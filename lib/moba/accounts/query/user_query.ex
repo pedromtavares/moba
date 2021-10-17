@@ -6,7 +6,12 @@ defmodule Moba.Accounts.Query.UserQuery do
   alias Moba.Accounts
   alias Accounts.Schema.User
 
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
+
+  def load(queryable \\ User) do
+    queryable
+    |> preload([:title_quest])
+  end
 
   def new_users(query \\ User, since_hours_ago \\ 24) do
     ago = Timex.now() |> Timex.shift(hours: -since_hours_ago)

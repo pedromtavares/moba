@@ -1,88 +1,88 @@
 <div class="hero-review" phx-hook="SetMainWrapper" id="hero-review">
     <%=if finished_hero = finished_jungle?(@current_user, @hero) do %>
-        <div class="row mt-3 d-flex">
-            <div class="col-xl-4 col-md-6">
-                <div class="card border border-primary" style="background-color: rgba(54, 64, 74, 0.5);">
-                    <div class="card-header" style="background-color: rgba(54, 64, 74, 0.5);">
-                        <h3 class="text-uppercase text-center m-0 text-white">Congratulations!</h3>
-                    </div>
-                    <div class="card-body text-center">
-                        <img src="/images/league_<%=finished_hero.league_tier%>.png" class="float-left" style="max-width: 100px;"/>
-                        <div class="rewards-text w-100">
-                            <strong class="mb-3">You have finished the Jungle in the</strong>
-                            <h4 class="text-league-<%=finished_hero.league_tier%>"><%=Moba.leagues[finished_hero.league_tier]%></h4>
-                            <strong class="mb-3">and have been rewarded</strong>
-                            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
-                                <h4 class="mb-0 text-league-<%=finished_hero.league_tier%>">
-                                    <i class="fab fa-ethereum"></i>
-                                    <u><%=finished_hero.shards_reward%> Shards</u>
-                                </h4>
-                            <% end %>
+        <div class="row mt-3">
+            <%= if @completed_quest do %>
+                <div class="col-xl-6 margin-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-center m-0">Quest Completed - <%=@completed_quest.quest.title%></h3>
+                        </div>
+                        <div class="card-body pt-0">
+                            <h4 class="text-success text-center">Level <%= @completed_quest.quest.level %></h4>
+                            <h5 class="text-center font-italic"><%= @completed_quest.quest.description %></h5>
+                            <div class="row collection mt-3">
+                                <%= for hero <- @current_master_collection do %>
+                                  <div style="width: 100px;" class='avatar-container text-center mx-1'>
+                                      <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
+                                      <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
+                                  </div>
+                                <% end %>
+                            </div>
+                            <h4 class="text-center my-2 mr-4"><i class="fa fa-gift mr-1 text-warning"></i>Rewards</h4>
+                            <div class="d-flex w-100 justify-content-between text-center">
+                              <div class="row d-block">
+                                <div class="col">
+                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
+                                        <h4><i class="fab fa-ethereum text-info fa-2x"></i></h4>
+                                        <h4>Shards</h4>
+                                        <h5 class="text-info">+<%= @completed_quest.quest.shard_prize %></h5>
+                                    <% end %>
+                                </div>
+                              </div>
+                              <div class="row d-block">
+                                <div class="col">
+                                  <h4><i class="fa fa-leaf text-success fa-2x"></i></h4>
+                                  <h4>Jungle Bonus</h4>
+                                  <h5 class="text-success"><%=MobaWeb.DashboardView.jungle_bonus_for(@completed_quest)%></h5>
+                                </div>
+                              </div>
+                              <div class="row d-block">
+                                <div class="col">
+                                  <h4><i class="fa fa-user text-muted fa-2x"></i></h4>
+                                  <h4>Profile Title</h4>
+                                  <h5 class="text-muted"><%= @completed_quest.quest.title %></h5>
+                                </div>
+                              </div>
+                            </div>
+                        </div>
+                        <div class="card-footer p-0">
+                            <a href="/base" class="btn btn-success btn-block btn-lg">
+                                <i class="fa fa-home fa-2x mr-1 mt-2"></i>
+                                <strong class="font-20 d-block">Proceed to Base</strong>
+                            </a>
                         </div>
                     </div>
-                    <div class="card-footer"  style="background-color: rgba(54, 64, 74, 0.5);">
-                        <span class="text-warning text-center font-italic">
-                            <%= if @current_user.shard_limit > 0 do %>
-                                You still have another <%=@current_user.shard_limit%> Shards to win today, finish the Jungle with another Hero to claim them.
-                            <% else %>
-                                You have claimed all of your available Shards today. Another batch of <%=Moba.shard_limit()%> Shards will be available <%=MobaWeb.CurrentHeroView.next_match_description()%>
-                            <% end %>
-                        </span>
-                    </div>
                 </div>
-            </div>
-            <div class="col-xl-8 col-md-6">
-                <div class="card collection">
-                    <h5 class="card-header text-center font-17 text-white"><i class="fa fa-users mr-1" aria-hidden="true"></i>Your Hero Collection</h5>
-                    <div class="card-body">
-                        <div class="row">
-                            <%= for hero <- @current_user.hero_collection do %>
-                                    <div style="width: 100px;" class='avatar-container text-center mx-1 <%=if @hero && @hero.id == hero["hero_id"], do: "current"%>'>
-                                        <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
-                                        <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
-                                    </div>
-                            <% end %>
-                            <%= for avatar <- @blank_collection do %>
-                                    <div style="width:100px" class='avatar-container text-center mx-1'>
-                                        <img src="<%=GH.image_url(avatar)%>" class="avatar blank-avatar"/>
-                                    </div>
-                            <% end %>
+            <% else %>
+                <div class="col-xl-6 margin-auto">
+                    <div class="card collection">
+                        <div class="card-header">
+                            <h3 class="text-center m-0"><img src="/images/league_<%=finished_hero.league_tier%>.png" style="max-width: 35px"/> Congratulations on reaching the </strong><span class="text-league-<%=finished_hero.league_tier%>"><%=Moba.leagues[finished_hero.league_tier]%></span>!</h3>
                         </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <%= for hero <- @current_user.hero_collection do %>
+                                        <div style="width: 100px;" class='avatar-container text-center mx-1 <%=if @hero && @hero.id == hero["hero_id"], do: "current"%>'>
+                                            <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
+                                            <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
+                                        </div>
+                                <% end %>
+                                <%= for avatar <- @blank_collection do %>
+                                        <div style="width:100px" class='avatar-container text-center mx-1'>
+                                            <img src="<%=GH.image_url(avatar)%>" class="avatar blank-avatar"/>
+                                        </div>
+                                <% end %>
+                            </div>
+                        </div>
+                        <div class="card-footer p-0">
+                                <a href="/base" class="btn btn-success btn-block btn-lg">
+                                    <i class="fa fa-home fa-2x mr-1 mt-2"></i>
+                                    <strong class="font-20 d-block">Proceed to Base</strong>
+                                </a>
+                            </div>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <div class="row mb-1">
-            <div class="col">
-                <a href="/base" class="btn btn-outline-info btn-block btn-lg">
-                    <i class="fa fa-home fa-2x mr-1 mt-2"></i>
-                    <strong class="font-20 d-block">Back to Base</strong>
-                    <p class="font-15">Decide what to do later</p>
-                </a>
-            </div>
-            <div class="col">
-                <a href="/create" class="btn btn-outline-success btn-block btn-lg">
-                    <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
-                    <strong class="font-20 d-block">Create another Hero</strong>
-                    <p class="font-15">Head back to the Jungle with a brand new Hero to complete your Collection</p>
-                </a>
-            </div>
-            <div class="col">
-                <%= if can_join_arena?(@current_user) do %>
-                    <a href="/arena/select" class="btn btn-outline-danger btn-block btn-lg">
-                        <i class="fa fa-crosshairs fa-2x mr-1 mt-2"></i>
-                        <strong class="font-20 d-block">Enter the Arena</strong>
-                        <p class="font-15">Fight for medals and glory in a free-for-all PVP warzone</p>
-                    </a>
-                <% else %>
-                    <a href="#" class="btn btn-outline-danger btn-block btn-lg disabled">
-                        <i class="fa fa-crosshairs fa-2x mr-1 mt-2"></i>
-                        <strong class="font-20 d-block">Enter the Arena</strong>
-                        <p class="font-15">Your hero did not reach the <img src="/images/league_5.png" class="league-logo" style="margin-top:-5px"/> <span class="text-primary">Master League</span> and cannot compete in the Arena.</p>
-                    </a>
-                <% end %>
-            </div>
+            <% end %>
         </div>
     <% else %>
         <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
@@ -99,7 +99,7 @@
                 </div>
                 <div class="card-body text-center">
                 </div>
-                <div class="card-footer p-0 text-center">
+                <div class="transparent card-footer p-0 text-center">
                     <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
                         <div class="col">
                             <%=GH.hero_stats(@hero, true)%>
@@ -244,7 +244,7 @@
                         <% end %>
                     </table>
                 </div>
-                <div class="card-footer p-0">
+                <div class="transparent card-footer p-0">
                     <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
                         <i class="fa fa-table mr-1"></i>See Top Heroes
                     <% end %>

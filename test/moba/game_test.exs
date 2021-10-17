@@ -235,11 +235,31 @@ defmodule Moba.GameTest do
 
     test "#finish_pve!" do
       user = create_user()
-      hero = create_base_hero(%{league_tier: 4}, user)
+      hero = create_base_hero(%{league_tier: 5}, user)
       finished = Game.finish_pve!(hero)
 
       assert finished.finished_pve
-      assert finished.shards_reward == 40
+      assert finished.shards_reward == 50
+
+      quest = Game.Quests.get_by_code_and_level!("season", 1)
+      progression = Game.Quests.find_progression_by!(user.id, quest.id)
+
+      assert progression.current_value == 1
+      refute progression.completed_at
+
+      user = Accounts.get_user!(user.id)
+
+      create_base_hero(%{league_tier: 5}, user, alternate_avatar()) |> Game.finish_pve!()
+      progression = Game.Quests.find_progression_by!(user.id, quest.id)
+
+      assert progression.current_value == 2
+      assert progression.completed_at
+
+      updated = Accounts.get_user!(user.id)
+
+      assert updated.pve_tier == 1
+      # gm hero reward
+      assert updated.shard_count == user.shard_count + quest.shard_prize + 50
     end
 
     test "#maybe_generate_boss" do

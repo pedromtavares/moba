@@ -75,12 +75,15 @@
                                             <div class="text-white text-center">
                                                 <h2 class="text-success mt-0">Veteran Mode</h2>
                                                 <h5 class="text-white mb-0"><%=@current_hero.pve_battles_available%> ganks available</h5>
-                                                <h5 class="text-warning">Total farm: <i class="fa fa-coins"></i> <%= @current_hero.total_farm %></h5>
-                                                <p class="mb-0">
+                                                <h5 class="text-warning">
+                                                    <i class="fa fa-coins"></i> Total farm: <%= @current_hero.total_farm %>
                                                     <%=if @current_hero.buybacks > 0 do %>
-                                                        <span class="text-warning"><i class="fa fa-street-view mr-1"></i>Buybacks: <strong><%=@current_hero.buybacks%></strong></span>
+                                                        (<%=@current_hero.buybacks%> buyback<%=if @current_hero.buybacks > 1, do: "s"%>)
                                                     <% end %>
-                                                </p>
+                                                </h5>
+                                                <%= if @current_user.pve_tier > 0 do %>
+                                                    <h5 class="text-success mb-0 font-italic" style="text-decoration: underline;" data-toggle="tooltip" title="<%=pve_tier_bonuses(@current_user)%>"><%=pve_tier_title(@current_user)%></h5>
+                                                <% end %>
                                             </div>
                                         <% end %>
                                     </div>
@@ -181,6 +184,13 @@
                 <% end %>
 
                 <%= if @current_hero.pve_battles_available > 0 do %>
+                    <%= if @current_hero.refresh_targets_count > 0 do %>
+                        <div class="row mt-3">
+                            <div class="col">
+                                <a href="javascript:;" phx-click="refresh-targets" class="btn btn-primary btn-block btn-lg"><i class="fa fa-refresh mr-1"></i>Refresh Targets (<%=@current_hero.refresh_targets_count%> remaining)</a>
+                            </div>
+                        </div>
+                    <% end %>
                     <div class="row mt-3">
                         <div class="col">
                             <div class="row d-flex align-items-center targets">

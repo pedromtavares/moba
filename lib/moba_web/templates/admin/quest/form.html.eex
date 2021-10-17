@@ -1,0 +1,68 @@
+<%= form_for @changeset, @action, [multipart: true, id: "torch-form"], fn f -> %>
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+
+    <div class="torch-form-group">
+      <%= label f, :title %>
+      <%= text_input f, :title %>
+      <%= error_tag f, :title %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :code %>
+      <%= text_input f, :code %>
+      <%= error_tag f, :code %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :description %>
+      <%= textarea f, :description %>
+      <%= error_tag f, :description %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :level %>
+      <%= number_input f, :level %>
+      <%= error_tag f, :level %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :icon %>
+      <%= text_input f, :icon %>
+      <%= error_tag f, :icon %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :shard_prize %>
+      <%= number_input f, :shard_prize %>
+      <%= error_tag f, :shard_prize %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :initial_value %>
+      <%= number_input f, :initial_value %>
+      <%= error_tag f, :initial_value %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :final_value %>
+      <%= number_input f, :final_value %>
+      <%= error_tag f, :shard_prize %>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label f, :daily %>
+      <%= checkbox f, :daily %>
+      <%= error_tag f, :daily %>
+    </div>
+
+    <div class="torch-submit-form">
+      <%= submit "Submit", class: "torch-submit-button" %>
+    </div>
+  </fieldset>
+<% end %>

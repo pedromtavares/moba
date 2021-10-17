@@ -1,6 +1,14 @@
 defmodule MobaWeb.JungleView do
   use MobaWeb, :view
 
+  def boss_available?(hero) do
+    hero.boss_id && Game.get_hero!(hero.boss_id)
+  end
+
+  def boss_percentage(boss) do
+    boss.total_hp * 100 / boss.avatar.total_hp
+  end
+
   def difficulty_color(difficulty) do
     case difficulty do
       "weak" -> "success"
@@ -106,17 +114,28 @@ defmodule MobaWeb.JungleView do
     )
   end
 
-  def boss_available?(hero) do
-    hero.boss_id && Game.get_hero!(hero.boss_id)
-  end
+  def pve_tier_title(%{pve_tier: 1}), do: "Season Novice"
+  def pve_tier_title(%{pve_tier: 2}), do: "Season Adept"
+  def pve_tier_title(%{pve_tier: 3}), do: "Season Veteran"
+  def pve_tier_title(%{pve_tier: 4}), do: "Season Expert"
 
-  def boss_percentage(boss) do
-    boss.total_hp * 100 / boss.avatar.total_hp
+  def pve_tier_bonuses(%{pve_tier: tier}) do
+    base = pve_tier_bonus_html("Starting gold: +1000 (1000 -> 2000)")
+    base = if tier > 1, do: "#{base}#{pve_tier_bonus_html("50% discount on buybacks")}", else: base
+
+    base =
+      if tier > 2, do: "#{base}#{pve_tier_bonus_html("Gank is reimbursed on death (+1 available Ganks)")}", else: base
+
+    base = if tier > 3, do: "#{base}#{pve_tier_bonus_html("Ability to refresh Targets up to 5 times")}", else: base
+
+    raw(base)
   end
 
   def show_league_challenge?(%{pve_points: pve_points, league_tier: league_tier}) do
     pve_points >= Moba.pve_points_limit() && league_tier < Moba.master_league_tier()
   end
+
+  defp pve_tier_bonus_html(label), do: "<div class='my-1'><i class='fa fa-hand-point-right mr-1'></i>#{label}</div>"
 
   defp with_display_stats(hero, heroes) do
     minimum = minimum_stats(heroes)

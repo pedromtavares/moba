@@ -48,6 +48,11 @@ defmodule MobaWeb.JungleLiveView do
      |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
   end
 
+  def handle_event("refresh-targets", _, %{assigns: %{current_hero: hero}} = socket) do
+    hero = Game.refresh_targets!(hero)
+    {:noreply, assign(socket, current_hero: hero, targets: Game.list_targets(hero))}
+  end
+
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
     socket = Tutorial.next_step(socket, 10)
 

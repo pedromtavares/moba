@@ -47,6 +47,7 @@ defmodule Moba.Accounts.Schema.User do
 
     belongs_to :current_pve_hero, Game.Schema.Hero
     belongs_to :current_pvp_hero, Game.Schema.Hero
+    belongs_to :title_quest, Game.Schema.Quest
 
     timestamps()
   end
@@ -101,7 +102,8 @@ defmodule Moba.Accounts.Schema.User do
       :season_points,
       :season_tier,
       :shard_limit,
-      :pve_tier
+      :pve_tier,
+      :title_quest_id
     ])
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)

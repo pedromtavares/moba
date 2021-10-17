@@ -86,7 +86,7 @@ defmodule Moba.Game.Targets do
         level..(level + 1)
 
       "strong" ->
-        (level + 1)..(level + 4)
+        (level + 2)..(level + 5)
     end
   end
 
@@ -99,7 +99,7 @@ defmodule Moba.Game.Targets do
         (level + 1)..(level + 3)
 
       "strong" ->
-        (level + 3)..(level + 7)
+        (level + 4)..(level + 10)
     end
   end
 
