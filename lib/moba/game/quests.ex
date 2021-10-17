@@ -20,6 +20,7 @@ defmodule Moba.Game.Quests do
     |> Enum.find(&is_nil(&1.completed_at))
   end
 
+  def last_completed_for(%{finished_at: nil}), do: nil
   def last_completed_for(%{user_id: user_id, finished_at: hero_finished_at}) do
     Repo.all(from p in load_progression(), where: p.user_id == ^user_id, where: p.completed_at >= ^hero_finished_at)
     |> List.first()
