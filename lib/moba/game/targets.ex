@@ -36,6 +36,7 @@ defmodule Moba.Game.Targets do
       cond do
         hero.easy_mode && user.pve_tier == 0 -> {2, 2, 2}
         user.pve_tier < 2 -> {3, 3, 3}
+        user.pve_tier < 3 -> {0, 6, 3}
         user.pve_tier < 4 -> {0, 3, 6}
         true -> {0, 0, 9}
       end

@@ -452,11 +452,19 @@ defmodule Moba.GameTest do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 2})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
+    end
+
+    test "#generate_targets! user tier 3" do
+      hero = create_base_hero(%{}, create_user(%{pve_tier: 3})) |> Game.generate_targets!()
+      assert length(hero.targets) == 9
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 6
     end
 
-    test "#generate_targets! user tier 3" do
+    test "#generate_targets! user tier 4" do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 4})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
