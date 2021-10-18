@@ -2,7 +2,7 @@
     <td class="text-center">
         <img src="/images/pvp/<%=@user.season_tier%>.png" style="max-height:  50px"/>
         <br/>
-        <%= live_redirect @user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @user), class: "text-white"%>
+        <%= live_redirect "#{@user.username} (#{@user.pve_tier})", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @user), class: "text-white"%>
         <br/>
         <small class="text-dark font-italic">
             <%=unless @user.is_bot do %>
