@@ -32,11 +32,15 @@ defmodule MobaWeb.CreateLiveView do
     avatars = Game.list_creation_avatars(unlocked_codes)
     items = Moba.cached_items()
 
+    collection_codes = Enum.map(user.hero_collection, & &1["code"])
+    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
+
     total_gold =
       Moba.summon_total_gold() - (Enum.map(cached.selected_items, &(&1 && Game.item_price(&1))) |> Enum.sum())
 
     {:ok,
      assign(socket,
+       blank_collection: blank_collection,
        skills: Game.list_creation_skills(5, unlocked_codes),
        avatars: avatars,
        all_avatars: avatars,
@@ -63,8 +67,12 @@ defmodule MobaWeb.CreateLiveView do
     cached = get_cache(user.id)
     avatars = Game.list_creation_avatars(unlocked_codes)
 
+    collection_codes = Enum.map(user.hero_collection, & &1["code"])
+    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
+
     {:ok,
      assign(socket,
+       blank_collection: blank_collection,
        skills: Game.list_creation_skills(1, unlocked_codes),
        avatars: avatars,
        all_avatars: avatars,

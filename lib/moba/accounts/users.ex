@@ -187,6 +187,7 @@ defmodule Moba.Accounts.Users do
       |> UserQuery.non_guests()
       |> UserQuery.by_level(level)
       |> UserQuery.limit_by(9)
+      |> UserQuery.load()
       |> Repo.all()
 
     [user] ++ Enum.filter(by_level, &(&1.id != id))
