@@ -301,10 +301,12 @@ defmodule Moba.Game.Heroes do
   Grabs all Heroes ordered by their total_farm and updates their pve_ranking
   """
   def update_pve_ranking! do
+    Repo.update_all(Hero, set: [pve_ranking: nil])
+
     HeroQuery.non_bots()
     |> HeroQuery.finished_pve()
     |> HeroQuery.non_summoned()
-    |> HeroQuery.year_to_date()
+    |> HeroQuery.in_current_ranking_date()
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.map(fn {hero, index} ->

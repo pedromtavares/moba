@@ -11,6 +11,7 @@ defmodule Moba.Game.Query.HeroQuery do
 
   @pvp_per_page Moba.pvp_heroes_per_page()
   @ranking_per_page Moba.ranking_heroes_per_page()
+  @current_ranking_date Timex.parse!("18-10-2021", "%d-%m-%Y", :strftime)
 
   def load(queryable \\ Hero) do
     queryable
@@ -216,11 +217,8 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query, where: hero.summoned == false
   end
 
-  def year_to_date(query \\ Hero) do
-    start = Timex.now() |> Timex.beginning_of_year()
-
-    from hero in query,
-      where: hero.inserted_at > ^start
+  def in_current_ranking_date(query \\ Hero) do
+    from hero in query, where: hero.inserted_at > ^@current_ranking_date
   end
 
   def pvp_ranked(query \\ Hero) do
