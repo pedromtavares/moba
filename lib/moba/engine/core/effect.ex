@@ -217,11 +217,11 @@ defmodule Moba.Engine.Core.Effect do
     update_defender_number(turn, :turn_armor, -resource.armor_amount)
   end
 
-  def add_buff_armor(%{resource: resource} = turn) do
+  def add_buff_next_armor(%{resource: resource} = turn) do
     {turn, buff} = update_buff(turn, :armor, resource.armor_amount)
 
     turn
-    |> update_attacker_number(:turn_armor, buff.armor)
+    |> update_attacker_number(:next_armor, buff.armor)
   end
 
   # POWER

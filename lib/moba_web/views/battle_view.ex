@@ -280,11 +280,7 @@ defmodule MobaWeb.BattleView do
   end
 
   def current_hp(hero) do
-    if hero.current_hp + hero.hp_regen > hero.total_hp do
-      hero.total_hp
-    else
-      hero.current_hp - hero.hp_regen
-    end
+    hero.current_hp - hero.hp_regen
   end
 
   def current_mp(hero) do

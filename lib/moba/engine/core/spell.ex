@@ -236,7 +236,7 @@ defmodule Moba.Engine.Core.Spell do
 
   defp effects_for(%{resource: %Skill{code: "bad_juju"}} = turn, _options) do
     turn
-    |> Effect.add_buff_armor()
+    |> Effect.add_buff_next_armor()
     |> Effect.add_buff_power()
   end
 
