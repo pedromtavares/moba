@@ -232,7 +232,7 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} was interrupted but immediately reloaded the gun, ready to fire again."
   end
 
-  defp description_for("bad_juju", %{"turn_armor" => {armor, hero}, "turn_power" => {power, _}}, _) do
+  defp description_for("bad_juju", %{"next_armor" => {armor, hero}, "turn_power" => {power, _}}, _) do
     "Dark incantations gave #{hero} extra [armor]#{armor} Armor[/armor] and [power]#{power} Power[/power] this turn!"
   end
 
