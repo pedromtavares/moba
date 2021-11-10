@@ -145,7 +145,7 @@
                             <div class="card-box mb-0 pt-2 p-1">
                                 <img src="/images/league_<%=next%>.png" style="height: 100px"/>
                                 <h3><%=Moba.leagues[next]%> Challenge</h3>
-                                <h3 class="text-warning"><i class="fa fa-coins"></i> <%=Moba.league_win_gold_bonus()%></h3>
+                                <h3 class="text-warning">Reward: <i class="fa fa-coins"></i> <%=Moba.league_win_gold_bonus()%></h3>
                                 <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
                                         <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
                                     </button>
