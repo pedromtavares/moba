@@ -166,7 +166,11 @@ defmodule Moba.Game.Heroes do
 
     # |> Game.generate_boss!()
 
-    if updated.level == 25, do: update!(updated, %{league_tier: 5}), else: updated
+    if updated.level == 25 do
+      update!(updated, %{league_tier: 5}) |> master_league_updates() |> Game.level_active_build_to_max!()
+    else
+      updated
+    end
   end
 
   def pve_win_rate(hero) do
@@ -216,7 +220,7 @@ defmodule Moba.Game.Heroes do
   """
   def pvp_ranking(league_tier, limit) do
     HeroQuery.pvp_ranked()
-    |> HeroQuery.by_league_tier(league_tier)
+    |> HeroQuery.with_league_tier(league_tier)
     |> HeroQuery.limit_by(limit)
     |> Repo.all()
     |> base_preload()
@@ -227,7 +231,7 @@ defmodule Moba.Game.Heroes do
   """
   def paged_pvp_ranking(league_tier, page) do
     HeroQuery.paged_pvp_ranking(page)
-    |> HeroQuery.by_league_tier(league_tier)
+    |> HeroQuery.with_league_tier(league_tier)
     |> Repo.all()
     |> base_preload()
   end
@@ -237,7 +241,8 @@ defmodule Moba.Game.Heroes do
   """
   def update_pvp_ranking!(league_tier) do
     HeroQuery.with_pvp_points()
-    |> HeroQuery.by_league_tier(league_tier)
+    |> HeroQuery.load_avatar()
+    |> HeroQuery.with_league_tier(league_tier)
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.map(fn {hero, index} ->
@@ -336,7 +341,7 @@ defmodule Moba.Game.Heroes do
 
     HeroQuery.pvp_active()
     |> HeroQuery.exclude_ids(list)
-    |> HeroQuery.by_league_tier(hero.league_tier)
+    |> HeroQuery.with_league_tier(hero.league_tier)
     |> Repo.aggregate(:count)
   end
 
@@ -349,7 +354,7 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{&1.league_tier, &1.total_farm}, :desc) |> List.first()
+        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_farm}, :desc) |> List.first()
       }
     end)
     |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_farm} end, :desc)

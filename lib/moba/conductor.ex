@@ -65,8 +65,8 @@ defmodule Moba.Conductor do
       |> generate_resources!()
       |> server_update!()
 
+    Game.generate_daily_quest_progressions!()
     Accounts.update_ranking!()
-    Accounts.reset_shard_limits!()
     Engine.read_all_battles()
 
     match
@@ -259,6 +259,8 @@ defmodule Moba.Conductor do
   defp assign_and_award_winners!(match) do
     top10_master = Game.pvp_ranking(5, 10)
 
+    pvp_quest_progressions(Enum.take(top10_master, 3))
+
     master =
       Enum.reduce(top10_master, %{}, fn hero, acc ->
         unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking, hero.league_tier)
@@ -266,6 +268,8 @@ defmodule Moba.Conductor do
       end)
 
     top10_grandmaster = Game.pvp_ranking(6, 10)
+
+    pvp_quest_progressions(Enum.take(top10_grandmaster, 3))
 
     grandmaster =
       Enum.reduce(top10_grandmaster, %{}, fn hero, acc ->
@@ -293,7 +297,7 @@ defmodule Moba.Conductor do
 
     if attacker do
       HeroQuery.with_pvp_points()
-      |> HeroQuery.by_league_tier(league_tier)
+      |> HeroQuery.with_league_tier(league_tier)
       |> Repo.all()
       |> Enum.each(fn defender ->
         defender &&
@@ -327,6 +331,10 @@ defmodule Moba.Conductor do
         match
       )
     end)
+  end
+
+  defp pvp_quest_progressions(podium_heroes) do
+    Enum.map(podium_heroes, &Game.track_achievement_pvp_quests(&1))
   end
 
   defp time_diff_in_seconds(nil), do: 0
@@ -374,7 +382,7 @@ defmodule Moba.Conductor do
       if current do
         query = AvatarQuery.non_current() |> AvatarQuery.with_code(avatar.code)
         avatar_ids = Repo.all(query) |> Enum.map(& &1.id)
-        query = HeroQuery.with_avatar_ids(avatar_ids)
+        query = HeroQuery.with_avatar_ids(Game.Schema.Hero, avatar_ids)
         Repo.update_all(query, set: [avatar_id: current.id])
       end
     end)

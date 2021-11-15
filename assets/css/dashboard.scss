@@ -1,5 +1,12 @@
 .dashboard{
 
+  .pve-header.link{
+    cursor: pointer;
+  }
+  .pve-header.link:hover{
+    background-color: #333c44 !important;
+  }
+
   .btn-success {
     color: #1abc9c;
     background: rgba(26,188,156, 0.2) !important;
@@ -76,6 +83,10 @@
 
   .half-fixed-panel{
     height: 220px;
+  }
+
+  .mid-fixed-panel{
+    max-height: 385px;
   }
 
   .fixed-panel{

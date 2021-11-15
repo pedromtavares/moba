@@ -1,5 +1,4 @@
-<hr/>
-<div class="text-center">
+<div class="text-center mb-2">
     <%= if can_unlock?(@resource, @user) do %>
         <a href="javascript:;" class="btn btn-outline-warning" phx-click="<%=@action%>" phx-value-code="<%=@resource.code%>" phx-hook="Loading" id="unlock-<%=@resource.code%>">
             <span class="loading-text">

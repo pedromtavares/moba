@@ -44,6 +44,8 @@
 
               <th><%= table_link(@conn, "Level", :level) %></th>
 
+              <th><%= table_link(@conn, "Final Value", :final_value) %></th>
+
               <th><%= table_link(@conn, "Shard Prize", :shard_prize) %></th>
 
               <th><%= table_link(@conn, "Daily", :daily) %></th>
@@ -61,6 +63,8 @@
                 <td><%= quest.code %></td>
 
                 <td><%= quest.level %></td>
+
+                <td><%= quest.final_value %></td>
 
                 <td><%= quest.shard_prize %></td>
 

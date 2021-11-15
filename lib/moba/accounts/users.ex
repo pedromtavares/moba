@@ -156,14 +156,6 @@ defmodule Moba.Accounts.Users do
   end
 
   @doc """
-  Updates all Users' shard_limit to the default daily amount
-  """
-  def reset_shard_limits! do
-    limit = Moba.shard_limit()
-    Repo.update_all(UserQuery.non_guests(), set: [shard_limit: limit])
-  end
-
-  @doc """
   Grabs users with rankings close to the target user
   """
   def search(%{ranking: ranking}) when not is_nil(ranking) do
@@ -223,31 +215,8 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  def finish_pve!(user, hero_collection, shards) do
-    update!(user, %{
-      hero_collection: hero_collection,
-      shard_count: user.shard_count + shards,
-      shard_limit: user.shard_limit - shards
-    })
-  end
-
-  def pve_shards_for(%{shard_limit: shard_limit}, league_tier) do
-    reward =
-      case league_tier do
-        6 -> 100
-        5 -> 50
-        4 -> 40
-        3 -> 30
-        2 -> 20
-        1 -> 10
-        _ -> 0
-      end
-
-    if shard_limit - reward >= 0 do
-      reward
-    else
-      shard_limit
-    end
+  def finish_pve!(user, hero_collection) do
+    update!(user, %{hero_collection: hero_collection})
   end
 
   def increment_unread_messages_count_for_all_online_except(user) do

@@ -1,0 +1,21 @@
+<div class="card">
+    <div class="card-header d-flex justify-content-between p-0">
+        <%=pve_tab_header @current_pve_tab, "daily", "w-100 p-1 border rounded-top-left" do %>
+            <h3 class="text-center"><i class="fa fa-clock-o text-success fa-2x"></i></h3>
+            <h3 class="text-center mb-1">Daily Quests</h3>
+        <% end %>
+        <%= if has_active_season_progression?(@season_progressions) do %>
+            <%=pve_tab_header @current_pve_tab, "season", "w-100 p-1 border" do %>
+                <h3 class="text-center"><i class="fa fa-globe text-success fa-2x"></i></h3>
+                <h3 class="text-center mb-1">Season Quest</h3>
+            <% end %>
+        <% end %>
+        <%=pve_tab_header @current_pve_tab, "achievements", "w-100 p-1 border rounded-top-right" do %>
+            <h3 class="text-center"><i class="fa fa-medal text-success fa-2x"></i></h3>
+            <h3 class="text-center mb-1">Achievements</h3>
+        <% end %>
+    </div>
+    <div class="card-body">
+        <%=render "_#{@current_pve_tab}_body.html", assigns %>
+    </div>
+</div>

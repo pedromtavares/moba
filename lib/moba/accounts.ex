@@ -58,11 +58,7 @@ defmodule Moba.Accounts do
 
   defdelegate update_ranking!, to: Users
 
-  defdelegate reset_shard_limits!, to: Users
-
-  defdelegate finish_pve!(user, hero_collection, shards), to: Users
-
-  defdelegate pve_shards_for(user, league_tier), to: Users
+  defdelegate finish_pve!(user, hero_collection), to: Users
 
   defdelegate reset_unread_messages_count(user), to: Users
 

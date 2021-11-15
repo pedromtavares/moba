@@ -196,13 +196,12 @@ defmodule Moba.Game do
 
   def finish_pve!(%{finished_pve: false, finished_at: nil} = hero) do
     hero = Repo.preload(hero, :user)
-    shards = Accounts.pve_shards_for(hero.user, hero.league_tier)
-    updated = update_hero!(hero, %{finished_pve: true, finished_at: Timex.now(), shards_reward: shards})
+    updated = update_hero!(hero, %{finished_pve: true, finished_at: Timex.now()})
 
     collection = Heroes.collection_for(updated.user_id)
-    Accounts.finish_pve!(updated.user, collection, shards)
+    Accounts.finish_pve!(updated.user, collection)
 
-    track_quest("season", %{user_id: hero.user_id})
+    track_pve_quests(updated)
 
     updated
   end
@@ -432,13 +431,25 @@ defmodule Moba.Game do
 
   # QUESTS
 
-  def current_quest_progression(code, user_id), do: Quests.current_progression_for(code, user_id)
+  def track_pve_quests(hero), do: Quests.track_pve(hero)
 
-  def last_completed_quest(hero), do: Quests.last_completed_for(hero)
+  def track_daily_pvp_quests(hero), do: Quests.track_daily_pvp(hero)
 
-  def list_quest_progressions(user_id), do: Quests.list_progressions(user_id)
+  def track_achievement_pvp_quests(hero), do: Quests.track_achievement_pvp(hero)
 
-  def list_title_quests(user_id), do: Quests.list_title_for(user_id)
+  def active_quest_progression?(progressions), do: Enum.find(progressions, &is_nil(&1.completed_at))
 
-  def track_quest(code, opts), do: Quests.track(code, opts)
+  def last_completed_quest_progressions(hero), do: Quests.last_completed_progressions(hero)
+
+  def list_quest_progressions(user_id, code \\ nil), do: Quests.list_progressions_by_code(user_id, code)
+
+  def list_title_quest_progressions(user_id), do: Quests.list_title_progressions(user_id)
+
+  def generate_daily_quest_progressions!(user_id \\ nil), do: Quests.generate_daily_progressions!(user_id)
+
+  def generate_achievement_progressions!(user_id), do: Quests.generate_achievement_progressions!(user_id)
+
+  def list_achievement_progressions(user_id), do: Quests.list_progressions(user_id, false)
+
+  def list_daily_quest_progressions(user_id), do: Quests.list_progressions(user_id, true)
 end

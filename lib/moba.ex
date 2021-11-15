@@ -44,10 +44,10 @@ defmodule Moba do
   @battle_xp 150
   @pve_points_limit 12
   @max_hero_level 25
-  @shard_limit 200
   @buyback_multiplier 20
   @veteran_buyback_multiplier 10
   @refresh_targets_count 5
+  @maximum_total_farm 30_000
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -92,10 +92,10 @@ defmodule Moba do
   def battle_xp, do: @battle_xp
   def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
-  def shard_limit, do: @shard_limit
   def buyback_multiplier(%{pve_tier: tier}) when tier > 1, do: @veteran_buyback_multiplier
   def buyback_multiplier(_), do: @buyback_multiplier
   def refresh_targets_count, do: @refresh_targets_count
+  def maximum_total_farm, do: @maximum_total_farm
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page

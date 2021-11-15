@@ -26,7 +26,7 @@ defmodule MobaWeb.ArenaView do
     end
   end
 
-  def next_round_description do
+  def next_round_description(show_label \\ true) do
     match = Game.current_match()
     created = Timex.shift(match.inserted_at, hours: 1)
 
@@ -43,7 +43,7 @@ defmodule MobaWeb.ArenaView do
       |> Timex.format("{relative}", :relative)
       |> elem(1)
 
-    "#{label} #{time}"
+    (show_label && "#{label} #{time}") || time
   end
 
   def can_join_grandmaster?(heroes), do: Enum.find(heroes, &(&1.league_tier == Moba.max_league_tier()))

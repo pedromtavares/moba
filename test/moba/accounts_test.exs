@@ -1,5 +1,5 @@
 defmodule Moba.AccountsTest do
-  use Moba.DataCase
+  use Moba.DataCase, async: true
 
   setup do
     %{user: create_user()}
@@ -34,26 +34,6 @@ defmodule Moba.AccountsTest do
       user = Accounts.set_current_pvp_hero!(user, hero.id)
 
       assert user.current_pvp_hero_id == hero.id
-    end
-
-    test "#finish_pve!", %{user: user} do
-      assert user.shard_limit == 100
-      master = Accounts.finish_pve!(user, [], Accounts.pve_shards_for(user, 5))
-
-      assert master.shard_limit == 50
-      assert master.shard_count == 50
-
-      diamond = Accounts.finish_pve!(master, [], Accounts.pve_shards_for(master, 4))
-      assert diamond.shard_limit == 10
-      assert diamond.shard_count == 90
-
-      grandmaster = Accounts.finish_pve!(diamond, [], Accounts.pve_shards_for(diamond, 6))
-      assert grandmaster.shard_limit == 0
-      assert grandmaster.shard_count == 100
-
-      diamond = Accounts.finish_pve!(grandmaster, [], Accounts.pve_shards_for(grandmaster, 4))
-      assert diamond.shard_limit == 0
-      assert diamond.shard_count == 100
     end
   end
 
@@ -125,7 +105,7 @@ defmodule Moba.AccountsTest do
   describe "unlocks" do
     test "#create_unlock! works" do
       skill = base_skill()
-      user = create_user(%{shard_count: 30}) |> Accounts.create_unlock!(skill)
+      user = create_user(%{shard_count: 100}) |> Accounts.create_unlock!(skill)
       assert user.shard_count == 0
       assert user.unlocks |> List.first() |> Map.get(:resource_code) == skill.code
     end
@@ -139,7 +119,7 @@ defmodule Moba.AccountsTest do
 
     test "#unlocked_codes_for" do
       skill = base_skill()
-      user = create_user(%{shard_count: 30}) |> Accounts.create_unlock!(skill)
+      user = create_user(%{shard_count: 100}) |> Accounts.create_unlock!(skill)
 
       assert Accounts.unlocked_codes_for(user) == [skill.code]
     end

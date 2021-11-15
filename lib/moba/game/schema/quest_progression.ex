@@ -9,6 +9,7 @@ defmodule Moba.Game.Schema.QuestProgression do
   schema "quest_progressions" do
     field :current_value, :integer, default: 0
     field :completed_at, :utc_datetime
+    field :history_codes, {:array, :string}, default: []
 
     belongs_to :user, Accounts.Schema.User
     belongs_to :quest, Game.Schema.Quest
@@ -20,7 +21,8 @@ defmodule Moba.Game.Schema.QuestProgression do
     progression
     |> cast(attrs, [
       :current_value,
-      :completed_at
+      :completed_at,
+      :history_codes
     ])
   end
 end

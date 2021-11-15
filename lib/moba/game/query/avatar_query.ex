@@ -58,6 +58,10 @@ defmodule Moba.Game.Query.AvatarQuery do
     from avatar in query, where: avatar.code in ^codes
   end
 
+  def with_role(query, role) do
+    from avatar in query, where: avatar.role == ^role
+  end
+
   def by_name(query) do
     from avatar in query, order_by: avatar.name
   end

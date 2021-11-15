@@ -1,0 +1,16 @@
+<tr>
+    <td class="text-center w-25">
+        <h5><%=@progression.quest.title%></h5>
+        <i class="fab fa-ethereum fa-2x text-primary"></i><br/><span class="font-italic">+<%=@progression.quest.shard_prize%></span>
+    </td>
+    <td class="text-center">
+        <strong><%=@progression.quest.description%></strong>
+        <%= if @progression.quest.final_value > 1 do %>
+            <div class="progress mt-2" style="height:30px;">
+                <div style="width:<%=progression_percentage(@progression)%>%" class="progress-bar bg-success">
+                    <span>&nbsp;<%=@progression.current_value%>/<%=@progression.quest.final_value%>&nbsp;</span>
+                </div>
+            </div>
+        <% end %>
+    </td>
+</tr>

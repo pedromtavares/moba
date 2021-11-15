@@ -65,7 +65,7 @@ defmodule Test.GameHelper do
 
   def strong_avatar do
     Game.create_avatar!(
-      %Game.Schema.Avatar{ultimate_code: "coup"},
+      %Game.Schema.Avatar{ultimate_code: "coup", role: "carry", enabled: true, current: true},
       %{
         atk: 1000,
         total_hp: 10000,

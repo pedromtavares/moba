@@ -1,0 +1,32 @@
+<div class="daily-body">
+    <%= if length(achievements_completed(@achievement_progressions)) > 0 do %>
+        <ul class="nav nav-pills navtab-bg nav-justified">
+            <li class="nav-item">
+                <a href="javascript:;" phx-click="achievements-display" phx-value-display="in_progress" class="nav-link <%=if @achievements_display == "in_progress", do: "bg-success"%>">
+                    <span class="d-none d-sm-inline-block">In Progress</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="javascript:;" phx-click="achievements-display" phx-value-display="completed" class="nav-link <%=if @achievements_display == "completed", do: "bg-success"%>">
+                    <span class="d-none d-sm-inline-block">Completed</span>
+                </a>
+            </li>
+        </ul>
+    <% end %>
+
+    <div class="w-100 mt-3 mid-fixed-panel" style="overflow: auto;">
+        <%=if @achievements_display == "in_progress" do %>
+            <table class="table table-dark mb-0 border">
+                <%= for progression <- achievements_in_progress(@achievement_progressions) do %>
+                    <%= render "_achievement_progression.html", progression: progression %>
+                <% end %>
+            </table>
+        <% else %>
+            <table class="table table-dark mb-0 border">
+                <%= for progression <- achievements_completed(@achievement_progressions) do %>
+                    <%= render "_achievement_progression.html", progression: progression %>
+                <% end %>
+            </table>
+        <% end %>
+    </div>
+</div>

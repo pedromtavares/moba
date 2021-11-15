@@ -25,7 +25,7 @@ defmodule MobaWeb.UserLiveView do
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
     ranking = Accounts.user_search(user)
     arena_picks = Game.list_recent_arena_picks(user)
-    available_title_quests = Game.list_title_quests(user.id)
+    available_title_quests = Game.list_title_quest_progressions(user.id)
 
     {:noreply,
      assign(socket,

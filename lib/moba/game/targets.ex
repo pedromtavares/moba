@@ -19,7 +19,7 @@ defmodule Moba.Game.Targets do
   def list(hero_id, farm_sort \\ :asc) do
     Repo.all(from t in Target, where: t.attacker_id == ^hero_id)
     |> Repo.preload(defender: HeroQuery.load())
-    |> Enum.sort_by(fn target -> target.defender.total_farm end, farm_sort)
+    |> Enum.sort_by(fn target -> target.defender.level end, farm_sort)
   end
 
   @doc """

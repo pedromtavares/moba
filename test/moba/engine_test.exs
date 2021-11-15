@@ -1,5 +1,5 @@
 defmodule Moba.EngineTest do
-  use Moba.DataCase
+  use Moba.DataCase, async: true
 
   setup do
     attrs = %{pvp_points: 50, season_points: 50}

@@ -18,18 +18,22 @@ defmodule Moba.Game.Query.HeroQuery do
     |> preload([:items, :avatar, :skin, :user, active_build: [skills: ^SkillQuery.ordered()]])
   end
 
+  def load_avatar(queryable \\ Hero) do
+    preload(queryable, [:avatar])
+  end
+
   def current_arena_players do
     non_bots() |> pvp_active()
   end
 
   def current_arena_bots(league_tier) do
-    bots() |> pvp_active() |> by_league_tier(league_tier)
+    bots() |> pvp_active() |> with_league_tier(league_tier)
   end
 
   def pvp_search(exclude_list, filter, pvp_points, league_tier, sort, page) do
     Hero
     |> pvp_active()
-    |> by_league_tier(league_tier)
+    |> with_league_tier(league_tier)
     |> exclude_ids(exclude_list)
     |> pvp_filter(filter, pvp_points)
     |> pvp_sort(sort)
@@ -161,9 +165,14 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.pvp_points <= ^max
   end
 
-  def by_league_tier(query, league_tier) do
+  def with_league_tier(query, league_tier) do
     from hero in query,
       where: hero.league_tier == ^league_tier
+  end
+
+  def with_league_tiers(query, league_tiers) do
+    from hero in query,
+      where: hero.league_tier in ^league_tiers
   end
 
   def by_codes(query, codes) do
@@ -193,12 +202,16 @@ defmodule Moba.Game.Query.HeroQuery do
       offset: ^offset
   end
 
+  def with_perfect_finish(query) do
+    from hero in query, where: hero.total_farm == ^Moba.maximum_total_farm()
+  end
+
   def random(query) do
     from hero in query,
       order_by: fragment("RANDOM()")
   end
 
-  def unarchived(query) do
+  def unarchived(query \\ Hero) do
     from hero in query,
       where: is_nil(hero.archived_at)
   end
@@ -307,8 +320,8 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in query, where: hero.inserted_at > ^ago)
   end
 
-  def with_avatar_ids(avatar_ids) do
-    from hero in Hero, where: hero.avatar_id in ^avatar_ids
+  def with_avatar_ids(query, avatar_ids) do
+    from hero in query, where: hero.avatar_id in ^avatar_ids
   end
 
   defp page_to_offset(page, per_page) do

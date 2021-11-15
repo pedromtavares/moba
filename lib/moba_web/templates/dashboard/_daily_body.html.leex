@@ -1,0 +1,52 @@
+<div class="daily-body">
+    <ul class="nav nav-pills navtab-bg nav-justified">
+        <li class="nav-item">
+            <a href="javascript:;" phx-click="daily-display" phx-value-display="pve" class="nav-link <%=if @daily_display == "pve", do: "bg-success"%>">
+                <span class="d-none d-sm-inline-block">Jungle</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="javascript:;" phx-click="daily-display" phx-value-display="pvp" class="nav-link <%=if @daily_display == "pvp", do: "bg-danger"%>">
+                <span class="d-none d-sm-inline-block">Arena</span>
+            </a>
+        </li>
+    </ul>
+
+    <div class="w-100 mt-3">
+        <%=if @daily_display == "pve" do %>
+            <table class="table table-dark mb-0 border">
+                <%=for progression <- pve_daily_progressions(@daily_progressions) do %>
+                    <tr>
+                        <td>
+                            <%=if progression.completed_at do %>
+                                <i class="fa fa-check-circle fa-2x text-success"></i>
+                            <% else %>
+                                <i class="fa fa-circle fa-2x text-warning"></i>
+                            <% end %>
+                        </td>
+                        <td><strong><%=progression.quest.description%></strong></td>
+                        <td class="text-center"><i class="fab fa-ethereum fa-2x text-primary"></i><br/><span class="font-italic">+<%=progression.quest.shard_prize%></span></td>
+                    </tr>
+                <% end %>
+            </table>
+        <% else %>
+            <table class="table table-dark mb-0 border">
+                <%=for progression <- pvp_daily_progressions(@daily_progressions) do %>
+                    <tr>
+                        <td>
+                            <%=if progression.completed_at do %>
+                                <i class="fa fa-check-circle fa-2x text-danger"></i>
+                            <% else %>
+                                <i class="fa fa-circle fa-2x text-warning"></i>
+                            <% end %>
+                        </td>
+                        <td><strong><%=progression.quest.description%></strong></td>
+                        <td class="text-center"><i class="fab fa-ethereum fa-2x text-primary"></i><br/><span class="font-italic">+<%=progression.quest.shard_prize%></span></td>
+                    </tr>
+                <% end %>
+            </table>
+        <% end %>
+    </div>
+
+    <h5 class="text-<%=if @daily_display == "pve", do: "success", else: "danger"%> text-center mt-3 mb-0">New quests will replace your completed quests <%=MobaWeb.ArenaView.next_round_description(false)%></h5>
+</div>
