@@ -64,7 +64,7 @@ defmodule Moba do
   @league_win_gold_bonus 2000
   @league_win_buffed_battles_bonus 3
   @veteran_league_win_buffed_battles_bonus 2
-  @league_buff_multiplier 0.5
+  @league_buff_multiplier 0.3
   @boss_regeneration_multiplier 0.5
   @boss_win_gold_bonus 2000
 
