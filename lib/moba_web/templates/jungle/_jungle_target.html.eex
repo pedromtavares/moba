@@ -3,7 +3,7 @@
         <div class="card-header pt-0 pb-1">
             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic text-center level text-<%=difficulty_color(@target.difficulty)%>"><%=difficulty_label @target.difficulty%><br/><span class="font-italic font-20">Level <%=@target.defender.level%></span></span>
-                <div><img src="/images/league_<%=@target.defender.league_tier%>.png" class="league-logo mr-1"><%=@target.defender.avatar.name%></div>
+                <div><%=@target.defender.avatar.name%></div>
                 <span class="font-20 font-italic text-warning tooltip-cursor" data-toggle="tooltip" title="<h4>Rewards (Victory/Draw)</h4><%=reward_badges_for(@current_hero, @target.difficulty)%>"><%=difficulty_reward_label @target.difficulty%></span>
             </h4>
         </div>

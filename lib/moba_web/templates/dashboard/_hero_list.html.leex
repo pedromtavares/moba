@@ -15,7 +15,7 @@
         </div>
         <div class="row mb-3 mx-2">
             <div class="col">
-                <a href="/create" class="btn btn-block btn-lg btn-success d-block <%=if @current_user.is_guest, do: "disabled"%>"><i class="fa fa-user-plus mr-1"></i>Create New Hero</a>
+                <a href="/invoke" class="btn btn-block btn-lg btn-success d-block <%=if @current_user.is_guest, do: "disabled"%>"><i class="fa fa-user-plus mr-1"></i>Invoke New Hero</a>
             </div>
         </div>
         <div class="w-100 hero-list fixed-panel" style="overflow: auto;">
@@ -46,10 +46,10 @@
                                 <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
                                 <h5 class="text-success"><%=GH.pve_win_rate(hero)%>% Win Rate</h5>
                                 <%=if hero.easy_mode do %>
-                                    <h5 class="text-primary">Easy Mode</h5>
+                                    <h5 class="text-primary">Casual Mode</h5>
                                 <% else %>
                                     <h5 class="text-warning"><%=hero.buybacks%> Buybacks</h5>
-                                    <h5 class="text-danger">Veteran Mode</h5>
+                                    <h5 class="text-danger">Competitive Mode</h5>
                                 <% end %>
                             </td>
                         <% end %>
@@ -65,10 +65,8 @@
                                     <i class="fa fa-leaf fa-2x"></i>
                                     <br/>
                                     Continue
-                                    <%= unless hero.easy_mode do %>
-                                        <br/>
-                                        <small><em>(<%=hero.pve_battles_available%> ganks left)</em>
-                                    <% end %>
+                                    <br/>
+                                    <small><em>(<%=hero.pve_battles_available%> ganks left)</em>
                                 <% end %>
                             <% end %>
                             <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>

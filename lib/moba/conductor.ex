@@ -113,10 +113,12 @@ defmodule Moba.Conductor do
   Creates PVE bots
   """
   def generate_bots!(bot_level_range) do
+    now = Timex.now()
+
     Game.current_match()
     |> generate_pve_bots!(bot_level_range)
-    |> archive_previous_bots!()
-    |> refresh_pve_targets!()
+    |> archive_previous_bots!(now)
+    |> delete_pve_targets!()
   end
 
   # Deactivates the current match and all pvp heroes, also assigning its winners and clearing all current heroes
@@ -192,23 +194,15 @@ defmodule Moba.Conductor do
     match
   end
 
-  # generates new targets for unfinished Jungle heroes
-  defp refresh_pve_targets!(match) do
-    UserQuery.current_players()
-    |> Repo.all()
-    |> Repo.preload(:current_pve_hero)
-    |> Enum.map(fn %{current_pve_hero: hero} = user ->
-      hero && Game.generate_targets!(%{hero | user: user})
-    end)
-
+  defp delete_pve_targets!(match) do
+    Repo.delete_all(Game.Schema.Target)
     match
   end
 
   # Archives all current bots so they can be removed later by Cleaner
-  defp archive_previous_bots!(match) do
-    match
-    |> HeroQuery.exclude_match()
-    |> HeroQuery.bots()
+  defp archive_previous_bots!(match, time) do
+    HeroQuery.pve_bots()
+    |> HeroQuery.created_before(time)
     |> HeroQuery.unarchived()
     |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
 

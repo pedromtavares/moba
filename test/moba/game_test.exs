@@ -27,7 +27,7 @@ defmodule Moba.GameTest do
       targets = Game.list_targets(hero)
 
       assert hero.active_build.type == "pve"
-      assert hero.gold == 1000
+      assert hero.gold == 800
       assert length(hero.active_build.skills) == 4
       assert length(targets) > 0
 
@@ -80,7 +80,7 @@ defmodule Moba.GameTest do
       updated = Game.update_attacker!(hero, updates)
       assert updated.level == 2
       assert updated.gold == 50
-      assert updated.experience == 30
+      assert updated.experience == 50
       assert updated.skill_levels_available == 1
       assert updated.total_hp > hero.total_hp
       assert updated.total_mp > hero.total_mp
@@ -170,26 +170,6 @@ defmodule Moba.GameTest do
       assert hero2.pve_ranking == 1
     end
 
-    test "#redeem_league!" do
-      hero = create_base_hero(%{pve_points: 10})
-      assert Game.redeem_league!(hero) == hero
-
-      hero = create_base_hero(%{pve_points: 22}) |> Game.redeem_league!()
-
-      assert hero.pve_points == 0
-      assert hero.league_step == 1
-    end
-
-    test "#redeem_league! when in master league" do
-      hero =
-        create_base_hero(%{league_tier: Moba.master_league_tier(), pve_points: Moba.pve_points_limit()})
-        |> Game.generate_boss!()
-        |> Game.redeem_league!()
-
-      assert hero.league_step == 1
-      assert hero.pve_points == Moba.pve_points_limit()
-    end
-
     test "#hero_has_other_build?" do
       hero = create_base_hero()
 
@@ -209,14 +189,13 @@ defmodule Moba.GameTest do
 
       assert Game.maybe_finish_pve(hero) == hero
 
-      hero = create_base_hero(%{pve_battles_available: 0, pve_points: 0}) |> Game.maybe_finish_pve()
+      hero = create_base_hero(%{pve_battles_available: 0, dead: true}) |> Game.maybe_finish_pve()
 
       assert hero.finished_pve
 
       hero =
         create_base_hero(%{
           pve_battles_available: 0,
-          pve_points: Moba.pve_points_limit(),
           league_tier: Moba.master_league_tier()
         })
 
@@ -225,7 +204,6 @@ defmodule Moba.GameTest do
       hero =
         create_base_hero(%{
           pve_battles_available: 0,
-          pve_points: Moba.pve_points_limit(),
           league_tier: Moba.max_league_tier()
         })
         |> Game.maybe_finish_pve()
@@ -264,8 +242,7 @@ defmodule Moba.GameTest do
       hero =
         create_base_hero(%{
           pve_battles_available: 0,
-          league_tier: Moba.master_league_tier(),
-          pve_points: Moba.pve_points_limit()
+          league_tier: Moba.master_league_tier()
         })
 
       assert Game.maybe_generate_boss(hero).boss_id
@@ -306,7 +283,6 @@ defmodule Moba.GameTest do
       assert boss.league_attempts == 1
 
       hero = Game.finalize_boss!(boss, 0, hero)
-      assert hero.pve_points == 11
       refute hero.boss_id
     end
 
@@ -369,7 +345,7 @@ defmodule Moba.GameTest do
 
     test "#generate_bot_build!" do
       hero =
-        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999})
+        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_farm: 999_999})
         |> Game.generate_bot_build!()
 
       assert hero.active_build.type == "pvp"
@@ -379,7 +355,10 @@ defmodule Moba.GameTest do
     end
 
     test "#reset_item_orders!" do
-      base_hero = create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999}) |> Game.generate_bot_build!()
+      base_hero =
+        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_farm: 999_999})
+        |> Game.generate_bot_build!()
+
       reset_hero = Game.reset_item_orders!(base_hero, [base_rare_item()])
       assert List.first(reset_hero.builds).item_order == ["tranquil_boots"]
     end
@@ -425,24 +404,24 @@ defmodule Moba.GameTest do
     test "#generate_targets! user tier 0 easy_mode" do
       hero = create_base_hero(%{easy_mode: true}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
       assert length(hero.targets) == 6
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 2
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 2
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 2
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 0
     end
 
     test "#generate_targets! user tier 0" do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
     end
 
     test "#generate_targets! user tier 1" do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 1})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
     end
 
@@ -450,8 +429,8 @@ defmodule Moba.GameTest do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 2})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 6
     end
 
     test "#generate_targets! user tier 3" do

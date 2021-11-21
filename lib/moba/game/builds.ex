@@ -150,18 +150,16 @@ defmodule Moba.Game.Builds do
   # item lists go from weak -> strong, so weak bots get this list as is and stronger bots reverse it,
   # first buying stronger items, making them much more challenging at any level
   defp items_list(item_list, difficulty, level, total_farm) do
-    gold = extra_gold(difficulty, level, total_farm)
-
     {result, _} =
       case items_difficulty(difficulty, level) do
-        "weak" -> item_list
-        "moderate" -> Enum.shuffle(item_list)
-        "strong" -> Enum.reverse(item_list)
-        "master" -> Enum.reverse(item_list)
-        "grandmaster" -> random_legendaries() ++ random_epics()
+        "weak" -> item_list ++ random_rares() ++ random_normals()
+        "moderate" -> Enum.shuffle(item_list) ++ random_rares() ++ random_normals()
+        "strong" -> Enum.reverse(item_list) ++ random_rares() ++ random_normals()
+        "pvp_master" -> Enum.reverse(item_list)
+        "pvp_grandmaster" -> random_legendaries() ++ random_epics()
       end
       |> Enum.map(fn item_code -> Game.get_item_by_code!(item_code) end)
-      |> Enum.reduce({[], gold}, fn item, {items, remaining} ->
+      |> Enum.reduce({[], total_farm}, fn item, {items, remaining} ->
         price = Game.item_price(item)
 
         if remaining >= price do
@@ -237,8 +235,13 @@ defmodule Moba.Game.Builds do
     |> Enum.take(6)
   end
 
-  defp extra_gold("strong", level, _) when level >= 25, do: 999_999
-  defp extra_gold(_, _, total_farm), do: total_farm
+  defp random_normals do
+    ["magic_stick", "sages_mask", "blades_of_attack", "ring_of_tarrasque", "chainmail"] |> Enum.shuffle()
+  end
+
+  defp random_rares do
+    ["maelstrom", "shadow_blade", "vanguard", "pipe_of_insight"]
+  end
 
   defp skills_to_order(skills) do
     skills |> Enum.filter(&(!&1.passive)) |> Enum.map(& &1.code)
@@ -248,7 +251,7 @@ defmodule Moba.Game.Builds do
     items |> Enum.filter(& &1.active) |> Enum.map(& &1.code)
   end
 
-  defp items_difficulty("strong", level) when level > 27, do: "grandmaster"
+  defp items_difficulty("strong", level) when level > 27, do: "pvp_grandmaster"
   defp items_difficulty(difficulty, _), do: difficulty
 
   defp codes_to_skills(lists) do
@@ -417,7 +420,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["elder_dragon_form", "empower", "double_edge", "counter_helix"],
-        ["maelstrom", "boots_of_travel", "shivas_guard", "linkens_sphere", "scythe_of_vyse", "daedalus"],
+        ["shivas_guard", "linkens_sphere", "maelstrom", "scythe_of_vyse", "daedalus", "boots_of_travel"],
         "Low-cost attack skills focused on longer fights."
       }
     ]
@@ -502,12 +505,12 @@ defmodule Moba.Game.Builds do
     [
       {
         ["guardian_angel", "double_edge", "counter_helix", "shuriken_toss"],
-        ["maelstrom", "boots_of_travel", "silver_edge", "dagon5", "orchid_malevolence", "daedalus"],
+        ["silver_edge", "maelstrom", "daedalus", "boots_of_travel", "dagon5", "orchid_malevolence"],
         "Single turn damage focused build."
       },
       {
         ["double_edge", "guardian_angel", "echo_stomp", "jinada"],
-        ["maelstrom", "boots_of_travel", "daedalus", "scythe_of_vyse", "linkens_sphere", "orchid_malevolence"],
+        ["orchid_malevolence", "daedalus", "maelstrom", "boots_of_travel", "scythe_of_vyse", "linkens_sphere"],
         "A more offensive Carry variant."
       }
     ]

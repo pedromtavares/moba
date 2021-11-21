@@ -7,6 +7,7 @@ defmodule Moba.Engine.Core.League do
   alias Engine.Schema.Battle
 
   @master_league_tier Moba.master_league_tier()
+  @max_league_tier Moba.max_league_tier()
   @easy_mode_max_farm Moba.easy_mode_max_farm()
 
   def create_battle!(%{league_step: step}, _) when step < 1 do
@@ -67,15 +68,17 @@ defmodule Moba.Engine.Core.League do
     updates =
       cond do
         win && step >= Game.max_league_step_for(league_tier) ->
+          next_league_tier = league_tier + 1
+
           %{
             league_step: 0,
-            league_tier: league_tier + 1,
+            league_tier: next_league_tier,
             league_successes: successes + 1,
             gold: attacker.gold + league_bonus(attacker),
             total_farm: attacker.total_farm + league_bonus(attacker),
-            buffed_battles_available:
-              attacker.buffed_battles_available + Moba.league_win_buffed_battles_bonus(attacker.user),
-            boss_id: nil
+            buffed_battles_available: buffed_battles(attacker),
+            boss_id: nil,
+            pve_battles_available: pve_battles_for(attacker, next_league_tier)
           }
 
         win ->
@@ -90,7 +93,9 @@ defmodule Moba.Engine.Core.League do
 
         true ->
           %{
-            league_step: 0
+            league_step: 0,
+            dead: !attacker.easy_mode,
+            pve_battles_available: loss_pve_battles(attacker)
           }
       end
 
@@ -120,7 +125,23 @@ defmodule Moba.Engine.Core.League do
     {battle, attacker}
   end
 
-  defp league_bonus(%{easy_mode: true, total_farm: farm}) when farm >= @easy_mode_max_farm, do: 0
+  defp buffed_battles(%{pve_battles_available: pve_battles, buffed_battles_available: buffed_battles}) do
+    extra = if pve_battles <= 2, do: 2, else: pve_battles
+    buffed_battles + extra
+  end
+
+  defp league_bonus(%{easy_mode: true, total_farm: farm}) do
+    bonus = Moba.league_win_gold_bonus()
+    if farm + bonus >= @easy_mode_max_farm, do: @easy_mode_max_farm, else: bonus
+  end
+
   defp league_bonus(%{league_tier: @master_league_tier}), do: Moba.boss_win_gold_bonus()
   defp league_bonus(_), do: Moba.league_win_gold_bonus()
+
+  defp loss_pve_battles(%{easy_mode: true, pve_battles_available: 0}), do: 2
+  defp loss_pve_battles(%{pve_battles_available: pve}), do: pve
+
+  defp pve_battles_for(_, tier) when tier == @max_league_tier, do: 0
+  defp pve_battles_for(%{easy_mode: true}, tier) when tier == @master_league_tier, do: 0
+  defp pve_battles_for(attacker, _), do: attacker.pve_battles_available + Moba.battles_per_tier()
 end

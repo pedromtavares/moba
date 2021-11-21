@@ -7,7 +7,8 @@ defmodule Moba do
 
   # General constants
   @initial_battles 30
-  @initial_gold 1000
+  @battles_per_tier 5
+  @initial_gold 800
   @veteran_initial_gold 2000
   @items_base_price 400
   @max_battle_turns 12
@@ -32,7 +33,7 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
-  @easy_mode_max_farm 22_000
+  @easy_mode_max_farm 24_000
   @turn_mp_regen_multiplier 0.01
   @summon_total_gold 24_000
   @summon_cost 100
@@ -42,7 +43,6 @@ defmodule Moba do
   @base_xp 150
   @xp_increment 20
   @battle_xp 150
-  @pve_points_limit 12
   @max_hero_level 25
   @buyback_multiplier 20
   @veteran_buyback_multiplier 10
@@ -62,13 +62,12 @@ defmodule Moba do
   @master_league_tier 5
   @max_league_tier 6
   @league_win_gold_bonus 2000
-  @league_win_buffed_battles_bonus 3
-  @veteran_league_win_buffed_battles_bonus 2
-  @league_buff_multiplier 0.3
+  @league_buff_multiplier 0.5
   @boss_regeneration_multiplier 0.5
   @boss_win_gold_bonus 2000
 
   def initial_battles, do: @initial_battles
+  def battles_per_tier, do: @battles_per_tier
   def initial_gold(%{pve_tier: tier}) when tier > 0, do: @veteran_initial_gold
   def initial_gold(_), do: @initial_gold
   def items_base_price, do: @items_base_price
@@ -90,7 +89,6 @@ defmodule Moba do
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment
   def battle_xp, do: @battle_xp
-  def pve_points_limit, do: @pve_points_limit
   def max_hero_level, do: @max_hero_level
   def buyback_multiplier(%{pve_tier: tier}) when tier > 1, do: @veteran_buyback_multiplier
   def buyback_multiplier(_), do: @buyback_multiplier
@@ -108,23 +106,14 @@ defmodule Moba do
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
   def league_win_gold_bonus, do: @league_win_gold_bonus
-  def league_win_buffed_battles_bonus(%{pve_tier: tier}) when tier > 2, do: @veteran_league_win_buffed_battles_bonus
-  def league_win_buffed_battles_bonus(_), do: @league_win_buffed_battles_bonus
   def league_buff_multiplier, do: @league_buff_multiplier
   def boss_regeneration_multiplier, do: @boss_regeneration_multiplier
   def boss_win_gold_bonus, do: @boss_win_gold_bonus
 
-  def xp_percentage("weak"), do: 70
-  def xp_percentage("moderate"), do: 100
-  def xp_percentage("strong"), do: 200
-
-  def victory_pve_points("weak"), do: 2
-  def victory_pve_points("moderate"), do: 4
-  def victory_pve_points("strong"), do: 6
-
-  def tie_pve_points("weak"), do: 1
-  def tie_pve_points("moderate"), do: 2
-  def tie_pve_points("strong"), do: 3
+  def xp_percentage("weak", _), do: 100
+  def xp_percentage("moderate", false), do: 100
+  def xp_percentage("moderate", true), do: 200
+  def xp_percentage("strong", _), do: 200
 
   # diff = defender.pvp_points - attacker.pvp_points
 
@@ -169,7 +158,7 @@ defmodule Moba do
   def xp_to_next_hero_level(level) when level < 1, do: 0
   def xp_to_next_hero_level(level) when level > 20, do: trunc(base_xp_calculation(level) * 1.5)
   def xp_to_next_hero_level(level), do: base_xp_calculation(level)
-  defp base_xp_calculation(level), do: base_xp() + (level - 1) * xp_increment()
+  defp base_xp_calculation(level), do: base_xp() + (level - 2) * xp_increment()
 
   def xp_until_hero_level(level) when level < 2, do: 0
   def xp_until_hero_level(level), do: xp_to_next_hero_level(level) + xp_until_hero_level(level - 1)

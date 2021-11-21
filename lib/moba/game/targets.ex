@@ -19,7 +19,7 @@ defmodule Moba.Game.Targets do
   def list(hero_id, farm_sort \\ :asc) do
     Repo.all(from t in Target, where: t.attacker_id == ^hero_id)
     |> Repo.preload(defender: HeroQuery.load())
-    |> Enum.sort_by(fn target -> target.defender.level end, farm_sort)
+    |> Enum.sort_by(fn target -> target.defender.total_farm end, farm_sort)
   end
 
   @doc """
@@ -34,9 +34,8 @@ defmodule Moba.Game.Targets do
 
     {weak_count, moderate_count, strong_count} =
       cond do
-        hero.easy_mode && user.pve_tier == 0 -> {2, 2, 2}
-        user.pve_tier < 2 -> {3, 3, 3}
-        user.pve_tier < 3 -> {0, 6, 3}
+        hero.easy_mode -> {3, 3, 0}
+        user.pve_tier < 2 -> {0, 6, 3}
         user.pve_tier < 4 -> {0, 3, 6}
         true -> {0, 0, 9}
       end

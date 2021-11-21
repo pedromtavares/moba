@@ -54,7 +54,7 @@
                                         <br/>
                                         <span class="d-none d-md-inline">Profile</span>
                                     <% end %>
-                                    <a href="https://discord.gg/wA3JxVU" target="_blank" class="nav-link d-none d-md-block float-right">
+                                    <a href="https://discord.gg/QNwEdPS" target="_blank" class="nav-link d-none d-md-block float-right">
                                         <i class="fab fa-discord"></i>
                                         <br/>
                                         Join our Discord!

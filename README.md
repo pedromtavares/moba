@@ -59,9 +59,9 @@ The first screen the user is taken to (after the homepage) is to create a new He
 
 ![Jungle](https://i.imgur.com/ecBqoKL.png)
 
-This is the first phase of the game, where players have to level their newly created Hero by battling several generated targets to gain experience (XP), gold and Jungle Points (JP). These generated targets come in varying difficulties and rewards the player accordingly.
+This is the first phase of the game, where players have to level their newly created Hero by battling several generated targets to gain experience (XP) and gold. These generated targets come in varying difficulties and rewards the player accordingly.
 
-Players can also use their JPs to periodically play through a League Challenge and rank up through the Leagues (Bronze -> Silver -> ... -> Master) for further rewards. The main objective when leveling is to reach the Master League, which automatically levels a Hero to the maximum level (25).
+Players can also play through a League Challenge and rank up through the Leagues (Bronze -> Silver -> ... -> Master) for further rewards. The main objective when leveling is to reach the Master League, which automatically levels a Hero to the maximum level (25).
 
 
 #### Inventory
@@ -171,4 +171,4 @@ Each `Effect` updates either the `defender` or the `attacker`, returning a modif
 In essence, all a particular `Effect` does is update one of the fields of the `Battler` struct, like `damage`, `hp_regen`, `stunned`, `silenced`, [and many more](lib/moba/engine/schema/battler.ex). It's these interactions between effects that generate nearly infinite different battle outcomes.
 
 
-[discord]: https://discord.gg/wA3JxVU
+[discord]: https://discord.gg/QNwEdPS

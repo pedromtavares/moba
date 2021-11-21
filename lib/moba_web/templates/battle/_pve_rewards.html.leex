@@ -18,9 +18,6 @@
                 <%= if @battle.rewards.total_gold > 0 do %>
                     <span class="badge badge-pill badge-light-warning">+<%=@battle.rewards.total_gold%>g</span>
                 <% end %>
-                <%= if @battle.rewards.total_pve_points > 0 do %>
-                    <span class="badge badge-pill badge-light-success">+<%=@battle.rewards.total_pve_points%> Jungle Points</span>
-                <% end %>
                 <%= if @battle.rewards.battle_xp > 0 do %>
                     <span class="badge badge-pill badge-light-info d-none"><%=@battle.rewards.difficulty_percentage%>% XP/gold for <%=@battle.difficulty%> difficulty </span>
                 <% else %>

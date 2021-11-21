@@ -68,20 +68,15 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def next_league_percentage(hero) do
-    max = Moba.pve_points_limit()
-    hero.pve_points * 100 / max
-  end
-
   def next_league(%{league_tier: current_tier}) do
     cond do
-      current_tier >= Moba.max_league_tier() -> nil
+      current_tier + 1 >= Moba.max_league_tier() -> nil
       true -> current_tier + 1
     end
   end
 
   def reward_badges_for(hero, difficulty) do
-    base_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty) / 100)
+    base_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty, hero.easy_mode) / 100)
     double_xp = base_xp * 2
 
     xp_reward =
@@ -91,24 +86,11 @@ defmodule MobaWeb.JungleView do
         ""
       end
 
-    points =
-      if Game.max_league?(hero) do
-        ""
-      else
-        draw_points = Moba.tie_pve_points(difficulty)
-        victory_points = Moba.victory_pve_points(difficulty)
-
-        content_tag(:span, "+#{victory_points}/+#{draw_points} Points",
-          class: "badge badge-pill badge-light-success mr-1"
-        )
-      end
-
     safe_to_string(
       content_tag :div do
         [
           xp_reward,
-          content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1"),
-          points
+          content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
         ]
       end
     )
@@ -120,7 +102,7 @@ defmodule MobaWeb.JungleView do
   def pve_tier_title(%{pve_tier: 4}), do: "Season Expert"
 
   def pve_tier_bonuses(%{pve_tier: tier}) do
-    base = pve_tier_bonus_html("Starting gold: +1000 (1000 -> 2000)")
+    base = pve_tier_bonus_html("Starting gold: +1200 (800 -> 2000)")
     base = if tier > 1, do: "#{base}#{pve_tier_bonus_html("50% discount on buybacks")}", else: base
 
     base =
@@ -131,9 +113,11 @@ defmodule MobaWeb.JungleView do
     raw(base)
   end
 
-  def show_league_challenge?(%{pve_points: pve_points, league_tier: league_tier}) do
-    pve_points >= Moba.pve_points_limit() && league_tier < Moba.master_league_tier()
+  def show_league_challenge?(%{pve_battles_available: 0, league_tier: league_tier}) do
+    league_tier < Moba.master_league_tier()
   end
+
+  def show_league_challenge?(_), do: false
 
   defp pve_tier_bonus_html(label), do: "<div class='my-1'><i class='fa fa-hand-point-right mr-1'></i>#{label}</div>"
 

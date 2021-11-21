@@ -5,7 +5,6 @@ defmodule Moba.Engine.Core.Pve do
   alias Moba.{Game, Engine}
   alias Engine.Schema.Battle
 
-  @pve_points_limit Moba.pve_points_limit()
   @easy_mode_max_farm Moba.easy_mode_max_farm()
 
   def create_battle!(%{attacker: %{pve_battles_available: battles}}) when battles < 1 do
@@ -72,10 +71,10 @@ defmodule Moba.Engine.Core.Pve do
     {battle, attacker}
   end
 
-  # Calculates XP, gold and points given, all depending on battle difficulty and outcome (victory/tie/loss)
+  # Calculates XP and gold given, all depending on battle difficulty and outcome (victory/tie/loss)
   defp manage_rewards(%{winner: winner, difficulty: difficulty, attacker: attacker} = battle) do
     base_xp = Moba.battle_xp()
-    percentage = Moba.xp_percentage(difficulty)
+    percentage = Moba.xp_percentage(difficulty, attacker.easy_mode)
 
     win = winner && attacker.id == winner.id
     alive = win || is_nil(winner)
@@ -84,8 +83,6 @@ defmodule Moba.Engine.Core.Pve do
 
     win_xp = (win && base_xp |> final_xp_value(percentage)) || 0
 
-    pve_points = !Game.max_league?(attacker) && difficulty_pve_points(difficulty, win, alive)
-
     total = battle_xp + win_xp
 
     rewards = %{
@@ -93,8 +90,7 @@ defmodule Moba.Engine.Core.Pve do
       win_xp: win_xp,
       difficulty_percentage: percentage,
       total_xp: final_rewards(total, attacker),
-      total_gold: final_rewards(total, attacker),
-      total_pve_points: pve_points || 0
+      total_gold: final_rewards(total, attacker)
     }
 
     Engine.update_battle!(battle, %{rewards: rewards})
@@ -133,24 +129,10 @@ defmodule Moba.Engine.Core.Pve do
         total_xp: rewards.total_xp,
         gold: attacker.gold + rewards.total_gold,
         total_farm: attacker.total_farm + rewards.total_gold,
-        buffed_battles_available: zero_limit(attacker.buffed_battles_available - 1),
-        pve_points: points_limit(attacker.pve_points + rewards.total_pve_points)
+        buffed_battles_available: zero_limit(attacker.buffed_battles_available - 1)
       })
     }
   end
-
-  defp difficulty_pve_points(difficulty, win, _) when win == true do
-    Moba.victory_pve_points(difficulty)
-  end
-
-  defp difficulty_pve_points(difficulty, _, alive) when alive == true do
-    Moba.tie_pve_points(difficulty)
-  end
-
-  defp difficulty_pve_points(_, _, _), do: 0
-
-  defp points_limit(result) when result > @pve_points_limit, do: @pve_points_limit
-  defp points_limit(result), do: result
 
   defp zero_limit(number) when number < 0, do: 0
   defp zero_limit(number), do: number

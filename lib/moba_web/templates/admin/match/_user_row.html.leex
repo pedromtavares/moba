@@ -56,12 +56,7 @@
                 <%= live_redirect "Lv #{@user.current_pve_hero.level} #{@user.current_pve_hero.avatar.name}", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @user.current_pve_hero), class: "text-white"%>
             </h5>
             <span class="text-center text-success">
-                <%=if @user.current_pve_hero.easy_mode do %>
-                    <%=1000-@user.current_pve_hero.pve_battles_available%> <span class="text-muted">easy</span>
-                <% else %>
-                    <%=30-@user.current_pve_hero.pve_battles_available %>
-                <% end %>
-                battles (<%=@user.current_pve_hero.buybacks%>)
+                <%=@user.current_pve_hero.pve_battles_available %> battles (<%=@user.current_pve_hero.buybacks%>)
             </span>
             |
             <span class="text-danger">WR: <strong><%=GH.pve_win_rate(@user.current_pve_hero)%>%</strong></span>

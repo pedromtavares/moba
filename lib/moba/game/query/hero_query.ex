@@ -143,6 +143,10 @@ defmodule Moba.Game.Query.HeroQuery do
       where: not is_nil(hero.bot_difficulty)
   end
 
+  def pve_bots(query \\ bots()) do
+    from hero in query, where: is_nil(hero.user_id)
+  end
+
   def by_difficulty(query, difficulty) do
     from hero in query,
       where: hero.bot_difficulty == ^difficulty
@@ -322,6 +326,10 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def with_avatar_ids(query, avatar_ids) do
     from hero in query, where: hero.avatar_id in ^avatar_ids
+  end
+
+  def created_before(query, time) do
+    from hero in query, where: hero.inserted_at < ^time
   end
 
   defp page_to_offset(page, per_page) do

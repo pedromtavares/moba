@@ -119,9 +119,7 @@ defmodule MobaWeb.Shop do
     Enum.take(updated, Game.item_ingredients_count(current_transmute))
   end
 
-  defp check_tutorial(socket, hero) do
-    step = socket.assigns.tutorial_step
-
+  defp check_tutorial(%{assigns: %{tutorial_step: step}} = socket, hero) do
     if length(hero.items) > 1 && step == 3 do
       socket
       |> Tutorial.next_step(4)

@@ -162,7 +162,7 @@ defmodule Moba.Game.Schema.Hero do
       power: avatar.power
     })
     |> change(%{
-      pve_battles_available: Moba.initial_battles(),
+      pve_battles_available: Moba.battles_per_tier(),
       pve_points: 0,
       pvp_points: 0,
       league_step: 0,

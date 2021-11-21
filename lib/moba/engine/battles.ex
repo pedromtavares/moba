@@ -146,7 +146,6 @@ defmodule Moba.Engine.Battles do
       wins: hero.wins,
       losses: hero.losses,
       ties: hero.ties,
-      pve_points: hero.pve_points,
       pvp_points: hero.pvp_points,
       league_step: hero.league_step,
       previous_league_step: battle_hero.league_step,

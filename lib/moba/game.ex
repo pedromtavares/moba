@@ -47,13 +47,6 @@ defmodule Moba.Game do
   """
   def create_hero!(attrs, user, avatar, skills) do
     attrs =
-      if Map.get(attrs, :easy_mode) do
-        Map.merge(attrs, %{pve_battles_available: 1000})
-      else
-        attrs
-      end
-
-    attrs =
       if user && user.pve_tier == 4 do
         Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count())
       else
@@ -74,7 +67,7 @@ defmodule Moba.Game do
   end
 
   def create_pvp_bot_hero!(user, avatar) do
-    difficulty = if user.bot_tier == Moba.master_league_tier(), do: "master", else: "grandmaster"
+    difficulty = if user.bot_tier == Moba.master_league_tier(), do: "pvp_master", else: "pvp_grandmaster"
     Heroes.create_bot!(avatar, 25, difficulty, user, 0, user.bot_tier)
   end
 
@@ -159,7 +152,7 @@ defmodule Moba.Game do
 
   def update_pve_ranking!, do: Heroes.update_pve_ranking!()
 
-  def redeem_league!(hero), do: Heroes.redeem_league!(hero)
+  defdelegate prepare_league_challenge!(hero), to: Heroes
 
   def level_cheat(hero), do: Heroes.level_cheat(hero)
 
@@ -172,8 +165,8 @@ defmodule Moba.Game do
   def veteran_hero?(%{easy_mode: true}), do: false
   def veteran_hero?(_), do: true
 
-  def maybe_generate_boss(%{pve_battles_available: 0, boss_id: nil, pve_points: points} = hero) do
-    if master_league?(hero) && points == Moba.pve_points_limit() do
+  def maybe_generate_boss(%{pve_battles_available: 0, boss_id: nil} = hero) do
+    if master_league?(hero) do
       generate_boss!(hero)
     else
       hero
@@ -183,9 +176,9 @@ defmodule Moba.Game do
   def maybe_generate_boss(hero), do: hero
 
   def maybe_finish_pve(
-        %{pve_battles_available: 0, pve_points: points, boss_id: nil, finished_pve: false, finished_at: nil} = hero
+        %{pve_battles_available: 0, dead: dead, boss_id: nil, finished_pve: false, finished_at: nil} = hero
       ) do
-    if max_league?(hero) || points < Moba.pve_points_limit() do
+    if max_league?(hero) || dead do
       finish_pve!(hero)
     else
       hero
@@ -231,7 +224,7 @@ defmodule Moba.Game do
     update_hero!(hero, %{dead: true})
   end
 
-  def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil, pve_points: Moba.pve_points_limit() - 1})
+  def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil})
 
   defdelegate buyback!(hero), to: Heroes
   defdelegate buyback_price(hero), to: Heroes

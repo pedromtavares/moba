@@ -5,7 +5,14 @@
         <div class="col-xl-6 margin-auto">
             <div class="card collection">
                 <div class="card-header">
-                    <h3 class="text-center m-0"><img src="/images/league_<%=@finished_hero.league_tier%>.png" style="max-width: 35px"/> Congratulations on reaching the </strong><span class="text-league-<%=@finished_hero.league_tier%>"><%=Moba.leagues[@finished_hero.league_tier]%></span>!</h3>
+                    <h3 class="text-center m-0">
+                        <img src="/images/league_<%=@finished_hero.league_tier%>.png" style="max-width: 35px"/>
+                        <%= if @finished_hero.league_tier >= Moba.master_league_tier() do %>
+                            Congratulations on reaching the </strong><span class="text-league-<%=@finished_hero.league_tier%>"><%=Moba.leagues[@finished_hero.league_tier]%></span>!
+                        <% else %>
+                            You reached the <span class="text-league-<%=@finished_hero.league_tier%>"><%=Moba.leagues[@finished_hero.league_tier]%></span>, nice try!
+                        <% end %>
+                    </h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -23,11 +30,18 @@
                     </div>
                 </div>
                 <div class="card-footer p-0">
+                    <%= if @finished_hero.league_tier >= Moba.master_league_tier() do %>
                         <a href="/base" class="btn btn-success btn-block btn-lg">
                             <i class="fa fa-home fa-2x mr-1 mt-2"></i>
                             <strong class="font-20 d-block">Proceed to Base</strong>
                         </a>
-                    </div>
+                    <% else %>
+                        <a href="/invoke" class="btn btn-success btn-block btn-lg">
+                            <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
+                            <strong class="font-20 d-block">Try Again</strong>
+                        </a>
+                    <% end %>
+                </div>
             </div>
         </div>
     <% end %>

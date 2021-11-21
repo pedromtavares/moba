@@ -100,20 +100,6 @@ const Tutorial = {
             },
             {
               text: 'Next',
-              action: tour.next
-            }
-          ]
-        });
-        tour.addStep({
-          id: 'fourth-tutorial-second-step',
-          text: "<p class='text-center'>With every battle, you also gain <span class='text-success'>Jungle Points</span>, which you need to gather to rank up to the next League. Keep battling until you've reached 12 points, good luck!</p>",
-          attachTo: {
-            element: '#current-hero-league',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'OK',
               action: function () { hookInstance.pushEvent("tutorial5", {}); this.complete() }
             }
           ]
@@ -218,7 +204,7 @@ const Tutorial = {
         });
         tour.addStep({
           id: 'eleventh-tutorial-second-step',
-          text: "<p class='text-center'>After each rank up you get a buff that makes your hero considerably stronger for 3 battles, use this opportunity to battle against <span class='text-danger'>Hard</span> targets!</p>",
+          text: "<p class='text-center'>After each rank up you get a buff that makes your hero considerably stronger, use this opportunity to battle against tougher targets!</p>",
           attachTo: {
             element: '#league-buff',
             on: 'bottom'
