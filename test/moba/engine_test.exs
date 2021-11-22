@@ -398,7 +398,7 @@ defmodule Moba.EngineTest do
       no_speed = %{attacker | speed: 0, level: 3}
       battle = build_basic_battle(no_speed, defender) |> Engine.start_battle!()
 
-      assert battle.initiator == defender
+      assert battle.initiator.id == defender.id
       assert length(battle.turns) == 1
     end
 

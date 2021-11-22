@@ -100,6 +100,7 @@ defmodule MobaWeb.JungleView do
   def pve_tier_title(%{pve_tier: 2}), do: "Season Adept"
   def pve_tier_title(%{pve_tier: 3}), do: "Season Veteran"
   def pve_tier_title(%{pve_tier: 4}), do: "Season Expert"
+  def pve_tier_title(_), do: ""
 
   def pve_tier_bonuses(%{pve_tier: tier}) do
     base = pve_tier_bonus_html("Starting gold: +1200 (800 -> 2000)")
