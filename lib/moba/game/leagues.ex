@@ -31,11 +31,11 @@ defmodule Moba.Game.Leagues do
   def defender_for(%{league_step: step} = attacker) do
     case step do
       0 -> easiest_defender(attacker)
-      1 -> easiest_defender(attacker)
-      2 -> easy_defender(attacker)
+      1 -> easy_defender(attacker)
+      2 -> moderate_defender(attacker)
       3 -> moderate_defender(attacker)
-      4 -> moderate_defender(attacker)
-      5 -> hard_defender(attacker)
+      4 -> hard_defender(attacker)
+      5 -> hardest_defender(attacker)
     end
   end
 
@@ -67,6 +67,11 @@ defmodule Moba.Game.Leagues do
   end
 
   defp hard_defender(%{id: id, league_tier: league_tier}) do
+    HeroQuery.league_defender(id, base_level(league_tier) + 3, "moderate")
+    |> get_first()
+  end
+
+  defp hardest_defender(%{id: id, league_tier: league_tier}) do
     HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong")
     |> get_first()
   end
@@ -75,9 +80,9 @@ defmodule Moba.Game.Leagues do
 
   defp base_level(tier) do
     case tier do
-      0 -> 6
-      1 -> 10
-      2 -> 14
+      0 -> 7
+      1 -> 11
+      2 -> 15
       3 -> 18
       4 -> 22
       5 -> 25
