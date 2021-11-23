@@ -62,7 +62,7 @@ defmodule Moba do
   @master_league_tier 5
   @max_league_tier 6
   @league_win_gold_bonus 2000
-  @league_buff_multiplier 0.5
+  @league_buff_multiplier 0.4
   @boss_regeneration_multiplier 0.5
   @boss_win_gold_bonus 2000
 
