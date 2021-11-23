@@ -420,10 +420,10 @@ defmodule Moba.Game.Heroes do
       case difficulty do
         # 0..800
         "weak" -> 0..2
-        # 1200..1600
-        "moderate" -> 3..4
-        # 2000..2800
-        "strong" -> 5..7
+        # 1200..2000
+        "moderate" -> 3..5
+        # 3200..4800
+        "strong" -> 8..12
         # 19_200..24_000
         "pvp_master" -> 0..12
         # 26_400..30_000
