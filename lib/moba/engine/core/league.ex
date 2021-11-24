@@ -132,7 +132,7 @@ defmodule Moba.Engine.Core.League do
 
   defp league_bonus(%{easy_mode: true, total_farm: farm}) do
     bonus = Moba.league_win_gold_bonus()
-    if farm + bonus >= @easy_mode_max_farm, do: @easy_mode_max_farm, else: bonus
+    if farm + bonus >= @easy_mode_max_farm, do: 0, else: bonus
   end
 
   defp league_bonus(%{league_tier: @master_league_tier}), do: Moba.boss_win_gold_bonus()
