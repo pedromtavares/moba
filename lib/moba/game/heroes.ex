@@ -422,8 +422,7 @@ defmodule Moba.Game.Heroes do
         "weak" -> 0..2
         # 1200..2000
         "moderate" -> 3..5
-        # 3200..4800
-        "strong" -> 8..12
+        "strong" -> (6 + league_tier)..(8 + league_tier)
         # 19_200..24_000
         "pvp_master" -> 0..12
         # 26_400..30_000

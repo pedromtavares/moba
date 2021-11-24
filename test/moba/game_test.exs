@@ -393,7 +393,7 @@ defmodule Moba.GameTest do
       master_league_defender = Game.league_defender_for(master_league_hero)
 
       assert first_league_defender.level >= 6
-      assert first_league_defender.bot_difficulty == "weak"
+      assert first_league_defender.bot_difficulty == "moderate"
       assert diamond_league_defender.level >= 25
       assert diamond_league_defender.bot_difficulty == "strong"
       assert master_league_defender.avatar.code == "boss"
