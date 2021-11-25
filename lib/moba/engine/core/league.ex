@@ -132,7 +132,7 @@ defmodule Moba.Engine.Core.League do
 
   defp league_bonus(%{easy_mode: true, total_farm: farm}) do
     bonus = Moba.league_win_gold_bonus()
-    if farm + bonus >= @easy_mode_max_farm, do: @easy_mode_max_farm - farm, else: bonus
+    if farm + bonus >= @easy_mode_max_farm, do: zero_limit(@easy_mode_max_farm - farm), else: bonus
   end
 
   defp league_bonus(%{league_tier: @master_league_tier}), do: Moba.boss_win_gold_bonus()
@@ -144,4 +144,7 @@ defmodule Moba.Engine.Core.League do
   defp pve_battles_for(_, tier) when tier == @max_league_tier, do: 0
   defp pve_battles_for(%{easy_mode: true}, tier) when tier == @master_league_tier, do: 0
   defp pve_battles_for(attacker, _), do: attacker.pve_battles_available + Moba.battles_per_tier()
+
+  defp zero_limit(number) when number < 0, do: 0
+  defp zero_limit(number), do: number
 end
