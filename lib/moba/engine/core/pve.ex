@@ -137,6 +137,6 @@ defmodule Moba.Engine.Core.Pve do
   defp zero_limit(number) when number < 0, do: 0
   defp zero_limit(number), do: number
 
-  defp final_rewards(_, %{easy_mode: true, total_farm: farm}) when farm >= @easy_mode_max_farm, do: 0
+  defp final_rewards(total, %{easy_mode: true, total_farm: farm}) when total + farm >= @easy_mode_max_farm, do: @easy_mode_max_farm - farm
   defp final_rewards(total, _), do: total
 end
