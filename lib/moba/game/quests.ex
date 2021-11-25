@@ -173,7 +173,7 @@ defmodule Moba.Game.Quests do
   defp season_rewards(_, %{level: quest_level}, base_rewards) do
     rewards = Map.put(base_rewards, :pve_tier, quest_level)
 
-    if quest_level == 3 do
+    if quest_level >= 1 do
       Map.put(rewards, :status, "available")
     else
       rewards
