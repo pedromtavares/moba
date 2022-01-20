@@ -10,7 +10,7 @@ defmodule MobaWeb.HeroLiveView do
     avatars = Game.list_avatars()
     collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Enum.filter(avatars, &(&1.code not in collection_codes))
-    completed_progressions = Game.last_completed_quest_progressions(hero)
+    completed_progressions = hero && Game.last_completed_quest_progressions(hero)
     completed_season_progression = completed_progressions && Enum.find(completed_progressions, &(&1.quest.code == "season"))
     completed_daily_progressions = completed_progressions && Enum.filter(completed_progressions, & &1.quest.daily)
 
