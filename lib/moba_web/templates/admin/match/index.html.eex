@@ -7,7 +7,7 @@
           <div class="field">
             <label>Next changelog</label>
             <%= filter_select(:match, :next_changelog, @conn.params) %>
-            <%= filter_text_input(:match, :next_changelog, @conn.params) %>
+            <%= filter_string_input(:match, :next_changelog, @conn.params) %>
           </div>
 
 

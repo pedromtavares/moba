@@ -226,14 +226,6 @@ defmodule Moba.Game.Query.HeroQuery do
       order_by: [desc: hero.total_farm, desc: fragment("? - ?", hero.inserted_at, hero.finished_at)]
   end
 
-  def summoned(query \\ Hero) do
-    from hero in query, where: hero.summoned == true
-  end
-
-  def non_summoned(query \\ Hero) do
-    from hero in query, where: hero.summoned == false
-  end
-
   def in_current_ranking_date(query \\ Hero) do
     from hero in query, where: hero.inserted_at > ^@current_ranking_date
   end

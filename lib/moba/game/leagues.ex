@@ -80,11 +80,11 @@ defmodule Moba.Game.Leagues do
 
   defp base_level(tier) do
     case tier do
-      0 -> 6
-      1 -> 10
-      2 -> 14
-      3 -> 18
-      4 -> 22
+      0 -> 4
+      1 -> 8
+      2 -> 12
+      3 -> 16
+      4 -> 20
       5 -> 25
     end
   end

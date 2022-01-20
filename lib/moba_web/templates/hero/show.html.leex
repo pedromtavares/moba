@@ -1,4 +1,4 @@
-<div class="hero-review" phx-hook="SetMainWrapper" id="hero-review">
+<div class="hero-review" id="hero-review">
     <%=if finished_hero = finished_jungle?(@current_user, @hero) do %>
         <%= render "_finished_hero.html", Map.put(assigns, :finished_hero, finished_hero)%>
     <% else %>

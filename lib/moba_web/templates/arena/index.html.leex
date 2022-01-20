@@ -1,4 +1,4 @@
-<div class="arena" phx-hook="SetMainWrapper" id="arena">
+<div class="arena" id="arena">
     <%= if @pending_battle do %>
         <%= MobaWeb.GameView.render "_pending_battle.html", battle: @pending_battle %>
     <% else %>

@@ -9,6 +9,20 @@ defmodule MobaWeb.JungleView do
     boss.total_hp * 100 / boss.avatar.total_hp
   end
 
+  def farming_progression(%{pve_farming_turns: turns, pve_farming_started_at: started}, %{current_time: current}) do
+    turn_seconds = turns * Moba.seconds_per_turn()
+    total = Timex.shift(started, seconds: turn_seconds)
+    total_diff = Timex.diff(total, started, :seconds)
+    current_diff = Timex.diff(current, started, :seconds)
+
+    100 * current_diff / total_diff
+  end
+
+  def farming_time_left(%{pve_farming_turns: turns, pve_farming_started_at: started}, %{current_time: current}) do
+    turn_seconds = turns * Moba.seconds_per_turn()
+    Timex.shift(started, seconds: turn_seconds) |> Timex.format("{relative}", :relative) |> elem(1)
+  end
+
   def difficulty_color(difficulty) do
     case difficulty do
       "weak" -> "success"
@@ -76,21 +90,15 @@ defmodule MobaWeb.JungleView do
   end
 
   def reward_badges_for(hero, difficulty) do
-    base_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty, hero.easy_mode) / 100)
-    double_xp = base_xp * 2
+    battle_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty, hero.easy_mode) / 100)
+    double_xp = battle_xp * 2
 
-    xp_reward =
-      if hero.level < Moba.max_hero_level() do
-        content_tag(:span, "+#{double_xp}/+#{base_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
-      else
-        ""
-      end
-
+    xp_reward = content_tag(:span, "+#{double_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
     safe_to_string(
       content_tag :div do
         [
           xp_reward,
-          content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
+          content_tag(:span, "+#{double_xp}/+#{battle_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
         ]
       end
     )

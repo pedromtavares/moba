@@ -7,7 +7,6 @@ defmodule Moba.Game.Heroes do
   alias Game.Schema.Hero
   alias Game.Query.{HeroQuery, SkillQuery}
 
-  @max_level Moba.max_hero_level()
   @master_league_tier Moba.master_league_tier()
 
   # -------------------------------- PUBLIC API
@@ -88,19 +87,6 @@ defmodule Moba.Game.Heroes do
       })
     end
   end
-
-  def level_to_max!(%{level: current_level} = hero) when current_level < @max_level do
-    diff = @max_level - current_level
-
-    xp =
-      Enum.reduce(1..diff, 0, fn level, acc ->
-        acc + Moba.xp_to_next_hero_level(current_level + level)
-      end)
-
-    add_experience!(hero, xp)
-  end
-
-  def level_to_max!(hero), do: hero
 
   def update!(nil, _), do: nil
 
@@ -305,7 +291,6 @@ defmodule Moba.Game.Heroes do
 
     HeroQuery.non_bots()
     |> HeroQuery.finished_pve()
-    |> HeroQuery.non_summoned()
     |> HeroQuery.in_current_ranking_date()
     |> Repo.all()
     |> Enum.with_index(1)
@@ -371,11 +356,26 @@ defmodule Moba.Game.Heroes do
 
   def buyback!(hero), do: hero
 
+  def start_farming(hero, state, turns) do
+    update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+  end
+
+  def finish_farming(%{pve_farming_turns: turns, pve_battles_available: battles, pve_farming_rewards: rewards, pve_farming_started_at: started} = hero, state) do
+    remaining_battles = battles - turns
+
+    {hero, amount} = apply_farming_rewards(hero, turns, state)
+
+    new_reward = [%{state: state, started_at: started, turns: turns, amount: amount}]
+
+    hero
+    |> Hero.replace_farming_rewards(rewards ++ new_reward)
+    |> update!(%{pve_state: nil, pve_farming_turns: 0, pve_farming_started_at: nil, pve_battles_available: remaining_battles})
+  end
+
   # --------------------------------
 
   defp add_experience!(hero, experience)
   defp add_experience!(hero, nil), do: hero
-  defp add_experience!(%{level: level} = hero, _) when level >= @max_level, do: hero
 
   defp add_experience!(hero, experience) do
     hero = Repo.preload(hero, :user)
@@ -385,6 +385,19 @@ defmodule Moba.Game.Heroes do
     |> Hero.changeset(%{experience: hero.experience + experience})
     |> check_if_leveled()
     |> Repo.update!()
+  end
+
+  defp apply_farming_rewards(hero, turns, "meditating") do 
+    rewards = turns * Enum.random(Moba.xp_farm_per_turn())
+    hero = add_experience!(hero, rewards)
+    
+    {hero, rewards}
+  end
+  defp apply_farming_rewards(hero, turns, "mining") do
+    rewards = turns * Enum.random(Moba.gold_farm_per_turn())
+    hero = update!(hero, %{gold: hero.gold + rewards, total_farm: hero.total_farm + rewards})
+
+    {hero, rewards}
   end
 
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do
@@ -471,13 +484,5 @@ defmodule Moba.Game.Heroes do
     master_league_updates(%{hero | easy_mode: false})
     |> Game.finish_pve!()
   end
-
-  defp master_league_updates(%{league_tier: tier, level: level} = hero)
-       when tier == @master_league_tier and level < @max_level do
-    hero
-    |> level_to_max!()
-    |> Game.level_active_build_to_max!()
-  end
-
   defp master_league_updates(hero), do: hero
 end

@@ -1,38 +1,7 @@
-.wrapper-jungle::after{
-  content: "";
-  // background: url('/images/jungle.jpg');
-  // opacity: 0.3;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  position: absolute;
-  z-index: -100;
-
-  box-shadow: inset 0px 0px 300px 50px black;
-  background: #07382E;
-  opacity: 1
-}
-
-@keyframes league-glow {
-  0% {
-    color: rgba(241,85,108, 0.2);
-    box-shadow: 0 0 5px 0 rgba(241,85,108, 0.2);
-  }
-  100% {
-    color: rgba(241,85,108, 1);
-    box-shadow: 0 0 20px 10px rgba(241,85,108, 1);
-  }
-}
-
 .jungle{
   margin-bottom: 180px;
   @media (max-width: 992px) {
     margin-bottom: 220px;
-  }
-
-  .league-challenge{
-    animation: 1s league-glow infinite;
   }
 
   .gank-button{
@@ -73,6 +42,16 @@
     background-color: rgba(54, 64, 74, 0.3);
     padding: 0;
     margin-bottom: 3rem;
+  }
+
+  .gank-tab a.active{
+    border: 2px solid #f1556c !important;
+  }
+  .meditation-tab a.active{
+    border: 2px solid #3bafda !important;
+  }
+  .mine-tab a.active{
+    border: 2px solid #f7b84b !important;
   }
 }
 

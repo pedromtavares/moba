@@ -26,10 +26,6 @@ defmodule MobaWeb.GameController do
     )
   end
 
-  def summon(conn, _params) do
-    live_render(conn, MobaWeb.CreateLiveView, session: %{"summon" => true})
-  end
-
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
     {user, conn} = Accounts.create_guest(conn)
     avatar = Game.get_avatar!(selected_avatar)

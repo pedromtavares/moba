@@ -2,7 +2,7 @@
 <html lang="en">
     <%=render "_head.html", conn: @conn%>
     <body>
-        <%=render "_navigation.html", conn: @conn, current_user: @current_user, clean: true%>
+        <%= render "_navigation.html", conn: @conn, current_user: @current_user, current_hero: assigns[:current_hero], clean: true %>
         <%= if get_flash(@conn, :info) do %>
             <div class="alert alert-primary alert-dismissible bg-primary text-white border-0 fade show text-center col" role="alert" style="border-radius: 0">
                 <button type="button" class="close" data-dismiss="alert" aria-label="Close">

@@ -195,11 +195,11 @@ defmodule MobaWeb.BattleView do
     Moba.leagues()[tier - 1]
   end
 
-  def league_gold_bonus(%{league_tier: tier}) do
+  def league_bonus(%{league_tier: tier}) do
     if tier == Moba.max_league_tier() do
-      Moba.boss_win_gold_bonus()
+      Moba.boss_win_bonus()
     else
-      Moba.league_win_gold_bonus()
+      Moba.league_win_bonus()
     end
   end
 

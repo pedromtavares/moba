@@ -90,35 +90,6 @@ defmodule Moba.Game do
     update_hero!(hero, %{archived_at: DateTime.utc_now()})
   end
 
-  def summon_hero!(user, avatar, skills, items) do
-    if user.shard_count >= Moba.summon_cost() do
-      hero =
-        create_hero!(
-          %{
-            name: user.username,
-            league_tier: Moba.master_league_tier(),
-            gold: Moba.summon_total_gold(),
-            pve_battles_available: 0,
-            finished_pve: true,
-            summoned: true
-          },
-          user,
-          avatar,
-          skills
-        )
-
-      Enum.reduce(items, hero, fn item, acc ->
-        buy_item!(acc, item)
-      end)
-      |> Heroes.level_to_max!()
-      |> level_active_build_to_max!()
-
-      Accounts.update_user!(user, %{shard_count: user.shard_count - Moba.summon_cost()})
-    else
-      user
-    end
-  end
-
   def refresh_targets!(%{refresh_targets_count: count} = hero) when count > 0 do
     generate_targets!(hero)
 
@@ -165,31 +136,25 @@ defmodule Moba.Game do
   def veteran_hero?(%{easy_mode: true}), do: false
   def veteran_hero?(_), do: true
 
-  def maybe_generate_boss(%{pve_battles_available: 0, boss_id: nil} = hero) do
+  def maybe_generate_boss(%{pve_battles_available: 0, pve_total_turns: 0, boss_id: nil} = hero) do
     if master_league?(hero) do
       generate_boss!(hero)
     else
       hero
     end
   end
-
   def maybe_generate_boss(hero), do: hero
 
   def maybe_finish_pve(
-        %{pve_battles_available: 0, dead: dead, boss_id: nil, finished_pve: false, finished_at: nil} = hero
+        %{pve_battles_available: 0, pve_total_turns: 0, boss_id: nil, finished_pve: false, finished_at: nil} = hero
       ) do
-    if max_league?(hero) || dead do
-      finish_pve!(hero)
-    else
-      hero
-    end
+    finish_pve!(hero)
   end
-
   def maybe_finish_pve(hero), do: hero
 
   def finish_pve!(%{finished_pve: false, finished_at: nil} = hero) do
     hero = Repo.preload(hero, :user)
-    updated = update_hero!(hero, %{finished_pve: true, finished_at: Timex.now()})
+    updated = update_hero!(hero, %{finished_pve: true, finished_at: Timex.now(), pve_state: "finished"})
 
     collection = Heroes.collection_for(updated.user_id)
     Accounts.finish_pve!(updated.user, collection)
@@ -198,7 +163,6 @@ defmodule Moba.Game do
 
     updated
   end
-
   def finish_pve!(hero), do: hero
 
   def generate_boss!(hero) do
@@ -223,11 +187,19 @@ defmodule Moba.Game do
     update_hero!(boss, %{total_hp: new_total, league_attempts: 1})
     update_hero!(hero, %{dead: true})
   end
-
   def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil})
 
   defdelegate buyback!(hero), to: Heroes
+
   defdelegate buyback_price(hero), to: Heroes
+
+  defdelegate start_farming(hero, state, turns), to: Heroes
+
+  def finish_farming(hero, state) do
+    updated = Heroes.finish_farming(hero, state)
+    generate_targets!(updated)
+    updated
+  end
 
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")

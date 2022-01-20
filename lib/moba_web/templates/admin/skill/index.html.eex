@@ -29,7 +29,7 @@
           <div class="field">
             <label>Description</label>
             <%= filter_select(:skill, :description, @conn.params) %>
-            <%= filter_text_input(:skill, :description, @conn.params) %>
+            <%= filter_string_input(:skill, :description, @conn.params) %>
           </div>
 
           <div class="field">

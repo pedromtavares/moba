@@ -39,9 +39,15 @@
                                     </div>
                                 </div>
                                 <div class="col-1 flex-center d-none d-md-flex">
-                                    <a href="/base">
-                                        <img src="/images/favlogo.png" style="height:50px;" />
-                                    </a>
+                                    <%= if assigns[:current_hero] do %>
+                                        <%= live_redirect to: Routes.live_path(@conn, MobaWeb.JungleLiveView) do %>
+                                            <%= GH.hero_avatar(@current_hero, false) %>
+                                        <% end %>
+                                    <% else %>
+                                        <a href="/base">
+                                            <img src="/images/favlogo.png" style="height:50px;" />
+                                        </a>
+                                    <% end %>
                                 </div>
                                 <div class="col">
                                     <%= live_redirect to: Routes.live_path(@conn, MobaWeb.LibraryLiveView), class: "nav-link"  do %>

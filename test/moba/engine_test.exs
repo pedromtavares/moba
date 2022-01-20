@@ -268,8 +268,8 @@ defmodule Moba.EngineTest do
       assert hero.buffed_battles_available ==
                attacker.buffed_battles_available + attacker.pve_battles_available
 
-      assert hero.gold == attacker.gold + Moba.league_win_gold_bonus()
-      assert hero.total_farm == attacker.total_farm + Moba.league_win_gold_bonus()
+      assert hero.gold == attacker.gold + Moba.league_win_bonus()
+      assert hero.total_farm == attacker.total_farm + Moba.league_win_bonus()
     end
 
     test "attacker wins and reaches master league", %{strong_hero: attacker} do
@@ -283,7 +283,6 @@ defmodule Moba.EngineTest do
       assert battle.winner_id == attacker.id
       assert hero.league_step == 0
       assert hero.league_tier == Moba.master_league_tier()
-      assert hero.level == Moba.max_hero_level()
       assert Enum.find(active_build.skills, & &1.ultimate).level == 3
     end
 
@@ -298,7 +297,6 @@ defmodule Moba.EngineTest do
       assert battle.winner_id == attacker.id
       assert hero.league_step == 0
       assert hero.league_tier == Moba.master_league_tier()
-      assert hero.level == Moba.max_hero_level()
       assert Enum.find(active_build.skills, & &1.ultimate).level == 3
       assert hero.finished_pve
     end

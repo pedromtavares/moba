@@ -29,7 +29,7 @@ defmodule Moba.Game.Schema.Hero do
     field :archived_at, :utc_datetime
     field :easy_mode, :boolean, default: false
 
-    # PVE (Jungle) related fields
+    # PVE related fields
     field :pve_points, :integer
     field :pve_battles_available, :integer
     field :buffed_battles_available, :integer, default: 0
@@ -46,8 +46,14 @@ defmodule Moba.Game.Schema.Hero do
     field :shards_reward, :integer, default: 0
     field :summoned, :boolean, default: false
     field :refresh_targets_count, :integer, default: 0
+    field :pve_state, :string
+    field :pve_farming_turns, :integer
+    field :pve_farming_started_at, :utc_datetime
+    field :pve_total_turns, :integer
 
-    # PVP (Arena) related fields
+    embeds_many :pve_farming_rewards, Game.Schema.FarmingReward
+
+    # PVP related fields
     field :pvp_points, :integer
     field :pvp_battles_available, :integer
     field :pvp_ranking, :integer
@@ -108,6 +114,10 @@ defmodule Moba.Game.Schema.Hero do
       :pvp_battles_available,
       :buffed_battles_available,
       :pve_points,
+      :pve_total_turns,
+      :pve_state,
+      :pve_farming_turns,
+      :pve_farming_started_at,
       :pvp_points,
       :bot_difficulty,
       :gold,
@@ -149,6 +159,7 @@ defmodule Moba.Game.Schema.Hero do
       :match_id,
       :refresh_targets_count
     ])
+    |> cast_embed(:pve_farming_rewards)
   end
 
   def create_changeset(hero, attrs, user, avatar) do
@@ -163,6 +174,7 @@ defmodule Moba.Game.Schema.Hero do
     })
     |> change(%{
       pve_battles_available: Moba.battles_per_tier(),
+      pve_total_turns: Moba.total_pve_turns(),
       pve_points: 0,
       pvp_points: 0,
       league_step: 0,
@@ -182,6 +194,12 @@ defmodule Moba.Game.Schema.Hero do
     |> put_assoc(:items, items)
   end
 
+  def replace_farming_rewards(hero, rewards) do
+    hero
+    |> changeset(%{})
+    |> put_embed(:pve_farming_rewards, rewards)
+  end
+
   def level_up(changeset, level, xp) do
     hero = changeset.data
     changes = changeset.changes
@@ -193,7 +211,6 @@ defmodule Moba.Game.Schema.Hero do
     skill_levels_available =
       cond do
         Integer.is_even(next_level) -> current_skill_levels + 1
-        next_level == Moba.max_hero_level() -> current_skill_levels + 2
         true -> current_skill_levels
       end
 
