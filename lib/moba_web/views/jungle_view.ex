@@ -90,7 +90,7 @@ defmodule MobaWeb.JungleView do
   end
 
   def reward_badges_for(hero, difficulty) do
-    battle_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty, hero.easy_mode) / 100)
+    battle_xp = Moba.battle_xp(difficulty, hero.pve_tier)
     double_xp = battle_xp * 2
 
     xp_reward = content_tag(:span, "+#{double_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
@@ -125,8 +125,11 @@ defmodule MobaWeb.JungleView do
   def show_league_challenge?(%{pve_battles_available: 0, league_tier: league_tier}) do
     league_tier < Moba.master_league_tier()
   end
-
   def show_league_challenge?(_), do: false
+
+  def max_available_league(%{pve_total_turns: total_turns, league_tier: league_tier}) do
+    trunc((total_turns + 5)/5 + league_tier)
+  end
 
   defp pve_tier_bonus_html(label), do: "<div class='my-1'><i class='fa fa-hand-point-right mr-1'></i>#{label}</div>"
 

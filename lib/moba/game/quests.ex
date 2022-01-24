@@ -100,7 +100,7 @@ defmodule Moba.Game.Quests do
       track("grandmaster_all", user_id, hero)
       track("grandmaster_#{avatar_role}", user_id, hero)
 
-      if hero.total_farm == Moba.maximum_total_farm() do
+      if hero.total_xp_farm + hero.total_gold_farm == Moba.maximum_total_farm() do
         track("daily_perfect", user_id, hero)
         track("grandmaster_perfect", user_id, hero)
         track("grandmaster_grail", user_id, hero)

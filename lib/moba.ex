@@ -6,11 +6,6 @@ defmodule Moba do
   alias Moba.{Game, Accounts, Conductor, Cleaner}
 
   # General constants
-  @initial_battles 30
-  @battles_per_tier 5
-  @initial_gold 800
-  @veteran_initial_gold 2000
-  @items_base_price 400
   @max_battle_turns 12
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
   @user_level_xp 5000
@@ -33,22 +28,22 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
-  @easy_mode_max_farm 24_000
   @turn_mp_regen_multiplier 0.01
   @final_tutorial_step 14
 
   # PVE constants
+  @total_pve_turns 25
+  @turns_per_tier 5
   @base_xp 600
   @xp_increment 50
-  @battle_xp 150
-  @total_pve_turns 25
-  @buyback_multiplier 20
-  @veteran_buyback_multiplier 10
+  @veteran_pve_tier 2
+  @initial_gold 800
+  @veteran_initial_gold 2000
+  @items_base_price 400
+  @buyback_multiplier 10
   @refresh_targets_count 5
-  @maximum_total_farm 30_000
+  @maximum_total_farm 60_000
   @seconds_per_turn 5
-  @xp_farm_per_turn 1000..1200
-  @gold_farm_per_turn 800..1000
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -63,14 +58,9 @@ defmodule Moba do
   @master_league_tier 5
   @max_league_tier 6
   @league_win_bonus 2000
-  @league_buff_multiplier 0.4
   @boss_regeneration_multiplier 0.5
   @boss_win_bonus 2000
 
-  def initial_battles, do: @initial_battles
-  def battles_per_tier, do: @battles_per_tier
-  def initial_gold(%{pve_tier: tier}) when tier > 0, do: @veteran_initial_gold
-  def initial_gold(_), do: @initial_gold
   def items_base_price, do: @items_base_price
   def normal_items_price, do: @items_base_price * 1
   def rare_items_price, do: @items_base_price * 3
@@ -81,21 +71,31 @@ defmodule Moba do
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
   def medals, do: @medals
-  def easy_mode_max_farm, do: @easy_mode_max_farm
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
   def final_tutorial_step, do: @final_tutorial_step
 
+  def total_pve_turns(0), do: @total_pve_turns - 10
+  def total_pve_turns(1), do: @total_pve_turns - 5
+  def total_pve_turns(_), do: @total_pve_turns
+  def turns_per_tier, do: @turns_per_tier
   def base_xp, do: @base_xp
   def xp_increment, do: @xp_increment
-  def battle_xp, do: @battle_xp
-  def total_pve_turns, do: @total_pve_turns
-  def buyback_multiplier(%{pve_tier: tier}) when tier > 1, do: @veteran_buyback_multiplier
-  def buyback_multiplier(_), do: @buyback_multiplier
+  def veteran_pve_tier, do: @veteran_pve_tier
+  def initial_gold(%{pve_tier: tier}) when tier > 0, do: @veteran_initial_gold
+  def initial_gold(_), do: @initial_gold
+  def buyback_multiplier, do: @buyback_multiplier
   def refresh_targets_count, do: @refresh_targets_count
   def maximum_total_farm, do: @maximum_total_farm
   def seconds_per_turn, do: @seconds_per_turn
-  def xp_farm_per_turn, do: @xp_farm_per_turn
-  def gold_farm_per_turn, do: @gold_farm_per_turn
+  def farm_per_turn(0), do: 800..1100
+  def farm_per_turn(1), do: 850..1100
+  def farm_per_turn(2), do: 900..1100
+  def farm_per_turn(3), do: 950..1100
+  def farm_per_turn(4), do: 1000..1100
+  def battle_xp("weak", pve_tier) when pve_tier < @veteran_pve_tier, do: 250
+  def battle_xp("moderate", pve_tier) when pve_tier < @veteran_pve_tier, do: 300
+  def battle_xp("moderate", _), do: 250
+  def battle_xp("strong", _), do: 300
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
@@ -108,14 +108,13 @@ defmodule Moba do
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
   def league_win_bonus, do: @league_win_bonus
-  def league_buff_multiplier, do: @league_buff_multiplier
+  def league_buff_multiplier(0, league_tier) when league_tier < 3, do: 0.6
+  def league_buff_multiplier(1, league_tier) when league_tier < 3, do: 0.45
+  def league_buff_multiplier(2, league_tier) when league_tier < 3, do: 0.3
+  def league_buff_multiplier(3, league_tier) when league_tier < 3, do: 0.15
+  def league_buff_multiplier(_, _), do: 0
   def boss_regeneration_multiplier, do: @boss_regeneration_multiplier
   def boss_win_bonus, do: @boss_win_bonus
-
-  def xp_percentage("weak", _), do: 100
-  def xp_percentage("moderate", false), do: 100
-  def xp_percentage("moderate", true), do: 200
-  def xp_percentage("strong", _), do: 200
 
   # diff = defender.pvp_points - attacker.pvp_points
 
@@ -199,7 +198,7 @@ defmodule Moba do
 
   @doc """
   Game pvp_ranking is defined by who currently have the highest pvp_points
-  Game pve_ranking is defined by who has the highest total_farm (gold)
+  Game pve_ranking is defined by who has the highest total_farm (gold + xp)
   Accounts ranking is defined by who has the highest season_points
   """
   def update_rankings! do

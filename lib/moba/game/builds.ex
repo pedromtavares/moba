@@ -110,7 +110,7 @@ defmodule Moba.Game.Builds do
   defp get_lists(%{
          level: level,
          bot_difficulty: difficulty,
-         total_farm: total_farm,
+         total_gold_farm: total_gold_farm,
          avatar: %{code: code, ultimate_code: ultimate_code}
        }) do
     {skill_list, item_list, _} =
@@ -121,7 +121,7 @@ defmodule Moba.Game.Builds do
 
     %{
       skills: skills,
-      items: items_list(item_list, difficulty, level, total_farm),
+      items: items_list(item_list, difficulty, level, total_gold_farm),
       skill_order: skill_order(skill_list, skills, ultimate_code),
       item_order: item_list |> Enum.reverse()
     }
@@ -146,7 +146,7 @@ defmodule Moba.Game.Builds do
 
   # item lists go from weak -> strong, so weak bots get this list as is and stronger bots reverse it,
   # first buying stronger items, making them much more challenging at any level
-  defp items_list(item_list, difficulty, level, total_farm) do
+  defp items_list(item_list, difficulty, level, total_gold_farm) do
     {result, _} =
       case items_difficulty(difficulty, level) do
         "weak" -> item_list ++ random_rares() ++ random_normals()
@@ -156,7 +156,7 @@ defmodule Moba.Game.Builds do
         "pvp_grandmaster" -> random_legendaries() ++ random_epics()
       end
       |> Enum.map(fn item_code -> Game.get_item_by_code!(item_code) end)
-      |> Enum.reduce({[], total_farm}, fn item, {items, remaining} ->
+      |> Enum.reduce({[], total_gold_farm}, fn item, {items, remaining} ->
         price = Game.item_price(item)
 
         if remaining >= price do

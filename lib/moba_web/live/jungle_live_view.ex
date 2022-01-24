@@ -78,7 +78,7 @@ defmodule MobaWeb.JungleLiveView do
   def handle_event("restart", _, %{assigns: %{current_hero: hero, current_user: user}} = socket) do
     Game.archive_hero!(hero)
     skills = Enum.map(hero.active_build.skills, &Game.get_skill_by_code!(&1.code, true, 1))
-    Moba.create_current_pve_hero!(%{easy_mode: hero.easy_mode, name: hero.name}, user, hero.avatar, skills)
+    Moba.create_current_pve_hero!(%{name: hero.name}, user, hero.avatar, skills)
 
     {:noreply, socket |> redirect(to: "/game/pve")}
   end
@@ -110,7 +110,6 @@ defmodule MobaWeb.JungleLiveView do
   end
   def handle_event("start-meditating", _, %{assigns: %{current_hero: hero, selected_turns: turns}} = socket) do
     hero = Game.start_farming(hero, "meditating", turns)
-    Process.send_after(self(), :current_time, 1000)
     {:noreply, assign(socket, current_hero: hero)}
   end
   def handle_event("start-mining", _, %{assigns: %{current_hero: hero, selected_turns: turns}} = socket) do
@@ -120,7 +119,12 @@ defmodule MobaWeb.JungleLiveView do
   def handle_event("finish-meditating", _, %{assigns: %{current_hero: hero}} = socket) do
     hero = Game.finish_farming(hero, "meditating")
     Game.broadcast_to_hero(hero.id)
-    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "meditating"))}
+    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "meditating"), targets: Game.list_targets(hero))}
+  end
+  def handle_event("finish-mining", _, %{assigns: %{current_hero: hero}} = socket) do
+    hero = Game.finish_farming(hero, "mining")
+    Game.broadcast_to_hero(hero.id)
+    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "mining"), targets: Game.list_targets(hero))}
   end
 
   def handle_info({"tutorial-step", %{step: step}}, socket) do

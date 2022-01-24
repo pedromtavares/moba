@@ -7,9 +7,7 @@ defmodule Moba.Engine.Core.League do
   alias Engine.Schema.Battle
 
   @master_league_tier Moba.master_league_tier()
-  @max_league_tier Moba.max_league_tier()
-  @easy_mode_max_farm Moba.easy_mode_max_farm()
-  @battles_per_tier Moba.battles_per_tier()
+  @turns_per_tier Moba.turns_per_tier()
 
   def create_battle!(%{league_step: step}, _) when step < 1 do
     {:error, "Not available"}
@@ -78,11 +76,11 @@ defmodule Moba.Engine.Core.League do
             league_tier: next_league_tier,
             league_successes: successes + 1,
             gold: attacker.gold + league_bonus(attacker),
-            total_farm: attacker.total_farm + league_bonus(attacker),
+            total_xp: league_bonus(attacker),
             boss_id: nil,
             pve_battles_available: current_turns,
             pve_total_turns: total_turns,
-            total_xp: league_bonus(attacker)
+            total_gold_farm: attacker.total_gold_farm + league_bonus(attacker)
           }
 
         win ->
@@ -129,21 +127,13 @@ defmodule Moba.Engine.Core.League do
     {battle, attacker}
   end
 
-  defp league_bonus(%{easy_mode: true, total_farm: farm}) do
-    bonus = Moba.league_win_bonus()
-    if farm + bonus >= @easy_mode_max_farm, do: zero_limit(@easy_mode_max_farm - farm), else: bonus
-  end
-
   defp league_bonus(%{league_tier: @master_league_tier}), do: Moba.boss_win_bonus()
   defp league_bonus(_), do: Moba.league_win_bonus()
 
-  defp league_turns(%{pve_total_turns: total_turns} = attacker) when total_turns >= @battles_per_tier do
-    current_turns = attacker.pve_battles_available + @battles_per_tier
-    total_turns = total_turns - @battles_per_tier
+  defp league_turns(%{pve_total_turns: total_turns} = attacker) when total_turns >= @turns_per_tier do
+    current_turns = attacker.pve_battles_available + @turns_per_tier
+    total_turns = total_turns - @turns_per_tier
     {total_turns, current_turns}
   end
   defp league_turns(_), do: {0, 0}
-
-  defp zero_limit(number) when number < 0, do: 0
-  defp zero_limit(number), do: number
 end

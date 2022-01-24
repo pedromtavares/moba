@@ -152,8 +152,7 @@ defmodule Moba.Engine.Battles do
       league_tier: hero.league_tier,
       pvp_wins: hero.pvp_wins,
       pvp_losses: hero.pvp_losses,
-      pvp_ranking: hero.pvp_ranking,
-      buffed_battles_available: hero.buffed_battles_available
+      pvp_ranking: hero.pvp_ranking
     }
   end
 end

@@ -182,46 +182,7 @@ const Tutorial = {
       case 11:
         tour.addStep({
           id: 'eleventh-tutorial-first-step',
-          text: "<p class='text-center'>You have ranked up to Silver League, congratulations! Now only Gold, Platinum, Diamond and Master Leagues to go ( ͡° ͜ʖ ͡°)</p>",
-          attachTo: {
-            element: '#current-hero-league',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Skip Tutorial',
-              secondary: true,
-              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
-            },
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          }
-        });
-        tour.addStep({
-          id: 'eleventh-tutorial-second-step',
-          text: "<p class='text-center'>After each rank up you get a buff that makes your hero considerably stronger, use this opportunity to battle against tougher targets!</p>",
-          attachTo: {
-            element: '#league-buff',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          }
-        });
-        tour.addStep({
-          id: 'eleventh-tutorial-third-step',
-          text: "<p class='text-center'>Keep ganking until you reach the Master League, you're doing realy well! Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
+          text: "<p class='text-center'>You have ranked up to Silver League, congratulations!<br/> Keep farming until you reach at least the Platinum League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and to level up your skills. Have fun!</p>",
           attachTo: {
             element: '#jungle-stats',
             on: 'bottom'

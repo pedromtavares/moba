@@ -430,25 +430,20 @@ defmodule MobaWeb.BattleView do
     end)
   end
 
-  def total_hp_for(hero, nil, battle), do: buffed_total(hero, battle, hero.total_hp + hero.item_hp)
+  def total_hp_for(hero, nil, battle), do: hero.total_hp + hero.item_hp
   def total_hp_for(_, last_hero, _), do: last_hero.total_hp
 
-  def total_mp_for(hero, nil, battle), do: buffed_total(hero, battle, hero.total_mp + hero.item_mp)
+  def total_mp_for(hero, nil, battle), do: hero.total_mp + hero.item_mp
   def total_mp_for(_, last_hero, _), do: last_hero.total_mp
 
-  def total_atk_for(hero, nil, battle), do: buffed_total(hero, battle, hero.atk + hero.item_atk)
+  def total_atk_for(hero, nil, battle), do: hero.atk + hero.item_atk
   def total_atk_for(_, last_hero, _), do: last_hero.base_atk
 
-  def total_power_for(hero, nil, battle), do: buffed_total(hero, battle, hero.power + hero.item_power)
+  def total_power_for(hero, nil, battle), do: hero.power + hero.item_power
   def total_power_for(_, last_hero, _), do: last_hero.base_power
 
-  def total_armor_for(hero, nil, battle), do: buffed_total(hero, battle, hero.armor + hero.item_armor)
+  def total_armor_for(hero, nil, battle), do: hero.armor + hero.item_armor
   def total_armor_for(_, last_hero, _), do: last_hero.base_armor
-
-  defp buffed_total(%{buffed_battles_available: battles}, %{type: type}, total) when type == "pve" and battles > 0,
-    do: total + round(Moba.league_buff_multiplier() * total)
-
-  defp buffed_total(_, _, total), do: total
 
   defp get_resource(turn, code) do
     skills =

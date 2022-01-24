@@ -133,8 +133,8 @@ defmodule Moba.Game do
 
   def set_hero_skin!(hero, skin), do: Heroes.set_skin!(hero, skin)
 
-  def veteran_hero?(%{easy_mode: true}), do: false
-  def veteran_hero?(_), do: true
+  def veteran_hero?(%{pve_tier: tier}) when tier >= 2, do: true
+  def veteran_hero?(_), do: false
 
   def maybe_generate_boss(%{pve_battles_available: 0, pve_total_turns: 0, boss_id: nil} = hero) do
     if master_league?(hero) do

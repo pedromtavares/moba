@@ -158,8 +158,8 @@ defmodule Moba.GameTest do
     end
 
     test "#update_pve_ranking" do
-      hero1 = create_base_hero(%{total_farm: 100, pve_battles_available: 0, finished_pve: true})
-      hero2 = create_base_hero(%{total_farm: 200, pve_battles_available: 0, finished_pve: true})
+      hero1 = create_base_hero(%{total_gold_farm: 100, pve_battles_available: 0, finished_pve: true})
+      hero2 = create_base_hero(%{total_gold_farm: 200, pve_battles_available: 0, finished_pve: true})
 
       Game.update_pve_ranking!()
 
@@ -291,7 +291,7 @@ defmodule Moba.GameTest do
 
       assert Game.buyback!(hero) == hero
 
-      hero = create_base_hero(%{gold: 1000, level: 10, dead: true, total_farm: 1000})
+      hero = create_base_hero(%{gold: 1000, level: 10, dead: true, total_gold_farm: 1000})
       updated = Game.buyback!(hero)
 
       price = Game.buyback_price(hero)
@@ -299,10 +299,10 @@ defmodule Moba.GameTest do
       refute updated.dead
       assert updated.buybacks == 1
       assert updated.gold == hero.gold - price
-      assert updated.total_farm == hero.total_farm - price
+      assert updated.total_gold_farm == hero.total_gold_farm - price
 
       veteran_hero =
-        create_base_hero(%{gold: 1000, level: 10, dead: true, total_farm: 1000}, create_user(%{pve_tier: 2}))
+        create_base_hero(%{gold: 1000, level: 10, dead: true, total_gold_farm: 1000}, create_user(%{pve_tier: 2}))
 
       veteran_price = Game.buyback_price(veteran_hero)
 
@@ -345,7 +345,7 @@ defmodule Moba.GameTest do
 
     test "#generate_bot_build!" do
       hero =
-        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_farm: 999_999})
+        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
         |> Game.generate_bot_build!()
 
       assert hero.active_build.type == "pvp"
@@ -356,7 +356,7 @@ defmodule Moba.GameTest do
 
     test "#reset_item_orders!" do
       base_hero =
-        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_farm: 999_999})
+        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
         |> Game.generate_bot_build!()
 
       reset_hero = Game.reset_item_orders!(base_hero, [base_rare_item()])
@@ -401,36 +401,28 @@ defmodule Moba.GameTest do
   end
 
   describe "targets" do
-    test "#generate_targets! user tier 0 easy_mode" do
-      hero = create_base_hero(%{easy_mode: true}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
+    test "#generate_targets! user tier 0" do
+      hero = create_base_hero(%{}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
       assert length(hero.targets) == 6
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 0
     end
 
-    test "#generate_targets! user tier 0" do
-      hero = create_base_hero(%{}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
-      assert length(hero.targets) == 9
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
-    end
-
     test "#generate_targets! user tier 1" do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 1})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 0
     end
 
     test "#generate_targets! user tier 2" do
       hero = create_base_hero(%{}, create_user(%{pve_tier: 2})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
-      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 6
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
+      assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
     end
 
     test "#generate_targets! user tier 3" do
@@ -675,7 +667,7 @@ defmodule Moba.GameTest do
       skills = base_skills()
 
       user_hero =
-        %{name: "User", league_tier: 6, finished_pve: true, total_farm: Moba.maximum_total_farm()}
+        %{name: "User", league_tier: 6, finished_pve: true, total_gold_farm: Moba.maximum_total_farm() / 2, total_xp_farm: Moba.maximum_total_farm() / 2}
         |> Game.create_hero!(user, strong_avatar(), skills)
 
       Game.track_pve_quests(user_hero)

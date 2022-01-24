@@ -17,7 +17,7 @@
                     <span class="badge badge-pill badge-light-warning">+<%=@battle.rewards.total_gold%>g</span>
                 <% end %>
                 <%= if @battle.rewards.battle_xp > 0 do %>
-                    <span class="badge badge-pill badge-light-info d-none"><%=@battle.rewards.difficulty_percentage%>% XP/gold for <%=@battle.difficulty%> difficulty </span>
+                    <span class="badge badge-pill badge-light-info d-none"><%=@battle.rewards.total_xp + @battle.rewards.total_gold%> total rewards for <%=@battle.difficulty%> difficulty </span>
                 <% else %>
                     <span class="badge badge-pill badge-light-dark">No rewards given on defeat</span>
                 <% end %>

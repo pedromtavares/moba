@@ -47,27 +47,27 @@
                         <td>
                             <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
                                 <%=GH.hero_avatar(hero, false)%><br/>
-                                <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%=hero.name%></h4>
-                                <small class="text-dark">Level <%=hero.level%> <%=hero.avatar.name%></small>
+                                <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%= hero.name %></h4>
+                                <small class="text-dark">Level <%= hero.level %> <%= hero.avatar.name %></small>
                             <% end %>
                         </td>
                         <td>
                             <div class="row d-flex mb-3">
                                 <div class="col">
-                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Farm">
-                                        <i class="fa fa-coins mr-1"></i><%=hero.total_farm%>
+                                    <h4 class="text-info" data-toggle="tooltip" title="Total XP Farm">
+                                        <i class="fa fa-atom mr-1"></i><%= hero.total_xp_farm %>
                                     </h4>
                                 </div>
                                 <div class="col">
-                                    <h4 class="text-success" data-toggle="tooltip" title="Win Rate">
-                                        <i class="fa fa-crosshairs mr-1"></i><%=GH.pve_win_rate(hero)%>%
+                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Gold Farm">
+                                        <i class="fa fa-coins mr-1"></i><%= hero.total_gold_farm %>
                                     </h4>
                                 </div>
                                 <div class="col">
                                     <h4 class="text-danger" data-toggle="tooltip" title="Time it took to finish the Jungle">
                                         <i class="fa fa-clock-o mr-1"></i>
                                         <%= if hero.finished_at do %>
-                                            <%=GH.finished_time(hero)%> minutes
+                                            <%= GH.finished_time(hero) %> minutes
                                         <% else %>
                                             ??
                                         <% end %>

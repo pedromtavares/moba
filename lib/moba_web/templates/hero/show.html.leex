@@ -70,22 +70,22 @@
                                 <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%=Moba.leagues[@hero.league_tier]%></h3>
                                 <div class="row text-center">
                                     <div class="col">
-                                        <h3 class="mb-0 text-primary">
-                                            <i class="fa fa-street-view"></i>
-                                            <%= @hero.buybacks %>
+                                        <h3 class="mb-0 text-info">
+                                            <i class="fa fa-atom"></i>
+                                            <%= @hero.total_xp_farm %>
                                         </h3>
-                                        <h4 class="text-primary">Buybacks</h4>
+                                        <h4 class="text-info">Total XP Farm</h4>
                                     </div>
                                     <div class="col">
                                         <h3 class="mb-0 text-warning">
                                             <i class="fa fa-coins"></i>
-                                            <%=@hero.total_farm%>
+                                            <%= @hero.total_gold_farm %>
                                         </h3>
-                                        <h4 class="text-warning">Total Farm</h4>
+                                        <h4 class="text-warning">Total Gold Farm</h4>
                                     </div>
                                     <div class="col">
                                         <h3 class="mb-0 text-success">
-                                            <i class="fa fa-leaf"></i>
+                                            <i class="fa fa-crosshairs"></i>
                                             <%=GH.pve_win_rate(@hero)%>%
                                         </h3>
                                         <h4 class="text-success">Win Rate</h4>
@@ -145,7 +145,7 @@
                                     <% end %>
                                 </td>
                                 <td>
-                                    <h3 class="text-warning"><i class="fa fa-coins"></i> <%=hero.total_farm%></h3>
+                                    <h3 class="text-warning"><i class="fa fa-tachometer-alt"></i> <%= hero.total_xp_farm + hero.total_gold_farm %></h3>
                                 </td>
                                 <td>
                                     <h3 class="text-success">
