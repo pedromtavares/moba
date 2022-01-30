@@ -85,7 +85,7 @@ defmodule Moba.EngineTest do
 
   describe "pve" do
     test "not enough battles", %{base_hero: attacker, alternate_hero: defender} do
-      updated = %{attacker | pve_battles_available: 0}
+      updated = %{attacker | pve_current_turns: 0}
       assert {:error, _} = Engine.create_pve_battle!(%{attacker: updated, defender: defender, difficulty: "weak"})
     end
 
@@ -108,8 +108,8 @@ defmodule Moba.EngineTest do
       assert reloaded_defender.experience == defender.experience
       assert reloaded_attacker.ties == 1
 
-      assert reloaded_attacker.pve_battles_available == attacker.pve_battles_available - 1
-      assert reloaded_defender.pve_battles_available == defender.pve_battles_available
+      assert reloaded_attacker.pve_current_turns == attacker.pve_current_turns - 1
+      assert reloaded_defender.pve_current_turns == defender.pve_current_turns
 
       assert reloaded_attacker.level == 2
       assert reloaded_attacker.gold == attacker.gold + 150
@@ -139,7 +139,7 @@ defmodule Moba.EngineTest do
       assert updated_attacker.wins == 1
 
       assert defender.experience == 0
-      refute attacker.dead
+      refute attacker.pve_state == "dead"
     end
 
     test "battle loss for attacker, no xp", %{weak_hero: attacker, strong_hero: defender} do
@@ -155,7 +155,7 @@ defmodule Moba.EngineTest do
       assert attacker.experience == 0
       assert attacker.level == 1
       assert attacker.losses == 1
-      assert attacker.dead
+      assert attacker.pve_state == "dead"
 
       assert defender.experience == 0
     end
@@ -168,7 +168,7 @@ defmodule Moba.EngineTest do
         |> Engine.auto_finish_battle!()
 
       assert battle.winner.id == defender.id
-      assert battle.attacker.pve_battles_available == attacker.pve_battles_available
+      assert battle.attacker.pve_current_turns == attacker.pve_current_turns
     end
   end
 
@@ -248,7 +248,7 @@ defmodule Moba.EngineTest do
       hero = Game.get_hero!(attacker.id)
       assert battle.winner_id != attacker.id
       assert hero.league_step == 0
-      assert hero.dead
+      assert hero.pve_state == "dead"
     end
 
     test "attacker wins and ranks up", %{strong_hero: attacker} do

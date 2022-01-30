@@ -5,7 +5,7 @@ defmodule Moba.Engine.Core.Pve do
   alias Moba.{Game, Engine}
   alias Engine.Schema.Battle
 
-  def create_battle!(%{attacker: %{pve_battles_available: battles}}) when battles < 1 do
+  def create_battle!(%{attacker: %{pve_current_turns: turns}}) when turns < 1 do
     {:error, "Not enough available turns"}
   end
 
@@ -13,7 +13,7 @@ defmodule Moba.Engine.Core.Pve do
     target
     |> battle_for()
     |> Engine.start_battle!()
-    |> manage_available_battles()
+    |> manage_current_turns()
     |> update_attacker()
     |> generate_targets()
   end
@@ -39,8 +39,8 @@ defmodule Moba.Engine.Core.Pve do
     }
   end
 
-  defp manage_available_battles(%{attacker: attacker} = battle) do
-    updates = %{pve_battles_available: attacker.pve_battles_available - 1}
+  defp manage_current_turns(%{attacker: attacker} = battle) do
+    updates = %{pve_current_turns: attacker.pve_current_turns - 1}
     {battle, updates}
   end
 
@@ -72,13 +72,14 @@ defmodule Moba.Engine.Core.Pve do
   # Calculates XP and gold given, all depending on battle difficulty and outcome (victory/tie/loss)
   defp manage_rewards(%{winner: winner, difficulty: difficulty, attacker: attacker} = battle) do
     base_battle_xp = Moba.battle_xp(difficulty, attacker.pve_tier)
+    win_bonus = Moba.pve_win_bonus()
 
     win = winner && attacker.id == winner.id
     alive = win || is_nil(winner)
 
     battle_xp = (alive && base_battle_xp) || 0
 
-    win_xp = (win && base_battle_xp) || 0
+    win_xp = (win && win_bonus) || 0
 
     total = battle_xp + win_xp
 
@@ -95,10 +96,10 @@ defmodule Moba.Engine.Core.Pve do
   defp manage_score(%{winner: winner, attacker: attacker, defender: defender} = battle) do
     updates =
       if winner && winner.id == defender.id do
-        battles =
-          if attacker.user.pve_tier > 2, do: attacker.pve_battles_available + 1, else: attacker.pve_battles_available
+        turns =
+          if attacker.pve_tier > 2, do: attacker.pve_current_turns + 1, else: attacker.pve_current_turns
 
-        %{losses: attacker.losses + 1, dead: true, pve_battles_available: battles}
+        %{losses: attacker.losses + 1, pve_state: "dead", pve_current_turns: turns}
       else
         wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
         ties = if !winner, do: attacker.ties + 1, else: attacker.ties

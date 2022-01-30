@@ -10,8 +10,13 @@ defmodule Moba.Repo.Migrations.AddPveStateToHeroes do
       add :pve_total_turns, :integer
       add :pve_tier, :integer
       add :total_xp_farm, :integer, default: 0
+      remove :finished_pve
+      remove :dead
     end
 
     rename table(:heroes), :total_farm, to: :total_gold_farm
+    rename table(:heroes), :pve_battles_available, to: :pve_current_turns
+
+    create index(:heroes, [:finished_at])
   end
 end

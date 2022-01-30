@@ -1,0 +1,40 @@
+<%= if @current_user && length(@current_user.hero_collection) > 0 do %>
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card-box collection p-2">
+                <div class="row">
+                    <div class="col">
+                        <h3 class="text-center mt-1 mb-2">Your Collection</h3>
+                    </div>
+                </div>
+                <%= for hero <- @current_user.hero_collection do %>
+                        <div style="width: 100px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
+                            <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar"/>
+                            <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo">
+                        </div>
+                <% end %>
+                <%= for avatar <- @blank_collection do %>
+                        <div style="width:100px;height:75px" class='avatar-container text-center mx-1'>
+                            <img src="<%= GH.image_url(avatar) %>" class="avatar blank-avatar" data-toggle="tooltip" title="<%= avatar.name %>"/>
+                        </div>
+                <% end %>
+            </div>
+        </div>
+    </div>
+<% end %>
+
+<div class="row mt-2 mb-3">
+    <div class="col text-center">
+        <h1>Pick your <%= if @filter do %><span class="text-danger"><%= String.capitalize(@filter)%> </span><% end %>Avatar<br/><small><em>You can filter by Role below</em></h1>
+        <%= for role <- roles() do %>
+            <a href="#" class="btn btn-outline-dark text-white m-1 <%= if @filter == role, do: "active" %>" phx-click="filter" phx-value-role="<%= role %>"><img src="/images/<%= role %>_icon.png" style="width: 30px" class="text-center mr-1"/><%= String.capitalize(role) %></a>
+        <% end %>
+        <a class="btn btn-outline-dark text-white m-1" phx-click="randomize" id="randomize-button"><i class="fa fa-dice mr-2" style="font-size: 1.3rem"></i>Randomize</a>
+    </div>
+</div>
+
+<div class="row text-center">
+    <%= for avatar <- Enum.uniq(@avatars) |> Enum.sort_by(fn avatar -> avatar.name end) do %>
+        <%= render "_background_avatar.html", avatar: avatar, avatars: @all_avatars, filter: @filter, selected: false %>
+    <% end %>
+</div>

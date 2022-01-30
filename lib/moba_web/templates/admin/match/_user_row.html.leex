@@ -56,10 +56,8 @@
                 <%= live_redirect "Lv #{@user.current_pve_hero.level} #{@user.current_pve_hero.avatar.name}", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @user.current_pve_hero), class: "text-white"%>
             </h5>
             <span class="text-center text-success">
-                <%=@user.current_pve_hero.pve_battles_available %> battles <span class="text-danger">(<%=@user.current_pve_hero.buybacks%>)</span>
+                <%=@user.current_pve_hero.pve_current_turns %> turns <span class="text-danger">(<%=@user.current_pve_hero.buybacks%>)</span>
             </span>
-            |
-            <span class="text-danger">WR: <strong><%=GH.pve_win_rate(@user.current_pve_hero) %>%</strong></span>
             |
             <span class="text-warning"><%=@user.current_pve_hero.total_gold_farm + @user.current_pve_hero.total_xp_farm %></span>
         <% end %>

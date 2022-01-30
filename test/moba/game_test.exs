@@ -158,8 +158,8 @@ defmodule Moba.GameTest do
     end
 
     test "#update_pve_ranking" do
-      hero1 = create_base_hero(%{total_gold_farm: 100, pve_battles_available: 0, finished_pve: true})
-      hero2 = create_base_hero(%{total_gold_farm: 200, pve_battles_available: 0, finished_pve: true})
+      hero1 = create_base_hero(%{total_gold_farm: 100, pve_current_turns: 0, finished_at: Timex.now()})
+      hero2 = create_base_hero(%{total_gold_farm: 200, pve_current_turns: 0, finished_at: Timex.now()})
 
       Game.update_pve_ranking!()
 
@@ -189,13 +189,13 @@ defmodule Moba.GameTest do
 
       assert Game.maybe_finish_pve(hero) == hero
 
-      hero = create_base_hero(%{pve_battles_available: 0, dead: true}) |> Game.maybe_finish_pve()
+      hero = create_base_hero(%{pve_current_turns: 0, pve_state: "dead"}) |> Game.maybe_finish_pve()
 
-      assert hero.finished_pve
+      assert hero.finished_at
 
       hero =
         create_base_hero(%{
-          pve_battles_available: 0,
+          pve_current_turns: 0,
           league_tier: Moba.master_league_tier()
         })
 
@@ -203,12 +203,12 @@ defmodule Moba.GameTest do
 
       hero =
         create_base_hero(%{
-          pve_battles_available: 0,
+          pve_current_turns: 0,
           league_tier: Moba.max_league_tier()
         })
         |> Game.maybe_finish_pve()
 
-      assert hero.finished_pve
+      assert hero.finished_at
     end
 
     test "#finish_pve!" do
@@ -216,7 +216,7 @@ defmodule Moba.GameTest do
       hero = create_base_hero(%{league_tier: 5}, user)
       finished = Game.finish_pve!(hero)
 
-      assert finished.finished_pve
+      assert finished.finished_at
 
       quest = Game.Quests.get_by_code_and_level!("season", 1)
       progression = Game.Quests.find_progression_by!(user.id, quest.id)
@@ -241,14 +241,14 @@ defmodule Moba.GameTest do
     test "#maybe_generate_boss" do
       hero =
         create_base_hero(%{
-          pve_battles_available: 0,
+          pve_current_turns: 0,
           league_tier: Moba.master_league_tier()
         })
 
       assert Game.maybe_generate_boss(hero).boss_id
 
       hero =
-        create_base_hero(%{pve_battles_available: 0, league_tier: Moba.master_league_tier()}) |> Game.generate_boss!()
+        create_base_hero(%{pve_current_turns: 0, league_tier: Moba.master_league_tier()}) |> Game.generate_boss!()
 
       assert Game.maybe_generate_boss(hero) == hero
 
@@ -291,7 +291,7 @@ defmodule Moba.GameTest do
 
       assert Game.buyback!(hero) == hero
 
-      hero = create_base_hero(%{gold: 1000, level: 10, dead: true, total_gold_farm: 1000})
+      hero = create_base_hero(%{gold: 1000, level: 10, pve_state: "dead", total_gold_farm: 1000})
       updated = Game.buyback!(hero)
 
       price = Game.buyback_price(hero)
@@ -302,7 +302,7 @@ defmodule Moba.GameTest do
       assert updated.total_gold_farm == hero.total_gold_farm - price
 
       veteran_hero =
-        create_base_hero(%{gold: 1000, level: 10, dead: true, total_gold_farm: 1000}, create_user(%{pve_tier: 2}))
+        create_base_hero(%{gold: 1000, level: 10, pve_state: "dead", total_gold_farm: 1000}, create_user(%{pve_tier: 2}))
 
       veteran_price = Game.buyback_price(veteran_hero)
 
@@ -630,7 +630,7 @@ defmodule Moba.GameTest do
       skills = base_skills()
 
       user_hero =
-        %{name: "User", league_tier: 5, finished_pve: true}
+        %{name: "User", league_tier: 5, finished_at: Timex.now()}
         |> Game.create_hero!(user, strong_avatar(), skills)
 
       Game.track_pve_quests(user_hero)
@@ -644,7 +644,7 @@ defmodule Moba.GameTest do
       skills = base_skills()
 
       user_hero =
-        %{name: "User", league_tier: 6, finished_pve: true}
+        %{name: "User", league_tier: 6, finished_at: Timex.now()}
         |> Game.create_hero!(user, strong_avatar(), skills)
 
       Game.track_pve_quests(user_hero)
@@ -667,7 +667,7 @@ defmodule Moba.GameTest do
       skills = base_skills()
 
       user_hero =
-        %{name: "User", league_tier: 6, finished_pve: true, total_gold_farm: Moba.maximum_total_farm() / 2, total_xp_farm: Moba.maximum_total_farm() / 2}
+        %{name: "User", league_tier: 6, finished_at: Timex.now(), total_gold_farm: Moba.maximum_total_farm() / 2, total_xp_farm: Moba.maximum_total_farm() / 2}
         |> Game.create_hero!(user, strong_avatar(), skills)
 
       Game.track_pve_quests(user_hero)

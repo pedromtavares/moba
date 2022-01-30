@@ -1,9 +1,8 @@
 defmodule MobaWeb.JungleView do
   use MobaWeb, :view
 
-  def boss_available?(hero) do
-    hero.boss_id && Game.get_hero!(hero.boss_id)
-  end
+  def boss_available?(%{pve_current_turns: 0, boss_id: boss_id}) when not is_nil(boss_id), do: Game.get_hero!(boss_id)
+  def boss_available?(_), do: false
 
   def boss_percentage(boss) do
     boss.total_hp * 100 / boss.avatar.total_hp
@@ -58,6 +57,10 @@ defmodule MobaWeb.JungleView do
     raw(coins)
   end
 
+  def display_farming_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
+
+  def dead?(hero), do: hero.pve_state == "dead"
+
   def offense_percentage(target, targets) do
     heroes = Enum.map(targets, & &1.defender)
     with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
@@ -91,14 +94,14 @@ defmodule MobaWeb.JungleView do
 
   def reward_badges_for(hero, difficulty) do
     battle_xp = Moba.battle_xp(difficulty, hero.pve_tier)
-    double_xp = battle_xp * 2
+    win_xp = battle_xp + Moba.pve_win_bonus()
 
-    xp_reward = content_tag(:span, "+#{double_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
+    xp_reward = content_tag(:span, "+#{win_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
     safe_to_string(
       content_tag :div do
         [
           xp_reward,
-          content_tag(:span, "+#{double_xp}/+#{battle_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
+          content_tag(:span, "+#{win_xp}/+#{battle_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
         ]
       end
     )
@@ -122,14 +125,10 @@ defmodule MobaWeb.JungleView do
     raw(base)
   end
 
-  def show_league_challenge?(%{pve_battles_available: 0, league_tier: league_tier}) do
+  def show_league_challenge?(%{pve_current_turns: 0, league_tier: league_tier}) do
     league_tier < Moba.master_league_tier()
   end
   def show_league_challenge?(_), do: false
-
-  def max_available_league(%{pve_total_turns: total_turns, league_tier: league_tier}) do
-    trunc((total_turns + 5)/5 + league_tier)
-  end
 
   defp pve_tier_bonus_html(label), do: "<div class='my-1'><i class='fa fa-hand-point-right mr-1'></i>#{label}</div>"
 

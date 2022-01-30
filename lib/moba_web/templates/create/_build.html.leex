@@ -1,7 +1,7 @@
 <div class="col-12 col-lg">
-    <div class="card-box text-center mb-0">
+    <div class="darker rounded text-center p-1 pb-2">
         <h3 class="text-danger"><%=@title%></h3>
-        <p class="font-italic text-muted">(mouse over skills for info)</p>
+        <p class="font-italic text-muted">(mouse over images for info)</p>
         <div class="row justify-content-center">
             <%= for skill <- @build do %>
                 <div class="col">
@@ -13,9 +13,9 @@
         </div>
         <div class="row justify-content-center mt-3">
             <%=if @selected_build_index == @index do %>
-                <a href="javascript:;" class="btn btn-secondary btn-lg col-6 margin-auto disabled"><i class="fa fa-dice-d20 mr-1"></i>Picked</a>
+                <a href="javascript:;" class="btn btn-secondary btn-lg col-6 margin-auto disabled">Picked</a>
             <% else %>
-                <button type="button" class="btn btn-secondary btn-lg col-6 margin-auto" phx-click="pick-build" phx-value-number="<%=@index%>"><i class="fa fa-dice-d20 mr-1"></i>Pick</button>
+                <button type="button" class="btn btn-secondary btn-lg col-6 margin-auto" phx-click="pick-build" phx-value-number="<%=@index%>">Pick</button>
             <% end %>
         </div>
     </div>

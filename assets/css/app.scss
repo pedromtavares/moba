@@ -210,6 +210,17 @@ hr{
   background-color: rgba(54, 64, 74, 0.8);
 }
 
+.dark-bg{
+  background: #38414a;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  box-shadow: inset 0px 0px 300px black;
+}
+
+.darker{
+  background: rgba(0, 0, 0, 0.2);
+}
+
 .original-bg{
   background-color: #414d59 !important;
 }

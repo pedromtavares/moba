@@ -136,7 +136,7 @@ defmodule Moba.Game do
   def veteran_hero?(%{pve_tier: tier}) when tier >= 2, do: true
   def veteran_hero?(_), do: false
 
-  def maybe_generate_boss(%{pve_battles_available: 0, pve_total_turns: 0, boss_id: nil} = hero) do
+  def maybe_generate_boss(%{pve_current_turns: 5, pve_total_turns: 0, boss_id: nil, pve_state: state} = hero) when state != "dead" do
     if master_league?(hero) do
       generate_boss!(hero)
     else
@@ -146,15 +146,19 @@ defmodule Moba.Game do
   def maybe_generate_boss(hero), do: hero
 
   def maybe_finish_pve(
-        %{pve_battles_available: 0, pve_total_turns: 0, boss_id: nil, finished_pve: false, finished_at: nil} = hero
+        %{pve_state: state, pve_current_turns: 0, pve_total_turns: 0, boss_id: nil, finished_at: nil} = hero
       ) do
-    finish_pve!(hero)
+    if max_league?(hero) || state == "dead" do
+      finish_pve!(hero)
+    else
+      hero
+    end
   end
   def maybe_finish_pve(hero), do: hero
 
-  def finish_pve!(%{finished_pve: false, finished_at: nil} = hero) do
+  def finish_pve!(%{finished_at: nil} = hero) do
     hero = Repo.preload(hero, :user)
-    updated = update_hero!(hero, %{finished_pve: true, finished_at: Timex.now(), pve_state: "finished"})
+    updated = update_hero!(hero, %{finished_at: Timex.now()})
 
     collection = Heroes.collection_for(updated.user_id)
     Accounts.finish_pve!(updated.user, collection)
@@ -185,9 +189,9 @@ defmodule Moba.Game do
     new_total = boss_current_hp + Moba.boss_regeneration_multiplier() * maximum_hp
     new_total = if new_total > maximum_hp, do: maximum_hp, else: trunc(new_total)
     update_hero!(boss, %{total_hp: new_total, league_attempts: 1})
-    update_hero!(hero, %{dead: true})
+    update_hero!(hero, %{pve_state: "dead"})
   end
-  def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil})
+  def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil, pve_state: "dead"})
 
   defdelegate buyback!(hero), to: Heroes
 

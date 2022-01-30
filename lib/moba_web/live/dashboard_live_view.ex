@@ -73,8 +73,8 @@ defmodule MobaWeb.DashboardLiveView do
     )
   end
 
-  defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &(not &1.finished_pve))
-  defp finished_heroes(all_heroes), do: Enum.filter(all_heroes, & &1.finished_pve)
+  defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &(is_nil(&1.finished_at)))
+  defp finished_heroes(all_heroes), do: Enum.filter(all_heroes, & &1.finished_at)
 
   defp pvp_assigns(%{assigns: %{current_user: user}} = socket) do
     current_pvp_hero = Game.current_pvp_hero(user)

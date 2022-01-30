@@ -149,8 +149,6 @@ defmodule MobaWeb.CreateLiveView do
 
     Moba.create_current_pve_hero!(%{name: hero_name}, user, avatar, skills)
 
-    delete_cache(socket)
-
     {:noreply, socket |> redirect(to: "/game/pve")}
   end
 
@@ -186,8 +184,6 @@ defmodule MobaWeb.CreateLiveView do
       selected_build_index: selected_build_index
     })
   end
-
-  defp delete_cache(%{assigns: %{cache_key: key}}), do: Cachex.del(:game_cache, key)
 
   defp validation_error(name, %{assigns: %{current_user: user}}) do
     length = String.length(name)

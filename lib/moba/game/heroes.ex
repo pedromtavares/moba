@@ -142,7 +142,7 @@ defmodule Moba.Game.Heroes do
       |> update!(%{gold: 100_000})
 
     if updated.level == 25 do
-      update!(updated, %{league_tier: 5})
+      update!(updated, %{league_tier: 5}) |> Game.generate_boss!()
     else
       updated
     end
@@ -333,12 +333,12 @@ defmodule Moba.Game.Heroes do
 
   def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
 
-  def buyback!(%{dead: true} = hero) do
+  def buyback!(%{pve_state: "dead"} = hero) do
     price = buyback_price(hero)
 
     if hero.gold >= price do
       update!(hero, %{
-        dead: false,
+        pve_state: "alive",
         buybacks: hero.buybacks + 1,
         gold: hero.gold - price,
         total_gold_farm: hero.total_gold_farm - price
@@ -354,23 +354,21 @@ defmodule Moba.Game.Heroes do
     update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
   end
 
-  def finish_farming(%{pve_farming_turns: turns, pve_battles_available: battles, pve_farming_rewards: rewards, pve_farming_started_at: started} = hero, state) do
-    remaining_battles = battles - turns
+  def finish_farming(%{pve_farming_turns: farming_turns, pve_current_turns: current_turns, pve_farming_rewards: rewards, pve_farming_started_at: started} = hero, state) do
+    remaining_turns = zero_limit(current_turns - farming_turns)
 
-    {hero, amount} = apply_farming_rewards(hero, turns, state)
+    {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
 
-    new_reward = [%{state: state, started_at: started, turns: turns, amount: amount}]
+    new_reward = [%{state: state, started_at: started, turns: farming_turns, amount: amount}]
 
     hero
     |> Hero.replace_farming_rewards(rewards ++ new_reward)
-    |> update!(%{pve_state: nil, pve_farming_turns: 0, pve_farming_started_at: nil, pve_battles_available: remaining_battles})
+    |> update!(%{pve_state: nil, pve_farming_turns: 0, pve_farming_started_at: nil, pve_current_turns: remaining_turns})
   end
 
   # --------------------------------
 
-  defp add_experience!(hero, experience)
   defp add_experience!(hero, nil), do: hero
-
   defp add_experience!(hero, experience) do
     hero = Repo.preload(hero, :user)
     if hero.user, do: Moba.add_user_experience(hero.user, experience)
@@ -473,4 +471,7 @@ defmodule Moba.Game.Heroes do
         end
       end)
   end
+
+  defp zero_limit(total) when total < 0, do: 0
+  defp zero_limit(total), do: total
 end

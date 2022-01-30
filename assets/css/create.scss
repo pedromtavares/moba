@@ -79,19 +79,11 @@
   }
 }
 
+.darker{
+  background: rgba(0, 0, 0, 0.2);
+}
+
 #create-bar{
-  // display: none;
-  background: #38414a;
-  // border: 0;
-  // border: 3px solid;
-  border-image-source: radial-gradient(white, rgb(47, 60, 74));
-  border-image-slice: 1;
-  // position: fixed;
-  // left: 0;
-  // right: 0;
-  // bottom: 0;
-  // padding: 12px;
-  box-shadow: inset 0px 0px 300px black;
   z-index: 1000;
   height: 220px;
 

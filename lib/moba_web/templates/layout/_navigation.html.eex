@@ -44,9 +44,11 @@
                                             <%= GH.hero_avatar(@current_hero, false) %>
                                         <% end %>
                                     <% else %>
-                                        <a href="/base">
-                                            <img src="/images/favlogo.png" style="height:50px;" />
-                                        </a>
+                                        <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLiveView), class: "nav-link" do %>
+                                            <i class="fa fa-home"></i>
+                                            <br/>
+                                            <span class="d-none d-md-inline">Base</span>
+                                        <% end %>
                                     <% end %>
                                 </div>
                                 <div class="col">

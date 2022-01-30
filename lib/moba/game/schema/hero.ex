@@ -31,18 +31,17 @@ defmodule Moba.Game.Schema.Hero do
 
     # PVE related fields
     field :pve_points, :integer # remove
-    field :pve_battles_available, :integer
+    field :pve_total_turns, :integer
+    field :pve_current_turns, :integer
     field :buffed_battles_available, :integer, default: 0 # remove
     field :xp_boosted_battles_available, :integer, default: 0 # remove
     field :wins, :integer, default: 0
     field :losses, :integer, default: 0
     field :ties, :integer, default: 0
     field :buybacks, :integer, default: 0
-    field :dead, :boolean, default: false
     field :total_gold_farm, :integer, default: 0
     field :total_xp_farm, :integer, default: 0
     field :pve_ranking, :integer
-    field :finished_pve, :boolean, default: false # remove
     field :finished_at, :utc_datetime
     field :shards_reward, :integer, default: 0
     field :summoned, :boolean, default: false # remove
@@ -50,7 +49,6 @@ defmodule Moba.Game.Schema.Hero do
     field :pve_state, :string
     field :pve_farming_turns, :integer
     field :pve_farming_started_at, :utc_datetime
-    field :pve_total_turns, :integer
     field :pve_tier, :integer
 
     embeds_many :pve_farming_rewards, Game.Schema.FarmingReward
@@ -112,11 +110,11 @@ defmodule Moba.Game.Schema.Hero do
       :wins,
       :losses,
       :ties,
-      :pve_battles_available,
+      :pve_current_turns,
+      :pve_total_turns,
       :pvp_battles_available,
       :buffed_battles_available,
       :pve_points,
-      :pve_total_turns,
       :pve_state,
       :pve_farming_turns,
       :pve_farming_started_at,
@@ -126,9 +124,7 @@ defmodule Moba.Game.Schema.Hero do
       :total_gold_farm,
       :total_xp_farm,
       :buybacks,
-      :dead,
       :pve_ranking,
-      :finished_pve,
       :finished_at,
       :item_hp,
       :item_mp,
@@ -177,7 +173,7 @@ defmodule Moba.Game.Schema.Hero do
       power: avatar.power
     })
     |> change(%{
-      pve_battles_available: Moba.turns_per_tier(),
+      pve_current_turns: Moba.turns_per_tier(),
       pve_total_turns: Moba.total_pve_turns(pve_tier),
       pve_tier: pve_tier,
       pve_points: 0,

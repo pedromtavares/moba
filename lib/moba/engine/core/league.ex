@@ -78,7 +78,7 @@ defmodule Moba.Engine.Core.League do
             gold: attacker.gold + league_bonus(attacker),
             total_xp: league_bonus(attacker),
             boss_id: nil,
-            pve_battles_available: current_turns,
+            pve_current_turns: current_turns,
             pve_total_turns: total_turns,
             total_gold_farm: attacker.total_gold_farm + league_bonus(attacker)
           }
@@ -96,8 +96,9 @@ defmodule Moba.Engine.Core.League do
         true ->
           %{
             league_step: 0,
-            pve_battles_available: current_turns,
-            pve_total_turns: total_turns
+            pve_current_turns: current_turns,
+            pve_total_turns: total_turns,
+            pve_state: "dead"
           }
       end
 
@@ -131,7 +132,7 @@ defmodule Moba.Engine.Core.League do
   defp league_bonus(_), do: Moba.league_win_bonus()
 
   defp league_turns(%{pve_total_turns: total_turns} = attacker) when total_turns >= @turns_per_tier do
-    current_turns = attacker.pve_battles_available + @turns_per_tier
+    current_turns = attacker.pve_current_turns + @turns_per_tier
     total_turns = total_turns - @turns_per_tier
     {total_turns, current_turns}
   end

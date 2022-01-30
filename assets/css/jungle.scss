@@ -38,12 +38,6 @@
     border-color: rgb(241, 151, 18) !important;
   }
 
-  .card-box{
-    background-color: rgba(54, 64, 74, 0.3);
-    padding: 0;
-    margin-bottom: 3rem;
-  }
-
   .gank-tab a.active{
     border: 2px solid #f1556c !important;
   }
@@ -57,15 +51,33 @@
 
 .jungle-header{
   .previous-tier{
-    max-width: 30px;
+    max-width: 35px;
     filter: grayscale(100%);
   }
   .current-tier{
-    max-width: 30px;
+    max-width: 50px;
   }
   .next-tier{
-    max-width: 30px;
+    max-width: 35px;
     opacity: 0.5;
+  }
+  .nav-link{
+    color: #8a929a;
+    text-align: center;
+  }
+  .nav-link:hover{
+    color: #3bafda;
+  }
+  .pve-info{
+    text-align: center;
+    line-height: 0.8;
+    border: 1px solid;
+    padding: 1rem;
+    margin: -2px;
+
+    small{
+      font-size: 0.9rem;
+    }
   }
   .ranking{
     img{

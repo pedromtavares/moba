@@ -6,9 +6,10 @@ defmodule MobaWeb.JungleLiveView do
   def mount(_, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
     hero = Game.current_pve_hero(socket.assigns.current_user) |> Game.maybe_finish_pve()
+    Cachex.del(:game_cache, user_id)
 
     cond do
-      hero && hero.finished_pve ->
+      hero && hero.finished_at ->
         if is_nil(hero.pve_ranking), do: Game.update_pve_ranking!()
         {:ok, socket |> redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
 
@@ -19,7 +20,7 @@ defmodule MobaWeb.JungleLiveView do
           |> Tutorial.subscribe()
         end
 
-        Process.send_after(self(), :current_time, 1000)
+        # Process.send_after(self(), :current_time, 1000)
 
         targets = Game.list_targets(hero)
         targets = if length(targets) > 0, do: targets, else: Game.generate_targets!(hero) |> Game.list_targets()
@@ -32,7 +33,7 @@ defmodule MobaWeb.JungleLiveView do
            pending_battle: Engine.pending_battle(hero.id),
            farm_tab: current_farm_tab(hero),
            farm_rewards: [],
-           selected_turns: hero.pve_battles_available,
+           selected_turns: hero.pve_current_turns,
            current_time: Timex.now()
          )}
 
@@ -105,7 +106,7 @@ defmodule MobaWeb.JungleLiveView do
   end
   def handle_event("select-turns", params, %{assigns: %{current_hero: hero}} = socket) do
     turns = String.to_integer(params["turns"])
-    turns = if turns > hero.pve_battles_available, do: hero.pve_battles_available, else: turns
+    turns = if turns > hero.pve_current_turns, do: hero.pve_current_turns, else: turns
     {:noreply, assign(socket, selected_turns: turns)}
   end
   def handle_event("start-meditating", _, %{assigns: %{current_hero: hero, selected_turns: turns}} = socket) do
@@ -119,12 +120,12 @@ defmodule MobaWeb.JungleLiveView do
   def handle_event("finish-meditating", _, %{assigns: %{current_hero: hero}} = socket) do
     hero = Game.finish_farming(hero, "meditating")
     Game.broadcast_to_hero(hero.id)
-    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "meditating"), targets: Game.list_targets(hero))}
+    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "meditating"), targets: Game.list_targets(hero), selected_turns: hero.pve_current_turns)}
   end
   def handle_event("finish-mining", _, %{assigns: %{current_hero: hero}} = socket) do
     hero = Game.finish_farming(hero, "mining")
     Game.broadcast_to_hero(hero.id)
-    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "mining"), targets: Game.list_targets(hero))}
+    {:noreply, assign(socket, current_hero: hero, farm_rewards: farm_rewards_for(hero, "mining"), targets: Game.list_targets(hero), selected_turns: hero.pve_current_turns)}
   end
 
   def handle_info({"tutorial-step", %{step: step}}, socket) do
