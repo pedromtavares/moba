@@ -3,7 +3,7 @@
         <%= for n <- (1..max_season_progression_level(@season_progressions)) do %>
             <li class="nav-item">
                 <a href="javascript:;" phx-click="pve-season-progression" phx-value-level="<%=n%>" class="nav-link <%=if @current_season_progression.quest.level == n, do: "bg-success"%>">
-                    <span class="d-none d-sm-inline-block">Level <%= n %></span>
+                    <span class="d-none d-sm-inline-block"><%= pve_tier_label(n) %></span>
                 </a>
             </li>
         <% end %>
@@ -41,7 +41,7 @@
         </div>
         <div class="row d-block">
             <div class="col">
-                <h4><i class="fa fa-leaf text-success fa-2x"></i></h4>
+                <h4><i class="fa fa-tachometer-alt text-success fa-2x"></i></h4>
                 <h4>Jungle Bonus</h4>
                 <h5 class="text-success"><%=jungle_bonus_for(@current_season_progression)%></h5>
             </div>

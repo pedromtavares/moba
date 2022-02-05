@@ -32,18 +32,18 @@
             <div class="row">
                 <div class="col">
                     <div class="alert alert-warning alert-dismissible bg-warning border-0 fade show text-center" role="alert">
-                        Congratulations, you've finished the previous match at #<%=@winner_index+1%>, enjoy your Rewards!
+                        Congratulations, you've finished the previous match at #<%= @winner_index+1 %>, enjoy your Rewards!
                     </div>
                 </div>
             </div>
         <% end %>
 
         <div class="row winners">
-            <%=render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket%>
-            <%=render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket%>
-            <%=render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket%>
+            <%= render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket %>
+            <%= render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket %>
+            <%= render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket %>
         </div>
     <% end %>
 </div>
 
-<%=render "_season_rankings.html"%>
+<%= render "_season_rankings.html" %>

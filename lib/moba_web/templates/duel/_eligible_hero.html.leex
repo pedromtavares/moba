@@ -36,10 +36,6 @@
                         <small>Previous Arena Picks</small><br/>
                         <%=@hero.pvp_picks%>
                     </h2>
-                    <h2 class="text-success text-center mt-0">
-                        <small>Jungle Win Rate</small><br/>
-                        <%=GH.pve_win_rate(@hero)%>%
-                    </h2>
                     <%=if @hero.pvp_ranking do %>
                         <h2 class="text-warning text-center mt-0">
                             <small>Previous Rank</small><br/>

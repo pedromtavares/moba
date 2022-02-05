@@ -225,7 +225,10 @@ defmodule Moba.Game.Query.HeroQuery do
   def finished_pve(query \\ Hero) do
     from hero in query,
       where: not is_nil(hero.finished_at),
-      order_by: [desc: fragment("? + ?", hero.total_xp_farm, hero.total_gold_farm), desc: fragment("? - ?", hero.inserted_at, hero.finished_at)]
+      order_by: [
+        desc: fragment("? + ?", hero.total_xp_farm, hero.total_gold_farm),
+        desc: fragment("? - ?", hero.inserted_at, hero.finished_at)
+      ]
   end
 
   def in_current_ranking_date(query \\ Hero) do

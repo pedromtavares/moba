@@ -16,7 +16,7 @@
     "popper.js": "^1.15.0",
     "shepherd.js": "^8.0.2",
     "sweetalert": "^2.1.2",
-    "tippy.js": "^4.3.5"
+    "tippy.js": "^6.3.7"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

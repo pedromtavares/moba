@@ -22,13 +22,7 @@
         <div class="transparent card-footer p-0 text-center" data-toggle="tooltip" title="<%=GH.hero_stats_string(@hero, true)%>">
             <div class="row performance">
                 <div class="col d-flex justify-content-around">
-                    <%= unless @hero.bot_difficulty do %>
-                        <h2 class="text-success text-center mt-0">
-                            <small>Jungle Win Rate</small><br/>
-                            <%=GH.pve_win_rate(@hero)%>%
-                        </h2>
-                    <% end %>
-                    <%=if @hero.pvp_ranking || @hero.pve_ranking do %>
+                    <%= if @hero.pve_ranking do %>
                         <h2 class="text-info text-center mt-0">
                             <%= if @hero.id == @user.current_pvp_hero_id do %>
                                 <small>Arena Rank</small><br/>
@@ -37,7 +31,6 @@
                                 <small>Jungle Rank</small><br/>
                                 #<%=@hero.pve_ranking%>
                             <% end %>
-
                         </h2>
                     <% end %>
                     <%= if GH.pvp_win_rate(@hero) > 0 do %>

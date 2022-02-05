@@ -123,7 +123,7 @@ defmodule MobaWeb.CurrentHeroView do
 
   def attribute_description(title, sub, main) do
     "
-      <h3 class='mb-1'>#{title}</h3>
+      <h3 class='mb-1 text-center'>#{title}</h3>
       <span class='text-dark'>#{sub}</span>
       <div class='text-center mt-1'>
         #{main}

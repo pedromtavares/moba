@@ -54,13 +54,13 @@
                         <td>
                             <div class="row d-flex mb-3">
                                 <div class="col">
-                                    <h4 class="text-info" data-toggle="tooltip" title="Total XP Farm">
-                                        <i class="fa fa-atom mr-1"></i><%= hero.total_xp_farm %>
+                                    <h4 class="text-info" data-toggle="tooltip" title="Total XP Farm: <%= hero.total_xp_farm %>">
+                                        <i class="fa fa-spa mr-1"></i><%= GH.farming_amount_label hero.total_xp_farm %>
                                     </h4>
                                 </div>
                                 <div class="col">
-                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Gold Farm">
-                                        <i class="fa fa-coins mr-1"></i><%= hero.total_gold_farm %>
+                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Gold Farm: <%= hero.total_gold_farm %>">
+                                        <i class="fa fa-coins mr-1"></i><%= GH.farming_amount_label hero.total_gold_farm %>
                                     </h4>
                                 </div>
                                 <div class="col">

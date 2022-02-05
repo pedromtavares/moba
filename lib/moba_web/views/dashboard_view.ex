@@ -75,6 +75,11 @@ defmodule MobaWeb.DashboardView do
     |> progression_level_sort()
   end
 
+  def pve_tier_label(1), do: "Novice"
+  def pve_tier_label(2), do: "Adept"
+  def pve_tier_label(3), do: "Veteran"
+  def pve_tier_label(4), do: "Expert"
+
   def jungle_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
   def jungle_bonus_for(%{quest: %{level: 2}}), do: "50% gold discount on Buybacks"
   def jungle_bonus_for(%{quest: %{level: 3}}), do: "Gank is reimbursed on death (+1 available Ganks)"

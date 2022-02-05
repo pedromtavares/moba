@@ -99,7 +99,9 @@ defmodule Moba.Game do
   def refresh_targets!(hero), do: hero
 
   def master_league?(%{league_tier: tier}), do: tier == Moba.master_league_tier()
-  def max_league?(%{league_tier: tier}), do: tier == Moba.max_league_tier()
+
+  def max_league?(%{league_tier: league_tier, pve_tier: pve_tier}),
+    do: league_tier == Moba.max_available_league(pve_tier)
 
   def pve_win_rate(hero), do: Heroes.pve_win_rate(hero)
 
@@ -136,13 +138,12 @@ defmodule Moba.Game do
   def veteran_hero?(%{pve_tier: tier}) when tier >= 2, do: true
   def veteran_hero?(_), do: false
 
-  def maybe_generate_boss(%{pve_current_turns: 5, pve_total_turns: 0, boss_id: nil, pve_state: state} = hero) when state != "dead" do
-    if master_league?(hero) do
-      generate_boss!(hero)
-    else
-      hero
-    end
+  def maybe_generate_boss(
+        %{pve_current_turns: 5, pve_total_turns: 0, boss_id: nil, pve_state: "alive", league_tier: 5} = hero
+      ) do
+    generate_boss!(hero)
   end
+
   def maybe_generate_boss(hero), do: hero
 
   def maybe_finish_pve(
@@ -154,19 +155,16 @@ defmodule Moba.Game do
       hero
     end
   end
+
   def maybe_finish_pve(hero), do: hero
 
   def finish_pve!(%{finished_at: nil} = hero) do
-    hero = Repo.preload(hero, :user)
-    updated = update_hero!(hero, %{finished_at: Timex.now()})
-
-    collection = Heroes.collection_for(updated.user_id)
-    Accounts.finish_pve!(updated.user, collection)
-
-    track_pve_quests(updated)
-
-    updated
+    hero
+    |> update_hero!(%{finished_at: Timex.now()})
+    |> update_hero_collection!()
+    |> track_pve_quests()
   end
+
   def finish_pve!(hero), do: hero
 
   def generate_boss!(hero) do
@@ -191,18 +189,27 @@ defmodule Moba.Game do
     update_hero!(boss, %{total_hp: new_total, league_attempts: 1})
     update_hero!(hero, %{pve_state: "dead"})
   end
+
   def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil, pve_state: "dead"})
 
   defdelegate buyback!(hero), to: Heroes
 
   defdelegate buyback_price(hero), to: Heroes
 
-  defdelegate start_farming(hero, state, turns), to: Heroes
+  defdelegate start_farming!(hero, state, turns), to: Heroes
 
-  def finish_farming(hero, state) do
-    updated = Heroes.finish_farming(hero, state)
-    generate_targets!(updated)
-    updated
+  def finish_farming!(hero) do
+    hero
+    |> Heroes.finish_farming!()
+    |> generate_targets!()
+  end
+
+  def update_hero_collection!(hero) do
+    hero = Repo.preload(hero, :user)
+    collection = Heroes.collection_for(hero.user_id)
+    Accounts.update_collection!(hero.user, collection)
+
+    hero
   end
 
   def subscribe_to_hero(hero_id) do

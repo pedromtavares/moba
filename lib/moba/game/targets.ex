@@ -19,7 +19,7 @@ defmodule Moba.Game.Targets do
   def list(hero_id, farm_sort \\ :asc) do
     Repo.all(from t in Target, where: t.attacker_id == ^hero_id)
     |> Repo.preload(defender: HeroQuery.load())
-    |> Enum.sort_by(fn target -> target.defender.total_gold_farm+target.defender.total_xp_farm end, farm_sort)
+    |> Enum.sort_by(fn target -> target.defender.total_gold_farm + target.defender.total_xp_farm end, farm_sort)
   end
 
   @doc """
@@ -71,13 +71,13 @@ defmodule Moba.Game.Targets do
 
     case difficulty do
       "weak" ->
-        minimum_farm(total_xp - (base_xp * 4))..minimum_farm(total_xp - (base_xp * 2))
+        minimum_farm(total_xp - base_xp * 4)..minimum_farm(total_xp - base_xp * 2)
 
       "moderate" ->
-        minimum_farm(total_xp - (base_xp * 3))..total_xp
+        minimum_farm(total_xp - base_xp * 3)..total_xp
 
       "strong" ->
-        (total_xp + (base_xp * 1))..(total_xp + (base_xp * 3))
+        (total_xp + base_xp * 1)..(total_xp + base_xp * 3)
     end
   end
 
@@ -86,13 +86,13 @@ defmodule Moba.Game.Targets do
 
     case difficulty do
       "weak" ->
-        (total_xp - (base_xp * 3))..(total_xp - (base_xp * 1))
+        (total_xp - base_xp * 3)..(total_xp - base_xp * 1)
 
       "moderate" ->
-        (total_xp - (base_xp * 1))..(total_xp + (base_xp * 2))
+        (total_xp - base_xp * 1)..(total_xp + base_xp * 2)
 
       "strong" ->
-        (total_xp + (base_xp * 1))..(total_xp + (base_xp * 4))
+        (total_xp + base_xp * 1)..(total_xp + base_xp * 4)
     end
   end
 
@@ -101,13 +101,13 @@ defmodule Moba.Game.Targets do
 
     case difficulty do
       "weak" ->
-        (total_xp - (base_xp * 2))..(total_xp + (base_xp * 1))
+        (total_xp - base_xp * 2)..(total_xp + base_xp * 1)
 
       "moderate" ->
-        total_xp..(total_xp + (base_xp * 3))
+        total_xp..(total_xp + base_xp * 3)
 
       "strong" ->
-        (total_xp + (base_xp * 3))..(total_xp + (base_xp * 6))
+        (total_xp + base_xp * 3)..(total_xp + base_xp * 6)
     end
   end
 

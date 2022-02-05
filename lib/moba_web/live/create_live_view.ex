@@ -135,11 +135,11 @@ defmodule MobaWeb.CreateLiveView do
   end
 
   def handle_event(
-         "create",
-         _,
-         %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
-           socket
-       ) do
+        "create",
+        _,
+        %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
+          socket
+      ) do
     skills =
       selected_skills
       |> Enum.map(fn skill -> skill.id end)

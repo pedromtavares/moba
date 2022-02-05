@@ -43,7 +43,7 @@ defmodule Moba do
   @buyback_multiplier 10
   @refresh_targets_count 5
   @maximum_total_farm 60_000
-  @seconds_per_turn 1
+  @seconds_per_turn 5
   @pve_win_bonus 100
 
   # PVP constants
@@ -117,6 +117,9 @@ defmodule Moba do
   def league_buff_multiplier(_, _), do: 0
   def boss_regeneration_multiplier, do: @boss_regeneration_multiplier
   def boss_win_bonus, do: @boss_win_bonus
+  def max_available_league(0), do: 4
+  def max_available_league(1), do: 5
+  def max_available_league(_), do: 6
 
   # diff = defender.pvp_points - attacker.pvp_points
 

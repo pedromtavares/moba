@@ -39,7 +39,7 @@
   }
 
   .gank-tab a.active{
-    border: 2px solid #f1556c !important;
+    border: 2px solid #1abc9c !important;
   }
   .meditation-tab a.active{
     border: 2px solid #3bafda !important;
@@ -64,6 +64,7 @@
   .nav-link{
     color: #8a929a;
     text-align: center;
+    line-height: 1.4;
   }
   .nav-link:hover{
     color: #3bafda;
@@ -86,6 +87,12 @@
       border-image-source: radial-gradient(white, rgb(47, 60, 74));
       border-image-slice: 1;
     }
+  }
+}
+
+.farm-tabs{
+  .nav-link h2{
+    line-height: 1.4;
   }
 }
 

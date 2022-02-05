@@ -96,8 +96,7 @@ defmodule Moba.Engine.Core.Pve do
   defp manage_score(%{winner: winner, attacker: attacker, defender: defender} = battle) do
     updates =
       if winner && winner.id == defender.id do
-        turns =
-          if attacker.pve_tier > 2, do: attacker.pve_current_turns + 1, else: attacker.pve_current_turns
+        turns = if attacker.pve_tier > 2, do: attacker.pve_current_turns + 1, else: attacker.pve_current_turns
 
         %{losses: attacker.losses + 1, pve_state: "dead", pve_current_turns: turns}
       else

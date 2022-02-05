@@ -27,14 +27,18 @@ defmodule Moba.Game.Schema.Hero do
     field :gold, :integer
     field :bot_difficulty, :string
     field :archived_at, :utc_datetime
-    field :easy_mode, :boolean, default: false # remove
+    # remove
+    field :easy_mode, :boolean, default: false
 
     # PVE related fields
-    field :pve_points, :integer # remove
+    # remove
+    field :pve_points, :integer
     field :pve_total_turns, :integer
     field :pve_current_turns, :integer
-    field :buffed_battles_available, :integer, default: 0 # remove
-    field :xp_boosted_battles_available, :integer, default: 0 # remove
+    # remove
+    field :buffed_battles_available, :integer, default: 0
+    # remove
+    field :xp_boosted_battles_available, :integer, default: 0
     field :wins, :integer, default: 0
     field :losses, :integer, default: 0
     field :ties, :integer, default: 0
@@ -44,7 +48,8 @@ defmodule Moba.Game.Schema.Hero do
     field :pve_ranking, :integer
     field :finished_at, :utc_datetime
     field :shards_reward, :integer, default: 0
-    field :summoned, :boolean, default: false # remove
+    # remove
+    field :summoned, :boolean, default: false
     field :refresh_targets_count, :integer, default: 0
     field :pve_state, :string
     field :pve_farming_turns, :integer
@@ -118,6 +123,7 @@ defmodule Moba.Game.Schema.Hero do
       :pve_state,
       :pve_farming_turns,
       :pve_farming_started_at,
+      :pve_tier,
       :pvp_points,
       :bot_difficulty,
       :gold,
@@ -162,7 +168,8 @@ defmodule Moba.Game.Schema.Hero do
   end
 
   def create_changeset(hero, attrs, user, avatar) do
-    pve_tier = (user && user.pve_tier) || 0 
+    pve_tier = (user && user.pve_tier) || 0
+
     hero
     |> change(%{
       atk: avatar.atk,
@@ -173,6 +180,7 @@ defmodule Moba.Game.Schema.Hero do
       power: avatar.power
     })
     |> change(%{
+      pve_state: "alive",
       pve_current_turns: Moba.turns_per_tier(),
       pve_total_turns: Moba.total_pve_turns(pve_tier),
       pve_tier: pve_tier,

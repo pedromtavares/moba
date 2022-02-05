@@ -70,7 +70,7 @@ defmodule Moba.Engine.Core.League do
       cond do
         win && step >= Game.max_league_step_for(league_tier) ->
           next_league_tier = league_tier + 1
-          
+
           %{
             league_step: 0,
             league_tier: next_league_tier,
@@ -136,5 +136,6 @@ defmodule Moba.Engine.Core.League do
     total_turns = total_turns - @turns_per_tier
     {total_turns, current_turns}
   end
+
   defp league_turns(_), do: {0, 0}
 end

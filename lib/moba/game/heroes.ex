@@ -315,6 +315,7 @@ defmodule Moba.Game.Heroes do
   def collection_for(user_id) do
     HeroQuery.finished_pve()
     |> HeroQuery.with_user(user_id)
+    |> HeroQuery.unarchived()
     |> Repo.all()
     |> Repo.preload(:avatar)
     |> Enum.group_by(& &1.avatar.code)
@@ -350,11 +351,19 @@ defmodule Moba.Game.Heroes do
 
   def buyback!(hero), do: hero
 
-  def start_farming(hero, state, turns) do
+  def start_farming!(hero, state, turns) do
     update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
   end
 
-  def finish_farming(%{pve_farming_turns: farming_turns, pve_current_turns: current_turns, pve_farming_rewards: rewards, pve_farming_started_at: started} = hero, state) do
+  def finish_farming!(
+        %{
+          pve_farming_turns: farming_turns,
+          pve_current_turns: current_turns,
+          pve_farming_rewards: rewards,
+          pve_farming_started_at: started,
+          pve_state: state
+        } = hero
+      ) do
     remaining_turns = zero_limit(current_turns - farming_turns)
 
     {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
@@ -363,12 +372,18 @@ defmodule Moba.Game.Heroes do
 
     hero
     |> Hero.replace_farming_rewards(rewards ++ new_reward)
-    |> update!(%{pve_state: nil, pve_farming_turns: 0, pve_farming_started_at: nil, pve_current_turns: remaining_turns})
+    |> update!(%{
+      pve_state: "alive",
+      pve_farming_turns: 0,
+      pve_farming_started_at: nil,
+      pve_current_turns: remaining_turns
+    })
   end
 
   # --------------------------------
 
   defp add_experience!(hero, nil), do: hero
+
   defp add_experience!(hero, experience) do
     hero = Repo.preload(hero, :user)
     if hero.user, do: Moba.add_user_experience(hero.user, experience)
@@ -379,12 +394,13 @@ defmodule Moba.Game.Heroes do
     |> Repo.update!()
   end
 
-  defp apply_farming_rewards(hero, turns, "meditating") do 
+  defp apply_farming_rewards(hero, turns, "meditating") do
     rewards = turns * Enum.random(Moba.farm_per_turn(hero.pve_tier))
     hero = add_experience!(hero, rewards)
-    
+
     {hero, rewards}
   end
+
   defp apply_farming_rewards(hero, turns, "mining") do
     rewards = turns * Enum.random(Moba.farm_per_turn(hero.pve_tier))
     hero = update!(hero, %{gold: hero.gold + rewards, total_gold_farm: hero.total_gold_farm + rewards})
@@ -437,7 +453,9 @@ defmodule Moba.Game.Heroes do
     base + 400 * Enum.random(range)
   end
 
-  defp bot_total_gold_farm_base(tier, difficulty) when difficulty in ["pvp_master", "pvp_grandmaster"], do: (tier - 1) * 4800
+  defp bot_total_gold_farm_base(tier, difficulty) when difficulty in ["pvp_master", "pvp_grandmaster"],
+    do: (tier - 1) * 4800
+
   defp bot_total_gold_farm_base(tier, _), do: tier * 4800
 
   defp inactivate_weakest_pvp_bot(league_tier) do

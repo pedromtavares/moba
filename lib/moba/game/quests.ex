@@ -76,6 +76,8 @@ defmodule Moba.Game.Quests do
 
     track("arena_podium", user_id, hero)
     track("arena_podium_all", user_id, hero)
+
+    hero
   end
 
   def track_achievement_pvp(hero), do: hero
@@ -85,6 +87,8 @@ defmodule Moba.Game.Quests do
     track("daily_arena_easy", user_id, hero)
     if ranking <= 10, do: track("daily_arena_medium", user_id, hero)
     if ranking == 1 && tier == Moba.max_league_tier(), do: track("daily_arena_hard", user_id, hero)
+
+    hero
   end
 
   def track_daily_pvp(hero), do: hero
@@ -106,6 +110,8 @@ defmodule Moba.Game.Quests do
         track("grandmaster_grail", user_id, hero)
       end
     end
+
+    hero
   end
 
   def track_pve(hero), do: hero

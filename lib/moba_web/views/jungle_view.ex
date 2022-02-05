@@ -17,7 +17,7 @@ defmodule MobaWeb.JungleView do
     100 * current_diff / total_diff
   end
 
-  def farming_time_left(%{pve_farming_turns: turns, pve_farming_started_at: started}, %{current_time: current}) do
+  def farming_time_left(%{pve_farming_turns: turns, pve_farming_started_at: started}) do
     turn_seconds = turns * Moba.seconds_per_turn()
     Timex.shift(started, seconds: turn_seconds) |> Timex.format("{relative}", :relative) |> elem(1)
   end
@@ -38,23 +38,6 @@ defmodule MobaWeb.JungleView do
       "strong" -> "Hard"
       _ -> "??"
     end
-  end
-
-  def difficulty_reward_label(difficulty) do
-    number =
-      case difficulty do
-        "weak" -> 1
-        "moderate" -> 2
-        "strong" -> 3
-        _ -> 0
-      end
-
-    coins =
-      Enum.reduce(1..number, "", fn _n, acc ->
-        acc <> "<i class='fa fa-coins'></i>"
-      end)
-
-    raw(coins)
   end
 
   def display_farming_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
@@ -92,11 +75,14 @@ defmodule MobaWeb.JungleView do
     end
   end
 
+  def max_available_league(%{pve_tier: tier}), do: Moba.max_available_league(tier)
+
   def reward_badges_for(hero, difficulty) do
     battle_xp = Moba.battle_xp(difficulty, hero.pve_tier)
     win_xp = battle_xp + Moba.pve_win_bonus()
 
     xp_reward = content_tag(:span, "+#{win_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
+
     safe_to_string(
       content_tag :div do
         [
@@ -128,6 +114,7 @@ defmodule MobaWeb.JungleView do
   def show_league_challenge?(%{pve_current_turns: 0, league_tier: league_tier}) do
     league_tier < Moba.master_league_tier()
   end
+
   def show_league_challenge?(_), do: false
 
   defp pve_tier_bonus_html(label), do: "<div class='my-1'><i class='fa fa-hand-point-right mr-1'></i>#{label}</div>"

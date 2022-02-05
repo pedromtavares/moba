@@ -10,7 +10,12 @@ defmodule MobaWeb.HeroView do
 
   def can_join_arena?(user), do: length(Game.eligible_heroes_for_pvp(user.id)) > 0
 
-  def display_quest_tabs?(%{completed_progressions: all, completed_daily_progressions: daily, completed_season_progression: season, completed_achievement_progressions: achievements}) do
+  def display_quest_tabs?(%{
+        completed_progressions: all,
+        completed_daily_progressions: daily,
+        completed_season_progression: season,
+        completed_achievement_progressions: achievements
+      }) do
     length(all) > 1 && all != daily && all != season && all != achievements
   end
 

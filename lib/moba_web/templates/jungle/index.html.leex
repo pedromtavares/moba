@@ -10,24 +10,24 @@
                     <div class="card-box p-2 darker mb-0">
                         <div class="row">
                             <div class="col d-flex align-items-center justify-content-around">
-                                <%= link to: "/base", class: "h3 mt-2 nav-link" do %>
-                                    <i class="fa fa-home fa-2x align-middle mr-1"></i>
-                                    <br/>
-                                    Base
-                                <% end %>
-                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), loading: " ", "phx-hook": "Loading", class: "h3 ml-3 nav-link", id: "load-battles" do %>
-                                    <span class="loading-text">
-                                        <i class="fa fa-history fa-2x mr-1"></i>
+                                <%= if length(@current_hero.user.hero_collection) > 0 do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DashboardLiveView), class: "h3 mt-2 nav-link" do %>
+                                        <i class="fa fa-home fa-2x align-middle mr-1"></i>
                                         <br/>
-                                        Battle History
-                                    </span>
+                                        Base
+                                    <% end %>
+                                <% end %>
+                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "h3 ml-3 nav-link" do %>
+                                    <i class="fa fa-history fa-2x mr-1"></i>
+                                    <br/>
+                                    Battle History
                                 <% end %>
                             </div>
                             <div class="col">
                                 <div class="d-flex align-items-center justify-content-center mt-3">
-                                    <%= for {tier, _} <- Moba.leagues() do %>
+                                    <%= for tier <- 0..max_available_league(@current_hero) do %>
                                         <img src="/images/league_<%=tier%>.png" class="<%=MobaWeb.HeroView.tier_class(tier, @current_hero.league_tier)%>" data-toggle="tooltip" title="<%=Moba.leagues[tier]%>"/>
-                                        <%= unless tier == Moba.max_league_tier() do %>
+                                        <%= unless tier == max_available_league(@current_hero) do %>
                                             <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
                                                 <div style="width:100%" class="progress-bar <%=if tier >= @current_hero.league_tier, do: "bg-dark", else: "bg-primary"%>">
                                                     <span></span>
@@ -41,18 +41,18 @@
                                 </h3>
                             </div>
                             <div class="col d-flex align-items-center justify-content-center">
-                                <h3 class="pve-info" data-toggle="tooltip" title="Total turns left: <%= @current_hero.pve_current_turns + @current_hero.pve_total_turns %>">
+                                <h3 class="pve-info text-success" data-toggle="tooltip" title="Total turns left: <%= @current_hero.pve_current_turns + @current_hero.pve_total_turns %>">
                                     <%= @current_hero.pve_current_turns %>
                                     <br/>
                                     <small class="text-muted">Turns available</small>
                                 </h3>
-                                <h3 class="pve-info text-primary">
-                                    <%= @current_hero.total_xp_farm %>
+                                <h3 class="pve-info text-primary" data-toggle="tooltip" title="<%= @current_hero.total_xp_farm %>">
+                                    <%= GH.farming_amount_label @current_hero.total_xp_farm %>
                                     <br/>
                                     <small class="text-muted">Total XP farm</small>
                                 </h3>
-                                <h3 class="pve-info text-warning">
-                                    <%= @current_hero.total_gold_farm %>
+                                <h3 class="pve-info text-warning" data-toggle="tooltip" title="<%= @current_hero.total_gold_farm %>">
+                                    <%= GH.farming_amount_label @current_hero.total_gold_farm %>
                                     <br/>
                                     <small class="text-muted">Total gold farm</small>
                                 </h3>
@@ -97,13 +97,13 @@
                         <div class="col">
                             <ul class="nav nav-tabs nav-bordered nav-justified farm-tabs">
                                 <li class="nav-item gank-tab">
-                                    <%= if is_nil(@current_hero.pve_state) do %>
+                                    <%= if @current_hero.pve_state == "alive" do %>
                                         <a href="javascript:;" phx-click="show-gank" class="nav-link <%=if @farm_tab == "gank", do: "active"%>">
-                                            <h2 class="d-none d-sm-inline-block text-danger">
-                                                <i class="fa fa-2x fa-crosshairs"></i><br/>
+                                            <h2 class="d-none d-sm-inline-block">
+                                                <i class="fa fa-2x fa-crosshairs text-success"></i><br/>
                                                 Gank
                                             </h2>
-                                            <h4 class="m-0"><i class="fa fa-angle-up mr-1"></i>XP <i class="fa fa-angle-up ml-1 mr-1"></i>Gold</h4>
+                                            <h4 class="m-0"><i class="fa fa-angle-up mr-1 text-primary"></i>XP <i class="fa fa-angle-up ml-1 mr-1 text-warning"></i>Gold</h4>
                                         </a>
                                     <% else %>
                                         <a href="javascript:;" class="no-action nav-link">
@@ -118,16 +118,16 @@
                                 <li class="nav-item meditation-tab">
                                     <%= if @current_hero.pve_state != "mining" do %>
                                         <a href="javascript:;" phx-click="show-meditation" class="nav-link <%=if @farm_tab == "meditation", do: "active"%>">
-                                            <h2 class="d-none d-sm-inline-block text-primary">
-                                                <i class="fa fa-2x fa-atom"></i><br/>
+                                            <h2 class="d-none d-sm-inline-block">
+                                                <i class="fa fa-2x fa-spa text-primary"></i><br/>
                                                 Meditate
                                             </h2>
-                                            <h4 class="m-0"><i class="fa fa-angle-double-up mr-1"></i>XP</h4>
+                                            <h4 class="m-0"><i class="fa fa-angle-double-up mr-1 text-primary"></i>XP</h4>
                                         </a>
                                     <% else %>
                                         <a href="javascript:;" class="nav-link no-action">
                                             <h2 class="d-none d-sm-inline-block text-muted">
-                                                <i class="fa fa-2x fa-atom"></i><br/>
+                                                <i class="fa fa-2x fa-spa"></i><br/>
                                                 Meditate
                                             </h2>
                                             <h4 class="m-0"><i class="fa fa-angle-double-up mr-1"></i>XP</h4>
@@ -137,11 +137,11 @@
                                 <li class="nav-item mine-tab">
                                     <%= if @current_hero.pve_state != "meditating" do %>
                                         <a href="javascript:;" phx-click="show-mine" class="nav-link <%=if @farm_tab == "mine", do: "active"%>">
-                                            <h2 class="d-none d-sm-inline-block text-warning">
-                                                <i class="fa fa-2x fa-coins"></i><br/>
+                                            <h2 class="d-none d-sm-inline-block">
+                                                <i class="fa fa-2x fa-mountain text-warning"></i><br/>
                                                 Mine
                                             </h2>
-                                            <h4 class="m-0"><i class="fa fa-angle-double-up mr-1"></i>Gold</h4>
+                                            <h4 class="m-0"><i class="fa fa-angle-double-up mr-1 text-warning"></i>Gold</h4>
                                         </a>
                                     <% else %>
                                         <a href="javascript:;" class="no-action nav-link">
@@ -227,14 +227,14 @@
                         <div class="col-8 margin-auto text-center">
                             <%= if @current_hero.pve_state == "meditating" do %>
                                 <%= if farming_progression(@current_hero, assigns) >= 100 do %>
-                                    <button class="btn btn-primary btn-lg" phx-click="finish-meditating">Meditation complete, click to claim your XP</button>
+                                    <button class="btn btn-primary btn-lg" phx-click="finish-farming">Meditation complete, click to claim your XP</button>
                                 <% else %>
                                     <div class="progress progress-fixed m-1">
                                         <div style="width:<%= farming_progression(@current_hero, assigns) %>%" class="progress-bar bg-primary no-mininum">
                                             <span></span>
                                         </div>
                                     </div>
-                                    <h5 class="text-center">Your meditation will end <%= farming_time_left(@current_hero, assigns) %></h5>
+                                    <h5 class="text-center">Your meditation will end <%= farming_time_left(@current_hero) %></h5>
                                 <% end %>
                             <% else %>
                                 <%= if @current_hero.pve_current_turns > 0 do %>
@@ -244,7 +244,7 @@
                                     </form>
                                     <div class="text-center">
                                         <%= if @selected_turns > 0 do %>
-                                            <button type="button" phx-click="start-meditating" class="btn btn-primary btn-lg">Meditate for <%= @selected_turns%> turns</button>
+                                            <button type="button" phx-click="start-farming" phx-value-state="meditating" class="btn btn-primary btn-lg">Meditate for <%= @selected_turns%> turns</button>
                                         <% else %>
                                             <button type="button" disabled class="btn btn-primary btn-lg">Meditate</button>
                                         <% end %>
@@ -273,14 +273,14 @@
                         <div class="col-8 margin-auto text-center">
                             <%= if @current_hero.pve_state == "mining" do %>
                                 <%= if farming_progression(@current_hero, assigns) >= 100 do %>
-                                    <button class="btn btn-warning btn-lg" phx-click="finish-mining">Mining complete, click to claim your Gold</button>
+                                    <button class="btn btn-warning btn-lg" phx-click="finish-farming">Mining complete, click to claim your Gold</button>
                                 <% else %>
                                     <div class="progress progress-fixed m-1">
                                         <div style="width:<%= farming_progression(@current_hero, assigns) %>%" class="progress-bar bg-warning no-mininum">
                                             <span></span>
                                         </div>
                                     </div>
-                                    <h5 class="text-center">Your mining will end <%= farming_time_left(@current_hero, assigns) %></h5>
+                                    <h5 class="text-center">Your mining will end <%= farming_time_left(@current_hero) %></h5>
                                 <% end %>
                             <% else %>
                                 <%= if @current_hero.pve_current_turns > 0 do %>
@@ -290,7 +290,7 @@
                                     </form>
                                     <div class="text-center">
                                         <%= if @selected_turns > 0 do %>
-                                            <button type="button" phx-click="start-mining" class="btn btn-warning btn-lg">Mine for <%= @selected_turns %> turns</button>
+                                            <button type="button" phx-click="start-farming" phx-value-state="mining" class="btn btn-warning btn-lg">Mine for <%= @selected_turns %> turns</button>
                                         <% else %>
                                             <button type="button" disabled class="btn btn-warning btn-lg">Mine</button>
                                         <% end %>

@@ -45,6 +45,8 @@ defmodule MobaWeb.DashboardLiveView do
   def handle_event("archive", %{"id" => id}, socket) do
     hero = Game.get_hero!(id)
     Game.archive_hero!(hero)
+    if hero.finished_at, do: Game.update_hero_collection!(hero)
+
     {:noreply, assign(socket, visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id)))}
   end
 
@@ -73,7 +75,7 @@ defmodule MobaWeb.DashboardLiveView do
     )
   end
 
-  defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &(is_nil(&1.finished_at)))
+  defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &is_nil(&1.finished_at))
   defp finished_heroes(all_heroes), do: Enum.filter(all_heroes, & &1.finished_at)
 
   defp pvp_assigns(%{assigns: %{current_user: user}} = socket) do

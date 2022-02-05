@@ -7,8 +7,7 @@ defmodule Moba.EngineTest do
     base_hero = create_base_hero(attrs)
     weak_hero = create_base_hero(attrs, create_user(attrs), weak_avatar())
 
-    strong_hero =
-      create_base_hero(attrs, create_user(attrs), strong_avatar())
+    strong_hero = create_base_hero(attrs, create_user(attrs), strong_avatar())
 
     alternate_hero = create_base_hero(attrs, create_user(attrs), strong_avatar())
 
@@ -97,23 +96,24 @@ defmodule Moba.EngineTest do
       assert battle.type == "pve"
 
       rewards = battle.rewards
-      assert rewards.battle_xp == 150
+      assert rewards.battle_xp == 400
       assert rewards.win_xp == 0
-      assert rewards.total_xp == 150
+      assert rewards.total_xp == 400
 
       reloaded_attacker = Game.get_hero!(attacker.id)
       reloaded_defender = Game.get_hero!(defender.id)
 
-      assert reloaded_attacker.level != attacker.level
+      assert reloaded_attacker.experience > attacker.experience
       assert reloaded_defender.experience == defender.experience
       assert reloaded_attacker.ties == 1
 
       assert reloaded_attacker.pve_current_turns == attacker.pve_current_turns - 1
       assert reloaded_defender.pve_current_turns == defender.pve_current_turns
 
-      assert reloaded_attacker.level == 2
-      assert reloaded_attacker.gold == attacker.gold + 150
-      assert reloaded_attacker.total_gold_farm == attacker.total_gold_farm + 150
+      assert reloaded_attacker.level == 1
+      assert reloaded_attacker.gold == attacker.gold + 400
+      assert reloaded_attacker.total_gold_farm == attacker.total_gold_farm + 400
+      assert reloaded_attacker.total_xp_farm == attacker.total_xp_farm + 400
     end
 
     test "battle win for attacker, level up", %{strong_hero: attacker, weak_hero: defender} do
@@ -127,15 +127,15 @@ defmodule Moba.EngineTest do
       assert battle.winner.id == attacker.id
 
       rewards = battle.rewards
-      assert rewards.battle_xp == 300
-      assert rewards.win_xp == 300
+      assert rewards.battle_xp == 500
+      assert rewards.win_xp == 100
       assert rewards.total_xp == 600
 
       updated_attacker = Game.get_hero!(attacker.id)
       defender = Game.get_hero!(defender.id)
 
-      assert updated_attacker.experience != attacker.experience
-      assert updated_attacker.level != attacker.level
+      assert updated_attacker.total_xp_farm == attacker.total_xp_farm + 600
+      assert updated_attacker.level > attacker.level
       assert updated_attacker.wins == 1
 
       assert defender.experience == 0
@@ -161,7 +161,7 @@ defmodule Moba.EngineTest do
     end
 
     test "battle loss for veteran attacker, gets gank back", %{weak_hero: attacker, strong_hero: defender} do
-      attacker = %{attacker | user: %{attacker.user | pve_tier: 3}}
+      attacker = %{attacker | pve_tier: 3}
 
       battle =
         Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
@@ -264,20 +264,7 @@ defmodule Moba.EngineTest do
 
       assert hero.gold == attacker.gold + Moba.league_win_bonus()
       assert hero.total_gold_farm == attacker.total_gold_farm + Moba.league_win_bonus()
-    end
-
-    test "attacker wins and reaches master league", %{strong_hero: attacker} do
-      diamond_league_tier = Moba.master_league_tier() - 1
-
-      battle =
-        Engine.create_league_battle!(%{attacker | league_step: 5, league_tier: diamond_league_tier})
-        |> Engine.auto_finish_battle!()
-
-      %{active_build: active_build} = hero = Game.get_hero!(attacker.id)
-      assert battle.winner_id == attacker.id
-      assert hero.league_step == 0
-      assert hero.league_tier == Moba.master_league_tier()
-      assert Enum.find(active_build.skills, & &1.ultimate).level == 3
+      assert hero.total_xp_farm == attacker.total_xp_farm + Moba.league_win_bonus()
     end
 
     test "attacker beats boss and ranks up", %{strong_hero: hero} do
@@ -291,7 +278,7 @@ defmodule Moba.EngineTest do
       assert battle.winner_id == with_boss.id
 
       with_boss = Game.get_hero!(with_boss.id)
-      assert with_boss.gold == hero.gold + Moba.boss_win_gold_bonus()
+      assert with_boss.gold == hero.gold + Moba.boss_win_bonus()
       assert with_boss.league_step == 0
       assert with_boss.league_tier == master_league_tier + 1
     end
