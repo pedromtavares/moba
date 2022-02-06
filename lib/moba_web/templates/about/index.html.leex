@@ -1,156 +1,97 @@
-<%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
-
 <div class="row mt-3">
     <div class="col">
         <div class="title-container">
             <i class="fa fa-users text-primary"></i>
             <h3>About Us</h3>
             <p class="text-muted">
-              Get to know more about the BrowserMOBA project and its future.
+              Get to know a bit more about the BrowserMOBA project.
             </p>
         </div>
     </div>
 </div>
 
-<div class="content-with-hero-bar" phx-hook="SetMainWrapper" id="about">
-<div class="row mt-4">
-  <div class="col-12">
-      <div class="card-box">
-          <ul class="nav nav-pills navtab-bg">
-              <li class="nav-item">
-                  <a href="#faq-tab" data-toggle="tab" aria-expanded="false" class="nav-link px-3 py-2 active">
-                      <span class="d-inline-block d-sm-none"><i class="fa fa-question-circle mr-1"></i>Info</span>
-                      <span class="d-none d-sm-inline-block"><i class="fa fa-question-circle mr-1"></i> About the Game</span>
-                  </a>
-              </li>
-              <li class="nav-item">
-                  <a href="#features-tab" data-toggle="tab" aria-expanded="true" class="nav-link px-3 py-2">
-                      <span class="d-inline-block d-sm-none"><i class="fa fa-star mr-1"></i>Future</span>
-                      <span class="d-none d-sm-inline-block"><i class="fa fa-star mr-1"></i> Upcoming Features</span>
-                  </a>
-              </li>
-              <li class="nav-item">
-                  <a href="#support-tab" data-toggle="tab" aria-expanded="false" class="nav-link px-3 py-2">
-                      <span class="d-inline-block d-sm-none"><i class="fa fa-headset mr-1"></i>Contact</span>
-                      <span class="d-none d-sm-inline-block"><i class="fa fa-headset mr-1"></i> Contact & Support</span>
-                  </a>
-              </li>
-          </ul>
-          <div class="tab-content">
-              <div class="tab-pane fade active show" id="faq-tab">
-                  <div class="row pt-2">
-                      <div class="col-lg-6">
-                          <div class="p-lg-2 text-white">
-                              <h5 class="text-danger my-2">Core</h5>
-                              <p class="mb-2">BrowserMOBA is a free-to-play community project that aims to bring part of the <a href="https://en.wikipedia.org/wiki/Multiplayer_online_battle_arena" target="blank">MOBA genre's strategic gameplay</a> to a more simplified and casual browser gaming experience. Without flashy effects or intense real-time gameplay common to MOBA games like Dota 2 or League of Legends, in BrowserMOBA you can take your time playing in short gaming sessions that you can pause whenever you like, perfect for playing while listening to a podcast or during work breaks.</p>
-                              <h5 class="text-danger my-2">Mission</h5>
-                              <p class="mb-2">Our mission is to create a community around a fun and competitive game that can be played in any device with a browser and an internet connection. We also have a commitment of keeping the game always free-to-play, with unlockable content being available by playing the game. Even though there is an in-game currency (Shards), you cannot and will not be able to purchase these with real money.</p>
-                              <h5 class="text-danger my-2">Team</h5>
-                              <p>The game is maintained by collaborators on their free time without any profit incentives, in fact, <a href="https://github.com/pedromtavares/moba" target="blank">the project's code is open-source</a>, so anyone can create their own MOBA. If you know the beautiful programming language that is Elixir, we'd love to have you join our development effort, and if you don't, we have lots of other important things that need a hand. </p>
-                          </div>
-                      </div>
-                      <div class="col-lg-6">
-                          <div class="p-lg-2">
-                              <div>
-                                  <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">How can I help the project?</h4>
-                                  <p class="faq-answer mb-4">Making a game is really fun, but also really hard. We need all the help we can get, not just in programming but also in things like balancing, play testing, content development, design, marketing, community management, etc. If you've read this far and is interested in helping in any way, <a href="https://discord.gg/QNwEdPS" target="_blank">feel free to reach us on Discord</a>, let's build this game together!</p>
-                              </div>
+<div class="content-with-hero-bar" id="about">
+  <div class="row mt-4">
+    <div class="col-12">
+        <div class="card-box">
+            <ul class="nav nav-pills navtab-bg">
+                <li class="nav-item">
+                    <a href="#faq-tab" data-toggle="tab" aria-expanded="false" class="nav-link px-3 py-2 active">
+                        <span class="d-inline-block d-sm-none"><i class="fa fa-question-circle mr-1"></i>Info</span>
+                        <span class="d-none d-sm-inline-block"><i class="fa fa-question-circle mr-1"></i> About the Game</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#support-tab" data-toggle="tab" aria-expanded="false" class="nav-link px-3 py-2">
+                        <span class="d-inline-block d-sm-none"><i class="fa fa-headset mr-1"></i>Contact</span>
+                        <span class="d-none d-sm-inline-block"><i class="fa fa-headset mr-1"></i> Contact & Support</span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade active show" id="faq-tab">
+                    <div class="row pt-2">
+                        <div class="col-lg-6">
+                            <div class="p-lg-2 text-white">
+                                <h5 class="text-danger my-2">Core</h5>
+                                <p class="mb-2">BrowserMOBA is a free-to-play community project that aims to bring part of the <a href="https://en.wikipedia.org/wiki/Multiplayer_online_battle_arena" target="blank">MOBA genre's strategic gameplay</a> to a more simplified and casual browser gaming experience. Without flashy effects or intense real-time gameplay common to MOBA games like Dota 2 or League of Legends, in BrowserMOBA you can take your time playing in short gaming sessions that you can pause whenever you like, perfect for playing while listening to a podcast or during work breaks.</p>
+                                <h5 class="text-danger my-2">Mission</h5>
+                                <p class="mb-2">Our mission is to create a community around a fun and competitive game that can be played in any device with a browser and an internet connection. We also have a commitment of keeping the game always free-to-play, with unlockable content being available by playing the game. Even though there is an in-game currency (Shards), you cannot and will not be able to purchase these with real money.</p>
+                                <h5 class="text-danger my-2">Team</h5>
+                                <p>The game is maintained by collaborators on their free time without any profit incentives, in fact, <a href="https://github.com/pedromtavares/moba" target="blank">the project's code is open-source</a>, so anyone can create their own MOBA. If you know the beautiful programming language that is Elixir, we'd love to have you join our development effort, and if you don't, we have lots of other important things that need a hand. </p>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="p-lg-2">
+                                <div>
+                                    <div class="faq-question-q-box">Q.</div>
+                                    <h4 class="faq-question">How can I help the project?</h4>
+                                    <p class="faq-answer mb-4">Making a game is really fun, but also really hard. We need all the help we can get, not just in programming but also in things like balancing, play testing, content development, design, marketing, community management, etc. If you've read this far and is interested in helping in any way, <a href="https://discord.gg/QNwEdPS" target="_blank">feel free to reach us on Discord</a>, let's build this game together!</p>
+                                </div>
 
-                              <div>
-                                  <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">What is the state of the game? Is it finished?</h4>
-                                  <p class="faq-answer mb-4">The game has been under heavy development since the beginning of 2019 and is currently under Beta testing for a planned release by the end of 2021, but development will continue well after that, we're all in this for the long haul!</p>
-                              </div>
+                                <div>
+                                    <div class="faq-question-q-box">Q.</div>
+                                    <h4 class="faq-question">What is the state of the game? Is it finished?</h4>
+                                    <p class="faq-answer mb-4">The game has been under heavy development since the beginning of 2019 and is currently under Beta testing for a planned release by the end of 2022, but development will continue well after that, we're all in this for the long haul!</p>
+                                </div>
 
-                              <div>
-                                  <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">Do you own all of the content in the game?</h4>
-                                  <p class="faq-answer mb-4">Definitely not. We take most of our inspiration from <a href="https://www.dota2.com/" target="_blank">Dota 2</a>, a game we have played since its early Warcraft days in 2006. Dota was the root of all MOBAs and we love their hero and item concepts, so we've ported them to a turn-based model here. If Valve has any problems with their content being used in BrowserMOBA, please reach out to us.</p>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="tab-pane fade" id="features-tab">
-                  <div class="row pt-2">
-                      <div class="col-lg-6">
-                          <div class="p-lg-2">
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-globe"></i></div>
-                                  <h4 class="faq-question">Seasons</h4>
-                                  <p class="faq-answer mb-4">Like many modern RPGs, BrowserMOBA will be played in Seasons, with each new season being a complete ranking reset along with tons of new content like heroes, items, skills, skins and balance changes. The first season will start with the launch of the game in the end of 2021, stay tuned!</p>
-                              </div>
+                                <div>
+                                    <div class="faq-question-q-box">Q.</div>
+                                    <h4 class="faq-question">Do you own all of the content in the game?</h4>
+                                    <p class="faq-answer mb-4">Definitely not. We take most of our inspiration from <a href="https://www.dota2.com/" target="_blank">Dota 2</a>, a game we have played since its early Warcraft days in 2006. Dota was the root of all MOBAs and we love their hero and item concepts, so we've ported them to a turn-based model here. If Valve has any problems with their content being used in BrowserMOBA, please reach out to us.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="support-tab">
+                    <div class="row pt-2">
+                        <div class="col-lg-6">
+                            <div class="p-lg-2">
+                                <div>
+                                    <div class="faq-question-q-box"><i class="fab fa-discord"></i></div>
+                                    <h4 class="faq-question">Discord</h4>
+                                    <p class="faq-answer mb-4">The best way to get in touch with our team is by <a href="https://discord.gg/QNwEdPS" target="_blank">visiting our Discord server</a>. That is where our community members hang out and can help you with any questions you may have.</p>
+                                </div>
 
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-crosshairs"></i></div>
-                                  <h4 class="faq-question" data-wow-delay=".1s">Arena Teams</h4>
-                                  <p class="faq-answer mb-4">Instead of playing the Arena with a single hero, you will enter with a team of 3 heroes that you will be able to switch between at any time during the match. This will add another layer of competitiveness, allowing more strategies of attacking and defending your rank.</p>
-                              </div>
+                                <div>
+                                    <div class="faq-question-q-box"><i class="fa fa-envelope"></i></div>
+                                    <h4 class="faq-question" data-wow-delay=".1s">E-mail</h4>
+                                    <p class="faq-answer mb-4">If you prefer, you can also reach the creator of the game <a href="mailto:pedro.tavares@hey.com">by e-mail</a> as well, although he is frequently online on the Discord server above.</p>
+                                </div>
 
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-user-friends"></i></div>
-                                  <h4 class="faq-question">Cooperative Bosses</h4>
-                                  <p class="faq-answer mb-4">Roshan was just the beginning. Players will be able to band together to challenge much harder bosses in order to win special rewards and recognition among an exclusive Cooperative Team Ranking.</p>
-                              </div>
-                          </div>
-                      </div>
+                                <div>
+                                    <div class="faq-question-q-box"><i class="fa fa-comments"></i></div>
+                                    <h4 class="faq-question">Sidebar Chat</h4>
+                                    <p class="faq-answer mb-4">Too lazy for the options above? Feel free to message us directly by using the sidebar Chat, messages are saved for 24 hours and there's always an Administrator around to help out. Click the button on the bottom right section of your screen to open the Chat.</p>
+                                </div>
 
-                      <div class="col-lg-6">
-                          <div class="p-lg-2">
-                            <h5 class="text-center text-warning" style="margin-top:-2rem"><i class="fa fa-trophy"></i> Tournaments</h5>
-                            <!-- Question/Answer -->
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-stopwatch"></i></div>
-                                  <h4 class="faq-question">Real-time Battles</h4>
-                                  <p class="faq-answer mb-4">Competition is the ultimate goal of BrowserMOBA, and in order to make the game truly competitive we will be rolling out tournaments with special formats where battles will be in real-time, with you being in control of the action when both attacking and defending.</p>
-                              </div>
-
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-users"></i></div>
-                                  <h4 class="faq-question">Team Battles</h4>
-                                  <p class="faq-answer mb-4">Tournaments will follow a special format of 5v5, where each player will use their heroes consecutively in a single battle against the opponent's team until one player loses all of their heroes, and thus, the battle. The true champion will be the one with the best team and the best strategy of picking the right heroes at the proper time.</p>
-                              </div>
-
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-eye"></i></div>
-                                  <h4 class="faq-question">Spectator Mode</h4>
-                                  <p class="faq-answer mb-4">Players and fans will be able to watch all tournament battles in real-time turn by turn to root for their favorites and study their opponents' strategies.</p>
-                              </div>
-
-
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="tab-pane fade" id="support-tab">
-                  <div class="row pt-2">
-                      <div class="col-lg-6">
-                          <div class="p-lg-2">
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fab fa-discord"></i></div>
-                                  <h4 class="faq-question">Discord</h4>
-                                  <p class="faq-answer mb-4">The best way to get in touch with our team is by <a href="https://discord.gg/QNwEdPS" target="_blank">visiting our Discord server</a>. That is where our community members hang out and can help you with any questions you may have.</p>
-                              </div>
-
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-envelope"></i></div>
-                                  <h4 class="faq-question" data-wow-delay=".1s">E-mail</h4>
-                                  <p class="faq-answer mb-4">If you prefer, you can also reach the creator of the game <a href="mailto:pedro.tavares@hey.com">by e-mail</a> as well, although he is frequently online on the Discord server above.</p>
-                              </div>
-
-                              <div>
-                                  <div class="faq-question-q-box"><i class="fa fa-comments"></i></div>
-                                  <h4 class="faq-question">Sidebar Chat</h4>
-                                  <p class="faq-answer mb-4">Too lazy for the options above? Feel free to message us directly by using the sidebar Chat, messages are saved for 24 hours and there's always an Administrator around to help out. Click the button on the bottom right section of your screen to open the Chat.</p>
-                              </div>
-
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
   </div>
-</div>
 </div>

@@ -48,12 +48,13 @@ function initTooltips(){
       return showMobile || !mobileCheck(); // cancels tooltip if on mobile
     },
     content(reference) {
-      const title = reference.getAttribute('title')
-      reference.removeAttribute('title')
-      return title
+      const title = reference.getAttribute('title');
+      reference.removeAttribute('title');
+      return title;
     },
     arrow: true,
-    flip: false
+    allowHTML: true,
+    inertia: true
   })
 }
 

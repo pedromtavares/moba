@@ -58,7 +58,7 @@ defmodule Moba.Accounts do
 
   defdelegate update_ranking!, to: Users
 
-  defdelegate finish_pve!(user, hero_collection), to: Users
+  defdelegate update_collection!(user, hero_collection), to: Users
 
   defdelegate reset_unread_messages_count(user), to: Users
 

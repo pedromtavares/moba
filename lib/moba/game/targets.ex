@@ -19,7 +19,7 @@ defmodule Moba.Game.Targets do
   def list(hero_id, farm_sort \\ :asc) do
     Repo.all(from t in Target, where: t.attacker_id == ^hero_id)
     |> Repo.preload(defender: HeroQuery.load())
-    |> Enum.sort_by(fn target -> target.defender.total_farm end, farm_sort)
+    |> Enum.sort_by(fn target -> target.defender.total_gold_farm + target.defender.total_xp_farm end, farm_sort)
   end
 
   @doc """
@@ -27,16 +27,17 @@ defmodule Moba.Game.Targets do
   Currently 2 Targets of each difficulty is generated after every PVE battle.
   """
   def generate!(hero, unlocked_codes \\ [])
-  def generate!(%{user: user} = hero, _) when is_nil(user), do: hero
+  def generate!(%{user_id: user_id} = hero, _) when is_nil(user_id), do: hero
 
-  def generate!(%{user: user} = hero, unlocked_codes) do
+  def generate!(%{pve_tier: pve_tier} = hero, unlocked_codes) do
     Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
 
     {weak_count, moderate_count, strong_count} =
       cond do
-        hero.easy_mode -> {3, 3, 0}
-        user.pve_tier < 2 -> {0, 6, 3}
-        user.pve_tier < 4 -> {0, 3, 6}
+        pve_tier == 0 -> {3, 3, 0}
+        pve_tier == 1 -> {3, 6, 0}
+        pve_tier == 2 -> {0, 6, 3}
+        pve_tier == 3 -> {0, 3, 6}
         true -> {0, 0, 9}
       end
 
@@ -51,9 +52,10 @@ defmodule Moba.Game.Targets do
 
   defp create(hero, difficulty, unlocked_codes, limit, exclude \\ []) do
     exclude_list = [hero.id | exclude]
-    level_range = level_range(hero, difficulty)
+    total_xp_farm = div(hero.total_xp_farm + hero.total_gold_farm, 2)
+    farm_range = farm_range(total_xp_farm, difficulty)
 
-    HeroQuery.pve_targets(difficulty, level_range, exclude_list, unlocked_codes, limit)
+    HeroQuery.pve_targets(difficulty, farm_range, exclude_list, unlocked_codes, limit)
     |> Repo.all()
     |> Enum.map(fn defender ->
       {:ok, target} =
@@ -64,50 +66,51 @@ defmodule Moba.Game.Targets do
     end)
   end
 
-  defp level_range(%{level: level}, difficulty) when level < 10 do
+  defp farm_range(total_xp, difficulty) when total_xp < 7000 do
+    base_xp = 600
+
     case difficulty do
       "weak" ->
-        minimum_or_target_level(level - 3)..minimum_or_target_level(level - 2)
+        minimum_farm(total_xp - base_xp * 4)..minimum_farm(total_xp - base_xp * 2)
 
       "moderate" ->
-        minimum_or_target_level(level - 1)..level
+        minimum_farm(total_xp - base_xp * 3)..total_xp
 
       "strong" ->
-        level..(level + 3)
+        (total_xp + base_xp * 1)..(total_xp + base_xp * 3)
     end
   end
 
-  defp level_range(%{level: level}, difficulty) when level < 25 do
+  defp farm_range(total_xp, difficulty) when total_xp < 20000 do
+    base_xp = 1200
+
     case difficulty do
       "weak" ->
-        (level - 2)..(level - 1)
+        (total_xp - base_xp * 3)..(total_xp - base_xp * 1)
 
       "moderate" ->
-        level..(level + 1)
+        (total_xp - base_xp * 1)..(total_xp + base_xp * 2)
 
       "strong" ->
-        (level + 2)..(level + 5)
+        (total_xp + base_xp * 1)..(total_xp + base_xp * 4)
     end
   end
 
-  defp level_range(%{level: level}, difficulty) do
+  defp farm_range(total_xp, difficulty) do
+    base_xp = 2000
+
     case difficulty do
       "weak" ->
-        level..(level + 1)
+        (total_xp - base_xp * 2)..(total_xp + base_xp * 1)
 
       "moderate" ->
-        (level + 1)..(level + 3)
+        total_xp..(total_xp + base_xp * 3)
 
       "strong" ->
-        (level + 4)..(level + 10)
+        (total_xp + base_xp * 3)..(total_xp + base_xp * 6)
     end
   end
 
-  defp minimum_or_target_level(level) do
-    case level do
-      n when n in [-2, -1] -> 0
-      0 -> 1
-      _ -> level
-    end
-  end
+  defp minimum_farm(farm) when farm < 0, do: 0
+  defp minimum_farm(farm), do: farm
 end

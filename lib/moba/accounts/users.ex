@@ -147,7 +147,7 @@ defmodule Moba.Accounts.Users do
   def update_ranking! do
     Repo.update_all(User, set: [ranking: nil])
 
-    UserQuery.eligible_for_ranking(100)
+    UserQuery.eligible_for_ranking(1000)
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.each(fn {user, index} ->
@@ -215,7 +215,7 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  def finish_pve!(user, hero_collection) do
+  def update_collection!(user, hero_collection) do
     update!(user, %{hero_collection: hero_collection})
   end
 

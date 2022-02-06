@@ -26,23 +26,14 @@
                     </li>
                     <li class="nav-item ml-4">
                         <div class="ribbon-box reward-box">
-                            <div class="ribbon ribbon-warning float-left shape">+<%=league_gold_bonus(@hero)%>g</div>
+                            <div class="ribbon ribbon-warning float-left shape">+<%=league_bonus(@hero)%>g</div>
                         </div>
                     </li>
-                    <%= if @hero.league_tier < Moba.max_league_tier() do %>
-                        <li class="nav-item ml-4">
-                            <div class="ribbon-box reward-box">
-                                <div class="ribbon ribbon-danger float-left shape">+<%=round(Moba.league_buff_multiplier() * 100)%>% buff</div>
-                            </div>
-                        </li>
-                    <% end %>
-                    <%= if @hero.league_tier == Moba.master_league_tier() do %>
-                        <li class="nav-item ml-4">
-                            <div class="ribbon-box reward-box">
-                                <div class="ribbon ribbon-primary float-left shape">MAX level</div>
-                            </div>
-                        </li>
-                    <% end %>
+                    <li class="nav-item ml-4">
+                        <div class="ribbon-box reward-box">
+                            <div class="ribbon ribbon-primary float-left shape">+<%=league_bonus(@hero)%> XP</div>
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -82,15 +73,9 @@
 <%= if @current_user do %>
     <%= if Game.master_league?(@hero) || @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
         <div class="row battle-border-top pt-1 mt-2">
-            <div class="col-4">
-                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView, %{league: true}), class: "btn btn-outline-secondary btn-lg btn-block", "phx-hook": "Loading", id: "load-battles" do %>
-                    <span class="loading-text"><i class="fa fa-history"></i> Battle History</span>
-                <% end %>
-            </div>
-
             <div class="col">
-                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-outline-success btn-lg btn-block", "phx-hook": "Loading", id: "load-jungle" do %>
-                    <span class="loading-text"><i class="fa fa-leaf"></i> Go back to the Jungle</span>
+                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-outline-info btn-lg btn-block", "phx-hook": "Loading", id: "load-jungle" do %>
+                    <span class="loading-text"><i class="fa fa-play"></i> Continue</span>
                 <% end %>
             </div>
         </div>

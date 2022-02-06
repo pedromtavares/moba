@@ -3,50 +3,33 @@
         <form phx-submit="finalize-edit" phx-target="#hero-bar">
             <div class="row">
                 <div class="d-none d-md-block col-3 col-md-2 col-lg-2 col-xl-2 center">
-                    <div class="row">
-                        <div class="col" data-toggle="tooltip" title="<img src='<%=GH.background_url(@current_hero)%>' style='max-width:500px'/>">
-                            <%=GH.hero_avatar(@current_hero)%>
+                    <div class="row mt-2">
+                        <div class="col" data-toggle="tooltip" title="<img src='<%= GH.background_url(@current_hero) %>' style='max-width:500px'/>">
+                            <%= GH.hero_avatar(@current_hero) %>
                         </div>
                     </div>
                     <h3 class="mb-0 mt-1 hero-name" phx-click="level">
-                        <img src="/images/league_<%=@current_hero.league_tier%>.png" class="league-logo" style="margin-top:-3px">
-                        <%=@current_hero.name%>
+                        <%= @current_hero.name %>
                     </h3>
-                    <%= if @current_mode == "pvp" || @current_hero.level == Moba.max_hero_level() do %>
-                        <div class="row">
-                            <div class="col">
-                                <h4 class="font-italic text-dark">Level <%=@current_hero.level%> <%=@current_hero.avatar.name%></h4>
-                            </div>
-                        </div>
-                    <% else %>
-                        <div class="row">
-                            <div class="col">
-                                <div class="float-left center">
-                                    <ul class="pagination pagination-rounded mb-0">
-                                        <li class="page-item">
-                                            <div class="page-link hero-level bg-white" data-toggle="tooltip" title="Level">
-                                                <%=@current_hero.level%>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <div class="progress progress-fixed xp-bar" data-toggle="tooltip" title="Experience: <%=@current_hero.experience%>/<%=xp_to_next_level(@current_hero)%>">
-                                    <div style="width:<%=xp_percentage(@current_hero)%>%" class="progress-bar bg-white">
-                                        <span></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    <% end %>
                 </div>
                 <div class="col col-md-5 col-lg-5 col-xl-4 <%=if @show_build, do: "d-none"%>">
                     <div class="flex-column">
-                        <div class="row no-gutters boxes">
-                            <%=render "_navigation.html", origin: @origin, current_user: @current_hero.user, socket: @socket, current_mode: @current_mode, unreads: @unreads %>
+                        <div class="row">
+                            <div class="col">
+                                <%= if @current_mode == "pvp" do %>
+                                    <h4 class="font-italic text-dark text-center">Level <%= @current_hero.level %> <%= @current_hero.avatar.name %></h4>
+                                <% else %>
+                                    <div class="progress progress-fixed xp-bar" data-toggle="tooltip" title="Experience: <%= @current_hero.experience %>/<%= xp_to_next_level(@current_hero) %>">
+                                        <div style="width:<%= xp_percentage(@current_hero) %>%" class="progress-bar bg-white">
+                                            <span class="font-15">Level <%= @current_hero.level%></span>
+                                        </div>
+                                    </div>
+                                <% end %>    
+                            </div>
                         </div>
                         <div class="row d-none d-md-block no-gutters" id="current-hero-stats">
                             <div class="col flex no-wrap pl-0" style="overflow: visible;">
-                                <%=render "_stats.html", current_hero: @current_hero%>
+                                <%= render "_stats.html", current_hero: @current_hero %>
                             </div>
                         </div>
                     </div>
@@ -68,7 +51,7 @@
                                             <%= if !skill.passive do %>
                                                 <div class="form-group">
                                                     <select class="custom-select" name="skill_order[<%=skill.code%>]">
-                                                        <%=for {code, index} <- Enum.with_index(@current_hero.active_build.skill_order, 1) do %>
+                                                        <%= for {code, index} <- Enum.with_index(@current_hero.active_build.skill_order, 1) do %>
                                                             <option value=<%=index%> <%=if code == skill.code, do: "selected"%>><%=index%></option>
                                                         <% end %>
                                                     </select>

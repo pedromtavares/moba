@@ -15,7 +15,7 @@ defmodule Moba.Cleaner do
       from h in Hero,
         where: not is_nil(h.archived_at),
         where: h.archived_at <= ^ago,
-        where: not h.finished_pve,
+        where: is_nil(h.finished_at),
         where: h.bot_difficulty != "boss",
         limit: 50
 

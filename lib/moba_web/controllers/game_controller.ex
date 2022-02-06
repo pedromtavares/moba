@@ -26,16 +26,12 @@ defmodule MobaWeb.GameController do
     )
   end
 
-  def summon(conn, _params) do
-    live_render(conn, MobaWeb.CreateLiveView, session: %{"summon" => true})
-  end
-
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
     {user, conn} = Accounts.create_guest(conn)
     avatar = Game.get_avatar!(selected_avatar)
     skills = Game.list_chosen_skills(selected_skills)
 
-    Moba.create_current_pve_hero!(%{name: avatar.name, easy_mode: true}, user, avatar, skills)
+    Moba.create_current_pve_hero!(%{name: avatar.name}, user, avatar, skills)
 
     conn
     |> put_session(:guest_user_id, user.id)

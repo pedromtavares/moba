@@ -7,9 +7,6 @@ defmodule Moba.Game.Heroes do
   alias Game.Schema.Hero
   alias Game.Query.{HeroQuery, SkillQuery}
 
-  @max_level Moba.max_hero_level()
-  @master_league_tier Moba.master_league_tier()
-
   # -------------------------------- PUBLIC API
 
   def get!(nil), do: nil
@@ -63,7 +60,7 @@ defmodule Moba.Game.Heroes do
           gold: 100_000,
           pvp_active: user != nil,
           league_tier: league_tier,
-          total_farm: bot_total_farm(league_tier, difficulty),
+          total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
           pvp_last_picked: user && DateTime.utc_now()
         },
         user,
@@ -89,19 +86,6 @@ defmodule Moba.Game.Heroes do
     end
   end
 
-  def level_to_max!(%{level: current_level} = hero) when current_level < @max_level do
-    diff = @max_level - current_level
-
-    xp =
-      Enum.reduce(1..diff, 0, fn level, acc ->
-        acc + Moba.xp_to_next_hero_level(current_level + level)
-      end)
-
-    add_experience!(hero, xp)
-  end
-
-  def level_to_max!(hero), do: hero
-
   def update!(nil, _), do: nil
 
   def update!(hero, attrs, items \\ nil) do
@@ -124,7 +108,6 @@ defmodule Moba.Game.Heroes do
     hero
     |> update!(updates)
     |> add_experience!(xp)
-    |> master_league_updates()
   end
 
   @doc """
@@ -156,13 +139,10 @@ defmodule Moba.Game.Heroes do
     updated =
       hero
       |> add_experience!(xp)
-      |> update!(%{
-        gold: 100_000,
-        buffed_battles_available: 0
-      })
+      |> update!(%{gold: 100_000})
 
     if updated.level == 25 do
-      update!(updated, %{league_tier: 5}) |> master_league_updates() |> Game.level_active_build_to_max!()
+      update!(updated, %{league_tier: 5}) |> Game.generate_boss!()
     else
       updated
     end
@@ -262,18 +242,18 @@ defmodule Moba.Game.Heroes do
     |> avatar_preload()
   end
 
-  def pve_search(%{total_farm: total_farm, bot_difficulty: bot}) when not is_nil(bot) do
+  def pve_search(%{total_gold_farm: total_gold_farm, bot_difficulty: bot}) when not is_nil(bot) do
     HeroQuery.non_bots()
-    |> HeroQuery.by_total_farm(total_farm - 200, total_farm + 200)
+    |> HeroQuery.by_total_gold_farm(total_gold_farm - 200, total_gold_farm + 200)
     |> HeroQuery.limit_by(5)
     |> Repo.all()
     |> avatar_preload()
   end
 
-  def pve_search(%{total_farm: total_farm, id: id}) do
+  def pve_search(%{total_gold_farm: total_gold_farm, id: id}) do
     by_farm =
       HeroQuery.non_bots()
-      |> HeroQuery.by_total_farm(total_farm - 500, total_farm + 500)
+      |> HeroQuery.by_total_gold_farm(total_gold_farm - 500, total_gold_farm + 500)
       |> Repo.all()
       |> avatar_preload()
 
@@ -298,14 +278,13 @@ defmodule Moba.Game.Heroes do
   end
 
   @doc """
-  Grabs all Heroes ordered by their total_farm and updates their pve_ranking
+  Grabs all Heroes ordered by their total_gold_farm and updates their pve_ranking
   """
   def update_pve_ranking! do
     Repo.update_all(Hero, set: [pve_ranking: nil])
 
     HeroQuery.non_bots()
     |> HeroQuery.finished_pve()
-    |> HeroQuery.non_summoned()
     |> HeroQuery.in_current_ranking_date()
     |> Repo.all()
     |> Enum.with_index(1)
@@ -336,33 +315,34 @@ defmodule Moba.Game.Heroes do
   def collection_for(user_id) do
     HeroQuery.finished_pve()
     |> HeroQuery.with_user(user_id)
+    |> HeroQuery.unarchived()
     |> Repo.all()
     |> Repo.preload(:avatar)
     |> Enum.group_by(& &1.avatar.code)
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_farm}, :desc) |> List.first()
+        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_gold_farm}, :desc) |> List.first()
       }
     end)
-    |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_farm} end, :desc)
+    |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_gold_farm} end, :desc)
     |> Enum.map(fn {code, hero} -> %{code: code, hero_id: hero.id, tier: hero.league_tier, avatar: hero.avatar} end)
   end
 
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
   def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
 
-  def buyback_price(%{level: level, user: user}), do: level * Moba.buyback_multiplier(user)
+  def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
 
-  def buyback!(%{dead: true} = hero) do
+  def buyback!(%{pve_state: "dead"} = hero) do
     price = buyback_price(hero)
 
     if hero.gold >= price do
       update!(hero, %{
-        dead: false,
+        pve_state: "alive",
         buybacks: hero.buybacks + 1,
         gold: hero.gold - price,
-        total_farm: hero.total_farm - price
+        total_gold_farm: hero.total_gold_farm - price
       })
     else
       hero
@@ -371,20 +351,61 @@ defmodule Moba.Game.Heroes do
 
   def buyback!(hero), do: hero
 
+  def start_farming!(hero, state, turns) do
+    update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+  end
+
+  def finish_farming!(
+        %{
+          pve_farming_turns: farming_turns,
+          pve_current_turns: current_turns,
+          pve_farming_rewards: rewards,
+          pve_farming_started_at: started,
+          pve_state: state
+        } = hero
+      ) do
+    remaining_turns = zero_limit(current_turns - farming_turns)
+
+    {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
+
+    new_reward = [%{state: state, started_at: started, turns: farming_turns, amount: amount}]
+
+    hero
+    |> Hero.replace_farming_rewards(rewards ++ new_reward)
+    |> update!(%{
+      pve_state: "alive",
+      pve_farming_turns: 0,
+      pve_farming_started_at: nil,
+      pve_current_turns: remaining_turns
+    })
+  end
+
   # --------------------------------
 
-  defp add_experience!(hero, experience)
   defp add_experience!(hero, nil), do: hero
-  defp add_experience!(%{level: level} = hero, _) when level >= @max_level, do: hero
 
   defp add_experience!(hero, experience) do
     hero = Repo.preload(hero, :user)
     if hero.user, do: Moba.add_user_experience(hero.user, experience)
 
     hero
-    |> Hero.changeset(%{experience: hero.experience + experience})
+    |> Hero.changeset(%{experience: hero.experience + experience, total_xp_farm: hero.total_xp_farm + experience})
     |> check_if_leveled()
     |> Repo.update!()
+  end
+
+  defp apply_farming_rewards(hero, turns, "meditating") do
+    rewards = turns * Enum.random(Moba.farm_per_turn(hero.pve_tier))
+    hero = add_experience!(hero, rewards)
+
+    {hero, rewards}
+  end
+
+  defp apply_farming_rewards(hero, turns, "mining") do
+    rewards = turns * Enum.random(Moba.farm_per_turn(hero.pve_tier))
+    hero = update!(hero, %{gold: hero.gold + rewards, total_gold_farm: hero.total_gold_farm + rewards})
+
+    {hero, rewards}
   end
 
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do
@@ -413,16 +434,16 @@ defmodule Moba.Game.Heroes do
     end)
   end
 
-  defp bot_total_farm(league_tier, difficulty) do
-    base = bot_total_farm_base(league_tier, difficulty)
+  defp bot_total_gold_farm(league_tier, difficulty) do
+    base = bot_total_gold_farm_base(league_tier, difficulty)
 
     range =
       case difficulty do
         # 0..800
         "weak" -> 0..2
         # 1200..2000
-        "moderate" -> 3..5
-        "strong" -> (6 + league_tier)..(8 + league_tier)
+        "moderate" -> 2..4
+        "strong" -> (4 + league_tier)..(6 + league_tier)
         # 19_200..24_000
         "pvp_master" -> 0..12
         # 26_400..30_000
@@ -432,8 +453,10 @@ defmodule Moba.Game.Heroes do
     base + 400 * Enum.random(range)
   end
 
-  defp bot_total_farm_base(tier, difficulty) when difficulty in ["pvp_master", "pvp_grandmaster"], do: (tier - 1) * 4800
-  defp bot_total_farm_base(tier, _), do: tier * 4800
+  defp bot_total_gold_farm_base(tier, difficulty) when difficulty in ["pvp_master", "pvp_grandmaster"],
+    do: (tier - 1) * 4800
+
+  defp bot_total_gold_farm_base(tier, _), do: tier * 4800
 
   defp inactivate_weakest_pvp_bot(league_tier) do
     HeroQuery.weakest_pvp_bot(league_tier)
@@ -467,17 +490,6 @@ defmodule Moba.Game.Heroes do
       end)
   end
 
-  defp master_league_updates(%{league_tier: tier, easy_mode: true} = hero) when tier == @master_league_tier do
-    master_league_updates(%{hero | easy_mode: false})
-    |> Game.finish_pve!()
-  end
-
-  defp master_league_updates(%{league_tier: tier, level: level} = hero)
-       when tier == @master_league_tier and level < @max_level do
-    hero
-    |> level_to_max!()
-    |> Game.level_active_build_to_max!()
-  end
-
-  defp master_league_updates(hero), do: hero
+  defp zero_limit(total) when total < 0, do: 0
+  defp zero_limit(total), do: total
 end

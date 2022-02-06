@@ -3,7 +3,7 @@ defmodule MobaWeb.ArenaSelectLiveViewTest do
   import Phoenix.LiveViewTest
 
   test "connected mount", %{conn: conn} do
-    hero = create_base_hero(%{league_tier: 5, finished_pve: true})
+    hero = create_base_hero(%{league_tier: 5, finished_at: Timex.now()})
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 

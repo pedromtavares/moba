@@ -1,6 +1,6 @@
 <div class="col-xl-<%=if @selected, do: 3, else: 4%> col-lg-6 col-sm-12 mb-4" id="avatar-<%=@avatar.id%>">
     <%= if @selected do %>
-        <a class="btn btn-outline-dark text-white btn-block mb-2 btn-lg" phx-click="repick-avatar" id="repick-button"><i class="fa fa-refresh mr-2"></i>Repick Hero</a>
+        <a class="btn btn-outline-dark text-white btn-block mb-2 btn-lg" phx-click="repick-avatar" id="repick-button"><i class="fa fa-refresh mr-2"></i>Repick Avatar</a>
     <% end %>
     <div class="hero-card card">
         <div class="card-body text-center p-0" style="background-image: url(<%=GH.background_url(@avatar)%>">

@@ -52,8 +52,8 @@ defmodule Moba.Engine.Schema.Battler do
 
     field :turn_atk, :integer, default: 0
 
-    field :total_buff, :float, default: 0
-    field :total_reduction, :float, default: 0
+    field :total_buff, :float, default: 0.0
+    field :total_reduction, :float, default: 0.0
 
     field :last_damage_taken, :integer, default: 0
     field :last_damage_caused, :integer, default: 0

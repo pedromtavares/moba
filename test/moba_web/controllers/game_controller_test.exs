@@ -22,22 +22,6 @@ defmodule MobaWeb.GameControllerTest do
     assert html_response(conn, 200) =~ "Your Heroes"
   end
 
-  test "user has active pvp hero and is redirected to base", %{conn: conn} do
-    hero = create_pvp_hero()
-
-    conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba) |> get("/")
-
-    assert "/base" = redir_path = redirected_to(conn, 302)
-
-    conn =
-      conn
-      |> recycle()
-      |> Pow.Plug.assign_current_user(hero.user, otp_app: :moba)
-      |> get(redir_path)
-
-    assert html_response(conn, 200) =~ "Arena"
-  end
-
   test "start loads", %{conn: conn} do
     conn = get(conn, "/start")
     assert html_response(conn, 200) =~ "Pick your Avatar"

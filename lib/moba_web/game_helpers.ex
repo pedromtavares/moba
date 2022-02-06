@@ -17,6 +17,9 @@ defmodule MobaWeb.GameHelpers do
   def background_url(%{background: background} = resource), do: get_background_url(background, resource)
   def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
 
+  def farming_amount_label(value) when value >= 1000, do: "#{div(value, 1000)}K"
+  def farming_amount_label(value), do: value
+
   def hero_skill_list(%{active_build: %{skills: skills}, id: id}) do
     Enum.map(skills, fn skill ->
       img_tag(image_url(skill),
@@ -57,7 +60,7 @@ defmodule MobaWeb.GameHelpers do
     end)
   end
 
-  def hero_avatar(hero, show_medals \\ true) do
+  def hero_avatar(hero, show_medals \\ false) do
     tooltip = "Earn Medals by finishing in the top 3 of a match"
     medals = (show_medals && hero.user && hero.user.medal_count > 0 && "
       <p class='medals text-warning bg-light-dark d-none d-xl-block text-center' title='#{tooltip}' data-toggle='tooltip'>
@@ -110,21 +113,21 @@ defmodule MobaWeb.GameHelpers do
 
   def skill_description(%{code: "basic_attack"} = skill) do
     "
-    <h3>#{skill.name}</h3>
+    <h3 class='text-center'>#{skill.name}</h3>
 
     #{skill.description}
     "
   end
 
   def skill_description(skill, full_description \\ true, show_name \\ true) do
-    name = show_name && "<h3 class='mb-1'>#{skill.name}</h3>"
-    level = full_description && skill.level && "<h5>Level #{skill.level}</h5>"
+    name = show_name && "<h3 class='mb-1 text-center'>#{skill.name}</h3>"
+    level = full_description && skill.level && "<h5 class='text-center'>Level #{skill.level}</h5>"
     full = (full_description && full_skill_description(skill)) || ""
     "
       #{name || ""}
       #{level || ""}
       <span class='text-dark'>#{skill.description}</span>
-      #{full}
+      <div class='text-center'>#{full}</div>
     "
   end
 
@@ -178,7 +181,7 @@ defmodule MobaWeb.GameHelpers do
         "<span class='badge badge-light-purple'><i class='fa fa-running mr-1'></i> +#{item.base_speed} Speed</span>"
 
     "
-      <h3 class='mb-1'>#{item.name}</h3>
+      <h3 class='mb-1 text-center'>#{item.name}</h3>
       <div class='text-center mb-1 mt-1'>#{rarity}</div>
       <span class='text-dark'>#{item.description}</span>
       <div class='text-center mb-2 mt-1'>
@@ -193,7 +196,7 @@ defmodule MobaWeb.GameHelpers do
         #{mp_cost || ""}
         #{cooldown || ""}
       </div>
-      #{effects}
+      <div class='text-center'>#{effects}</div>
     "
   end
 

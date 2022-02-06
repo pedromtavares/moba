@@ -27,27 +27,38 @@ defmodule Moba.Game.Schema.Hero do
     field :gold, :integer
     field :bot_difficulty, :string
     field :archived_at, :utc_datetime
+    # remove
     field :easy_mode, :boolean, default: false
 
-    # PVE (Jungle) related fields
+    # PVE related fields
+    # remove
     field :pve_points, :integer
-    field :pve_battles_available, :integer
+    field :pve_total_turns, :integer
+    field :pve_current_turns, :integer
+    # remove
     field :buffed_battles_available, :integer, default: 0
+    # remove
     field :xp_boosted_battles_available, :integer, default: 0
     field :wins, :integer, default: 0
     field :losses, :integer, default: 0
     field :ties, :integer, default: 0
     field :buybacks, :integer, default: 0
-    field :dead, :boolean, default: false
-    field :total_farm, :integer, default: 0
+    field :total_gold_farm, :integer, default: 0
+    field :total_xp_farm, :integer, default: 0
     field :pve_ranking, :integer
-    field :finished_pve, :boolean, default: false
     field :finished_at, :utc_datetime
     field :shards_reward, :integer, default: 0
+    # remove
     field :summoned, :boolean, default: false
     field :refresh_targets_count, :integer, default: 0
+    field :pve_state, :string
+    field :pve_farming_turns, :integer
+    field :pve_farming_started_at, :utc_datetime
+    field :pve_tier, :integer
 
-    # PVP (Arena) related fields
+    embeds_many :pve_farming_rewards, Game.Schema.FarmingReward
+
+    # PVP related fields
     field :pvp_points, :integer
     field :pvp_battles_available, :integer
     field :pvp_ranking, :integer
@@ -104,18 +115,22 @@ defmodule Moba.Game.Schema.Hero do
       :wins,
       :losses,
       :ties,
-      :pve_battles_available,
+      :pve_current_turns,
+      :pve_total_turns,
       :pvp_battles_available,
       :buffed_battles_available,
       :pve_points,
+      :pve_state,
+      :pve_farming_turns,
+      :pve_farming_started_at,
+      :pve_tier,
       :pvp_points,
       :bot_difficulty,
       :gold,
-      :total_farm,
+      :total_gold_farm,
+      :total_xp_farm,
       :buybacks,
-      :dead,
       :pve_ranking,
-      :finished_pve,
       :finished_at,
       :item_hp,
       :item_mp,
@@ -149,9 +164,12 @@ defmodule Moba.Game.Schema.Hero do
       :match_id,
       :refresh_targets_count
     ])
+    |> cast_embed(:pve_farming_rewards)
   end
 
   def create_changeset(hero, attrs, user, avatar) do
+    pve_tier = (user && user.pve_tier) || 0
+
     hero
     |> change(%{
       atk: avatar.atk,
@@ -162,7 +180,10 @@ defmodule Moba.Game.Schema.Hero do
       power: avatar.power
     })
     |> change(%{
-      pve_battles_available: Moba.battles_per_tier(),
+      pve_state: "alive",
+      pve_current_turns: Moba.turns_per_tier(),
+      pve_total_turns: Moba.total_pve_turns(pve_tier),
+      pve_tier: pve_tier,
       pve_points: 0,
       pvp_points: 0,
       league_step: 0,
@@ -182,6 +203,12 @@ defmodule Moba.Game.Schema.Hero do
     |> put_assoc(:items, items)
   end
 
+  def replace_farming_rewards(hero, rewards) do
+    hero
+    |> changeset(%{})
+    |> put_embed(:pve_farming_rewards, rewards)
+  end
+
   def level_up(changeset, level, xp) do
     hero = changeset.data
     changes = changeset.changes
@@ -192,8 +219,8 @@ defmodule Moba.Game.Schema.Hero do
 
     skill_levels_available =
       cond do
+        next_level > 28 -> current_skill_levels
         Integer.is_even(next_level) -> current_skill_levels + 1
-        next_level == Moba.max_hero_level() -> current_skill_levels + 2
         true -> current_skill_levels
       end
 

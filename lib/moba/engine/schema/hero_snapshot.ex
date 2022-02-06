@@ -23,7 +23,6 @@ defmodule Moba.Engine.Schema.HeroSnapshot do
     field :pvp_wins, :integer
     field :pvp_losses, :integer
     field :pvp_ranking, :integer
-    field :buffed_battles_available, :integer, default: 0
   end
 
   def changeset(model, params \\ %{}) do
@@ -44,8 +43,7 @@ defmodule Moba.Engine.Schema.HeroSnapshot do
       :league_tier,
       :pvp_wins,
       :pvp_losses,
-      :pvp_ranking,
-      :buffed_battles_available
+      :pvp_ranking
     ])
   end
 end

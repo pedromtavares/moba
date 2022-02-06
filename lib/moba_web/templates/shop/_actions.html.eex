@@ -7,7 +7,7 @@
 <hr/>
 <div class="row">
     <div class="col center">
-        <button class="btn btn-warning buy-button" phx-click="buy" phx-target="#shop" <%=unless can_buy?(@hero, @selected_shop), do: "disabled"%> phx-hook="Loading" loading="Buying...">
+        <button class="btn btn-warning buy-button" phx-click="buy" phx-target="#shop" <%= unless can_buy?(@hero, @selected_shop), do: "disabled" %> phx-hook="Loading" loading="Buying..." id="buy-button">
             <span class="loading-text">Buy for <i class="fa fa-coins"></i> <%=price(@selected_shop)%></span>
         </button>
         <%= unless normal?(@selected_shop) do %>

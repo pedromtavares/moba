@@ -1,4 +1,4 @@
-<div class="arena-select" phx-hook="SetMainWrapper" id="arena-select">
+<div class="arena-select" id="arena-select">
 
     <div class="row">
         <div class="col-12 text-center">
@@ -80,10 +80,6 @@
                                 <h2 class="text-info text-center mt-0">
                                     <small>Previous Arena Picks</small><br/>
                                     <%=hero.pvp_picks%>
-                                </h2>
-                                <h2 class="text-success text-center mt-0">
-                                    <small>Jungle Win Rate</small><br/>
-                                    <%=GH.pve_win_rate(hero)%>%
                                 </h2>
                                 <%=if hero.pvp_ranking do %>
                                     <h2 class="text-warning text-center mt-0">

@@ -23,7 +23,7 @@
           <div class="field">
             <label>Description</label>
             <%= filter_select(:item, :description, @conn.params) %>
-            <%= filter_text_input(:item, :description, @conn.params) %>
+            <%= filter_string_input(:item, :description, @conn.params) %>
           </div>
 
           <div class="field">

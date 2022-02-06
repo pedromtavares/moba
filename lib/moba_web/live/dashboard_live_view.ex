@@ -9,23 +9,6 @@ defmodule MobaWeb.DashboardLiveView do
     {:ok, socket |> pve_assigns() |> pvp_assigns() |> quest_assigns()}
   end
 
-  def handle_event("achievements-display", %{"display" => display}, socket) do
-    {:noreply, assign(socket, achievements_display: display)}
-  end
-
-  def handle_event("daily-display", %{"display" => display}, socket) do
-    {:noreply, assign(socket, daily_display: display)}
-  end
-
-  def handle_event("pve-tab", %{"tab" => tab}, socket) do
-    {:noreply, assign(socket, current_pve_tab: tab)}
-  end
-
-  def handle_event("pve-season-progression", %{"level" => level}, socket) do
-    progression = Enum.find(socket.assigns.season_progressions, &(&1.quest.level == String.to_integer(level)))
-    {:noreply, assign(socket, current_season_progression: progression)}
-  end
-
   def handle_event("pve-show-finished", _, socket) do
     {:noreply, assign(socket, visible_heroes: finished_heroes(socket.assigns.all_heroes), pve_display: "finished")}
   end
@@ -34,17 +17,11 @@ defmodule MobaWeb.DashboardLiveView do
     {:noreply, assign(socket, visible_heroes: unfinished_heroes(socket.assigns.all_heroes), pve_display: "unfinished")}
   end
 
-  def handle_event("show-current", _, socket) do
-    {:noreply, assign(socket, pvp_hero: socket.assigns.current_pvp_hero, pvp_display: "current")}
-  end
-
-  def handle_event("show-previous", _, socket) do
-    {:noreply, assign(socket, pvp_hero: socket.assigns.last_pvp_hero, pvp_display: "previous")}
-  end
-
   def handle_event("archive", %{"id" => id}, socket) do
     hero = Game.get_hero!(id)
     Game.archive_hero!(hero)
+    if hero.finished_at, do: Game.update_hero_collection!(hero)
+
     {:noreply, assign(socket, visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id)))}
   end
 
@@ -64,64 +41,37 @@ defmodule MobaWeb.DashboardLiveView do
     unfinished_heroes = unfinished_heroes(all_heroes)
     pve_display = if Enum.any?(unfinished_heroes), do: "unfinished", else: "finished"
     visible_heroes = if pve_display == "unfinished", do: unfinished_heroes, else: finished_heroes(all_heroes)
+    collection_codes = Enum.map(user.hero_collection, & &1["code"])
+    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
 
     assign(socket,
       all_heroes: all_heroes,
       unfinished_heroes: unfinished_heroes,
       pve_display: pve_display,
-      visible_heroes: visible_heroes
+      visible_heroes: visible_heroes,
+      collection_codes: collection_codes,
+      blank_collection: blank_collection
     )
   end
 
-  defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &(not &1.finished_pve))
-  defp finished_heroes(all_heroes), do: Enum.filter(all_heroes, & &1.finished_pve)
+  defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &is_nil(&1.finished_at))
+  defp finished_heroes(all_heroes), do: Enum.filter(all_heroes, & &1.finished_at)
 
   defp pvp_assigns(%{assigns: %{current_user: user}} = socket) do
-    current_pvp_hero = Game.current_pvp_hero(user)
-    last_match = Game.last_match()
-    last_pvp_hero = Game.last_picked_pvp_hero(user.id)
-    winners = Game.podium_for(last_match)
-
-    tier_winners =
-      if last_pvp_hero && last_pvp_hero.league_tier == Moba.master_league_tier(),
-        do: winners["master"],
-        else: winners["grandmaster"]
-
-    winner_index = tier_winners && Enum.find_index(tier_winners, fn winner -> winner.user_id == user.id end)
-
-    pvp_display = if current_pvp_hero, do: "current", else: "previous"
-    pvp_hero = if current_pvp_hero, do: current_pvp_hero, else: last_pvp_hero
-
     duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
 
-    assign(socket,
-      current_pvp_hero: current_pvp_hero,
-      duel_users: duel_users,
-      last_pvp_hero: last_pvp_hero,
-      pvp_hero: pvp_hero,
-      pvp_display: pvp_display,
-      winners: tier_winners,
-      winner_index: winner_index
-    )
+    assign(socket, duel_users: duel_users)
   end
 
   defp quest_assigns(%{assigns: %{current_user: user}} = socket) do
-    current_master_collection = Enum.filter(user.hero_collection, fn hero -> hero["tier"] >= 5 end)
-    season_progressions = Game.list_quest_progressions(user.id, "season")
+    season_progressions = Game.list_season_quest_progressions(user.id)
     current_season_progression = Game.active_quest_progression?(season_progressions)
     daily_progressions = Game.list_daily_quest_progressions(user.id)
-    achievement_progressions = Game.list_achievement_progressions(user.id)
-    current_pve_tab = if current_season_progression, do: "season", else: "daily"
 
     assign(socket,
-      current_master_collection: current_master_collection,
       season_progressions: season_progressions,
       current_season_progression: current_season_progression,
-      daily_display: "pve",
-      daily_progressions: daily_progressions,
-      achievements_display: "in_progress",
-      achievement_progressions: achievement_progressions,
-      current_pve_tab: current_pve_tab
+      daily_progressions: daily_progressions
     )
   end
 end

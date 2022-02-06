@@ -1,5 +1,3 @@
-<%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
-
 <div class="row mt-3">
     <div class="col">
         <div class="title-container">
@@ -12,22 +10,12 @@
     </div>
 </div>
 
-<div class="row mt-3 content-with-hero-bar" phx-hook="SetMainWrapper" id="hall-of-fame">
+<div class="row mt-3 content-with-hero-bar" id="hall-of-fame">
     <div class="col text-center">
         <ul class="nav nav-tabs nav-bordered nav-justified">
             <li class="nav-item">
                 <a href="javascript:;" class="nav-link <%=if @active_tab == "pve", do: "active"%>" phx-click="show-pve" phx-hook="Loading" id="show-pve-link">
-                    <span class="loading-text"><i class="fa fa-leaf text-success mr-1"></i>Jungle Ranking</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:;" class="nav-link <%=if @active_tab == "grandmaster", do: "active"%>" phx-click="show-grandmaster" phx-hook="Loading" id="show-grandmaster-link">
-                    <span class="loading-text"><img src="/images/league_6.png" class="league-logo mr-1">Grandmaster Arena Ranking</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:;" class="nav-link <%=if @active_tab == "master", do: "active"%>" phx-click="show-master" phx-hook="Loading" id="show-master-link">
-                    <span class="loading-text"><img src="/images/league_5.png" class="league-logo mr-1">Master Arena Ranking</span>
+                    <span class="loading-text"><i class="fa fa-crosshairs text-success mr-1"></i>Hero Ranking</span>
                 </a>
             </li>
 
@@ -39,37 +27,37 @@
         </ul>
         <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "pve", do: "d-none"%>">
             <tbody id="hall-of-heroes">
-                <%=for hero <- @pve do %>
+                <%= for hero <- @pve do %>
                     <tr id="hero-<%=hero.id%>">
                         <td>
                             <h1 class="mb-0">
-                                #<%=hero.pve_ranking%>
+                                #<%= hero.pve_ranking %>
                             </h1>
                         </td>
                         <td>
-                            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
-                                <%=GH.hero_avatar(hero, false)%><br/>
-                                <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%=hero.name%></h4>
-                                <small class="text-dark">Level <%=hero.level%> <%=hero.avatar.name%></small>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
+                                <%= GH.hero_avatar(hero, false) %><br/>
+                                <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%= hero.name %></h4>
+                                <small class="text-dark">Level <%= hero.level %> <%= hero.avatar.name %></small>
                             <% end %>
                         </td>
                         <td>
                             <div class="row d-flex mb-3">
                                 <div class="col">
-                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Farm">
-                                        <i class="fa fa-coins mr-1"></i><%=hero.total_farm%>
+                                    <h4 class="text-info" data-toggle="tooltip" title="Total XP Farm: <%= hero.total_xp_farm %>">
+                                        <i class="fa fa-spa mr-1"></i><%= GH.farming_amount_label hero.total_xp_farm %>
                                     </h4>
                                 </div>
                                 <div class="col">
-                                    <h4 class="text-success" data-toggle="tooltip" title="Win Rate">
-                                        <i class="fa fa-crosshairs mr-1"></i><%=GH.pve_win_rate(hero)%>%
+                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Gold Farm: <%= hero.total_gold_farm %>">
+                                        <i class="fa fa-coins mr-1"></i><%= GH.farming_amount_label hero.total_gold_farm %>
                                     </h4>
                                 </div>
                                 <div class="col">
                                     <h4 class="text-danger" data-toggle="tooltip" title="Time it took to finish the Jungle">
                                         <i class="fa fa-clock-o mr-1"></i>
                                         <%= if hero.finished_at do %>
-                                            <%=GH.finished_time(hero)%> minutes
+                                            <%= GH.finished_time(hero) %> minutes
                                         <% else %>
                                             ??
                                         <% end %>
@@ -77,98 +65,22 @@
                                 </div>
                             </div>
 
-                            <%=GH.hero_stats(hero, true)%>
+                            <%= GH.hero_stats(hero, true) %>
                         </td>
                         <td>
-                            <%=GH.hero_skill_list(hero)%>
+                            <%= GH.hero_skill_list(hero) %>
                             <br/>
-                            <%=GH.hero_item_list(hero, true)%>
+                            <%= GH.hero_item_list(hero, true) %>
                         </td>
                     </tr>
               <% end %>
             </tbody>
         </table>
-        <%= if @grandmaster do %>
-            <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "grandmaster", do: "d-none"%>">
-                <tbody id="hall-of-heroes">
-                    <%=for hero <- @grandmaster do %>
-                        <tr id="hero-<%=hero.id%>">
-                            <td>
-                                <h1 class="mb-0">
-                                    #<%=hero.pvp_ranking%>
-                                </h1>
-                            </td>
-                            <td>
-                                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.user_id) do %>
-                                    <%=GH.hero_avatar(hero)%><br/>
-                                    <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%=hero.name%></h4>
-                                    <small class="text-dark">Level <%=hero.level%> <%=hero.avatar.name%></small>
-                                <% end %>
-                            </td>
-                            <td>
-                                <div class="row d-flex mb-3">
-                                    <div class="col">
-                                        <h4 class="text-warning"><%=hero.pvp_points%> Points</h4>
-                                    </div>
-                                    <div class="col">
-                                        <h4 class="text-danger">WR: <%=GH.pvp_win_rate(hero)%>%</h4>
-                                    </div>
-                                </div>
-                                <%=GH.hero_stats(hero, true)%>
-                            </td>
-                            <td>
-                                <%=GH.hero_skill_list(hero)%>
-                                <br/>
-                                <%=GH.hero_item_list(hero, true)%>
-                            </td>
-                        </tr>
-                  <% end %>
-                </tbody>
-            </table>
-        <% end %>
-        <%= if @master do %>
-            <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "master", do: "d-none"%>">
-                <tbody id="hall-of-heroes">
-                    <%=for hero <- @master do %>
-                        <tr id="hero-<%=hero.id%>">
-                            <td>
-                                <h1 class="mb-0">
-                                    #<%=hero.pvp_ranking%>
-                                </h1>
-                            </td>
-                            <td>
-                                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, hero.user_id) do %>
-                                    <%=GH.hero_avatar(hero)%><br/>
-                                    <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%=hero.name%></h4>
-                                    <small class="text-dark">Level <%=hero.level%> <%=hero.avatar.name%></small>
-                                <% end %>
-                            </td>
-                            <td>
-                                <div class="row d-flex mb-3">
-                                    <div class="col">
-                                        <h4 class="text-warning"><%=hero.pvp_points%> Points</h4>
-                                    </div>
-                                    <div class="col">
-                                        <h4 class="text-danger">WR: <%=GH.pvp_win_rate(hero)%>%</h4>
-                                    </div>
-                                </div>
-                                <%=GH.hero_stats(hero, true)%>
-                            </td>
-                            <td>
-                                <%=GH.hero_skill_list(hero)%>
-                                <br/>
-                                <%=GH.hero_item_list(hero, true)%>
-                            </td>
-                        </tr>
-                  <% end %>
-                </tbody>
-            </table>
-        <% end %>
         <%= if @users do %>
             <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "users", do: "d-none"%>">
                 <tbody id="hall-of-users">
                     <tr>
-                        <td colspan="4" class='text-success'>Ranked by Season Points - Play in the Arena to win Season Points</td>
+                        <td colspan="4" class='text-success'>Ranked by Season Points - Duel against other players to win Season Points</td>
                     </tr>
                     <%=for {user, index} <- Enum.with_index(@users, 1) do %>
                         <tr id="user-<%=user.id%>">

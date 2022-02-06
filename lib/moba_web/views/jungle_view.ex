@@ -1,12 +1,44 @@
 defmodule MobaWeb.JungleView do
   use MobaWeb, :view
 
-  def boss_available?(hero) do
-    hero.boss_id && Game.get_hero!(hero.boss_id)
-  end
+  def boss_available?(%{pve_current_turns: 0, boss_id: boss_id}) when not is_nil(boss_id), do: Game.get_hero!(boss_id)
+  def boss_available?(_), do: false
 
   def boss_percentage(boss) do
     boss.total_hp * 100 / boss.avatar.total_hp
+  end
+
+  def farming_container_background(hero, assigns) do
+    if farming_progression(hero, assigns) >= 100 do
+      "rgba(54, 64, 74, 0.8)"
+    else
+      "rgba(54, 64, 74, 0.6)"
+    end
+  end
+
+  def farming_progression(%{pve_farming_turns: turns, pve_farming_started_at: started, pve_state: state}, %{
+        current_time: current
+      })
+      when state in ["meditating", "mining"] do
+    turn_seconds = turns * Moba.seconds_per_turn()
+    total = Timex.shift(started, seconds: turn_seconds)
+    total_diff = Timex.diff(total, started, :seconds)
+    current_diff = Timex.diff(current, started, :seconds)
+
+    100 * current_diff / total_diff
+  end
+
+  def farming_progression(_, _), do: 100
+
+  def farming_reward(%{pve_tier: tier}, turns) do
+    start..endd = Moba.farm_per_turn(tier)
+
+    "#{start * turns} - #{endd * turns}"
+  end
+
+  def farming_time_left(%{pve_farming_turns: turns, pve_farming_started_at: started}, %{current_time: _}) do
+    turn_seconds = turns * Moba.seconds_per_turn()
+    Timex.shift(started, seconds: turn_seconds) |> Timex.format("{relative}", :relative) |> elem(1)
   end
 
   def difficulty_color(difficulty) do
@@ -27,22 +59,9 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def difficulty_reward_label(difficulty) do
-    number =
-      case difficulty do
-        "weak" -> 1
-        "moderate" -> 2
-        "strong" -> 3
-        _ -> 0
-      end
+  def display_farm_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
 
-    coins =
-      Enum.reduce(1..number, "", fn _n, acc ->
-        acc <> "<i class='fa fa-coins'></i>"
-      end)
-
-    raw(coins)
-  end
+  def dead?(hero), do: hero.pve_state == "dead"
 
   def offense_percentage(target, targets) do
     heroes = Enum.map(targets, & &1.defender)
@@ -75,22 +94,19 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def reward_badges_for(hero, difficulty) do
-    base_xp = round(Moba.battle_xp() * Moba.xp_percentage(difficulty, hero.easy_mode) / 100)
-    double_xp = base_xp * 2
+  def max_available_league(%{pve_tier: tier}), do: Moba.max_available_league(tier)
 
-    xp_reward =
-      if hero.level < Moba.max_hero_level() do
-        content_tag(:span, "+#{double_xp}/+#{base_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
-      else
-        ""
-      end
+  def reward_badges_for(hero, difficulty) do
+    battle_xp = Moba.battle_xp(difficulty, hero.pve_tier)
+    win_xp = battle_xp + Moba.pve_win_bonus()
+
+    xp_reward = content_tag(:span, "+#{win_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
 
     safe_to_string(
       content_tag :div do
         [
           xp_reward,
-          content_tag(:span, "+#{double_xp}/+#{base_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
+          content_tag(:span, "+#{win_xp}/+#{battle_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
         ]
       end
     )
@@ -114,7 +130,7 @@ defmodule MobaWeb.JungleView do
     raw(base)
   end
 
-  def show_league_challenge?(%{pve_battles_available: 0, league_tier: league_tier}) do
+  def show_league_challenge?(%{pve_current_turns: 0, league_tier: league_tier}) do
     league_tier < Moba.master_league_tier()
   end
 

@@ -10,13 +10,17 @@ defmodule MobaWeb.HeroLiveView do
     avatars = Game.list_avatars()
     collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Enum.filter(avatars, &(&1.code not in collection_codes))
+    
     completed_progressions = hero && Game.last_completed_quest_progressions(hero)
     completed_season_progression = completed_progressions && Enum.find(completed_progressions, &(&1.quest.code == "season"))
     completed_daily_progressions = completed_progressions && Enum.filter(completed_progressions, & &1.quest.daily)
 
-    completed_achievement_progressions = completed_progressions && Enum.filter(completed_progressions, &(not &1.quest.daily and &1.quest.code != "season"))
+    completed_season_progression =
+      completed_progressions && Enum.find(completed_progressions, &String.contains?(&1.quest.code, "season"))
 
-    tab_display = tab_display_priority(completed_season_progression, completed_daily_progressions)
+    completed_daily_progressions = completed_progressions && Enum.filter(completed_progressions, & &1.quest.daily)
+
+    tab_display = tab_display_priority(completed_season_progression)
 
     {:ok,
      assign(socket,
@@ -26,7 +30,6 @@ defmodule MobaWeb.HeroLiveView do
        completed_progressions: completed_progressions,
        completed_season_progression: completed_season_progression,
        completed_daily_progressions: completed_daily_progressions,
-       completed_achievement_progressions: completed_achievement_progressions,
        tab_display: tab_display
      )}
   end
@@ -54,11 +57,6 @@ defmodule MobaWeb.HeroLiveView do
     MobaWeb.HeroView.render("show.html", assigns)
   end
 
-  defp tab_display_priority(season, daily) do
-    cond do
-      season -> "season"
-      daily -> "daily"
-      true -> "achievement"
-    end
-  end
+  defp tab_display_priority(season) when not is_nil(season), do: "season"
+  defp tab_display_priority(_), do: "daily"
 end

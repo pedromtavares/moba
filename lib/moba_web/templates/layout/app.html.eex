@@ -2,7 +2,7 @@
 <html lang="en">
     <%=render "_head.html", conn: @conn, current_hero: nil%>
     <body>
-        <%= render "_navigation.html", conn: @conn, current_user: @current_user, clean: true%>
+        <%= render "_navigation.html", conn: @conn, current_user: @current_user, current_hero: assigns[:current_hero], clean: true%>
         <div class="wrapper" id="main-wrapper">
             <div class="container-fluid" style="margin-bottom: 100px;">
                 <div class="row">

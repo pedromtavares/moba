@@ -1,49 +1,24 @@
 <div class="dashboard mt-3">
     <div class="row">
-        <div class="col-xl-6">
-            <%= render "_quests.html", assigns %>
+        <div class="col-xl-12">
+            <%= render "_pve_progression.html", assigns %>
         </div>
-        <%=if length(@duel_users) > 0 do %>
-            <div class="col-xl-6">
-                <%= render "_duels.html", assigns %>
-            </div>
-        <% end %>
     </div>
-
+    <div class="row mb-3">
+        <div class="col">
+            <a href="/invoke" class="btn p-2 btn-block btn-lg btn-success d-block <%= if @current_user.is_guest, do: "disabled" %>"><i class="fa fa-user-plus mr-1"></i>Train a new Hero</a>
+        </div>
+    </div>
     <div class="row">
         <div class="col-xl-6">
             <%= render "_hero_list.html", assigns %>
         </div>
         <div class="col-xl-6">
-            <%= render "_arena.html", assigns %>
+            <%= render "_pvp_progression.html", assigns %>
         </div>
     </div>
-
-    <%= if @winners do %>
-        <div class="row">
-            <div class="col">
-                <h3 class="page-title mb-3 text-center">
-                    <i class="fa fa-medal mr-2"></i>Winners of the Previous Match
-                </h3>
-            </div>
-        </div>
-
-        <%= if @winner_index do %>
-            <div class="row">
-                <div class="col">
-                    <div class="alert alert-warning alert-dismissible bg-warning border-0 fade show text-center" role="alert">
-                        Congratulations, you've finished the previous match at #<%=@winner_index+1%>, enjoy your Rewards!
-                    </div>
-                </div>
-            </div>
-        <% end %>
-
-        <div class="row winners">
-            <%=render "_podium_hero.html", hero: Enum.at(@winners, 0), ranking: 1, socket: @socket%>
-            <%=render "_podium_hero.html", hero: Enum.at(@winners, 1), ranking: 2, socket: @socket%>
-            <%=render "_podium_hero.html", hero: Enum.at(@winners, 2), ranking: 3, socket: @socket%>
-        </div>
-    <% end %>
 </div>
 
-<%=render "_season_rankings.html"%>
+<%= render "_season_rankings.html" %>
+<%= render "_pve_tier_rewards.html", Map.put(assigns, :pve_tier, @current_user.pve_tier + 1) %>
+<%= render "_daily_quests.html", assigns %>

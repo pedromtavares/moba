@@ -4,57 +4,47 @@
             <div class="col">
                 <h4 class="header-title pt-3 pl-3">Your Heroes</h4>
             </div>
+            <div class="col d-flex justify-content-center">
+                <div class="d-none d-md-inline-block pt-3 pb-3 pr-3">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-xs <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished">In Progress</button>
+                        <button type="button" class="btn btn-xs <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished">Completed</button>
+                    </div>
+                </div>
+            </div>
             <div class="col">
                 <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-xs <%=if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light"%>" phx-click="pve-show-unfinished">In Progress</button>
-                        <button type="button" class="btn btn-xs <%=if @pve_display == "finished", do: "btn-secondary", else: "btn-light"%>" phx-click="pve-show-finished">Completed</button>
+                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#daily-quests"><i class="fa fa-clock-o mr-1"></i>Daily Quests</button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row mb-3 mx-2">
-            <div class="col">
-                <a href="/invoke" class="btn btn-block btn-lg btn-success d-block <%=if @current_user.is_guest, do: "disabled"%>"><i class="fa fa-user-plus mr-1"></i>Invoke New Hero</a>
-            </div>
-        </div>
         <div class="w-100 hero-list fixed-panel" style="overflow: auto;">
             <table class="table table-dark mb-0">
-                <%=for hero <- @visible_heroes do %>
+                <%= for hero <- @visible_heroes do %>
                     <tr>
                         <td class="text-center" width="20%">
                             <h4>
-                                <%=hero.name%><%=if hero.finished_pve && !hero.summoned do %><span class="text-success">#<%=hero.pve_ranking%></span><%end%>
+                                <%= hero.name %><%= if hero.finished_at do %><span class="text-success">#<%= hero.pve_ranking %></span><% end %>
                             </h4>
 
-                            <%=GH.hero_avatar(hero, false)%>
+                            <%= GH.hero_avatar(hero, false) %>
 
                             <h5 class="text-muted font-italic">Level <%=hero.level%> <%=hero.avatar.name%></h5>
                         </td>
                         <td class="p-0 text-center">
-                            <%=GH.hero_skill_list(hero)%>
+                            <%= GH.hero_skill_list(hero) %>
                             <br/>
-                            <%=GH.hero_item_list(hero, true)%>
+                            <%= GH.hero_item_list(hero, true) %>
                         </td>
-                        <%= if hero.summoned do %>
-                            <td class="text-center" width="25%">
-                                <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
-                                <h5 class="text-primary">Summoned</h5>
-                            </td>
-                        <% else %>
-                            <td class="text-center" width="25%">
-                                <img src="/images/league_<%=hero.league_tier%>.png" class="league-logo">
-                                <h5 class="text-success"><%=GH.pve_win_rate(hero)%>% Win Rate</h5>
-                                <%=if hero.easy_mode do %>
-                                    <h5 class="text-primary">Casual Mode</h5>
-                                <% else %>
-                                    <h5 class="text-warning"><%=hero.buybacks%> Buybacks</h5>
-                                    <h5 class="text-danger">Competitive Mode</h5>
-                                <% end %>
-                            </td>
-                        <% end %>
+                        <td class="text-center" width="25%">
+                            <img src="/images/league_<%= hero.league_tier %>.png" class="league-logo">
+                            <h5><%= Moba.leagues()[hero.league_tier] %></h5>
+                            <h5 class="text-warning" data-toggle="tooltip" title="Total farm: <%= hero.total_xp_farm + hero.total_gold_farm %>"><%= GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm) %> Total Farm</h5>
+                        </td>
                         <td class="text-center" width="20%">
-                            <%= if hero.finished_pve do %>
+                            <%= if hero.finished_at do %>
                                 <%=live_redirect class: "btn btn-primary btn-lg btn-block", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
                                     <i class="fa fa-address-card fa-2x"></i>
                                     <br/>
@@ -62,11 +52,11 @@
                                 <% end %>
                             <% else %>
                                 <%= link to: "/game/continue?hero_id=#{hero.id}", class: "btn btn-success btn-lg btn-block", method: :post do %>
-                                    <i class="fa fa-leaf fa-2x"></i>
+                                    <i class="fa fa-crosshairs fa-2x"></i>
                                     <br/>
                                     Continue
                                     <br/>
-                                    <small><em>(<%=hero.pve_battles_available%> ganks left)</em>
+                                    <small><em>(<%= hero.pve_total_turns + hero.pve_current_turns %> turns left)</em>
                                 <% end %>
                             <% end %>
                             <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>

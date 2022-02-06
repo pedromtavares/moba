@@ -1,5 +1,4 @@
-<%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
-<div class="content-with-hero-bar" phx-hook="SetMainWrapper" id="library">
+<div class="content-with-hero-bar" id="library">
     <div class="row mt-3">
         <div class="col">
             <div class="title-container">
@@ -24,16 +23,16 @@
               </li>
               <li class="nav-item">
                   <a href="#jungle-tab" data-toggle="tab" aria-expanded="true" class="nav-link px-3 py-2">
-                      <span class="d-inline-block d-sm-none"><i class="fa fa-leaf mr-1"></i>Jungle</span>
-                      <span class="d-none d-sm-inline-block"><i class="fa fa-leaf mr-1"></i>Jungle Guide</span>
+                      <span class="d-inline-block d-sm-none"><i class="fa fa-crosshairs mr-1"></i>Training</span>
+                      <span class="d-none d-sm-inline-block"><i class="fa fa-crosshairs mr-1"></i>Training Guide</span>
                   </a>
               </li>
-              <li class="nav-item">
+              <%# <li class="nav-item">
                   <a href="#arena-tab" data-toggle="tab" aria-expanded="false" class="nav-link px-3 py-2">
-                      <span class="d-inline-block d-sm-none"><i class="fa fa-crosshairs mr-1"></i>Arena</span>
-                      <span class="d-none d-sm-inline-block"><i class="fa fa-crosshairs mr-1"></i>Arena Guide</span>
+                      <span class="d-inline-block d-sm-none"><i class="fa fa-crosshairs mr-1"></i>Duel</span>
+                      <span class="d-none d-sm-inline-block"><i class="fa fa-crosshairs mr-1"></i>Duel Guide</span>
                   </a>
-              </li>
+              </li> %>
           </ul>
           <div class="tab-content">
               <div class="tab-pane fade active show" id="faq-tab">
@@ -42,14 +41,14 @@
                           <div class="p-lg-2">
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question" data-wow-delay=".1s">What is the difference between Jungle and Arena?</h4>
-                                  <p class="faq-answer mb-4">The Jungle is the PVE (Player vs Environment) phase of the game where you get to build out your hero to perfect its gameplay, it's the only phase where you can farm XP and gold so make sure you do your best for your hero to be competitive. The Arena is the PVP (Player vs Player) phase where you get to use your leveled hero (and the items you managed to farm) against other players. In the Jungle, battles have a set limit of 12 turns and can end in a tie, whereas in the Arena you fight to the death in every battle (no ties).</p>
+                                  <h4 class="faq-question" data-wow-delay=".1s">What is the main objective of this game?</h4>
+                                  <p class="faq-answer mb-4">There is always a main quest to complete that is displayed on the top bar of the Base. This quest will have you train to reach the Grandmaster League with all of the Avatars in the game. Experiment beating the game with different builds as every build is a different challenge, and when it gets stale, try dueling against other players! </p>
                               </div>
 
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">Can I pick another hero after joining the Arena?</h4>
-                                  <p class="faq-answer mb-4">No, you must wait until the current match ends to be able to pick another hero in the Arena. Matches last for 24h, there is a timer showing how much time is left on your hero's bottom bar. We have a planned feature of allowing you to join the Arena with a team of heroes instead of just one, so stay tuned for that!</p>
+                                  <h4 class="faq-question">What is the Season Progression on the PvP tab of the Base?</h4>
+                                  <p class="faq-answer mb-4">This is the alternative progression in the game where you climb up the PvP ladder by dueling other players. This ladder is what ultimately ranks users in the game, so get good Dueling!</p>
                               </div>
                           </div>
                       </div>
@@ -69,8 +68,8 @@
 
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">What are Quests? </h4>
-                                  <p class="faq-answer mb-4">Quests are game objectives that you can complete in order to win Shards. Quests and their rewards vary depending on their difficulty, with harder ones requiring more dedication and skill to complete. The ultimate goal in BrowserMOBA is to complete all available Quests.</p>
+                                  <h4 class="faq-question">What are Daily Quests? </h4>
+                                  <p class="faq-answer mb-4">Quests are small objectives that you can complete in order to farm Shards. The main quest will also reward you with a lot of Shards on top of other rewards.</p>
                               </div>
                           </div>
                       </div>
@@ -82,17 +81,17 @@
                           <div class="p-lg-2">
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">What is the main objective of the Jungle?</h4>
-                                  <p class="faq-answer mb-4">In Casual Mode, to reach the Master League by winning all League Challenges (Silver, Gold, Platinum and Diamond). In Competitive Mode, to reach the Grandmaster League with as much gold as possible.</p>
+                                  <h4 class="faq-question">What is the main objective of Training?</h4>
+                                  <p class="faq-answer mb-4">After invoking your Hero, you should level it until you run out of turns by fighting through the Leagues. The farther you level the stronger your hero will be. After finishing Training, you will be able to use the Hero in PvP duelds.</p>
                               </div>
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
                                   <h4 class="faq-question" data-wow-delay=".1s">How do I get to Grandmaster League?</h4>
-                                  <p class="faq-answer mb-4">Create hero in Competitive mode and beat Roshan, the final boss of the Jungle. You have 2 chances of beating Roshan and will finish in the Master League if you fail these chances.</p>
+                                  <p class="faq-answer mb-4">You must be at least a Veteran to unlock the Grandmaster League. Level up your hero without losing a single League Challenge and you will be presented with a chance to fight Roshan, the final boss of the Master League. You have 2 chances of beating Roshan and will finish in the Master League if you fail these chances.</p>
                               </div>
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">What is a good strategy for beating the Jungle?</h4>
+                                  <h4 class="faq-question">What is a good strategy for Training?</h4>
                                   <p class="faq-answer mb-4">Avoid dying as much as possible and always buy Normal/Rare items when you have the gold to do so, remember, you can always Transmute them into better items later. If there aren't any targets you are confident in killing, aim for targets with low Offense to reduce your chances of dying. Aim for Normal and Hard targets only for optimal farming.</p>
                               </div>
                           </div>
@@ -112,15 +111,16 @@
                               <!-- Question/Answer -->
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">What is the Season Quest?</h4>
-                                  <p class="faq-answer mb-4">It's the initial quest that players must finish in order to gain all Jungle Bonuses: extra initial gold, 50% buyback discount, gank recovery on death and the possibility to refresh targets.</p>
+                                  <h4 class="faq-question">Should I gank or meditate/mine?</h4>
+                                  <p class="faq-answer mb-4">Ganking will always offer more rewards but it comes with more risk as you can die and have to buyback. Meditating/mining is a safe choice but can randomly offer very low rewards. Ideally you should only meditate/mine if you have no good targets to gank or if you have a specific build in mind that needs more XP or gold early on.</p>
                               </div>
+
 
                               <!-- Question/Answer -->
                               <div>
                                   <div class="faq-question-q-box">Q.</div>
-                                  <h4 class="faq-question">How does the Jungle Ranking work?</h4>
-                                  <p class="faq-answer mb-4">The Jungle Ranking ranks heroes by their total farm, which is the amount of gold you gain since your first battle. In order to reach the higher ranks, you must create a hero in Competitive Mode due to farming not being limited.</p>
+                                  <h4 class="faq-question">How does the Hero Ranking work?</h4>
+                                  <p class="faq-answer mb-4">The Hero Ranking ranks heroes by their total farm, which is the amount of XP and gold you gain after finishing Training. Note that only by Ganking you can reach a higher total farm, as passive farming via Meditation and Mining offer less overall rewards than Ganking.</p>
                               </div>
                           </div>
                       </div>
@@ -128,7 +128,7 @@
                   </div>
                   <!-- end row -->
               </div>
-              <div class="tab-pane fade" id="arena-tab">
+              <%# <div class="tab-pane fade" id="arena-tab">
                   <div class="row pt-2">
                       <div class="col-lg-6">
                           <div class="p-lg-2">
@@ -180,7 +180,7 @@
                       <!--/col-md-5-->
                   </div>
                   <!-- end row -->
-              </div>
+              </div> %>
           </div>
       </div>
   </div>

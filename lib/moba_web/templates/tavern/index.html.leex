@@ -1,6 +1,4 @@
-<%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
-
-<div class="content-with-hero-bar tavern" phx-hook="SetMainWrapper" id="tavern">
+<div class="content-with-hero-bar tavern" id="tavern">
 
     <div class="row mt-3">
         <div class="col">
@@ -8,7 +6,7 @@
                 <i class="fa fa-store-alt text-primary"></i>
                 <h1>Tavern</h1>
                 <p class="text-muted">
-                    Unlock new heroes, skills and skins to play with by using your Shards. You can acquire Shards by finishing heroes in the Jungle or winning top 3 of the Arena.
+                    Unlock new heroes, skills and skins to play with by using your Shards. You can acquire Shards by finishing Quests.
                 </p>
             </div>
         </div>
@@ -20,16 +18,6 @@
                 <h2 class="text-warning counter mt-0"><i class="fab fa-ethereum mr-2"></i><%=@current_user.shard_count%></h3>
                 <p class="text-muted mb-0">Shards</p>
             </div>
-        </div>
-    </div>
-
-    <div class="row mt-2 mb-2">
-        <div class="col text-center">
-            <%= live_redirect to: "/summon", class: "btn btn-outline-primary btn-lg #{if @current_user.shard_count < Moba.summon_cost(), do: "disabled"}" do %>
-                <i class="fa fa-user fa-2x mr-1 mt-2"></i>
-                <strong class="font-20 d-block">Summon Hero (100 Shards)</strong>
-                <p class="font-15">Create a level 25 Master League Hero to use in PVP</p>
-            <% end %>
         </div>
     </div>
 
@@ -45,7 +33,7 @@
 
     <div class="row">
         <%= for avatar <- @avatars do %>
-            <%=render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
+            <%= render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
         <% end %>
     </div>
 
@@ -61,7 +49,7 @@
 
     <div class="row">
         <%= for skill <- @skills do %>
-            <%=render "_skill.html", skill: skill, user: @current_user %>
+            <%= render "_skill.html", skill: skill, user: @current_user %>
         <% end %>
     </div>
 

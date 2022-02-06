@@ -17,6 +17,7 @@
 
 @import "../node_modules/nprogress/nprogress.css";
 @import "../node_modules/shepherd.js/dist/css/shepherd.css";
+@import '../node_modules/tippy.js/dist/tippy.css';
 
 @font-face {
   font-family: bravadaArma;
@@ -37,6 +38,10 @@ body{
 
 .progress-bar{
   min-width: 10%;
+}
+
+.no-mininum{
+  min-width: 0% !important;
 }
 
 hr{
@@ -133,6 +138,10 @@ hr{
     .nav-link{
       padding-top: 1rem;
     }
+
+    .avatar{
+      max-width: 100px;
+    }
   }
 
   .container-fluid{
@@ -200,6 +209,17 @@ hr{
 
 .transparent{
   background-color: rgba(54, 64, 74, 0.8);
+}
+
+.dark-bg{
+  background: #38414a;
+  border-image-source: radial-gradient(white, rgb(47, 60, 74));
+  border-image-slice: 1;
+  box-shadow: inset 0px 0px 300px black;
+}
+
+.darker{
+  background: rgba(0, 0, 0, 0.2);
 }
 
 .original-bg{

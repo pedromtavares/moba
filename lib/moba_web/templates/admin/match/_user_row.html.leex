@@ -26,11 +26,11 @@
             </h5>
             <span class="text-center text-success"><%=@user.current_pvp_hero.pvp_points%> Points</span>
             |
-            <span class="text-danger">WR: <strong><%=GH.pvp_win_rate(@user.current_pvp_hero)%>%</strong></span>
+            <span class="text-danger">WR: <strong><%=GH.pvp_win_rate(@user.current_pvp_hero) %>%</strong></span>
             |
-            <span class="text-warning"><%=@user.current_pvp_hero.total_farm%></span>
+            <span class="text-warning"><%=@user.current_pvp_hero.total_gold_farm + @user.current_pvp_hero.total_xp_farm %></span>
             |
-            <span class="text-primary">#<%=@user.current_pvp_hero.pve_ranking%></span>
+            <span class="text-primary">#<%=@user.current_pvp_hero.pve_ranking %></span>
         <% end %>
     </td>
     <td class="text-center">
@@ -43,9 +43,9 @@
                 <img src="<%=GH.image_url(item)%>" style="width: 35px;">
             <% end %>
             <br/>
-            <small class="text-dark"><%=Enum.join(@user.current_pvp_hero.active_build.skill_order, ", ")%></small>
+            <small class="text-dark"><%=Enum.join(@user.current_pvp_hero.active_build.skill_order, ", ") %></small>
             <br/>
-            <small class="text-dark"><%=Enum.join(@user.current_pvp_hero.active_build.item_order, ", ")%></small>
+            <small class="text-dark"><%=Enum.join(@user.current_pvp_hero.active_build.item_order, ", " )%></small>
         <% end %>
     </td>
     <td class="text-center">
@@ -56,12 +56,10 @@
                 <%= live_redirect "Lv #{@user.current_pve_hero.level} #{@user.current_pve_hero.avatar.name}", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @user.current_pve_hero), class: "text-white"%>
             </h5>
             <span class="text-center text-success">
-                <%=@user.current_pve_hero.pve_battles_available %><%=if @user.current_pve_hero.easy_mode, do: " easy"%> battles <span class="text-warning">(<%=@user.current_pve_hero.buffed_battles_available%>)</span> <span class="text-danger">(<%=@user.current_pve_hero.buybacks%>)</span>
+                <%=@user.current_pve_hero.pve_current_turns %> turns <span class="text-danger">(<%=@user.current_pve_hero.buybacks%>)</span>
             </span>
             |
-            <span class="text-danger">WR: <strong><%=GH.pve_win_rate(@user.current_pve_hero)%>%</strong></span>
-            |
-            <span class="text-warning"><%=@user.current_pve_hero.total_farm%></span>
+            <span class="text-warning"><%=@user.current_pve_hero.total_gold_farm + @user.current_pve_hero.total_xp_farm %></span>
         <% end %>
     </td>
     <td class="text-center">

@@ -18,43 +18,6 @@ defmodule MobaWeb.CreateLiveView do
        cache_key: cache_key,
        token: token,
        filter: nil,
-       summoning?: false,
-       error: nil,
-       name: nil
-     )}
-  end
-
-  def mount(_params, %{"summon" => true, "user_id" => user_id}, socket) do
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
-    user = socket.assigns.current_user
-    unlocked_codes = Accounts.unlocked_codes_for(user)
-    cached = get_cache(user.id)
-    avatars = Game.list_creation_avatars(unlocked_codes)
-    items = Moba.cached_items()
-
-    collection_codes = Enum.map(user.hero_collection, & &1["code"])
-    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
-
-    total_gold =
-      Moba.summon_total_gold() - (Enum.map(cached.selected_items, &(&1 && Game.item_price(&1))) |> Enum.sum())
-
-    {:ok,
-     assign(socket,
-       blank_collection: blank_collection,
-       skills: Game.list_creation_skills(5, unlocked_codes),
-       avatars: avatars,
-       all_avatars: avatars,
-       selected_avatar: cached.selected_avatar,
-       selected_skills: cached.selected_skills,
-       selected_items: cached.selected_items,
-       custom: true,
-       cache_key: user.id,
-       filter: nil,
-       summoning?: true,
-       items: items,
-       total_gold: total_gold,
-       epic_items: Enum.filter(items, fn item -> item.rarity == "epic" end),
-       legendary_items: Enum.filter(items, fn item -> item.rarity == "legendary" end),
        error: nil,
        name: nil
      )}
@@ -82,7 +45,6 @@ defmodule MobaWeb.CreateLiveView do
        custom: false,
        cache_key: user.id,
        filter: nil,
-       summoning?: false,
        error: nil,
        name: user.username
      )}
@@ -172,50 +134,22 @@ defmodule MobaWeb.CreateLiveView do
     {:noreply, assign(socket, selected_avatar: selected_avatar, selected_skills: [])}
   end
 
-  def handle_event("create-easy", _, socket), do: create_hero(true, socket)
-  def handle_event("create-veteran", _, socket), do: create_hero(false, socket)
-
   def handle_event(
-        "select-item",
-        %{"code" => code},
-        %{assigns: %{selected_skills: skills, cache_key: cache_key, selected_avatar: avatar} = assigns} = socket
-      ) do
-    item = get_item(code, socket)
-
-    {items, gold} =
-      if Enum.member?(assigns.selected_items, item) do
-        remove_item(assigns, item)
-      else
-        add_item(assigns, item)
-      end
-
-    put_cache(cache_key, avatar, skills, nil, items)
-
-    {:noreply, assign(socket, selected_items: items, total_gold: gold)}
-  end
-
-  def handle_event(
-        "summon",
+        "create",
         _,
-        %{
-          assigns: %{
-            current_user: user,
-            selected_avatar: avatar,
-            selected_skills: selected_skills,
-            selected_items: selected_items
-          }
-        } = socket
+        %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
+          socket
       ) do
     skills =
       selected_skills
       |> Enum.map(fn skill -> skill.id end)
       |> Game.list_chosen_skills()
 
-    Game.summon_hero!(user, avatar, skills, selected_items)
+    hero_name = if !is_nil(name) && is_nil(validation_error(name, socket)), do: name, else: user.username
 
-    delete_cache(socket)
+    Moba.create_current_pve_hero!(%{name: hero_name}, user, avatar, skills)
 
-    {:noreply, socket |> redirect(to: "/base")}
+    {:noreply, socket |> redirect(to: "/game/pve")}
   end
 
   def handle_event("validate", %{"name" => name}, socket) do
@@ -224,25 +158,6 @@ defmodule MobaWeb.CreateLiveView do
 
   def render(assigns) do
     MobaWeb.CreateView.render("index.html", assigns)
-  end
-
-  defp create_hero(
-         easy_mode,
-         %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
-           socket
-       ) do
-    skills =
-      selected_skills
-      |> Enum.map(fn skill -> skill.id end)
-      |> Game.list_chosen_skills()
-
-    hero_name = if !is_nil(name) && is_nil(validation_error(name, socket)), do: name, else: user.username
-
-    Moba.create_current_pve_hero!(%{name: hero_name, easy_mode: easy_mode}, user, avatar, skills)
-
-    delete_cache(socket)
-
-    {:noreply, socket |> redirect(to: "/game/pve")}
   end
 
   defp add_skill(selected, skill) when length(selected) < 3 do
@@ -255,41 +170,20 @@ defmodule MobaWeb.CreateLiveView do
     selected -- [skill]
   end
 
-  defp add_item(%{selected_items: selected, total_gold: total_gold}, item) when length(selected) < 6 do
-    price = Game.item_price(item)
-
-    if total_gold >= price do
-      {selected ++ [item], total_gold - price}
-    else
-      {selected, total_gold}
-    end
-  end
-
-  defp add_item(%{selected_items: selected, total_gold: total_gold}, _), do: {selected, total_gold}
-
-  defp remove_item(%{selected_items: selected, total_gold: total_gold}, item) do
-    {selected -- [item], total_gold + Game.item_price(item)}
-  end
-
   defp get_cache(cache_key) do
     case Cachex.get(:game_cache, cache_key) do
-      {:ok, nil} -> %{selected_avatar: nil, selected_skills: [], selected_build_index: nil, selected_items: []}
+      {:ok, nil} -> %{selected_avatar: nil, selected_skills: [], selected_build_index: nil}
       {:ok, attrs} -> attrs
     end
   end
 
-  defp put_cache(cache_key, avatar, skills, selected_build_index, selected_items \\ []) do
+  defp put_cache(cache_key, avatar, skills, selected_build_index) do
     Cachex.put(:game_cache, cache_key, %{
       selected_avatar: avatar,
       selected_skills: skills,
-      selected_build_index: selected_build_index,
-      selected_items: selected_items
+      selected_build_index: selected_build_index
     })
   end
-
-  defp delete_cache(%{assigns: %{cache_key: key}}), do: Cachex.del(:game_cache, key)
-
-  defp get_item(code, socket), do: Enum.find(socket.assigns.items, fn item -> item.code == code end)
 
   defp validation_error(name, %{assigns: %{current_user: user}}) do
     length = String.length(name)

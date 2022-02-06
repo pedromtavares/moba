@@ -1,17 +1,15 @@
-<div class="hero-review" phx-hook="SetMainWrapper" id="hero-review">
-    <%=if finished_hero = finished_jungle?(@current_user, @hero) do %>
-        <%= render "_finished_hero.html", Map.put(assigns, :finished_hero, finished_hero)%>
-    <% else %>
-        <%= @current_hero && live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>
+<div class="hero-review" id="hero-review">
+    <%= if finished_hero = finished_jungle?(@current_user, @hero) do %>
+        <%= render "_finished_hero.html", Map.put(assigns, :finished_hero, finished_hero) %>
     <% end %>
     <div class="row mt-3">
         <div class="col-md-6 col-xl-4">
-            <div class="hero-card card " style="background-image: url(<%=GH.background_url(@hero)%>">
+            <div class="hero-card card " style="background-image: url(<%= GH.background_url(@hero) %>">
                 <div class="card-header pt-0 pb-1">
                     <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-                        <span class="font-italic level">Level<br/><span class="font-italic font-20"><%=@hero.level%></span></span>
-                        <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%=@hero.name%><%end%>
-                        <span class="font-15 font-italic"><%=@hero.avatar.name%></span>
+                        <span class="font-italic level">Level<br/><span class="font-italic font-20"><%= @hero.level %></span></span>
+                        <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%= @hero.name %><%end %>
+                        <span class="font-15 font-italic"><%= @hero.avatar.name %></span>
                     </h4>
                 </div>
                 <div class="card-body text-center">
@@ -19,16 +17,16 @@
                 <div class="transparent card-footer p-0 text-center">
                     <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
                         <div class="col">
-                            <%=GH.hero_stats(@hero, true)%>
+                            <%= GH.hero_stats(@hero, true) %>
                         </div>
                     </div>
                     <div class="row">
                         <div class="col-12 mt-1">
                             <div class="skills-container d-flex justify-content-between">
-                                <%=GH.hero_skill_list(@hero)%>
+                                <%= GH.hero_skill_list(@hero) %>
                             </div>
                             <div class="items-container row no-gutters">
-                                <%=GH.hero_item_list(@hero)%>
+                                <%= GH.hero_item_list(@hero) %>
                             </div>
 
                         </div>
@@ -39,7 +37,7 @@
         <div class="col-md-6 col-xl-4">
             <div class="row">
                 <div class="col">
-                    <%=live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<%end%>
+                    <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
                 </div>
             </div>
             <div class="row">
@@ -47,8 +45,8 @@
                     <div class="card">
                         <h5 class="card-header text-center font-17 text-white">
                             <i class="fa fa-poll mr-1"></i>Hero Performance
-                            <%=unless @hero.finished_pve do %>
-                                <small class="text-muted font-italic"> - In Progress <%=@hero.pve_battles_available%> battles left)</small>
+                            <%= unless @hero.finished_at do %>
+                                <small class="text-muted font-italic"> - In Progress <%= @hero.pve_total_turns %> turns left)</small>
                             <% end %>
                         </h5>
                         <div class="card-body p-2">
@@ -56,10 +54,10 @@
                                 <div class="row">
                                     <div class="col d-flex align-items-center">
                                         <%= for {tier, _} <- Moba.leagues() do %>
-                                            <img src="/images/league_<%=tier%>.png" class="<%=tier_class(tier, @hero.league_tier)%>"/>
+                                            <img src="/images/league_<%=tier%>.png" class="<%= tier_class(tier, @hero.league_tier) %>"/>
                                             <%= unless tier == Moba.max_league_tier() do %>
                                                 <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
-                                                    <div style="width:100%" class="progress-bar <%=if tier >= @hero.league_tier, do: "bg-dark", else: "bg-primary"%>">
+                                                    <div style="width:100%" class="progress-bar <%= if tier >= @hero.league_tier, do: "bg-dark", else: "bg-primary" %>">
                                                         <span></span>
                                                     </div>
                                                 </div>
@@ -67,48 +65,23 @@
                                         <% end %>
                                     </div>
                                 </div>
-                                <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%=Moba.leagues[@hero.league_tier]%></h3>
+                                <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%= Moba.leagues[@hero.league_tier] %></h3>
                                 <div class="row text-center">
                                     <div class="col">
-                                        <h3 class="mb-0 text-primary">
-                                            <i class="fa fa-street-view"></i>
-                                            <%= @hero.buybacks %>
+                                        <h3 class="mb-0 text-info">
+                                            <i class="fa fa-spa"></i>
+                                            <%= @hero.total_xp_farm %>
                                         </h3>
-                                        <h4 class="text-primary">Buybacks</h4>
+                                        <h4 class="text-info">Total XP Farm</h4>
                                     </div>
                                     <div class="col">
                                         <h3 class="mb-0 text-warning">
                                             <i class="fa fa-coins"></i>
-                                            <%=@hero.total_farm%>
+                                            <%= @hero.total_gold_farm %>
                                         </h3>
-                                        <h4 class="text-warning">Total Farm</h4>
-                                    </div>
-                                    <div class="col">
-                                        <h3 class="mb-0 text-success">
-                                            <i class="fa fa-leaf"></i>
-                                            <%=GH.pve_win_rate(@hero)%>%
-                                        </h3>
-                                        <h4 class="text-success">Win Rate</h4>
+                                        <h4 class="text-warning">Total Gold Farm</h4>
                                     </div>
                                 </div>
-                                <%= if @hero.pvp_ranking do %>
-                                    <h3 class="text-center mt-4 mb-2 text-danger">Arena</h3>
-                                    <div class="row text-center">
-                                        <div class="col">
-                                            <h3 class="mb-0 text-danger">
-                                                #<%=@hero.pvp_ranking%>
-                                            </h3>
-                                            <h4 class="text-danger"><%= if @hero.id == @hero.user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</h4>
-                                        </div>
-                                        <div class="col">
-                                            <h3 class="mb-0 text-danger">
-                                                <i class="fa fa-crosshairs"></i>
-                                                <%=GH.pvp_win_rate(@hero)%>%
-                                            </h3>
-                                            <h4 class="text-danger">Win Rate</h4>
-                                        </div>
-                                    </div>
-                                <% end %>
                             </div>
                         </div>
                     </div>
@@ -129,29 +102,29 @@
                         <%= for hero <- @ranking do %>
                             <tr>
                                 <td>
-                                    <h1 class="<%=if hero.id == @hero.id, do: "text-danger"%>">
-                                        <%=if hero.pve_ranking do %>
-                                        #<%=hero.pve_ranking%>
+                                    <h1 class="<%= if hero.id == @hero.id, do: "text-danger" %>">
+                                        <%= if hero.pve_ranking do %>
+                                            #<%= hero.pve_ranking %>
                                         <% else %>
                                             ?
                                         <% end %>
                                     </h1>
                                 </td>
                                 <td>
-                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
                                         <%=GH.hero_avatar(hero, false)%>
                                         <br/>
-                                        <h5 class="text-primary mb-0 mt-1"><%=hero.name%></h5>
+                                        <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>
                                     <% end %>
                                 </td>
                                 <td>
-                                    <h3 class="text-warning"><i class="fa fa-coins"></i> <%=hero.total_farm%></h3>
+                                    <h3 class="text-warning" data-toggle="tooltip" title="<%= hero.total_xp_farm + hero.total_gold_farm %>"><i class="fa fa-crown"></i> <%= GH.farming_amount_label hero.total_xp_farm + hero.total_gold_farm %></h3>
                                 </td>
                                 <td>
                                     <h3 class="text-success">
                                         <i class="fa fa-clock-o"></i>
-                                        <%=if hero.finished_at do %>
-                                            <%=GH.finished_time(hero)%> min
+                                        <%= if hero.finished_at do %>
+                                            <%= GH.finished_time(hero) %> min
                                         <% else %>
                                             ??
                                         <% end %>
@@ -162,7 +135,7 @@
                     </table>
                 </div>
                 <div class="transparent card-footer p-0">
-                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
+                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
                         <i class="fa fa-table mr-1"></i>See Top Heroes
                     <% end %>
                 </div>

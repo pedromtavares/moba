@@ -46,11 +46,11 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(@ranking_per_page, page_to_offset(page, @ranking_per_page))
   end
 
-  def pve_targets(difficulty, level_range, exclude_list, codes, limit) do
+  def pve_targets(difficulty, farm_range, exclude_list, codes, limit) do
     Hero
     |> by_difficulty(difficulty)
     |> pvp_inactive()
-    |> by_level(level_range)
+    |> by_total_xp_farm(farm_range)
     |> by_codes(codes)
     |> exclude_ids(exclude_list)
     |> limit_by(limit)
@@ -82,7 +82,7 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in with_user(Hero, user_id),
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.id]],
-      where: hero.finished_pve == true,
+      where: not is_nil(hero.finished_at),
       where: hero.league_tier >= 5
     )
   end
@@ -158,6 +158,12 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.level <= ^last
   end
 
+  def by_total_xp_farm(query, first..last) do
+    from hero in query,
+      where: hero.total_xp_farm >= ^first,
+      where: hero.total_xp_farm <= ^last
+  end
+
   def with_user(query, user_id) do
     from hero in query,
       where: hero.user_id == ^user_id
@@ -193,21 +199,17 @@ defmodule Moba.Game.Query.HeroQuery do
       order_by: [asc: hero.pve_ranking]
   end
 
-  def by_total_farm(query, min, max) do
+  def by_total_gold_farm(query, min, max) do
     from hero in query,
-      where: hero.total_farm >= ^min,
-      where: hero.total_farm <= ^max,
-      order_by: [desc: hero.total_farm]
+      where: hero.total_gold_farm >= ^min,
+      where: hero.total_gold_farm <= ^max,
+      order_by: [desc: hero.total_gold_farm]
   end
 
   def limit_by(query, limit, offset \\ 0) do
     from hero in query,
       limit: ^limit,
       offset: ^offset
-  end
-
-  def with_perfect_finish(query) do
-    from hero in query, where: hero.total_farm == ^Moba.maximum_total_farm()
   end
 
   def random(query) do
@@ -222,16 +224,11 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def finished_pve(query \\ Hero) do
     from hero in query,
-      where: hero.finished_pve == true,
-      order_by: [desc: hero.total_farm, desc: fragment("? - ?", hero.inserted_at, hero.finished_at)]
-  end
-
-  def summoned(query \\ Hero) do
-    from hero in query, where: hero.summoned == true
-  end
-
-  def non_summoned(query \\ Hero) do
-    from hero in query, where: hero.summoned == false
+      where: not is_nil(hero.finished_at),
+      order_by: [
+        desc: fragment("? + ?", hero.total_xp_farm, hero.total_gold_farm),
+        desc: fragment("? - ?", hero.inserted_at, hero.finished_at)
+      ]
   end
 
   def in_current_ranking_date(query \\ Hero) do

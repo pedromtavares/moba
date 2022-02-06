@@ -4,11 +4,19 @@ defmodule MobaWeb.HeroView do
   def finished_jungle?(user, hero) do
     if user.current_pve_hero_id do
       current_hero = Game.get_hero!(user.current_pve_hero_id)
-      current_hero.finished_pve && hero.id == current_hero.id && hero
+      current_hero.finished_at && hero.id == current_hero.id && hero
     end
   end
 
   def can_join_arena?(user), do: length(Game.eligible_heroes_for_pvp(user.id)) > 0
+
+  def display_quest_tabs?(%{
+        completed_progressions: all,
+        completed_daily_progressions: daily,
+        completed_season_progression: season
+      }) do
+    length(all) > 1 && all != daily && all != season
+  end
 
   def quest_title_for(progressions) when length(progressions) > 1, do: "Quests"
   def quest_title_for(_), do: "Quest"

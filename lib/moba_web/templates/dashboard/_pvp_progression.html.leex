@@ -1,0 +1,77 @@
+<div class="card">
+    <div class="card-body p-0">
+        <div class="row">
+            <div class="col">
+                <h4 class="header-title pt-3 pl-3">PvP</h4>
+            </div>
+            <div class="col">
+                <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#season-rankings"><i class="fa fa-list-ul mr-1"></i>Season Rankings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="w-100 border-top fixed-panel">
+            <div class="row mt-3 mb-3">
+                <%= if next = next_medal(@current_user) do %>
+                    <div class="col pvp-tier-container">
+                        <div class="text-right">
+                            <img src="/images/pvp/<%=@current_user.season_tier%>.png" class="user-rank"/>
+                            <h5 class="text-medal-<%=@current_user.season_tier%> mb-0 mr-3"><%=Moba.medals[@current_user.season_tier]%></h5>
+                        </div>
+                    </div>
+                    <div class="col-5">
+                        <h5 class="text-center mb-0 mt-0">Season Progression</h5>
+                        <div class="progress mt-3" style="height:30px;">
+                            <div style="width:<%=next_medal_percentage(@current_user)%>%" class="progress-bar pvp-bar">
+                            </div>
+                            <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%=@current_user.season_points%>/<%=Accounts.season_points_for(next)%> Season Points</small>
+                        </div>
+                    </div>
+                    <div class="col pvp-tier-container">
+                        <div class="text-left">
+                            <img src="/images/pvp/<%=next%>.png" class="user-rank"/>
+                            <h5 class="text-medal-<%=next%> mb-0 ml-3"><%=Moba.medals[next]%></h5>
+                        </div>
+                    </div>
+                <% else %>
+                    <div class="col text-center">
+                        <img src="/images/pvp/<%=@current_user.season_tier%>.png" class="user-rank"/>
+                        <h5 class="text-medal-<%=@current_user.season_tier%> mb-0 mr-3"><%=Moba.medals[@current_user.season_tier]%></h5>
+                    </div>
+                <% end %>
+            </div>
+            <hr/>
+            <div class="card">
+                <div class="card-body p-0">
+                    <table class="table-dark table mt-3">
+                        <%= if length(@duel_users) > 0 do %>
+                            <%= for user <- @duel_users do %>
+                            <tr>
+                                <td>
+                                    <img src="/images/pvp/<%=user.season_tier%>.png" style="max-height:  50px"/>
+                                </td>
+                                <td>
+                                    <h5><%=live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, user)%></h5>
+                                </td>
+                                <td>
+                                    <%=user.season_points%> Season Points
+                                </td>
+                                <td>
+                                    Online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id="<%=user.id%>"><i class="fa fa-bullseye mr-1"></i>Duel</button>
+                                </td>
+                            </tr>
+                            <% end %>
+                        <% else %>
+                            <h5 class="text-center mt-3">There are no online players to duel at the moment.</h5>
+                        <% end %>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

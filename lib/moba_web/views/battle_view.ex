@@ -117,7 +117,7 @@ defmodule MobaWeb.BattleView do
     winner = battle.winner_id == battle.attacker_id
 
     cond do
-      winner && Game.max_league?(hero) ->
+      winner && hero.league_tier == Moba.max_league_tier() ->
         "GGWP! You have beaten the game by ranking up to the Grandmaster League!"
 
       winner && hero.league_step == 0 ->
@@ -195,11 +195,11 @@ defmodule MobaWeb.BattleView do
     Moba.leagues()[tier - 1]
   end
 
-  def league_gold_bonus(%{league_tier: tier}) do
+  def league_bonus(%{league_tier: tier}) do
     if tier == Moba.max_league_tier() do
-      Moba.boss_win_gold_bonus()
+      Moba.boss_win_bonus()
     else
-      Moba.league_win_gold_bonus()
+      Moba.league_win_bonus()
     end
   end
 
@@ -430,25 +430,20 @@ defmodule MobaWeb.BattleView do
     end)
   end
 
-  def total_hp_for(hero, nil, battle), do: buffed_total(hero, battle, hero.total_hp + hero.item_hp)
-  def total_hp_for(_, last_hero, _), do: last_hero.total_hp
+  def total_hp_for(hero, nil), do: hero.total_hp + hero.item_hp
+  def total_hp_for(_, last_hero), do: last_hero.total_hp
 
-  def total_mp_for(hero, nil, battle), do: buffed_total(hero, battle, hero.total_mp + hero.item_mp)
-  def total_mp_for(_, last_hero, _), do: last_hero.total_mp
+  def total_mp_for(hero, nil), do: hero.total_mp + hero.item_mp
+  def total_mp_for(_, last_hero), do: last_hero.total_mp
 
-  def total_atk_for(hero, nil, battle), do: buffed_total(hero, battle, hero.atk + hero.item_atk)
-  def total_atk_for(_, last_hero, _), do: last_hero.base_atk
+  def total_atk_for(hero, nil), do: hero.atk + hero.item_atk
+  def total_atk_for(_, last_hero), do: last_hero.base_atk
 
-  def total_power_for(hero, nil, battle), do: buffed_total(hero, battle, hero.power + hero.item_power)
-  def total_power_for(_, last_hero, _), do: last_hero.base_power
+  def total_power_for(hero, nil), do: hero.power + hero.item_power
+  def total_power_for(_, last_hero), do: last_hero.base_power
 
-  def total_armor_for(hero, nil, battle), do: buffed_total(hero, battle, hero.armor + hero.item_armor)
-  def total_armor_for(_, last_hero, _), do: last_hero.base_armor
-
-  defp buffed_total(%{buffed_battles_available: battles}, %{type: type}, total) when type == "pve" and battles > 0,
-    do: total + round(Moba.league_buff_multiplier() * total)
-
-  defp buffed_total(_, _, total), do: total
+  def total_armor_for(hero, nil), do: hero.armor + hero.item_armor
+  def total_armor_for(_, last_hero), do: last_hero.base_armor
 
   defp get_resource(turn, code) do
     skills =

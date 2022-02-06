@@ -1,17 +1,35 @@
-<div class="battles content-with-hero-bar" phx-hook="SetMainWrapper" id="battle-history">
-    <div class="row">
-        <div class="col-sm-12 text-center">
-            <h1 class="page-title mb-3 mt-3 text-primary">
-              <i class="fa fa-history"></i> Battle History
-            </h1>
+<div class="battles content-with-hero-bar" id="battle-history">
+
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card-box p-2 darker mb-3 pl-4">
+                <div class="row">
+                    <div class="col">
+                        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView) do %>
+                            <h2 class="page-title text-left text-muted">
+                                <i class="fa fa-crosshairs mr-1"></i>
+                                Back to Ganking
+                            </h2>
+                        <% end %>
+                    </div>
+                    <div class="col">
+                        <h1 class="page-title text-center">
+                          Battle History
+                        </h1>
+                    </div>
+                    <div class="col">
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
 
     <div class="row">
         <div class="col-12 col-xl-6">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="text-center text-success"><i class="fa fa-leaf align-middle"></i> Jungle</h2>
+                    <h2 class="text-center"><i class="fa fa-crosshairs text-success"></i> Ganks</h2>
                 </div>
                 <div class="card-body text-center">
                     <div class="row">
@@ -54,7 +72,7 @@
         <div class="col-12 col-xl-6">
             <div class="card">
                 <div class="card-header">
-                    <h2 class="text-center text-info"><i class="fa fa-star align-middle"></i> League Challenge</h2>
+                    <h2 class="text-center"><i class="fa fa-star text-info"></i> League Challenge</h2>
                 </div>
                 <div class="card-body text-center">
                     <div class="row">
@@ -96,5 +114,3 @@
         </div>
     </div>
 </div>
-
-<%= live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @current_hero.id}, id: "current-hero-live-view") %>

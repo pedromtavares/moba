@@ -1,38 +1,8 @@
-.wrapper-jungle::after{
-  content: "";
-  // background: url('/images/jungle.jpg');
-  // opacity: 0.3;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  position: absolute;
-  z-index: -100;
-
-  box-shadow: inset 0px 0px 300px 50px black;
-  background: #07382E;
-  opacity: 1
-}
-
-@keyframes league-glow {
-  0% {
-    color: rgba(241,85,108, 0.2);
-    box-shadow: 0 0 5px 0 rgba(241,85,108, 0.2);
-  }
-  100% {
-    color: rgba(241,85,108, 1);
-    box-shadow: 0 0 20px 10px rgba(241,85,108, 1);
-  }
-}
-
 .jungle{
   margin-bottom: 180px;
+
   @media (max-width: 992px) {
     margin-bottom: 220px;
-  }
-
-  .league-challenge{
-    animation: 1s league-glow infinite;
   }
 
   .gank-button{
@@ -69,24 +39,47 @@
     border-color: rgb(241, 151, 18) !important;
   }
 
-  .card-box{
-    background-color: rgba(54, 64, 74, 0.3);
-    padding: 0;
-    margin-bottom: 3rem;
+  .gank-tab a.active{
+    border: 2px solid #1abc9c !important;
+  }
+  .meditation-tab a.active{
+    border: 2px solid #3bafda !important;
+  }
+  .mine-tab a.active{
+    border: 2px solid #f7b84b !important;
   }
 }
 
 .jungle-header{
   .previous-tier{
-    max-width: 30px;
+    max-width: 35px;
     filter: grayscale(100%);
   }
   .current-tier{
-    max-width: 30px;
+    max-width: 50px;
   }
   .next-tier{
-    max-width: 30px;
+    max-width: 35px;
     opacity: 0.5;
+  }
+  .nav-link{
+    color: #8a929a;
+    text-align: center;
+    line-height: 1.4;
+  }
+  .nav-link:hover{
+    color: #3bafda;
+  }
+  .pve-info{
+    text-align: center;
+    line-height: 0.8;
+    border: 1px solid;
+    padding: 1rem;
+    margin: -2px;
+
+    small{
+      font-size: 0.9rem;
+    }
   }
   .ranking{
     img{
@@ -95,6 +88,43 @@
       border-image-source: radial-gradient(white, rgb(47, 60, 74));
       border-image-slice: 1;
     }
+  }
+}
+
+.farm-tabs{
+  .nav-link h2{
+    line-height: 1.4;
+  }
+}
+
+.farming-bg{
+  background: 0;
+  width: 100%;
+  min-height: 800px;
+  border: 2px solid rgba(206, 212, 218, 0.2);
+  border-top: 0;
+
+  .table{
+    background-color: rgba(54, 64, 74, 0.8);
+  }
+
+  .farming-history{
+    max-height: 500px;
+    overflow: auto;
+  }
+
+  .card-box {
+    background-color: rgba(54, 64, 74, 0.8);
+  }
+}
+
+.mining-bg{
+  input[type='range']::-webkit-slider-thumb {
+    width: 16px;
+    -webkit-appearance: none;
+    height: 16px;
+    background: #f7b84b;
+    border-radius: 10px;
   }
 }
 

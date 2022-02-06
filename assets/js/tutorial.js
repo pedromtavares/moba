@@ -40,7 +40,7 @@ const Tutorial = {
       case 1:
         tour.addStep({
           id: 'first-tutorial-first-step',
-          text: "Welcome to the Jungle! Now that you've created your hero, it's time to put it to the test. Gank this target to start your first battle.",
+          text: "Welcome to Training! Now that you've created your hero, it's time to put it to the test. Gank this target to start your first battle.",
           attachTo: {
             element: '.targets .battle-button',
             on: 'right'
@@ -56,7 +56,7 @@ const Tutorial = {
       case 2:
         tour.addStep({
           id: 'second-tutorial-first-step',
-          text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>Here in the Jungle is where you will farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by ganking other opponents.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
+          text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>By Training here you can farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by ganking other opponents or by passively farming through Meditation or Mining.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
           buttons: [
             {
               text: 'Skip Tutorial',
@@ -182,46 +182,7 @@ const Tutorial = {
       case 11:
         tour.addStep({
           id: 'eleventh-tutorial-first-step',
-          text: "<p class='text-center'>You have ranked up to Silver League, congratulations! Now only Gold, Platinum, Diamond and Master Leagues to go ( ͡° ͜ʖ ͡°)</p>",
-          attachTo: {
-            element: '#current-hero-league',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Skip Tutorial',
-              secondary: true,
-              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
-            },
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          }
-        });
-        tour.addStep({
-          id: 'eleventh-tutorial-second-step',
-          text: "<p class='text-center'>After each rank up you get a buff that makes your hero considerably stronger, use this opportunity to battle against tougher targets!</p>",
-          attachTo: {
-            element: '#league-buff',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          }
-        });
-        tour.addStep({
-          id: 'eleventh-tutorial-third-step',
-          text: "<p class='text-center'>Keep ganking until you reach the Master League, you're doing realy well! Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and level up your skills. Have fun!</p>",
+          text: "<p class='text-center'>You have ranked up to Silver League, congratulations!<br/> Keep farming until you reach at least the Platinum League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and to level up your skills. Have fun!</p>",
           attachTo: {
             element: '#jungle-stats',
             on: 'bottom'
@@ -237,81 +198,6 @@ const Tutorial = {
           }
         });
         break;
-      case 13:
-        tour.addStep({
-          id: 'thirteenth-tutorial-first-step',
-          text: "<p class='text-center'>Welcome to the the Arena!</p><p class='text-center'>This is where the true competition happens, as you'll be fighting other players for the #1 spot. Here, there are no draws: you must kill your opponent to win.</p>",
-          attachTo: {
-            element: '#arena-info',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Skip Tutorial',
-              secondary: true,
-              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
-            },
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          },
-          cancelIcon: { enabled: true },
-        });
-        tour.addStep({
-          id: 'thirteenth-tutorial-first-step',
-          text: "<p class='text-center'>Instead of XP and Gold, here you fight for Season Points, which you can also lose from being attacked by other players.</p>",
-          attachTo: {
-            element: '#current-hero-arena-points',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          },
-        });
-        tour.addStep({
-          id: 'thirteenth-tutorial-second-step',
-          text: "<p class='text-center'>Your Rank is directly tied to how many Season Points you have. Finish the match ranked in the Top 3 to receive Medals and be ranked among the best of BrowserMOBA.</p>",
-          attachTo: {
-            element: '#current-hero-rank',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Next',
-              action: tour.next
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          }
-        });
-        tour.addStep({
-          id: 'thirteenth-tutorial-third-step',
-          text: "<p class='text-center'>If you want to know more about how the Arena works, you can click View Tips at any time. Have fun!</p>",
-          attachTo: {
-            element: '#main-arena-title',
-            on: 'bottom'
-          },
-          buttons: [
-            {
-              text: 'Finish Tutorial',
-              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
-            }
-          ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
-          }
-        });
     }
     return tour;
   }

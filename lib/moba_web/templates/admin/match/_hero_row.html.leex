@@ -27,7 +27,9 @@
         |
         <span class="text-danger">WR: <strong><%=GH.pvp_win_rate(@hero)%>%</strong></span>
         |
-        <span class="text-warning"><%=@hero.total_farm%></span>
+        <span class="text-warning"><%=@hero.total_gold_farm%></span>
+        |
+        <span class="text-info"><%=@hero.total_xp_farm%></span>
     </td>
     <td>
         <%=for skill <- @hero.active_build.skills do %>
