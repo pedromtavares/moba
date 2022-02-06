@@ -55,7 +55,7 @@ defmodule Moba.Game.Quests do
 
   def list_progressions(user_id, daily) do
     Repo.all(from p in progressions_by_user(user_id), join: q in assoc(p, :quest), where: q.daily == ^daily)
-  end  
+  end
 
   def list_progressions_by_code(user_id, nil), do: progressions_by_user(user_id)
 
@@ -67,7 +67,7 @@ defmodule Moba.Game.Quests do
 
   def list_season_progressions(user_id) do
     ["season", "season_master", "season_grandmaster", "season_perfect"]
-    |> Enum.map(&(get_all_by_code(&1)))
+    |> Enum.map(&get_all_by_code(&1))
     |> List.flatten()
     |> find_progressions(user_id)
   end
@@ -75,7 +75,7 @@ defmodule Moba.Game.Quests do
   def track_pve(%{user_id: user_id, league_tier: league_tier} = hero)
       when league_tier >= @platinum_league_tier do
     track("season", user_id, hero)
-    
+
     if league_tier >= Moba.master_league_tier() do
       track("daily_master", user_id, hero)
       track("season_master", user_id, hero)
@@ -99,7 +99,8 @@ defmodule Moba.Game.Quests do
   defp apply_rewards(%{quest: quest, user: user} = progression) do
     base_rewards = %{shard_count: user.shard_count + quest.shard_prize}
 
-    rewards = if String.contains?(quest.code, "season"), do: season_rewards(user, quest, base_rewards), else: base_rewards
+    rewards =
+      if String.contains?(quest.code, "season"), do: season_rewards(user, quest, base_rewards), else: base_rewards
 
     Accounts.update_user!(user, rewards)
 

@@ -1211,7 +1211,9 @@ Repo.insert(%Quest{code: "season_grandmaster", level: 6, shard_prize: 250, initi
 Repo.insert(%Quest{code: "season_perfect", level: 7, shard_prize: 250, initial_value: 0, final_value: 15})
 
 Repo.insert(%Quest{code: "daily_master", level: 1, shard_prize: 100, initial_value: 0, final_value: 1, daily: true})
+
 Repo.insert(%Quest{code: "daily_grandmaster", level: 1, shard_prize: 100, initial_value: 0, final_value: 1, daily: true})
+
 Repo.insert(%Quest{code: "daily_perfect", level: 1, shard_prize: 100, initial_value: 0, final_value: 1, daily: true})
 
 Moba.start!()

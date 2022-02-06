@@ -16,7 +16,10 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def farming_progression(%{pve_farming_turns: turns, pve_farming_started_at: started, pve_state: state}, %{current_time: current}) when state in ["meditating", "mining"] do
+  def farming_progression(%{pve_farming_turns: turns, pve_farming_started_at: started, pve_state: state}, %{
+        current_time: current
+      })
+      when state in ["meditating", "mining"] do
     turn_seconds = turns * Moba.seconds_per_turn()
     total = Timex.shift(started, seconds: turn_seconds)
     total_diff = Timex.diff(total, started, :seconds)

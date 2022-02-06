@@ -13,7 +13,7 @@ defmodule MobaWeb.HeroLiveView do
     completed_progressions = Game.last_completed_quest_progressions(hero)
 
     completed_season_progression =
-      completed_progressions && Enum.find(completed_progressions, &(String.contains?(&1.quest.code, "season")))
+      completed_progressions && Enum.find(completed_progressions, &String.contains?(&1.quest.code, "season"))
 
     completed_daily_progressions = completed_progressions && Enum.filter(completed_progressions, & &1.quest.daily)
 
