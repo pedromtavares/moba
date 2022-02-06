@@ -8,7 +8,15 @@ defmodule MobaWeb.JungleView do
     boss.total_hp * 100 / boss.avatar.total_hp
   end
 
-  def farming_progression(%{pve_farming_turns: turns, pve_farming_started_at: started}, %{current_time: current}) do
+  def farming_container_background(hero, assigns) do
+    if farming_progression(hero, assigns) >= 100 do
+      "rgba(54, 64, 74, 0.8)"
+    else
+      "rgba(54, 64, 74, 0.6)"
+    end
+  end
+
+  def farming_progression(%{pve_farming_turns: turns, pve_farming_started_at: started, pve_state: state}, %{current_time: current}) when state in ["meditating", "mining"] do
     turn_seconds = turns * Moba.seconds_per_turn()
     total = Timex.shift(started, seconds: turn_seconds)
     total_diff = Timex.diff(total, started, :seconds)
@@ -17,7 +25,15 @@ defmodule MobaWeb.JungleView do
     100 * current_diff / total_diff
   end
 
-  def farming_time_left(%{pve_farming_turns: turns, pve_farming_started_at: started}) do
+  def farming_progression(_, _), do: 100
+
+  def farming_reward(%{pve_tier: tier}, turns) do
+    start..endd = Moba.farm_per_turn(tier)
+
+    "#{start * turns} - #{endd * turns}"
+  end
+
+  def farming_time_left(%{pve_farming_turns: turns, pve_farming_started_at: started}, %{current_time: _}) do
     turn_seconds = turns * Moba.seconds_per_turn()
     Timex.shift(started, seconds: turn_seconds) |> Timex.format("{relative}", :relative) |> elem(1)
   end
@@ -40,7 +56,7 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def display_farming_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
+  def display_farm_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
 
   def dead?(hero), do: hero.pve_state == "dead"
 

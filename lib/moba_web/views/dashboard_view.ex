@@ -14,6 +14,12 @@ defmodule MobaWeb.DashboardView do
     Enum.filter(progressions, & &1.completed_at) |> Enum.sort_by(& &1.quest.shard_prize)
   end
 
+  def farming_per_turn(pve_tier) do
+    start..endd = Moba.farm_per_turn(pve_tier)
+
+    "#{start} - #{endd}"
+  end
+
   def next_medal_percentage(%{season_tier: current_tier, season_points: season_points}) do
     max = Accounts.season_points_for(current_tier + 1)
     season_points * 100 / max

@@ -17,16 +17,6 @@ defmodule MobaWeb.HallLiveView do
     {:noreply, assign(socket, active_tab: "users", users: users)}
   end
 
-  def handle_event("show-master", _, socket) do
-    master = if socket.assigns.master, do: socket.assigns.master, else: Game.pvp_ranking(5, 20)
-    {:noreply, assign(socket, active_tab: "master", master: master)}
-  end
-
-  def handle_event("show-grandmaster", _, socket) do
-    grandmaster = if socket.assigns.grandmaster, do: socket.assigns.grandmaster, else: Game.pvp_ranking(6, 20)
-    {:noreply, assign(socket, active_tab: "grandmaster", grandmaster: grandmaster)}
-  end
-
   def handle_event("show-pve", _, socket) do
     {:noreply, assign(socket, active_tab: "pve")}
   end

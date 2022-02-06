@@ -26,6 +26,13 @@
                     <% end %>
 
                     <tr>
+                        <tr>
+                            <td class="text-center text-primary"><i class="fa fa-spa fa-2x"></i><br/> Farming per Turn</td>
+                            <td class="text-left"><h5><%= farming_per_turn(@pve_tier) %></h5></td>
+                        </tr>
+                    </tr>
+
+                    <tr>
                         <td class="text-center text-warning"><i class="fa fa-trophy fa-2x"></i><br/> Maximum League</td>
                         <td class="text-left"><h4><%= max_league_allowed_for(@current_season_progression) %></h4></td>
                     </tr>

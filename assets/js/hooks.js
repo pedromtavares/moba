@@ -63,25 +63,6 @@ Hooks.ToggleChatButton = {
   }
 }
 
-Hooks.SetMainWrapper = {
-  mounted(){
-    let el = $(this.el);
-    let wrapper = $("#main-wrapper").removeClass("wrapper-jungle").removeClass("wrapper-arena").removeClass("wrapper-battles").removeClass("wrapper-league");
-    if (el.hasClass("jungle-battle") || el.hasClass("jungle") || el.hasClass("hero-review")){
-      wrapper.addClass("wrapper-jungle");
-    };
-    if (el.hasClass("arena-battle") || el.hasClass("arena") || el.hasClass("arena-select")){
-      wrapper.addClass("wrapper-arena");
-    };
-    if (el.hasClass("battles")){
-      wrapper.addClass("wrapper-battles");
-    };
-    if (el.hasClass("league-battle")){
-      wrapper.addClass("wrapper-league");
-    };
-  }
-}
-
 Hooks.Loading = {
   mounted(){
     let el = this.el;

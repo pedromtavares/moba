@@ -1,6 +1,25 @@
 .dashboard{
 
+  .pve-bar{
+    background: rgba(26, 188, 156, 0.7) !important;
+  }
+
+  .pvp-bar{
+    background: rgba(241,85,108, 0.8) !important;
+  }
+
+  .pve-tier-container{
+    line-height: 7rem;
+  }
+
+  .pvp-tier-container{
+    line-height: 6.5rem;
+  }
+
   .collection{
+    max-width: 1200px;
+    margin: auto;
+
     .avatar{
       max-width: 100%;
     }
@@ -36,20 +55,6 @@
   .btn-danger {
     color: #f1556c;
     background: rgba(241,85,108, 0.2) !important;
-  }
-
-  .collection{
-    .avatar{
-      max-width: 100%;
-    }
-    .blank-avatar{
-      filter: grayscale(100%);
-    }
-    .league-logo{
-      max-width: 25px;
-      height: auto;
-      margin-top: -30px
-    }
   }
 
   .hero-list{

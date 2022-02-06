@@ -15,7 +15,7 @@
         <div class="w-100 border-top fixed-panel">
             <div class="row mt-3 mb-3">
                 <%= if next = next_medal(@current_user) do %>
-                    <div class="col">
+                    <div class="col pvp-tier-container">
                         <div class="text-right">
                             <img src="/images/pvp/<%=@current_user.season_tier%>.png" class="user-rank"/>
                             <h5 class="text-medal-<%=@current_user.season_tier%> mb-0 mr-3"><%=Moba.medals[@current_user.season_tier]%></h5>
@@ -24,12 +24,12 @@
                     <div class="col-5">
                         <h5 class="text-center mb-0 mt-0">Season Progression</h5>
                         <div class="progress mt-3" style="height:30px;">
-                            <div style="width:<%=next_medal_percentage(@current_user)%>%" class="progress-bar bg-danger">
+                            <div style="width:<%=next_medal_percentage(@current_user)%>%" class="progress-bar pvp-bar">
                             </div>
                             <small class="justify-content-center d-flex position-absolute w-100 text-white mt-1"><%=@current_user.season_points%>/<%=Accounts.season_points_for(next)%> Season Points</small>
                         </div>
                     </div>
-                    <div class="col">
+                    <div class="col pvp-tier-container">
                         <div class="text-left">
                             <img src="/images/pvp/<%=next%>.png" class="user-rank"/>
                             <h5 class="text-medal-<%=next%> mb-0 ml-3"><%=Moba.medals[next]%></h5>

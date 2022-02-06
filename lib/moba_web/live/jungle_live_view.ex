@@ -22,6 +22,8 @@ defmodule MobaWeb.JungleLiveView do
 
         targets = Game.list_targets(hero)
         targets = if length(targets) > 0, do: targets, else: Game.generate_targets!(hero) |> Game.list_targets()
+        farm_tab = current_farm_tab(hero)
+        if Enum.member?(["meditation", "mine"], farm_tab), do: time_trigger()
 
         {:ok,
          assign(socket,
@@ -29,10 +31,11 @@ defmodule MobaWeb.JungleLiveView do
            targets: targets,
            tutorial_step: hero.user.tutorial_step,
            pending_battle: Engine.pending_battle(hero.id),
-           farm_tab: current_farm_tab(hero),
+           farm_tab: farm_tab,
            farm_rewards: [],
            selected_turns: hero.pve_current_turns,
-           current_time: Timex.now()
+           current_time: Timex.now(),
+           farm_rewards: farm_rewards_for(hero, "meditating")
          )}
 
       true ->
@@ -87,12 +90,12 @@ defmodule MobaWeb.JungleLiveView do
   end
 
   def handle_event("show-meditation", _, %{assigns: %{current_hero: hero}} = socket) do
-    Process.send_after(self(), :current_time, 1000)
+    time_trigger()
     {:noreply, assign(socket, farm_tab: "meditation", farm_rewards: farm_rewards_for(hero, "meditating"))}
   end
 
   def handle_event("show-mine", _, %{assigns: %{current_hero: hero}} = socket) do
-    Process.send_after(self(), :current_time, 1000)
+    time_trigger()
     {:noreply, assign(socket, farm_tab: "mine", farm_rewards: farm_rewards_for(hero, "mining"))}
   end
 
@@ -169,5 +172,7 @@ defmodule MobaWeb.JungleLiveView do
   defp current_farm_tab(_), do: "gank"
 
   defp farm_rewards_for(hero, state),
-    do: Enum.filter(hero.pve_farming_rewards, &(&1.state == state)) |> Enum.sort_by(& &1.started_at, :desc)
+    do: Enum.filter(hero.pve_farming_rewards, &(&1.state == state)) |> Enum.sort_by(& &1.started_at, {:desc, DateTime})
+
+  defp time_trigger, do: Process.send_after(self(), :current_time, 1000)
 end

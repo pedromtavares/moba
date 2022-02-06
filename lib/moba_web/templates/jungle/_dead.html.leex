@@ -1,0 +1,24 @@
+<div class="card-box border border-light bg-light" style="height: 400px">
+    <p class="text-center mt-3"><i class="fa fa-skull-crossbones fa-3x text-dark"></i></p>
+    <h2 class="text-center mb-4">
+        You are DEAD<br/>
+        <small class="text-muted">You can continue ganking by buying back your hero</small>
+    </h2>
+    <div class="text-center mt-2 mb-2">
+        <%= if @current_hero.gold >= Game.buyback_price(@current_hero) do %>
+            <button class="btn btn-primary btn-lg" phx-hook="Loading" loading="Respawning..." phx-click="buyback" id="buyback-hero">
+                <span class="loading-text"><i class="fa fa-street-view mr-1"></i> Buyback for <%= Game.buyback_price(@current_hero) %>g</span>
+            </button>
+        <% else %>
+            <button class="btn btn-primary btn-lg disabled no-action">
+                <span class="loading-text"><i class="fa fa-street-view mr-1"></i> You do not have <%= Game.buyback_price(@current_hero) %>g to Buyback, try selling one of your items on the Shop</span>
+            </button>
+        <% end %>
+    </div>
+    <div class="text-center mt-4">
+        <button phx-click="restart" id="restart-hero" class="btn btn-warning" data-confirm="WARNING: This reset your hero to level 1."><i class="fa fa-user-plus mr-1"></i>Restart Hero</button>
+    </div>
+    <div class="text-center mt-2">
+        <a href="/invoke" class="btn btn-danger btn-sm"><i class="fa fa-refresh mr-1"></i>New Hero</a>
+    </div>
+</div>

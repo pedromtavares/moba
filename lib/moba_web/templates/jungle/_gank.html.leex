@@ -1,0 +1,62 @@
+<%= if show_league_challenge?(@current_hero) do %>
+    <% next = next_league(@current_hero) %>
+    <div class="row mt-2">
+        <div class="col text-center">
+            <div class="card-box mb-0 pt-2 p-1">
+                <img src="/images/league_<%= next %>.png" style="height: 100px"/>
+                <h3><%= Moba.leagues[next] %> Challenge</h3>
+                <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
+                        <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
+                    </button>
+                <p class="text-muted font-italic">
+                    Click above to start your <span class="text-league-<%= next %>"><%= Moba.leagues[next] %> Challenge</span>.
+                    <br/>
+                    You will face consecutive opponents <span class="text-danger">to the death</span> and must win all the battles in order to rank up to the <span class="text-league-<%=next%>"><%= Moba.leagues[next] %></span>.</span>
+                </p>
+            </div>
+        </div>
+    </div>
+<% end %>
+
+<%= if boss = boss_available?(@current_hero) do %>
+    <div class="row mt-2 margin-auto">
+        <%= render "_boss.html", boss: boss %>
+    </div>
+    <div class="row">
+        <div class="col text-center">
+            <img src="/images/league_6.png" style="height: 100px"/>
+            <br/>
+            <button class="btn btn-warning btn-lg mt-1 mb-1 btn-boss" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
+                <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Boss Fight</span>
+            </button>
+            <%= if boss.league_attempts == 0 do %>
+                <p class="text-muted font-italic">
+                    Click above to start your Boss Fight.<br/>You will face Roshan <span class="text-danger">to the death</span> and must win in order to <span class="text-success">rank up</span> to the <span class="text-league-6"><%= Moba.leagues[6] %></span>.
+                </p>
+            <% else %>
+                <p class="text-muted font-italic">
+                    Roshan has <span class="text-success">regenerated <%= trunc(Moba.boss_regeneration_multiplier * boss.avatar.total_hp) %> HP</span>.<br/>You may try to beat him one last time.
+                </p>
+            <% end %>
+        </div>
+    </div>
+<% end %>
+
+<%= if @current_hero.pve_current_turns > 0 do %>
+    <%= if @current_hero.refresh_targets_count > 0 do %>
+        <div class="row mt-2">
+            <div class="col">
+                <a href="javascript:;" phx-click="refresh-targets" class="btn btn-primary btn-block btn-lg"><i class="fa fa-refresh mr-1"></i>Refresh Targets (<%= @current_hero.refresh_targets_count %> remaining)</a>
+            </div>
+        </div>
+    <% end %>
+    <div class="row mt-2">
+        <div class="col">
+            <div class="row d-flex align-items-center targets">
+                <%= for target <- @targets do %>
+                    <%= render "_jungle_target.html", target: target, targets: @targets, current_hero: @current_hero %>
+                <% end %>
+            </div>
+        </div>
+    </div>
+<% end %>

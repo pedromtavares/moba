@@ -82,24 +82,6 @@
                                         <h4 class="text-warning">Total Gold Farm</h4>
                                     </div>
                                 </div>
-                                <%= if @hero.pvp_ranking do %>
-                                    <h3 class="text-center mt-4 mb-2 text-danger">Arena</h3>
-                                    <div class="row text-center">
-                                        <div class="col">
-                                            <h3 class="mb-0 text-danger">
-                                                #<%= @hero.pvp_ranking %>
-                                            </h3>
-                                            <h4 class="text-danger"><%= if @hero.id == @hero.user.current_pvp_hero_id, do: "Current", else: "Previous" %> Rank</h4>
-                                        </div>
-                                        <div class="col">
-                                            <h3 class="mb-0 text-danger">
-                                                <i class="fa fa-crosshairs"></i>
-                                                <%= GH.pvp_win_rate(@hero) %>%
-                                            </h3>
-                                            <h4 class="text-danger">Win Rate</h4>
-                                        </div>
-                                    </div>
-                                <% end %>
                             </div>
                         </div>
                     </div>

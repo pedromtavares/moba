@@ -29,7 +29,7 @@ defmodule Moba do
     7 => "Immortal"
   }
   @pve_tiers %{
-    0 => "Starter",
+    0 => "Initiate",
     1 => "Novice",
     2 => "Adept",
     3 => "Veteran",
@@ -53,7 +53,7 @@ defmodule Moba do
   @buyback_multiplier 10
   @refresh_targets_count 5
   @maximum_total_farm 60_000
-  @seconds_per_turn 1
+  @seconds_per_turn 6
   @pve_win_bonus 100
   @max_pve_tier 7
 

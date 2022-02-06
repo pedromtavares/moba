@@ -26,7 +26,6 @@ defmodule MobaWeb.HeroLiveView do
        blank_collection: blank_collection,
        completed_progressions: completed_progressions,
        completed_season_progression: completed_season_progression,
-       current_season_progression: completed_season_progression,
        completed_daily_progressions: completed_daily_progressions,
        tab_display: tab_display
      )}
