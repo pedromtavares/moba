@@ -26,25 +26,10 @@ defmodule MobaWeb.DashboardView do
     end
   end
 
-  def rewards_for(ranking) do
-    number = round(3 / ranking)
-
-    medals =
-      Enum.reduce(1..number, "", fn _n, acc ->
-        acc <> "<i class='fa fa-medal'></i>"
-      end)
-
-    raw(medals)
-  end
-
-  def shards_for(ranking, league_tier) do
-    number = round(3 / ranking)
-    total = 50 + number * 50
-
-    if league_tier == Moba.max_league_tier() do
-      total
-    else
-      div(total, 2)
+  def next_pve_tier(%{pve_tier: current_tier}) do
+    cond do
+      current_tier >= Moba.max_season_tier() -> nil
+      true -> current_tier + 1
     end
   end
 
@@ -69,31 +54,18 @@ defmodule MobaWeb.DashboardView do
     |> progression_level_sort()
   end
 
-  def pvp_daily_progressions(progressions) do
-    progressions
-    |> Enum.filter(&String.starts_with?(&1.quest.code, "daily_arena"))
-    |> progression_level_sort()
-  end
-
-  def pve_tier_label(1), do: "Novice"
-  def pve_tier_label(2), do: "Adept"
-  def pve_tier_label(3), do: "Veteran"
-  def pve_tier_label(4), do: "Expert"
-
   def jungle_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
-  def jungle_bonus_for(%{quest: %{level: 2}}), do: "50% gold discount on Buybacks"
-  def jungle_bonus_for(%{quest: %{level: 3}}), do: "Gank is reimbursed on death (+1 available Ganks)"
+  def jungle_bonus_for(%{quest: %{level: 3}}), do: "Used turn is reimbursed upon death"
   def jungle_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
+  def jungle_bonus_for(_), do: nil
 
-  def pve_tab_header(current_pve_tab, tab, class, do: block) when current_pve_tab == tab do
-    content_tag(:div, [class: "pve-header #{class} bg-secondary active"], do: block)
-  end
+  def jungle_difficulty_for(%{quest: %{level: 1}}), do: "3 Easy targets + 6 Medium targets"
+  def jungle_difficulty_for(%{quest: %{level: 2}}), do: "6 Medium targets + 3 Hard targets"
+  def jungle_difficulty_for(%{quest: %{level: 3}}), do: "3 Medium targets + 6 Hard targets"
+  def jungle_difficulty_for(_), do: "9 Hard targets"
 
-  def pve_tab_header(_, tab, class, do: block) do
-    content_tag(:div, [class: "pve-header #{class} bg-light link", "phx-click": "pve-tab", "phx-value-tab": tab],
-      do: block
-    )
-  end
+  def max_league_allowed_for(%{quest: %{level: 1}}), do: "Master League"
+  def max_league_allowed_for(_), do: "Grandmaster League"
 
   defp filter_incompleted_by_code(progressions, code) do
     progressions

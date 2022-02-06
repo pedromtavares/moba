@@ -253,8 +253,6 @@ defmodule Moba.Conductor do
   defp assign_and_award_winners!(match) do
     top10_master = Game.pvp_ranking(5, 10)
 
-    pvp_quest_progressions(Enum.take(top10_master, 3))
-
     master =
       Enum.reduce(top10_master, %{}, fn hero, acc ->
         unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking, hero.league_tier)
@@ -262,8 +260,6 @@ defmodule Moba.Conductor do
       end)
 
     top10_grandmaster = Game.pvp_ranking(6, 10)
-
-    pvp_quest_progressions(Enum.take(top10_grandmaster, 3))
 
     grandmaster =
       Enum.reduce(top10_grandmaster, %{}, fn hero, acc ->
@@ -325,10 +321,6 @@ defmodule Moba.Conductor do
         match
       )
     end)
-  end
-
-  defp pvp_quest_progressions(podium_heroes) do
-    Enum.map(podium_heroes, &Game.track_achievement_pvp_quests(&1))
   end
 
   defp time_diff_in_seconds(nil), do: 0

@@ -13,14 +13,11 @@ defmodule MobaWeb.HeroLiveView do
     completed_progressions = Game.last_completed_quest_progressions(hero)
 
     completed_season_progression =
-      completed_progressions && Enum.find(completed_progressions, &(&1.quest.code == "season"))
+      completed_progressions && Enum.find(completed_progressions, &(String.contains?(&1.quest.code, "season")))
 
     completed_daily_progressions = completed_progressions && Enum.filter(completed_progressions, & &1.quest.daily)
 
-    completed_achievement_progressions =
-      completed_progressions && Enum.filter(completed_progressions, &(not &1.quest.daily and &1.quest.code != "season"))
-
-    tab_display = tab_display_priority(completed_season_progression, completed_daily_progressions)
+    tab_display = tab_display_priority(completed_season_progression)
 
     {:ok,
      assign(socket,
@@ -29,8 +26,8 @@ defmodule MobaWeb.HeroLiveView do
        blank_collection: blank_collection,
        completed_progressions: completed_progressions,
        completed_season_progression: completed_season_progression,
+       current_season_progression: completed_season_progression,
        completed_daily_progressions: completed_daily_progressions,
-       completed_achievement_progressions: completed_achievement_progressions,
        tab_display: tab_display
      )}
   end
@@ -58,11 +55,6 @@ defmodule MobaWeb.HeroLiveView do
     MobaWeb.HeroView.render("show.html", assigns)
   end
 
-  defp tab_display_priority(season, daily) do
-    cond do
-      season -> "season"
-      daily -> "daily"
-      true -> "achievement"
-    end
-  end
+  defp tab_display_priority(season) when not is_nil(season), do: "season"
+  defp tab_display_priority(_), do: "daily"
 end

@@ -13,10 +13,9 @@ defmodule MobaWeb.HeroView do
   def display_quest_tabs?(%{
         completed_progressions: all,
         completed_daily_progressions: daily,
-        completed_season_progression: season,
-        completed_achievement_progressions: achievements
+        completed_season_progression: season
       }) do
-    length(all) > 1 && all != daily && all != season && all != achievements
+    length(all) > 1 && all != daily && all != season
   end
 
   def quest_title_for(progressions) when length(progressions) > 1, do: "Quests"

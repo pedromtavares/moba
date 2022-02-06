@@ -15,17 +15,7 @@
         <ul class="nav nav-tabs nav-bordered nav-justified">
             <li class="nav-item">
                 <a href="javascript:;" class="nav-link <%=if @active_tab == "pve", do: "active"%>" phx-click="show-pve" phx-hook="Loading" id="show-pve-link">
-                    <span class="loading-text"><i class="fa fa-leaf text-success mr-1"></i>Jungle Ranking</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:;" class="nav-link <%=if @active_tab == "grandmaster", do: "active"%>" phx-click="show-grandmaster" phx-hook="Loading" id="show-grandmaster-link">
-                    <span class="loading-text"><img src="/images/league_6.png" class="league-logo mr-1">Grandmaster Arena Ranking</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:;" class="nav-link <%=if @active_tab == "master", do: "active"%>" phx-click="show-master" phx-hook="Loading" id="show-master-link">
-                    <span class="loading-text"><img src="/images/league_5.png" class="league-logo mr-1">Master Arena Ranking</span>
+                    <span class="loading-text"><i class="fa fa-crosshairs text-success mr-1"></i>Hero Ranking</span>
                 </a>
             </li>
 

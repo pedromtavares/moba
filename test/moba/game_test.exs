@@ -226,6 +226,18 @@ defmodule Moba.GameTest do
         |> Game.maybe_finish_pve()
 
       assert hero.finished_at
+
+      hero =
+        create_base_hero(%{
+          pve_current_turns: 0,
+          pve_total_turns: 0,
+          pve_tier: 4,
+          league_tier: 5,
+          boss_id: nil
+        })
+        |> Game.maybe_finish_pve()
+
+      assert hero.finished_at
     end
 
     test "#finish_pve!" do
@@ -674,6 +686,7 @@ defmodule Moba.GameTest do
       Game.track_pve_quests(user_hero)
 
       assert_progression("season", user_hero, 1)
+      assert_progression("season_master", user_hero, 1, 5)
       assert_progression("daily_master", user_hero, 1)
     end
 
@@ -689,15 +702,9 @@ defmodule Moba.GameTest do
 
       assert_progression("season", user_hero, 1)
       assert_progression("daily_master", user_hero, 1)
-      assert_progression("grandmaster_first", user_hero, 1)
-      assert_progression("grandmaster_all", user_hero, 1)
+      assert_progression("season_master", user_hero, 1, 5)
+      assert_progression("season_grandmaster", user_hero, 1, 6)
       assert_progression("daily_grandmaster", user_hero, 1)
-
-      assert_progression("grandmaster_carry", user_hero, 1)
-      assert_progression("grandmaster_bruiser", user_hero, 0)
-      assert_progression("grandmaster_tank", user_hero, 0)
-      assert_progression("grandmaster_nuker", user_hero, 0)
-      assert_progression("grandmaster_support", user_hero, 0)
     end
 
     test "#track_pve perfect quests" do
@@ -718,74 +725,11 @@ defmodule Moba.GameTest do
 
       assert_progression("season", user_hero, 1)
       assert_progression("daily_master", user_hero, 1)
-      assert_progression("grandmaster_first", user_hero, 1)
-      assert_progression("grandmaster_all", user_hero, 1)
+      assert_progression("season_master", user_hero, 1, 5)
+      assert_progression("season_grandmaster", user_hero, 1, 6)
       assert_progression("daily_grandmaster", user_hero, 1)
       assert_progression("daily_perfect", user_hero, 1)
-      assert_progression("grandmaster_perfect", user_hero, 1)
-      assert_progression("grandmaster_grail", user_hero, 1)
-    end
-
-    test "#track_daily_pvp" do
-      user = create_user()
-      skills = base_skills()
-
-      user_hero =
-        %{name: "User", league_tier: 5, pvp_active: true, pvp_ranking: 20}
-        |> Game.create_hero!(user, strong_avatar(), skills)
-
-      Game.track_daily_pvp_quests(user_hero)
-
-      assert_progression("daily_arena_easy", user_hero, 1)
-      assert_progression("daily_arena_medium", user_hero, 0)
-      assert_progression("daily_arena_hard", user_hero, 0)
-
-      user_hero =
-        %{name: "User", league_tier: 5, pvp_active: true, pvp_ranking: 10}
-        |> Game.create_hero!(user, strong_avatar(), skills)
-
-      Game.track_daily_pvp_quests(user_hero)
-
-      assert_progression("daily_arena_easy", user_hero, 1)
-      assert_progression("daily_arena_medium", user_hero, 1)
-      assert_progression("daily_arena_hard", user_hero, 0)
-
-      user_hero =
-        %{name: "User", league_tier: 6, pvp_active: true, pvp_ranking: 1}
-        |> Game.create_hero!(user, strong_avatar(), skills)
-
-      Game.track_daily_pvp_quests(user_hero)
-
-      assert_progression("daily_arena_hard", user_hero, 1)
-      assert_progression("daily_arena_medium", user_hero, 1)
-      assert_progression("daily_arena_easy", user_hero, 1)
-    end
-
-    test "#track_achievement_pvp" do
-      user = create_user()
-      skills = base_skills()
-
-      user_hero =
-        %{name: "User", league_tier: 5, pvp_active: true, pvp_ranking: 3}
-        |> Game.create_hero!(user, strong_avatar(), skills)
-
-      Game.track_achievement_pvp_quests(user_hero)
-
-      assert_progression("arena_podium", user_hero, 1)
-      assert_progression("arena_podium_all", user_hero, 1, 2)
-      assert_progression("arena_grandmaster", user_hero, 0)
-      assert_progression("arena_grandmaster_all", user_hero, 0, 2)
-
-      user_hero =
-        %{name: "User", league_tier: 6, pvp_active: true, pvp_ranking: 1}
-        |> Game.create_hero!(user, strong_avatar(), skills)
-
-      Game.track_achievement_pvp_quests(user_hero)
-
-      assert_progression("arena_podium", user_hero, 1)
-      assert_progression("arena_podium_all", user_hero, 1, 2)
-      assert_progression("arena_grandmaster", user_hero, 1)
-      assert_progression("arena_grandmaster_all", user_hero, 1, 2)
+      assert_progression("season_perfect", user_hero, 1, 7)
     end
   end
 

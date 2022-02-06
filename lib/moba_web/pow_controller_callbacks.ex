@@ -32,7 +32,6 @@ defmodule MobaWeb.PowControllerCallbacks do
         conn
       end
 
-    Game.generate_achievement_progressions!(user.id)
     Game.generate_daily_quest_progressions!(user.id)
 
     {:ok, user, conn}

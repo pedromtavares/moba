@@ -1,5 +1,19 @@
 .dashboard{
 
+  .collection{
+    .avatar{
+      max-width: 100%;
+    }
+    .blank-avatar{
+      filter: grayscale(100%);
+    }
+    .league-logo{
+      max-width: 25px;
+      height: auto;
+      margin-top: -30px
+    }
+  }
+
   .pve-header.link{
     cursor: pointer;
   }
@@ -91,6 +105,10 @@
 
   .fixed-panel{
     height: 640px;
+  }
+
+  .pve-rank{
+    width: 100px;
   }
 
   .user-rank{

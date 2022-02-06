@@ -32,7 +32,7 @@ defmodule MobaWeb.TavernLiveView do
      assign(socket,
        current_avatar: current_avatar,
        current_skins: current_skins,
-       current_skin: current_skin
+       current_skin: false #current_skin
      )}
   end
 

@@ -1,0 +1,29 @@
+<div id="daily-quests" class="modal fade show" tabindex="-1" role="dialog" aria-labelledby="daily-quests-label" aria-modal="true">
+    <div class="modal-dialog" style="max-width: 1000px">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title margin-auto pl-3" id="season-rankings-label">Daily Quests</h4>
+                <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">×</button>
+            </div>
+            <div class="modal-body">
+                <h5 class="text-success text-center mb-3">New quests will replace your completed quests <%= MobaWeb.ArenaView.next_round_description(false) %></h5>
+
+                <table class="table table-dark mb-0 border">
+                    <%= for progression <- pve_daily_progressions(@daily_progressions) do %>
+                        <tr>
+                            <td>
+                                <%= if progression.completed_at do %>
+                                    <i class="fa fa-check-circle fa-2x text-success"></i>
+                                <% else %>
+                                    <i class="fa fa-circle fa-2x text-warning"></i>
+                                <% end %>
+                            </td>
+                            <td><strong><%= progression.quest.description %></strong></td>
+                            <td class="text-center"><i class="fab fa-ethereum fa-2x text-primary"></i><br/><span class="font-italic">+<%= progression.quest.shard_prize %></span></td>
+                        </tr>
+                    <% end %>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

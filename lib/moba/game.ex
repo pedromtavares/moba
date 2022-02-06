@@ -47,7 +47,7 @@ defmodule Moba.Game do
   """
   def create_hero!(attrs, user, avatar, skills) do
     attrs =
-      if user && user.pve_tier == 4 do
+      if user && user.pve_tier >= 4 do
         Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count())
       else
         attrs
@@ -149,7 +149,7 @@ defmodule Moba.Game do
   def maybe_finish_pve(
         %{pve_state: state, pve_current_turns: 0, pve_total_turns: 0, boss_id: nil, finished_at: nil} = hero
       ) do
-    if max_league?(hero) || state == "dead" do
+    if max_league?(hero) || master_league?(hero) || state == "dead" do
       finish_pve!(hero)
     else
       hero
@@ -409,23 +409,17 @@ defmodule Moba.Game do
 
   def track_pve_quests(hero), do: Quests.track_pve(hero)
 
-  def track_daily_pvp_quests(hero), do: Quests.track_daily_pvp(hero)
-
-  def track_achievement_pvp_quests(hero), do: Quests.track_achievement_pvp(hero)
-
   def active_quest_progression?(progressions), do: Enum.find(progressions, &is_nil(&1.completed_at))
 
   def last_completed_quest_progressions(hero), do: Quests.last_completed_progressions(hero)
 
   def list_quest_progressions(user_id, code \\ nil), do: Quests.list_progressions_by_code(user_id, code)
 
+  def list_season_quest_progressions(user_id), do: Quests.list_season_progressions(user_id)
+
   def list_title_quest_progressions(user_id), do: Quests.list_title_progressions(user_id)
 
   def generate_daily_quest_progressions!(user_id \\ nil), do: Quests.generate_daily_progressions!(user_id)
-
-  def generate_achievement_progressions!(user_id), do: Quests.generate_achievement_progressions!(user_id)
-
-  def list_achievement_progressions(user_id), do: Quests.list_progressions(user_id, false)
 
   def list_daily_quest_progressions(user_id), do: Quests.list_progressions(user_id, true)
 end

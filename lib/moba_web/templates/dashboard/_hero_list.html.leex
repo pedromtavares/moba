@@ -4,18 +4,20 @@
             <div class="col">
                 <h4 class="header-title pt-3 pl-3">Your Heroes</h4>
             </div>
-            <div class="col">
-                <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
+            <div class="col d-flex justify-content-center">
+                <div class="d-none d-md-inline-block pt-3 pb-3 pr-3">
                     <div class="btn-group">
                         <button type="button" class="btn btn-xs <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished">In Progress</button>
                         <button type="button" class="btn btn-xs <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished">Completed</button>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="row mb-3 mx-2">
             <div class="col">
-                <a href="/invoke" class="btn btn-block btn-lg btn-success d-block <%= if @current_user.is_guest, do: "disabled" %>"><i class="fa fa-user-plus mr-1"></i>Invoke New Hero</a>
+                <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#daily-quests"><i class="fa fa-clock-o mr-1"></i>Daily Quests</button>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="w-100 hero-list fixed-panel" style="overflow: auto;">
@@ -38,8 +40,8 @@
                         </td>
                         <td class="text-center" width="25%">
                             <img src="/images/league_<%= hero.league_tier %>.png" class="league-logo">
-                            <h5 class="text-league-<%= hero.league_tier %>"><%= Moba.leagues()[hero.league_tier] %></h5>
-                            <h5 class="text-warning"><%= hero.total_xp_farm + hero.total_gold_farm %> Total Farm</h5>
+                            <h5><%= Moba.leagues()[hero.league_tier] %></h5>
+                            <h5 class="text-warning" data-toggle="tooltip" title="Total farm: <%= hero.total_xp_farm + hero.total_gold_farm %>"><%= GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm) %> Total Farm</h5>
                         </td>
                         <td class="text-center" width="20%">
                             <%= if hero.finished_at do %>

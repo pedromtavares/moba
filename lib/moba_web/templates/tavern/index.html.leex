@@ -33,7 +33,7 @@
 
     <div class="row">
         <%= for avatar <- @avatars do %>
-            <%=render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
+            <%= render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
         <% end %>
     </div>
 
@@ -49,7 +49,7 @@
 
     <div class="row">
         <%= for skill <- @skills do %>
-            <%=render "_skill.html", skill: skill, user: @current_user %>
+            <%= render "_skill.html", skill: skill, user: @current_user %>
         <% end %>
     </div>
 

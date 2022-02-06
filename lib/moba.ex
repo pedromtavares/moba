@@ -28,6 +28,16 @@ defmodule Moba do
     6 => "Divine",
     7 => "Immortal"
   }
+  @pve_tiers %{
+    0 => "Starter",
+    1 => "Novice",
+    2 => "Adept",
+    3 => "Veteran",
+    4 => "Expert",
+    5 => "Master",
+    6 => "Grandmaster",
+    7 => "Invoker"
+  }
   @turn_mp_regen_multiplier 0.01
   @final_tutorial_step 14
 
@@ -43,8 +53,9 @@ defmodule Moba do
   @buyback_multiplier 10
   @refresh_targets_count 5
   @maximum_total_farm 60_000
-  @seconds_per_turn 5
+  @seconds_per_turn 1
   @pve_win_bonus 100
+  @max_pve_tier 7
 
   # PVP constants
   @pvp_heroes_per_page 3
@@ -56,6 +67,7 @@ defmodule Moba do
   @max_season_tier 7
 
   # League constants
+  @platinum_league_tier 3
   @master_league_tier 5
   @max_league_tier 6
   @league_win_bonus 2000
@@ -72,6 +84,7 @@ defmodule Moba do
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
   def medals, do: @medals
+  def pve_tiers, do: @pve_tiers
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
   def final_tutorial_step, do: @final_tutorial_step
 
@@ -98,6 +111,7 @@ defmodule Moba do
   def battle_xp("moderate", pve_tier) when pve_tier < @veteran_pve_tier, do: 500
   def battle_xp("moderate", _), do: 400
   def battle_xp("strong", _), do: 500
+  def max_pve_tier, do: @max_pve_tier
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page
@@ -107,6 +121,7 @@ defmodule Moba do
   def season_points_per_medal, do: @season_points_per_medal
   def max_season_tier, do: @max_season_tier
 
+  def platinum_league_tier, do: @platinum_league_tier
   def master_league_tier, do: @master_league_tier
   def max_league_tier, do: @max_league_tier
   def league_win_bonus, do: @league_win_bonus
