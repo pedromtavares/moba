@@ -1,7 +1,7 @@
 defmodule MobaWeb.JungleLiveView do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{Tutorial, Shop}
+  alias MobaWeb.{Tutorial, Shop, JungleView}
 
   def mount(_, %{"user_id" => user_id}, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
@@ -132,6 +132,7 @@ defmodule MobaWeb.JungleLiveView do
       )
       when state in ["meditating", "mining"] do
     updated = Game.start_farming!(hero, state, turns)
+    time_trigger()
     {:noreply, assign(socket, current_hero: updated)}
   end
 
@@ -156,8 +157,12 @@ defmodule MobaWeb.JungleLiveView do
     {:noreply, assign(socket, current_hero: Game.get_hero!(id))}
   end
 
-  def handle_info(:current_time, %{assigns: %{farm_tab: tab}} = socket) when tab in ["meditation", "mine"] do
-    Process.send_after(self(), :current_time, 1000)
+  def handle_info(:current_time, %{assigns: %{current_hero: hero}} = socket) do
+    if JungleView.farming_progression(hero, %{current_time: Timex.now}) < 100 do
+      Process.send_after(self(), :current_time, 1000)
+      IO.inspect("time: #{Timex.now()}")
+    end
+    
     {:noreply, assign(socket, current_time: Timex.now())}
   end
 
