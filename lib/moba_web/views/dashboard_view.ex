@@ -61,7 +61,6 @@ defmodule MobaWeb.DashboardView do
   end
 
   def jungle_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
-  def jungle_bonus_for(%{quest: %{level: 3}}), do: "Used turn is reimbursed upon death"
   def jungle_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
   def jungle_bonus_for(_), do: nil
 
