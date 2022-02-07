@@ -106,7 +106,7 @@ defmodule Moba do
   def farm_per_turn(1), do: 850..1100
   def farm_per_turn(2), do: 900..1100
   def farm_per_turn(3), do: 950..1100
-  def farm_per_turn(4), do: 1000..1100
+  def farm_per_turn(_), do: 1000..1100
   def battle_xp("weak", pve_tier) when pve_tier < @veteran_pve_tier, do: 400
   def battle_xp("moderate", pve_tier) when pve_tier < @veteran_pve_tier, do: 500
   def battle_xp("moderate", _), do: 400
