@@ -70,4 +70,6 @@
     </div>
 </div>
 
-<%= MobaWeb.DashboardView.render "_pve_tier_rewards.html", Map.merge(assigns, %{pve_tier: @current_user.pve_tier, current_season_progression: @completed_season_progression}) %>
+<%= if @completed_season_progression do %>
+    <%= MobaWeb.DashboardView.render "_pve_tier_rewards.html", Map.merge(assigns, %{pve_tier: @current_user.pve_tier, current_season_progression: @completed_season_progression}) %>
+<% end %>
