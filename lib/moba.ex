@@ -54,7 +54,7 @@ defmodule Moba do
   @buyback_multiplier 10
   @refresh_targets_count 5
   @maximum_total_farm 60_000
-  @seconds_per_turn 6
+  @seconds_per_turn 3
   @pve_win_bonus 100
   @max_pve_tier 7
 

@@ -1,6 +1,8 @@
 defmodule MobaWeb.JungleView do
   use MobaWeb, :view
 
+  alias MobaWeb.BattleView
+
   def boss_available?(%{pve_current_turns: 0, boss_id: boss_id}) when not is_nil(boss_id), do: Game.get_hero!(boss_id)
   def boss_available?(_), do: false
 
@@ -94,7 +96,15 @@ defmodule MobaWeb.JungleView do
     end
   end
 
-  def max_available_league(%{pve_tier: tier}), do: Moba.max_available_league(tier)
+  def max_available_league(%{pve_tier: pve_tier, league_attempts: attempts} = hero) do
+    max = Moba.max_available_league(pve_tier)
+
+    if max != Moba.max_league_tier() || attempts == 0 || BattleView.league_success_rate(hero) >= 100 do
+      max
+    else
+      max - 1
+    end
+  end
 
   def reward_badges_for(hero, difficulty) do
     battle_xp = Moba.battle_xp(difficulty, hero.pve_tier)
