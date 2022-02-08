@@ -417,7 +417,7 @@ defmodule Moba.Engine.Core.Effect do
   end
 
   def undisarmable(turn) do
-    update_defender(turn, :undisarmable, true)
+    update_attacker(turn, :undisarmable, true)
   end
 
   def execute(turn) do
