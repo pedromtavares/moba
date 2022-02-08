@@ -254,7 +254,7 @@ defmodule Moba.Engine.Core do
   end
 
   # Heroes in initial pve_tiers are constantly buffed for league battles
-  defp buffed_total(%{pve_tier: pve_tier, league_tier: league_tier}, %{type: "league"}, total),
+  defp buffed_total(%{pve_tier: pve_tier, league_tier: league_tier, bot_difficulty: diff}, %{type: "league"}, total) when is_nil(diff),
     do: total + round(Moba.league_buff_multiplier(pve_tier, league_tier) * total)
 
   defp buffed_total(_, _, total), do: total
