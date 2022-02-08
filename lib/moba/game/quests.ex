@@ -66,7 +66,7 @@ defmodule Moba.Game.Quests do
   end
 
   def list_season_progressions(user_id) do
-    ["season", "season_master", "season_grandmaster", "season_perfect"]
+    Moba.season_quest_codes()
     |> Enum.map(&get_all_by_code(&1))
     |> List.flatten()
     |> find_progressions(user_id)

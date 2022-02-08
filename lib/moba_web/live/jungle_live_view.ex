@@ -158,10 +158,10 @@ defmodule MobaWeb.JungleLiveView do
   end
 
   def handle_info(:current_time, %{assigns: %{current_hero: hero}} = socket) do
-    if JungleView.farming_progression(hero, %{current_time: Timex.now}) < 100 do
+    if JungleView.farming_progression(hero, %{current_time: Timex.now()}) < 100 do
       Process.send_after(self(), :current_time, 1000)
     end
-    
+
     {:noreply, assign(socket, current_time: Timex.now())}
   end
 

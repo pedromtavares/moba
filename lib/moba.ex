@@ -40,6 +40,7 @@ defmodule Moba do
   }
   @turn_mp_regen_multiplier 0.01
   @final_tutorial_step 14
+  @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
 
   # PVE constants
   @total_pve_turns 25
@@ -87,6 +88,7 @@ defmodule Moba do
   def pve_tiers, do: @pve_tiers
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
   def final_tutorial_step, do: @final_tutorial_step
+  def season_quest_codes, do: @season_quest_codes
 
   def total_pve_turns(0), do: @total_pve_turns - 10
   def total_pve_turns(1), do: @total_pve_turns - 5
