@@ -85,7 +85,7 @@ defmodule Moba.Game.Quests do
       track("daily_grandmaster", user_id, hero)
       track("season_grandmaster", user_id, hero)
 
-      if hero.total_xp_farm + hero.total_gold_farm == Moba.maximum_total_farm() do
+      if hero.total_xp_farm + hero.total_gold_farm >= Moba.maximum_total_farm() do
         track("daily_perfect", user_id, hero)
         track("season_perfect", user_id, hero)
       end

@@ -2,7 +2,7 @@
     <div class="row mt-3">
         <div class="col-md-6 col-xl-4">
             <div class="row">
-                <%=@featured && render("_hero.html", hero: @featured, user: @user, socket: @socket)%>
+                <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
             </div>
             <div class="row">
                 <div class="col">
@@ -12,9 +12,9 @@
                             <div class="row d-flex justify-content-center">
                                 <%=if @user.current_pve_hero do %>
                                     <div class="col-3 mb-2 text-center">
-                                        <a href="javascript:;" class="<%=if @featured.id == @user.current_pve_hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=@user.current_pve_hero_id%>" phx-hook="Loading" id="set-featured-<%=@user.current_pve_hero_id%>">
+                                        <a href="javascript:;" class="<%= if @featured.id == @user.current_pve_hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%= @user.current_pve_hero_id %>" phx-hook="Loading" id="set-featured-<%= @user.current_pve_hero_id %>">
                                             <div class='avatar-container'>
-                                                <img src="<%=GH.image_url(@user.current_pve_hero.avatar)%>" class="avatar"/>
+                                                <img src="<%= GH.image_url(@user.current_pve_hero.avatar) %>" class="avatar"/>
                                                 <span class="badge badge-pill badge-light-success"><i class="fa fa-crosshairs mr-1"></i>Current</span>
                                             </div>
                                         </a>
@@ -24,10 +24,10 @@
                             <div class="row">
                                 <%= for hero <- @user.hero_collection do %>
                                     <div class="col-3 mb-2 text-center">
-                                        <a href="javascript:;" class="<%=if @featured.id == hero["hero_id"], do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=hero["hero_id"]%>" phx-hook="Loading" id="set-featured-<%=hero["hero_id"]%>">
+                                        <a href="javascript:;" class="<%= if @featured.id == hero["hero_id"], do: "current-featured" %>" phx-click="set-featured" phx-value-id="<%= hero["hero_id"] %>" phx-hook="Loading" id="set-featured-<%= hero["hero_id"] %>">
                                             <div class='avatar-container'>
-                                                <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
-                                                <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
+                                                <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar"/>
+                                                <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo">
                                             </div>
 
                                         </a>
@@ -55,9 +55,9 @@
                                 <%= if @editing do %>
                                     <form phx-change="update">
                                         <select name="quest_id" class="form-control d-inline">
-                                            <option value="" <%=if is_nil(@user.title_quest_id), do: "selected"%>>None (Remove)</option>
+                                            <option value="" <%= if is_nil(@user.title_quest_id), do: "selected" %>>None (Remove)</option>
                                             <%=for progression <- @available_title_quests do %>
-                                                <option value="<%=progression.quest_id%>" <%=if @user.title_quest_id == progression.quest_id, do: "selected"%>><%=progression.quest.title%></option>
+                                                <option value="<%= progression.quest_id %>" <%= if @user.title_quest_id == progression.quest_id, do: "selected" %>><%= progression.quest.title %></option>
                                             <% end %>
                                         </select>
                                     </form>
@@ -85,13 +85,13 @@
                             <%= unless @user.is_bot do %>
                                 <div class="row">
                                     <div class="col text-center d-flex justify-content-between" title="Account Level. Gain Account XP by leveling heroes in the Jungle" data-toggle="tooltip">
-                                        <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%=@user.level%></div>
+                                        <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%= @user.level %></div>
                                         <div class="progress progress-fixed account-level-bar">
-                                            <div style="width:<%=MobaWeb.HallView.xp_percentage(@user)%>%" class="progress-bar">
-                                                <span>&nbsp;&nbsp;<%=@user.experience%>/<%=Moba.user_level_xp()%>&nbsp;&nbsp;</span>
+                                            <div style="width:<%= MobaWeb.HallView.xp_percentage(@user) %>%" class="progress-bar">
+                                                <span>&nbsp;&nbsp;<%= @user.experience %>/<%= Moba.user_level_xp() %>&nbsp;&nbsp;</span>
                                             </div>
                                         </div>
-                                        <div class="badge badge-primary bg-white text-light font-16" style="padding: 15px"><%=@user.level+1%></div>
+                                        <div class="badge badge-primary bg-white text-light font-16" style="padding: 15px"><%= @user.level+1 %></div>
                                     </div>
                                 </div>
                             <% end %>
@@ -103,17 +103,13 @@
                                         <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
                                             <i class="fa fa-edit mr-1"></i>Edit Profile
                                         <% end %>
-                                        <small class="font-italic text-dark float-left mt-1">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
-
-                                        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), class: "font-13 badge badge-pill badge-light-warning py-1 px-2 text-reset" do %>
-                                            <i class="fab fa-ethereum mr-1"></i>Redeem Shards (<%=@user.shard_count%>)
-                                        <% end %>
+                                        <small class="font-italic text-dark float-left mt-1">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
                                     <% else %>
                                         <%= if @user.is_bot do %>
                                             <small class="font-italic text-dark">A.I. Player</small>
                                         <% else %>
-                                            <small class="font-italic text-dark float-left">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
-                                            <small class="font-italic text-dark float-right">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)%></small>
+                                            <small class="font-italic text-dark float-left">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
+                                            <small class="font-italic text-dark float-right">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
                                         <% end %>
                                     <% end %>
                                 </div>
@@ -122,16 +118,16 @@
                     </div>
                 </div>
             </div>
-            <%=if @user.id != @current_user.id do %>
+            <%= if @user.id != @current_user.id do %>
                 <div class="row text-center">
                     <div class="col">
                         <div class="card">
                             <h5 class="card-header text-center font-17 text-white"><i class="fa fa-user-friends mr-1"></i>Score</h5>
                             <div class="card-body">
                                 <h4 class="text-center">
-                                    <%=@current_user.username%> <span class="badge badge-pill badge-light-danger font-20"><%=@current_user.duel_score["#{@user.id}"] || 0%></span>
+                                    <%= @current_user.username %> <span class="badge badge-pill badge-light-danger font-20"><%= @current_user.duel_score["#{@user.id}"] || 0 %></span>
                                     <i class="fa fa-times mx-2"></i>
-                                    <span class="badge badge-pill badge-light-danger font-20"><%=@user.duel_score["#{@current_user.id}"] || 0%></span> <%=@user.username%>
+                                    <span class="badge badge-pill badge-light-danger font-20"><%= @user.duel_score["#{@current_user.id}"] || 0 %></span> <%= @user.username %>
                                 </h4>
                             </div>
                         </div>
@@ -146,23 +142,23 @@
                             <div class="performance">
                                 <div class="row text-center">
                                     <div class="col">
-                                        <img src="/images/pvp/<%=@user.season_tier%>.png" style="max-height: 100px"/>
-                                        <h2 class="text-medal-<%=@user.season_tier%>"><%=Moba.medals[@user.season_tier]%></h2>
+                                        <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height: 100px"/>
+                                        <h2 class="text-medal-<%= @user.season_tier %>"><%= Moba.medals[@user.season_tier] %></h2>
                                     </div>
                                 </div>
                                 <div class="row text-center">
                                     <%=if @user.ranking do %>
                                         <div class="col">
                                             <h3 class="mb-0 text-info">
-                                                # <%=@user.ranking%>
+                                                # <%= @user.ranking %>
                                             </h3>
-                                            <h4 class="text-info">Season Ranking</h4>
+                                            <h4 class="text-info">Season Rank</h4>
                                         </div>
                                     <% end %>
                                     <div class="col">
                                         <h3 class="mb-0 text-success">
                                             <i class="fa fa-globe mr-1"></i>
-                                            <%=@user.season_points%>
+                                            <%= @user.season_points %>
                                         </h3>
                                         <h4 class="text-success">Season Points</h4>
                                     </div>
@@ -207,10 +203,9 @@
                 <div class="card-body p-0">
                     <table class="table table-dark text-center m-0 table-sm">
                         <tr>
-                            <th><%=if @user.ranking, do: "Rank", else: "Level" %></th>
+                            <th><%= if @user.ranking, do: "Rank", else: "Level" %></th>
                             <th>User</th>
                             <th>Season Points</th>
-                            <th>Medals</th>
                         </tr>
                         <%= for user <- @ranking do %>
                             <tr>
@@ -224,23 +219,20 @@
                                     </h1>
                                 </td>
                                 <td>
-                                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
                                         <img src="/images/pvp/<%=user.season_tier%>.png" style="max-height:  50px"/>
-                                        <h5 class="text-primary mb-0 mt-1"><%=if user.title_quest, do: user.title_quest.title%> <%=user.username%></h5>
+                                        <h5 class="text-primary mb-0 mt-1"><%= if user.title_quest, do: user.title_quest.title %> <%= user.username %></h5>
                                     <% end %>
                                 </td>
                                 <td>
-                                    <h3 class="text-success"><%=user.season_points%></h3>
-                                </td>
-                                <td>
-                                    <h3 class="text-warning"><i class="fa fa-medals"></i> <%=user.medal_count%></h3>
+                                    <h3 class="text-success"><%= user.season_points %></h3>
                                 </td>
                             </tr>
                         <% end %>
                     </table>
                 </div>
                 <div class="transparent card-footer p-0">
-                    <%=live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
+                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
                         <i class="fa fa-table mr-1"></i>See Top Users
                     <% end %>
                 </div>

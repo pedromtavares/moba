@@ -36,14 +36,14 @@
                         <div class="col-6">
                             <div class="card-box border mb-0">
                                 <i class="fa fa-calendar font-24 text-success"></i>
-                                <h3><%=@current_hero.wins%>/<%=@current_hero.ties%>/<%=@current_hero.losses%></h3>
+                                <h3><%=@current_hero.wins%>/<%= @current_hero.ties %>/<%= @current_hero.losses %></h3>
                                 <p class="text-uppercase mb-1 font-13 font-weight-medium">Wins/Ties/Losses</p>
                             </div>
                         </div>
                         <div class="col-6">
                             <div class="card-box border mb-0">
                                 <i class="fa fa-trophy font-24 text-success"></i>
-                                <h3><%=Moba.Game.pve_win_rate(@current_hero)%>%</h3>
+                                <h3><%= Moba.Game.pve_win_rate(@current_hero) %>%</h3>
                                 <p class="text-uppercase mb-1 font-13 font-weight-medium">Win Rate</p>
                             </div>
                         </div>
@@ -52,7 +52,7 @@
                 <table class="table table-dark mb-2 text-center">
                     <tbody phx-update="append" id="history-jungle">
                         <%= for battle <- @battles[:pve] do %>
-                            <%=render "_battle_row.html", battle: battle, current_hero: @current_hero%>
+                            <%= render "_battle_row.html", battle: battle, current_hero: @current_hero %>
                         <% end %>
                     </tbody>
                 </table>
@@ -60,7 +60,7 @@
                     <ul class="pagination flex-center">
                         <%= if @pages[:pve] > 0  && Enum.count(@battles[:pve]) > 0 do %>
                             <li class="page-item">
-                                <a class="page-link" phx-hook="Loading" phx-click="page" phx-value-number="<%=@pages[:pve] + 1%>" phx-value-type="pve" id="load-more-pve-<%=@pages[:pve]%>">
+                                <a class="page-link" phx-hook="Loading" phx-click="page" phx-value-number="<%= @pages[:pve] + 1 %>" phx-value-type="pve" id="load-more-pve-<%= @pages[:pve] %>">
                                     <span class="loading-text">Load more <i class="fa fa-chevron-down ml-1"></i> </span>
                                 </a>
                             </li>
@@ -79,14 +79,14 @@
                         <div class="col-md-12 col-xl-6">
                             <div class="card-box border mb-0">
                                 <i class="fa fa-bullseye font-24 text-info"></i>
-                                <h3><%=@current_hero.league_attempts%></h3>
+                                <h3><%= @current_hero.league_attempts %></h3>
                                 <p class="text-uppercase mb-1 font-13 font-weight-medium">Attempts</p>
                             </div>
                         </div>
                         <div class="col-md-12 col-xl-6">
                             <div class="card-box border mb-0">
                                 <i class="fa fa-trophy font-24 text-info"></i>
-                                <h3><%=league_success_rate(@current_hero)%>%</h3>
+                                <h3><%= league_success_rate(@current_hero) %>%</h3>
                                 <p class="text-uppercase mb-1 font-13 font-weight-medium">Success Rate</p>
                             </div>
                         </div>
@@ -95,7 +95,7 @@
                 <table class="table table-dark mb-2 text-center">
                     <tbody phx-update="append" id="history-league">
                         <%= for battle <- @battles[:league] do %>
-                            <%=render "_battle_row.html", battle: battle, current_hero: @current_hero%>
+                            <%= render "_battle_row.html", battle: battle, current_hero: @current_hero %>
                         <% end %>
                     </tbody>
                 </table>
@@ -103,7 +103,7 @@
                     <ul class="pagination flex-center">
                         <%= if @pages[:league] > 0 do %>
                             <li class="page-item">
-                                <a class="page-link" phx-click="page" phx-hook="Loading" phx-value-number="<%=@pages[:league] + 1%>" phx-value-type="league" id="load-more-league-<%=@pages[:league]%>">
+                                <a class="page-link" phx-click="page" phx-hook="Loading" phx-value-number="<%= @pages[:league] + 1 %>" phx-value-type="league" id="load-more-league-<%= @pages[:league] %>">
                                     <span class="loading-text">Load more <i class="fa fa-chevron-down ml-1"></i></span>
                                 </a>
                             </li>

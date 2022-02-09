@@ -20,7 +20,7 @@
                     <div class="card-box" style="background-color: <%= farming_container_background(@current_hero, assigns) %>">
                         <%= if @current_hero.pve_state == "mining" do %>
                             <%= if farming_progression(@current_hero, assigns) >= 100 do %>
-                                <button class="btn btn-warning btn-lg" phx-click="finish-farming">Mining complete, click to claim your XP</button>
+                                <button class="btn btn-warning btn-lg" phx-click="finish-farming">Mining complete, click to claim your Gold</button>
                             <% else %>
                                 <div class="progress progress-fixed m-1">
                                     <div style="width:<%= farming_progression(@current_hero, assigns) %>%" class="progress-bar bg-warning no-mininum">
