@@ -38,7 +38,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   def online_users(query \\ User, hours_ago \\ 1) do
     ago = Timex.now() |> Timex.shift(hours: -hours_ago)
 
-    from(user in non_bots(query), where: user.last_online_at > ^ago)
+    from(u in non_bots(query), where: u.last_online_at > ^ago, order_by: [desc: u.last_online_at])
   end
 
   def by_user(query \\ User, user) do
@@ -63,7 +63,7 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def eligible_for_ranking(limit) do
     from(u in User,
-      order_by: [desc: [u.season_points, u.medal_count, u.level, u.experience]],
+      order_by: [desc: [u.pve_tier, u.season_points, u.level, u.experience]],
       where: u.is_bot == false,
       where: u.is_guest == false,
       limit: ^limit
@@ -97,13 +97,6 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in by_season_points(),
       where: u.is_bot == true,
       where: is_nil(u.current_pvp_hero_id)
-    )
-  end
-
-  def current_players do
-    from(u in User,
-      where: not is_nil(u.current_pve_hero_id) or not is_nil(u.current_pvp_hero_id),
-      order_by: [desc: u.last_online_at]
     )
   end
 

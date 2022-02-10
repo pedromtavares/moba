@@ -77,28 +77,13 @@ defmodule Moba.AccountsTest do
     end
   end
 
-  describe "#update_ranking" do
-    test "highest medal_count is #1" do
-      user = create_user(%{medal_count: 100})
-      user2 = create_user(%{medal_count: 99})
-
-      Accounts.update_ranking!()
-
-      user = Accounts.get_user!(user.id)
-      user2 = Accounts.get_user!(user2.id)
-
-      assert user.ranking == 1
-      assert user2.ranking == 2
-    end
-  end
-
   describe "messages" do
     test "#create_message" do
       MobaWeb.subscribe("chat")
       message = Accounts.create_message!(%{body: "hi"})
 
       assert message.body == "hi"
-      assert_receive message
+      assert_receive _message
     end
   end
 

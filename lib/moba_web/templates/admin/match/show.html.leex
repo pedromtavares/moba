@@ -2,28 +2,28 @@
     <div class="row mt-3">
         <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box">
-                <h3 class="text-success counter mt-0"><%=@user_stats.new_guests%></h3>
+                <h3 class="text-success counter mt-0"><%= @user_stats.new_guests %></h3>
                 <p class="text-muted mb-0">New Guests</p>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box">
-                <h3 class="text-primary counter mt-0"><%=@user_stats.new_users%></h3>
+                <h3 class="text-primary counter mt-0"><%= @user_stats.new_users%> <%= if @user_stats.new_guests > 0 do %> (<%= div(@user_stats.new_users, @user_stats.new_guests) %>%)<% end %></h3>
                 <p class="text-muted mb-0">New Users</p>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box">
-                <h3 class="text-danger counter mt-0"><%=@user_stats.new_heroes%></h3>
+                <h3 class="text-danger counter mt-0"><%= @user_stats.new_heroes %> <%= if @user_stats.new_users > 0 do %> (<%= div(@user_stats.new_heroes, @user_stats.new_users) %>%)<% end %></h3>
                 <p class="text-muted mb-0">New Heroes</p>
             </div>
         </div>
 
         <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box">
-                <h3 class="text-pink mt-0 counter"><%=@user_stats.online_today%></h3>
+                <h3 class="text-pink mt-0 counter"><%= @user_stats.online_today %></h3>
                 <p class="text-muted mb-0">Online Today</p>
             </div>
         </div>
@@ -40,113 +40,49 @@
     <div class="col">
         <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
             <tbody id="hall-of-jungle">
-                <%=for user <- @players do %>
-                    <%=render "_user_row.html", user: user, socket: @socket %>
+                <%= for user <- @players do %>
+                    <%= render "_user_row.html", user: user, socket: @socket %>
                 <% end %>
             </tbody>
         </table>
     </div>
 </div>
+
 <div class="row mt-3">
-    <nav class="margin-auto">
-        <ul class="pagination pagination-lg mb-3">
-            <%= unless @match == Moba.Game.current_match() do %>
-                <li class="page-item">
-                    <a class="page-link" href="/admin/matches/<%=@match.id+1%>">
-                        <span><i class="fa fa-arrow-left"></i></span>
-                    </a>
-                </li>
+    <div class="col-xl-6 col-lg-8 margin-auto col-xs-12">
+        <table class="table table-dark mb-0 border-left border-right border-bottom text-center">
+            <%= for duel <- @duels do %>
+                <tr>
+                    <td>
+                       <h5><%= live_redirect "Duel ##{duel.id}", to: Routes.live_path(@socket, MobaWeb.DuelLiveView, duel)%></h5>
+                    </td>
+                    <td>
+                        Started <%= duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                    </td>
+                    <td>
+                       <img src="/images/pvp/<%= duel.user.season_tier %>.png" style="max-height:  40px"/><br/>
+                       <%= duel.user.username %>
+                    </td>
+                    <td style="width: 1%">
+                        vs
+                    </td>
+                    <td>
+                        <img src="/images/pvp/<%= duel.opponent.season_tier %>.png" style="max-height:  40px"/><br/>
+                        <%= duel.opponent.username %>
+                    </td>
+                    <td>
+                        <%= if duel.phase == "finished" do %>
+                            <%= if duel.winner do %>
+                                <span class="text-success">Winner: <%= duel.winner.username %></span>
+                            <% else %>
+                                <span class="text-muted">Tie</span>
+                            <% end %>
+                        <% else %>
+                            <span class="text-danger">In progress</span>
+                        <% end %>
+                    </td>
+                </tr>
             <% end %>
-            <%=for match <- @matches do%>
-                <li class="page-item  <%=if match == @match, do: "active"%>">
-                    <%= if match == Moba.Game.current_match() do %>
-                        <%=live_redirect "Current Match", to: "/admin/matches/current", class: "page-link" %>
-                    <% else %>
-                        <%=live_redirect match.id, to: "/admin/matches/#{match.id}", class: "page-link" %>
-                    <% end %>
-                </li>
-            <% end %>
-            <li class="page-item">
-                <a class="page-link" href="/admin/matches/<%=@match.id-1%>">
-                    <span><i class="fa fa-arrow-right"></i></span>
-                </a>
-            </li>
-        </ul>
-    </nav>
-</div>
-<div class="row">
-    <div class="col">
-        <div class="card-box">
-            <h4 class="header-title mb-3 text-center">Skill Winrates</h4>
-
-            <div style="display: flex">
-                <%=for {skill, {winrate, count}} <- @normal_rates do %>
-                    <div class="text-center m-1">
-                        <img src="<%=GH.image_url(skill)%>" style="width: 100%" class="img-border-xs"/>
-                        <br/>
-                        <h4 class="text-danger"><%=round(winrate)%>% <br/> <small class="text-dark">(<%=count%>)</small></h4>
-                    </div>
-                <% end %>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card-box">
-            <h4 class="header-title mb-3 text-center">Ultimate Winrates</h4>
-
-            <div style="display: flex">
-                <%=for {skill, {winrate, count}} <- @ult_rates do %>
-                    <div class="text-center m-1">
-                        <img src="<%=GH.image_url(skill)%>" style="width: 100%;" class="img-border-xs"/>
-                        <br/>
-                        <h4 class="text-danger"><%=round(winrate)%>% <br/> <small class="text-dark">(<%=count%>)</small></h4>
-                    </div>
-                <% end %>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-3 mb-3">
-    <div class="col">
-        <%= if @match == Game.current_match() do %>
-            <h2 class="text-center text-danger">Grandmaster Arena: <%=length(@arena_grandmaster)%> | Bots: <%=length(@bots_grandmaster)%></h2>
-        <% else %>
-            <h2 class="text-center text-danger">Grandmaster Winners (<%=length(@bots_grandmaster)%> bots)</h2>
-        <% end %>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col">
-        <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
-            <tbody id="hall-of-heroes">
-                <%=for hero <- @arena_grandmaster do %>
-                    <%=render "_hero_row.html", hero: hero, socket: @socket %>
-                <% end %>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<div class="row mt-3 mb-3">
-    <div class="col">
-        <%= if @match == Game.current_match() do %>
-            <h2 class="text-center text-danger">Master Arena: <%=length(@arena_master)%> | Bots: <%=length(@bots_master)%></h2>
-        <% else %>
-            <h2 class="text-center text-danger">Master Winners (<%=length(@bots_master)%> bots)</h2>
-        <% end %>
-    </div>
-</div>
-
-<div class="row">
-    <div class="col">
-        <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
-            <tbody id="hall-of-heroes">
-                <%=for hero <- @arena_master do %>
-                    <%=render "_hero_row.html", hero: hero, socket: @socket %>
-                <% end %>
-            </tbody>
         </table>
     </div>
 </div>

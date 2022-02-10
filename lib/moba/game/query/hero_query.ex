@@ -68,11 +68,11 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(1)
   end
 
-  def latest(user_id) do
+  def latest(user_id, limit \\ 50) do
     base = Hero |> with_user(user_id)
 
     from(hero in base,
-      limit: 50,
+      limit: ^limit,
       order_by: [desc: [hero.id]],
       where: is_nil(hero.archived_at)
     )
@@ -318,7 +318,12 @@ defmodule Moba.Game.Query.HeroQuery do
   def created_recently(query \\ non_bots(), hours_ago \\ 24) do
     ago = Timex.now() |> Timex.shift(hours: -hours_ago)
 
-    from(hero in query, where: hero.inserted_at > ^ago)
+    from(hero in query,
+      join: user in assoc(hero, :user),
+      where: hero.inserted_at > ^ago,
+      where: user.is_guest == false,
+      where: user.is_bot == false
+    )
   end
 
   def with_avatar_ids(query, avatar_ids) do

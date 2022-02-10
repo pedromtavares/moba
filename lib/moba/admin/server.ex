@@ -5,7 +5,7 @@ defmodule Moba.Admin.Server do
 
   use GenServer
 
-  alias Moba.{Admin, Game}
+  alias Moba.Admin
 
   @timeout 1000 * String.to_integer(Application.get_env(:moba, :admin_refresh_seconds))
 
@@ -32,75 +32,15 @@ defmodule Moba.Admin.Server do
   @doc """
   Returns current match state or fetches from cache in the case of past matches
   """
-  def handle_call({:data, match}, _from, state) do
-    data =
-      if match.id == Game.current_match().id do
-        state
-      else
-        get_cached_data(match)
-      end
-
-    {:reply, data, state}
+  def handle_call({:data, _match}, _from, state) do
+    {:reply, state, state}
   end
 
   defp current_state do
-    match = Game.current_match()
+    players = Admin.current_active_players()
 
-    if match do
-      players = Admin.current_active_players()
-      arena = Admin.current_arena_heroes()
-      rates = Admin.recent_winrates(match.inserted_at)
-
-      %{
-        players: players,
-        arena_master: Enum.filter(arena, &(&1.league_tier == Moba.master_league_tier())),
-        arena_grandmaster: Enum.filter(arena, &(&1.league_tier == Moba.max_league_tier())),
-        rates: rates
-      }
-    else
-      %{
-        players: [],
-        arena_master: [],
-        arena_grandmaster: [],
-        rates: []
-      }
-    end
-  end
-
-  defp get_cached_data(match) do
-    key = "admin-match-#{match.id}"
-
-    case Cachex.get(:game_cache, key) do
-      {:ok, nil} -> put_cache_data(match)
-      {:ok, data} -> data
-    end
-  end
-
-  defp put_cache_data(match) do
-    key = "admin-match-#{match.id}"
-    rates = Admin.recent_winrates(match.inserted_at)
-
-    master_winners = if match.winners["master"], do: match.winners["master"], else: match.winners
-    grandmaster_winners = if match.winners["grandmaster"], do: match.winners["grandmaster"], else: match.winners
-
-    arena_master =
-      Enum.map(master_winners, fn {ranking, winner_id} ->
-        Map.put(Game.get_hero!(winner_id), :pvp_ranking, String.to_integer(ranking))
-      end)
-
-    arena_grandmaster =
-      Enum.map(grandmaster_winners, fn {ranking, winner_id} ->
-        Map.put(Game.get_hero!(winner_id), :pvp_ranking, String.to_integer(ranking))
-      end)
-
-    data = %{
-      rates: rates,
-      players: [],
-      arena_master: arena_master,
-      arena_grandmaster: arena_grandmaster
+    %{
+      players: players
     }
-
-    Cachex.put(:game_cache, key, data)
-    data
   end
 end

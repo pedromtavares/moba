@@ -4,23 +4,16 @@ defmodule Moba.ConductorTest do
   describe "main game loop" do
     test "#start" do
       old = Moba.current_match()
-      winner = create_pvp_hero(%{league_tier: 5}, 10000)
 
       current = Conductor.start_match!()
       old = Admin.get_match!(old.id)
-      winner_user = Accounts.get_user!(winner.user_id)
 
       assert current.active
       refute old.active
       assert current.last_server_update_at
-      assert current.last_pvp_round_at
 
       assert Game.get_current_skill!("coup")
       assert Game.get_item_by_code!("boots_of_speed")
-
-      assert old.winners["master"]["1"] == winner.id
-      refute winner_user.current_pvp_hero_id
-      refute Game.get_hero!(winner.id) |> Map.get(:pvp_active)
     end
 
     test "server_update!" do

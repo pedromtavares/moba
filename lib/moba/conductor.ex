@@ -19,9 +19,6 @@ defmodule Moba.Conductor do
   # 1 day
   @reset_diff_in_seconds 60 * 60 * 24
 
-  # 12 hours
-  @new_round_diff_in_seconds 60 * 60 * Moba.pvp_round_timeout_in_hours()
-
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   def init(state) do
@@ -44,10 +41,6 @@ defmodule Moba.Conductor do
       server_update!(match)
     end
 
-    if time_diff_in_seconds(match.last_pvp_round_at) >= @new_round_diff_in_seconds do
-      new_pvp_round!(match)
-    end
-
     {:noreply, state}
   end
 
@@ -60,14 +53,10 @@ defmodule Moba.Conductor do
 
     match =
       create_match!()
-      |> generate_pvp_bots!()
-      |> new_pvp_round!()
-      |> generate_resources!()
       |> server_update!()
 
     Game.generate_daily_quest_progressions!()
     Accounts.update_ranking!()
-    Engine.read_all_battles()
 
     match
   end
@@ -77,11 +66,12 @@ defmodule Moba.Conductor do
   so Moba.Game.Server knows when to run this again, currently every 10 mins.
   """
   def server_update!(match \\ Moba.current_match()) do
-    skynet!(5)
-    skynet!(6)
+    # skynet!(5)
+    # skynet!(6)
 
-    Game.update_pvp_rankings!()
-    Game.update_pve_ranking!()
+    # Game.update_pvp_rankings!()
+    # Game.update_pve_ranking!()
+    Accounts.update_ranking!()
 
     match
     |> Game.update_match!(%{last_server_update_at: DateTime.utc_now()})
@@ -125,15 +115,7 @@ defmodule Moba.Conductor do
   defp end_active_match! do
     active = Moba.current_match()
 
-    if active do
-      Game.update_pvp_rankings!()
-
-      active
-      |> Game.update_match!(%{active: false})
-      |> manage_season()
-      |> assign_and_award_winners!()
-      |> clear_current_heroes!()
-    end
+    if active, do: Game.update_match!(active, %{active: false})
 
     HeroQuery.pvp_active()
     |> Repo.update_all(set: [pvp_active: false, pvp_history: %{}])

@@ -4,7 +4,7 @@ defmodule Moba.Admin do
   """
 
   alias Moba.Admin
-  alias Admin.{Skills, Items, Avatars, Matches, Users, Server, Skins, Quests}
+  alias Admin.{Skills, Items, Avatars, Matches, Users, Server, Skins, Quests, Duels}
 
   # SKILLS
 
@@ -94,8 +94,6 @@ defmodule Moba.Admin do
 
   defdelegate current_active_players, to: Matches
 
-  defdelegate current_arena_heroes, to: Matches
-
   # SKINS
 
   def paginate_skins(params \\ %{}), do: Skins.paginate(params)
@@ -127,4 +125,8 @@ defmodule Moba.Admin do
   def delete_quest(quest), do: Quests.delete(quest)
 
   def change_quest(quest), do: Quests.change(quest)
+
+  # DUELS
+
+  def list_recent_duels, do: Duels.list_recent()
 end

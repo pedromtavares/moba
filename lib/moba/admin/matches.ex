@@ -74,23 +74,20 @@ defmodule Moba.Admin.Matches do
     end)
   end
 
-  def current_arena_heroes do
-    HeroQuery.pvp_active()
-    |> HeroQuery.load()
-    |> Repo.all()
-    |> Enum.sort_by(fn hero -> [hero.pvp_ranking] end)
-  end
-
   def current_active_players do
-    UserQuery.current_players()
-    |> UserQuery.non_bots()
+    UserQuery.non_bots()
     |> UserQuery.non_guests()
     |> UserQuery.online_users(48)
     |> Repo.all()
-    |> Repo.preload(
-      current_pve_hero: HeroQuery.load(),
-      current_pvp_hero: HeroQuery.load()
-    )
+    |> Enum.map(fn user ->
+      heroes = HeroQuery.latest(user.id, 5) |> HeroQuery.load_avatar() |> Repo.all()
+
+      count = HeroQuery.with_user(HeroQuery.unarchived(), user.id) |> Repo.aggregate(:count)
+
+      user
+      |> Map.put(:latest_heroes, heroes)
+      |> Map.put(:hero_count, count)
+    end)
   end
 
   defp skill_winrates(heroes) do
