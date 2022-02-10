@@ -46,7 +46,7 @@
                         <h5 class="card-header text-center font-17 text-white">
                             <i class="fa fa-poll mr-1"></i>Hero Performance
                             <%= unless @hero.finished_at do %>
-                                <small class="text-muted font-italic"> - In Progress <%= @hero.pve_total_turns %> turns left)</small>
+                                <small class="text-muted font-italic"> - In Progress (<%= @hero.pve_total_turns %> turns left)</small>
                             <% end %>
                         </h5>
                         <div class="card-body p-2">
