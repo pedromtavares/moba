@@ -6,18 +6,9 @@ defmodule MobaWeb.Admin.MatchLiveView do
   def mount(_, session, socket) do
     if connected?(socket), do: MobaWeb.subscribe("admin")
 
-    match_id = Map.get(session, "match_id")
-
-    match =
-      case match_id do
-        nil -> Game.current_match()
-        "current" -> Game.current_match()
-        _ -> Admin.get_match!(match_id)
-      end
-
     duels = Admin.list_recent_duels()
 
-    {:ok, assign(socket, match: match, duels: duels) |> set_vars()}
+    {:ok, assign(socket, match: Game.current_match(), duels: duels) |> set_vars()}
   end
 
   def handle_info({"server", _}, socket) do

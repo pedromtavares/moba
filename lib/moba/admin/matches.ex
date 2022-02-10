@@ -77,7 +77,7 @@ defmodule Moba.Admin.Matches do
   def current_active_players do
     UserQuery.non_bots()
     |> UserQuery.non_guests()
-    |> UserQuery.online_users(48)
+    |> UserQuery.online_users(24)
     |> Repo.all()
     |> Enum.map(fn user ->
       heroes = HeroQuery.latest(user.id, 5) |> HeroQuery.load_avatar() |> Repo.all()

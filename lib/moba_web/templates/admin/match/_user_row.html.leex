@@ -17,7 +17,7 @@
     </td>
     <%= for hero <- @user.latest_heroes do %>
         <td class="text-center <%= if hero.id == @user.current_pve_hero_id, do: "border" %>">
-            <img src="<%= GH.image_url(hero.avatar) %>" style="width: 80px;" class="img-border-xs"><br/>
+            <img src="<%= GH.image_url(hero.avatar) %>" style="width: 100px;" class="img-border-xs"><br/>
             <h5 class="mb-0 text-center">
                 <img src="/images/league_<%= hero.league_tier %>.png" style="width: 20px;">
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero), class: "text-white" do %>
@@ -27,7 +27,7 @@
                     <% end %>
                 <% end %>
             </h5>
-            <div class="progress mb-1 mt-2 margin-auto" style="max-width: 100px">
+            <div class="progress mb-1 mt-2 margin-auto" style="max-width: 150px">
                 <div class="progress-bar" role="progressbar" style="width: <%= xp_farm_percentage(hero) %>%"> <%= xp_farm_percentage(hero) %></div>
                 <div class="progress-bar bg-warning" style="width: <%= gold_farm_percentage(hero) %>%"> <%= gold_farm_percentage(hero) %></div>
             </div>
@@ -37,8 +37,12 @@
                 <span class="text-muted"><%= hero.pve_total_turns + hero.pve_current_turns %>t</span>
             <% end %>
             |
+            <span class="text-info">
+                <%= trunc(MobaWeb.BattleView.league_success_rate(hero)) %>%
+            </span>
+            |
             <span class="text-center text-success">
-                <span class="text-danger"><%= hero.buybacks %> bb</span>
+                <span class="text-danger"><%= hero.buybacks %></span>
             </span>
             |
             <span class="text-success"><%= hero.total_gold_farm + hero.total_xp_farm %></span>

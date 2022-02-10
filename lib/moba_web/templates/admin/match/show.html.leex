@@ -1,40 +1,32 @@
-<%=if @match.id == Game.current_match().id do %>
-    <div class="row mt-3">
-        <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box">
-                <h3 class="text-success counter mt-0"><%= @user_stats.new_guests %></h3>
-                <p class="text-muted mb-0">New Guests</p>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box">
-                <h3 class="text-primary counter mt-0"><%= @user_stats.new_users %> <%= if @user_stats.new_guests > 0 do %> (<%= div(@user_stats.new_users * 100, @user_stats.new_guests) %>%)<% end %></h3>
-                <p class="text-muted mb-0">New Users</p>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box">
-                <h3 class="text-danger counter mt-0"><%= @user_stats.new_heroes %> <%= if @user_stats.online_today > 0 do %> (<%= Float.round(@user_stats.new_heroes / @user_stats.online_today, 1) %>x)<% end %></h3>
-                <p class="text-muted mb-0">New Heroes</p>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box">
-                <h3 class="text-pink mt-0 counter"><%= @user_stats.online_today %></h3>
-                <p class="text-muted mb-0">Online Today</p>
-            </div>
+<div class="row mt-3">
+    <div class="col-xl-3 col-md-6">
+        <div class="widget-simple text-center card-box">
+            <h3 class="text-success counter mt-0"><%= @user_stats.new_guests %></h3>
+            <p class="text-muted mb-0">New Guests</p>
         </div>
     </div>
 
-    <div class="row mt-0 mb-2">
-        <div class="col">
-            <h2 class="text-center text-success">Active Players: <%=length(@players)%> <br/><small class="text-dark font-italic">Last updated: <%= Timex.format!(@last_updated, "%H:%M:%S", :strftime) %> -- Next match starts <%=MobaWeb.CurrentHeroView.next_match_description()%></small></h2>
+    <div class="col-xl-3 col-md-6">
+        <div class="widget-simple text-center card-box">
+            <h3 class="text-primary counter mt-0"><%= @user_stats.new_users %> <%= if @user_stats.new_guests > 0 do %> (<%= div(@user_stats.new_users * 100, @user_stats.new_guests) %>%)<% end %></h3>
+            <p class="text-muted mb-0">New Users (% converted)</p>
         </div>
     </div>
-<% end %>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="widget-simple text-center card-box">
+            <h3 class="text-pink mt-0 counter"><%= @user_stats.online_today %> <%= if @user_stats.online_today > 0 do %> (<%= div(@user_stats.new_users * 100, @user_stats.online_today) %>%)<% end %></h3>
+            <p class="text-muted mb-0">Online Today (% new)</p>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="widget-simple text-center card-box">
+            <h3 class="text-danger counter mt-0"><%= @user_stats.new_heroes %> <%= if @user_stats.online_today > 0 do %> (<%= Float.round(@user_stats.new_heroes / @user_stats.online_today, 1) %>x)<% end %></h3>
+            <p class="text-muted mb-0">New Heroes (x online)</p>
+        </div>
+    </div>
+</div>
 
 <div class="row">
     <div class="col">
@@ -57,7 +49,7 @@
                        <h5><%= live_redirect "Duel ##{duel.id}", to: Routes.live_path(@socket, MobaWeb.DuelLiveView, duel)%></h5>
                     </td>
                     <td>
-                        Started <%= duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                        <%= duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
                     </td>
                     <td>
                        <img src="/images/pvp/<%= duel.user.season_tier %>.png" style="max-height:  40px"/><br/>
@@ -74,6 +66,19 @@
                         <%= if duel.phase == "finished" do %>
                             <%= if duel.winner do %>
                                 <span class="text-success">Winner: <%= duel.winner.username %></span>
+                                <br/>
+                                <%= if duel.rewards.attacker_pvp_points > 0 do %>
+                                    <span class="badge badge-pill badge-light-success"><%= duel.user.username %>: +<%= duel.rewards.attacker_pvp_points %></span>
+                                <% else %>
+                                    <span class="badge badge-pill badge-light-dark"><%= duel.user.username %>: <%= duel.rewards.attacker_pvp_points %></span>
+                                <% end %>
+                                <%= if duel.rewards.defender_pvp_points != 0 do %>
+                                    <%= if duel.rewards.defender_pvp_points > 0 do %>
+                                        <span class="badge badge-pill badge-light-success"><%=duel.opponent.username%>: +<%=duel.rewards.defender_pvp_points %></span>
+                                    <% else %>
+                                        <span class="badge badge-pill badge-light-dark"><%=duel.opponent.username%>: <%= duel.rewards.defender_pvp_points %></span>
+                                    <% end %>
+                                <% end %>
                             <% else %>
                                 <span class="text-muted">Tie</span>
                             <% end %>
