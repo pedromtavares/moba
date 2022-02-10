@@ -31,9 +31,12 @@
                 <div class="progress-bar" role="progressbar" style="width: <%= xp_farm_percentage(hero) %>%"> <%= xp_farm_percentage(hero) %></div>
                 <div class="progress-bar bg-warning" style="width: <%= gold_farm_percentage(hero) %>%"> <%= gold_farm_percentage(hero) %></div>
             </div>
-            <%= unless hero.finished_at do %>
-                <span class="text-muted"><%= hero.pve_total_turns + hero.pve_current_turns %>t</span> | 
+            <%= if hero.finished_at do %>
+                <span class="text-muted"><%= hero.finished_at |> Timex.format("{relative}", :relative) |> elem(1) %></span>
+            <% else %>
+                <span class="text-muted"><%= hero.pve_total_turns + hero.pve_current_turns %>t</span>
             <% end %>
+            |
             <span class="text-center text-success">
                 <span class="text-danger"><%= hero.buybacks %> bb</span>
             </span>
