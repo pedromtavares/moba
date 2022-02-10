@@ -31,7 +31,7 @@ defmodule MobaWeb.ArenaView do
     created = Timex.shift(match.inserted_at, hours: 1)
 
     label =
-      if Timex.before?(match.last_pvp_round_at, created) do
+      if match.last_pvp_round_at && Timex.before?(match.last_pvp_round_at, created) do
         "Next round"
       else
         "Next match"

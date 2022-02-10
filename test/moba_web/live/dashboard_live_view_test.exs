@@ -3,10 +3,10 @@ defmodule MobaWeb.DashboardLiveViewTest do
   import Phoenix.LiveViewTest
 
   test "connected mount", %{conn: conn} do
-    %{user: pvp_user} = create_base_hero()
+    %{user: pve_user} = create_base_hero()
 
-    pvp_user = Accounts.get_user!(pvp_user.id)
-    conn = Pow.Plug.assign_current_user(conn, pvp_user, otp_app: :moba) |> init_test_session(current_mode: "pvp")
+    pve_user = Accounts.get_user!(pve_user.id)
+    conn = Pow.Plug.assign_current_user(conn, pve_user, otp_app: :moba) |> init_test_session(current_mode: "pve")
 
     {:ok, _view, html} = live(conn, "/base")
     assert html =~ "Train a new Hero"

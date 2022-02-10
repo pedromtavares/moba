@@ -1,5 +1,5 @@
 <div class="row mt-3">
-    <%= if length(@completed_progressions) > 0 do %>
+    <%= if @completed_progressions && length(@completed_progressions) > 0 do %>
         <%= render "_quests.html", assigns %>
     <% else %>
         <div class="col-xl-6 margin-auto">
