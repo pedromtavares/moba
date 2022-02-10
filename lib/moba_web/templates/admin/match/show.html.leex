@@ -16,7 +16,7 @@
 
         <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box">
-                <h3 class="text-danger counter mt-0"><%= @user_stats.new_heroes %> <%= if @user_stats.new_users > 0 do %> (<%= div(@user_stats.new_heroes, @user_stats.new_users) %>x)<% end %></h3>
+                <h3 class="text-danger counter mt-0"><%= @user_stats.new_heroes %> <%= if @user_stats.online_today > 0 do %> (<%= Float.round(@user_stats.new_heroes / @user_stats.online_today, 1) %>x)<% end %></h3>
                 <p class="text-muted mb-0">New Heroes</p>
             </div>
         </div>
