@@ -84,6 +84,9 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="card-footer text-center font-italic text-muted">
+                            Finished <%= @hero.finished_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                        </div>
                     </div>
                 </div>
             </div>

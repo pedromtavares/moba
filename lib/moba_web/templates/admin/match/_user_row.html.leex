@@ -11,7 +11,7 @@
             <%=unless @user.is_bot do %>
                 Online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
                 <br/>
-                Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)%>
+                Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
             <% end %>
         </small>
     </td>

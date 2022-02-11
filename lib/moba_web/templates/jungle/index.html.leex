@@ -2,7 +2,7 @@
     <%= if @pending_battle do %>
         <%= MobaWeb.GameView.render "_pending_battle.html", battle: @pending_battle %>
     <% else %>
-        <%= if @current_hero.user.is_guest && @current_hero.level >= 20 do %>
+        <%= if @current_hero.user.is_guest && @current_hero.level >= 10 do %>
             <%= render "_guest_signup.html", assigns %>
         <% else %>
             <div class="row mt-2 jungle-header">
