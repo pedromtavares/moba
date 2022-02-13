@@ -1,6 +1,6 @@
 <article class="timeline-item <%=if @is_attacker, do: "timeline-item-left timeline-attacker", else: "timeline-defender"%> turn"  id="turn-<%=@turn.number%>">
     <div class="timeline-desk">
-        <div class="timeline-box card-box" style="text-align: left">
+        <div class="timeline-box card-box p-1">
             <span class="<%=if @is_attacker, do: "arrow-alt", else: "arrow"%>"></span>
             <span class="timeline-icon"><%=@turn.number%></span>
             <div class="col-12 d-block d-md-none" style="margin-top: -0.5rem">
@@ -8,7 +8,7 @@
                     <span class="badge badge-pill text-white text-center turn-badge">Turn #<%=@turn.number%></span>
                 </div>
             </div>
-            <h3 class="center">
+            <h3 class="center text-white">
                 <%= if @turn.attacker.stunned do %>
                     <img src="/images/stunned.png" class="skill-img img-border">
                     <br/>
@@ -31,18 +31,11 @@
             <% descriptions = effect_descriptions(@turn) %>
             <% {first, tail} = List.pop_at(descriptions, 0) %>
             <%= if first do %>
-                <%= render "_description.html", turn: @turn, resource: elem(first, 0), effect: elem(first, 1) %>
+                <%= render "_first_description.html", turn: @turn, resource: elem(first, 0), effect: elem(first, 1), descriptions: descriptions -- [first] %>
                 <div class="descriptions">
                     <%= for {resource, effect} <- tail do %>
                         <%= render "_description.html", turn: @turn, resource: resource, effect: effect %>
                     <% end %>
-                </div>
-            <% end %>
-            <%= if Enum.count(descriptions) > 1 do %>
-                <div class="row show-all-effects">
-                    <div class="col center">
-                        <span class="badge badge-pill badge-dark center text-white" id="show-effects-for-<%=@turn.number%>" phx-hook="ExpandEffects" style="cursor:pointer" data-turn="<%=@turn.number%>"><em>show all effects</em></span>
-                    </div>
                 </div>
             <% end %>
             <div style="height: 10px;" class="d-none d-md-block">

@@ -69,6 +69,10 @@
     margin-bottom: 2rem;
   }
 
+  .timeline::before{
+    top: 45px;
+  }
+
   @media (max-width: 767.98px) {
     .timeline:before{
       display: none;
@@ -90,15 +94,20 @@
   .timeline-box{
     background-color: rgba(54, 64, 74, 0.5) !important;
     font-size: 0.9rem;
+    text-align: left;
+    background: #38414a;
+    box-shadow: inset 0px 0px 300px black;
   }
 
   .notification{
-    background-color: rgba(54, 64, 74, 0.8) !important;
-
     img{
-      width: 30px;
+      width: 40px;
       margin-right: 5px;
     }
+  }
+
+  .contracted-effects img{
+    aspect-ratio: 19/17;
   }
 
   .debug{

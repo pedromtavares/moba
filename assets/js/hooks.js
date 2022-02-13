@@ -169,7 +169,7 @@ Hooks.ExpandEffects = {
     let turn = $(el).data('turn');
     el.addEventListener("click", e => {
       $("#turn-"+turn).find(".descriptions").addClass("active");
-      $(el).closest(".show-all-effects").remove();
+      $(el).closest(".contracted-effects").remove();
     })
   }
 }

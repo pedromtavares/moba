@@ -1,5 +1,5 @@
 <div class="col-6 pr-1">
-    <div class="notification turn-hero">
+    <div class="notification turn-hero darker">
         <img src="<%=GH.image_url(@hero)%>" class="img-border-xs"/> <span class="d-none d-md-inline"><%=@hero.name%></span>
         <div class="float-right">
         <%= if @is_attacker do %>
