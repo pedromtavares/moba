@@ -3,7 +3,7 @@ defmodule MobaWeb.Admin.MatchLiveView do
 
   alias Moba.{Game, Admin}
 
-  def mount(_, session, socket) do
+  def mount(_, _, socket) do
     if connected?(socket), do: MobaWeb.subscribe("admin")
 
     duels = Admin.list_recent_duels()
