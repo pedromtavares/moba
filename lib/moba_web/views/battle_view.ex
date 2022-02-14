@@ -130,16 +130,7 @@ defmodule MobaWeb.BattleView do
         "You have died to Roshan."
 
       true ->
-        "You have died and lost the League Challenge. Farm a bit more and try again!"
-    end
-  end
-
-  def battle_class(%{type: type}) do
-    case type do
-      "pve" -> "jungle-battle"
-      "pvp" -> "arena-battle"
-      "league" -> "league-battle"
-      _ -> ""
+        "You have died and lost the League Challenge."
     end
   end
 

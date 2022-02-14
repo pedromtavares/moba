@@ -71,21 +71,10 @@ defmodule Moba.Engine.Core.Pve do
 
   # Calculates XP and gold given, all depending on battle difficulty and outcome (victory/tie/loss)
   defp manage_rewards(%{winner: winner, difficulty: difficulty, attacker: attacker} = battle) do
-    base_battle_xp = Moba.battle_xp(difficulty, attacker.pve_tier)
-    win_bonus = Moba.pve_win_bonus()
 
-    win = winner && attacker.id == winner.id
-    alive = win || is_nil(winner)
-
-    battle_xp = (alive && base_battle_xp) || 0
-
-    win_xp = (win && win_bonus) || 0
-
-    total = battle_xp + win_xp
+    total = if winner && winner.id == attacker.id, do: Moba.pve_battle_rewards(difficulty, attacker.pve_tier), else: 0
 
     rewards = %{
-      battle_xp: battle_xp,
-      win_xp: win_xp,
       total_xp: total,
       total_gold: total
     }

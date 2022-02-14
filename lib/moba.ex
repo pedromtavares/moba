@@ -6,7 +6,6 @@ defmodule Moba do
   alias Moba.{Game, Accounts, Conductor, Cleaner}
 
   # General constants
-  @max_battle_turns 12
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
   @user_level_xp 5000
   @leagues %{
@@ -55,7 +54,6 @@ defmodule Moba do
   @refresh_targets_count 5
   @maximum_total_farm 60_000
   @seconds_per_turn 3
-  @pve_win_bonus 100
   @max_pve_tier 7
 
   # PVP constants
@@ -80,7 +78,6 @@ defmodule Moba do
   def rare_items_price, do: @items_base_price * 3
   def epic_items_price, do: @items_base_price * 6
   def legendary_items_price, do: @items_base_price * 12
-  def max_battle_turns, do: @max_battle_turns
   def damage_types, do: @damage_types
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
@@ -103,16 +100,15 @@ defmodule Moba do
   def refresh_targets_count, do: @refresh_targets_count
   def maximum_total_farm, do: @maximum_total_farm
   def seconds_per_turn, do: @seconds_per_turn
-  def pve_win_bonus, do: @pve_win_bonus
   def farm_per_turn(0), do: 800..1200
   def farm_per_turn(1), do: 850..1200
   def farm_per_turn(2), do: 900..1200
   def farm_per_turn(3), do: 950..1200
   def farm_per_turn(_), do: 1000..1200
-  def battle_xp("weak", pve_tier) when pve_tier < @veteran_pve_tier, do: 400
-  def battle_xp("moderate", pve_tier) when pve_tier < @veteran_pve_tier, do: 500
-  def battle_xp("moderate", _), do: 400
-  def battle_xp("strong", _), do: 500
+  def pve_battle_rewards("weak", pve_tier) when pve_tier < @veteran_pve_tier, do: 500
+  def pve_battle_rewards("moderate", pve_tier) when pve_tier < @veteran_pve_tier, do: 600
+  def pve_battle_rewards("moderate", _), do: 500
+  def pve_battle_rewards("strong", _), do: 600
   def max_pve_tier, do: @max_pve_tier
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page

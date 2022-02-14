@@ -11,7 +11,7 @@
                 <p class="text-muted font-italic">
                     Click above to start your <span class="text-league-<%= next %>"><%= Moba.leagues[next] %> Challenge</span>.
                     <br/>
-                    You will face consecutive opponents <span class="text-danger">to the death</span> and must win all the battles in order to rank up to the <span class="text-league-<%=next%>"><%= Moba.leagues[next] %></span>.</span>
+                    You will face consecutive random opponents and must win all the battles in order to rank up to the <span class="text-league-<%=next%>"><%= Moba.leagues[next] %></span>.</span>
                 </p>
             </div>
         </div>
@@ -31,11 +31,11 @@
             </button>
             <%= if boss.league_attempts == 0 do %>
                 <p class="text-muted font-italic">
-                    Click above to start your Boss Fight.<br/>You will face Roshan <span class="text-danger">to the death</span> and must win in order to <span class="text-success">rank up</span> to the <span class="text-league-6"><%= Moba.leagues[6] %></span>.
+                    Click above to start your Boss Fight.<br/>You will face Roshan and must win in order to <span class="text-success">rank up</span> to the <span class="text-league-6"><%= Moba.leagues[6] %></span>.
                 </p>
             <% else %>
                 <p class="text-muted font-italic">
-                    Roshan has <span class="text-success">regenerated <%= trunc(Moba.boss_regeneration_multiplier * boss.avatar.total_hp) %> HP</span>.<br/>You may try to beat him one last time.
+                    Roshan has <span class="text-success">regenerated <%= trunc(Moba.boss_regeneration_multiplier * boss.avatar.total_hp) %> HP</span>.<br/>You may try to beat it one last time.
                 </p>
             <% end %>
         </div>

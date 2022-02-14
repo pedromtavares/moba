@@ -88,34 +88,6 @@ defmodule Moba.EngineTest do
       assert {:error, _} = Engine.create_pve_battle!(%{attacker: updated, defender: defender, difficulty: "weak"})
     end
 
-    test "battle ties and attacker gains xp", %{strong_hero: attacker, alternate_hero: defender} do
-      battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "weak"})
-        |> Engine.auto_finish_battle!()
-
-      assert battle.type == "pve"
-
-      rewards = battle.rewards
-      assert rewards.battle_xp == 400
-      assert rewards.win_xp == 0
-      assert rewards.total_xp == 400
-
-      reloaded_attacker = Game.get_hero!(attacker.id)
-      reloaded_defender = Game.get_hero!(defender.id)
-
-      assert reloaded_attacker.experience > attacker.experience
-      assert reloaded_defender.experience == defender.experience
-      assert reloaded_attacker.ties == 1
-
-      assert reloaded_attacker.pve_current_turns == attacker.pve_current_turns - 1
-      assert reloaded_defender.pve_current_turns == defender.pve_current_turns
-
-      assert reloaded_attacker.level == 1
-      assert reloaded_attacker.gold == attacker.gold + 400
-      assert reloaded_attacker.total_gold_farm == attacker.total_gold_farm + 400
-      assert reloaded_attacker.total_xp_farm == attacker.total_xp_farm + 400
-    end
-
     test "battle win for attacker, level up", %{strong_hero: attacker, weak_hero: defender} do
       battle =
         Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
@@ -127,16 +99,17 @@ defmodule Moba.EngineTest do
       assert battle.winner.id == attacker.id
 
       rewards = battle.rewards
-      assert rewards.battle_xp == 500
-      assert rewards.win_xp == 100
       assert rewards.total_xp == 600
 
-      updated_attacker = Game.get_hero!(attacker.id)
-      defender = Game.get_hero!(defender.id)
+      reloaded_attacker = Game.get_hero!(attacker.id)
+      reloaded_defender = Game.get_hero!(defender.id)
 
-      assert updated_attacker.total_xp_farm == attacker.total_xp_farm + 600
-      assert updated_attacker.level > attacker.level
-      assert updated_attacker.wins == 1
+      assert reloaded_attacker.total_xp_farm == attacker.total_xp_farm + 600
+      assert reloaded_attacker.level > attacker.level
+      assert reloaded_attacker.wins == 1
+
+      assert reloaded_attacker.pve_current_turns == attacker.pve_current_turns - 1
+      assert reloaded_defender.pve_current_turns == defender.pve_current_turns
 
       assert defender.experience == 0
       refute attacker.pve_state == "dead"

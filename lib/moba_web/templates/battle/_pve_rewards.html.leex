@@ -1,24 +1,16 @@
 <div class="row">
     <div class="col center victory-title margin-auto">
         <h3>
-            <%=battle_result(@battle)%>
+            <%= battle_result(@battle) %>
             <br/>
             <small>
-                <%= if @battle.rewards.battle_xp > 0 do %>
-                    <span class="badge badge-pill badge-light-primary d-none d-sm-inline">+<%=@battle.rewards.battle_xp%> Battle XP</span>
-                <% end %>
-                <%= if @battle.rewards.win_xp > 0 do %>
-                    <span class="badge badge-pill badge-light-primary d-none d-sm-inline">+<%=@battle.rewards.win_xp%> Victory XP</span>
-                <% end %>
                 <%= if @battle.rewards.total_xp > 0 do %>
-                    <span class="badge badge-pill badge-light-primary d-inline d-sm-none">+<%=@battle.rewards.total_xp%> XP</span>
+                    <span class="badge badge-pill badge-light-primary d-inline d-sm-none">+<%= @battle.rewards.total_xp %> XP</span>
                 <% end %>
                 <%= if @battle.rewards.total_gold > 0 do %>
-                    <span class="badge badge-pill badge-light-warning">+<%=@battle.rewards.total_gold%>g</span>
+                    <span class="badge badge-pill badge-light-warning">+<%= @battle.rewards.total_gold %>g</span>
                 <% end %>
-                <%= if @battle.rewards.battle_xp > 0 do %>
-                    <span class="badge badge-pill badge-light-info d-none"><%=@battle.rewards.total_xp + @battle.rewards.total_gold%> total rewards for <%=@battle.difficulty%> difficulty </span>
-                <% else %>
+                <%= if @battle.rewards.total_xp == 0 do %>
                     <span class="badge badge-pill badge-light-dark">No rewards given on defeat</span>
                 <% end %>
             </small>
@@ -34,17 +26,17 @@
             <ul class="pagination pagination-rounded mb-0">
                 <li class="page-item">
                     <div class="page-link hero-level bg-white">
-                        <%=if @hero.leveled_up, do: @hero.level-1, else: @hero.level%>
+                        <%= if @hero.leveled_up, do: @hero.level-1, else: @hero.level %>
                     </div>
                 </li>
             </ul>
         </div>
         <div class="progress progress-fixed victory-xp-bar">
-            <div style="width:<%=hero_xp_percentage(@battle)%>%" class="progress-bar bg-white">
+            <div style="width:<%= hero_xp_percentage(@battle) %>%" class="progress-bar bg-white">
             </div>
-            <%=if @battle.rewards.total_xp > 0 do %>
-                <div style="width:<%=battle_xp_percentage(@battle)%>%" class="progress-bar">
-                    <span>&nbsp;&nbsp;+<%=@battle.rewards.total_xp%> XP&nbsp;&nbsp;</span>
+            <%= if @battle.rewards.total_xp > 0 do %>
+                <div style="width:<%= battle_xp_percentage(@battle) %>%" class="progress-bar">
+                    <span>&nbsp;&nbsp;+<%= @battle.rewards.total_xp %> XP&nbsp;&nbsp;</span>
                 </div>
             <% end %>
         </div>
@@ -52,7 +44,7 @@
             <ul class="pagination pagination-rounded mb-0">
                 <li class="page-item">
                     <div class="page-link hero-next-level <%=if @hero.leveled_up, do: "hero-leveled"%>">
-                        <%=if @hero.leveled_up, do: @hero.level, else: @hero.level+1%>
+                        <%= if @hero.leveled_up, do: @hero.level, else: @hero.level+1 %>
                     </div>
                 </li>
             </ul>

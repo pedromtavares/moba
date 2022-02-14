@@ -7,8 +7,6 @@ defmodule Moba.Engine.Core do
   alias Engine.Schema.{Turn, Battler}
   alias Engine.Core.{Processor, Pve, Pvp, League, Duel, Logger, Helper}
 
-  @max_turns Moba.max_battle_turns()
-
   def create_pve_battle!(target), do: Pve.create_battle!(target)
 
   def create_pvp_battle!(attrs), do: Pvp.create_battle!(attrs)
@@ -118,11 +116,6 @@ defmodule Moba.Engine.Core do
   end
 
   defp battle_finished?(%{number: turn_number} = turn) when turn_number >= 100 do
-    finish_battle(turn)
-  end
-
-  defp battle_finished?(%{number: turn_number, battle: %{type: battle_type}} = turn)
-       when turn_number >= @max_turns and battle_type == "pve" do
     finish_battle(turn)
   end
 

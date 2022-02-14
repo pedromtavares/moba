@@ -4,7 +4,7 @@
             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic text-center level text-<%= difficulty_color(@target.difficulty) %>"><%= difficulty_label @target.difficulty %><br/><span class="font-italic font-20">Level <%= @target.defender.level %></span></span>
                 <div><%= @target.defender.avatar.name %></div>
-                <span class="font-20 font-italic text-warning tooltip-cursor" data-toggle="tooltip" title="<h4>Rewards (Victory/Draw)</h4><%= reward_badges_for(@current_hero, @target.difficulty) %>"><i class="fa fa-crown text-<%= difficulty_color(@target.difficulty) %>"></i></span>
+                <span class="font-20 font-italic text-warning tooltip-cursor" data-toggle="tooltip" title="<h4 class='text-center'>Rewards</h4><%= reward_badges_for(@current_hero, @target.difficulty) %><br/>"><i class="fa fa-crown text-<%= difficulty_color(@target.difficulty) %>"></i></span>
             </h4>
         </div>
         <div class="card-body p-0 d-flex align-items-center justify-content-center">

@@ -107,16 +107,15 @@ defmodule MobaWeb.JungleView do
   end
 
   def reward_badges_for(hero, difficulty) do
-    battle_xp = Moba.battle_xp(difficulty, hero.pve_tier)
-    win_xp = battle_xp + Moba.pve_win_bonus()
+    rewards = Moba.pve_battle_rewards(difficulty, hero.pve_tier)
 
-    xp_reward = content_tag(:span, "+#{win_xp}/+#{battle_xp} XP", class: "badge badge-pill badge-light-primary mr-1")
+    xp_reward = content_tag(:span, "+#{rewards} XP", class: "badge badge-pill badge-light-primary mr-1")
 
     safe_to_string(
       content_tag :div do
         [
           xp_reward,
-          content_tag(:span, "+#{win_xp}/+#{battle_xp} Gold", class: "badge badge-pill badge-light-warning mr-1")
+          content_tag(:span, "+#{rewards} Gold", class: "badge badge-pill badge-light-warning mr-1")
         ]
       end
     )
