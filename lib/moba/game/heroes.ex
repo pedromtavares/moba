@@ -436,6 +436,7 @@ defmodule Moba.Game.Heroes do
 
   defp bot_total_gold_farm(league_tier, difficulty) do
     base = bot_total_gold_farm_base(league_tier, difficulty)
+    extra_farm = zero_limit(league_tier - 2)
 
     range =
       case difficulty do
@@ -443,7 +444,7 @@ defmodule Moba.Game.Heroes do
         "weak" -> 0..2
         # 1200..2000
         "moderate" -> 2..4
-        "strong" -> (4 + league_tier)..(6 + league_tier)
+        "strong" -> (4 + extra_farm)..(6 + extra_farm)
         # 19_200..24_000
         "pvp_master" -> 0..12
         # 26_400..30_000
