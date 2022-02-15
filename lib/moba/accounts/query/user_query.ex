@@ -8,6 +8,8 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   import Ecto.Query
 
+  @current_ranking_date Moba.current_ranking_date()
+
   def load(queryable \\ User) do
     queryable
     |> preload([:title_quest])
@@ -66,6 +68,7 @@ defmodule Moba.Accounts.Query.UserQuery do
       order_by: [desc: [u.pve_tier, u.season_points, u.level, u.experience]],
       where: u.is_bot == false,
       where: u.is_guest == false,
+      where: u.last_online_at > ^@current_ranking_date,
       limit: ^limit
     )
   end

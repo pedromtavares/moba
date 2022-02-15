@@ -11,7 +11,7 @@ defmodule Moba.Game.Query.HeroQuery do
 
   @pvp_per_page Moba.pvp_heroes_per_page()
   @ranking_per_page Moba.ranking_heroes_per_page()
-  @current_ranking_date Timex.parse!("24-11-2021", "%d-%m-%Y", :strftime)
+  @current_ranking_date Moba.current_ranking_date()
 
   def load(queryable \\ Hero) do
     queryable
