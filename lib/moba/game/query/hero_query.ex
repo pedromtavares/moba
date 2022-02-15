@@ -83,7 +83,8 @@ defmodule Moba.Game.Query.HeroQuery do
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.id]],
       where: not is_nil(hero.finished_at),
-      where: hero.league_tier >= 5
+      where: hero.league_tier >= 3,
+      where: hero.inserted_at > ^@current_ranking_date
     )
   end
 
