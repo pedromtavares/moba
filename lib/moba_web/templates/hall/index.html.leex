@@ -79,18 +79,17 @@
         <%= if @users do %>
             <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "users", do: "d-none"%>">
                 <tbody id="hall-of-users">
-                    <tr>
-                        <td colspan="4" class='text-success'>Ranked by Season Points - Duel against other players to win Season Points</td>
-                    </tr>
                     <%=for {user, index} <- Enum.with_index(@users, 1) do %>
                         <tr id="user-<%=user.id%>">
                             <td>
+                                <%= if user.pve_tier >= user.season_tier do %>
+                                    <img src="/images/pve/<%= user.pve_tier %>.png" style="max-height: 100px"/>
+                                <% else %>
+                                    <img src="/images/pvp/<%= user.season_tier %>.png" style="max-height: 100px"/>
+                                <% end %>
                                 <h1>
                                     #<%=index%>
                                 </h1>
-                            </td>
-                            <td>
-                                <img src="/images/pvp/<%=user.season_tier%>.png" style="max-height: 120px;max-width: 150px"/>
                             </td>
                             <td>
                                 <h2>
@@ -98,32 +97,20 @@
                                     <br/>
                                     <small class="text-dark"><em>Last online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
                                 </h2>
-                                <span class="font-15 badge badge-pill badge-light-success py-1 px-2 text-reset">
-                                    <i class="fa fa-globe mr-1"></i><%=user.season_points%>
+                                <span class="font-15 badge badge-pill badge-light-primary py-1 px-2 text-reset m-1">
+                                    <i class="fa fa-layer-group mr-1"></i>Level <%= user.level %>
                                 </span>
-                                <span class="font-15 badge badge-pill badge-light-warning py-1 px-2 text-reset">
-                                    <i class="fa fa-medal mr-1"></i><%=user.medal_count%>
+                                <span class="font-15 badge badge-pill badge-light-success py-1 px-2 text-reset m-1">
+                                    <i class="fa fa-globe mr-1"></i><%= user.season_points %> Season Points
                                 </span>
                             </td>
-                            <td style="width: 50%">
-                                <div class="row">
-                                    <div class="col">
-                                        <div class="float-left center">
-                                            <ul class="pagination pagination-rounded mb-0">
-                                                <li class="page-item">
-                                                    <div class="page-link text-white bg-primary" data-toggle="tooltip" title="Level" style="margin-right: -1rem">
-                                                        <%=user.level%>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="progress" style="height:25px;margin-top: 4px;"  data-toggle="tooltip" title="Experience: <%=user.experience%>/<%=Moba.user_level_xp()%>">
-                                            <div style="width:<%=xp_percentage(user)%>%;" class="progress-bar bg-primary text-white">
-
-                                            </div>
-                                        </div>
+                            <td style="width: 1000px">
+                                <%= for hero <- user.hero_collection do %>
+                                    <div style="width: 80px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
+                                        <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar"/>
+                                        <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo" style="margin-top: -20px">
                                     </div>
-                                </div>
+                            <% end %>
                             </td>
                         </tr>
                   <% end %>
