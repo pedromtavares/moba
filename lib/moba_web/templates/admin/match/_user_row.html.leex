@@ -21,7 +21,7 @@
             <h5 class="mb-0 text-center">
                 <img src="/images/league_<%= hero.league_tier %>.png" style="width: 20px;">
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero), class: "text-white" do %>
-                    Lv <span class='<%= if hero.state == "dead", do: "text-muted" %>'><%= hero.level %></span> 
+                    Lv <span class='<%= if hero.pve_state == "dead", do: "text-muted" %>'><%= hero.level %></span> 
                     <%= if hero.pve_ranking do %>
                         <span class="text-success">#<%= hero.pve_ranking %></span>
                     <% end %>
