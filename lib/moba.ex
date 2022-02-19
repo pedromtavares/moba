@@ -7,7 +7,7 @@ defmodule Moba do
 
   # General constants
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
-  @user_level_xp 5000
+  @user_level_xp 10_000
   @leagues %{
     0 => "Bronze League",
     1 => "Silver League",
@@ -112,6 +112,9 @@ defmodule Moba do
   def pve_battle_rewards("moderate", _), do: 500
   def pve_battle_rewards("strong", _), do: 600
   def max_pve_tier, do: @max_pve_tier
+  def refresh_targets_count(4), do: 5
+  def refresh_targets_count(5), do: 10
+  def refresh_targets_count(6), do: 15
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page

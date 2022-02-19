@@ -77,7 +77,7 @@ defmodule Moba.Game.Targets do
         minimum_farm(total_xp - base_xp * 3)..total_xp
 
       "strong" ->
-        (total_xp + base_xp * 1)..(total_xp + base_xp * 3)
+        total_xp..(total_xp + base_xp * 3)
     end
   end
 
@@ -92,7 +92,7 @@ defmodule Moba.Game.Targets do
         (total_xp - base_xp * 1)..(total_xp + base_xp * 2)
 
       "strong" ->
-        (total_xp + base_xp * 1)..(total_xp + base_xp * 4)
+        total_xp..(total_xp + base_xp * 4)
     end
   end
 
@@ -107,7 +107,7 @@ defmodule Moba.Game.Targets do
         total_xp..(total_xp + base_xp * 3)
 
       "strong" ->
-        (total_xp + base_xp * 3)..(total_xp + base_xp * 6)
+        total_xp..(total_xp + base_xp * 6)
     end
   end
 

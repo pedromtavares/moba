@@ -26,7 +26,7 @@
                     <tr>
                         <td class="text-center" width="20%">
                             <h4>
-                                <%= hero.name %><%= if hero.finished_at do %><span class="text-success">#<%= hero.pve_ranking %></span><% end %>
+                                <%= hero.name %><%= if hero.pve_ranking do %><span class="text-success">#<%= hero.pve_ranking %></span><% end %>
                             </h4>
 
                             <%= GH.hero_avatar(hero, false) %>

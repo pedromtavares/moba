@@ -322,10 +322,10 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_gold_farm}, :desc) |> List.first()
+        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_gold_farm + &1.total_xp_farm}, :desc) |> List.first()
       }
     end)
-    |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_gold_farm} end, :desc)
+    |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_gold_farm + hero.total_xp_farm} end, :desc)
     |> Enum.map(fn {code, hero} -> %{code: code, hero_id: hero.id, tier: hero.league_tier, avatar: hero.avatar} end)
   end
 
@@ -436,14 +436,15 @@ defmodule Moba.Game.Heroes do
 
   defp bot_total_gold_farm(league_tier, difficulty) do
     base = bot_total_gold_farm_base(league_tier, difficulty)
-    extra_farm = zero_limit(league_tier - 2)
+    extra_farm = zero_limit(league_tier - 3)
 
     range =
       case difficulty do
         # 0..800
         "weak" -> 0..2
-        # 1200..2000
+        # 800..1600
         "moderate" -> 2..4
+        # 1600..3200
         "strong" -> (4 + extra_farm)..(6 + extra_farm)
         # 19_200..24_000
         "pvp_master" -> 0..12

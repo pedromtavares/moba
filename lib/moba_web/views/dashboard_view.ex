@@ -62,6 +62,8 @@ defmodule MobaWeb.DashboardView do
 
   def jungle_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
   def jungle_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
+  def jungle_bonus_for(%{quest: %{level: 5}}), do: "Ability to refresh Targets up to 10 times"
+  def jungle_bonus_for(%{quest: %{level: 6}}), do: "Ability to refresh Targets up to 15 times"
   def jungle_bonus_for(_), do: nil
 
   def jungle_difficulty_for(%{quest: %{level: 1}}), do: "3 Easy targets + 6 Medium targets"

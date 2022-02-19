@@ -48,7 +48,7 @@ defmodule Moba.Game do
   def create_hero!(attrs, user, avatar, skills) do
     attrs =
       if user && user.pve_tier >= 4 do
-        Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count())
+        Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count(user.pve_tier))
       else
         attrs
       end
