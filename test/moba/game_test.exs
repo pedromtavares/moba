@@ -384,15 +384,6 @@ defmodule Moba.GameTest do
       assert hero.active_build.type == "pvp"
     end
 
-    test "#switch_build!" do
-      hero =
-        create_base_hero(%{level: 10})
-        |> Game.create_pvp_build!(alternate_skills())
-        |> Game.switch_build!()
-
-      assert hero.active_build.type == "pve"
-    end
-
     test "#generate_bot_build!" do
       hero =
         create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
@@ -526,6 +517,14 @@ defmodule Moba.GameTest do
       assert hero.item_hp == base_hero.item_hp
       assert hero.item_mp == base_hero.item_mp
       assert hero.item_atk == base_hero.item_atk
+
+      base_hero = create_base_hero(%{gold: 5000, finished_at: Timex.now()})
+      hero =
+        base_hero
+        |> Game.buy_item!(alternate_item())
+        |> Game.sell_item!(alternate_item())
+
+      assert hero.gold == 5000
     end
 
     test "#transmute_item!" do

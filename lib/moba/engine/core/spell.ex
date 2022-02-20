@@ -493,6 +493,7 @@ defmodule Moba.Engine.Core.Spell do
     if result / turn.defender.total_hp * 100 <= turn.resource.base_amount do
       turn
       |> Effect.limit_defender_hp_to_base_amount()
+      |> Effect.defender_immortal()
       |> Effect.defender_mp_cost()
       |> Effect.add_defender_battle_armor()
       |> Effect.add_defender_battle_power()
@@ -508,6 +509,7 @@ defmodule Moba.Engine.Core.Spell do
     if result / turn.attacker.total_hp * 100 <= turn.resource.base_amount do
       turn
       |> Effect.limit_attacker_hp_to_base_amount()
+      |> Effect.immortal()
       |> Effect.mp_cost()
       |> Effect.add_battle_armor()
       |> Effect.add_battle_power()

@@ -37,6 +37,21 @@ defmodule MobaWeb.HeroLiveView do
     {:noreply, assign(socket, tab_display: display)}
   end
 
+  def handle_event(
+        "set-skin",
+        %{"skin-code" => skin_code},
+        %{assigns: %{skin_selection: selection, hero: hero}} = socket
+      ) do
+    skin = Enum.find(selection.skins, &(&1.code == skin_code))
+
+    updated_hero = Game.set_hero_skin!(hero, skin)
+
+    skin_index = Enum.find_index(selection.skins, fn selection_skin -> selection_skin.code == skin_code end)
+    updated_selection = %{selection | index: skin_index}
+
+    {:noreply, assign(socket, hero: updated_hero, skin_selection: updated_selection)}
+  end
+
   def handle_info({"hero", %{id: id}}, socket) do
     {:noreply, assign(socket, hero: Game.get_hero!(id))}
   end
@@ -44,12 +59,25 @@ defmodule MobaWeb.HeroLiveView do
   def handle_params(%{"id" => id}, _uri, socket) do
     hero = Game.get_hero!(id)
     ranking = Game.pve_search(hero)
+    user = socket.assigns.current_user
 
     if connected?(socket) do
       Game.subscribe_to_hero(id)
     end
 
-    {:noreply, assign(socket, hero: hero, ranking: ranking)}
+    skin_selection = if hero.user_id == user.id do
+      skins = Accounts.unlocked_codes_for(user) |> Game.list_skins_with_codes()
+      avatar_code = hero.avatar.code
+      avatar_skins = [Game.default_skin(avatar_code)] ++ Enum.filter(skins, &(&1.avatar_code == avatar_code))
+      index = Enum.find_index(avatar_skins, fn skin -> skin.id == hero.skin_id end)
+
+      %{
+        index: index,
+        skins: avatar_skins
+      }
+    end
+
+    {:noreply, assign(socket, hero: hero, ranking: ranking, skin_selection: skin_selection)}
   end
 
   def render(assigns) do

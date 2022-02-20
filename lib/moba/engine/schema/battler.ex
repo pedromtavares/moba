@@ -83,6 +83,7 @@ defmodule Moba.Engine.Schema.Battler do
     field :silenced, :boolean, default: false
     field :physically_invulnerable, :boolean, default: false
     field :invulnerable, :boolean, default: false
+    field :immortal, :boolean, default: false
     field :inneffectable, :boolean, default: false
     field :miss, :boolean, default: false
     field :disarmed, :boolean, default: false

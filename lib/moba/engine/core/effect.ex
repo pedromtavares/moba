@@ -424,6 +424,14 @@ defmodule Moba.Engine.Core.Effect do
     update_defender(turn, :executed, true)
   end
 
+  def immortal(turn) do
+    update_attacker(turn, :immortal, true)
+  end
+
+  def defender_immortal(turn) do
+    update_defender(turn, :immortal, true)
+  end
+
   def charging(%{attacker: attacker} = turn) do
     turn
     |> update_attacker(:charging, true)
@@ -502,17 +510,13 @@ defmodule Moba.Engine.Core.Effect do
   def limit_attacker_hp_to_base_amount(%{resource: resource, attacker: attacker} = turn) do
     limit = round(attacker.total_hp * resource.base_amount / 100)
 
-    turn
-    |> update_attacker(:current_hp, limit)
-    |> update_attacker(:damage, 0)
+    update_attacker(turn, :current_hp, limit)
   end
 
   def limit_defender_hp_to_base_amount(%{resource: resource, defender: defender} = turn) do
     limit = round(defender.total_hp * resource.base_amount / 100)
 
-    turn
-    |> update_defender(:current_hp, limit)
-    |> update_defender(:damage, 0)
+    update_defender(turn, :current_hp, limit)
   end
 
   def increment_spell_count(%{attacker: attacker} = turn) do

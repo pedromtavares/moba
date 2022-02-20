@@ -90,11 +90,9 @@ defmodule Moba.Engine.Core.Helper do
   def total_damage_reduction(armor), do: armor
 
   def calculate_final_hp(battler) do
-    result =
-      battler.current_hp +
-        battler.hp_regen -
-        battler.damage -
-        battler.self_damage
+    regen = battler.current_hp + battler.hp_regen
+    damage = battler.damage + battler.self_damage
+    result = if battler.immortal, do: regen, else: regen - damage
 
     cond do
       result > battler.total_hp -> battler.total_hp

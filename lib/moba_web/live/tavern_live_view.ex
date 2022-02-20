@@ -30,10 +30,10 @@ defmodule MobaWeb.TavernLiveView do
 
     {:noreply,
      assign(socket,
+       avatar_code: avatar_code,
        current_avatar: current_avatar,
        current_skins: current_skins,
-       # current_skin
-       current_skin: false
+       current_skin: current_skin
      )}
   end
 

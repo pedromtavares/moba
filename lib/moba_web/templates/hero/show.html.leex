@@ -1,50 +1,68 @@
-<div class="hero-review" id="hero-review">
+<div class="hero-review content-with-hero-bar" id="hero-review">
     <%= if finished_hero = finished_jungle?(@current_user, @hero) do %>
         <%= render "_finished_hero.html", Map.put(assigns, :finished_hero, finished_hero) %>
     <% end %>
     <div class="row mt-3">
-        <div class="col-md-6 col-xl-4">
-            <div class="hero-card card " style="background-image: url(<%= GH.background_url(@hero) %>">
-                <div class="card-header pt-0 pb-1">
-                    <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-                        <span class="font-italic level">Level<br/><span class="font-italic font-20"><%= @hero.level %></span></span>
-                        <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%= @hero.name %><%end %>
-                        <span class="font-15 font-italic"><%= @hero.avatar.name %></span>
-                    </h4>
-                </div>
-                <div class="card-body text-center">
-                </div>
-                <div class="transparent card-footer p-0 text-center">
-                    <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
-                        <div class="col">
-                            <%= GH.hero_stats(@hero, true) %>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-12 mt-1">
-                            <div class="skills-container d-flex justify-content-between">
-                                <%= GH.hero_skill_list(@hero) %>
-                            </div>
-                            <div class="items-container row no-gutters">
-                                <%= GH.hero_item_list(@hero) %>
-                            </div>
-
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-6 col-xl-4">
+        <div class="col-md-6 col-xl-6">
             <div class="row">
                 <div class="col">
-                    <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
+                    <div class="hero-card card">
+                        <div class="card-header pt-0 pb-1">
+                            <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+                                <span class="font-italic level">Level<br/><span class="font-italic font-20"><%= @hero.level %></span></span>
+                                <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%= @hero.name %><%end %>
+                                <span class="font-15 font-italic"><%= @hero.avatar.name %></span>
+                            </h4>
+                        </div>
+                        <div class="card-body text-center">
+                            <img src="<%= GH.background_url(@hero) %>"/>
+                        </div>
+                        <div class="transparent card-footer p-0 text-center">
+                            <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
+                                <div class="col">
+                                    <%= GH.hero_stats(@hero, true) %>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-12 mt-1 d-flex justify-content-center">
+                                    <div class="skills-container d-flex justify-content-between">
+                                        <%= GH.hero_skill_list(@hero) %>
+                                    </div>
+                                    <div class="items-container row no-gutters">
+                                        <%= GH.hero_item_list(@hero) %>
+                                    </div>
+                                </div>
+                            </div>
+                            <%= if @hero.user_id == @current_user.id do %>
+                                <div class="row">
+                                    <%= if @skin_selection do %>
+                                        <div class="col">
+                                            <%= live_redirect class: "btn btn-light btn-block mt-1", to: Routes.live_path(@socket, MobaWeb.TavernLiveView, %{avatar: @hero.avatar.code}) do %>
+                                                <i class="fa fa-palette mr-1"></i>View Skins
+                                            <% end %>
+                                        </div>
+                                        <%= if has_previous_skin?(@skin_selection) do %>
+                                            <div class="col">
+                                                <a href="javascript:;" class="btn btn-secondary btn-block mt-1" phx-click="set-skin" phx-value-skin-code="<%= previous_skin_for(@skin_selection) %>"><i class="fa fa-chevron-left mr-1"></i> Change Skin</a>
+                                            </div>
+                                        <% end %>
+                                        <%= if has_next_skin?(@skin_selection) do %>
+                                            <div class="col">
+                                                <a href="javascript:;" class="btn btn-secondary btn-block mt-1" phx-click="set-skin" phx-value-skin-code="<%= next_skin_for(@skin_selection) %>">Change Skin<i class="fa fa-chevron-right ml-1"></i> </a>
+                                            </div>
+                                        <% end %>
+                                    <% end %>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <div class="card">
                         <h5 class="card-header text-center font-17 text-white">
-                            <i class="fa fa-poll mr-1"></i>Hero Performance
+                            <i class="fa fa-poll mr-1"></i>Performance
                             <%= unless @hero.finished_at do %>
                                 <small class="text-muted font-italic"> - In Progress (<%= @hero.pve_total_turns %> turns left)</small>
                             <% end %>
@@ -93,8 +111,16 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card ranking">
+        <div class="col-md-6 col-xl-6">
+            <div class="row">
+                <div class="col">
+                    <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col">
+                    <div class="card ranking">
                 <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i>Hero Ranking</h5>
                 <div class="card-body p-0">
                     <table class="table table-dark text-center m-0 table-sm">
@@ -145,6 +171,10 @@
                     <% end %>
                 </div>
             </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<%= if @hero.user_id == @current_user.id, do: live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero_id" => @hero.id}, id: "current-hero-live-view") %>

@@ -34,4 +34,24 @@ defmodule MobaWeb.HeroView do
       true -> "previous-tier"
     end
   end
+
+  def has_previous_skin?(selection) do
+    selection.index > 0
+  end
+
+  def has_next_skin?(selection) do
+    length(selection.skins) > selection.index + 1
+  end
+
+  def next_skin_for(selection) do
+    next_index = selection.index + 1
+    skin = Enum.at(selection.skins, next_index)
+    skin.code
+  end
+
+  def previous_skin_for(selection) do
+    next_index = selection.index - 1
+    skin = Enum.at(selection.skins, next_index)
+    skin.code
+  end
 end

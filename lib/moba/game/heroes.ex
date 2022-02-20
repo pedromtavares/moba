@@ -230,10 +230,10 @@ defmodule Moba.Game.Heroes do
   """
   def pve_search(%{pve_ranking: ranking}) when not is_nil(ranking) do
     {min, max} =
-      if ranking <= 3 do
-        {1, 5}
+      if ranking <= 6 do
+        {1, 10}
       else
-        {ranking - 2, ranking + 2}
+        {ranking - 5, ranking + 5}
       end
 
     HeroQuery.non_bots()
@@ -244,25 +244,27 @@ defmodule Moba.Game.Heroes do
 
   def pve_search(%{total_gold_farm: total_gold_farm, bot_difficulty: bot}) when not is_nil(bot) do
     HeroQuery.non_bots()
-    |> HeroQuery.by_total_gold_farm(total_gold_farm - 200, total_gold_farm + 200)
-    |> HeroQuery.limit_by(5)
+    |> HeroQuery.by_total_gold_farm(total_gold_farm - 2000, total_gold_farm + 2000)
+    |> HeroQuery.limit_by(10)
     |> Repo.all()
     |> avatar_preload()
   end
 
-  def pve_search(%{total_gold_farm: total_gold_farm, id: id}) do
+  def pve_search(%{total_gold_farm: total_gold_farm, id: id} = hero) do
     by_farm =
       HeroQuery.non_bots()
-      |> HeroQuery.by_total_gold_farm(total_gold_farm - 500, total_gold_farm + 500)
+      |> HeroQuery.by_total_gold_farm(total_gold_farm - 5000, total_gold_farm + 5000)
       |> Repo.all()
       |> avatar_preload()
 
-    hero_index = Enum.find_index(by_farm, &(&1.id == id))
+    with_hero = Enum.sort_by(by_farm ++ [hero], &(&1.total_gold_farm + &1.total_xp_farm), :desc)
 
-    by_farm
+    hero_index = Enum.find_index(with_hero, &(&1.id == id))
+
+    with_hero
     |> Enum.with_index()
     |> Enum.filter(fn {_, index} ->
-      index >= hero_index - 2 && index <= hero_index + 2
+      index >= hero_index - 4 && index <= hero_index + 5
     end)
     |> Enum.map(fn {elem, _} -> elem end)
   end

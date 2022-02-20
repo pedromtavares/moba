@@ -150,7 +150,21 @@
   }
 
   .hero-card{
-    height: 450px;
+    .card-body{
+      padding: 0;
+
+      img{
+        max-width: 100%;
+      }
+    }
+
+    .skills-container{
+      max-width: 400px;
+    }
+
+    .items-container{
+      max-width: 200px;
+    }
 
     .performance{
       background-color: rgba(54, 64, 74, 0.8);

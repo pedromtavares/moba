@@ -204,6 +204,7 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query,
       where: hero.total_gold_farm >= ^min,
       where: hero.total_gold_farm <= ^max,
+      where: not is_nil(hero.pve_ranking),
       order_by: [desc: hero.total_gold_farm]
   end
 

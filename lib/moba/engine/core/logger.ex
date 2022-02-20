@@ -116,7 +116,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("echo_stomp", %{"charging" => {true, defender}}, _) do
-    "#{defender} is connecting with the [status]Astral Spirit[/status]"
+    "#{defender} is connecting with the [status]Astral Spirit ...[/status]"
   end
 
   defp description_for("echo_stomp", %{"damage" => {damage, defender}}, heroes) do

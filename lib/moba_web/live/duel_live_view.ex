@@ -45,15 +45,6 @@ defmodule MobaWeb.DuelLiveView do
     {:noreply, socket}
   end
 
-  def handle_event("switch-build", %{"id" => hero_id}, %{assigns: %{heroes: heroes}} = socket) do
-    id = String.to_integer(hero_id)
-    index = Enum.find_index(heroes, fn hero -> hero.id == id end)
-    hero = Enum.find(heroes, fn hero -> hero.id == id end)
-    updated = List.replace_at(heroes, index, Game.switch_build!(hero))
-
-    {:noreply, assign(socket, heroes: updated)}
-  end
-
   def render(assigns) do
     MobaWeb.DuelView.render("show.html", assigns)
   end

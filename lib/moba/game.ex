@@ -241,14 +241,6 @@ defmodule Moba.Game do
     |> level_active_build_to_max!()
   end
 
-  @doc """
-  Heroes can freely switch between builds when in the Arena
-  """
-  def switch_build!(hero) do
-    build = Builds.other_build_for(hero)
-    activate_build!(hero, build)
-  end
-
   def generate_bot_build!(bot) do
     build = Builds.generate_for_bot!(bot)
     activate_build!(build.hero, build)
@@ -311,7 +303,7 @@ defmodule Moba.Game do
 
   def item_price(item), do: Items.price(item)
 
-  def item_sell_price(item), do: Items.sell_price(item)
+  def item_sell_price(hero, item), do: Items.sell_price(hero, item)
 
   def can_equip_item?(hero, item), do: Items.can_equip?(hero, item)
 

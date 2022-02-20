@@ -17,15 +17,15 @@
                 <h3 class="page-title center">
                     <span class="text-dark">Normal Items</span>
                     <br/>
-                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%=Moba.normal_items_price()%></span></em></small>
+                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%= Moba.normal_items_price() %></span></em></small>
                 </h3>
                 <div class="row">
                     <%= for item <- normals(@items) do %>
-                        <%=render "_item.html", item: item%>
+                        <%= render "_item.html", item: item %>
                     <% end %>
                 </div>
-                <%=if @selected_shop && @selected_shop.rarity == "normal" do %>
-                    <%=render "_actions.html", selected_shop: @selected_shop, hero: @current_hero%>
+                <%= if @selected_shop && @selected_shop.rarity == "normal" do %>
+                    <%= render "_actions.html", selected_shop: @selected_shop, hero: @current_hero %>
                 <% end %>
             </div>
         </div>
@@ -34,15 +34,15 @@
                 <h3 class="page-title center">
                     <span class="text-primary">Rare Items</span>
                     <br/>
-                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%=Moba.rare_items_price()%></span> or <span class="text-dark">3 Normal</span></em></small>
+                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%= Moba.rare_items_price() %></span> or <span class="text-dark">3 Normal</span></em></small>
                 </h3>
                 <div class="row">
                     <%= for item <- rares(@items) do %>
-                        <%=render "_item.html", item: item%>
+                        <%= render "_item.html", item: item %>
                     <% end %>
                 </div>
-                <%=if @selected_shop && @selected_shop.rarity == "rare" do %>
-                    <%=render "_actions.html", selected_shop: @selected_shop, hero: @current_hero%>
+                <%= if @selected_shop && @selected_shop.rarity == "rare" do %>
+                    <%= render "_actions.html", selected_shop: @selected_shop, hero: @current_hero %>
                 <% end %>
             </div>
         </div>
@@ -51,15 +51,15 @@
                 <h3 class="page-title center">
                     <span class="text-purple">Epic Items</span>
                     <br/>
-                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%=Moba.epic_items_price()%></span> or <span class="text-primary">2 Rare</span></em></small>
+                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%= Moba.epic_items_price() %></span> or <span class="text-primary">2 Rare</span></em></small>
                 </h3>
                 <div class="row">
                     <%= for item <- epics(@items) do %>
-                        <%=render "_item.html", item: item%>
+                        <%= render "_item.html", item: item %>
                     <% end %>
                 </div>
-                <%=if @selected_shop && @selected_shop.rarity == "epic" do %>
-                    <%=render "_actions.html", selected_shop: @selected_shop, hero: @current_hero%>
+                <%= if @selected_shop && @selected_shop.rarity == "epic" do %>
+                    <%= render "_actions.html", selected_shop: @selected_shop, hero: @current_hero %>
                 <% end %>
             </div>
         </div>
@@ -68,15 +68,15 @@
                 <h3 class="page-title center">
                     <span class="text-danger">Legendary Items</span>
                     <br/>
-                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%=Moba.legendary_items_price()%></span> or <span class="text-purple">2 Epic</span></em></small>
+                    <small><em><span class="text-warning"><i class="fa fa-coins"></i> <%= Moba.legendary_items_price() %></span> or <span class="text-purple">2 Epic</span></em></small>
                 </h3>
                 <div class="row">
                     <%= for item <- legendaries(@items) do %>
-                        <%=render "_item.html", item: item %>
+                        <%= render "_item.html", item: item %>
                     <% end %>
                 </div>
-                <%=if @selected_shop && @selected_shop.rarity == "legendary" do %>
-                    <%=render "_actions.html", selected_shop: @selected_shop, hero: @current_hero%>
+                <%= if @selected_shop && @selected_shop.rarity == "legendary" do %>
+                    <%= render "_actions.html", selected_shop: @selected_shop, hero: @current_hero %>
                 <% end %>
             </div>
         </div>
@@ -88,8 +88,8 @@
                 <h3 class="page-title center">
                     Your Inventory
                     <br/>
-                    <%=if @transmute do %>
-                        <small id="transmute-instructions"><em class="text-warning"><%=transmute_instructions_for(@transmute)%></em></small>
+                    <%= if @transmute do %>
+                        <small id="transmute-instructions"><em class="text-warning"><%= transmute_instructions_for(@transmute) %></em></small>
                     <% else %>
                         <small><em>Click on an item to sell</em></small>
                     <% end %>
@@ -98,9 +98,9 @@
                     <%= for item <- @current_hero.items do %>
                         <div class="col-4 col-md-2 inventory-item">
                             <%= if can_select_inventory(item, @transmute, @recipe) do %>
-                                <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class='item-img <%=if item.active, do: "active"%>' phx-click="select-inventory" phx-value-code="<%=item.code%>" phx-target="#shop" id="transmute-<%=item.id%>"/>
+                                <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class='item-img <%= if item.active, do: "active" %>' phx-click="select-inventory" phx-value-code="<%= item.code %>" phx-target="#shop" id="transmute-<%= item.id %>"/>
                             <% else %>
-                                <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class="item-img inactive" />
+                                <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class="item-img inactive" />
                             <% end %>
                         </div>
                     <% end %>
@@ -120,28 +120,28 @@
                     <hr/>
                     <div class="row selected-shop">
                         <div class="col center">
-                            <img src="<%=GH.image_url(@selected_inventory)%>" data-toggle="tooltip" title="<%=GH.item_description(@selected_inventory)%>" class="item-img" />
+                            <img src="<%= GH.image_url(@selected_inventory) %>" data-toggle="tooltip" title="<%= GH.item_description(@selected_inventory) %>" class="item-img" />
                         </div>
                     </div>
                     <hr/>
                     <div class="row">
                         <div class="col center">
-                            <button class="btn btn-danger" phx-click="sell" phx-target="#shop" id="sell-<%=@selected_inventory.id%>"><i class="fa fa-coins"></i> Sell for <%=sell_price(@selected_inventory)%></button>
+                            <button class="btn btn-danger" phx-click="sell" phx-target="#shop" id="sell-<%= @selected_inventory.id %>"><i class="fa fa-coins"></i> Sell for <%= sell_price(@current_hero, @selected_inventory) %></button>
                         </div>
                     </div>
                 <% end %>
                 <%= if @transmute do %>
                     <hr/>
                     <div class="row transmute">
-                        <div class="col-12 col-md-<%=4 + ingredients_count_for(@transmute)%> center margin-auto">
+                        <div class="col-12 col-md-<%= 4 + ingredients_count_for(@transmute) %> center margin-auto">
                             <div class="row">
                                 <%= for item <- @recipe do %>
                                     <div class="col-4 col-md-2">
-                                        <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class="item-img" id="recipe-<%=item.id%>"/>
+                                        <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class="item-img" id="recipe-<%= item.id %>"/>
                                     </div>
                                 <% end %>
                                 <%= if length(@recipe) < ingredients_count_for(@transmute) do %>
-                                    <%= for _ <- 1..ingredients_count_for(@transmute)-length(@recipe) do %>
+                                    <%= for _ <- 1..(ingredients_count_for(@transmute) - length(@recipe)) do %>
                                         <div class="col-4 col-md-2 item-container">
                                             <div class="item-img empty-item"></div>
                                         </div>
@@ -151,7 +151,7 @@
                                     <i class="fa fa-2x fa-arrow-circle-right"></i>
                                 </div>
                                 <div class="col-md-3 d-none d-md-block">
-                                    <img src="<%=GH.image_url(@transmute)%>" data-toggle="tooltip" title="<%=GH.item_description(@transmute)%>" class="item-img float-right"/>
+                                    <img src="<%= GH.image_url(@transmute) %>" data-toggle="tooltip" title="<%= GH.item_description(@transmute) %>" class="item-img float-right"/>
                                 </div>
                             </div>
                         </div>
@@ -162,7 +162,7 @@
                         </div>
                         <div class="col-12 d-block d-md-none">
                             <div class="col-3 margin-auto">
-                                <img src="<%=GH.image_url(@transmute)%>" data-toggle="tooltip" title="<%=GH.item_description(@transmute)%>" class="item-img float-right"/>
+                                <img src="<%= GH.image_url(@transmute) %>" data-toggle="tooltip" title="<%= GH.item_description(@transmute) %>" class="item-img float-right"/>
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
                     <div class="row">
                         <div class="col center">
                             <div class="center">
-                                    <button class="btn btn-primary" phx-hook="Loading" loading="Transmuting..." <%=unless proper_recipe(@recipe, @transmute), do: "disabled"%> phx-click="finish-transmute"  phx-target="#shop" id="finish-transmute">
+                                    <button class="btn btn-primary" phx-hook="Loading" loading="Transmuting..." <%= unless proper_recipe(@recipe, @transmute), do: "disabled" %> phx-click="finish-transmute"  phx-target="#shop" id="finish-transmute">
                                         <span class="loading-text"><i class="fa fa-refresh mr-1"></i>Transmute</span>
                                     </button>
                                 <button class="btn btn-danger" phx-click="cancel-transmute" id="cancel-transmute" phx-target="#shop"><i class="fa fa-times"></i> Cancel</button>

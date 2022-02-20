@@ -32,7 +32,7 @@ defmodule MobaWeb.ShopView do
 
   def price(item), do: Game.item_price(item)
 
-  def sell_price(item), do: Game.item_sell_price(item)
+  def sell_price(hero, item), do: Game.item_sell_price(hero, item)
 
   def ingredients_count_for(item), do: Game.item_ingredients_count(item)
 

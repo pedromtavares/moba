@@ -11,18 +11,16 @@ defmodule MobaWeb.CurrentHeroLiveView do
       |> Shop.subscribe()
     end
 
-    socket = assign_new(socket, :current_hero, fn -> Game.get_hero!(hero_id) end)
-    hero = socket.assigns.current_hero
+    hero = Game.get_hero!(hero_id)
     step = session["tutorial_step"] || hero.user.tutorial_step
 
     {:ok,
      assign(socket,
+       current_hero: hero,
        editing: false,
        show_build: false,
-       unreads: Engine.unread_battles_count(hero),
        show_shop: Enum.member?([3, 7, 8, 9], step),
        tutorial_step: step,
-       origin: session["origin"],
        current_mode: session["current_mode"] || "pve"
      )}
   end
@@ -62,10 +60,6 @@ defmodule MobaWeb.CurrentHeroLiveView do
     {:noreply, assign(socket, editing: false, current_hero: %{current | active_build: build})}
   end
 
-  def handle_event("switch-build", _, %{assigns: assigns} = socket) do
-    {:noreply, assign(socket, current_hero: Game.switch_build!(assigns.current_hero))}
-  end
-
   def handle_event("show-build", _, socket) do
     {:noreply, assign(socket, show_build: true)}
   end
@@ -96,15 +90,6 @@ defmodule MobaWeb.CurrentHeroLiveView do
 
   def handle_info({"hero", %{id: id}}, socket) do
     {:noreply, assign(socket, current_hero: Game.get_hero!(id))}
-  end
-
-  def handle_info({"unread", %{hero_id: hero_id}}, socket) do
-    unreads =
-      hero_id
-      |> Game.get_hero!()
-      |> Engine.unread_battles_count()
-
-    {:noreply, assign(socket, unreads: unreads)}
   end
 
   def handle_info({"tutorial-step", %{step: step}}, socket) do

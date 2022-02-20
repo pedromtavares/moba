@@ -42,21 +42,22 @@
                             <img src="/images/league_<%= hero.league_tier %>.png" class="league-logo">
                             <h5><%= Moba.leagues()[hero.league_tier] %></h5>
                             <h5 class="text-warning" data-toggle="tooltip" title="Total farm: <%= hero.total_xp_farm + hero.total_gold_farm %>"><%= GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm) %> Total Farm</h5>
+                            <%= unless hero.finished_at do %>
+                                <small><em>(<%= hero.pve_total_turns + hero.pve_current_turns %> turns left)</em>
+                            <% end %>
                         </td>
                         <td class="text-center" width="20%">
                             <%= if hero.finished_at do %>
                                 <%=live_redirect class: "btn btn-primary btn-lg btn-block", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
                                     <i class="fa fa-address-card fa-2x"></i>
                                     <br/>
-                                    View Details
+                                    Customize
                                 <% end %>
                             <% else %>
                                 <%= link to: "/game/continue?hero_id=#{hero.id}", class: "btn btn-success btn-lg btn-block", method: :post do %>
                                     <i class="fa fa-crosshairs fa-2x"></i>
                                     <br/>
-                                    Continue
-                                    <br/>
-                                    <small><em>(<%= hero.pve_total_turns + hero.pve_current_turns %> turns left)</em>
+                                    Continue                                    
                                 <% end %>
                             <% end %>
                             <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>

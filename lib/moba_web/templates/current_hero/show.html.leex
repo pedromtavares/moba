@@ -41,18 +41,18 @@
                                 <%= for skill <- sorted_skills(@current_hero) do %>
                                     <div class="skill-container <%=if skill.passive, do: "passive", else: "active"%>">
                                         <%= if can_level_skill?(@current_hero, skill) do %>
-                                            <a href="javascript:;" phx-click="skill" phx-value-code="<%=skill.code%>" phx-target="#hero-bar">
-                                                <img src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=next_skill_description(skill)%>" class="skill-img can-level img-border <%=if skill.passive, do: "passive"%> <%=if skill.ultimate, do: "ultimate"%>"/>
+                                            <a href="javascript:;" phx-click="skill" phx-value-code="<%= skill.code %>" phx-target="#hero-bar">
+                                                <img src="<%= GH.image_url(skill) %>" data-toggle="tooltip" title="<%= next_skill_description(skill) %>" class="skill-img can-level img-border <%=if skill.passive, do: "passive"%> <%=if skill.ultimate, do: "ultimate"%>"/>
                                             </a>
                                         <% else %>
-                                            <img src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" class="skill-img img-border tooltip-mobile <%=if skill.passive, do: "passive"%> <%=if skill.ultimate, do: "ultimate"%>"/>
+                                            <img src="<%= GH.image_url(skill) %>" data-toggle="tooltip" title="<%= GH.skill_description(skill) %>" class="skill-img img-border tooltip-mobile <%=if skill.passive, do: "passive"%> <%= if skill.ultimate, do: "ultimate" %>"/>
                                         <% end %>
                                         <%= if @editing do %>
                                             <%= if !skill.passive do %>
                                                 <div class="form-group">
-                                                    <select class="custom-select" name="skill_order[<%=skill.code%>]">
+                                                    <select class="custom-select" name="skill_order[<%= skill.code %>]">
                                                         <%= for {code, index} <- Enum.with_index(@current_hero.active_build.skill_order, 1) do %>
-                                                            <option value=<%=index%> <%=if code == skill.code, do: "selected"%>><%=index%></option>
+                                                            <option value=<%= index %> <%= if code == skill.code, do: "selected" %>><%= index %></option>
                                                         <% end %>
                                                     </select>
                                                 </div>
@@ -77,21 +77,14 @@
                     <div class="row mt-1">
                         <div class="col center">
                             <%= if @current_hero.skill_levels_available > 0 do %>
-                                <em class="text-warning">You have <%=@current_hero.skill_levels_available%> available skill point<%=if @current_hero.skill_levels_available > 1, do: "s"%>, click on a skill to level it up!</em>
+                                <em class="text-warning">You have <%= @current_hero.skill_levels_available %> available skill point<%= if @current_hero.skill_levels_available > 1, do: "s" %>, click on a skill to level it up!</em>
                             <% else %>
-                                <%= if @editing do %>
-                                    <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
-                                <% else %>
-                                    <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="<%=edit_orders_description(@current_mode)%>" class="badge badge-pill badge-light-warning py-1 px-3 font-14"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
-                                    <%= if @current_mode == "pve" do %>
+                                <%= unless @current_hero.finished_at do %>
+                                    <%= if @editing do %>
+                                        <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
+                                    <% else %>
+                                        <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="<%= edit_orders_description(@current_mode) %>" class="badge badge-pill badge-light-warning py-1 px-3 font-14"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
                                         <a href="/invoke" data-toggle="tooltip" title="Create a new hero. Your current hero will be saved." class="badge badge-pill badge-light-danger py-1 px-3 font-14"><i class="fa fa-refresh mr-1"></i>New Hero</a>
-                                    <% end %>
-                                    <%= if @current_mode == "pvp" do %>
-                                        <%= if can_create_extra_build?(@current_hero) do %>
-                                            <a href="/build" data-toggle="tooltip" title="Create an extra build for your Hero. You will be able to switch back and forth between builds at any time." class="badge badge-pill badge-light-danger py-1 px-3 font-14 <%=if @current_hero.pvp_picks <= 1, do: "red-glow"%>"><i class="fa fa-dice-d20 mr-1"></i>Create Extra Build</a>
-                                        <% else %>
-                                            <a href="javascript:;" class="badge badge-pill badge-light-danger py-1 px-3 font-14" phx-click="switch-build"><i class="fa fa-sync mr-1"></i>Switch Build</a>
-                                        <% end %>
                                     <% end %>
                                 <% end %>
                             <% end %>
@@ -103,19 +96,19 @@
                     <div class="row">
                         <div class="col center">
                             <h3 class="mb-1 mt-0 no-wrap">
-                                <span class="text-warning mr-1"><i class="fa fa-coins"></i> <%=@current_hero.gold%></span>
-                                <a href="javascript:;" id="toggle-shop" class="badge badge-light-warning border border-warning toggle-shop <%=if @show_shop, do: "active-shop"%>" phx-click="toggle-shop" phx-hook="ToggleShop">SHOP</a>
+                                <span class="text-warning mr-1"><i class="fa fa-coins"></i> <%= @current_hero.gold %></span>
+                                <a href="javascript:;" id="toggle-shop" class="badge badge-light-warning border border-warning toggle-shop <%= if @show_shop, do: "active-shop" %>" phx-click="toggle-shop" phx-hook="ToggleShop">SHOP</a>
                             </h3>
                             <div class="inventory <%=if @editing, do: "editing"%>">
                                 <%= for item <- sorted_items(@current_hero) do %>
-                                    <div class="item-container <%=if !item.active, do: "passive", else: "active"%>" id="inventory-<%=item.id%>">
-                                        <img src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" class="item-img img-border-sm"/>
+                                    <div class="item-container <%= if !item.active, do: "passive", else: "active" %>" id="inventory-<%= item.id %>">
+                                        <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class="item-img img-border-sm"/>
                                         <%= if @editing do %>
                                             <%= if item.active do %>
                                                 <div class="form-group">
                                                     <select class="custom-select" name="item_order[<%=item.code%>]">
-                                                        <%=for {code, index} <- Enum.with_index(@current_hero.active_build.item_order, 1) do %>
-                                                            <option value=<%=index%> <%=if code == item.code, do: "selected"%>><%=index%></option>
+                                                        <%= for {code, index} <- Enum.with_index(@current_hero.active_build.item_order, 1) do %>
+                                                            <option value=<%= index %> <%= if code == item.code, do: "selected" %>><%= index %></option>
                                                         <% end %>
                                                     </select>
                                                 </div>
@@ -141,20 +134,20 @@
             <div class="row d-flex d-md-none mobile-row no-gutters">
                 <%= if @show_build do %>
                     <div class="col-12 tiny-stats mb-1 text-center mt-1">
-                        <%=render "_stats.html", current_hero: @current_hero %>
+                        <%= render "_stats.html", current_hero: @current_hero %>
                     </div>
                 <% else %>
                     <div class="col-5 pr-0">
-                        <div class="progress progress-fixed xp-bar border border-white tooltip-mobile" data-toggle="tooltip" title="Experience: <%=@current_hero.experience%>/<%=xp_to_next_level(@current_hero)%>" style="margin-top:0.3rem">
-                            <div style="width:<%=xp_percentage(@current_hero)%>%" class="progress-bar bg-white">
-                                <span><%=@current_hero.level%></span>
+                        <div class="progress progress-fixed xp-bar border border-white tooltip-mobile" data-toggle="tooltip" title="Experience: <%= @current_hero.experience %>/<%= xp_to_next_level(@current_hero) %>" style="margin-top:0.3rem">
+                            <div style="width:<%= xp_percentage(@current_hero) %>%" class="progress-bar bg-white">
+                                <span><%= @current_hero.level %></span>
                             </div>
                         </div>
                     </div>
                     <div class="col-7">
                         <h3 class="mb-1 mt-0 pt-1 text-right" id="tiny-shop">
-                            <span class="text-warning mr-1"><i class="fa fa-coins"></i> <%=@current_hero.gold%></span>
-                            <a href="javascript:;" phx-click="toggle-shop" id="toggle-tiny-shop" phx-hook="ToggleShop" class="badge badge-light-warning border border-warning toggle-shop <%=if @show_shop, do: "active-shop"%>">SHOP</a>
+                            <span class="text-warning mr-1"><i class="fa fa-coins"></i> <%= @current_hero.gold %></span>
+                            <a href="javascript:;" phx-click="toggle-shop" id="toggle-tiny-shop" phx-hook="ToggleShop" class="badge badge-light-warning border border-warning toggle-shop <%= if @show_shop, do: "active-shop" %>">SHOP</a>
                         </h3>
                     </div>
                 <% end %>
@@ -173,11 +166,11 @@
         </form>
     </div>
     <h3 class="mb-1 mt-0 d-none d-md-block d-xl-none" id="small-shop">
-        <span class="text-warning mr-1"><i class="fa fa-coins"></i> <%=@current_hero.gold%></span>
-        <a href="javascript:;" id="toggle-small-shop" phx-click="toggle-shop" phx-hook="ToggleShop" class="badge badge-light-warning border border-warning toggle-shop <%=if @show_shop, do: "active-shop"%>">SHOP</a>
+        <span class="text-warning mr-1"><i class="fa fa-coins"></i> <%= @current_hero.gold %></span>
+        <a href="javascript:;" id="toggle-small-shop" phx-click="toggle-shop" phx-hook="ToggleShop" class="badge badge-light-warning border border-warning toggle-shop <%= if @show_shop, do: "active-shop" %>">SHOP</a>
     </h3>
 </div>
 
-<div class="shop-modal <%=if @show_shop, do: "d-block", else: "d-none"%>" phx-window-keydown="close-shop" phx-key="Escape" id="shop-modal">
+<div class="shop-modal <%= if @show_shop, do: "d-block", else: "d-none"%>" phx-window-keydown="close-shop" phx-key="Escape" id="shop-modal">
     <%= Phoenix.LiveView.Helpers.live_component(@socket, MobaWeb.Shop, current_hero: @current_hero, tutorial_step: @tutorial_step, id: "shop") %>
 </div>

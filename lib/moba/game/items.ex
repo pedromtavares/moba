@@ -47,7 +47,7 @@ defmodule Moba.Game.Items do
       hero
       |> unequip([item])
       |> Game.update_hero!(%{
-        gold: hero.gold + sell_price(item)
+        gold: hero.gold + sell_price(hero, item)
       })
     else
       hero
@@ -98,7 +98,8 @@ defmodule Moba.Game.Items do
     end
   end
 
-  def sell_price(item), do: trunc(price(item) * 0.9)
+  def sell_price(%{finished_at: finished}, item) when not is_nil(finished), do: price(item)
+  def sell_price(_, item), do: trunc(price(item) * 0.9)
 
   def can_equip?(hero, item) do
     hero = Repo.preload(hero, :items)

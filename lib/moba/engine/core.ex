@@ -258,6 +258,7 @@ defmodule Moba.Engine.Core do
     %{
       attacker
       | invulnerable: false,
+        immortal: false,
         physically_invulnerable: false,
         inneffectable: false,
         turn_armor: attacker.turn_armor + attacker.next_armor,
@@ -288,7 +289,8 @@ defmodule Moba.Engine.Core do
         miss: false,
         silenced: false,
         stunned: false,
-        disarmed: false
+        disarmed: false,
+        immortal: false
     }
     |> flush()
   end

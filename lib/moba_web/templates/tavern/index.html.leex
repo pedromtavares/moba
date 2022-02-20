@@ -1,4 +1,4 @@
-<div class="content-with-hero-bar tavern" id="tavern">
+<div class="tavern" id="tavern">
 
     <div class="row mt-3">
         <div class="col">
@@ -52,6 +52,10 @@
             <%= render "_skill.html", skill: skill, user: @current_user %>
         <% end %>
     </div>
+
+    <%= if @avatar_code do %>
+        <div id="scroll-to-skins" phx-hook="Scroll"></div>
+    <% end %>
 
     <%= if @current_skin do %>
         <div class="row">
