@@ -64,6 +64,8 @@ defmodule Moba.Accounts do
 
   defdelegate increment_unread_messages_count_for_all_online_except(user), to: Users
 
+  defdelegate shard_buyback_price(user), to: Users
+
   defdelegate shard_buyback!(user), to: Users
 
   # MESSAGES

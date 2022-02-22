@@ -324,7 +324,8 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_gold_farm + &1.total_xp_farm}, :desc) |> List.first()
+        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_gold_farm + &1.total_xp_farm}, :desc)
+        |> List.first()
       }
     end)
     |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_gold_farm + hero.total_xp_farm} end, :desc)

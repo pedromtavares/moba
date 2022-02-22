@@ -519,6 +519,7 @@ defmodule Moba.GameTest do
       assert hero.item_atk == base_hero.item_atk
 
       base_hero = create_base_hero(%{gold: 5000, finished_at: Timex.now()})
+
       hero =
         base_hero
         |> Game.buy_item!(alternate_item())

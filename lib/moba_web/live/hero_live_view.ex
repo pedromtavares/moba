@@ -65,17 +65,18 @@ defmodule MobaWeb.HeroLiveView do
       Game.subscribe_to_hero(id)
     end
 
-    skin_selection = if hero.user_id == user.id do
-      skins = Accounts.unlocked_codes_for(user) |> Game.list_skins_with_codes()
-      avatar_code = hero.avatar.code
-      avatar_skins = [Game.default_skin(avatar_code)] ++ Enum.filter(skins, &(&1.avatar_code == avatar_code))
-      index = Enum.find_index(avatar_skins, fn skin -> skin.id == hero.skin_id end)
+    skin_selection =
+      if hero.user_id == user.id do
+        skins = Accounts.unlocked_codes_for(user) |> Game.list_skins_with_codes()
+        avatar_code = hero.avatar.code
+        avatar_skins = [Game.default_skin(avatar_code)] ++ Enum.filter(skins, &(&1.avatar_code == avatar_code))
+        index = Enum.find_index(avatar_skins, fn skin -> skin.id == hero.skin_id end)
 
-      %{
-        index: index,
-        skins: avatar_skins
-      }
-    end
+        %{
+          index: index,
+          skins: avatar_skins
+        }
+      end
 
     {:noreply, assign(socket, hero: hero, ranking: ranking, skin_selection: skin_selection)}
   end

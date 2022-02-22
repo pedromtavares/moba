@@ -61,7 +61,7 @@
                                 <% end %>
                             <% end %>
                             <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>
-                                <button type="button" class="btn btn-warning mt-1 btn-block" data-confirm="Are you sure?" phx-click="archive" phx-value-id="<%=hero.id%>">
+                                <button type="button" class="btn btn-danger mt-1 btn-block" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id="<%=hero.id%>">
                                     <i class="fa fa-trash-alt mr-1"></i>Delete
                                 </button>
                             <% end %>

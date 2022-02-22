@@ -10,8 +10,6 @@ defmodule Moba.Accounts.Users do
   alias Accounts.Schema.User
   alias Accounts.Query.UserQuery
 
-  @shard_buyback_price Moba.shard_buyback_price()
-
   # -------------------------------- PUBLIC API
 
   def get!(nil), do: nil
@@ -231,10 +229,26 @@ defmodule Moba.Accounts.Users do
     |> Repo.update_all(set: [unread_messages_count: 0])
   end
 
-  def shard_buyback!(%{shard_count: count} = user) when count >= @shard_buyback_price do
-    update!(user, %{shard_count: count - @shard_buyback_price})
+  def shard_buyback_price(%{shard_count: count}) do
+    minimum = Moba.shard_buyback_minimum()
+    percentage_price = trunc(count * minimum / 100)
+
+    if percentage_price > minimum do
+      percentage_price
+    else
+      minimum
+    end
   end
-  def shard_buyback!(_), do: nil
+
+  def shard_buyback!(%{shard_count: count} = user) do
+    price = shard_buyback_price(user)
+
+    if count >= price do
+      update!(user, %{shard_count: count - price})
+    else
+      nil
+    end
+  end
 
   # --------------------------------
 
