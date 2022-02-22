@@ -10,8 +10,8 @@
                 <span class="loading-text"><i class="fa fa-coins mr-1"></i> Buyback with <%= Game.buyback_price(@current_hero) %>g</span>
             </button>
         <% else %>
-            <button class="btn btn-primary btn-lg disabled no-action">
-                <span class="loading-text"><i class="fa fa-street-view mr-1"></i> You do not have <%= Game.buyback_price(@current_hero) %>g to Buyback, try selling one of your items on the Shop</span>
+            <button class="btn btn-warning btn-lg disabled no-action">
+                <span class="loading-text"><i class="fa fa-coins mr-1"></i> You do not have <%= Game.buyback_price(@current_hero) %>g to Buyback, try selling one of your items on the Shop</span>
             </button>
         <% end %>
     </div>
