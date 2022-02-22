@@ -15,7 +15,7 @@
             </button>
         <% end %>
     </div>
-    <%= if @current_hero.user.shard_count >= Accounts.shard_buyback_price(@current_hero.user) do %>
+    <%= if @current_hero.league_tier < Moba.master_league_tier() && @current_hero.user.shard_count >= Accounts.shard_buyback_price(@current_hero.user) do %>
         <div class="text-center">
             <h3>or</h3>
         </div>
