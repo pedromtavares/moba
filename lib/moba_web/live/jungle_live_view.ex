@@ -81,6 +81,12 @@ defmodule MobaWeb.JungleLiveView do
     {:noreply, assign(socket, current_hero: hero)}
   end
 
+  def handle_event("shard-buyback", _, %{assigns: %{current_hero: hero}} = socket) do
+    hero = Game.shard_buyback!(hero)
+    Game.broadcast_to_hero(hero.id)
+    {:noreply, assign(socket, current_hero: hero)}
+  end
+
   def handle_event("restart", _, %{assigns: %{current_hero: hero, current_user: user}} = socket) do
     Game.archive_hero!(hero)
     skills = Enum.map(hero.active_build.skills, &Game.get_skill_by_code!(&1.code, true, 1))

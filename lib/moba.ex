@@ -41,6 +41,7 @@ defmodule Moba do
   @final_tutorial_step 14
   @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
+  @shard_buyback_price 5
 
   # PVE constants
   @total_pve_turns 25
@@ -88,6 +89,7 @@ defmodule Moba do
   def final_tutorial_step, do: @final_tutorial_step
   def season_quest_codes, do: @season_quest_codes
   def current_ranking_date, do: @current_ranking_date
+  def shard_buyback_price, do: @shard_buyback_price
 
   def total_pve_turns(0), do: @total_pve_turns - 10
   def total_pve_turns(1), do: @total_pve_turns - 5

@@ -84,7 +84,6 @@
                                         <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
                                     <% else %>
                                         <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="<%= edit_orders_description(@current_mode) %>" class="badge badge-pill badge-light-warning py-1 px-3 font-14"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
-                                        <a href="/invoke" data-toggle="tooltip" title="Create a new hero. Your current hero will be saved." class="badge badge-pill badge-light-danger py-1 px-3 font-14"><i class="fa fa-refresh mr-1"></i>New Hero</a>
                                     <% end %>
                                 <% end %>
                             <% end %>

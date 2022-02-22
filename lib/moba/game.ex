@@ -212,6 +212,14 @@ defmodule Moba.Game do
     hero
   end
 
+  def shard_buyback!(%{user: user} = hero) do
+    if Accounts.shard_buyback!(user) do
+      update_hero!(hero, %{pve_state: "alive"})
+    else
+      hero
+    end
+  end
+
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")
     hero_id
