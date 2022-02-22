@@ -1,11 +1,15 @@
 <tr id="user-<%= @user.id %>">
     <td class="text-center">
-        <img src="/images/pve/<%= @user.pve_tier %>.png" style="max-height:  50px"/>
-        <%= if @user.season_points > 0 do %>
-            <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height:  50px"/>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, @user), class: "text-white" do %>
+            <img src="/images/pve/<%= @user.pve_tier %>.png" style="max-height:  50px"/>
+            <%= if @user.season_points > 0 do %>
+                <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height:  50px"/>
+            <% end %>
+            <br/>
+            <span class="text-white"><%= @user.username %></span>
+            <span class="badge badge-pill badge-light-success"><%= @user.hero_count%></span>
+            <span class="badge badge-pill badge-light-dark"><%= @user.shard_count%></span>
         <% end %>
-        <br/>
-        <%= live_redirect "#{@user.username} (#{@user.hero_count})", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @user), class: "text-white"%>
         <br/>
         <small class="text-dark font-italic">
             <%=unless @user.is_bot do %>
