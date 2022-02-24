@@ -2,7 +2,7 @@ defmodule Moba.EngineTest do
   use Moba.DataCase, async: true
 
   setup do
-    attrs = %{pvp_points: 50, season_points: 50}
+    attrs = %{pvp_points: 50, season_points: 50, pve_tier: 1}
 
     base_hero = create_base_hero(attrs)
     weak_hero = create_base_hero(attrs, create_user(attrs), weak_avatar())

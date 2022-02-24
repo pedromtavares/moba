@@ -117,6 +117,7 @@ defmodule Moba do
   def refresh_targets_count(4), do: 5
   def refresh_targets_count(5), do: 10
   def refresh_targets_count(6), do: 15
+  def refresh_targets_count(7), do: 20
 
   def pvp_heroes_per_page, do: @pvp_heroes_per_page
   def ranking_heroes_per_page, do: @ranking_heroes_per_page

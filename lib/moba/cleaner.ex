@@ -17,7 +17,7 @@ defmodule Moba.Cleaner do
       where: h.inserted_at <= ^ago,
       where: is_nil(h.bot_difficulty)
 
-    Repo.update_all(query, set: [archived_at: Timex.now()])
+    Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
 
     query =
       from h in Hero,
