@@ -40,17 +40,9 @@ defmodule Moba.Engine.Battles do
         order_by: [desc: b.id]
 
     query =
-      case type do
-        "pvp_defended" ->
-          from b in base,
-            where: b.defender_id == ^hero.id,
-            where: b.type == "pvp"
-
-        _ ->
-          from b in base,
-            where: b.attacker_id == ^hero.id,
-            where: b.type == ^type
-      end
+      from b in base,
+        where: b.attacker_id == ^hero.id,
+        where: b.type == ^type
 
     query
     |> load()
@@ -96,21 +88,6 @@ defmodule Moba.Engine.Battles do
     |> List.first()
   end
 
-  def read!(battle), do: update!(battle, %{unread_id: nil})
-
-  def unreads_for(hero) do
-    unreads_query(hero)
-    |> Repo.aggregate(:count)
-  end
-
-  def read_all, do: update_unread(Battle)
-
-  def read_all_for_hero(hero) do
-    hero
-    |> unreads_query()
-    |> update_unread()
-  end
-
   @doc """
   Snapshots keep a permanent state of both heroes when the battle finishes
   """
@@ -125,16 +102,6 @@ defmodule Moba.Engine.Battles do
   end
 
   defp for_duel(query \\ Battle, duel_id), do: from(b in query, where: b.duel_id == ^duel_id)
-
-  defp unreads_query(hero) do
-    from b in Battle,
-      where: b.unread_id == ^hero.id,
-      where: b.type == "pvp"
-  end
-
-  defp update_unread(query) do
-    Repo.update_all(query, set: [unread_id: nil])
-  end
 
   defp snapshot_for(hero, battle_hero) do
     %{

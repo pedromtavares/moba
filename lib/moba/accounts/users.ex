@@ -59,28 +59,6 @@ defmodule Moba.Accounts.Users do
   end
 
   @doc """
-  Given to the top 3 of the Arena when the match ends
-  Medals are displayed on the Arena and Shards are used for unlocking new content
-  """
-  def award_medals_and_shards(user, ranking, league_tier) when ranking > 0 and ranking < 4 do
-    {medals, shards} =
-      case ranking do
-        1 -> {3, 200}
-        2 -> {2, 150}
-        3 -> {1, 100}
-      end
-
-    shards = if league_tier == Moba.master_league_tier(), do: div(shards, 2), else: shards
-
-    total_medals = if league_tier == Moba.max_league_tier(), do: user.medal_count + medals, else: user.medal_count
-    total_shards = user.shard_count + shards
-
-    update!(user, %{medal_count: total_medals, shard_count: total_shards})
-  end
-
-  def award_medals_and_shards(user, _, _), do: user
-
-  @doc """
   Guests are used after a Hero is created from the homepage, so the user
   can experiment the game without the inconvenience of creating an account
   They eventually can register and all data is transferred to the new account
@@ -103,20 +81,7 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  @doc """
-  A User can have different active Heroes per game mode at the same time, which the User
-  can switch freely at any time through the UI
-  """
   def set_current_pve_hero!(user, hero_id), do: update!(user, %{current_pve_hero_id: hero_id})
-
-  def set_current_pvp_hero!(user, hero_id), do: update!(user, %{current_pvp_hero_id: hero_id})
-
-  @doc """
-  Clears all active PVP heroes from the current players in the match.
-  """
-  def clear_active_players! do
-    Repo.update_all(User, set: [current_pvp_hero_id: nil])
-  end
 
   @doc """
   Increments duel counts and sets the duel_score map that is displayed on the user's profile
@@ -185,23 +150,6 @@ defmodule Moba.Accounts.Users do
     [user] ++ Enum.filter(by_level, &(&1.id != id))
   end
 
-  def manage_season_points!(%{current_pvp_hero: hero, season_points: current_points} = user) do
-    new_points =
-      if hero do
-        current_points + hero.pvp_points
-      else
-        current_points
-      end
-
-    minimum = mininum_season_points_for(user)
-
-    new_points = if new_points < minimum, do: minimum, else: new_points
-
-    season_tier = Enum.find(1..7, 1, fn tier -> season_points_for(tier) > new_points end) - 1
-
-    update!(user, %{season_tier: season_tier, season_points: new_points})
-  end
-
   def season_points_for(tier) do
     case tier do
       1 -> 100
@@ -265,6 +213,4 @@ defmodule Moba.Accounts.Users do
       changeset
     end
   end
-
-  defp mininum_season_points_for(%{medal_count: medals}), do: medals * Moba.season_points_per_medal()
 end

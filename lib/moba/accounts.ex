@@ -30,8 +30,6 @@ defmodule Moba.Accounts do
 
   defdelegate create_guest(conn), to: Users
 
-  defdelegate award_medals_and_shards(user, ranking, league_tier), to: Users
-
   def set_user_online_now(user), do: Users.set_online_now(user)
 
   def user_search(user), do: Users.search(user)
@@ -41,12 +39,6 @@ defmodule Moba.Accounts do
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 
   defdelegate set_current_pve_hero!(user, hero_id), to: Users
-
-  defdelegate set_current_pvp_hero!(user, hero_id), to: Users
-
-  defdelegate clear_active_players!, to: Users
-
-  defdelegate manage_season_points!(user), to: Users
 
   defdelegate season_points_for(tier), to: Users
 

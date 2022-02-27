@@ -13,30 +13,14 @@ defmodule Test.GameHelper do
     )
   end
 
-  def create_pvp_hero(attrs \\ %{}, pvp_points \\ 0) do
-    user = create_user()
-
-    hero =
-      attrs
-      |> Map.merge(%{pvp_active: true, finished_at: Timex.now()})
-      |> create_base_hero(user)
-      |> Game.prepare_hero_for_pvp!()
-      |> Game.update_hero!(%{pvp_points: pvp_points})
-
-    user = Accounts.set_current_pvp_hero!(user, hero.id)
-
-    %{hero | user: user}
-  end
-
   def build_base_hero(attrs \\ %{}), do: Map.merge(%Game.Schema.Hero{}, attrs)
 
-  def create_bot_hero(pvp_points \\ 0, level \\ 1, difficulty \\ "strong") do
+  def create_bot_hero(level \\ 1, difficulty \\ "strong") do
     Game.create_bot_hero!(
       base_avatar(),
       level,
       difficulty,
-      create_user(),
-      pvp_points
+      create_user()
     )
   end
 

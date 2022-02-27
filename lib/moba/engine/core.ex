@@ -5,11 +5,9 @@ defmodule Moba.Engine.Core do
 
   alias Moba.{Engine, Repo, Game}
   alias Engine.Schema.{Turn, Battler}
-  alias Engine.Core.{Processor, Pve, Pvp, League, Duel, Logger, Helper}
+  alias Engine.Core.{Processor, Pve, League, Duel, Logger, Helper}
 
   def create_pve_battle!(target), do: Pve.create_battle!(target)
-
-  def create_pvp_battle!(attrs), do: Pvp.create_battle!(attrs)
 
   def create_league_battle!(attacker, defender), do: League.create_battle!(attacker, defender)
 
@@ -71,8 +69,6 @@ defmodule Moba.Engine.Core do
       }
   end
 
-  def can_pvp?(attrs), do: Pvp.valid?(attrs)
-
   def effect_descriptions(turn), do: Logger.descriptions_for(turn)
 
   def can_use_resource?(%{attacker: attacker}, resource), do: Helper.can_use?(attacker, resource, :active)
@@ -80,14 +76,14 @@ defmodule Moba.Engine.Core do
   # Uses the attacker's speed to calculate if they will initiate the battle. 1 speed = 1% chance
   defp determine_initiator(%{attacker: attacker, defender: defender} = battle) do
     number =
-      if attacker.level > 2 do
+      if attacker.pve_tier > 0 do
         buffed_total(attacker, battle, attacker.speed + attacker.item_speed)
       else
         100
       end
 
     initiator =
-      if number >= Enum.random(0..100) do
+      if number >= Enum.random(1..100) do
         attacker
       else
         defender
@@ -97,7 +93,6 @@ defmodule Moba.Engine.Core do
   end
 
   defp maybe_finalize_battle(%{finished: true, type: "pve"} = battle), do: Pve.finalize_battle(battle)
-  defp maybe_finalize_battle(%{finished: true, type: "pvp"} = battle), do: Pvp.finalize_battle(battle)
   defp maybe_finalize_battle(%{finished: true, type: "league"} = battle), do: League.finalize_battle(battle)
   defp maybe_finalize_battle(%{finished: true, type: "duel"} = battle), do: Duel.finalize_battle(battle)
   defp maybe_finalize_battle(battle), do: battle
@@ -156,7 +151,6 @@ defmodule Moba.Engine.Core do
     end
   end
 
-  # Ties exist only in PVE
   defp determine_winner(%{battle: %{type: "pve"} = battle, attacker: attacker, defender: defender} = turn) do
     battle =
       cond do
@@ -173,7 +167,6 @@ defmodule Moba.Engine.Core do
     %{battle | turns: battle.turns ++ [turn]}
   end
 
-  # In both PVP and League battles, the attacker will lose if they do not manage to kill their opponent
   defp determine_winner(%{battle: battle, attacker: attacker, defender: defender} = turn) do
     battle =
       cond do

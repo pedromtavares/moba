@@ -73,9 +73,6 @@ defmodule MobaWeb.Router do
     live "/invoke", CreateLiveView, layout: {MobaWeb.LayoutView, :clean}
 
     post "/game/continue", GameController, :continue
-    get "/game/:mode", GameController, :switch_mode
-
-    live "/arena/select", ArenaSelectLiveView
 
     live "/duels/:id", DuelLiveView
   end
@@ -85,11 +82,7 @@ defmodule MobaWeb.Router do
 
     live "/battles", BattlesLiveView
 
-    live "/arena", ArenaLiveView
-
     live "/jungle", JungleLiveView
-
-    live "/build", BuildLiveView
   end
 
   scope "/admin", MobaWeb do

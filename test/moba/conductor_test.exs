@@ -23,12 +23,5 @@ defmodule Moba.ConductorTest do
 
       assert Date.compare(match.last_server_update_at, DateTime.utc_now()) == :eq
     end
-
-    test "new_pvp_round!" do
-      current = Moba.current_match()
-      match = Conductor.new_pvp_round!(current)
-
-      assert Date.compare(match.last_pvp_round_at, DateTime.utc_now()) == :eq
-    end
   end
 end

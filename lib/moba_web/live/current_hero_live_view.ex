@@ -20,8 +20,7 @@ defmodule MobaWeb.CurrentHeroLiveView do
        editing: false,
        show_build: false,
        show_shop: Enum.member?([3, 7, 8, 9], step),
-       tutorial_step: step,
-       current_mode: session["current_mode"] || "pve"
+       tutorial_step: step
      )}
   end
 

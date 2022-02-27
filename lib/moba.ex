@@ -42,6 +42,7 @@ defmodule Moba do
   @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
   @shard_buyback_minimum 5
+  @max_season_tier 7
 
   # PVE constants
   @total_pve_turns 25
@@ -57,15 +58,6 @@ defmodule Moba do
   @maximum_total_farm 60_000
   @seconds_per_turn 3
   @max_pve_tier 7
-
-  # PVP constants
-  @pvp_heroes_per_page 3
-  @ranking_heroes_per_page 10
-  @pvp_timeout_in_hours 24
-  @pvp_round_decay 25
-  @pvp_round_timeout_in_hours 12
-  @season_points_per_medal 25
-  @max_season_tier 7
 
   # League constants
   @platinum_league_tier 3
@@ -90,6 +82,7 @@ defmodule Moba do
   def season_quest_codes, do: @season_quest_codes
   def current_ranking_date, do: @current_ranking_date
   def shard_buyback_minimum, do: @shard_buyback_minimum
+  def max_season_tier, do: @max_season_tier
 
   def total_pve_turns(0), do: @total_pve_turns - 10
   def total_pve_turns(1), do: @total_pve_turns - 5
@@ -118,14 +111,6 @@ defmodule Moba do
   def refresh_targets_count(5), do: 10
   def refresh_targets_count(6), do: 15
   def refresh_targets_count(7), do: 20
-
-  def pvp_heroes_per_page, do: @pvp_heroes_per_page
-  def ranking_heroes_per_page, do: @ranking_heroes_per_page
-  def pvp_timeout_in_hours, do: @pvp_timeout_in_hours
-  def pvp_round_decay, do: @pvp_round_decay
-  def pvp_round_timeout_in_hours, do: @pvp_round_timeout_in_hours
-  def season_points_per_medal, do: @season_points_per_medal
-  def max_season_tier, do: @max_season_tier
 
   def platinum_league_tier, do: @platinum_league_tier
   def master_league_tier, do: @master_league_tier
@@ -217,18 +202,11 @@ defmodule Moba do
     hero
   end
 
-  def prepare_current_pvp_hero!(hero) do
-    Accounts.set_current_pvp_hero!(hero.user, hero.id)
-    Game.prepare_hero_for_pvp!(hero)
-  end
-
   @doc """
-  Game pvp_ranking is defined by who currently have the highest pvp_points
   Game pve_ranking is defined by who has the highest total_farm (gold + xp)
   Accounts ranking is defined by who has the highest season_points
   """
   def update_rankings! do
-    Game.update_pvp_rankings!()
     Game.update_pve_ranking!()
     Accounts.update_ranking!()
   end

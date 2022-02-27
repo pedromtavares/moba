@@ -53,17 +53,6 @@ defmodule Moba.GameTest do
       assert bot_level_0.total_mp < avatar.total_mp
     end
 
-    test "#create_bot_hero! pvp" do
-      user = create_user()
-      avatar = base_avatar()
-
-      bot = Game.create_bot_hero!(avatar, 25, "strong", user)
-
-      assert bot.league_tier == 5
-      assert bot.pvp_active
-      assert bot.pvp_last_picked
-    end
-
     test "#update_hero!" do
       %{id: id} = hero = create_base_hero()
       Game.subscribe_to_hero(id)
@@ -97,34 +86,6 @@ defmodule Moba.GameTest do
       assert updated.skill_levels_available == 0
     end
 
-    test "#prepare_hero_for_pvp!" do
-      user = create_user(%{pvp_points: 100})
-      hero = create_base_hero(%{}, user) |> Game.buy_item!(base_item())
-      weak_bot = create_bot_hero(-100)
-
-      prepared = Game.prepare_hero_for_pvp!(hero)
-      weak_bot = Game.get_hero!(weak_bot.id)
-
-      hero_skills = hero.active_build.skills
-      prepared_skills = prepared.active_build.skills
-
-      assert length(hero.items) == length(prepared.items)
-      assert length(hero_skills) == length(prepared.active_build.skills)
-
-      assert Enum.map(hero_skills, fn skill -> skill.level end) |> Enum.sum() ==
-               Enum.map(prepared_skills, fn skill -> skill.level end) |> Enum.sum()
-
-      assert prepared.pvp_points == 0
-      assert prepared.pvp_wins == 0
-      assert prepared.pvp_losses == 0
-      assert prepared.pvp_picks == 1
-      assert prepared.pvp_last_picked
-      assert prepared.pvp_active
-      refute prepared.pvp_ranking
-      refute weak_bot.pvp_active
-      assert prepared.match_id == Game.current_match().id
-    end
-
     test "#max_league?" do
       assert build_base_hero(%{league_tier: 6}) |> Game.max_league?()
       refute build_base_hero(%{league_tier: 5}) |> Game.max_league?()
@@ -147,19 +108,6 @@ defmodule Moba.GameTest do
       assert build_base_hero() |> Game.pvp_win_rate() == 0
     end
 
-    test "#update_pvp_ranking" do
-      hero1 = create_pvp_hero(%{league_tier: 5}, 1000)
-      hero2 = create_pvp_hero(%{league_tier: 5}, 1020)
-
-      Game.update_pvp_rankings!()
-
-      hero1 = Game.get_hero!(hero1.id)
-      hero2 = Game.get_hero!(hero2.id)
-
-      assert hero1.pvp_ranking == 2
-      assert hero2.pvp_ranking == 1
-    end
-
     test "#update_pve_ranking" do
       hero1 = create_base_hero(%{total_gold_farm: 100, pve_current_turns: 0, finished_at: Timex.now()})
       hero2 = create_base_hero(%{total_gold_farm: 200, pve_current_turns: 0, finished_at: Timex.now()})
@@ -171,16 +119,6 @@ defmodule Moba.GameTest do
 
       assert hero1.pve_ranking == 2
       assert hero2.pve_ranking == 1
-    end
-
-    test "#hero_has_other_build?" do
-      hero = create_base_hero()
-
-      refute Game.hero_has_other_build?(hero)
-
-      hero = Game.create_pvp_build!(hero, base_skills())
-
-      assert Game.hero_has_other_build?(hero)
     end
 
     test "#maybe_finish_pve" do
@@ -373,17 +311,6 @@ defmodule Moba.GameTest do
       assert build.skills == alternate_skills()
     end
 
-    test "#create_pvp_build!" do
-      hero = create_base_hero(%{level: 25}) |> Game.create_pvp_build!(alternate_skills())
-      skills = hero.active_build.skills
-      normals = Enum.filter(skills, &(!&1.ultimate))
-      ultimate = Enum.find(skills, & &1.ultimate)
-
-      assert List.first(normals).level == 5
-      assert ultimate.level == 3
-      assert hero.active_build.type == "pvp"
-    end
-
     test "#generate_bot_build!" do
       hero =
         create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
@@ -563,7 +490,7 @@ defmodule Moba.GameTest do
 
       refute Game.can_buy_item?(base_hero, item)
 
-      hero_with_full_inventory = create_bot_hero(0, 40, "strong")
+      hero_with_full_inventory = create_bot_hero(40, "strong")
 
       refute Game.can_buy_item?(hero_with_full_inventory, item)
 

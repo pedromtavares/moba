@@ -4,7 +4,7 @@ defmodule Moba.Conductor do
   """
   use GenServer
 
-  alias Moba.{Repo, Game, Accounts, Engine}
+  alias Moba.{Repo, Game, Accounts}
   alias Game.Query.{ItemQuery, HeroQuery, AvatarQuery, SkillQuery}
   alias Accounts.Query.UserQuery
 
@@ -66,29 +66,11 @@ defmodule Moba.Conductor do
   so Moba.Game.Server knows when to run this again, currently every 10 mins.
   """
   def server_update!(match \\ Moba.current_match()) do
-    # skynet!(5)
-    # skynet!(6)
-
-    # Game.update_pvp_rankings!()
     # Game.update_pve_ranking!()
     Accounts.update_ranking!()
 
     match
     |> Game.update_match!(%{last_server_update_at: DateTime.utc_now()})
-  end
-
-  @doc """
-  Each match has 2 PVP rounds that last 12 hours each. In each of these rounds, all heroes may
-  battle each other exactly one time. Once a new round starts, all Users lose points, in an
-  effort to avoid having users purposefully not play a round in order to not lose points.
-  New PVP rounds will be started automatically by Moba.Game.Server
-  """
-  def new_pvp_round!(match) do
-    HeroQuery.pvp_active()
-    |> Repo.update_all(set: [pvp_history: %{}])
-
-    match
-    |> Game.update_match!(%{last_pvp_round_at: DateTime.utc_now()})
   end
 
   @doc """
@@ -116,9 +98,6 @@ defmodule Moba.Conductor do
     active = Moba.current_match()
 
     if active, do: Game.update_match!(active, %{active: false})
-
-    HeroQuery.pvp_active()
-    |> Repo.update_all(set: [pvp_active: false, pvp_history: %{}])
   end
 
   defp create_match!(attrs \\ %{}) do
@@ -167,9 +146,11 @@ defmodule Moba.Conductor do
       Enum.each(level_range, fn level ->
         Game.create_bot_hero!(avatar, level, "weak")
         Game.create_bot_hero!(avatar, level, "moderate")
-        Game.create_bot_hero!(avatar, level, "strong")
-        Game.create_bot_hero!(avatar, level, "strong")
-        Game.create_bot_hero!(avatar, level, "strong")
+        if level > 0 do
+          Game.create_bot_hero!(avatar, level, "strong")
+          Game.create_bot_hero!(avatar, level, "strong")
+          Game.create_bot_hero!(avatar, level, "strong")
+        end
       end)
     end)
 
@@ -211,75 +192,10 @@ defmodule Moba.Conductor do
 
       avatar = Enum.random(avatars)
 
-      hero = Game.create_pvp_bot_hero!(user, avatar)
-
-      Accounts.set_current_pvp_hero!(user, hero.id)
+      Game.create_pvp_bot_hero!(user, avatar)
     end)
 
     match
-  end
-
-  defp manage_season(match) do
-    UserQuery.with_pvp_heroes()
-    |> Repo.all()
-    |> Repo.preload(:current_pvp_hero)
-    |> Enum.map(fn user ->
-      Game.create_arena_pick!(user, match)
-      Accounts.manage_season_points!(user)
-    end)
-
-    match
-  end
-
-  # Awards winners and saves the PVP top 10 heroes of the match
-  defp assign_and_award_winners!(match) do
-    top10_master = Game.pvp_ranking(5, 10)
-
-    master =
-      Enum.reduce(top10_master, %{}, fn hero, acc ->
-        unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking, hero.league_tier)
-        Map.put(acc, hero.pvp_ranking, hero.id)
-      end)
-
-    top10_grandmaster = Game.pvp_ranking(6, 10)
-
-    grandmaster =
-      Enum.reduce(top10_grandmaster, %{}, fn hero, acc ->
-        unless hero.bot_difficulty, do: Accounts.award_medals_and_shards(hero.user, hero.pvp_ranking, hero.league_tier)
-        Map.put(acc, hero.pvp_ranking, hero.id)
-      end)
-
-    Game.update_match!(match, %{winners: %{"master" => master, "grandmaster" => grandmaster}})
-  end
-
-  # Clears all active PVP heroes from the current match
-  # Users will need to pick a new Hero for the Arena
-  defp clear_current_heroes!(match) do
-    Logger.info("Clearing active players...")
-    Accounts.clear_active_players!()
-    match
-  end
-
-  # Picks one PVP bot to battle someone in the Arena. Over the period of a PVP round, bots should attempt to battle
-  # each Hero twice (although only the first will be allowed), considering the current max bot number of 30
-  # We use the pvp_last_picked field here to tell skynet that this bot shouldn't be picked to battle again for another 6 hours
-  defp skynet!(league_tier) do
-    now = Timex.now()
-    attacker = HeroQuery.skynet_bot(league_tier, now) |> Repo.all() |> List.first()
-
-    if attacker do
-      HeroQuery.with_pvp_points()
-      |> HeroQuery.with_league_tier(league_tier)
-      |> Repo.all()
-      |> Enum.each(fn defender ->
-        defender &&
-          %{attacker: Game.get_hero!(attacker.id), defender: Game.get_hero!(defender.id)}
-          |> Engine.create_pvp_battle!()
-          |> Engine.auto_finish_battle!()
-      end)
-
-      Game.update_hero!(attacker, %{pvp_last_picked: now |> Timex.shift(hours: +6)})
-    end
   end
 
   # by nilifing :id here we can make a perfect clone of a record

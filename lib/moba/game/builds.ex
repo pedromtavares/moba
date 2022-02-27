@@ -44,17 +44,6 @@ defmodule Moba.Game.Builds do
   end
 
   @doc """
-  Heroes can have up to 2 Builds, and this returns the one which is not
-  currently active.
-  """
-  def other_build_for(%{active_build_id: active_build_id} = hero) do
-    %{builds: builds} = Repo.preload(hero, builds: [skills: SkillQuery.ordered()])
-
-    other = Enum.find(builds, fn build -> build.id != active_build_id end)
-    other || List.first(builds)
-  end
-
-  @doc """
   Grabs a pre-defined skill/item list and generates a build for a bot. These lists vary in effectiveness
   and strength depending on the difficulty and level. Weak bots have more random skills and less items, whilst
   strong bots have a proper skill build and a high tier inventory
@@ -94,16 +83,6 @@ defmodule Moba.Game.Builds do
 
     Map.put(hero, :builds, updated_builds)
   end
-
-  def level_active_to_max!(%{active_build: %{skills: skills} = build} = hero) do
-    updated = replace_skills!(build, Game.max_leveled_skills(skills))
-
-    hero
-    |> Game.update_hero!(%{skill_levels_available: 0})
-    |> Map.put(:active_build, updated)
-  end
-
-  def level_active_to_max!(hero), do: hero
 
   # --------------------------------
 

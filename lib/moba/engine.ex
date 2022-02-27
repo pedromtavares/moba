@@ -32,19 +32,6 @@ defmodule Moba.Engine do
 
   def latest_duel_battle(duel_id), do: Battles.latest_for_duel(duel_id)
 
-  def read_battle!(battle), do: Battles.read!(battle)
-
-  def unread_battles_count(hero), do: Battles.unreads_for(hero)
-
-  def read_all_battles, do: Battles.read_all()
-
-  def read_all_battles_for(hero) do
-    Battles.read_all_for_hero(hero)
-    broadcast_unread(hero)
-  end
-
-  def broadcast_unread(hero), do: MobaWeb.broadcast("hero-#{hero.id}", "unread", %{hero_id: hero.id})
-
   def generate_attacker_snapshot!(tuple), do: Battles.generate_attacker_snapshot!(tuple)
 
   def generate_defender_snapshot!(tuple), do: Battles.generate_defender_snapshot!(tuple)
@@ -54,8 +41,6 @@ defmodule Moba.Engine do
   # CORE MECHANICS
 
   defdelegate create_pve_battle!(target), to: Core
-
-  defdelegate create_pvp_battle!(attrs), to: Core
 
   def create_league_battle!(attacker) do
     Core.create_league_battle!(attacker, Game.league_defender_for(attacker))
@@ -72,8 +57,6 @@ defmodule Moba.Engine do
   def next_battle_turn(battle), do: Core.build_turn(battle, %{})
 
   defdelegate last_turn(battle), to: Core
-
-  def can_pvp?(attacker, defender), do: Core.can_pvp?(%{attacker: attacker, defender: defender})
 
   defdelegate effect_descriptions(turn), to: Core
 

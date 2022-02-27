@@ -60,16 +60,5 @@ defmodule Moba.MobaTest do
       assert hero
       assert user.current_pve_hero_id == hero.id
     end
-
-    test "#prepare_current_pvp_hero!" do
-      user = create_user(%{pvp_points: 100})
-      hero = create_base_hero(%{}, user)
-
-      prepared = Moba.prepare_current_pvp_hero!(hero)
-      user = Accounts.get_user!(hero.user_id)
-
-      assert user.current_pvp_hero_id == prepared.id
-      assert prepared.pvp_active
-    end
   end
 end

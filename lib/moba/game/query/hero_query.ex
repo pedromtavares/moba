@@ -9,8 +9,6 @@ defmodule Moba.Game.Query.HeroQuery do
 
   import Ecto.Query
 
-  @pvp_per_page Moba.pvp_heroes_per_page()
-  @ranking_per_page Moba.ranking_heroes_per_page()
   @current_ranking_date Moba.current_ranking_date()
 
   def load(queryable \\ Hero) do
@@ -22,34 +20,9 @@ defmodule Moba.Game.Query.HeroQuery do
     preload(queryable, [:avatar])
   end
 
-  def current_arena_players do
-    non_bots() |> pvp_active()
-  end
-
-  def current_arena_bots(league_tier) do
-    bots() |> pvp_active() |> with_league_tier(league_tier)
-  end
-
-  def pvp_search(exclude_list, filter, pvp_points, league_tier, sort, page) do
-    Hero
-    |> pvp_active()
-    |> with_league_tier(league_tier)
-    |> exclude_ids(exclude_list)
-    |> pvp_filter(filter, pvp_points)
-    |> pvp_sort(sort)
-    |> limit_by(@pvp_per_page, page_to_offset(page, @pvp_per_page))
-  end
-
-  def paged_pvp_ranking(page) do
-    Hero
-    |> pvp_ranked()
-    |> limit_by(@ranking_per_page, page_to_offset(page, @ranking_per_page))
-  end
-
   def pve_targets(difficulty, farm_range, exclude_list, codes, limit) do
     Hero
     |> by_difficulty(difficulty)
-    |> pvp_inactive()
     |> by_total_xp_farm(farm_range)
     |> by_codes(codes)
     |> exclude_ids(exclude_list)
@@ -101,36 +74,12 @@ defmodule Moba.Game.Query.HeroQuery do
     )
   end
 
-  def pvp_last_picked(user_id) do
-    base = with_user(Hero, user_id) |> pvp_inactive()
-
-    from(hero in base,
-      order_by: [desc: hero.pvp_last_picked],
-      where: not is_nil(hero.pvp_last_picked),
-      limit: 1
-    )
-  end
-
   def pvp_picked_recently(match_time) do
     ago = match_time |> Timex.shift(days: -3)
 
     from(hero in Hero,
       where: not is_nil(hero.pvp_last_picked),
       where: hero.pvp_last_picked > ^ago
-    )
-  end
-
-  def skynet_bot(league_tier, time) do
-    from(hero in current_arena_bots(league_tier),
-      where: hero.pvp_last_picked <= ^time,
-      limit: 1
-    )
-  end
-
-  def weakest_pvp_bot(league_tier) do
-    from(hero in current_arena_bots(league_tier),
-      order_by: [asc: hero.pvp_points],
-      limit: 1
     )
   end
 
@@ -168,12 +117,6 @@ defmodule Moba.Game.Query.HeroQuery do
   def with_user(query, user_id) do
     from hero in query,
       where: hero.user_id == ^user_id
-  end
-
-  def by_pvp_points(query, min, max) do
-    from hero in query,
-      where: hero.pvp_points >= ^min,
-      where: hero.pvp_points <= ^max
   end
 
   def with_league_tier(query, league_tier) do
@@ -237,12 +180,6 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query, where: hero.inserted_at > ^@current_ranking_date
   end
 
-  def pvp_ranked(query \\ Hero) do
-    from hero in pvp_active(query),
-      where: not is_nil(hero.pvp_ranking),
-      order_by: [asc: hero.pvp_ranking]
-  end
-
   def pve_ranked(query \\ Hero) do
     from hero in non_bots(query),
       where: not is_nil(hero.pve_ranking),
@@ -254,11 +191,6 @@ defmodule Moba.Game.Query.HeroQuery do
       where: not is_nil(hero.pvp_points)
   end
 
-  def with_pvp_points(query \\ pvp_active()) do
-    from hero in query,
-      order_by: [desc: hero.pvp_points]
-  end
-
   def exclude_ids(query, ids) do
     from hero in query,
       where: hero.id not in ^ids
@@ -266,55 +198,6 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def exclude_match(%{id: id} = _match) do
     from hero in Hero, where: hero.match_id != ^id
-  end
-
-  def pvp_active(query \\ Hero) do
-    from hero in query,
-      where: hero.pvp_active == true
-  end
-
-  def pvp_inactive(query \\ Hero) do
-    from hero in query,
-      where: hero.pvp_active == false
-  end
-
-  def pvp_filter(query, nil, _), do: query
-
-  def pvp_filter(query, filter, pvp_points) when filter == "easy" do
-    by_pvp_points(query, 0, pvp_points - 41)
-  end
-
-  def pvp_filter(query, filter, pvp_points) when filter == "normal" do
-    by_pvp_points(query, pvp_points - 40, pvp_points + 40)
-  end
-
-  def pvp_filter(query, filter, pvp_points) when filter == "hard" do
-    by_pvp_points(query, pvp_points + 41, pvp_points + 80)
-  end
-
-  def pvp_filter(query, filter, pvp_points) when filter == "hardest" do
-    by_pvp_points(query, pvp_points + 81, 10000)
-  end
-
-  def pvp_sort(query, nil), do: query
-
-  def pvp_sort(query, "level") do
-    from hero in query,
-      order_by: [asc: hero.level, asc: hero.experience, asc: hero.pvp_ranking]
-  end
-
-  def pvp_sort(query, "hp") do
-    from hero in query,
-      order_by: [asc: hero.total_hp + hero.item_hp, asc: hero.pvp_ranking]
-  end
-
-  def pvp_sort(query, "atk") do
-    from hero in query,
-      order_by: [asc: hero.atk + hero.item_atk, asc: hero.pvp_ranking]
-  end
-
-  def pvp_sort(query, "random") do
-    random(query)
   end
 
   def created_recently(query \\ non_bots(), hours_ago \\ 24) do
@@ -334,15 +217,5 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def created_before(query, time) do
     from hero in query, where: hero.inserted_at < ^time
-  end
-
-  defp page_to_offset(page, per_page) do
-    result = (page - 1) * per_page
-
-    if result < 0 do
-      0
-    else
-      result
-    end
   end
 end

@@ -184,5 +184,5 @@ defmodule MobaWeb.JungleLiveView do
   defp farm_rewards_for(hero, state),
     do: Enum.filter(hero.pve_farming_rewards, &(&1.state == state)) |> Enum.sort_by(& &1.started_at, {:desc, DateTime})
 
-  defp time_trigger, do: Process.send_after(self(), :current_time, 1000)
+  defp time_trigger, do: Process.send_after(self(), :current_time, 100)
 end

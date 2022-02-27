@@ -8,8 +8,6 @@ defmodule MobaWeb.HeroView do
     end
   end
 
-  def can_join_arena?(user), do: length(Game.eligible_heroes_for_pvp(user.id)) > 0
-
   def display_quest_tabs?(%{
         completed_progressions: all,
         completed_daily_progressions: daily,
@@ -24,8 +22,6 @@ defmodule MobaWeb.HeroView do
   def history_avatars(%{history_codes: history_codes}, avatars) do
     Enum.filter(avatars, &(&1.code in history_codes))
   end
-
-  def next_match_description, do: MobaWeb.CurrentHeroView.next_match_description()
 
   def tier_class(tier, hero_tier) do
     cond do

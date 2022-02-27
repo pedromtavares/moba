@@ -19,7 +19,6 @@ defmodule MobaWeb.BattleLiveView do
        last_turn: nil,
        action_turn_number: nil,
        show_shop: false,
-       unreads: 0,
        tutorial_step: current_user && current_user.tutorial_step
      )}
   end
@@ -27,18 +26,10 @@ defmodule MobaWeb.BattleLiveView do
   def handle_params(%{"id" => id} = params, _uri, socket) do
     current_hero = socket.assigns.current_hero
     battle = Engine.get_battle!(id)
-    current_hero && Engine.read_battle!(battle)
 
     if connected?(socket) && battle.type == "duel" do
       MobaWeb.subscribe("battle-#{battle.id}")
     end
-
-    snapshot =
-      if current_hero && current_hero.id != battle.attacker_id && battle.type == "pvp" do
-        battle.defender_snapshot
-      else
-        battle.attacker_snapshot
-      end
 
     turn = Engine.next_battle_turn(battle)
 
@@ -46,7 +37,7 @@ defmodule MobaWeb.BattleLiveView do
      assign(socket,
        battle: battle,
        debug: Map.get(params, "debug"),
-       hero: snapshot,
+       hero: battle.attacker_snapshot,
        turn: turn,
        last_turn: Engine.last_turn(battle),
        current_hero: current_hero,

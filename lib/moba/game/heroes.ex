@@ -17,13 +17,6 @@ defmodule Moba.Game.Heroes do
     |> base_preload()
   end
 
-  def pvp_last_picked(user_id) do
-    HeroQuery.pvp_last_picked(user_id)
-    |> Repo.all()
-    |> List.first()
-    |> base_preload()
-  end
-
   def list_latest(user_id) do
     HeroQuery.latest(user_id)
     |> Repo.all()
@@ -46,9 +39,8 @@ defmodule Moba.Game.Heroes do
   Creates a bot Hero, automatically leveling it and its skills.
   Level 0 bots exist to serve as weak targets for newly created player Heroes,
   and thus have their stats greatly reduced
-  If a user is passed, the bot will be automatically assigned to PVP (Arena).
   """
-  def create_bot!(avatar, level, difficulty, user \\ nil, pvp_points \\ 0, league_tier \\ 0) do
+  def create_bot!(avatar, level, difficulty, league_tier, user \\ nil) do
     name = if user, do: user.username, else: avatar.name
 
     bot =
@@ -56,12 +48,9 @@ defmodule Moba.Game.Heroes do
         %{
           bot_difficulty: difficulty,
           name: name,
-          pvp_points: pvp_points,
           gold: 100_000,
-          pvp_active: user != nil,
           league_tier: league_tier,
           total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
-          pvp_last_picked: user && DateTime.utc_now()
         },
         user,
         avatar
@@ -111,26 +100,6 @@ defmodule Moba.Game.Heroes do
   end
 
   @doc """
-  A new PVP hero will start out with points inherited from its User and a clean score.
-  To keep the same amount of Heroes in the Arena, the weakest PVP bot will be inactivated.
-  """
-  def prepare_for_pvp!(hero) do
-    inactivate_weakest_pvp_bot(hero.league_tier)
-
-    update!(hero, %{
-      pvp_points: 0,
-      pvp_ranking: nil,
-      pvp_active: true,
-      pvp_last_picked: Timex.now(),
-      pvp_picks: hero.pvp_picks + 1,
-      pvp_wins: 0,
-      pvp_losses: 0,
-      pvp_history: %{},
-      match_id: Game.current_match().id
-    })
-  end
-
-  @doc """
   Used for easy testing in development, unavailable in production
   """
   def level_cheat(hero) do
@@ -166,63 +135,6 @@ defmodule Moba.Game.Heroes do
     else
       0
     end
-  end
-
-  @doc """
-  Returns valid PVP targets for a Hero, prioritizing ones with equivalent points
-  """
-  def pvp_search(hero, sort \\ "hp") do
-    ["normal", "easy", "hard", "hardest", nil]
-    |> Enum.reduce_while([], fn filter, _ ->
-      results = pvp_search(hero, filter, sort)
-
-      if Enum.count(results) > 0 do
-        {:halt, {filter, results}}
-      else
-        {:cont, {filter, results}}
-      end
-    end)
-  end
-
-  def pvp_search(%{pvp_points: pvp_points, league_tier: league_tier} = hero, filter, sort, page \\ 1) do
-    HeroQuery.pvp_search(pvp_exclusions(hero), filter, pvp_points, league_tier, sort, page)
-    |> Repo.all()
-    |> base_preload()
-  end
-
-  @doc """
-  Retrieves top PVP ranked Heroes
-  """
-  def pvp_ranking(league_tier, limit) do
-    HeroQuery.pvp_ranked()
-    |> HeroQuery.with_league_tier(league_tier)
-    |> HeroQuery.limit_by(limit)
-    |> Repo.all()
-    |> base_preload()
-  end
-
-  @doc """
-  Retrieves PVP ranked Heroes by page
-  """
-  def paged_pvp_ranking(league_tier, page) do
-    HeroQuery.paged_pvp_ranking(page)
-    |> HeroQuery.with_league_tier(league_tier)
-    |> Repo.all()
-    |> base_preload()
-  end
-
-  @doc """
-  Grabs all Heroes ordered by their pvp points and updates their pvp_ranking in the current Arena match
-  """
-  def update_pvp_ranking!(league_tier) do
-    HeroQuery.with_pvp_points()
-    |> HeroQuery.load_avatar()
-    |> HeroQuery.with_league_tier(league_tier)
-    |> Repo.all()
-    |> Enum.with_index(1)
-    |> Enum.map(fn {hero, index} ->
-      update!(hero, %{pvp_ranking: index})
-    end)
   end
 
   @doc """
@@ -296,23 +208,6 @@ defmodule Moba.Game.Heroes do
   end
 
   def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
-
-  def has_other_build?(hero) do
-    builds =
-      Repo.preload(hero, :builds)
-      |> Map.get(:builds)
-
-    length(builds) > 1
-  end
-
-  def pvp_targets_available(hero) do
-    list = pvp_exclusions(hero)
-
-    HeroQuery.pvp_active()
-    |> HeroQuery.exclude_ids(list)
-    |> HeroQuery.with_league_tier(hero.league_tier)
-    |> Repo.aggregate(:count)
-  end
 
   def collection_for(user_id) do
     HeroQuery.finished_pve()
@@ -463,13 +358,6 @@ defmodule Moba.Game.Heroes do
 
   defp bot_total_gold_farm_base(tier, _), do: tier * 4800
 
-  defp inactivate_weakest_pvp_bot(league_tier) do
-    HeroQuery.weakest_pvp_bot(league_tier)
-    |> Repo.all()
-    |> List.first()
-    |> update!(%{pvp_active: false})
-  end
-
   defp base_preload(struct_or_structs, extras \\ []) do
     Repo.preload(
       struct_or_structs,
@@ -479,20 +367,6 @@ defmodule Moba.Game.Heroes do
 
   defp avatar_preload(struct_or_structs) do
     Repo.preload(struct_or_structs, :avatar)
-  end
-
-  # makes sure Heroes that were recently battled are excluded from searches
-  defp pvp_exclusions(%{id: hero_id, pvp_history: history}) do
-    [hero_id] ++
-      Enum.reduce(history, [], fn {id, time}, acc ->
-        parsed = Timex.parse!(time, "{ISO:Extended:Z}")
-
-        if Timex.before?(parsed, Timex.now()) do
-          acc
-        else
-          acc ++ [id]
-        end
-      end)
   end
 
   defp zero_limit(total) when total < 0, do: 0

@@ -74,6 +74,16 @@ defmodule MobaWeb.DashboardView do
   def max_league_allowed_for(%{quest: %{level: 1}}), do: "Master League"
   def max_league_allowed_for(_), do: "Grandmaster League"
 
+  def replenish_time do
+    match = Game.current_match()
+
+    match &&
+      match.inserted_at
+      |> Timex.shift(days: +1)
+      |> Timex.format("{relative}", :relative)
+      |> elem(1)
+  end
+
   defp filter_incompleted_by_code(progressions, code) do
     progressions
     |> Enum.filter(&is_nil(&1.completed_at))

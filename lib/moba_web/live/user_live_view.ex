@@ -18,7 +18,7 @@ defmodule MobaWeb.UserLiveView do
         hero = List.first(user.hero_collection)
         Game.get_hero!(hero["hero_id"])
       else
-        Game.current_hero(user)
+        Game.current_pve_hero(user)
       end
 
     collection_codes = Enum.map(user.hero_collection, & &1["code"])

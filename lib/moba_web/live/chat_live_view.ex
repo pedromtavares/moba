@@ -50,7 +50,7 @@ defmodule MobaWeb.ChatLiveView do
   end
 
   def handle_event("send", params, %{assigns: %{user: user}} = socket) do
-    hero = Game.current_hero(user)
+    hero = Game.current_pve_hero(user)
     body = params["message"]["body"]
     length = String.length(body)
 

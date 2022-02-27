@@ -20,22 +20,12 @@ defmodule Moba.Game do
 
   def update_match!(match, attrs), do: Matches.update!(match, attrs)
 
-  def podium_for(match), do: Matches.load_podium(match)
-
   # HEROES
 
   def get_hero!(hero_id), do: Heroes.get!(hero_id)
 
-  def current_hero(user, "pve"), do: current_pve_hero(user)
-  def current_hero(user, "pvp"), do: current_pvp_hero(user)
-
-  def current_hero(nil), do: nil
-  def current_hero(user), do: current_pvp_hero(user) || current_pve_hero(user)
-
   def current_pve_hero(%{current_pve_hero_id: hero_id}), do: get_hero!(hero_id)
-  def current_pvp_hero(%{current_pvp_hero_id: hero_id}), do: get_hero!(hero_id)
-
-  def last_picked_pvp_hero(user_id), do: Heroes.pvp_last_picked(user_id)
+  def current_pve_hero(_), do: nil
 
   def latest_heroes(user_id), do: Heroes.list_latest(user_id)
 
@@ -61,14 +51,14 @@ defmodule Moba.Game do
     |> generate_targets!()
   end
 
-  def create_bot_hero!(avatar, level, difficulty, user \\ nil, pvp_points \\ 0) do
+  def create_bot_hero!(avatar, level, difficulty, user \\ nil) do
     league_tier = Leagues.tier_for(level)
-    Heroes.create_bot!(avatar, level, difficulty, user, pvp_points, league_tier)
+    Heroes.create_bot!(avatar, level, difficulty, league_tier, user)
   end
 
   def create_pvp_bot_hero!(user, avatar) do
     difficulty = if user.bot_tier == Moba.master_league_tier(), do: "pvp_master", else: "pvp_grandmaster"
-    Heroes.create_bot!(avatar, 25, difficulty, user, 0, user.bot_tier)
+    Heroes.create_bot!(avatar, 25, difficulty, user.bot_tier, user)
   end
 
   def update_hero!(hero, attrs, items \\ nil) do
@@ -82,8 +72,6 @@ defmodule Moba.Game do
     broadcast_to_hero(hero.id)
     updated
   end
-
-  def prepare_hero_for_pvp!(hero), do: Heroes.prepare_for_pvp!(hero)
 
   def archive_hero!(%{user: user} = hero) do
     if user.current_pve_hero_id == hero.id, do: Accounts.set_current_pve_hero!(user, nil)
@@ -107,18 +95,6 @@ defmodule Moba.Game do
 
   def pvp_win_rate(hero), do: Heroes.pvp_win_rate(hero)
 
-  def pvp_search(hero, sort \\ "level"), do: Heroes.pvp_search(hero, sort)
-
-  def pvp_search(hero, filter, sort, page), do: Heroes.pvp_search(hero, filter, sort, page)
-
-  def pvp_ranking(league_tier, limit), do: Heroes.pvp_ranking(league_tier, limit)
-
-  def paged_pvp_ranking(league_tier, page), do: Heroes.paged_pvp_ranking(league_tier, page)
-
-  defdelegate update_pvp_ranking!(league_tier), to: Heroes
-
-  def update_pvp_rankings!, do: update_pvp_ranking!(5) && update_pvp_ranking!(6)
-
   def pve_search(hero), do: Heroes.pve_search(hero)
 
   def pve_ranking(limit \\ 20), do: Heroes.pve_ranking(limit)
@@ -128,10 +104,6 @@ defmodule Moba.Game do
   defdelegate prepare_league_challenge!(hero), to: Heroes
 
   def level_cheat(hero), do: Heroes.level_cheat(hero)
-
-  def hero_has_other_build?(hero), do: Heroes.has_other_build?(hero)
-
-  def pvp_targets_available(hero), do: Heroes.pvp_targets_available(hero)
 
   def set_hero_skin!(hero, skin), do: Heroes.set_skin!(hero, skin)
 
@@ -237,18 +209,6 @@ defmodule Moba.Game do
 
   def replace_build_skills!(build, new_skills), do: Builds.replace_skills!(build, new_skills)
 
-  @doc """
-  Creating a new PVP build also means giving the Hero all the skill levels necessary
-  for it to level up its new Skills
-  """
-  def create_pvp_build!(hero, skills) do
-    %{hero: hero} = build = Builds.create!("pvp", hero, skills)
-
-    hero
-    |> activate_build!(build)
-    |> level_active_build_to_max!()
-  end
-
   def generate_bot_build!(bot) do
     build = Builds.generate_for_bot!(bot)
     activate_build!(build.hero, build)
@@ -265,8 +225,6 @@ defmodule Moba.Game do
   defdelegate skill_build_for(avatar, index), to: Builds
 
   defdelegate reset_item_orders!(hero, new_inventory), to: Builds
-
-  def level_active_build_to_max!(hero), do: Builds.level_active_to_max!(hero)
 
   # LEAGUES
 

@@ -25,46 +25,6 @@ defmodule Moba.EngineTest do
       assert battle.difficulty == "test"
     end
 
-    test "#read_battle!", %{strong_hero: attacker, alternate_hero: defender} do
-      battle =
-        Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
-        |> Engine.auto_finish_battle!()
-
-      assert battle.unread_id == defender.id
-      refute Engine.read_battle!(battle) |> Map.get(:unread_id)
-    end
-
-    test "#unread_battles_count", %{strong_hero: attacker, alternate_hero: defender} do
-      assert Engine.unread_battles_count(defender) == 0
-
-      Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
-      |> Engine.auto_finish_battle!()
-
-      assert Engine.unread_battles_count(defender) == 1
-    end
-
-    test "#read_all_battles", %{strong_hero: attacker, alternate_hero: defender} do
-      Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
-      |> Engine.auto_finish_battle!()
-
-      assert Engine.unread_battles_count(defender) == 1
-
-      Engine.read_all_battles()
-
-      assert Engine.unread_battles_count(defender) == 0
-    end
-
-    test "#read_all_battles_for", %{strong_hero: attacker, alternate_hero: defender} do
-      Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
-      |> Engine.auto_finish_battle!()
-
-      assert Engine.unread_battles_count(defender) == 1
-
-      Engine.read_all_battles_for(defender)
-
-      assert Engine.unread_battles_count(defender) == 0
-    end
-
     test "#generate_attacker_snapshot", %{strong_hero: attacker, alternate_hero: defender} do
       battle = create_basic_battle(attacker, defender)
       battle = Engine.generate_attacker_snapshot!({battle, attacker})
@@ -142,47 +102,6 @@ defmodule Moba.EngineTest do
 
       assert battle.winner.id == defender.id
       assert battle.attacker.pve_current_turns == attacker.pve_current_turns
-    end
-  end
-
-  describe "pvp" do
-    test "valid first battle, invalid second battle", %{strong_hero: attacker, alternate_hero: defender} do
-      assert Engine.can_pvp?(attacker, defender)
-
-      battle =
-        Engine.create_pvp_battle!(%{attacker: attacker, defender: defender})
-        |> Engine.auto_finish_battle!()
-
-      assert battle.type == "pvp"
-      assert battle.unread_id == defender.id
-
-      assert battle.attacker_snapshot.level == attacker.level
-      assert battle.defender_snapshot.level == defender.level
-
-      hero = Game.get_hero!(attacker.id)
-      assert {:error, _} = Engine.create_pvp_battle!(%{attacker: hero, defender: defender})
-      refute Engine.can_pvp?(hero, defender)
-    end
-
-    test "attacker wins", %{strong_hero: attacker, weak_hero: defender} do
-      Engine.create_pvp_battle!(%{attacker: %{attacker | league_tier: 6}, defender: %{defender | league_tier: 6}})
-      |> Engine.auto_finish_battle!()
-
-      hero = Game.get_hero!(attacker.id)
-
-      assert hero.pvp_points == attacker.pvp_points + 9
-      assert hero.pvp_wins == attacker.pvp_wins + 1
-    end
-
-    test "defender wins", %{strong_hero: defender, weak_hero: attacker} do
-      Engine.create_pvp_battle!(%{attacker: %{attacker | league_tier: 6}, defender: %{defender | league_tier: 6}})
-      |> Engine.auto_finish_battle!()
-
-      updated_attacker = Game.get_hero!(attacker.id)
-      updated_defender = Game.get_hero!(defender.id)
-
-      assert updated_attacker.pvp_points == attacker.pvp_points - 9
-      assert updated_defender.pvp_points == defender.pvp_points + 2
     end
   end
 
@@ -332,7 +251,7 @@ defmodule Moba.EngineTest do
       assert battle.initiator == attacker
       assert length(battle.turns) == 0
 
-      no_speed = %{attacker | speed: 0, level: 3}
+      no_speed = %{attacker | speed: 0, pve_tier: 3}
       battle = build_basic_battle(no_speed, defender) |> Engine.start_battle!()
 
       assert battle.initiator.id == defender.id

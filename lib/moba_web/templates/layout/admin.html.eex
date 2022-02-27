@@ -35,11 +35,6 @@
                                             <br/>
                                             <span class="d-none d-md-inline">Skins</span>
                                         </a>
-                                        <a href="/admin/quests" class="nav-link">
-                                            <i class="fa fa-trophy"></i>
-                                            <br/>
-                                            <span class="d-none d-md-inline">Quests</span>
-                                        </a>
                                     </div>
                                 </div>
                                 <div class="col-1 flex-center d-none d-md-flex">
@@ -58,10 +53,10 @@
                                             <br/>
                                             <span class="d-none d-md-inline">Users</span>
                                         </a>
-                                        <a href="/admin/matches" class="nav-link">
-                                            <i class="fa fa-cubes"></i>
+                                        <a href="/admin/quests" class="nav-link">
+                                            <i class="fa fa-trophy"></i>
                                             <br/>
-                                            <span class="d-none d-md-inline">Matches</span>
+                                            <span class="d-none d-md-inline">Quests</span>
                                         </a>
                                         <a href="/admin/dashboard" class="nav-link">
                                             <i class="fab fa-phoenix-framework"></i>

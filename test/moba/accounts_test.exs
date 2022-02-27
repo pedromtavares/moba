@@ -25,16 +25,6 @@ defmodule Moba.AccountsTest do
 
       assert user.current_pve_hero_id == hero.id
     end
-
-    test "#set_current_pvp_hero!", %{user: user} do
-      hero = create_base_hero(%{pve_current_turns: 0}, user)
-      user = Accounts.get_user!(user.id)
-      assert user.current_pve_hero_id
-
-      user = Accounts.set_current_pvp_hero!(user, hero.id)
-
-      assert user.current_pvp_hero_id == hero.id
-    end
   end
 
   describe "#add_user_experience" do
@@ -47,17 +37,6 @@ defmodule Moba.AccountsTest do
       assert user.experience == 100
       # assert user.shard_count == 1
       # assert_receive {"alert", %{level: 2, type: "battle"}}
-    end
-  end
-
-  describe "#award_medals_and_shards" do
-    test "first place" do
-      user =
-        create_user()
-        |> Accounts.award_medals_and_shards(1, 6)
-
-      assert user.medal_count == 3
-      assert user.shard_count == 200
     end
   end
 

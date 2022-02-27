@@ -5,45 +5,13 @@ defmodule MobaWeb.CurrentHeroView do
 
   def sorted_skills(%{active_build: %{skills: skills}}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
 
-  def can_create_extra_build?(hero), do: !Game.hero_has_other_build?(hero)
-
   def can_level_skill?(hero, skill), do: Game.can_level_skill?(hero, skill)
 
   def max_skill_level(skill), do: Game.max_skill_level(skill)
 
-  def match_progress_percentage do
-    match = Game.current_match()
-
-    if match do
-      start = match.inserted_at
-      ending = start |> Timex.shift(days: +1)
-      GH.time_percentage(start, ending)
-    else
-      0
-    end
-  end
-
-  def next_match_description do
-    match = Game.current_match()
-
-    match &&
-      match.inserted_at
-      |> Timex.shift(days: +1)
-      |> Timex.format("{relative}", :relative)
-      |> elem(1)
-  end
-
   def xp_percentage(hero), do: hero.experience * 100 / xp_to_next_level(hero)
 
   def xp_to_next_level(hero), do: Moba.xp_to_next_hero_level(hero.level + 1)
-
-  def edit_orders_description("pve") do
-    "Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle."
-  end
-
-  def edit_orders_description(_) do
-    "Click to edit the skill and item orders that will be used when you defend against other players"
-  end
 
   def next_skill_description(skill) do
     next = Game.get_current_skill!(skill.code, skill.level + 1)

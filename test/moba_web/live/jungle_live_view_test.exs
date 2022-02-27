@@ -12,9 +12,9 @@ defmodule MobaWeb.JungleLiveViewTest do
   end
 
   test "connected mount redirects if there is no pve hero", %{conn: conn} do
-    hero = create_pvp_hero()
+    user = create_user()
 
-    user = Accounts.get_user!(hero.user_id) |> Accounts.update_user!(%{current_pve_hero_id: nil})
+    user = Accounts.get_user!(user.id) |> Accounts.update_user!(%{current_pve_hero_id: nil})
 
     conn = Pow.Plug.assign_current_user(conn, user, otp_app: :moba)
 

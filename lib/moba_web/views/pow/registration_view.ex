@@ -7,7 +7,7 @@ defmodule MobaWeb.Pow.RegistrationView do
     conn
     |> Plug.Conn.get_session(:guest_user_id)
     |> Accounts.get_user!()
-    |> Game.current_hero()
+    |> Game.current_pve_hero()
   end
 
   def current_avatar(hero), do: Game.get_avatar!(hero.avatar.id)
