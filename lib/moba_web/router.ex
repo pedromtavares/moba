@@ -11,7 +11,6 @@ defmodule MobaWeb.Router do
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
-    plug :fetch_flash
     plug :fetch_live_flash
     plug :protect_from_forgery
     plug :put_secure_browser_headers
@@ -50,7 +49,9 @@ defmodule MobaWeb.Router do
     post "/start", MobaWeb.GameController, :create
     get "/", MobaWeb.GameController, :index
 
-    live "/battles/:id", MobaWeb.BattleLiveView, layout: {MobaWeb.LayoutView, :root}
+    live_session :battle, root_layout: {MobaWeb.LayoutView, "root.html"} do
+      live "/battles/:id", MobaWeb.BattleLiveView
+    end 
   end
 
   scope "/", MobaWeb do
@@ -70,7 +71,9 @@ defmodule MobaWeb.Router do
 
     live "/library", LibraryLiveView
 
-    live "/invoke", CreateLiveView, layout: {MobaWeb.LayoutView, :clean}
+    live_session :create, root_layout: {MobaWeb.LayoutView, "clean.html"} do
+      live "/invoke", CreateLiveView
+    end
 
     post "/game/continue", GameController, :continue
 

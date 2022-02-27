@@ -7,7 +7,6 @@
                 <br/>
                 <small><em>Click on an item to buy or transmute</em></small>
             </h2>
-
         </div>
     </div>
 
@@ -98,9 +97,9 @@
                     <%= for item <- @current_hero.items do %>
                         <div class="col-4 col-md-2 inventory-item">
                             <%= if can_select_inventory(item, @transmute, @recipe) do %>
-                                <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class='item-img <%= if item.active, do: "active" %>' phx-click="select-inventory" phx-value-code="<%= item.code %>" phx-target="#shop" id="transmute-<%= item.id %>"/>
+                                <img src={GH.image_url(item)} data-toggle="tooltip" title={GH.item_description(item)} class={if item.active, do: "item-img active", else: "item-img"} phx-click="select-inventory" phx-value-code={item.code} phx-target="#shop" id={"transmute-#{item.id}"}/>
                             <% else %>
-                                <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class="item-img inactive" />
+                                <img src={GH.image_url(item)} data-toggle="tooltip" title={GH.item_description(item)} class="item-img inactive" />
                             <% end %>
                         </div>
                     <% end %>
@@ -120,24 +119,24 @@
                     <hr/>
                     <div class="row selected-shop">
                         <div class="col center">
-                            <img src="<%= GH.image_url(@selected_inventory) %>" data-toggle="tooltip" title="<%= GH.item_description(@selected_inventory) %>" class="item-img" />
+                            <img src={GH.image_url(@selected_inventory)} data-toggle="tooltip" title={GH.item_description(@selected_inventory)} class="item-img" />
                         </div>
                     </div>
                     <hr/>
                     <div class="row">
                         <div class="col center">
-                            <button class="btn btn-danger" phx-click="sell" phx-target="#shop" id="sell-<%= @selected_inventory.id %>"><i class="fa fa-coins"></i> Sell for <%= sell_price(@current_hero, @selected_inventory) %></button>
+                            <button class="btn btn-danger" phx-click="sell" phx-target="#shop" id={"sell-#{@selected_inventory.id}"}><i class="fa fa-coins"></i> Sell for <%= sell_price(@current_hero, @selected_inventory) %></button>
                         </div>
                     </div>
                 <% end %>
                 <%= if @transmute do %>
                     <hr/>
                     <div class="row transmute">
-                        <div class="col-12 col-md-<%= 4 + ingredients_count_for(@transmute) %> center margin-auto">
+                        <div class="col-12 col-md-8 center margin-auto">
                             <div class="row">
                                 <%= for item <- @recipe do %>
                                     <div class="col-4 col-md-2">
-                                        <img src="<%= GH.image_url(item) %>" data-toggle="tooltip" title="<%= GH.item_description(item) %>" class="item-img" id="recipe-<%= item.id %>"/>
+                                        <img src={GH.image_url(item)} data-toggle="tooltip" title={GH.item_description(item)} class="item-img" id={"recipe-#{item.id}"}/>
                                     </div>
                                 <% end %>
                                 <%= if length(@recipe) < ingredients_count_for(@transmute) do %>
@@ -151,7 +150,7 @@
                                     <i class="fa fa-2x fa-arrow-circle-right"></i>
                                 </div>
                                 <div class="col-md-3 d-none d-md-block">
-                                    <img src="<%= GH.image_url(@transmute) %>" data-toggle="tooltip" title="<%= GH.item_description(@transmute) %>" class="item-img float-right"/>
+                                    <img src={GH.image_url(@transmute)} data-toggle="tooltip" title={GH.item_description(@transmute)} class="item-img float-right"/>
                                 </div>
                             </div>
                         </div>
@@ -162,7 +161,7 @@
                         </div>
                         <div class="col-12 d-block d-md-none">
                             <div class="col-3 margin-auto">
-                                <img src="<%= GH.image_url(@transmute) %>" data-toggle="tooltip" title="<%= GH.item_description(@transmute) %>" class="item-img float-right"/>
+                                <img src={GH.image_url(@transmute)} data-toggle="tooltip" title={GH.item_description(@transmute)} class="item-img float-right"/>
                             </div>
                         </div>
                     </div>
@@ -170,7 +169,7 @@
                     <div class="row">
                         <div class="col center">
                             <div class="center">
-                                    <button class="btn btn-primary" phx-hook="Loading" loading="Transmuting..." <%= unless proper_recipe(@recipe, @transmute), do: "disabled" %> phx-click="finish-transmute"  phx-target="#shop" id="finish-transmute">
+                                    <button class={if proper_recipe(@recipe, @transmute), do: "btn btn-primary", else: "btn btn-primary disabled"} phx-hook="Loading" loading="Transmuting..." phx-click="finish-transmute"  phx-target="#shop" id="finish-transmute">
                                         <span class="loading-text"><i class="fa fa-refresh mr-1"></i>Transmute</span>
                                     </button>
                                 <button class="btn btn-danger" phx-click="cancel-transmute" id="cancel-transmute" phx-target="#shop"><i class="fa fa-times"></i> Cancel</button>

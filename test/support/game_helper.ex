@@ -1,5 +1,5 @@
 defmodule Test.GameHelper do
-  alias Moba.{Game, Accounts}
+  alias Moba.Game
   import Test.AccountsHelper
 
   def create_base_hero(attrs \\ %{}, user \\ create_user(), avatar \\ base_avatar()) do

@@ -8,7 +8,7 @@ defmodule MobaWeb.JungleLiveViewTest do
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
     {:ok, _view, html} = live(conn, "/jungle")
-    assert html =~ "Jungle"
+    assert html =~ "Meditate"
   end
 
   test "connected mount redirects if there is no pve hero", %{conn: conn} do

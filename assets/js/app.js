@@ -7,15 +7,27 @@ import "phoenix_html"
 import 'bootstrap';
 import $ from 'jquery';
 import tippy from 'tippy.js';
+import topbar from "topbar";
 import {Socket} from "phoenix";
-import LiveSocket from "phoenix_live_view";
-import NProgress from "nprogress";
+import {LiveSocket} from "phoenix_live_view";
 import mobileCheck from "./mobile_check";
 import Hooks from "./hooks";
 
 // Show progress bar on live navigation and form submits
-window.addEventListener("phx:page-loading-start", info => NProgress.start())
-window.addEventListener("phx:page-loading-stop", info => NProgress.done())
+topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
+let topBarScheduled = undefined;
+
+window.addEventListener("phx:page-loading-start", () => {
+  if(!topBarScheduled) {
+    topBarScheduled = setTimeout(() => topbar.show(), 200);
+  }
+});
+
+window.addEventListener("phx:page-loading-stop", () => {
+  clearTimeout(topBarScheduled);
+  topBarScheduled = undefined;
+  topbar.hide();
+});
 
 // Close chat window
 window.addEventListener("keydown", event => {
@@ -26,7 +38,7 @@ window.addEventListener("keydown", event => {
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}});
-liveSocket.connect()
+liveSocket.connect();
 
 window.jQuery = $;
 window.$ = $;

@@ -39,7 +39,7 @@ defmodule MobaWeb.JungleLiveView do
          )}
 
       true ->
-        {:ok, socket |> redirect(to: "/game/pve")}
+        {:ok, socket |> redirect(to: "/base")}
     end
   end
 
@@ -92,7 +92,7 @@ defmodule MobaWeb.JungleLiveView do
     skills = Enum.map(hero.active_build.skills, &Game.get_skill_by_code!(&1.code, true, 1))
     Moba.create_current_pve_hero!(%{name: hero.name}, user, hero.avatar, skills)
 
-    {:noreply, socket |> redirect(to: "/game/pve")}
+    {:noreply, socket |> redirect(to: "/jungle")}
   end
 
   def handle_event("show-meditation", _, %{assigns: %{current_hero: hero}} = socket) do

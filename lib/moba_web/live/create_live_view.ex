@@ -149,7 +149,7 @@ defmodule MobaWeb.CreateLiveView do
 
     Moba.create_current_pve_hero!(%{name: hero_name}, user, avatar, skills)
 
-    {:noreply, socket |> redirect(to: "/game/pve")}
+    {:noreply, socket |> redirect(to: "/jungle")}
   end
 
   def handle_event("validate", %{"name" => name}, socket) do

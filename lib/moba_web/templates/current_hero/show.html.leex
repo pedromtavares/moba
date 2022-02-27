@@ -167,5 +167,5 @@
 </div>
 
 <div class="shop-modal <%= if @show_shop, do: "d-block", else: "d-none"%>" phx-window-keydown="close-shop" phx-key="Escape" id="shop-modal">
-    <%= Phoenix.LiveView.Helpers.live_component(@socket, MobaWeb.Shop, current_hero: @current_hero, tutorial_step: @tutorial_step, id: "shop") %>
+    <%= Phoenix.LiveView.Helpers.live_component(MobaWeb.Shop, current_hero: @current_hero, tutorial_step: @tutorial_step, id: "shop") %>
 </div>
