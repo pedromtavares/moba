@@ -21,7 +21,7 @@
                 <div class="col d-flex justify-content-around">
                     <%= if @hero.pve_ranking do %>
                         <h2 class="text-info text-center mt-0">
-                            <small>Jungle Rank</small><br/>
+                            <small>Rank</small><br/>
                             #<%= @hero.pve_ranking %>
                         </h2>
                     <% end %>

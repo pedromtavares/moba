@@ -58,44 +58,22 @@
   }
 
   .hero-list{
-    .skill-img{
-      width:23%;
-      max-width: 80px;
-      margin: 1px;
-    }
 
-    .item-img{
-      width: 14%;
-      margin: 1px;
-      background: black;
-    }
+    .hero-card{
+      min-height: 380px;
+      border: 3px solid;
+      border-image-source: radial-gradient(white, rgb(47, 60, 74));
+      border-image-slice: 1;
 
-    .avatar{
-      max-width: 150px;
-      width: 100%;
-    }
-
-    .skill-container{
-      width: 100%;
-      margin-bottom: 0.5rem;
-
-      img{
-        width: 25%;
-        margin: 0;
-      }
-    }
-
-    .item-container{
-      width: 100%;
-
-      img{
-        width: 16.5%;
+      .card-footer{
+        background-color: rgba(54, 64, 74, 0.95) !important;
       }
     }
 
     .league-logo{
-      width: 40px;
+      width: 25px;
       height: auto !important;
+      margin-right: 2px;
     }
 
   }

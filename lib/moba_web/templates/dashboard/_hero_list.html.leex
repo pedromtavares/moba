@@ -16,70 +16,97 @@
                 <% end %>
             </div>
         </div>
-        <hr/>
-        <div class="row">
-            <div class="col d-flex justify-content-center">
-                <div class="d-none d-md-inline-block pt-3 pb-3 pr-3">
-                    <div class="btn-group">
-                        <button type="button" class="btn <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished" phx-hook="Loading" id="in-progress-heroes-btn">
-                            <span class="loading-text">In Progress</span>
-                        </button>
-                        <button type="button" class="btn <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished" phx-hook="Loading" id="finished-heroes-btn">
-                            <span class="loading-text">Finished</span>
-                        </button>
+        <%= if length(@all_heroes) > 0 do %>
+            <hr/>
+            <div class="row">
+                <div class="col d-flex justify-content-center">
+                    <div class="pt-3 pb-3 pr-3">
+                        <div class="btn-group">
+                            <%= if @pve_display == "unfinished" do %>
+                                <button type="button" class="btn btn-secondary no-action">
+                                    <span class="loading-text">In Progress</span>
+                                </button>
+                                <button type="button" class="btn btn-light" phx-click="pve-show-finished" phx-hook="Loading" id="finished-heroes-btn">
+                                    <span class="loading-text">Finished</span>
+                                </button>
+                            <% else %>
+                                <button type="button" class="btn btn-light" phx-click="pve-show-unfinished" phx-hook="Loading" id="in-progress-heroes-btn">
+                                    <span class="loading-text">In Progress</span>
+                                </button>
+                                <button type="button" class="btn btn-secondary no-action">
+                                    <span class="loading-text">Finished</span>
+                                </button>
+                            <% end %>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="w-100 hero-list">
-            <table class="table table-dark mb-0">
-                <%= for hero <- @visible_heroes do %>
-                    <tr>
-                        <td class="text-center" width="20%">
-                            <h4>
-                                <%= hero.name %><%= if hero.pve_ranking do %><span class="text-success">#<%= hero.pve_ranking %></span><% end %>
-                            </h4>
-
-                            <%= GH.hero_avatar(hero) %>
-
-                            <h5 class="text-muted font-italic">Level <%=hero.level%> <%=hero.avatar.name%></h5>
-                        </td>
-                        <td class="p-0 text-center">
-                            <%= GH.hero_skill_list(hero) %>
-                            <br/>
-                            <%= GH.hero_item_list(hero, true) %>
-                        </td>
-                        <td class="text-center" width="25%">
-                            <img src="/images/league_<%= hero.league_tier %>.png" class="league-logo">
-                            <h5><%= Moba.leagues()[hero.league_tier] %></h5>
-                            <h5 class="text-warning" data-toggle="tooltip" title="Total farm: <%= hero.total_xp_farm + hero.total_gold_farm %>"><%= GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm) %> Total Farm</h5>
-                            <%= unless hero.finished_at do %>
-                                <small><em>(<%= hero.pve_total_turns + hero.pve_current_turns %> turns left)</em>
-                            <% end %>
-                        </td>
-                        <td class="text-center" width="20%">
-                            <%= if hero.finished_at do %>
-                                <%=live_redirect class: "btn btn-primary btn-lg btn-block", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
-                                    <i class="fa fa-address-card fa-2x"></i>
-                                    <br/>
-                                    Customize
-                                <% end %>
-                            <% else %>
-                                <%= link to: "/game/continue?hero_id=#{hero.id}", class: "btn btn-success btn-lg btn-block", method: :post do %>
-                                    <i class="fa fa-crosshairs fa-2x"></i>
-                                    <br/>
-                                    Continue                                    
-                                <% end %>
-                            <% end %>
-                            <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>
-                                <button type="button" class="btn btn-danger mt-1 btn-block" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id="<%=hero.id%>">
-                                    <i class="fa fa-trash-alt mr-1"></i>Delete
-                                </button>
-                            <% end %>
-                        </td>
-                    </tr>
-                <% end %>
-            </table>
-        </div>
+            <div class="w-100 hero-list darker">
+                <div class="row no-gutters">
+                    <%= for hero <- @visible_heroes do %>
+                        <div class="col-6" id="visible-hero-<%= hero.id %>">
+                            <div class="card hero-card mb-0" style="background-image: url(<%= GH.background_url(hero) %>)">
+                                <div class="card-header pt-0 pb-1">
+                                    <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+                                        <span class="font-italic font-20"><%= if hero.pve_ranking do %>#<%= hero.pve_ranking %><% end %></span>
+                                        <div>
+                                            <img src="/images/league_<%= hero.league_tier%>.png" class="league-logo">
+                                            <%=hero.name%>
+                                        </div>
+                                        <span class="font-15 font-italic" data-toggle="tooltip" title="<%= GH.hero_stats_string(hero, false) %>">Level <%= hero.level %> <%=hero.avatar.name%></span>
+                                    </h4>
+                                </div>
+                                <div class="card-body p-0 d-flex align-items-center justify-content-center">
+                                </div>
+                                <div class="card-footer transparent p-1">
+                                    <div class="row">
+                                        <div class="col justify-content-between d-flex">
+                                            <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>
+                                                <button type="button" class="btn btn-danger" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id="<%= hero.id %>">
+                                                    <i class="fa fa-trash-alt mr-1"></i>Delete
+                                                </button>
+                                            <% end %>
+                                            <%= if hero.finished_at do %>
+                                                <%= live_redirect class: "btn btn-primary", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
+                                                    <i class="fa fa-address-card mr-1"></i>
+                                                    Customize
+                                                <% end %>
+                                            <% else %>
+                                                <%= link to: "/game/continue?hero_id=#{hero.id}", class: "btn btn-success", method: :post do %>
+                                                    <i class="fa fa-crosshairs mr-1"></i>
+                                                    Continue (<%= hero.pve_total_turns + hero.pve_current_turns %> turns left)
+                                                <% end %>
+                                            <% end %>
+                                            <div class="btn-group">
+                                                <button class="btn btn-icon btn-outline-dark text-warning" data-toggle="tooltip" title="Total farm: <%= hero.total_xp_farm + hero.total_gold_farm %>. Gold farm: <%= hero.total_gold_farm %>. XP farm: <%= hero.total_xp_farm %><br/>">
+                                                    <i class="fa fa-crown"></i>
+                                                    <%= GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm) %> Total Farm
+                                                </button>
+                                                <%= if hero.finished_at do %>
+                                                    <button class="btn btn-icon btn-outline-dark text-success">
+                                                        <i class="fa fa-clock-o"></i>
+                                                        <%= GH.finished_time(hero) %> minutes
+                                                    </button>
+                                                <% end %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row mt-1">
+                                        <div class="col-12">
+                                            <div class="skills-container d-flex justify-content-between">
+                                                <%= GH.hero_skill_list(hero) %>
+                                            </div>
+                                            <div class="items-container row no-gutters">
+                                                <%= GH.hero_item_list(hero) %>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        <% end %>
     </div>
 </div>

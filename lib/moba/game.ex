@@ -29,7 +29,7 @@ defmodule Moba.Game do
 
   def latest_heroes(user_id), do: Heroes.list_latest(user_id)
 
-  def eligible_heroes_for_pvp(user_id), do: Heroes.list_pvp_eligible(user_id)
+  def eligible_heroes_for_pvp(user_id, duel_inserted_at), do: Heroes.list_pvp_eligible(user_id, duel_inserted_at)
 
   @doc """
   Orchestrates the creation of a Hero, which involves creating its initial build, activating it
@@ -348,8 +348,9 @@ defmodule Moba.Game do
     duel
   end
 
-  def next_duel_phase!(duel, hero_id \\ nil) do
-    updated = Duels.next_phase!(duel, hero_id)
+  def next_duel_phase!(duel, hero \\ nil) do
+    updated = Duels.next_phase!(duel, hero)
+    hero && update_hero!(hero, %{pvp_last_picked: Timex.now()})
     MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
     updated
   end

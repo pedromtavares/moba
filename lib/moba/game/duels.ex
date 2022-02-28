@@ -26,7 +26,9 @@ defmodule Moba.Game.Duels do
     |> Repo.insert!()
   end
 
-  def next_phase!(%{phase: phase} = duel, hero_id) do
+  def next_phase!(%{phase: phase} = duel, hero) do
+    hero_id = hero && Map.get(hero, :id)
+
     case phase do
       "user_first_pick" ->
         update!(duel, %{user_first_pick_id: hero_id, phase: "opponent_first_pick"})

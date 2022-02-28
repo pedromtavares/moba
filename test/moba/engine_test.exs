@@ -210,9 +210,9 @@ defmodule Moba.EngineTest do
   describe "duel" do
     test "full cycle", %{strong_hero: attacker, weak_hero: defender} do
       duel = Game.create_duel!(attacker.user, defender.user)
-      Game.next_duel_phase!(duel, attacker.id)
+      Game.next_duel_phase!(duel, attacker)
       duel = Game.get_duel!(duel.id)
-      Game.next_duel_phase!(duel, defender.id)
+      Game.next_duel_phase!(duel, defender)
       Engine.first_duel_battle(duel) |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -221,9 +221,9 @@ defmodule Moba.EngineTest do
       assert hero.user.season_points == attacker.user.season_points
 
       duel = Game.get_duel!(duel.id)
-      Game.next_duel_phase!(duel, defender.id)
+      Game.next_duel_phase!(duel, defender)
       duel = Game.get_duel!(duel.id)
-      Game.next_duel_phase!(duel, attacker.id)
+      Game.next_duel_phase!(duel, attacker)
 
       last_battle = Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
 

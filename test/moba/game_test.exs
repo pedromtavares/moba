@@ -557,13 +557,13 @@ defmodule Moba.GameTest do
 
       assert duel.phase == "user_first_pick"
 
-      Game.next_duel_phase!(duel, user_hero.id)
+      Game.next_duel_phase!(duel, user_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_first_pick"
       assert duel.user_first_pick_id == user_hero.id
 
-      Game.next_duel_phase!(duel, opp_hero.id)
+      Game.next_duel_phase!(duel, opp_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "user_battle"
@@ -579,12 +579,12 @@ defmodule Moba.GameTest do
 
       assert duel.phase == "opponent_second_pick"
 
-      Game.next_duel_phase!(duel, opp_hero.id)
+      Game.next_duel_phase!(duel, opp_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "user_second_pick"
 
-      Game.next_duel_phase!(duel, user_hero.id)
+      Game.next_duel_phase!(duel, user_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_battle"

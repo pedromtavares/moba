@@ -9,6 +9,7 @@ defmodule Moba.Game.Query.HeroQuery do
 
   import Ecto.Query
 
+  @platinum_league_tier Moba.platinum_league_tier()
   @current_ranking_date Moba.current_ranking_date()
 
   def load(queryable \\ Hero) do
@@ -51,13 +52,14 @@ defmodule Moba.Game.Query.HeroQuery do
     )
   end
 
-  def eligible_for_pvp(user_id) do
+  def eligible_for_pvp(user_id, duel_inserted_at) do
     from(hero in with_user(Hero, user_id),
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.id]],
       where: not is_nil(hero.finished_at),
-      where: hero.league_tier >= 3,
-      where: hero.inserted_at > ^@current_ranking_date
+      where: hero.league_tier >= @platinum_league_tier,
+      where: hero.inserted_at > ^@current_ranking_date,
+      where: is_nil(hero.pvp_last_picked) or hero.pvp_last_picked < ^duel_inserted_at
     )
   end
 

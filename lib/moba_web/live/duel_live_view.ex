@@ -13,7 +13,7 @@ defmodule MobaWeb.DuelLiveView do
     {:ok,
      assign(socket,
        duel: duel,
-       heroes: Game.eligible_heroes_for_pvp(user_id),
+       heroes: Game.eligible_heroes_for_pvp(user_id, duel.inserted_at),
        first_battle: Engine.first_duel_battle(duel),
        last_battle: Engine.last_duel_battle(duel)
      )}
@@ -31,8 +31,9 @@ defmodule MobaWeb.DuelLiveView do
     {:noreply, push_redirect(socket, to: "/battles/#{battle.id}")}
   end
 
-  def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel}} = socket) do
-    Game.next_duel_phase!(duel, String.to_integer(hero_id))
+  def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel, heroes: heroes}} = socket) do
+    hero = Enum.find(heroes, &(&1.id == String.to_integer(hero_id)))
+    Game.next_duel_phase!(duel, hero)
 
     {:noreply, socket}
   end

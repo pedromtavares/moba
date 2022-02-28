@@ -23,8 +23,8 @@ defmodule Moba.Game.Heroes do
     |> base_preload()
   end
 
-  def list_pvp_eligible(user_id) do
-    HeroQuery.eligible_for_pvp(user_id)
+  def list_pvp_eligible(user_id, duel_inserted_at) do
+    HeroQuery.eligible_for_pvp(user_id, duel_inserted_at)
     |> Repo.all()
     |> base_preload()
   end
