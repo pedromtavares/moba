@@ -21,10 +21,10 @@
             <div class="col d-flex justify-content-center">
                 <div class="d-none d-md-inline-block pt-3 pb-3 pr-3">
                     <div class="btn-group">
-                        <button type="button" class="btn <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished" phx-hook="Loading">
+                        <button type="button" class="btn <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished" phx-hook="Loading" id="in-progress-heroes-btn">
                             <span class="loading-text">In Progress</span>
                         </button>
-                        <button type="button" class="btn <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished" phx-hook="Loading">
+                        <button type="button" class="btn <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished" phx-hook="Loading" id="finished-heroes-btn">
                             <span class="loading-text">Finished</span>
                         </button>
                     </div>

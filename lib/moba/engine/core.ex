@@ -326,6 +326,7 @@ defmodule Moba.Engine.Core do
         |> Map.put(:resource, loaded_resource)
       end
     end)
+    |> Enum.reject(&(&1.duration <= 0))
   end
 
   defp load_skill(map), do: load_resource(map, %Game.Schema.Skill{})

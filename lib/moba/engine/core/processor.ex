@@ -327,11 +327,7 @@ defmodule Moba.Engine.Core.Processor do
     future_duration = duration - 1
     updated_list = List.delete(list, existing)
 
-    if future_duration >= 0 do
-      updated_list ++ [%{existing | duration: future_duration}]
-    else
-      updated_list
-    end
+    updated_list ++ [%{existing | duration: future_duration}]
   end
 
   # If the attacker has a current double_skill, it is the one that gets cast
