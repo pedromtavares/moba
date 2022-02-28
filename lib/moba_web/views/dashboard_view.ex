@@ -20,19 +20,19 @@ defmodule MobaWeb.DashboardView do
     "#{start} - #{endd}"
   end
 
-  def next_medal_percentage(%{season_tier: current_tier, season_points: season_points}) do
-    max = Accounts.season_points_for(current_tier + 1)
-    season_points * 100 / max
-  end
-
-  def next_medal(%{season_tier: current_tier}) do
+  def next_pve_tier(%{pve_tier: current_tier}) do
     cond do
       current_tier >= Moba.max_season_tier() -> nil
       true -> current_tier + 1
     end
   end
 
-  def next_pve_tier(%{pve_tier: current_tier}) do
+  def next_pvp_tier_percentage(%{season_tier: current_tier, season_points: season_points}) do
+    max = Accounts.season_points_for(current_tier + 1)
+    season_points * 100 / max
+  end
+
+  def next_pvp_tier(%{season_tier: current_tier}) do
     cond do
       current_tier >= Moba.max_season_tier() -> nil
       true -> current_tier + 1

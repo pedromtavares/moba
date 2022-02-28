@@ -36,7 +36,7 @@
                         </td>
                         <td>
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
-                                <%= GH.hero_avatar(hero, false) %><br/>
+                                <%= GH.hero_avatar(hero) %><br/>
                                 <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%= hero.name %></h4>
                                 <small class="text-dark">Level <%= hero.level %> <%= hero.avatar.name %></small>
                             <% end %>

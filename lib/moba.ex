@@ -17,7 +17,7 @@ defmodule Moba do
     5 => "Master League",
     6 => "Grandmaster League"
   }
-  @medals %{
+  @pvp_tiers %{
     0 => "Herald",
     1 => "Guardian",
     2 => "Crusader",
@@ -75,7 +75,7 @@ defmodule Moba do
   def damage_types, do: @damage_types
   def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
-  def medals, do: @medals
+  def pvp_tiers, do: @pvp_tiers
   def pve_tiers, do: @pve_tiers
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
   def final_tutorial_step, do: @final_tutorial_step

@@ -41,7 +41,7 @@
                                 <div class="col-1 flex-center d-none d-md-flex">
                                     <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
                                         <%= live_redirect to: Routes.live_path(@conn, MobaWeb.JungleLiveView) do %>
-                                            <%= GH.hero_avatar(@current_hero, false) %>
+                                            <%= GH.hero_avatar(@current_hero) %>
                                         <% end %>
                                     <% else %>
                                         <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLiveView), class: "nav-link" do %>

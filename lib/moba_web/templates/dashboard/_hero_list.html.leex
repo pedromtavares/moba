@@ -1,26 +1,37 @@
 <div class="card">
-    <div class="card-body p-0">
-        <div class="row">
-            <div class="col">
-                <h4 class="header-title pt-3 pl-3">Your Heroes</h4>
+    <div class="card-body p-0 text-center">
+        <a href="/invoke" class="btn p-2 btn-block btn-lg btn-success col-xl-4 margin-auto mt-2 <%= if @current_user.is_guest, do: "disabled" %>"><i class="fa fa-user-plus mr-1"></i>Train a new Hero</a>
+        <div class="pt-3">
+            <div class="collection">
+                <%= for hero <- @current_user.hero_collection do %>
+                    <div style="width: 100px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
+                        <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar"/>
+                        <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo">
+                    </div>
+                <% end %>
+                <%= for avatar <- @blank_collection do %>
+                    <div style="width:100px;height:75px" class='avatar-container text-center mx-1'>
+                        <img src="<%= GH.image_url(avatar) %>" class="avatar blank-avatar" data-toggle="tooltip" title="<%= avatar.name %>"/>
+                    </div>
+                <% end %>
             </div>
+        </div>
+        <hr/>
+        <div class="row">
             <div class="col d-flex justify-content-center">
                 <div class="d-none d-md-inline-block pt-3 pb-3 pr-3">
                     <div class="btn-group">
-                        <button type="button" class="btn btn-xs <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished">In Progress</button>
-                        <button type="button" class="btn btn-xs <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished">Completed</button>
-                    </div>
-                </div>
-            </div>
-            <div class="col">
-                <div class="float-right d-none d-md-inline-block pt-3 pb-3 pr-3">
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#daily-quests"><i class="fa fa-clock-o mr-1"></i>Daily Quests</button>
+                        <button type="button" class="btn <%= if @pve_display == "unfinished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-unfinished" phx-hook="Loading">
+                            <span class="loading-text">In Progress</span>
+                        </button>
+                        <button type="button" class="btn <%= if @pve_display == "finished", do: "btn-secondary", else: "btn-light" %>" phx-click="pve-show-finished" phx-hook="Loading">
+                            <span class="loading-text">Finished</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="w-100 hero-list fixed-panel" style="overflow: auto;">
+        <div class="w-100 hero-list">
             <table class="table table-dark mb-0">
                 <%= for hero <- @visible_heroes do %>
                     <tr>
@@ -29,7 +40,7 @@
                                 <%= hero.name %><%= if hero.pve_ranking do %><span class="text-success">#<%= hero.pve_ranking %></span><% end %>
                             </h4>
 
-                            <%= GH.hero_avatar(hero, false) %>
+                            <%= GH.hero_avatar(hero) %>
 
                             <h5 class="text-muted font-italic">Level <%=hero.level%> <%=hero.avatar.name%></h5>
                         </td>

@@ -7,11 +7,11 @@
             </div>
             <div class="modal-body p-0">
                 <table class="table table-dark">
-                    <%=for {tier, label} <- Moba.medals() do %>
+                    <%= for {tier, label} <- Moba.pvp_tiers() do %>
                         <tr>
-                            <td class="text-center"><img src="/images/pvp/<%=tier%>.png" style="max-height: 70px"/></td>
-                            <td class="text-center"><h5 class="text-medal-<%=tier%>"><%=label%></h5></td>
-                            <td class="text-center"><strong><%=Accounts.season_points_for(tier)%></strong> <em class="text-muted">Season Points</em></td>
+                            <td class="text-center"><img src="/images/pvp/<%= tier %>.png" style="max-height: 70px"/></td>
+                            <td class="text-center"><h5 class="text-medal-<%= tier %>"><%= label %></h5></td>
+                            <td class="text-center"><strong><%= Accounts.season_points_for(tier) %></strong> <em class="text-muted">Season Points</em></td>
                         </tr>
                     <% end %>
                 </table>

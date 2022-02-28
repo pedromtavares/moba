@@ -6,7 +6,7 @@ defmodule MobaWeb.DashboardLiveView do
   def mount(_, session, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
 
-    {:ok, socket |> pve_assigns() |> pvp_assigns() |> quest_assigns()}
+    {:ok, socket |> assign(current_mode: "pve") |> pve_assigns() |> pvp_assigns() |> quest_assigns()}
   end
 
   def handle_event("pve-show-finished", _, socket) do
@@ -15,6 +15,11 @@ defmodule MobaWeb.DashboardLiveView do
 
   def handle_event("pve-show-unfinished", _, socket) do
     {:noreply, assign(socket, visible_heroes: unfinished_heroes(socket.assigns.all_heroes), pve_display: "unfinished")}
+  end
+
+  def handle_event("change-mode", _, %{assigns: %{current_mode: current_mode}} = socket) do
+    mode = if current_mode == "pve", do: "pvp", else: "pve"
+    {:noreply, assign(socket, current_mode: mode)}
   end
 
   def handle_event("archive", %{"id" => id}, socket) do

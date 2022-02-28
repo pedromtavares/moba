@@ -143,7 +143,7 @@
                                 </td>
                                 <td>
                                     <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
-                                        <%=GH.hero_avatar(hero, false)%>
+                                        <%= GH.hero_avatar(hero) %>
                                         <br/>
                                         <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>
                                     <% end %>

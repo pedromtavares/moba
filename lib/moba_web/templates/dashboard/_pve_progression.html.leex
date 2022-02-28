@@ -1,14 +1,12 @@
 <div class="card dark-bg">
-    <div class="card-body text-center pb-0">
-        <div class="row mt-3 mb-3">
+    <div class="card-body pb-0">
+        <div class="row mt-3 mb-3 d-flex justify-content-center">
             <%= if next = next_pve_tier(@current_user) do %>
-                <div class="col pve-tier-container">
-                    <div class="text-right">
-                        <img src="/images/pve/<%=@current_user.pve_tier%>.png" class="pve-rank"/>
-                        <h5 class="mb-0 mr-2 text-uppercase text-white mt-1"><%= Moba.pve_tiers[@current_user.pve_tier] %></h5>
-                    </div>
+                <div class="col pve-tier-container text-center">
+                    <img src="/images/pve/<%= @current_user.pve_tier %>.png" class="pve-rank"/>
+                    <h5 class="text-uppercase text-white my-0"><%= Moba.pve_tiers[@current_user.pve_tier] %></h5>
                 </div>
-                <div class="col-xl-5 col-lg-7 col-md-8">
+                <div class="col-8">
                     <h4 class="text-center mb-0 mt-0"><%= @current_season_progression.quest.description %></h4>
                     <div class="progress mt-3" style="height:50px;">
                         <div style="width:<%= progression_percentage(@current_season_progression) %>%;" class="progress-bar pve-bar"></div>
@@ -16,34 +14,23 @@
                             <%= @current_season_progression.current_value %>/<%= @current_season_progression.quest.final_value %> Avatars
                         </h5>
                     </div>
-                    <button type="button" class="btn btn-xs btn-light mt-4" data-toggle="modal" data-target="#pve-tier-rewards">
-                        <i class="fa fa-crown mr-1"></i>Rewards
-                    </button>
-                </div>
-                <div class="col pve-tier-container">
-                    <div class="text-left">
-                        <img src="/images/pve/<%=next%>.png" class="pve-rank"/>
-                        <h5 class="mb-0 ml-3 text-uppercase text-white mt-1"><%= Moba.pve_tiers[next] %></h5>
+                    <div class="mt-4 text-center">
+                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#pve-tier-rewards">
+                            <i class="fa fa-crown mr-1"></i>Progression Rewards
+                        </button>
+                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#daily-quests">
+                            <i class="fa fa-clock-o mr-1"></i>Daily Quests
+                        </button>
                     </div>
+                </div>
+                <div class="col pve-tier-container text-center">
+                    <img src="/images/pve/<%= next %>.png" class="pve-rank"/>
+                    <h5 class="text-uppercase text-white my-0"><%= Moba.pve_tiers[next] %></h5>
                 </div>
             <% else %>
                 <div class="col text-center">
-                    <img src="/images/pvp/<%=@current_user.season_tier%>.png" class="user-rank"/>
-                    <h5 class="text-medal-<%=@current_user.season_tier%> mb-0 mr-3"><%= Moba.pve_tiers[@current_user.pve_tier] %></h5>
-                </div>
-            <% end %>
-        </div>
-
-        <div class="collection">
-            <%= for hero <- @current_user.hero_collection do %>
-                <div style="width: 100px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
-                    <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar"/>
-                    <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo">
-                </div>
-            <% end %>
-            <%= for avatar <- @blank_collection do %>
-                <div style="width:100px;height:75px" class='avatar-container text-center mx-1'>
-                    <img src="<%= GH.image_url(avatar) %>" class="avatar blank-avatar" data-toggle="tooltip" title="<%= avatar.name %>"/>
+                    <img src="/images/pve/<%= @current_user.pve_tier %>.png" class="user-rank"/>
+                    <h5 class="my-0 text-uppercase text-white"><%= Moba.pve_tiers[@current_user.pve_tier] %></h5>
                 </div>
             <% end %>
         </div>

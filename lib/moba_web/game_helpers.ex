@@ -60,21 +60,10 @@ defmodule MobaWeb.GameHelpers do
     end)
   end
 
-  def hero_avatar(hero, show_medals \\ false) do
-    tooltip = "Earn Medals by finishing in the top 3 of a match"
-    medals = (show_medals && hero.user && hero.user.medal_count > 0 && "
-      <p class='medals text-warning bg-light-dark d-none d-xl-block text-center' title='#{tooltip}' data-toggle='tooltip'>
-          <i class='fa fa-medal mr-1'></i>#{hero.user.medal_count}
-      </p>
-    ") || nil
-
-    "
-    <div class='avatar-container'>
-        <img src='#{image_url(hero.avatar)}' class='avatar img-border'/>
-        #{medals}
-    </div>
-    "
-    |> raw()
+  def hero_avatar(hero) do
+    content_tag :div, class: "avatar-container" do
+      img_tag(image_url(hero.avatar), class: "avatar img-border")
+    end
   end
 
   def hero_stats(hero, show_speed \\ false) do

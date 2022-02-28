@@ -327,7 +327,7 @@ defmodule Moba.Engine.Core.Processor do
     future_duration = duration - 1
     updated_list = List.delete(list, existing)
 
-    if future_duration >= 0 do
+    if future_duration > 0 do
       updated_list ++ [%{existing | duration: future_duration}]
     else
       updated_list
