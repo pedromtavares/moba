@@ -19,16 +19,12 @@ defmodule MobaWeb.DuelLiveView do
      )}
   end
 
-  def handle_info({"phase", phase}, socket) when phase in ["opponent_first_pick", "user_second_pick"] do
-    duel = Game.get_duel!(socket.assigns.duel.id)
-    {:noreply, assign(socket, duel: duel)}
-  end
-
-  def handle_info({"phase", phase}, %{assigns: %{duel: duel}} = socket)
-      when phase in ["user_battle", "opponent_battle"] do
-    duel = Game.get_duel!(duel.id)
-    battle = Engine.latest_duel_battle(duel.id)
-    {:noreply, push_redirect(socket, to: "/battles/#{battle.id}")}
+  def handle_info({"phase", _}, socket) do
+    with duel = Game.get_duel!(socket.assigns.duel.id),
+         first_battle = Engine.first_duel_battle(duel),
+         last_battle = Engine.last_duel_battle(duel) do
+      {:noreply, assign(socket, duel: duel, first_battle: first_battle, last_battle: last_battle)}
+    end
   end
 
   def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel, heroes: heroes}} = socket) do

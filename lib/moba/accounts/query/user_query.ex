@@ -51,8 +51,8 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in query, where: u.status == ^status)
   end
 
-  def exclude_user(query \\ User, user) do
-    from(u in query, where: u.id != ^user.id)
+  def exclude_ids(query, ids) do
+    from user in query, where: user.id not in ^ids
   end
 
   def ranking(limit) do
@@ -97,13 +97,34 @@ defmodule Moba.Accounts.Query.UserQuery do
   end
 
   def eligible_arena_bots do
-    from(u in by_season_points(),
-      where: u.is_bot == true,
-      where: is_nil(u.current_pvp_hero_id)
-    )
+    from(u in by_season_points(), where: u.is_bot == true)
+  end
+
+  def season_search(min_tier, max_tier) do
+    bots()
+    |> in_season_tiers(min_tier, max_tier)
+    |> random()
+  end
+
+  def in_season_tiers(query, min, max) do
+    from user in query,
+      where: user.season_tier >= ^min,
+      where: user.season_tier <= ^max
   end
 
   def limit_by(query, limit) do
     from u in query, limit: ^limit
+  end
+
+  def random(query) do
+    from user in query,
+      order_by: fragment("RANDOM()")
+  end
+
+  def skynet_bot(timestamp) do
+    base = bots() |> random() |> limit_by(1)
+
+    from bot in base,
+      where: is_nil(bot.last_online_at) or bot.last_online_at < ^timestamp
   end
 end

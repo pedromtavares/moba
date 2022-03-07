@@ -43,6 +43,8 @@ defmodule Moba.Game.Heroes do
   def create_bot!(avatar, level, difficulty, league_tier, user \\ nil) do
     name = if user, do: user.username, else: avatar.name
 
+    finished_at = if user, do: Timex.now() |> Timex.shift(hours: 1), else: nil
+
     bot =
       create!(
         %{
@@ -51,6 +53,7 @@ defmodule Moba.Game.Heroes do
           gold: 100_000,
           league_tier: league_tier,
           total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
+          finished_at: finished_at
         },
         user,
         avatar
@@ -219,7 +222,7 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{&1.pve_ranking, &1.league_tier, &1.total_gold_farm + &1.total_xp_farm}, :desc)
+        Enum.sort_by(heroes, &{&1.league_tier, &1.total_gold_farm + &1.total_xp_farm, &1.id}, :desc)
         |> List.first()
       }
     end)

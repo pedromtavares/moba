@@ -1,0 +1,17 @@
+<%= if @battle do %>
+    <div class="d-flex justify-content-center">
+        <div class="text-center">
+            <img src={GH.image_url(@battle.attacker.avatar)} class="avatar"/>
+            <br/>
+            <span class={if @battle.attacker.id == @battle.winner.id, do: "hero-name text-success", else: "hero-name text-muted"}><%= @battle.attacker.name %></span>
+        </div>
+        <div class="mx-1 mt-2">
+            <i class="fa fa-times"></i>
+        </div>
+        <div class="text-center">
+            <img src={GH.image_url(@battle.defender.avatar)} class="avatar"/>
+            <br/>
+            <span class={if @battle.defender.id == @battle.winner.id, do: "hero-name text-success", else: "hero-name text-muted"}><%= @battle.defender.name %></span>
+        </div>
+    </div>
+<% end %>

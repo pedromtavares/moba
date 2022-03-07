@@ -16,9 +16,7 @@ defmodule MobaWeb.CurrentHeroView do
   def next_skill_description(skill) do
     next = Game.get_current_skill!(skill.code, skill.level + 1)
 
-    "#{GH.skill_description(skill)}<hr/>#{
-      GH.skill_description(%{next | name: "Next Level (#{next.level})", level: nil, description: ""})
-    }"
+    "#{GH.skill_description(skill)}<hr/>#{GH.skill_description(%{next | name: "Next Level (#{next.level})", level: nil, description: ""})}"
   end
 
   def total_hp_description(hero) do
@@ -26,9 +24,7 @@ defmodule MobaWeb.CurrentHeroView do
     sub = "Your total Hit Points. When they reach 0 in a battle, you die and are defeated, with no rewards given."
 
     main =
-      "Current base HP: #{hero.total_hp} <br/>HP given by items: #{hero.item_hp}<br/><br/>HP gain on level up: #{
-        hero.avatar.hp_per_level
-      }"
+      "Current base HP: #{hero.total_hp} <br/>HP given by items: #{hero.item_hp}<br/><br/>HP gain on level up: #{hero.avatar.hp_per_level}"
 
     attribute_description(title, sub, main)
   end
@@ -40,9 +36,7 @@ defmodule MobaWeb.CurrentHeroView do
       "Your total Mana Points. Your 'fuel' in a battle, used to power abilities and active items. When they reach 0 in a battle, you will hit with a Basic Attack, which deals 100% ATK as Normal Damage."
 
     main =
-      "Current base MP: #{hero.total_mp} <br/>MP given by items: #{hero.item_mp}<br/><br/>MP gain on level up: #{
-        hero.avatar.mp_per_level
-      }"
+      "Current base MP: #{hero.total_mp} <br/>MP given by items: #{hero.item_mp}<br/><br/>MP gain on level up: #{hero.avatar.mp_per_level}"
 
     attribute_description(title, sub, main)
   end
@@ -52,9 +46,7 @@ defmodule MobaWeb.CurrentHeroView do
     sub = "Your total Attack (ATK). This is the base stat used to calculate damage in most skills and items."
 
     main =
-      "Current ATK: #{hero.atk} <br/>ATK given by items: #{hero.item_atk}<br/><br/>ATK gain on level up: #{
-        hero.avatar.atk_per_level
-      }"
+      "Current ATK: #{hero.atk} <br/>ATK given by items: #{hero.item_atk}<br/><br/>ATK gain on level up: #{hero.avatar.atk_per_level}"
 
     attribute_description(title, sub, main)
   end

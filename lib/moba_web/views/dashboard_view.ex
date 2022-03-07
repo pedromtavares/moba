@@ -1,17 +1,8 @@
 defmodule MobaWeb.DashboardView do
   use MobaWeb, :view
 
-  alias Moba.Accounts
-
-  def achievements_in_progress(progressions) do
-    incomplete_pve = filter_incompleted_by_code(progressions, "grandmaster")
-    incomplete_pvp = filter_incompleted_by_code(progressions, "arena")
-
-    Enum.sort_by(filter_by_level(incomplete_pvp) ++ filter_by_level(incomplete_pve), & &1.quest.shard_prize)
-  end
-
-  def achievements_completed(progressions) do
-    Enum.filter(progressions, & &1.completed_at) |> Enum.sort_by(& &1.quest.shard_prize)
+  def can_enter_arena?(%{all_heroes: heroes}) do
+    Enum.reject(heroes, &is_nil(&1.finished_at)) |> length() >= 2
   end
 
   def farming_per_turn(pve_tier) do
@@ -21,18 +12,6 @@ defmodule MobaWeb.DashboardView do
   end
 
   def next_pve_tier(%{pve_tier: current_tier}) do
-    cond do
-      current_tier >= Moba.max_season_tier() -> nil
-      true -> current_tier + 1
-    end
-  end
-
-  def next_pvp_tier_percentage(%{season_tier: current_tier, season_points: season_points}) do
-    max = Accounts.season_points_for(current_tier + 1)
-    season_points * 100 / max
-  end
-
-  def next_pvp_tier(%{season_tier: current_tier}) do
     cond do
       current_tier >= Moba.max_season_tier() -> nil
       true -> current_tier + 1
@@ -82,18 +61,6 @@ defmodule MobaWeb.DashboardView do
       |> Timex.shift(days: +1)
       |> Timex.format("{relative}", :relative)
       |> elem(1)
-  end
-
-  defp filter_incompleted_by_code(progressions, code) do
-    progressions
-    |> Enum.filter(&is_nil(&1.completed_at))
-    |> Enum.filter(&String.starts_with?(&1.quest.code, code))
-  end
-
-  defp filter_by_level(progressions) do
-    lowest_level_progression = progressions |> Enum.sort_by(& &1.quest.level) |> List.first()
-
-    Enum.filter(progressions, &(&1.quest.level <= lowest_level_progression.quest.level))
   end
 
   defp progression_level_sort(progressions), do: Enum.sort_by(progressions, & &1.quest.level)

@@ -1,48 +1,30 @@
 <div class="dashboard mt-3">
     <div class="row">
-        <div class="col-xl-10 col-md-12 margin-auto">
-            <%= if @current_mode == "pve" do %>
-                <%= if @current_user.pve_tier > 0 do %>
-                    <div class="row mb-3 d-flex justify-content-around">
-                        <div class="col-xl-3 col-md-6">
-                            <a href="javascript:;" phx-click="change-mode" phx-hook="Loading" loading="Entering..." class="btn p-2 btn-block btn-lg btn-danger d-block" id="enter-the-arena">
-                                <span class="loading-text">
-                                    <i class="fa fa-chess-rook mr-1"></i>Enter the Arena
-                                </span>
-                            </a>
-                        </div>
-                    </div>
-                <% end %>
-                <div class="row">
-                    <div class="col">
-                        <%= render "_pve_progression.html", assigns %>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <%= render "_hero_list.html", assigns %>
-                    </div>
-                </div>
-            <% else %>
+        <div class="col-xl-10 col-lg-12 margin-auto">
+            <%= if can_enter_arena?(assigns) do %>
                 <div class="row mb-3 d-flex justify-content-around">
                     <div class="col-xl-3 col-md-6">
-                        <a href="javascript:;" phx-click="change-mode" phx-hook="Loading" loading="Returning..." class="btn p-2 btn-block btn-lg btn-success d-block" id="return-to-training">
+                        <%= live_redirect to: Routes.arena_path(@socket, :arena), class: "btn p-2 btn-block btn-lg btn-primary d-block", "phx-hook": "Loading", loading: "Entering...", id: "enter-the-arena" do %>
                             <span class="loading-text">
-                                <i class="fa fa-crosshairs mr-1"></i>Return to Training
+                                <i class="fa fa-chess-rook mr-1"></i>Enter the Arena
                             </span>
-                        </a>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <%= render "_pvp_progression.html", assigns %>
+                        <% end %>
                     </div>
                 </div>
             <% end %>
-        </div>
+            <div class="row">
+                <div class="col">
+                    <%= render "_pve_progression.html", assigns %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <%= render "_hero_list.html", assigns %>
+                </div>
+            </div>
+    </div>
     </div>
 </div>
 
-<%= render "_season_rankings.html" %>
 <%= render "_pve_tier_rewards.html", Map.put(assigns, :pve_tier, @current_user.pve_tier + 1) %>
 <%= render "_daily_quests.html", assigns %>

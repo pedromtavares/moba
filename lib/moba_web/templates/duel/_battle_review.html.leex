@@ -9,21 +9,21 @@
         </div>
     </div>
     <div class="card">
-        <div class="card-header">
-            <h1 class="text-center">
-                <%=MobaWeb.BattleView.battle_result(@battle)%>
-            </h1>
+        <div class="card-header p-1">
+            <h3 class="text-center">
+                <%= MobaWeb.BattleView.battle_result(@battle) %>
+            </h3>
         </div>
-        <div class="card-body">
+        <div class="card-body p-3">
             <div class="row">
                 <div class="col center pr-4">
-                    <%=render "_turn_hero.html", battle: @battle, turn: Engine.last_turn(@battle), hero: @battle.attacker, turn_hero: if turn.attacker.hero_id == @battle.attacker_id, do: turn.attacker, else: turn.defender%>
+                    <%= render "_turn_hero.html", battle: @battle, turn: Engine.last_turn(@battle), hero: @battle.attacker, turn_hero: if turn.attacker.hero_id == @battle.attacker_id, do: turn.attacker, else: turn.defender %>
                 </div>
             </div>
             <hr class="mt-2 mb-1" />
             <div class="row">
                 <div class="col center pr-4">
-                    <%=render "_turn_hero.html", battle: @battle, turn: Engine.last_turn(@battle), hero: @battle.defender, turn_hero: if turn.attacker.hero_id == @battle.attacker_id, do: turn.defender, else: turn.attacker%>
+                    <%= render "_turn_hero.html", battle: @battle, turn: Engine.last_turn(@battle), hero: @battle.defender, turn_hero: if turn.attacker.hero_id == @battle.attacker_id, do: turn.defender, else: turn.attacker %>
                 </div>
             </div>
         </div>
@@ -31,10 +31,12 @@
 <% else %>
     <div class="row">
         <div class="col">
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-outline-danger btn-block btn-lg" do %>
-                <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
-                <strong class="font-20 d-block">Enter Battle</strong>
-            <% end %>
+            <div style="min-height: 250px" class="d-flex">
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-outline-danger btn-block btn-lg pt-5" do %>
+                    <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Enter Battle</strong>
+                <% end %>
+            </div>
         </div
     </div>
 <% end %>

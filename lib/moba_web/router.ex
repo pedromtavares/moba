@@ -51,13 +51,15 @@ defmodule MobaWeb.Router do
 
     live_session :battle, root_layout: {MobaWeb.LayoutView, "root.html"} do
       live "/battles/:id", MobaWeb.BattleLiveView
-    end 
+    end
   end
 
   scope "/", MobaWeb do
     pipe_through [:browser, :root_layout, :protected, :user_helper]
 
-    live "/base", DashboardLiveView
+    live "/base", DashboardLiveView, :base, as: :base
+    live "/arena", ArenaLiveView, :arena, as: :arena
+    live "/arena/:id", DuelLiveView
 
     live "/hall", HallLiveView
 
@@ -76,8 +78,6 @@ defmodule MobaWeb.Router do
     end
 
     post "/game/continue", GameController, :continue
-
-    live "/duels/:id", DuelLiveView
   end
 
   scope "/", MobaWeb do

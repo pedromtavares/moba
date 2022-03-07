@@ -44,13 +44,15 @@ defmodule Moba.Engine.Core.Duel do
 
     diff = duel.opponent.season_points - duel.user.season_points
 
+    multiplier = if duel.type == "pvp", do: 2, else: 0.5
+
     {duel_winner, attacker_points, defender_points} =
       cond do
         user_win ->
-          {duel.user, Moba.attacker_win_pvp_points(diff, 6) * 2, Moba.defender_loss_pvp_points(diff, 6) * 2}
+          {duel.user, round(Moba.attacker_win_pvp_points(diff) * multiplier), round(Moba.defender_loss_pvp_points(diff) * multiplier)}
 
         opponent_win ->
-          {duel.opponent, Moba.attacker_loss_pvp_points(diff, 6) * 2, Moba.defender_win_pvp_points(diff, 6) * 2}
+          {duel.opponent, round(Moba.attacker_loss_pvp_points(diff) * multiplier), round(Moba.defender_win_pvp_points(diff) * multiplier)}
 
         true ->
           {nil, 0, 0}
@@ -98,7 +100,7 @@ defmodule Moba.Engine.Core.Duel do
   end
 
   defp next_duel_phase({_, battle}) do
-    Game.next_duel_phase!(battle.duel)
+    Game.get_duel!(battle.duel_id) |> Game.next_duel_phase!()
 
     battle
   end

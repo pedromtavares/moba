@@ -78,11 +78,25 @@
                             <% end %>
                         </h5>
                         <div class="card-body p-2">
+                            <%= if @user.is_bot do %>
+                                <div class="text-center mt-2">
+                                    <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height: 100px;"/>
+                                    <h3><%= Moba.pvp_tiers[@user.season_tier] %></h3>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col text-center">
+                                        <h3 class="mb-0 text-success">
+                                            <i class="fa fa-globe mr-1"></i>
+                                            <%= @user.season_points %>
+                                        </h3>
+                                        <h4 class="text-success">Season Points</h4>
+                                    </div>
+                                </div>
+                            <% else %>
                             <div class="text-center mt-2">
                                 <img src="/images/pve/<%= @user.pve_tier %>.png" style="max-height: 100px;"/>
                                 <h3><%= Moba.pve_tiers[@user.pve_tier] %></h3>
                             </div>
-                            <%= unless @user.is_bot do %>
                                 <div class="row">
                                     <div class="col text-center d-flex justify-content-between" title="Account Level. Gain Account XP by leveling heroes in the Jungle" data-toggle="tooltip">
                                         <div class="badge badge-primary font-16" style="padding: 15px;margin-right:-2px"><%= @user.level %></div>
@@ -97,23 +111,27 @@
                             <% end %>
                         </div>
                         <div class="card-footer mt-1">
-                            <div class="row">
-                                <div class="col text-center d-flex justify-content-between">
-                                    <%=if @user.id == @current_user.id do %>
-                                        <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
-                                            <i class="fa fa-edit mr-1"></i>Edit Profile
-                                        <% end %>
-                                        <small class="font-italic text-dark float-left mt-1">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
-                                    <% else %>
-                                        <%= if @user.is_bot do %>
-                                            <small class="font-italic text-dark">A.I. Player</small>
+                            <%= if @user.is_bot do %>
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <span class="font-italic text-dark">A.I. Player</span>
+                                    </div>
+                                </div>
+                            <% else %>
+                                <div class="row">
+                                    <div class="col text-center d-flex justify-content-between">
+                                        <%=if @user.id == @current_user.id do %>
+                                            <%= link to: Routes.pow_registration_path(@socket, :edit), class: "font-13 badge badge-pill badge-secondary py-1 px-2 text-white" do %>
+                                                <i class="fa fa-edit mr-1"></i>Edit Profile
+                                            <% end %>
+                                            <small class="font-italic text-dark float-left mt-1">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
                                         <% else %>
                                             <small class="font-italic text-dark float-left">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
                                             <small class="font-italic text-dark float-right">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
                                         <% end %>
-                                    <% end %>
+                                    </div>
                                 </div>
-                            </div>
+                            <% end %>
                         </div>
                     </div>
                 </div>
@@ -134,93 +152,95 @@
                     </div>
                 </div>
             <% end %>
-            <div class="row">
-                <div class="col">
-                    <div class="card">
-                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>PvP Performance</h5>
-                        <div class="card-body p-2">
-                            <div class="performance">
-                                <div class="row text-center">
-                                    <div class="col">
-                                        <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height: 100px"/>
-                                        <h2 class="text-medal-<%= @user.season_tier %>"><%= Moba.pvp_tiers[@user.season_tier] %></h2>
-                                    </div>
-                                </div>
-                                <div class="row text-center">
-                                    <%=if @user.ranking do %>
+            <%= unless @user.is_bot do %>
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-poll mr-1"></i>PvP Performance</h5>
+                            <div class="card-body p-2">
+                                <div class="performance">
+                                    <div class="row text-center">
                                         <div class="col">
-                                            <h3 class="mb-0 text-info">
-                                                # <%= @user.ranking %>
-                                            </h3>
-                                            <h4 class="text-info">Season Rank</h4>
+                                            <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height: 100px"/>
+                                            <h2 class="text-medal-<%= @user.season_tier %>"><%= Moba.pvp_tiers[@user.season_tier] %></h2>
                                         </div>
-                                    <% end %>
-                                    <div class="col">
-                                        <h3 class="mb-0 text-success">
-                                            <i class="fa fa-globe mr-1"></i>
-                                            <%= @user.season_points %>
-                                        </h3>
-                                        <h4 class="text-success">Season Points</h4>
+                                    </div>
+                                    <div class="row text-center">
+                                        <%=if @user.ranking do %>
+                                            <div class="col">
+                                                <h3 class="mb-0 text-info">
+                                                    # <%= @user.ranking %>
+                                                </h3>
+                                                <h4 class="text-info">Season Rank</h4>
+                                            </div>
+                                        <% end %>
+                                        <div class="col">
+                                            <h3 class="mb-0 text-success">
+                                                <i class="fa fa-globe mr-1"></i>
+                                                <%= @user.season_points %>
+                                            </h3>
+                                            <h4 class="text-success">Season Points</h4>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <%= if false do %>
-                            <div class="transparent card-footer p-0">
-                                <table class="table table-dark text-center table-sm m-0 mt-2 arena-picks">
-                                    <tr>
-                                        <th>Recent Pick</th>
-                                        <th>Ranking</th>
-                                        <th>Win Rate</th>
-                                        <th>Season Points</th>
-                                    </tr>
-                                    <%= for pick <- @arena_picks do %>
+                            <%= if false do %>
+                                <div class="transparent card-footer p-0">
+                                    <table class="table table-dark text-center table-sm m-0 mt-2 arena-picks">
                                         <tr>
-                                            <td>
-                                                <a href="javascript:;" class="<%=if @featured.id == pick.hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=pick.hero_id%>" phx-hook="Loading" id="set-ap-featured-<%=pick.hero_id%>">
-                                                    <div class='avatar-container'>
-                                                        <img src="<%=GH.image_url(pick.hero.avatar)%>" class="avatar"/>
-                                                        <img src="/images/league_<%=pick.hero.league_tier%>.png" class="league-logo">
-                                                    </div>
-
-                                                </a>
-                                            </td>
-                                            <td><h2 class="text-info">#<%=pick.ranking%></h2></td>
-                                            <td><h2 class="text-danger"><%=win_rate(pick)%>%</h2></td>
-                                            <td><h2 class="text-success">+<%=pick.points%></h2></td>
+                                            <th>Recent Pick</th>
+                                            <th>Ranking</th>
+                                            <th>Win Rate</th>
+                                            <th>Season Points</th>
                                         </tr>
-                                    <% end %>
-                                </table>
-                            </div>
-                        <% end %>
+                                        <%= for pick <- @arena_picks do %>
+                                            <tr>
+                                                <td>
+                                                    <a href="javascript:;" class="<%=if @featured.id == pick.hero_id, do: "current-featured"%>" phx-click="set-featured" phx-value-id="<%=pick.hero_id%>" phx-hook="Loading" id="set-ap-featured-<%=pick.hero_id%>">
+                                                        <div class='avatar-container'>
+                                                            <img src="<%=GH.image_url(pick.hero.avatar)%>" class="avatar"/>
+                                                            <img src="/images/league_<%=pick.hero.league_tier%>.png" class="league-logo">
+                                                        </div>
+
+                                                    </a>
+                                                </td>
+                                                <td><h2 class="text-info">#<%=pick.ranking%></h2></td>
+                                                <td><h2 class="text-danger"><%=win_rate(pick)%>%</h2></td>
+                                                <td><h2 class="text-success">+<%=pick.points%></h2></td>
+                                            </tr>
+                                        <% end %>
+                                    </table>
+                                </div>
+                            <% end %>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <% end %>
         </div>
         <div class="col-md-6 col-xl-4">
             <div class="card ranking">
-                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i>Ranking</h5>
-                <div class="card-body p-0">
+                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i><%= if @user.is_bot, do: "A.I. " %>Ranking</h5>
+                <div class="card-body p-0" style="max-height: 900px;overflow: auto;">
                     <table class="table table-dark text-center m-0 table-sm">
                         <tr>
-                            <th><%= if @user.ranking, do: "Rank", else: "Level" %></th>
+                            <th><%= if @user.ranking || @user.is_bot, do: "Rank", else: "Level" %></th>
                             <th>User</th>
                             <th>Season Points</th>
                         </tr>
-                        <%= for user <- @ranking do %>
+                        <%= for {user, index} <- Enum.with_index(@ranking, 1) do %>
                             <tr>
                                 <td>
                                     <h1 class="<%=if user.id == @user.id, do: "text-info"%>">
-                                        <%=if user.ranking do %>
-                                            #<%=user.ranking%>
+                                        <%=if user.ranking || user.is_bot do %>
+                                            #<%= user.ranking || index %>
                                         <% else %>
-                                            <%=user.level%>
+                                            <%= user.level %>
                                         <% end %>
                                     </h1>
                                 </td>
                                 <td>
                                     <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
-                                        <%= if user.pve_tier >= user.season_tier do %>
+                                        <%= if user.pve_tier >= user.season_tier && !user.is_bot do %>
                                             <img src="/images/pve/<%= user.pve_tier %>.png" style="max-height:  50px"/>
                                         <% else %>
                                             <img src="/images/pvp/<%= user.season_tier %>.png" style="max-height:  50px"/>

@@ -20,6 +20,7 @@ defmodule Test.GameHelper do
       base_avatar(),
       level,
       difficulty,
+      nil,
       create_user()
     )
   end

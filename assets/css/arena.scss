@@ -1,21 +1,6 @@
-.arena-select{
-  .pick-button{
-    background: rgba(54, 64, 74, 0.8);
-    color: #f1556c;
-  }
-  .hero-card{
-    .card-header{
-      min-height: 45px;
-    }
-    .card-body{
-      background-color: initial !important;
-      background-repeat: no-repeat;
-      background-size: cover;
-      background-position: 80%;
-      min-height: 400px;
-    }
-  }
-  .btn-success {
+.arena{
+
+	.btn-success {
     color: #1abc9c;
     background: rgba(26,188,156, 0.2) !important;
   }
@@ -27,214 +12,39 @@
     color: #f7b84b;
     background: rgba(247, 184, 75, 0.2) !important;
   }
-}
 
-.arena{
-  margin-bottom: 180px;
+	.pvp-tier-container{
+    line-height: 6.5rem;
+  }
 
-  .hero-card{
+  .pvp-bar{
+    background: rgba(59,175,218, 0.8) !important;
+  }
 
-    .card-body{
-      min-height: 300px;
+  .pvp-rank{
+    height: 90px;
+    margin-bottom: 10px;
+  }
+
+	.matchmaking{
+
+    .avatar{
+      max-height: 25px;
     }
 
-    .attack {
-      color: #f1556c;
-      background: rgba(54, 64, 74, 0.9) !important;
-    }
-  }
-
-  .battle-button {
-    color: #f1556c;
-    background: rgba(241,85,108, 0.2) !important;
-  }
-
-  @media (max-width: 992px) {
-    margin-bottom: 220px;
-  }
-
-
-  .card-box{
-    background-color: rgba(54, 64, 74, 0.5);
-  }
-
-  .info-box{
-    // border: 1px solid #36404a;
-    border-top: 0;
-    border-bottom: 0;
-    @media (max-width: 992px) {
-      border: 0;
-    }
-
-    .form-group{
-      margin-bottom: 0;
-    }
-
-    form{
-      justify-content: space-around;
-      // width:94%;
-
-      .filter{
-        // margin-bottom: 0.5rem;
-      }
-
-      @media (max-width: 992px) {
-        width: 100%;
-
-        .filter{
-          margin-bottom: 0 !important;
-        }
-      }
-
-    }
-
-    .form-group{
-      flex: 0 1 auto;
-    }
-
-  }
-
-  .nav-container{
-    margin-top: 0.5rem;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    // border-top: 1px solid #36404a;
-  }
-
-  .extra-nav{
-    margin-bottom: 2rem;
-    // border-top: 1px solid #36404a;
-  }
-
-  .page-link{
-    background-color: rgba(73, 85, 97, .7);
-    padding: 0.45rem 0.9rem;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    border-radius: 0.15rem;
-  }
-
-  .padding-right{
-    padding-right: 4rem;
-  }
-
-  .padding-left{
-    padding-left: 4rem;
-  }
-
-  .round-progress{
-    height:30px;
-    border-radius:0;
-    width: 70%;
-
-    small{
-      margin-top:4px;
-      width: 70%;
-    }
-  }
-
-  .empty-target{
-    height: 400px;
-  }
-
-  .table{
-    background: rgba(54, 64, 74, 0.5);
-
-    td{
-      vertical-align: middle;
-    }
-  }
-
-  small{
-    font-size: 0.90rem;
-  }
-
-  .custom-select{
-    width: auto !important;
-    background-color: unset;
-  }
-
-  .pagination{
-    margin-bottom: 0;
-  }
-
-  .nav-link.active{
-    background-color: rgba(73, 85, 97, 0.8) !important;
-    border-color: rgba(241, 85, 108, 0.5) !important;
-  }
-
-
- hr{
-    border-top: 3px solid #36404a;
-  }
-
-  #ranking{
-    .current-hero{
-      margin-bottom: 1rem;
-    }
-  }
-}
-
-.ranking{
-  .skill-img{
-    width:23%;
-    max-width: 80px;
-    margin: 1px;
-  }
-
-  .item-img{
-    width: 50px;
-    margin: 1px;
-    background: black;
-  }
-
-  .avatar{
-    max-width: 150px;
-    width: 100%;
-  }
-
-  .nav-link{
-    background-color: rgba(73, 85, 97, 0.3);
-    padding: 0.5rem;
-  }
-
-  .nav-item{
-    width: 20%;
-
-    img{
-      width: 100%;
-      max-width: 70px;
-      max-height: unset;
-    }
-  }
-
-  .hero-stats{
-    width: 100%;
-    margin-bottom: 0.5rem;
-
-    @media (max-width: 992px) {
-      button{
-        font-size: 0.7rem;
-      }
-    }
-  }
-
-  .skill-container{
-    width: 100%;
-    margin-bottom: 0.5rem;
-
-    img{
-      width: 25%;
+    h5{
       margin: 0;
     }
-  }
 
-  .item-container{
-    width: 100%;
+    .match-history{
+    	max-height: 300px;
+    	overflow: auto;
+    }
 
-    img{
-      width: 16.5%;
+    .matchmaking-button{
+    	.badge{
+    		font-size: 0.7rem;
+    	}
     }
   }
 }
-

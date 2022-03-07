@@ -1,12 +1,10 @@
 defmodule MobaWeb.DashboardLiveView do
   use MobaWeb, :live_view
 
-  alias Moba.{Accounts, Game}
-
   def mount(_, session, socket) do
     socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
 
-    {:ok, socket |> assign(current_mode: "pve") |> pve_assigns() |> pvp_assigns() |> quest_assigns()}
+    {:ok, socket |> pve_assigns() |> quest_assigns()}
   end
 
   def handle_event("pve-show-finished", _, socket) do
@@ -17,24 +15,12 @@ defmodule MobaWeb.DashboardLiveView do
     {:noreply, assign(socket, visible_heroes: unfinished_heroes(socket.assigns.all_heroes), pve_display: "unfinished")}
   end
 
-  def handle_event("change-mode", _, %{assigns: %{current_mode: current_mode}} = socket) do
-    mode = if current_mode == "pve", do: "pvp", else: "pve"
-    {:noreply, assign(socket, current_mode: mode)}
-  end
-
   def handle_event("archive", %{"id" => id}, socket) do
     hero = Game.get_hero!(id)
     Game.archive_hero!(hero)
     if hero.finished_at, do: Game.update_hero_collection!(hero)
 
     {:noreply, assign(socket, visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id)))}
-  end
-
-  def handle_event("challenge", %{"id" => opponent_id}, socket) do
-    opponent = Accounts.get_user!(opponent_id)
-    Game.duel_challenge(socket.assigns.current_user, opponent)
-
-    {:noreply, socket}
   end
 
   def render(assigns) do
@@ -60,13 +46,8 @@ defmodule MobaWeb.DashboardLiveView do
   end
 
   defp unfinished_heroes(all_heroes), do: Enum.filter(all_heroes, &is_nil(&1.finished_at))
+
   defp finished_heroes(all_heroes), do: Enum.filter(all_heroes, & &1.finished_at)
-
-  defp pvp_assigns(%{assigns: %{current_user: user}} = socket) do
-    duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
-
-    assign(socket, duel_users: duel_users)
-  end
 
   defp quest_assigns(%{assigns: %{current_user: user}} = socket) do
     season_progressions = Game.list_season_quest_progressions(user.id)

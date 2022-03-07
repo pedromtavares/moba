@@ -39,11 +39,13 @@ defmodule Moba.Game.Leagues do
     end
   end
 
-  def tier_for(level) when level >= 25, do: 5
+  def tier_for(level) when level > 25, do: 6
 
   def tier_for(level) do
     Enum.find(0..5, fn tier -> base_level(tier) + 3 > level end) || 0
   end
+
+  def level_range_for(tier), do: base_level(tier)..(base_level(tier) + 3)
 
   # --------------------------------
 
@@ -86,6 +88,7 @@ defmodule Moba.Game.Leagues do
       3 -> 13
       4 -> 17
       5 -> 22
+      6 -> 24
     end
   end
 end

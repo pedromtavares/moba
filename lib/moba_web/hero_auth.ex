@@ -13,7 +13,7 @@ defmodule MobaWeb.HeroAuth do
   def call(conn, _) do
     user = conn.assigns.current_user
     hero = Game.current_pve_hero(user)
-    
+
     if hero do
       conn
       |> assign(:current_hero, hero)

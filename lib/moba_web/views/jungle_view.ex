@@ -11,7 +11,8 @@ defmodule MobaWeb.JungleView do
   end
 
   def can_shard_buyback?(%{user: user} = hero) do
-    hero.pve_tier > 3 && hero.league_tier < Moba.master_league_tier() && user.shard_count >= Accounts.shard_buyback_price(user)
+    hero.pve_tier > 3 && hero.league_tier < Moba.master_league_tier() &&
+      user.shard_count >= Accounts.shard_buyback_price(user)
   end
 
   def farming_container_background(hero, assigns) do

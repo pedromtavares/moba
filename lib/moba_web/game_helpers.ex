@@ -206,11 +206,9 @@ defmodule MobaWeb.GameHelpers do
       <div class='text-center mb-2 mt-1'>
         #{mp_cost || ""}
         #{cooldown || ""}
-        #{
-      if skill.passive,
-        do: "<span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>",
-        else: ""
-    }
+        #{if skill.passive,
+      do: "<span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>",
+      else: ""}
         #{damage_type && "#{damage_type}<br/>"}
       </div>
       #{effects}

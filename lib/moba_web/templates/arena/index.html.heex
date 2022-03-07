@@ -1,0 +1,32 @@
+<div class="arena mt-3">
+    <div class="row">
+        <div class="col-xl-10 col-lg-12 margin-auto">
+            <div class="row mb-3 d-flex justify-content-around">
+                <div class="col-xl-3 col-md-6">
+                    <%= live_redirect to: Routes.base_path(@socket, :base), class: "btn p-2 btn-block btn-lg btn-success d-block", "phx-hook": "Loading", loading: "Returning...", id: "return-to-training" do %>
+                        <span class="loading-text">
+                            <i class="fa fa-crosshairs mr-1"></i>Return to Training
+                        </span>
+                    <% end %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <%= render "_pvp_progression.html", assigns %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <%= render "_matchmaking.html", assigns %>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <%= render "_duels.html", assigns %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%= render "_season_rankings.html" %>

@@ -44,7 +44,7 @@
                                             <%= GH.hero_avatar(@current_hero) %>
                                         <% end %>
                                     <% else %>
-                                        <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLiveView), class: "nav-link" do %>
+                                        <%= live_redirect to: Routes.base_path(@conn, :base), class: "nav-link" do %>
                                             <i class="fa fa-home"></i>
                                             <br/>
                                             <span class="d-none d-md-inline">Base</span>

@@ -4,16 +4,8 @@
     background: rgba(26, 188, 156, 0.7) !important;
   }
 
-  .pvp-bar{
-    background: rgba(241,85,108, 0.8) !important;
-  }
-
   .pve-tier-container{
     line-height: 7rem;
-  }
-
-  .pvp-tier-container{
-    line-height: 6.5rem;
   }
 
   .collection{
@@ -68,10 +60,18 @@
       .card-footer{
         background-color: rgba(54, 64, 74, 0.95) !important;
       }
+
+      .skills-container{
+        max-width: 400px;
+      }
+
+      .items-container{
+        max-width: 200px;
+      }
     }
 
     .league-logo{
-      width: 25px;
+      width: 20px;
       height: auto !important;
       margin-right: 2px;
     }

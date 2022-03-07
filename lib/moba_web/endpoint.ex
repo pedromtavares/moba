@@ -70,10 +70,14 @@ defmodule MobaWeb.Endpoint do
   # Set :encryption_salt if you would also like to encrypt it.
   plug Plug.Session, @session_options
 
-  plug Pow.Plug.Session,
-    otp_app: :moba,
-    session_ttl_renewal: :timer.hours(720),
-    credentials_cache_store: {Pow.Store.CredentialsCache, ttl: :timer.hours(720), namespace: "credentials"}
+  if Mix.env() == :test do
+    plug Pow.Plug.Session, otp_app: :moba
+  else
+    plug Pow.Plug.Session,
+      otp_app: :moba,
+      session_ttl_renewal: :timer.hours(720),
+      credentials_cache_store: {Pow.Store.CredentialsCache, ttl: :timer.hours(720), namespace: "credentials"}
+  end
 
   plug PowPersistentSession.Plug.Cookie
 

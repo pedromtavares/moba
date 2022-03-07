@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%=render "_head.html", conn: @conn, current_hero: nil, title: "Admin - Browser MOBA", favicon: Routes.static_path(@conn, "/images/league_6.png")%>
+    <%= render "_head.html", conn: @conn, current_hero: nil, title: "Admin - Browser MOBA", favicon: Routes.static_path(@conn, "/images/league_6.png") %>
     <body>
-        <header id="topnav">
+        <header id="topnav" class="d-none d-md-block">
             <div class="topbar-menu">
                 <div class="container-fluid clean-container">
                     <div id="inner-navigation">

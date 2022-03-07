@@ -51,14 +51,23 @@ defmodule Moba.Game do
     |> generate_targets!()
   end
 
-  def create_bot_hero!(avatar, level, difficulty, user \\ nil) do
-    league_tier = Leagues.tier_for(level)
-    Heroes.create_bot!(avatar, level, difficulty, league_tier, user)
+  def create_bot_hero!(avatar, level, difficulty, league_tier \\ nil, user \\ nil) do
+    tier = league_tier || Leagues.tier_for(level)
+    
+    Heroes.create_bot!(avatar, level, difficulty, tier, user)
   end
 
-  def create_pvp_bot_hero!(user, avatar) do
-    difficulty = if user.bot_tier == Moba.master_league_tier(), do: "pvp_master", else: "pvp_grandmaster"
-    Heroes.create_bot!(avatar, 25, difficulty, user.bot_tier, user)
+  def create_pvp_bot_hero!(%{bot_tier: tier} = user, avatar) do
+    level = Leagues.level_range_for(tier) |> Enum.random()
+
+    difficulty =
+      cond do
+        tier == Moba.master_league_tier() -> "pvp_master"
+        tier == Moba.max_league_tier() -> "pvp_grandmaster"
+        true -> "strong"
+      end
+
+    create_bot_hero!(avatar, level, difficulty, tier, user)
   end
 
   def update_hero!(hero, attrs, items \\ nil) do
@@ -341,16 +350,22 @@ defmodule Moba.Game do
 
   def get_duel!(id), do: Duels.get!(id)
 
-  def create_duel!(user, opponent) do
-    duel = Duels.create!(user, opponent)
-    MobaWeb.broadcast("user-#{user.id}", "duel", %{id: duel.id})
-    MobaWeb.broadcast("user-#{opponent.id}", "duel", %{id: duel.id})
+  def create_duel!(user, opponent, type) do
+    duel = Duels.create!(user, opponent, type)
+
+    unless type == "pvp", do: Accounts.manage_match_history(user, opponent)
+
+    unless opponent.is_bot do
+      MobaWeb.broadcast("user-#{user.id}", "duel", %{id: duel.id})
+      MobaWeb.broadcast("user-#{opponent.id}", "duel", %{id: duel.id})
+    end
+
     duel
   end
 
   def next_duel_phase!(duel, hero \\ nil) do
     updated = Duels.next_phase!(duel, hero)
-    hero && update_hero!(hero, %{pvp_last_picked: Timex.now()})
+    hero && update_hero!(hero, %{pvp_last_picked: Timex.now(), pvp_picks: hero.pvp_picks + 1})
     MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
     updated
   end
@@ -363,6 +378,10 @@ defmodule Moba.Game do
     MobaWeb.broadcast("user-#{user_id}", "challenge", attrs)
     MobaWeb.broadcast("user-#{opponent_id}", "challenge", attrs)
   end
+
+  # MATCHMAKING
+
+  defdelegate list_matchmaking(user), to: Duels
 
   # QUESTS
 

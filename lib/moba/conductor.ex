@@ -4,7 +4,7 @@ defmodule Moba.Conductor do
   """
   use GenServer
 
-  alias Moba.{Repo, Game, Accounts}
+  alias Moba.{Repo, Game, Accounts, Engine}
   alias Game.Query.{ItemQuery, HeroQuery, AvatarQuery, SkillQuery}
   alias Accounts.Query.UserQuery
 
@@ -66,7 +66,7 @@ defmodule Moba.Conductor do
   so Moba.Game.Server knows when to run this again, currently every 10 mins.
   """
   def server_update!(match \\ Moba.current_match()) do
-    # Game.update_pve_ranking!()
+    # skynet(match)
     Accounts.update_ranking!()
 
     match
@@ -81,16 +81,53 @@ defmodule Moba.Conductor do
     Game.current_match() |> generate_resources!()
   end
 
-  @doc """
-  Creates PVE bots
-  """
-  def generate_bots!(bot_level_range) do
-    now = Timex.now()
+  def regenerate_pve_bots!(level_range) do
+    timestamp = Timex.now()
 
-    Game.current_match()
-    |> generate_pve_bots!(bot_level_range)
-    |> archive_previous_bots!(now)
-    |> delete_pve_targets!()
+    AvatarQuery.base_canon()
+    |> Repo.all()
+    |> Enum.each(fn avatar ->
+      Logger.info("Generating #{avatar.name}s...")
+
+      Enum.each(level_range, fn level ->
+        Game.create_bot_hero!(avatar, level, "weak")
+        Game.create_bot_hero!(avatar, level, "moderate")
+
+        if level > 0 do
+          Game.create_bot_hero!(avatar, level, "strong")
+          Game.create_bot_hero!(avatar, level, "strong")
+          Game.create_bot_hero!(avatar, level, "strong")
+        end
+      end)
+    end)
+
+    archive_previous_bots!(HeroQuery.pve_bots(), timestamp)
+
+    Repo.delete_all(Game.Schema.Target)
+  end
+
+  def regenerate_pvp_bots! do
+    timestamp = Timex.now()
+
+    all_avatars = AvatarQuery.base_canon() |> Repo.all()
+
+    bot_heroes =
+      UserQuery.eligible_arena_bots()
+      |> Repo.all()
+      |> Enum.map(fn user ->
+        Logger.info("New PVP heroes for #{user.username}: #{user.bot_codes |> Enum.join(", ")}")
+
+        user.bot_codes
+        |> Enum.map(fn code -> Enum.find(all_avatars, &(&1.code == code)) end)
+        |> Enum.filter(& &1)
+        |> Enum.map(&Game.create_pvp_bot_hero!(user, &1))
+      end)
+
+    archive_previous_bots!(HeroQuery.pvp_bots(), timestamp)
+
+    bot_heroes
+    |> List.flatten()
+    |> Enum.map(&Game.update_hero_collection!(&1))
   end
 
   # Deactivates the current match and all pvp heroes, also assigning its winners and clearing all current heroes
@@ -134,68 +171,12 @@ defmodule Moba.Conductor do
     match
   end
 
-  # generates PVE bots for every eligible Avatar, every difficulty and every level in the range provided
-  defp generate_pve_bots!(match, level_range) do
-    Logger.info("Generating PVE bots...")
-
-    AvatarQuery.base_canon()
-    |> Repo.all()
-    |> Enum.each(fn avatar ->
-      Logger.info("Generating #{avatar.name}s...")
-
-      Enum.each(level_range, fn level ->
-        Game.create_bot_hero!(avatar, level, "weak")
-        Game.create_bot_hero!(avatar, level, "moderate")
-        if level > 0 do
-          Game.create_bot_hero!(avatar, level, "strong")
-          Game.create_bot_hero!(avatar, level, "strong")
-          Game.create_bot_hero!(avatar, level, "strong")
-        end
-      end)
-    end)
-
-    match
-  end
-
-  defp delete_pve_targets!(match) do
-    Repo.delete_all(Game.Schema.Target)
-    match
-  end
-
   # Archives all current bots so they can be removed later by Cleaner
-  defp archive_previous_bots!(match, time) do
-    HeroQuery.pve_bots()
+  defp archive_previous_bots!(query, time) do
+    query
     |> HeroQuery.created_before(time)
     |> HeroQuery.unarchived()
     |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
-
-    match
-  end
-
-  # Generates a new PVP hero for every bot User with random avatars
-  defp generate_pvp_bots!(match) do
-    Logger.info("Generating PVP bots...")
-
-    all_avatars = AvatarQuery.base_canon() |> Repo.all()
-
-    UserQuery.eligible_arena_bots()
-    |> Repo.all()
-    |> Enum.map(fn user ->
-      Logger.info("New PVP hero for #{user.username}")
-
-      avatars =
-        if length(user.bot_codes) > 0 do
-          Enum.map(user.bot_codes, fn code -> Enum.find(all_avatars, &(&1.code == code)) end) |> Enum.filter(& &1)
-        else
-          all_avatars
-        end
-
-      avatar = Enum.random(avatars)
-
-      Game.create_pvp_bot_hero!(user, avatar)
-    end)
-
-    match
   end
 
   # by nilifing :id here we can make a perfect clone of a record
@@ -270,5 +251,28 @@ defmodule Moba.Conductor do
         Repo.update_all(query, set: [avatar_id: current.id])
       end
     end)
+  end
+
+  defp skynet(%{last_server_update_at: time}) do
+    Enum.each(1..5, fn _n ->
+      bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
+      if bot do
+        duel = Moba.normal_matchmaking!(bot)
+        if duel do
+          Logger.info("Created duel ##{duel.id} for #{bot.username}")
+          Game.get_duel!(duel.id) |> Game.next_duel_phase!(skynet_hero(bot, duel))
+          Engine.first_duel_battle(duel) |> Engine.auto_finish_battle!()
+          Game.get_duel!(duel.id) |> Game.next_duel_phase!(skynet_hero(bot, duel))
+          Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
+
+          later = Timex.shift(time, minutes: 190)
+          Accounts.update_user!(bot, %{last_online_at: later})
+        end
+      end
+    end)
+  end
+
+  defp skynet_hero(bot, duel) do
+    Game.eligible_heroes_for_pvp(bot.id, duel.inserted_at) |> List.first()
   end
 end

@@ -55,7 +55,7 @@ defmodule Moba.Game.Query.HeroQuery do
   def eligible_for_pvp(user_id, duel_inserted_at) do
     from(hero in with_user(Hero, user_id),
       limit: 50,
-      order_by: [desc: [hero.pvp_picks, hero.id]],
+      order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]],
       where: not is_nil(hero.finished_at),
       where: hero.league_tier >= @platinum_league_tier,
       where: hero.inserted_at > ^@current_ranking_date,
@@ -97,6 +97,10 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def pve_bots(query \\ bots()) do
     from hero in query, where: is_nil(hero.user_id)
+  end
+
+  def pvp_bots(query \\ bots()) do
+    from hero in query, where: not is_nil(hero.user_id)
   end
 
   def by_difficulty(query, difficulty) do

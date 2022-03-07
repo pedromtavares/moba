@@ -42,6 +42,8 @@ defmodule Moba.Accounts do
 
   defdelegate season_points_for(tier), to: Users
 
+  defdelegate season_tier_for(season_points), to: Users
+
   def user_duel_updates!(nil, _), do: nil
 
   def user_duel_updates!(user, updates), do: Users.duel_updates!(user, updates)
@@ -59,6 +61,18 @@ defmodule Moba.Accounts do
   defdelegate shard_buyback_price(user), to: Users
 
   defdelegate shard_buyback!(user), to: Users
+
+  defdelegate normal_matchmaking(user), to: Users
+
+  defdelegate elite_matchmaking(user), to: Users
+
+  defdelegate manage_match_history(user, opponent), to: Users
+
+  defdelegate normal_matchmaking_count(user), to: Users
+
+  defdelegate elite_matchmaking_count(user), to: Users
+
+  defdelegate closest_bot_time(user), to: Users
 
   # MESSAGES
 

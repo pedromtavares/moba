@@ -9,6 +9,7 @@ defmodule Moba.Game.Schema.Duel do
 
   schema "duels" do
     field :phase, :string
+    field :type, :string
 
     embeds_one :rewards, Engine.Schema.Rewards, on_replace: :update
 
@@ -27,6 +28,7 @@ defmodule Moba.Game.Schema.Duel do
   def changeset(duel, attrs) do
     duel
     |> cast(attrs, [
+      :type,
       :phase,
       :user_id,
       :opponent_id,

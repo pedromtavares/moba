@@ -10,6 +10,8 @@ defmodule Moba.Accounts.Users do
   alias Accounts.Schema.User
   alias Accounts.Query.UserQuery
 
+  @max_season_tier Moba.max_season_tier()
+
   # -------------------------------- PUBLIC API
 
   def get!(nil), do: nil
@@ -43,7 +45,7 @@ defmodule Moba.Accounts.Users do
   def duel_list(user) do
     UserQuery.online_users()
     |> UserQuery.with_status("available")
-    |> UserQuery.exclude_user(user)
+    |> UserQuery.exclude_ids([user.id])
     |> Repo.all()
   end
 
@@ -92,12 +94,15 @@ defmodule Moba.Accounts.Users do
     current_score = user.duel_score[loser_id] || 0
     duel_score = loser_id && Map.put(user.duel_score, loser_id, current_score + 1)
     extra_win = if updates[:duel_winner], do: 1, else: 0
+    season_points = updates[:season_points] || user.season_points
+    season_tier = season_tier_for(season_points)
 
     update!(user, %{
       duel_score: duel_score || user.duel_score,
       duel_wins: user.duel_wins + extra_win,
       duel_count: user.duel_count + 1,
-      season_points: updates[:season_points] || user.season_points
+      season_points: season_points,
+      season_tier: season_tier
     })
   end
 
@@ -123,6 +128,13 @@ defmodule Moba.Accounts.Users do
   @doc """
   Grabs users with rankings close to the target user
   """
+  def search(%{is_bot: true}) do
+    UserQuery.by_season_points()
+    |> UserQuery.bots()
+    |> UserQuery.load()
+    |> Repo.all()
+  end
+
   def search(%{ranking: ranking}) when not is_nil(ranking) do
     {min, max} =
       if ranking <= 5 do
@@ -163,12 +175,18 @@ defmodule Moba.Accounts.Users do
     end
   end
 
+  def season_tier_for(points) when points < 4000 do
+    Enum.find(0..7, fn tier -> season_points_for(tier + 1) > points end)
+  end
+
+  def season_tier_for(_), do: 7
+
   def update_collection!(user, hero_collection) do
     update!(user, %{hero_collection: hero_collection})
   end
 
   def increment_unread_messages_count_for_all_online_except(user) do
-    query = UserQuery.online_users(User, 24) |> UserQuery.non_guests() |> UserQuery.exclude_user(user)
+    query = UserQuery.online_users(User, 24) |> UserQuery.non_guests() |> UserQuery.exclude_ids([user.id])
     Repo.update_all(query, inc: [unread_messages_count: 1])
   end
 
@@ -198,7 +216,43 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  # --------------------------------
+  def normal_matchmaking(user) do
+    opponent = normal_matchmaking_opponent(user)
+
+    if opponent do
+      update!(user, %{shard_count: user.shard_count + Moba.normal_matchmaking_shards()})
+      opponent
+    end
+  end
+
+  def elite_matchmaking(user) do
+    opponent = elite_matchmaking_opponent(user)
+
+    if opponent do
+      update!(user, %{shard_count: user.shard_count + Moba.elite_matchmaking_shards()})
+      opponent
+    end
+  end
+
+  def manage_match_history(%{match_history: history} = user, opponent) do
+    timeout = Timex.shift(Timex.now(), hours: Moba.match_timeout_in_hours())
+    history = Map.put(history, Integer.to_string(opponent.id), timeout)
+    update!(user, %{match_history: history})
+  end
+
+  def normal_matchmaking_count(user) do
+    normal_matchmaking_query(user) |> Repo.aggregate(:count)
+  end
+
+  def elite_matchmaking_count(user) do
+    elite_matchmaking_query(user) |> Repo.aggregate(:count)
+  end
+
+  def closest_bot_time(%{match_history: history}) do
+    Map.values(history) |> Enum.sort() |> List.first()
+  end
+
+  # -------------------------------- 
 
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do
     current_level = changes[:level] || data.level
@@ -212,5 +266,54 @@ defmodule Moba.Accounts.Users do
     else
       changeset
     end
+  end
+
+  defp match_exclusions(%{match_history: history}) do
+    Enum.reduce(history, [], fn {id, time}, acc ->
+      parsed = Timex.parse!(time, "{ISO:Extended:Z}")
+
+      if Timex.before?(parsed, Timex.now()) do
+        acc
+      else
+        acc ++ [id]
+      end
+    end)
+  end
+
+  defp maximum_tier(tier) when tier > @max_season_tier, do: @max_season_tier
+  defp maximum_tier(tier), do: tier
+
+  defp minimum_tier(tier) when tier < 0, do: 0
+  defp minimum_tier(tier), do: tier
+
+  def normal_matchmaking_opponent(%{season_tier: tier}) when tier < 0, do: nil
+
+  def normal_matchmaking_opponent(%{season_tier: tier} = user) do
+    result = normal_matchmaking_query(user) |> Repo.all() |> List.first()
+
+    if result, do: result, else: normal_matchmaking(%{user | season_tier: tier - 1})
+  end
+
+  def elite_matchmaking_opponent(%{season_tier: tier}) when tier > @max_season_tier, do: nil
+
+  def elite_matchmaking_opponent(%{season_tier: tier} = user) do
+    result = elite_matchmaking_query(user) |> Repo.all() |> List.first()
+
+    if result, do: result, else: elite_matchmaking(%{user | season_tier: tier + 1})
+  end
+
+  defp normal_matchmaking_query(%{season_tier: tier} = user) do
+    exclusions = match_exclusions(user)
+    min_tier = minimum_tier(tier - 1)
+
+    UserQuery.season_search(min_tier, tier) |> UserQuery.exclude_ids(exclusions)
+  end
+
+  defp elite_matchmaking_query(%{season_tier: tier} = user) do
+    exclusions = match_exclusions(user)
+    min_tier = maximum_tier(tier + 1)
+    max_tier = maximum_tier(tier + 2)
+
+    UserQuery.season_search(min_tier, max_tier) |> UserQuery.exclude_ids(exclusions)
   end
 end

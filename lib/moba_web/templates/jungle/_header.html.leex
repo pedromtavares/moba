@@ -2,14 +2,14 @@
     <div class="row">
         <div class="col d-flex align-items-center justify-content-around">
             <%= if length(@current_hero.user.hero_collection) > 0 do %>
-                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DashboardLiveView), class: "h3 mt-2 nav-link" do %>
-                    <i class="fa fa-home fa-2x align-middle mr-1"></i>
+                <%= live_redirect to: Routes.base_path(@socket, :base), class: "h3 mt-2 nav-link" do %>
+                    <i class="fa fa-home fa-2x align-middle"></i>
                     <br/>
                     Base
                 <% end %>
             <% end %>
             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "h3 ml-3 nav-link" do %>
-                <i class="fa fa-history fa-2x mr-1"></i>
+                <i class="fa fa-history fa-2x"></i>
                 <br/>
                 Battle History
             <% end %>

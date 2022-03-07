@@ -24,12 +24,10 @@
     </div>
 </div>
 <%= if @current_user do %>
-    <div class="row battle-border-top pt-1 mt-1">
-        <div class="col">
-            <%=live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @battle.duel_id), class: "btn btn-outline-primary btn-lg btn-block text-white", "phx-hook": "Loading", id: "load-battles" do %>
-                <span class="loading-text"><i class="fa fa-history"></i> View Duel</span>
-            <% end %>
-        </div>
+    <div class="pt-1 mt-1">
+        <%=live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @battle.duel_id), class: "btn btn-outline-primary btn-lg btn-block text-white", "phx-hook": "Loading", id: "load-battles" do %>
+            <span class="loading-text"><i class="fa fa-play"></i> Continue</span>
+        <% end %>
     </div>
 <% else %>
     <div class="row battle-border-top pt-1 mt-1">

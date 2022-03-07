@@ -11,11 +11,12 @@ defmodule Moba.Cleaner do
 
     Repo.all(query) |> delete_records()
 
-    query = from h in Hero,
-      where: is_nil(h.finished_at),
-      where: is_nil(h.archived_at),
-      where: h.inserted_at <= ^ago,
-      where: is_nil(h.bot_difficulty)
+    query =
+      from h in Hero,
+        where: is_nil(h.finished_at),
+        where: is_nil(h.archived_at),
+        where: h.inserted_at <= ^ago,
+        where: is_nil(h.bot_difficulty)
 
     Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
 

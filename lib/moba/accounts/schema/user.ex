@@ -39,6 +39,7 @@ defmodule Moba.Accounts.Schema.User do
     field :shard_limit, :integer, default: 100
     field :pve_tier, :integer, default: 0
     field :unread_messages_count, :integer, default: 0
+    field :match_history, :map, default: %{}
 
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick
@@ -103,7 +104,8 @@ defmodule Moba.Accounts.Schema.User do
       :season_tier,
       :shard_limit,
       :pve_tier,
-      :title_quest_id
+      :title_quest_id,
+      :match_history
     ])
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)
@@ -114,7 +116,7 @@ defmodule Moba.Accounts.Schema.User do
   def admin_changeset(user, attrs) do
     user
     |> update_changeset(attrs)
-    |> cast(attrs, [:is_admin, :is_bot, :bot_tier])
+    |> cast(attrs, [:is_admin, :is_bot, :bot_tier, :bot_codes])
   end
 
   def level_up(changeset, level, xp) do

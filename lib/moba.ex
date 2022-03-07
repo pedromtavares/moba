@@ -43,6 +43,9 @@ defmodule Moba do
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
   @shard_buyback_minimum 5
   @max_season_tier 7
+  @match_timeout_in_hours 24
+  @normal_matchmaking_shards 5
+  @elite_matchmaking_shards 15
 
   # PVE constants
   @total_pve_turns 25
@@ -83,6 +86,9 @@ defmodule Moba do
   def current_ranking_date, do: @current_ranking_date
   def shard_buyback_minimum, do: @shard_buyback_minimum
   def max_season_tier, do: @max_season_tier
+  def match_timeout_in_hours, do: @match_timeout_in_hours
+  def normal_matchmaking_shards, do: @normal_matchmaking_shards
+  def elite_matchmaking_shards, do: @elite_matchmaking_shards
 
   def total_pve_turns(0), do: @total_pve_turns - 10
   def total_pve_turns(1), do: @total_pve_turns - 5
@@ -129,21 +135,17 @@ defmodule Moba do
 
   # diff = defender.pvp_points - attacker.pvp_points
 
-  def attacker_win_pvp_points(diff, 6) when diff < -40, do: 2
-  def attacker_win_pvp_points(diff, 6), do: round(5 + (diff + 80) * 0.05)
-  def attacker_win_pvp_points(diff, _), do: div(attacker_win_pvp_points(diff, 6), 2)
+  def attacker_win_pvp_points(diff) when diff < -40, do: 2
+  def attacker_win_pvp_points(diff), do: round(5 + (diff + 80) * 0.05)
 
-  def attacker_loss_pvp_points(diff, 6) when diff > 40, do: -2
-  def attacker_loss_pvp_points(diff, 6), do: round(-5 + (diff - 80) * 0.05)
-  def attacker_loss_pvp_points(diff, _), do: div(attacker_loss_pvp_points(diff, 6), 2)
+  def attacker_loss_pvp_points(diff) when diff > 40, do: -2
+  def attacker_loss_pvp_points(diff), do: round(-5 + (diff - 80) * 0.05)
 
-  def defender_win_pvp_points(diff, 6) when diff > 40, do: 0
-  def defender_win_pvp_points(diff, 6), do: -round((diff - 40) * 0.05)
-  def defender_win_pvp_points(diff, _), do: div(defender_win_pvp_points(diff, 6), 2)
+  def defender_win_pvp_points(diff) when diff > 40, do: 0
+  def defender_win_pvp_points(diff), do: -round((diff - 40) * 0.05)
 
-  def defender_loss_pvp_points(diff, 6) when diff < -40, do: 0
-  def defender_loss_pvp_points(diff, 6), do: -round((diff + 40) * 0.05)
-  def defender_loss_pvp_points(diff, _), do: div(defender_loss_pvp_points(diff, 6), 2)
+  def defender_loss_pvp_points(diff) when diff < -40, do: 0
+  def defender_loss_pvp_points(diff), do: -round((diff + 40) * 0.05)
 
   def avatar_minimum_stats() do
     %{
@@ -184,9 +186,14 @@ defmodule Moba do
     Conductor.regenerate_resources!()
   end
 
-  def generate_bots!(bot_level_range \\ 0..35) do
-    IO.puts("Generating new bots...")
-    Conductor.generate_bots!(bot_level_range)
+  def regenerate_pve_bots!(bot_level_range \\ 0..35) do
+    IO.puts("Generating new PVE bots...")
+    Conductor.regenerate_pve_bots!(bot_level_range)
+  end
+
+  def regenerate_pvp_bots! do
+    IO.puts("Generating new PVP bots...")
+    Conductor.regenerate_pvp_bots!()
   end
 
   def current_match, do: Game.current_match()
@@ -209,6 +216,18 @@ defmodule Moba do
   def update_rankings! do
     Game.update_pve_ranking!()
     Accounts.update_ranking!()
+  end
+
+  def normal_matchmaking!(user) do
+    opponent = Accounts.normal_matchmaking(user)
+
+    if opponent, do: Game.create_duel!(user, opponent, "normal_matchmaking")
+  end
+
+  def elite_matchmaking!(user) do
+    opponent = Accounts.elite_matchmaking(user)
+
+    if opponent, do: Game.create_duel!(user, opponent, "elite_matchmaking")
   end
 
   def basic_attack, do: Game.basic_attack()

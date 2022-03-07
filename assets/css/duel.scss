@@ -1,18 +1,30 @@
 .duel{
+  margin-bottom: 50px;
+
   .pick-button{
     background: rgba(54, 64, 74, 0.8);
     color: #f1556c;
   }
   .hero-card{
+    min-height: 200px;
+    margin-bottom: 0;
+
     .card-header{
       min-height: 45px;
+      .league-logo{
+        height: 25px;
+      }
     }
     .card-body{
       background-color: initial !important;
       background-repeat: no-repeat;
       background-size: cover;
       background-position: 80%;
-      min-height: 300px;
+      min-height: 200px;
+    }
+
+    .card-footer{
+      background-color: rgba(54, 64, 74, 0.95) !important;
     }
   }
   .btn-success {

@@ -15,9 +15,11 @@
                         </h5>
                     </div>
                     <div class="mt-4 text-center">
-                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#pve-tier-rewards">
-                            <i class="fa fa-crown mr-1"></i>Progression Rewards
-                        </button>
+                        <%= unless @current_user.season_tier == Moba.max_season_tier() do %>
+                            <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#pve-tier-rewards">
+                                <i class="fa fa-crown mr-1"></i>Progression Rewards
+                            </button>
+                        <% end %>
                         <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#daily-quests">
                             <i class="fa fa-clock-o mr-1"></i>Daily Quests
                         </button>

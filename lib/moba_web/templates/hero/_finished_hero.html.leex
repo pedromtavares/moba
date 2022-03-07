@@ -14,22 +14,7 @@
                         <% end %>
                     </h3>
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <%= for hero <- @current_user.hero_collection do %>
-                                <div style="width: 100px;" class='avatar-container text-center mx-1 <%=if @hero && @hero.id == hero["hero_id"], do: "current"%>'>
-                                    <img src="<%=GH.image_url(hero["avatar"])%>" class="avatar"/>
-                                    <img src="/images/league_<%=hero["tier"]%>.png" class="league-logo">
-                                </div>
-                        <% end %>
-                        <%= for avatar <- @blank_collection do %>
-                                <div style="width:100px" class='avatar-container text-center mx-1'>
-                                    <img src="<%=GH.image_url(avatar)%>" class="avatar blank-avatar"/>
-                                </div>
-                        <% end %>
-                    </div>
-                </div>
-                <div class="card-footer p-0">
+                <div class="card-body p-0">
                     <%= if @finished_hero.league_tier >= Moba.platinum_league_tier() do %>
                         <a href="/base" class="btn btn-success btn-block btn-lg">
                             <i class="fa fa-home fa-2x mr-1 mt-2"></i>

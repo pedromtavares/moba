@@ -94,7 +94,7 @@ defmodule MobaWeb.ChatLiveView do
         {challenge.other, current_user}
       end
 
-    Game.create_duel!(user, opponent)
+    Game.create_duel!(user, opponent, "pvp")
 
     {:noreply, assign(socket, challenge: nil)}
   end

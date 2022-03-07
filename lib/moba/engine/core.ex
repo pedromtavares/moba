@@ -136,18 +136,21 @@ defmodule Moba.Engine.Core do
 
   defp finalize_boss(battle), do: battle
 
-  # Skips to the next turn if the attacker can't do anything, such as the defender was the initiator
+  # Skips to the next turn if the attacker is a bot or can't do anything, such as the defender was the initiator
   # or the attacker was disabled
-  defp maybe_skip_next_turn(%{type: type} = battle) do
+  defp maybe_skip_next_turn(%{attacker: attacker, defender: defender, initiator: initiator} = battle) do
     battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
     last_turn = List.last(battle.turns)
-    not_duel = type != "duel"
 
-    cond do
-      not_duel && is_nil(last_turn) && battle.initiator == battle.defender -> create_turn!(battle, %{auto: true})
-      not_duel && last_turn && last_turn.defender.hero_id != battle.attacker_id -> create_turn!(battle, %{auto: true})
-      last_turn && Helper.disabled?(last_turn.defender) -> create_turn!(battle, %{auto: true})
-      true -> battle
+    bot_initiator = is_nil(last_turn) && initiator.bot_difficulty
+    bot_attacker = last_turn && attacker.bot_difficulty && last_turn.defender.hero_id == attacker.id
+    bot_defender = last_turn && defender.bot_difficulty && last_turn.defender.hero_id == defender.id
+    attacker_disabled = last_turn && Helper.disabled?(last_turn.defender)
+
+    if bot_initiator || bot_attacker || bot_defender || attacker_disabled do
+      create_turn!(battle, %{auto: true})
+    else
+      battle
     end
   end
 

@@ -15,14 +15,76 @@ alias Game.Schema.{Item, Skill, Avatar, Quest}
 alias Accounts.Schema.User
 
 defmodule SeedHelper do
-  def create_bot(bot_tier \\ 5) do
+  def create_bot(bot_tier, avatar_codes) do
     name = Faker.Superhero.name()
     email = Faker.Internet.email()
 
-    case Admin.create_user(%{username: name, email: email, is_bot: true, bot_tier: bot_tier}) do
+    season_points =
+      case bot_tier do
+        4 -> 200..499
+        5 -> 500..999
+        6 -> 1000..3999
+        _ -> 0..199
+      end
+      |> Enum.random()
+
+    season_tier = Accounts.season_tier_for(season_points)
+
+    case Admin.create_user(%{
+           username: name,
+           email: email,
+           is_bot: true,
+           bot_tier: bot_tier,
+           season_points: season_points,
+           season_tier: season_tier,
+           bot_codes: avatar_codes
+         }) do
       {:ok, user} -> user
-      {:error, _} -> create_bot()
+      {:error, _} -> create_bot(bot_tier, avatar_codes)
     end
+  end
+
+  def create_pvp_bots do
+    codes = Game.list_avatars() |> Enum.map(& &1.code)
+
+    # creates 10 plat and 10 diamond bots, each with 2 avatars each
+    Enum.each(3..4, fn bot_tier ->
+      Enum.reduce(1..10, codes, fn _, acc ->
+        used = Enum.shuffle(acc) |> Enum.take(2)
+        create_bot(bot_tier, used)
+        acc -- used
+      end)
+    end)
+
+    # creates 40 master bots, each with 3 avatars each
+    Enum.reduce(1..40, codes, fn _, acc ->
+      used = Enum.shuffle(acc) |> Enum.take(3)
+      total = length(used)
+      if total < 3 do
+        new_acc = acc ++ Enum.shuffle(codes)
+        used = used ++ Enum.take(new_acc, 3 - total)
+        create_bot(5, used)
+        new_acc -- used
+      else
+        create_bot(5, used)
+        acc -- used
+      end
+    end)
+
+    # creates 40 grandmaster bots, each with 4 avatars each
+    Enum.reduce(1..40, codes, fn _, acc ->
+      used = Enum.shuffle(acc) |> Enum.take(4)
+      total = length(used)
+      if total < 4 do
+        new_acc = acc ++ Enum.shuffle(codes)
+        used = used ++ Enum.take(new_acc, 4 - total)
+        create_bot(6, used)
+        new_acc -- used
+      else
+        create_bot(6, used)
+        acc -- used
+      end
+    end)
   end
 
   def image_for(code) do
@@ -58,8 +120,6 @@ end
   password_confirmation: "123456"
 })
 |> Repo.insert!()
-
-Enum.map(1..30, fn _number -> SeedHelper.create_bot() end)
 
 # ITEMS
 
@@ -1177,6 +1237,8 @@ SeedHelper.create_avatar(
     %{}
   )
 )
+
+SeedHelper.create_pvp_bots()
 
 # generates all further skill levels with same values as level 1
 Game.Query.SkillQuery.base_canon()
