@@ -256,8 +256,10 @@ defmodule Moba.Conductor do
   defp skynet(%{last_server_update_at: time}) do
     Enum.each(1..5, fn _n ->
       bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
+
       if bot do
         duel = Moba.normal_matchmaking!(bot)
+
         if duel do
           Logger.info("Created duel ##{duel.id} for #{bot.username}")
           Game.get_duel!(duel.id) |> Game.next_duel_phase!(skynet_hero(bot, duel))

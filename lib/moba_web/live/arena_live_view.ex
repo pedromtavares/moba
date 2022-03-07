@@ -21,7 +21,7 @@ defmodule MobaWeb.ArenaLiveView do
          normal_count: normal_count,
          matchmaking: matchmaking,
          pending_match: pending_match,
-         closest_bot_time: closest_bot_time 
+         closest_bot_time: closest_bot_time
        )}
     else
       {:ok, socket |> push_redirect(to: "/base")}
@@ -41,7 +41,11 @@ defmodule MobaWeb.ArenaLiveView do
     if duel do
       {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLiveView, duel.id))}
     else
-      {:noreply, assign(socket, normal_count: Accounts.normal_matchmaking_count(user), elite_count: Accounts.elite_matchmaking_count(user))}
+      {:noreply,
+       assign(socket,
+         normal_count: Accounts.normal_matchmaking_count(user),
+         elite_count: Accounts.elite_matchmaking_count(user)
+       )}
     end
   end
 

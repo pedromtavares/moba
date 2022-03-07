@@ -60,6 +60,7 @@ defmodule SeedHelper do
     Enum.reduce(1..40, codes, fn _, acc ->
       used = Enum.shuffle(acc) |> Enum.take(3)
       total = length(used)
+
       if total < 3 do
         new_acc = acc ++ Enum.shuffle(codes)
         used = used ++ Enum.take(new_acc, 3 - total)
@@ -75,6 +76,7 @@ defmodule SeedHelper do
     Enum.reduce(1..40, codes, fn _, acc ->
       used = Enum.shuffle(acc) |> Enum.take(4)
       total = length(used)
+
       if total < 4 do
         new_acc = acc ++ Enum.shuffle(codes)
         used = used ++ Enum.take(new_acc, 4 - total)
@@ -1281,4 +1283,4 @@ Repo.insert(%Quest{code: "daily_perfect", level: 1, shard_prize: 100, initial_va
 Moba.start!()
 
 (Enum.to_list(0..10) ++ Enum.to_list(17..22))
-|> Moba.generate_bots!()
+|> Moba.regenerate_pve_bots!()

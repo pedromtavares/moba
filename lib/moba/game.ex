@@ -53,7 +53,7 @@ defmodule Moba.Game do
 
   def create_bot_hero!(avatar, level, difficulty, league_tier \\ nil, user \\ nil) do
     tier = league_tier || Leagues.tier_for(level)
-    
+
     Heroes.create_bot!(avatar, level, difficulty, tier, user)
   end
 

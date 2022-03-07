@@ -4,9 +4,10 @@ defmodule MobaWeb.ArenaView do
   alias Moba.Accounts
 
   def bot_timer(time) do
-    time = Timex.parse!(time, "{ISO:Extended:Z}") 
-    |> Timex.format("{relative}", :relative)
-    |> elem(1)
+    time =
+      Timex.parse!(time, "{ISO:Extended:Z}")
+      |> Timex.format("{relative}", :relative)
+      |> elem(1)
 
     "Your next opponent will be available #{time}"
   end

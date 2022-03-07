@@ -49,10 +49,12 @@ defmodule Moba.Engine.Core.Duel do
     {duel_winner, attacker_points, defender_points} =
       cond do
         user_win ->
-          {duel.user, round(Moba.attacker_win_pvp_points(diff) * multiplier), round(Moba.defender_loss_pvp_points(diff) * multiplier)}
+          {duel.user, round(Moba.attacker_win_pvp_points(diff) * multiplier),
+           round(Moba.defender_loss_pvp_points(diff) * multiplier)}
 
         opponent_win ->
-          {duel.opponent, round(Moba.attacker_loss_pvp_points(diff) * multiplier), round(Moba.defender_win_pvp_points(diff) * multiplier)}
+          {duel.opponent, round(Moba.attacker_loss_pvp_points(diff) * multiplier),
+           round(Moba.defender_win_pvp_points(diff) * multiplier)}
 
         true ->
           {nil, 0, 0}
