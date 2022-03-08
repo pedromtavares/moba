@@ -41,14 +41,4 @@ defmodule MobaWeb.ArenaView do
       true -> current_tier + 1
     end
   end
-
-  def replenish_time do
-    match = Game.current_match()
-
-    match &&
-      match.inserted_at
-      |> Timex.shift(days: +1)
-      |> Timex.format("{relative}", :relative)
-      |> elem(1)
-  end
 end

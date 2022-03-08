@@ -47,7 +47,7 @@ defmodule SeedHelper do
   def create_pvp_bots do
     codes = Game.list_avatars() |> Enum.map(& &1.code)
 
-    # creates 10 plat and 10 diamond bots, each with 2 avatars each
+    # creates 10 plat and 10 diamond bots, each with 2 avatar codes
     Enum.each(3..4, fn bot_tier ->
       Enum.reduce(1..10, codes, fn _, acc ->
         used = Enum.shuffle(acc) |> Enum.take(2)
@@ -56,7 +56,7 @@ defmodule SeedHelper do
       end)
     end)
 
-    # creates 40 master bots, each with 3 avatars each
+    # creates 40 master bots, each with 3 avatar codes
     Enum.reduce(1..40, codes, fn _, acc ->
       used = Enum.shuffle(acc) |> Enum.take(3)
       total = length(used)
@@ -72,7 +72,7 @@ defmodule SeedHelper do
       end
     end)
 
-    # creates 40 grandmaster bots, each with 4 avatars each
+    # creates 40 grandmaster bots, each with 4 avatar coces
     Enum.reduce(1..40, codes, fn _, acc ->
       used = Enum.shuffle(acc) |> Enum.take(4)
       total = length(used)
