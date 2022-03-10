@@ -18,15 +18,24 @@ defmodule MobaWeb.ArenaView do
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 
-  def match_label(%{type: "elite_matchmaking"}), do: "Elite"
-  def match_label(_), do: "Normal"
+  def match_badge_class(%{type: type}) do
+    case type do
+      "pvp" -> "badge badge-light-danger"
+      "elite_matchmaking" -> "badge badge-light-warning"
+      _ -> "badge badge-light-primary"
+    end
+  end
+
+  def match_label(%{type: "elite_matchmaking"}), do: "Elite MM"
+  def match_label(%{type: "pvp"}), do: "PvP"
+  def match_label(_), do: "Normal MM"
 
   def match_result(match) do
     cond do
       match.phase != "finished" -> content_tag(:h5, "In Progress")
-      is_nil(match.winner) -> content_tag(:h5, "Tie", class: "text-muted")
+      is_nil(match.winner) -> content_tag(:h5, "Tie", class: "text-white")
       match.winner_id == match.user_id -> content_tag(:h5, "Victory", class: "text-success")
-      true -> content_tag(:h5, "Defeat", class: "text-danger")
+      true -> content_tag(:h5, "Defeat", class: "text-muted")
     end
   end
 

@@ -1,15 +1,16 @@
 .user-profile{
 
-  .account-level-bar{
-    width:100%;
-    height:25px;
-    margin-top:11px;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
+  .pve-rank{
+    max-height: 80px;
+    margin-top: -0.75rem;
+  }
+
+  .pvp-rank{
+    max-height: 120px;
   }
 
   .hero-card{
-    min-height: 500px;
+    min-height: 400px;
   }
 
   .featured-hero{
@@ -36,7 +37,44 @@
     }
   }
 
-  .arena-picks{
+  .bot-ranking{
+    .card-body{
+      max-height: 720px !important;
+    }
+  }
+
+  .ranking{
+    margin-bottom: 0;
+
+    .card-body{
+      padding: 0 !important;
+      max-height: 920px;
+      overflow: auto;
+    }
+
+    .pvp-rank{
+      max-height: 50px;
+    }
+  }
+
+
+  .duels{
+    max-height: 605px;
+    overflow: auto;
+
+    h5{
+      margin: 0;
+    }
+
+    .pvp-rank{
+      max-height: 40px;
+      margin-right: 0.5rem;
+    }
+
+    .opponent{
+      font-weight: bold;
+      font-size: 1rem;
+    }
 
     .avatar{
       max-width: 100px;

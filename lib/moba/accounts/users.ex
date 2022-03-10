@@ -15,13 +15,13 @@ defmodule Moba.Accounts.Users do
   # -------------------------------- PUBLIC API
 
   def get!(nil), do: nil
-  def get!(id), do: Repo.get!(UserQuery.load(), id)
+  def get!(id), do: Repo.get!(User, id)
 
   def get_with_unlocks!(id), do: get!(id) |> Repo.preload(:unlocks)
 
   def get_with_current_heroes!(id), do: get!(id) |> Repo.preload(current_pve_hero: :avatar, current_pvp_hero: :avatar)
 
-  def get_by_username(username), do: Repo.get_by(UserQuery.load(), username: username)
+  def get_by_username(username), do: Repo.get_by(User, username: username)
 
   def create(attrs \\ %{}) do
     %User{}
@@ -109,7 +109,7 @@ defmodule Moba.Accounts.Users do
   @doc """
   Lists Users by their ranking
   """
-  def ranking(limit), do: UserQuery.ranking(limit) |> UserQuery.load() |> Repo.all()
+  def ranking(limit), do: UserQuery.ranking(limit) |> Repo.all()
 
   @doc """
   Updates all Users' ranking by their medal_count and XP
@@ -131,7 +131,6 @@ defmodule Moba.Accounts.Users do
   def search(%{is_bot: true}) do
     UserQuery.by_season_points()
     |> UserQuery.bots()
-    |> UserQuery.load()
     |> Repo.all()
   end
 
@@ -143,8 +142,7 @@ defmodule Moba.Accounts.Users do
         {ranking - 4, ranking + 4}
       end
 
-    UserQuery.load()
-    |> UserQuery.non_bots()
+    UserQuery.non_bots()
     |> UserQuery.non_guests()
     |> UserQuery.by_ranking(min, max)
     |> Repo.all()
@@ -156,7 +154,6 @@ defmodule Moba.Accounts.Users do
       |> UserQuery.non_guests()
       |> UserQuery.by_level(level)
       |> UserQuery.limit_by(9)
-      |> UserQuery.load()
       |> Repo.all()
 
     [user] ++ Enum.filter(by_level, &(&1.id != id))

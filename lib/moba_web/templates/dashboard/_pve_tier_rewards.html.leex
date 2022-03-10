@@ -38,11 +38,6 @@
                     </tr>
 
                     <tr>
-                        <td class="text-center text-muted"><i class="fa fa-user fa-2x"></i><br/> Profile Title</td>
-                        <td class="text-left"><h4><%= @current_season_progression.quest.title %></h4></td>
-                    </tr>
-
-                    <tr>
                         <td class="text-center text-info">
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
                                 <i class="fab fa-ethereum fa-2x"></i><br/> Shards

@@ -93,7 +93,7 @@
                             </td>
                             <td>
                                 <h2>
-                                    <%=live_redirect "#{if user.title_quest, do: user.title_quest.title} #{user.username}", to: Routes.live_path(@socket, MobaWeb.UserLiveView, user.id), class: "text-reset"%>
+                                    <%=live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, user.id), class: "text-reset"%>
                                     <br/>
                                     <small class="text-dark"><em>Last online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
                                 </h2>

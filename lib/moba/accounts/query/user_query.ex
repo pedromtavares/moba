@@ -12,7 +12,6 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def load(queryable \\ User) do
     queryable
-    |> preload([:title_quest])
   end
 
   def new_users(query \\ User, since_hours_ago \\ 24) do
@@ -65,7 +64,7 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def eligible_for_ranking(limit) do
     from(u in User,
-      order_by: [desc: [u.pve_tier, u.season_points, u.level, u.experience]],
+      order_by: [desc: [u.season_points, u.level, u.experience]],
       where: u.is_bot == false,
       where: u.is_guest == false,
       where: u.last_online_at > ^@current_ranking_date,

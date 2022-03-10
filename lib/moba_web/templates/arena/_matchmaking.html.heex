@@ -65,7 +65,7 @@
 
                         <td width="15%" class="text-center">
                             <%= match_result(match) %>
-                            <%= if finished?(match) do %>
+                            <%= if finished?(match) && match.rewards.attacker_pvp_points != 0 do %>
                                 <%= if match.rewards.attacker_pvp_points > 0 do %>
                                     <span class="badge badge-pill badge-light-success">+<%= match.rewards.attacker_pvp_points %> Season Points</span>
                                 <% else %>

@@ -5,15 +5,20 @@ defmodule Moba.Game.Duels do
 
   import Ecto.Query
 
-  def list_matchmaking(%{id: user_id}) do
-    query =
-      from duel in Duel,
-        where: duel.user_id == ^user_id,
-        where: duel.type == "normal_matchmaking" or duel.type == "elite_matchmaking",
-        limit: 20,
-        order_by: [desc: duel.inserted_at]
+  def list(user) do 
+    query = 
+      from duel in base_query(user),
+        where: duel.phase == "finished"
 
-    load(query) |> Repo.all()
+    Repo.all(query)
+  end
+
+  def list_matchmaking(user) do
+    query = 
+      from duel in base_query(user),
+        where: duel.type == "normal_matchmaking" or duel.type == "elite_matchmaking"
+
+    Repo.all(query)
   end
 
   def load(queryable \\ Duel) do
@@ -80,6 +85,13 @@ defmodule Moba.Game.Duels do
   defp available_bot_hero(%{opponent: %{id: user_id}, inserted_at: duel_inserted_at}) do
     Game.eligible_heroes_for_pvp(user_id, duel_inserted_at)
     |> List.first()
+  end
+
+  defp base_query(%{id: user_id}) do
+    from duel in load(),
+      where: duel.user_id == ^user_id,
+      limit: 20,
+      order_by: [desc: duel.inserted_at]
   end
 
   defp maybe_auto_next_phase(%{opponent: %{is_bot: true}, phase: phase} = duel)

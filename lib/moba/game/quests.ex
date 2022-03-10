@@ -44,15 +44,6 @@ defmodule Moba.Game.Quests do
     Repo.all(from p in progressions_by_user(user_id), where: p.completed_at >= ^hero_finished_at)
   end
 
-  def list_title_progressions(user_id) do
-    Repo.all(
-      from p in progressions_by_user(user_id),
-        join: q in assoc(p, :quest),
-        where: q.daily == false,
-        where: not is_nil(p.completed_at)
-    )
-  end
-
   def list_progressions(user_id, daily) do
     Repo.all(from p in progressions_by_user(user_id), join: q in assoc(p, :quest), where: q.daily == ^daily)
   end

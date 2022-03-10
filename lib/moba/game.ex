@@ -8,7 +8,7 @@ defmodule Moba.Game do
   """
 
   alias Moba.{Repo, Game, Accounts}
-  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, ArenaPicks, Skins, Duels, Quests}
+  alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, Skins, Duels, Quests}
 
   # MATCHES
 
@@ -330,12 +330,6 @@ defmodule Moba.Game do
 
   def list_unlockable_avatars, do: Avatars.unlockable_list()
 
-  # ARENA PICKS
-
-  def create_arena_pick!(user, match), do: ArenaPicks.create!(user, match)
-
-  def list_recent_arena_picks(user), do: ArenaPicks.list_recent(user)
-
   # SKINS
 
   def list_skins_for(avatar_code), do: Skins.list_for(avatar_code)
@@ -347,6 +341,8 @@ defmodule Moba.Game do
   def default_skin(avatar_code), do: Skins.default(avatar_code)
 
   # DUELS
+
+  def list_duels(user), do: Duels.list(user)
 
   def get_duel!(id), do: Duels.get!(id)
 
@@ -394,8 +390,6 @@ defmodule Moba.Game do
   def list_quest_progressions(user_id, code \\ nil), do: Quests.list_progressions_by_code(user_id, code)
 
   def list_season_quest_progressions(user_id), do: Quests.list_season_progressions(user_id)
-
-  def list_title_quest_progressions(user_id), do: Quests.list_title_progressions(user_id)
 
   def generate_daily_quest_progressions!(user_id \\ nil), do: Quests.generate_daily_progressions!(user_id)
 

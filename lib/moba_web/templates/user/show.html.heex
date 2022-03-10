@@ -1,0 +1,185 @@
+<div class="user-profile" id="user-profile">
+    <div class="row mt-3">
+        <div class="col-md-6 col-xl-4">
+            <div class="row">
+                <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div class="card-box collection mb-0 pb-2">
+                        <%= unless @user.is_bot do %>
+                            <div class="text-center">
+                                <img src={"/images/pve/#{@user.pve_tier}.png"} class="pve-rank"/>
+                                <h3 class="mb-2 mt-1"><%= Moba.pve_tiers[@user.pve_tier] %></h3>
+                            </div>
+                        <% end %>
+                        <div class="row">
+                            <%= for hero <- @user.hero_collection do %>
+                                <div class="col-3 mb-2 text-center">
+                                    <a href="javascript:;" class={if @featured.id == hero["hero_id"], do: "current-featured"} phx-click="set-featured" phx-value-id={hero["hero_id"]} phx-hook="Loading" id={"set-featured-#{hero["hero_id"]}"}>
+                                        <div class='avatar-container'>
+                                            <img src={GH.image_url(hero["avatar"])} class="avatar"/>
+                                            <img src={"/images/league_#{hero["tier"]}.png"} class="league-logo">
+                                        </div>
+
+                                    </a>
+                                </div>
+                            <% end %>
+                            <%= for avatar <- @blank_collection do %>
+                                <div class="col-3 mb-2 text-center">
+                                    <div class='avatar-container'>
+                                        <img src={GH.image_url(avatar)} class="avatar blank-avatar"/>
+                                    </div>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <div class="row">
+                <div class="col">
+                    <div class="card">
+                        <%= if @user.id == @current_user.id do %>
+                            <h5 class="card-header font-17 text-white d-flex justify-content-between">  
+                                <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
+                                    <i class="fa fa-edit mr-1"></i>Edit Profile
+                                <% end %>
+                                <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
+                                    <i class="fa fa-sign-out-alt"></i>
+                                    <span class="d-none d-md-inline">Log out</span>
+                                <% end %>
+                            </h5>
+                        <% end %>
+                        <div class="card-body p-2 text-center">
+                            <img src={"/images/pvp/#{@user.season_tier}.png"} class="pvp-rank"/>
+                            <h2 class={"text-medal-#{@user.season_tier}"}><%= @user.username %></h2>
+                        </div>
+                        <div class="card-footer mt-1">
+                            <%= if @user.is_bot do %>
+                                <div class="row">
+                                    <div class="col text-center">
+                                        <span class="font-italic text-dark">A.I. Player</span>
+                                    </div>
+                                </div>
+                            <% else %>
+                                <div class="row">
+                                    <div class="col text-center d-flex justify-content-between">
+                                        <small class="font-italic text-dark float-left">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
+                                        <small class="font-italic text-dark float-right">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
+                                    </div>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row text-center">
+                <div class="col">
+                    <div class="card">
+                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-chess-rook mr-1"></i> Arena</h5>
+                        <%= if @user.id != @current_user.id do %>
+                            <div class="card-body p-1 score">
+                                <div class="row no-gutters">
+                                    <div class="col">
+                                        <h4 class="text-right">
+                                            <%= @current_user.username %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_user.duel_score["#{@user.id}"] || 0 %></span>
+                                        </h4>
+                                    </div>
+                                    <div class="col-1 d-flex align-items-center justify-content-center">
+                                        <i class="fa fa-times"></i>
+                                    </div>
+                                    <div class="col">
+                                        <h4 class="text-left">
+                                            <span class="badge badge-pill badge-light-danger font-15"><%= @user.duel_score["#{@current_user.id}"] || 0 %></span> <%= @user.username %>
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        <% end %>
+                        <%= unless @user.is_bot || length(@duels) == 0 do %>
+                            <div class="transparent card-footer p-0 duels">
+                                <table class="table table-dark text-center table-sm m-0">
+                                    <%= for duel <- @duels do %>
+                                        <tr>
+                                            <td>
+                                                <small class={ArenaView.match_badge_class(duel)} style="font-size: 0.6rem">
+                                                    <%= ArenaView.match_label(duel) %>
+                                                </small>
+                                            </td>
+
+                                            <td class="text-left">
+                                                <img src={"/images/pvp/#{duel.opponent.season_tier}.png"} class="pvp-rank"/>
+                                                <span class="opponent"><%= live_redirect duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, duel.opponent) %></span>
+                                            </td>
+
+                                            <td class="text-center">
+                                                <%= ArenaView.match_result(duel) %>
+                                                <%= if duel.rewards.attacker_pvp_points != 0 do %>
+                                                    <%= if duel.rewards.attacker_pvp_points > 0 do %>
+                                                        <span class="badge badge-pill badge-light-success">+<%= duel.rewards.attacker_pvp_points %> Season Points</span>
+                                                    <% else %>
+                                                        <span class="badge badge-pill badge-light-dark"><%= duel.rewards.attacker_pvp_points %> Season Points</span>
+                                                    <% end %>
+                                                <% end %>
+                                            </td>
+                                            
+                                            <td>
+                                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, duel), class: "btn btn-light btn-sm" do %>
+                                                    <i class="fa fa-eye"></i>
+                                                <% end %>
+                                            </td>
+                                        </tr>
+                                    <% end %>
+                                </table>
+                            </div>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-xl-4">
+            <div class={if @user.is_bot, do: "card bot-ranking ranking", else: "card ranking"}>
+                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i><%= if @user.is_bot, do: "A.I. " %>Ranking</h5>
+                <div class="card-body">
+                    <table class="table table-dark text-center m-0 table-sm">
+                        <tr>
+                            <th><%= if @user.ranking || @user.is_bot, do: "Rank", else: "Level" %></th>
+                            <th>User</th>
+                            <th>Season Points</th>
+                        </tr>
+                        <%= for {user, index} <- Enum.with_index(@ranking, 1) do %>
+                            <tr>
+                                <td>
+                                    <h1 class={if user.id == @user.id, do: "text-info"}>
+                                        <%=if user.ranking || user.is_bot do %>
+                                            #<%= user.ranking || index %>
+                                        <% else %>
+                                            <%= user.level %>
+                                        <% end %>
+                                    </h1>
+                                </td>
+                                <td>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
+                                        <img src={"/images/pvp/#{user.season_tier}.png"} class="pvp-rank" />
+                                        <h5 class="text-primary mb-0 mt-1"><%= user.username %></h5>
+                                    <% end %>
+                                </td>
+                                <td>
+                                    <h3 class="text-success"><%= user.season_points %></h3>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </table>
+                </div>
+                <div class="transparent card-footer p-0">
+                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
+                        <i class="fa fa-table mr-1"></i>See Top Users
+                    <% end %>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
