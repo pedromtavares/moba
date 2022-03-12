@@ -108,7 +108,10 @@ defmodule Moba.Game do
 
   def pve_ranking(limit \\ 20), do: Heroes.pve_ranking(limit)
 
-  def update_pve_ranking!, do: Heroes.update_pve_ranking!()
+  def update_pve_ranking! do
+    Heroes.update_pve_ranking!()
+    MobaWeb.broadcast("hero-ranking", "ranking", %{})
+  end
 
   defdelegate prepare_league_challenge!(hero), to: Heroes
 
@@ -140,10 +143,15 @@ defmodule Moba.Game do
   def maybe_finish_pve(hero), do: hero
 
   def finish_pve!(%{finished_at: nil} = hero) do
+    hero =
+      hero
+      |> update_hero!(%{finished_at: Timex.now()})
+      |> update_hero_collection!()
+      |> track_pve_quests()
+
+    Moba.run_async(fn -> update_pve_ranking!() end)
+
     hero
-    |> update_hero!(%{finished_at: Timex.now()})
-    |> update_hero_collection!()
-    |> track_pve_quests()
   end
 
   def finish_pve!(hero), do: hero

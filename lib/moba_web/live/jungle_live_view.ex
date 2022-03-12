@@ -10,7 +10,6 @@ defmodule MobaWeb.JungleLiveView do
 
     cond do
       hero && hero.finished_at ->
-        if is_nil(hero.pve_ranking), do: Game.update_pve_ranking!()
         {:ok, socket |> redirect(to: Routes.live_path(socket, MobaWeb.HeroLiveView, hero.id))}
 
       hero ->

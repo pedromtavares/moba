@@ -56,6 +56,11 @@ defmodule MobaWeb.HeroLiveView do
     {:noreply, assign(socket, hero: Game.get_hero!(id))}
   end
 
+  def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
+    hero = Game.get_hero!(id)
+    {:noreply, assign(socket, ranking: Game.pve_search(hero))}
+  end
+
   def handle_params(%{"id" => id}, _uri, socket) do
     hero = Game.get_hero!(id)
     ranking = Game.pve_search(hero)
@@ -63,6 +68,7 @@ defmodule MobaWeb.HeroLiveView do
 
     if connected?(socket) do
       Game.subscribe_to_hero(id)
+      MobaWeb.subscribe("hero-ranking")
     end
 
     skin_selection =

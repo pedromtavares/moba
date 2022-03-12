@@ -11,6 +11,10 @@ defmodule MobaWeb.UserLiveView do
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
+    if connected?(socket) do
+      MobaWeb.subscribe("user-ranking")
+    end
+
     user = Accounts.get_user_with_current_heroes!(id)
 
     featured =
@@ -39,6 +43,11 @@ defmodule MobaWeb.UserLiveView do
   def handle_event("set-featured", %{"id" => id}, socket) do
     featured = Game.get_hero!(id)
     {:noreply, assign(socket, featured: featured)}
+  end
+
+  def handle_info({"ranking", _}, %{assigns: %{user: %{id: id}}} = socket) do
+    user = Accounts.get_user!(id)
+    {:noreply, assign(socket, ranking: Accounts.user_search(user))}
   end
 
   def render(assigns) do

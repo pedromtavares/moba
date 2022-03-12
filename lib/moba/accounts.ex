@@ -50,7 +50,10 @@ defmodule Moba.Accounts do
 
   defdelegate ranking(limit), to: Users
 
-  defdelegate update_ranking!, to: Users
+  def update_ranking! do
+    Users.update_ranking!()
+    MobaWeb.broadcast("user-ranking", "ranking", %{})
+  end
 
   defdelegate update_collection!(user, hero_collection), to: Users
 
