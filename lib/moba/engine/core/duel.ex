@@ -32,32 +32,37 @@ defmodule Moba.Engine.Core.Duel do
       defender: defender,
       match_id: Moba.current_match().id,
       duel_id: duel_id,
-      type: Engine.battle_types().duel
+      type: Engine.battle_types().duel,
+      duel: Game.get_duel!(duel_id)
     }
   end
 
-  defp manage_duel_winner(%{winner: winner, duel: %{phase: phase} = duel} = last_battle)
+  defp manage_duel_winner(%{winner_id: last_winner_id, duel: %{phase: phase} = duel} = last_battle)
        when phase == "opponent_battle" do
     first_battle = Engine.first_duel_battle(duel)
-    user_win = first_battle.winner_id == duel.user_first_pick_id && winner.id == duel.user_second_pick_id
-    opponent_win = first_battle.winner_id == duel.opponent_first_pick_id && winner.id == duel.opponent_second_pick_id
+
+    user_win =
+      last_winner_id && first_battle.winner_id == duel.user_first_pick_id && last_winner_id == duel.user_second_pick_id
+
+    opponent_win =
+      last_winner_id && first_battle.winner_id == duel.opponent_first_pick_id &&
+        last_winner_id == duel.opponent_second_pick_id
 
     diff = duel.opponent.season_points - duel.user.season_points
-
-    multiplier = if duel.type == "pvp", do: 2, else: 0.5
+    multiplier = if duel.type == "pvp", do: 3, else: 1
+    victory_points = Moba.victory_duel_points(diff) * multiplier
+    tie_points = Moba.tie_duel_points(diff) * multiplier
 
     {duel_winner, attacker_points, defender_points} =
       cond do
         user_win ->
-          {duel.user, round(Moba.attacker_win_pvp_points(diff) * multiplier),
-           round(Moba.defender_loss_pvp_points(diff) * multiplier)}
+          {duel.user, victory_points, victory_points * -1}
 
         opponent_win ->
-          {duel.opponent, round(Moba.attacker_loss_pvp_points(diff) * multiplier),
-           round(Moba.defender_win_pvp_points(diff) * multiplier)}
+          {duel.opponent, victory_points * -1, victory_points}
 
         true ->
-          {nil, 0, 0}
+          {nil, tie_points, tie_points * -1}
       end
 
     rewards = %{
@@ -102,7 +107,7 @@ defmodule Moba.Engine.Core.Duel do
   end
 
   defp next_duel_phase({_, battle}) do
-    Game.get_duel!(battle.duel_id) |> Game.next_duel_phase!()
+    Game.next_duel_phase!(battle.duel)
 
     battle
   end

@@ -1,49 +1,34 @@
 defmodule Moba.MobaTest do
   use Moba.DataCase
 
-  describe "pvp_points" do
-    test "attacker win" do
-      assert Moba.attacker_win_pvp_points(200) == 19
-      assert Moba.attacker_win_pvp_points(100) == 14
-      assert Moba.attacker_win_pvp_points(80) == 13
-      assert Moba.attacker_win_pvp_points(40) == 11
-      assert Moba.attacker_win_pvp_points(0) == 9
-      assert Moba.attacker_win_pvp_points(-40) == 7
-      assert Moba.attacker_win_pvp_points(-80) == 2
-      assert Moba.attacker_win_pvp_points(-100) == 2
+  describe "duel points" do
+    test "victory" do
+      # Enum.each((-100..100), fn n -> IO.inspect("#{n} - #{Moba.victory_duel_points(n)}") end)
+      assert Moba.victory_duel_points(200) == 30
+      assert Moba.victory_duel_points(100) == 15
+      assert Moba.victory_duel_points(80) == 12
+      assert Moba.victory_duel_points(40) == 6
+      assert Moba.victory_duel_points(20) == 5
+      assert Moba.victory_duel_points(0) == 5
+      assert Moba.victory_duel_points(-20) == 5
+      assert Moba.victory_duel_points(-40) == 4
+      assert Moba.victory_duel_points(-50) == 3
+      assert Moba.victory_duel_points(-80) == 2
+      assert Moba.victory_duel_points(-100) == 2
+      assert Moba.victory_duel_points(-200) == 2
     end
 
-    test "attacker loss" do
-      assert Moba.attacker_loss_pvp_points(100) == -2
-      assert Moba.attacker_loss_pvp_points(80) == -2
-      assert Moba.attacker_loss_pvp_points(40) == -7
-      assert Moba.attacker_loss_pvp_points(0) == -9
-      assert Moba.attacker_loss_pvp_points(-40) == -11
-      assert Moba.attacker_loss_pvp_points(-80) == -13
-      assert Moba.attacker_loss_pvp_points(-100) == -14
-      assert Moba.attacker_loss_pvp_points(-200) == -19
-    end
-
-    test "defender win" do
-      assert Moba.defender_win_pvp_points(100) == 0
-      assert Moba.defender_win_pvp_points(80) == 0
-      assert Moba.defender_win_pvp_points(40) == 0
-      assert Moba.defender_win_pvp_points(0) == 2
-      assert Moba.defender_win_pvp_points(-40) == 4
-      assert Moba.defender_win_pvp_points(-80) == 6
-      assert Moba.defender_win_pvp_points(-100) == 7
-      assert Moba.defender_win_pvp_points(-200) == 12
-    end
-
-    test "defender loss" do
-      assert Moba.defender_loss_pvp_points(200) == -12
-      assert Moba.defender_loss_pvp_points(100) == -7
-      assert Moba.defender_loss_pvp_points(80) == -6
-      assert Moba.defender_loss_pvp_points(40) == -4
-      assert Moba.defender_loss_pvp_points(0) == -2
-      assert Moba.defender_loss_pvp_points(-40) == 0
-      assert Moba.defender_loss_pvp_points(-80) == 0
-      assert Moba.defender_loss_pvp_points(-100) == 0
+    test "tie" do
+      assert Moba.tie_duel_points(100) == 5
+      assert Moba.tie_duel_points(80) == 4
+      assert Moba.tie_duel_points(40) == 2
+      assert Moba.tie_duel_points(20) == 2
+      assert Moba.tie_duel_points(0) == 2
+      assert Moba.tie_duel_points(-20) == -2
+      assert Moba.tie_duel_points(-40) == -2
+      assert Moba.tie_duel_points(-80) == -4
+      assert Moba.tie_duel_points(-100) == -5
+      assert Moba.tie_duel_points(-200) == -10
     end
   end
 

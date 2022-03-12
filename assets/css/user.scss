@@ -1,8 +1,7 @@
 .user-profile{
 
   .pve-rank{
-    max-height: 80px;
-    margin-top: -0.75rem;
+    max-height: 30px;
   }
 
   .pvp-rank{
@@ -48,7 +47,7 @@
 
     .card-body{
       padding: 0 !important;
-      max-height: 920px;
+      max-height: 870px;
       overflow: auto;
     }
 
@@ -59,7 +58,7 @@
 
 
   .duels{
-    max-height: 605px;
+    max-height: 570px;
     overflow: auto;
 
     h5{
@@ -87,5 +86,12 @@
       top: 70%;
       left: 40%;
     }
+  }
+}
+
+.bot-profile{
+
+  .duels{
+    max-height: 410px !important;
   }
 }

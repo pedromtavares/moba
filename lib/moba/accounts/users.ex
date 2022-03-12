@@ -280,37 +280,24 @@ defmodule Moba.Accounts.Users do
   defp maximum_tier(tier) when tier > @max_season_tier, do: @max_season_tier
   defp maximum_tier(tier), do: tier
 
-  defp minimum_tier(tier) when tier < 0, do: 0
-  defp minimum_tier(tier), do: tier
-
-  def normal_matchmaking_opponent(%{season_tier: tier}) when tier < 0, do: nil
-
-  def normal_matchmaking_opponent(%{season_tier: tier} = user) do
-    result = normal_matchmaking_query(user) |> Repo.all() |> List.first()
-
-    if result, do: result, else: normal_matchmaking(%{user | season_tier: tier - 1})
+  def normal_matchmaking_opponent(user) do
+    normal_matchmaking_query(user) |> UserQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
-  def elite_matchmaking_opponent(%{season_tier: tier}) when tier > @max_season_tier, do: nil
-
-  def elite_matchmaking_opponent(%{season_tier: tier} = user) do
-    result = elite_matchmaking_query(user) |> Repo.all() |> List.first()
-
-    if result, do: result, else: elite_matchmaking(%{user | season_tier: tier + 1})
+  def elite_matchmaking_opponent(user) do
+    elite_matchmaking_query(user) |> UserQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
-  defp normal_matchmaking_query(%{season_tier: tier} = user) do
-    exclusions = match_exclusions(user)
-    min_tier = minimum_tier(tier - 1)
+  defp normal_matchmaking_query(%{season_tier: user_tier} = user) do
+    exclusions = match_exclusions(user) ++ [user.id]
 
-    UserQuery.season_search(min_tier, tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.matchmaking(user_tier) |> UserQuery.exclude_ids(exclusions)
   end
 
-  defp elite_matchmaking_query(%{season_tier: tier} = user) do
-    exclusions = match_exclusions(user)
-    min_tier = maximum_tier(tier + 1)
-    max_tier = maximum_tier(tier + 2)
+  defp elite_matchmaking_query(%{season_tier: user_tier} = user) do
+    exclusions = match_exclusions(user) ++ [user.id]
+    tier = maximum_tier(user_tier + 1)
 
-    UserQuery.season_search(min_tier, max_tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.elite_matchmaking(tier) |> UserQuery.exclude_ids(exclusions)
   end
 end

@@ -1,8 +1,6 @@
 defmodule MobaWeb.ArenaView do
   use MobaWeb, :view
 
-  alias Moba.Accounts
-
   def bot_timer(time) do
     time =
       Timex.parse!(time, "{ISO:Extended:Z}")
@@ -27,7 +25,7 @@ defmodule MobaWeb.ArenaView do
   end
 
   def match_label(%{type: "elite_matchmaking"}), do: "Elite MM"
-  def match_label(%{type: "pvp"}), do: "PvP"
+  def match_label(%{type: "pvp"}), do: "Duel"
   def match_label(_), do: "Normal MM"
 
   def match_result(match) do

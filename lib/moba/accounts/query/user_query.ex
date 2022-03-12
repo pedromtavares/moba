@@ -99,16 +99,16 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in by_season_points(), where: u.is_bot == true)
   end
 
-  def season_search(min_tier, max_tier) do
-    bots()
-    |> in_season_tiers(min_tier, max_tier)
-    |> random()
+  def matchmaking(season_tier) do
+    from bot in bots(),
+      where: bot.season_tier <= ^season_tier,
+      order_by: [desc: bot.season_points]
   end
 
-  def in_season_tiers(query, min, max) do
-    from user in query,
-      where: user.season_tier >= ^min,
-      where: user.season_tier <= ^max
+  def elite_matchmaking(season_tier) do
+    from bot in bots(),
+      where: bot.season_tier >= ^season_tier,
+      order_by: [asc: bot.season_points]
   end
 
   def limit_by(query, limit) do

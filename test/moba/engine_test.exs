@@ -239,8 +239,8 @@ defmodule Moba.EngineTest do
       assert user.duel_score == %{"#{opponent.id}" => 1}
       assert opponent.duel_score == %{}
 
-      assert user.season_points == attacker.user.season_points + 18
-      assert opponent.season_points == defender.user.season_points - 4
+      assert user.season_points == attacker.user.season_points + 15
+      assert opponent.season_points == defender.user.season_points - 15
     end
   end
 

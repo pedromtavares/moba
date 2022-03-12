@@ -4,7 +4,7 @@ defmodule Moba.Conductor do
   """
   use GenServer
 
-  alias Moba.{Repo, Game, Accounts, Engine}
+  alias Moba.{Repo, Game, Accounts}
   alias Game.Query.{ItemQuery, HeroQuery, AvatarQuery, SkillQuery}
   alias Accounts.Query.UserQuery
 
@@ -66,7 +66,7 @@ defmodule Moba.Conductor do
   so Moba.Game.Server knows when to run this again, currently every 10 mins.
   """
   def server_update!(match \\ Moba.current_match()) do
-    # skynet(match)
+    skynet(match)
     Accounts.update_ranking!()
 
     match
@@ -253,7 +253,9 @@ defmodule Moba.Conductor do
     end)
   end
 
-  defp skynet(%{last_server_update_at: time}) do
+  defp skynet(%{last_server_update_at: updated_at, inserted_at: inserted_at}) do
+    time = updated_at || inserted_at
+
     Enum.each(1..5, fn _n ->
       bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
 
@@ -262,19 +264,10 @@ defmodule Moba.Conductor do
 
         if duel do
           Logger.info("Created duel ##{duel.id} for #{bot.username}")
-          Game.get_duel!(duel.id) |> Game.next_duel_phase!(skynet_hero(bot, duel))
-          Engine.first_duel_battle(duel) |> Engine.auto_finish_battle!()
-          Game.get_duel!(duel.id) |> Game.next_duel_phase!(skynet_hero(bot, duel))
-          Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
-
           later = Timex.shift(time, minutes: 190)
           Accounts.update_user!(bot, %{last_online_at: later})
         end
       end
     end)
-  end
-
-  defp skynet_hero(bot, duel) do
-    Game.eligible_heroes_for_pvp(bot.id, duel.inserted_at) |> List.first()
   end
 end

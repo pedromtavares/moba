@@ -46,6 +46,8 @@ defmodule Moba do
   @match_timeout_in_hours 24
   @normal_matchmaking_shards 5
   @elite_matchmaking_shards 15
+  @minimum_duel_points 2
+  @maximum_duel_points 100
 
   # PVE constants
   @total_pve_turns 25
@@ -89,6 +91,15 @@ defmodule Moba do
   def match_timeout_in_hours, do: @match_timeout_in_hours
   def normal_matchmaking_shards, do: @normal_matchmaking_shards
   def elite_matchmaking_shards, do: @elite_matchmaking_shards
+  def minimum_duel_points(points) when points < @minimum_duel_points, do: @minimum_duel_points
+  def minimum_duel_points(points), do: points
+  def maximum_duel_points(points) when points > @maximum_duel_points, do: @maximum_duel_points
+  def maximum_duel_points(points), do: points
+  def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
+  def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
+  def victory_duel_points(diff), do: ceil(diff * 0.15) |> maximum_duel_points()
+  def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points() |> maximum_duel_points())
+  def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points() |> maximum_duel_points()
 
   def total_pve_turns(0), do: @total_pve_turns - 10
   def total_pve_turns(1), do: @total_pve_turns - 5
@@ -132,20 +143,6 @@ defmodule Moba do
   def max_available_league(0), do: 4
   def max_available_league(1), do: 5
   def max_available_league(_), do: 6
-
-  # diff = defender.pvp_points - attacker.pvp_points
-
-  def attacker_win_pvp_points(diff) when diff < -40, do: 2
-  def attacker_win_pvp_points(diff), do: round(5 + (diff + 80) * 0.05)
-
-  def attacker_loss_pvp_points(diff) when diff > 40, do: -2
-  def attacker_loss_pvp_points(diff), do: round(-5 + (diff - 80) * 0.05)
-
-  def defender_win_pvp_points(diff) when diff > 40, do: 0
-  def defender_win_pvp_points(diff), do: -round((diff - 40) * 0.05)
-
-  def defender_loss_pvp_points(diff) when diff < -40, do: 0
-  def defender_loss_pvp_points(diff), do: -round((diff + 40) * 0.05)
 
   def avatar_minimum_stats() do
     %{

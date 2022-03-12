@@ -5,8 +5,8 @@ defmodule Moba.Game.Duels do
 
   import Ecto.Query
 
-  def list(user) do 
-    query = 
+  def list(user) do
+    query =
       from duel in base_query(user),
         where: duel.phase == "finished"
 
@@ -14,9 +14,8 @@ defmodule Moba.Game.Duels do
   end
 
   def list_matchmaking(user) do
-    query = 
-      from duel in base_query(user),
-        where: duel.type == "normal_matchmaking" or duel.type == "elite_matchmaking"
+    types = ["normal_matchmaking", "elite_matchmaking"]
+    query = from duel in base_query(user), where: duel.type in ^types
 
     Repo.all(query)
   end
@@ -34,12 +33,26 @@ defmodule Moba.Game.Duels do
     ])
   end
 
+  def simple_load(queryable \\ Duel) do
+    queryable
+    |> preload([
+      :user,
+      :opponent,
+      :winner,
+      user_first_pick: ^HeroQuery.load_avatar(),
+      opponent_first_pick: ^HeroQuery.load_avatar(),
+      user_second_pick: ^HeroQuery.load_avatar(),
+      opponent_second_pick: ^HeroQuery.load_avatar()
+    ])
+  end
+
   def get!(id), do: load() |> Repo.get!(id)
 
   def create!(user, opponent, type) do
-    %Duel{phase: "user_first_pick", user_id: user.id, opponent_id: opponent.id, type: type}
+    %Duel{phase: "user_first_pick", user: user, user_id: user.id, opponent_id: opponent.id, type: type}
     |> Duel.changeset(%{})
     |> Repo.insert!()
+    |> maybe_auto_next_phase()
   end
 
   def next_phase!(%{phase: phase} = duel, hero) do
@@ -82,21 +95,29 @@ defmodule Moba.Game.Duels do
     update!(duel, %{winner_id: winner && winner.id, rewards: rewards, phase: "finished"})
   end
 
-  defp available_bot_hero(%{opponent: %{id: user_id}, inserted_at: duel_inserted_at}) do
+  defp available_bot_hero(%{inserted_at: duel_inserted_at}, user_id) do
     Game.eligible_heroes_for_pvp(user_id, duel_inserted_at)
+    |> Enum.shuffle()
     |> List.first()
   end
 
   defp base_query(%{id: user_id}) do
-    from duel in load(),
+    from duel in simple_load(),
       where: duel.user_id == ^user_id,
       limit: 20,
       order_by: [desc: duel.inserted_at]
   end
 
-  defp maybe_auto_next_phase(%{opponent: %{is_bot: true}, phase: phase} = duel)
+  defp maybe_auto_next_phase(%{user: %{is_bot: true, id: user_id}, phase: phase} = duel)
+       when phase in ["user_first_pick", "user_second_pick"] do
+    bot = available_bot_hero(duel, user_id)
+    if bot, do: Game.next_duel_phase!(get!(duel.id), bot), else: duel
+  end
+
+  defp maybe_auto_next_phase(%{opponent: %{is_bot: true, id: user_id}, phase: phase} = duel)
        when phase in ["opponent_first_pick", "opponent_second_pick"] do
-    Game.next_duel_phase!(get!(duel.id), available_bot_hero(duel))
+    bot = available_bot_hero(duel, user_id)
+    if bot, do: Game.next_duel_phase!(get!(duel.id), bot), else: duel
   end
 
   defp maybe_auto_next_phase(duel), do: duel

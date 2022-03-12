@@ -1,4 +1,4 @@
-<div class="user-profile" id="user-profile">
+<div class={if @user.is_bot, do: "user-profile bot-profile", else: "user-profile"}>
     <div class="row mt-3">
         <div class="col-md-6 col-xl-4">
             <div class="row">
@@ -6,32 +6,33 @@
             </div>
             <div class="row">
                 <div class="col">
-                    <div class="card-box collection mb-0 pb-2">
+                    <div class="card collection mb-0">
                         <%= unless @user.is_bot do %>
-                            <div class="text-center">
-                                <img src={"/images/pve/#{@user.pve_tier}.png"} class="pve-rank"/>
-                                <h3 class="mb-2 mt-1"><%= Moba.pve_tiers[@user.pve_tier] %></h3>
-                            </div>
+                            <h5 class="card-header text-center text-white font-17">
+                                <img src={"/images/pve/#{@user.pve_tier}.png"} class="pve-rank"/> <%= Moba.pve_tiers[@user.pve_tier] %> Collection
+                            </h5>
                         <% end %>
-                        <div class="row">
-                            <%= for hero <- @user.hero_collection do %>
-                                <div class="col-3 mb-2 text-center">
-                                    <a href="javascript:;" class={if @featured.id == hero["hero_id"], do: "current-featured"} phx-click="set-featured" phx-value-id={hero["hero_id"]} phx-hook="Loading" id={"set-featured-#{hero["hero_id"]}"}>
-                                        <div class='avatar-container'>
-                                            <img src={GH.image_url(hero["avatar"])} class="avatar"/>
-                                            <img src={"/images/league_#{hero["tier"]}.png"} class="league-logo">
-                                        </div>
+                        <div class="card-body pb-2">
+                            <div class="row">
+                                <%= for hero <- @user.hero_collection do %>
+                                    <div class="col-3 mb-2 text-center">
+                                        <a href="javascript:;" class={if @featured.id == hero["hero_id"], do: "current-featured"} phx-click="set-featured" phx-value-id={hero["hero_id"]} phx-hook="Loading" id={"set-featured-#{hero["hero_id"]}"}>
+                                            <div class='avatar-container'>
+                                                <img src={GH.image_url(hero["avatar"])} class="avatar"/>
+                                                <img src={"/images/league_#{hero["tier"]}.png"} class="league-logo">
+                                            </div>
 
-                                    </a>
-                                </div>
-                            <% end %>
-                            <%= for avatar <- @blank_collection do %>
-                                <div class="col-3 mb-2 text-center">
-                                    <div class='avatar-container'>
-                                        <img src={GH.image_url(avatar)} class="avatar blank-avatar"/>
+                                        </a>
                                     </div>
-                                </div>
-                            <% end %>
+                                <% end %>
+                                <%= for avatar <- @blank_collection do %>
+                                    <div class="col-3 mb-2 text-center">
+                                        <div class='avatar-container'>
+                                            <img src={GH.image_url(avatar)} class="avatar blank-avatar"/>
+                                        </div>
+                                    </div>
+                                <% end %>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -53,7 +54,7 @@
                             </h5>
                         <% end %>
                         <div class="card-body p-2 text-center">
-                            <img src={"/images/pvp/#{@user.season_tier}.png"} class="pvp-rank"/>
+                            <img src={"/images/pvp/#{@user.season_tier}.png"} class="pvp-rank" data-toggle="tooltip" title={Moba.pvp_tiers[@user.season_tier]}/>
                             <h2 class={"text-medal-#{@user.season_tier}"}><%= @user.username %></h2>
                         </div>
                         <div class="card-footer mt-1">
@@ -78,7 +79,7 @@
             
             <div class="row text-center">
                 <div class="col">
-                    <div class="card">
+                    <div class="card mb-0">
                         <h5 class="card-header text-center font-17 text-white"><i class="fa fa-chess-rook mr-1"></i> Arena</h5>
                         <%= if @user.id != @current_user.id do %>
                             <div class="card-body p-1 score">
@@ -99,7 +100,7 @@
                                 </div>
                             </div>
                         <% end %>
-                        <%= unless @user.is_bot || length(@duels) == 0 do %>
+                        <%= unless length(@duels) == 0 do %>
                             <div class="transparent card-footer p-0 duels">
                                 <table class="table table-dark text-center table-sm m-0">
                                     <%= for duel <- @duels do %>
