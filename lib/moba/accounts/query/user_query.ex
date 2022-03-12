@@ -49,7 +49,6 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in base, where: u.last_online_at < ^ago)
   end
 
-
   def by_user(query \\ User, user) do
     from(u in query, where: u.id == ^user.id)
   end

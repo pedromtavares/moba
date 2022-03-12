@@ -58,7 +58,7 @@ defmodule Moba.Conductor do
     Game.generate_daily_quest_progressions!()
     deflation_is_transitory()
     Accounts.update_ranking!()
-  
+
     match
   end
 

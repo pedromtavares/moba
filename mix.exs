@@ -39,6 +39,7 @@ defmodule Moba.MixProject do
       {:phoenix_pubsub, "~> 2.0"},
       {:phoenix_ecto, "~> 4.0"},
       {:ecto_sql, "~> 3.0"},
+      {:ecto_psql_extras, "~> 0.6"},
       {:postgrex, ">= 0.15.3"},
       {:phoenix_html, "~> 3.2"},
       {:phoenix_live_reload, "~> 1.3.3", only: :dev},
@@ -67,6 +68,8 @@ defmodule Moba.MixProject do
       {:telemetry_metrics, "~> 0.6"},
       {:ecto_explain, "~> 0.1.2"},
       {:sentry, "~> 8.0"},
+      {:appsignal, "~> 2.0"},
+      {:appsignal_phoenix, "~> 2.0"},
       {:pow_postgres_store, github: "ZennerIoT/pow_postgres_store"},
       {:floki, ">= 0.0.0", only: :test},
       {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false}

@@ -99,7 +99,7 @@ defmodule MobaWeb.Router do
     resources "/skins", Admin.SkinController
     resources "/quests", Admin.QuestController
 
-    live_dashboard "/dashboard", metrics: MobaWeb.Telemetry
+    live_dashboard "/dashboard", metrics: MobaWeb.Telemetry, ecto_repos: [Moba.Repo]
 
     get "/", Admin.SkillController, :root
   end
