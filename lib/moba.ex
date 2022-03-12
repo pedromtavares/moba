@@ -48,6 +48,7 @@ defmodule Moba do
   @elite_matchmaking_shards 15
   @minimum_duel_points 2
   @maximum_duel_points 100
+  @season_deflation_rate 0.01
 
   # PVE constants
   @total_pve_turns 25
@@ -100,6 +101,7 @@ defmodule Moba do
   def victory_duel_points(diff), do: ceil(diff * 0.15) |> maximum_duel_points()
   def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points() |> maximum_duel_points())
   def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points() |> maximum_duel_points()
+  def season_deflation_rate, do: @season_deflation_rate
 
   def total_pve_turns(0), do: @total_pve_turns - 10
   def total_pve_turns(1), do: @total_pve_turns - 5

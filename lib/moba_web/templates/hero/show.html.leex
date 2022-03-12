@@ -131,7 +131,7 @@
                             <th>Finished in</th>
                         </tr>
                         <%= for hero <- @ranking do %>
-                            <tr id="ranking-<%=hero.id%>">
+                            <tr id="ranking-<%= hero.id %>">
                                 <td>
                                     <h1 class="<%= if hero.id == @hero.id, do: "text-danger" %>">
                                         <%= if hero.pve_ranking do %>

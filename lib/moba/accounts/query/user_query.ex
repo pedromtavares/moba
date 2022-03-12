@@ -42,6 +42,14 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in non_bots(query), where: u.last_online_at > ^ago, order_by: [desc: u.last_online_at])
   end
 
+  def online_before(days_ago) do
+    base = non_bots() |> non_guests()
+    ago = Timex.now() |> Timex.shift(days: -days_ago)
+
+    from(u in base, where: u.last_online_at < ^ago)
+  end
+
+
   def by_user(query \\ User, user) do
     from(u in query, where: u.id == ^user.id)
   end

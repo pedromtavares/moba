@@ -58,7 +58,7 @@ defmodule MobaWeb.HeroLiveView do
 
   def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
     hero = Game.get_hero!(id)
-    {:noreply, assign(socket, ranking: Game.pve_search(hero))}
+    {:noreply, assign(socket, ranking: Game.pve_search(hero), hero: hero)}
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do

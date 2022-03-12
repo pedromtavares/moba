@@ -47,7 +47,7 @@ defmodule MobaWeb.UserLiveView do
 
   def handle_info({"ranking", _}, %{assigns: %{user: %{id: id}}} = socket) do
     user = Accounts.get_user!(id)
-    {:noreply, assign(socket, ranking: Accounts.user_search(user))}
+    {:noreply, assign(socket, ranking: Accounts.user_search(user), user: user)}
   end
 
   def render(assigns) do

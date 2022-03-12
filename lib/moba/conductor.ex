@@ -56,8 +56,9 @@ defmodule Moba.Conductor do
       |> server_update!()
 
     Game.generate_daily_quest_progressions!()
+    deflation_is_transitory()
     Accounts.update_ranking!()
-
+  
     match
   end
 
@@ -268,6 +269,16 @@ defmodule Moba.Conductor do
           Accounts.update_user!(bot, %{last_online_at: later})
         end
       end
+    end)
+  end
+
+  defp deflation_is_transitory do
+    old_users = UserQuery.online_before(7) |> Repo.all()
+    deflation = Moba.season_deflation_rate()
+
+    Enum.map(old_users, fn user ->
+      loss = ceil(user.season_points * deflation)
+      Accounts.update_user!(user, %{season_points: user.season_points - loss})
     end)
   end
 end
