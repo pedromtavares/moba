@@ -13,9 +13,10 @@ defmodule MobaWeb.ArenaView do
   def elite?(%{type: "elite_matchmaking"}), do: true
   def elite?(_), do: false
 
-  def first_battle_for(%{id: duel_id, user_first_pick: hero_id}, battles), do: duel_battle(duel_id, hero_id, battles)
+  def first_battle_for(%{id: duel_id, user_first_pick_id: hero_id}, battles), do: duel_battle(duel_id, hero_id, battles)
 
-  def last_battle_for(%{id: duel_id, opponent_second_pick: hero_id}, battles), do: duel_battle(duel_id, hero_id, battles)
+  def last_battle_for(%{id: duel_id, opponent_second_pick_id: hero_id}, battles),
+    do: duel_battle(duel_id, hero_id, battles)
 
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false

@@ -66,7 +66,7 @@ defmodule Moba.Engine.Battles do
   def list_for_duels(duel_ids) do
     from(b in Battle, where: b.duel_id in ^duel_ids)
     |> Repo.all()
-    |> Repo.preload([:attacker, :defender, :winner])
+    |> Repo.preload([:winner, attacker: :avatar, defender: :avatar])
   end
 
   def first_from_duel(%{user_first_pick_id: pick_id}) when is_nil(pick_id), do: nil
