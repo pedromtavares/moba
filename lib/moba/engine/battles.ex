@@ -63,11 +63,10 @@ defmodule Moba.Engine.Battles do
     |> List.first()
   end
 
-  def latest_for_duel(duel_id) do
-    from(b in for_duel(duel_id), order_by: [desc: :id], limit: 1)
-    |> load()
+  def list_for_duels(duel_ids) do
+    from(b in Battle, where: b.duel_id in ^duel_ids)
     |> Repo.all()
-    |> List.first()
+    |> Repo.preload([:attacker, :defender, :winner])
   end
 
   def first_from_duel(%{user_first_pick_id: pick_id}) when is_nil(pick_id), do: nil

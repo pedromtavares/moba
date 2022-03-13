@@ -75,11 +75,11 @@
                         </td>
 
                         <td>
-                            <%= render "_match_battle.html", battle: Engine.first_duel_battle(match) %>
+                            <%= render "_match_battle.html", battle: first_battle_for(match, @battles) %>
                         </td>
 
                         <td>
-                            <%= render "_match_battle.html", battle: Engine.last_duel_battle(match) %>
+                            <%= render "_match_battle.html", battle: last_battle_for(match, @battles) %>
                         </td>
                         
                         <td>

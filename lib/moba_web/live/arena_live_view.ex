@@ -13,11 +13,13 @@ defmodule MobaWeb.ArenaLiveView do
         normal_count = Accounts.normal_matchmaking_count(user)
         elite_count = Accounts.elite_matchmaking_count(user)
         matchmaking = Game.list_matchmaking(user)
+        battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles()
         pending_match = Enum.find(matchmaking, &(&1.phase != "finished"))
         closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user)
 
         {:ok,
          assign(socket,
+           battles: battles,
            duel_users: duel_users,
            elite_count: elite_count,
            normal_count: normal_count,

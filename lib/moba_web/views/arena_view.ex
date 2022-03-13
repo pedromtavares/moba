@@ -13,6 +13,10 @@ defmodule MobaWeb.ArenaView do
   def elite?(%{type: "elite_matchmaking"}), do: true
   def elite?(_), do: false
 
+  def first_battle_for(%{id: duel_id, user_first_pick: hero_id}, battles), do: duel_battle(duel_id, hero_id, battles)
+
+  def last_battle_for(%{id: duel_id, opponent_second_pick: hero_id}, battles), do: duel_battle(duel_id, hero_id, battles)
+
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 
@@ -47,5 +51,9 @@ defmodule MobaWeb.ArenaView do
       current_tier >= Moba.max_season_tier() -> nil
       true -> current_tier + 1
     end
+  end
+
+  defp duel_battle(duel_id, hero_id, battles) do
+    Enum.find(battles, &(&1.attacker_id == hero_id && &1.duel_id == duel_id))
   end
 end

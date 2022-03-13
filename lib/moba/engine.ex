@@ -22,6 +22,8 @@ defmodule Moba.Engine do
     Battles.list(hero, type, page, limit)
   end
 
+  def list_duel_battles(duel_ids), do: Battles.list_for_duels(duel_ids)
+
   def first_duel_battle(duel), do: Battles.first_from_duel(duel)
 
   def last_duel_battle(duel), do: Battles.last_from_duel(duel)
@@ -29,8 +31,6 @@ defmodule Moba.Engine do
   def pending_battle(hero_id), do: Battles.pending_for(hero_id)
 
   def latest_battle(hero_id), do: Battles.latest_for(hero_id)
-
-  def latest_duel_battle(duel_id), do: Battles.latest_for_duel(duel_id)
 
   def generate_attacker_snapshot!(tuple), do: Battles.generate_attacker_snapshot!(tuple)
 
