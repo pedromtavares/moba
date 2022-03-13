@@ -67,7 +67,7 @@ defmodule Moba.Game.Items do
       |> unequip(ingredients)
       |> equip(result)
     else
-      raise "Invalid recipe"
+      hero
     end
   end
 

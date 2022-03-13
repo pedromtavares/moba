@@ -1,36 +1,33 @@
 defmodule MobaWeb.ArenaLiveView do
   use MobaWeb, :live_view
-  import Appsignal.Phoenix.LiveView, only: [instrument: 4]
 
   def mount(_, session, socket) do
-    instrument(__MODULE__, "mount", socket, fn ->
-      socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
-      user = socket.assigns.current_user
-      eligible_heroes = Game.eligible_heroes_for_pvp(user.id, Timex.now())
+    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
+    user = socket.assigns.current_user
+    eligible_heroes = Game.eligible_heroes_for_pvp(user.id, Timex.now())
 
-      if length(eligible_heroes) >= 2 do
-        duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
-        normal_count = Accounts.normal_matchmaking_count(user)
-        elite_count = Accounts.elite_matchmaking_count(user)
-        matchmaking = Game.list_matchmaking(user)
-        battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles()
-        pending_match = Enum.find(matchmaking, &(&1.phase != "finished"))
-        closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user)
+    if length(eligible_heroes) >= 2 do
+      duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
+      normal_count = Accounts.normal_matchmaking_count(user)
+      elite_count = Accounts.elite_matchmaking_count(user)
+      matchmaking = Game.list_matchmaking(user)
+      battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles()
+      pending_match = Enum.find(matchmaking, &(&1.phase != "finished"))
+      closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user)
 
-        {:ok,
-         assign(socket,
-           battles: battles,
-           duel_users: duel_users,
-           elite_count: elite_count,
-           normal_count: normal_count,
-           matchmaking: matchmaking,
-           pending_match: pending_match,
-           closest_bot_time: closest_bot_time
-         )}
-      else
-        {:ok, socket |> push_redirect(to: "/base")}
-      end
-    end)
+      {:ok,
+       assign(socket,
+         battles: battles,
+         duel_users: duel_users,
+         elite_count: elite_count,
+         normal_count: normal_count,
+         matchmaking: matchmaking,
+         pending_match: pending_match,
+         closest_bot_time: closest_bot_time
+       )}
+    else
+      {:ok, socket |> push_redirect(to: "/base")}
+    end
   end
 
   def handle_event("challenge", %{"id" => opponent_id}, socket) do

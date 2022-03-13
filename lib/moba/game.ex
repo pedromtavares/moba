@@ -27,7 +27,13 @@ defmodule Moba.Game do
   def current_pve_hero(%{current_pve_hero_id: hero_id}), do: get_hero!(hero_id)
   def current_pve_hero(_), do: nil
 
-  def latest_heroes(user_id), do: Heroes.list_latest(user_id)
+  def list_all_unfinished_heroes(user_id), do: Heroes.list_all_unfinished(user_id)
+
+  def list_all_finished_heroes(user_id), do: Heroes.list_all_finished(user_id)
+
+  def latest_unfinished_heroes(user_id), do: Heroes.list_latest_unfinished(user_id)
+
+  def latest_finished_heroes(user_id), do: Heroes.list_latest_finished(user_id)
 
   def eligible_heroes_for_pvp(user_id, duel_inserted_at), do: Heroes.list_pvp_eligible(user_id, duel_inserted_at)
 

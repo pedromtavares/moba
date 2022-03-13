@@ -39,7 +39,11 @@ defmodule Moba.Accounts.Query.UserQuery do
   def online_users(query \\ User, hours_ago \\ 1) do
     ago = Timex.now() |> Timex.shift(hours: -hours_ago)
 
-    from(u in non_bots(query), where: u.last_online_at > ^ago, order_by: [desc: u.last_online_at])
+    from(u in non_bots(query), where: u.last_online_at > ^ago)
+  end
+
+  def order_by_online(query) do
+    from(u in query, order_by: [desc: u.last_online_at])
   end
 
   def online_before(days_ago) do

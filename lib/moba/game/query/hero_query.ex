@@ -42,38 +42,30 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(1)
   end
 
-  def latest(user_id, limit \\ 50) do
-    base = Hero |> with_user(user_id)
+  def latest(user_id, limit \\ 10) do
+    base = load() |> with_user(user_id) |> unarchived()
 
-    from(hero in base,
-      limit: ^limit,
-      order_by: [desc: [hero.id]],
-      where: is_nil(hero.archived_at)
-    )
+    from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])
   end
 
   def eligible_for_pvp(user_id, duel_inserted_at) do
-    from(hero in with_user(Hero, user_id),
+    base = with_user(Hero, user_id) |> unarchived() |> finished()
+
+    from(hero in base,
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]],
-      where: not is_nil(hero.finished_at),
       where: hero.league_tier >= @platinum_league_tier,
       where: hero.inserted_at > ^@current_ranking_date,
       where: is_nil(hero.pvp_last_picked) or hero.pvp_last_picked < ^duel_inserted_at
     )
   end
 
-  def eligible_for_fame do
-    match_players = non_bots() |> non_retired()
-    ago = Timex.now() |> Timex.shift(days: -7)
+  def finished(query) do
+    from(hero in query, where: not is_nil(hero.finished_at))
+  end
 
-    from(h in match_players,
-      order_by: [desc: h.pvp_points],
-      limit: 20,
-      where: h.inserted_at > ^ago,
-      where: h.pvp_points > 0,
-      where: not is_nil(h.pvp_points)
-    )
+  def unfinished(query) do
+    from(hero in query, where: is_nil(hero.finished_at))
   end
 
   def pvp_picked_recently(match_time) do
@@ -190,11 +182,6 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in non_bots(query),
       where: not is_nil(hero.pve_ranking),
       order_by: [asc: hero.pve_ranking]
-  end
-
-  def non_retired(query \\ Hero) do
-    from hero in query,
-      where: not is_nil(hero.pvp_points)
   end
 
   def exclude_ids(query, ids) do

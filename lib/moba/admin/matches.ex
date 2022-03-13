@@ -78,6 +78,7 @@ defmodule Moba.Admin.Matches do
     UserQuery.non_bots()
     |> UserQuery.non_guests()
     |> UserQuery.online_users(24)
+    |> UserQuery.order_by_online()
     |> Repo.all()
     |> Enum.map(fn user ->
       heroes = HeroQuery.latest(user.id, 5) |> HeroQuery.load_avatar() |> Repo.all()

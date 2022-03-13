@@ -4,13 +4,11 @@ defmodule MobaWeb.BattleLiveView do
   alias MobaWeb.{BattleView, Tutorial}
 
   def mount(_, session, socket) do
-    current_hero = Game.get_hero!(session["hero_id"])
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
-    current_user = socket.assigns.current_user
+    %{assigns: %{current_user: current_user}} =
+      socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
 
     {:ok,
      assign(socket,
-       current_hero: current_hero,
        battle: nil,
        hero: nil,
        skill: nil,
@@ -24,7 +22,6 @@ defmodule MobaWeb.BattleLiveView do
   end
 
   def handle_params(%{"id" => id} = params, _uri, socket) do
-    current_hero = socket.assigns.current_hero
     battle = Engine.get_battle!(id)
 
     if connected?(socket) && battle.type == "duel" do
@@ -40,7 +37,6 @@ defmodule MobaWeb.BattleLiveView do
        hero: battle.attacker_snapshot,
        turn: turn,
        last_turn: Engine.last_turn(battle),
-       current_hero: current_hero,
        skill: BattleView.preselected_skill(turn.attacker, turn)
      )}
   end

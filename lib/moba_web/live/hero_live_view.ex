@@ -1,30 +1,32 @@
 defmodule MobaWeb.HeroLiveView do
   use MobaWeb, :live_view
 
-  def mount(_, %{"user_id" => user_id} = session, socket) do
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
-    user = socket.assigns.current_user
-    hero_id = Map.get(session, "hero_id")
-    hero = hero_id && Game.get_hero!(hero_id)
+  def mount(_, %{"user_id" => user_id}, socket) do
+    socket =
+      %{assigns: %{current_user: current_user}} =
+      assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
+
+    socket =
+      %{assigns: %{current_hero: current_hero}} =
+      assign_new(socket, :current_hero, fn -> Game.current_pve_hero(current_user) end)
 
     avatars = Game.list_avatars()
-    collection_codes = Enum.map(user.hero_collection, & &1["code"])
+    collection_codes = Enum.map(current_user.hero_collection, & &1["code"])
     blank_collection = Enum.filter(avatars, &(&1.code not in collection_codes))
 
-    completed_progressions = hero && Game.last_completed_quest_progressions(hero)
+    completed_progressions = current_hero && Game.last_completed_quest_progressions(current_hero)
 
     completed_season_progression =
       completed_progressions &&
         Enum.find(completed_progressions, &Enum.member?(Moba.season_quest_codes(), &1.quest.code))
 
     completed_daily_progressions = completed_progressions && Enum.filter(completed_progressions, & &1.quest.daily)
-
     tab_display = tab_display_priority(completed_season_progression)
 
     {:ok,
      assign(socket,
        avatars: avatars,
-       current_hero: hero,
+       current_hero: current_hero,
        blank_collection: blank_collection,
        completed_progressions: completed_progressions,
        completed_season_progression: completed_season_progression,
@@ -61,8 +63,8 @@ defmodule MobaWeb.HeroLiveView do
     {:noreply, assign(socket, ranking: Game.pve_search(hero), hero: hero)}
   end
 
-  def handle_params(%{"id" => id}, _uri, socket) do
-    hero = Game.get_hero!(id)
+  def handle_params(%{"id" => id}, _uri, %{assigns: %{current_hero: current_hero}} = socket) do
+    hero = if id == current_hero.id, do: current_hero, else: Game.get_hero!(id)
     ranking = Game.pve_search(hero)
     user = socket.assigns.current_user
 

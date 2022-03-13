@@ -1,9 +1,8 @@
-<%=if @action_turn_number && !@battle.finished do %>
+<%= if @action_turn_number && !@battle.finished do %>
     <div id="scroll-to-turn" phx-hook="ScrollToTarget" phx-target-element="#turn-<%= @action_turn_number %>"/>
 <% end %>
 
 <div id='hero-battle' class="battle mt-3">
-
     <div class="row">
         <div class="col-12 col-md-5">
             <%= render "_hero.html", hero: @battle.attacker, last_hero: last_hero_for(@battle.attacker, @last_turn), battle: @battle, snapshot: @battle.attacker_snapshot %>

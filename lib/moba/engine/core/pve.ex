@@ -52,7 +52,7 @@ defmodule Moba.Engine.Core.Pve do
   end
 
   defp generate_targets({battle, attacker}) do
-    Game.generate_targets!(attacker)
+    Moba.run_async(fn -> Game.generate_targets!(attacker) end)
 
     battle
   end

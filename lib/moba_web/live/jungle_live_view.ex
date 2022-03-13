@@ -4,8 +4,13 @@ defmodule MobaWeb.JungleLiveView do
   alias MobaWeb.{Tutorial, Shop, JungleView}
 
   def mount(_, %{"user_id" => user_id}, socket) do
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
-    hero = Game.current_pve_hero(socket.assigns.current_user) |> Game.maybe_finish_pve()
+    socket =
+      %{assigns: %{current_user: user}} = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
+
+    socket =
+      %{assigns: %{current_hero: hero}} = assign_new(socket, :current_hero, fn -> Game.current_pve_hero(user) end)
+
+    hero = Game.maybe_finish_pve(hero)
     Cachex.del(:game_cache, user_id)
 
     cond do

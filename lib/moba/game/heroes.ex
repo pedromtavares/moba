@@ -5,28 +5,42 @@ defmodule Moba.Game.Heroes do
   """
   alias Moba.{Repo, Game}
   alias Game.Schema.Hero
-  alias Game.Query.{HeroQuery, SkillQuery}
+  alias Game.Query.HeroQuery
 
   # -------------------------------- PUBLIC API
 
   def get!(nil), do: nil
 
-  def get!(id) do
-    Hero
-    |> Repo.get(id)
-    |> base_preload()
+  def get!(id), do: HeroQuery.load() |> Repo.get(id)
+
+  def list_all_unfinished(user_id) do
+    HeroQuery.latest(user_id, 100)
+    |> HeroQuery.unfinished()
+    |> Repo.all()
   end
 
-  def list_latest(user_id) do
-    HeroQuery.latest(user_id)
+  def list_all_finished(user_id) do
+    HeroQuery.latest(user_id, 100)
+    |> HeroQuery.finished()
     |> Repo.all()
-    |> base_preload()
+  end
+
+  def list_latest_unfinished(user_id) do
+    HeroQuery.latest(user_id)
+    |> HeroQuery.unfinished()
+    |> Repo.all()
+  end
+
+  def list_latest_finished(user_id) do
+    HeroQuery.latest(user_id)
+    |> HeroQuery.finished()
+    |> Repo.all()
   end
 
   def list_pvp_eligible(user_id, duel_inserted_at) do
     HeroQuery.eligible_for_pvp(user_id, duel_inserted_at)
+    |> HeroQuery.load()
     |> Repo.all()
-    |> base_preload()
   end
 
   def create!(attrs, user, avatar) do
@@ -153,24 +167,24 @@ defmodule Moba.Game.Heroes do
 
     HeroQuery.non_bots()
     |> HeroQuery.by_pve_ranking(min, max)
+    |> HeroQuery.load_avatar()
     |> Repo.all()
-    |> avatar_preload()
   end
 
   def pve_search(%{total_gold_farm: total_gold_farm, bot_difficulty: bot}) when not is_nil(bot) do
     HeroQuery.non_bots()
     |> HeroQuery.by_total_gold_farm(total_gold_farm - 2000, total_gold_farm + 2000)
     |> HeroQuery.limit_by(10)
+    |> HeroQuery.load_avatar()
     |> Repo.all()
-    |> avatar_preload()
   end
 
   def pve_search(%{total_gold_farm: total_gold_farm, id: id} = hero) do
     by_farm =
       HeroQuery.non_bots()
       |> HeroQuery.by_total_gold_farm(total_gold_farm - 5000, total_gold_farm + 5000)
+      |> HeroQuery.load_avatar()
       |> Repo.all()
-      |> avatar_preload()
 
     with_hero = Enum.sort_by(by_farm ++ [hero], &(&1.total_gold_farm + &1.total_xp_farm), :desc)
 
@@ -190,8 +204,8 @@ defmodule Moba.Game.Heroes do
   def pve_ranking(limit) do
     HeroQuery.pve_ranked()
     |> HeroQuery.limit_by(limit)
+    |> HeroQuery.load()
     |> Repo.all()
-    |> base_preload()
   end
 
   @doc """
@@ -214,10 +228,10 @@ defmodule Moba.Game.Heroes do
 
   def collection_for(user_id) do
     HeroQuery.finished_pve()
+    |> HeroQuery.load_avatar()
     |> HeroQuery.with_user(user_id)
     |> HeroQuery.unarchived()
     |> Repo.all()
-    |> Repo.preload(:avatar)
     |> Enum.group_by(& &1.avatar.code)
     |> Enum.map(fn {code, heroes} ->
       {
@@ -360,17 +374,6 @@ defmodule Moba.Game.Heroes do
     do: (tier - 1) * 4800
 
   defp bot_total_gold_farm_base(tier, _), do: tier * 4800
-
-  defp base_preload(struct_or_structs, extras \\ []) do
-    Repo.preload(
-      struct_or_structs,
-      [:user, :avatar, :items, :skin, active_build: [skills: SkillQuery.ordered()]] ++ extras
-    )
-  end
-
-  defp avatar_preload(struct_or_structs) do
-    Repo.preload(struct_or_structs, :avatar)
-  end
 
   defp zero_limit(total) when total < 0, do: 0
   defp zero_limit(total), do: total

@@ -3,15 +3,14 @@ defmodule MobaWeb.CurrentHeroLiveView do
 
   alias MobaWeb.{Tutorial, Shop}
 
-  def mount(_, %{"hero_id" => hero_id} = session, socket) do
+  def mount(_, %{"hero" => hero} = session, socket) do
     if connected?(socket) do
-      hero_id
+      hero.id
       |> Game.subscribe_to_hero()
       |> Tutorial.subscribe()
       |> Shop.subscribe()
     end
 
-    hero = Game.get_hero!(hero_id)
     step = session["tutorial_step"] || hero.user.tutorial_step
 
     {:ok,

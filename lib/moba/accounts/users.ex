@@ -44,6 +44,7 @@ defmodule Moba.Accounts.Users do
 
   def duel_list(user) do
     UserQuery.online_users()
+    |> UserQuery.order_by_online()
     |> UserQuery.with_status("available")
     |> UserQuery.exclude_ids([user.id])
     |> Repo.all()

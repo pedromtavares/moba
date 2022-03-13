@@ -84,7 +84,7 @@
                             <td>
                                 <img src="/images/pvp/<%= user.season_tier %>.png" style="max-height: 90px"/>
                                 <h1 class="mb-0">
-                                    #<%=index%>
+                                    #<%= index %>
                                 </h1>
                             </td>
                             <td>
@@ -96,6 +96,12 @@
                                 <span class="font-15 badge badge-pill badge-light-success py-1 px-2 text-reset m-1">
                                     <i class="fa fa-globe mr-1"></i><%= user.season_points %> Season Points
                                 </span>
+                            </td>
+                            <td>
+                                <img src="/images/pve/<%= user.pve_tier %>.png" style="max-height: 50px"/>
+                                <h3 class="mb-0">
+                                    <%= Moba.pve_tiers[user.pve_tier] %>
+                                </h3>
                             </td>
                             <td style="width: 1000px">
                                 <%= for hero <- user.hero_collection do %>

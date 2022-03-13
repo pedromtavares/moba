@@ -41,7 +41,7 @@
                     </div>
                 </div>
             </div>
-            <div class="w-100 hero-list darker">
+            <div class="w-100 hero-list darker" id="hero-list-<%= @pve_display %>">
                 <div class="row no-gutters">
                     <%= for hero <- @visible_heroes do %>
                         <div class="col-6" id="visible-hero-<%= hero.id %>">
@@ -61,7 +61,7 @@
                                 <div class="card-footer transparent p-1">
                                     <div class="row">
                                         <div class="col justify-content-between d-flex">
-                                            <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) == 1 do %>
+                                            <%= unless hero.id == @current_user.current_pvp_hero_id || length(@all_heroes) <= 2 do %>
                                                 <button type="button" class="btn btn-danger" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id="<%= hero.id %>">
                                                     <i class="fa fa-trash-alt mr-1"></i>Delete
                                                 </button>
@@ -106,6 +106,15 @@
                         </div>
                     <% end %>
                 </div>
+                <%= unless Enum.member?(@loaded, @pve_display) do %>
+                    <div class="row">
+                        <div class="col">
+                            <button type="button" class="btn btn-light btn-block btn-lg img-border-sm" phx-click="load-all" phx-hook="Loading" id="load-all-heroes-<%= @pve_display %>">
+                                <span class="loading-text"><i class="fa fa-plus mr-1"></i>Load All</span>
+                            </button>
+                        </div>
+                    </div>
+                <% end %>
             </div>
         <% end %>
     </div>

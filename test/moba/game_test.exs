@@ -460,7 +460,7 @@ defmodule Moba.GameTest do
       normal_items = base_normal_items()
       rare = base_rare_item()
 
-      catch_error(Game.transmute_item!(base_hero, normal_items, rare))
+      assert Game.transmute_item!(base_hero, normal_items, rare) == base_hero
 
       hero =
         base_hero
