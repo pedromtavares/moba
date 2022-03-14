@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%=render "_head.html", conn: @conn, current_hero: nil%>
+    <%= render "_head.html", conn: @conn %>
     <body>
-        <%=render "_navigation.html", conn: @conn, current_user: @current_user, clean: true %>
+        <%= render "_navigation.html", conn: @conn, current_user: @current_user %>
         <div class="wrapper" id="main-wrapper">
             <div class="container-fluid clean-container">
                 <div class="row">
-                    <div class="col col-xl-11 margin-auto">
+                    <div class="col">
                         <%= @inner_content %>
                     </div>
                 </div>

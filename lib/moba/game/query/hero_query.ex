@@ -55,7 +55,6 @@ defmodule Moba.Game.Query.HeroQuery do
       limit: 50,
       order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]],
       where: hero.league_tier >= @platinum_league_tier,
-      where: hero.inserted_at > ^@current_ranking_date,
       where: is_nil(hero.pvp_last_picked) or hero.pvp_last_picked < ^duel_inserted_at
     )
   end

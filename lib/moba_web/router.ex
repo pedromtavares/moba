@@ -20,6 +20,10 @@ defmodule MobaWeb.Router do
     plug :put_root_layout, {MobaWeb.LayoutView, :root}
   end
 
+  pipeline :pow_layout do
+    plug :put_pow_layout, {MobaWeb.LayoutView, :root}
+  end
+
   pipeline :protected do
     plug Pow.Plug.RequireAuthenticated,
       error_handler: Pow.Phoenix.PlugErrorHandler
@@ -40,7 +44,7 @@ defmodule MobaWeb.Router do
   end
 
   scope "/" do
-    pipe_through [:browser, :user_helper]
+    pipe_through [:browser, :user_helper, :pow_layout]
 
     pow_routes()
     pow_extension_routes()
@@ -103,4 +107,6 @@ defmodule MobaWeb.Router do
 
     get "/", Admin.SkillController, :root
   end
+
+  defp put_pow_layout(conn, layout), do: put_private(conn, :phoenix_layout, layout)
 end

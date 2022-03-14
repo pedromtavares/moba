@@ -1,17 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%=render "_head.html", conn: @conn%>
+    <%= render "_head.html", conn: @conn %>
     <body>
-        <%= render "_navigation.html", conn: @conn, current_user: @current_user, current_hero: assigns[:current_hero], clean: true %>
-        <%= if get_flash(@conn, :info) do %>
-            <div class="alert alert-primary alert-dismissible bg-primary text-white border-0 fade show text-center col" role="alert" style="border-radius: 0">
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">×</span>
-                </button>
-                <i class="fa fa-info-circle mr-1"></i><%= get_flash(@conn, :info)%>
-            </div>
-        <% end %>
-        <div class="wrapper <%=wrapper_for(@conn)%>" id="main-wrapper">
+        <%= render "_navigation.html", conn: @conn, current_user: @current_user, current_hero: assigns[:current_hero] %>
+        <div class="wrapper" id="main-wrapper">
             <div class="container-fluid">
                 <div class="row">
                     <div class="col-12 col-xl-11 margin-auto">

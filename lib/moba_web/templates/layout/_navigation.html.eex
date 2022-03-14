@@ -1,8 +1,8 @@
 <header id="topnav">
     <div class="topbar-menu">
-        <div class="container-fluid <%=if @clean, do: "clean-container"%>">
+        <div class="container-fluid clean-container">
             <div id="inner-navigation">
-                <div class="col-xl-11 <%=if @clean, do: "margin-auto"%>"">
+                <div class="col-xl-11 margin-auto">
                     <%= if @current_user do %>
                         <%= if @current_user.is_guest do %>
                             <div class="row d-flex justify-content-center">
