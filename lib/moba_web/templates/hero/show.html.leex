@@ -177,4 +177,4 @@
     </div>
 </div>
 
-<%= if @hero.user_id == @current_user.id, do: live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero" => @hero}, id: "current-hero-live-view") %>
+<%= if @hero.user_id == @current_user.id, do: live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero" => @hero}, id: "hero-bar") %>

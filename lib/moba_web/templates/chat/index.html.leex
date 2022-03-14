@@ -1,16 +1,16 @@
 <div class="chat-button-container">
-    <%=if @unread_count > 0 do %>
-        <span class="unread-count badge badge-pill badge-danger"><%=@unread_count%></span>
-        <button class="btn btn-outline-danger red-glow d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Chat</button>
+    <%= if @unread_count > 0 do %>
+        <span class="unread-count badge badge-pill badge-danger"><%= @unread_count %></span>
+        <button class="btn btn-outline-danger red-glow d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat" phx-target="#chat-live-view"><i class="fa fa-comments mr-1"></i>Chat</button>
     <% else %>
-        <button class="btn btn-outline-secondary text-white d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat"><i class="fa fa-comments mr-1"></i>Chat</button>
+        <button class="btn btn-outline-secondary text-white d-none d-xl-block" id="show-chat-button" phx-hook="ToggleChatButton" id="show-chat" phx-click="show-chat" phx-target="#chat-live-view"><i class="fa fa-comments mr-1"></i>Chat</button>
     <% end %>
 
 </div>
 
-<div class="right-bar" id="chat" phx-window-keydown="close-chat">
+<div class="right-bar" id="chat" phx-window-keydown="close-chat" phx-target="#chat-live-view">
     <div class="chat-title img-border-sm">
-        <a href="javascript:void(0);" class="right-bar-toggle" phx-hook="ToggleChatButton" phx-click="close-chat" id="close-chat">
+        <a href="javascript:void(0);" class="right-bar-toggle" phx-hook="ToggleChatButton" phx-click="close-chat" id="close-chat" phx-target="#chat-live-view">
             <i class="fa fa-times text-white"></i>
         </a>
         <h4 class="m-0 text-white text-center">
@@ -29,19 +29,19 @@
                     <div class="inbox-item">
                         <div class="inbox-item-img">
                             <%= if message.code do %>
-                                <img src="<%=GH.image_url(message)%>" class="img-border-xs"/>
+                                <img src="<%= GH.image_url(message) %>" class="img-border-xs"/>
                             <% end %>
                         </div>
                         <p class="inbox-item-author">
-                            <%=live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark")%>
-                            <%=if message.is_admin do %>
+                            <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
+                            <%= if message.is_admin do %>
                                 <small class="text-danger">(admin)</small>
                             <% end %>
-                            <%=if @user.is_admin do %>
-                                <a href="javascript:void(0)" phx-click="delete" phx-value-id="<%=message.id%>" class="text-left text-danger float-right small">Delete</a>
+                            <%= if @user.is_admin do %>
+                                <a href="javascript:void(0)" phx-click="delete" phx-value-id="<%= message.id %>" class="text-left text-danger float-right small" phx-target="#chat-live-view">Delete</a>
                             <% end %>
                         </p>
-                        <p class="inbox-item-text"><%=chat_message(message.body)%></p>
+                        <p class="inbox-item-text"><%= chat_message(message.body) %></p>
                     </div>
                 <% end %>
             </div>
@@ -58,10 +58,10 @@
 
 <div id="alert-toasts" class="message-toast-container" phx-update="append">
     <%= for alert <- message_alerts(@alerts) do %>
-        <%=render("_message_alert.html", alert: alert)%>
+        <%= render("_message_alert.html", alert: alert) %>
     <% end %>
 </div>
 
 <%= if @challenge do %>
-    <div phx-hook="<%=if @challenge.challenger, do: "DuelChallenger", else: "DuelChallenged"%>" id="duel-challenge" data-other="<%=@challenge.other.username%>"/>
+    <div phx-hook="<%=if @challenge.challenger, do: "DuelChallenger", else: "DuelChallenged"%>" id="duel-challenge" data-other="<%= @challenge.other.username %>"/>
 <% end %>
