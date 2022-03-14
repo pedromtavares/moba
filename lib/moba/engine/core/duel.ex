@@ -51,6 +51,7 @@ defmodule Moba.Engine.Core.Duel do
     diff = duel.opponent.season_points - duel.user.season_points
     multiplier = if duel.type == "pvp", do: 3, else: 1
     victory_points = Moba.victory_duel_points(diff) * multiplier
+    defeat_points = Moba.defeat_duel_points(diff) * multiplier
     tie_points = Moba.tie_duel_points(diff) * multiplier
 
     {duel_winner, attacker_points, defender_points} =
@@ -59,7 +60,7 @@ defmodule Moba.Engine.Core.Duel do
           {duel.user, victory_points, victory_points * -1}
 
         opponent_win ->
-          {duel.opponent, victory_points * -1, victory_points}
+          {duel.opponent, defeat_points * -1, defeat_points}
 
         true ->
           {nil, tie_points, tie_points * -1}

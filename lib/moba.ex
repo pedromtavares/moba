@@ -99,6 +99,7 @@ defmodule Moba do
   def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
   def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
   def victory_duel_points(diff), do: ceil(diff * 0.15) |> maximum_duel_points()
+  def defeat_duel_points(diff), do: victory_duel_points(-diff)
   def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points() |> maximum_duel_points())
   def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points() |> maximum_duel_points()
   def season_deflation_rate, do: @season_deflation_rate
