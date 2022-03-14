@@ -64,7 +64,7 @@ defmodule MobaWeb.HeroLiveView do
   end
 
   def handle_params(%{"id" => id}, _uri, %{assigns: %{current_hero: current_hero}} = socket) do
-    hero = if id == current_hero.id, do: current_hero, else: Game.get_hero!(id)
+    hero = if current_hero && id == current_hero.id, do: current_hero, else: Game.get_hero!(id)
     ranking = Game.pve_search(hero)
     user = socket.assigns.current_user
 
