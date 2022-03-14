@@ -33,11 +33,13 @@ defmodule MobaWeb.ArenaView do
   def match_label(%{type: "pvp"}), do: "Duel"
   def match_label(_), do: "Normal MM"
 
-  def match_result(match) do
+  def match_result(match, user_id \\ nil) do
+    user_id = user_id || match.user_id
+
     cond do
       match.phase != "finished" -> content_tag(:h5, "In Progress")
       is_nil(match.winner) -> content_tag(:h5, "Tie", class: "text-white")
-      match.winner_id == match.user_id -> content_tag(:h5, "Victory", class: "text-success")
+      match.winner_id == user_id -> content_tag(:h5, "Victory", class: "text-success")
       true -> content_tag(:h5, "Defeat", class: "text-muted")
     end
   end

@@ -112,18 +112,16 @@
                                             </td>
 
                                             <td class="text-left">
-                                                <img src={"/images/pvp/#{duel.opponent.season_tier}.png"} class="pvp-rank"/>
-                                                <span class="opponent"><%= live_redirect duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, duel.opponent) %></span>
+                                                <img src={"/images/pvp/#{opponent_for(duel, @user).season_tier}.png"} class="pvp-rank"/>
+                                                <span class="opponent"><%= live_redirect opponent_for(duel, @user).username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, opponent_for(duel, @user)) %></span>
                                             </td>
 
                                             <td class="text-center">
-                                                <%= ArenaView.match_result(duel) %>
-                                                <%= if duel.rewards.attacker_pvp_points != 0 do %>
-                                                    <%= if duel.rewards.attacker_pvp_points > 0 do %>
-                                                        <span class="badge badge-pill badge-light-success">+<%= duel.rewards.attacker_pvp_points %> Season Points</span>
-                                                    <% else %>
-                                                        <span class="badge badge-pill badge-light-dark"><%= duel.rewards.attacker_pvp_points %> Season Points</span>
-                                                    <% end %>
+                                                <%= ArenaView.match_result(duel, @user.id) %>
+                                                <%= if duel.user_id == @user.id do %>
+                                                    <%= rewards_badge(duel.rewards.attacker_pvp_points) %>
+                                                <% else %>
+                                                    <%= rewards_badge(duel.rewards.defender_pvp_points) %>
                                                 <% end %>
                                             </td>
                                             
