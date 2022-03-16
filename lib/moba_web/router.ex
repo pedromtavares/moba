@@ -76,10 +76,8 @@ defmodule MobaWeb.Router do
     live "/hero/:id", HeroLiveView
 
     live "/library", LibraryLiveView
-
-    live_session :create, root_layout: {MobaWeb.LayoutView, "clean.html"} do
-      live "/invoke", CreateLiveView
-    end
+    
+    live "/invoke", CreateLiveView
 
     post "/game/continue", GameController, :continue
   end

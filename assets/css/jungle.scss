@@ -1,5 +1,9 @@
 .jungle{
-  margin-bottom: 180px;
+  margin-bottom: 150px;
+
+  .league-bar{
+    background: rgba(26, 188, 156, 0.7) !important;
+  }
 
   @media (max-width: 992px) {
     margin-bottom: 220px;
@@ -51,6 +55,11 @@
 }
 
 .jungle-header{
+
+  .league-rank{
+    max-height: 100px;
+  }
+
   .previous-tier{
     max-width: 35px;
     filter: grayscale(100%);

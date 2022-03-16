@@ -2,16 +2,17 @@
 <html lang="en">
     <%= render "_head.html", conn: @conn %>
     <body>
-        <%= render "_navigation.html", conn: @conn, current_user: @current_user, current_hero: assigns[:current_hero] %>
         <div class="wrapper" id="main-wrapper">
             <div class="container-fluid">
                 <div class="row">
-                    <div class="col-12 col-xl-11 margin-auto">
+                    <%= unless assigns[:hide_sidebar] do %>
+                        <div class="col-1">
+                            <%= render "_navigation.html", assigns %>
+                        </div>
+                    <% end %>
+                    <div class="col">
                         <%= @inner_content %>
                     </div>
-                    <%= unless is_nil(@current_user) || @current_user.is_guest  do %> 
-                        <%= live_render(@conn, MobaWeb.ChatLiveView, session: %{"user_id" => @current_user.id}) %>
-                    <% end %>
                 </div>
             </div>
         </div>

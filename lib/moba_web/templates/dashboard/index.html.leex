@@ -1,17 +1,6 @@
-<div class="dashboard mt-3">
+<div class="dashboard mt-2">
     <div class="row">
-        <div class="col-xl-10 col-lg-12 margin-auto">
-            <%= if can_enter_arena?(assigns) do %>
-                <div class="row mb-3 d-flex justify-content-around">
-                    <div class="col-xl-3 col-md-6">
-                        <%= live_redirect to: Routes.arena_path(@socket, :arena), class: "btn p-2 btn-block btn-lg btn-primary d-block", "phx-hook": "Loading", loading: "Entering...", id: "enter-the-arena" do %>
-                            <span class="loading-text">
-                                <i class="fa fa-chess-rook mr-1"></i>Enter the Arena
-                            </span>
-                        <% end %>
-                    </div>
-                </div>
-            <% end %>
+        <div class="col">
             <div class="row">
                 <div class="col">
                     <%= render "_pve_progression.html", assigns %>
@@ -22,7 +11,7 @@
                     <%= render "_hero_list.html", assigns %>
                 </div>
             </div>
-    </div>
+        </div>
     </div>
 </div>
 

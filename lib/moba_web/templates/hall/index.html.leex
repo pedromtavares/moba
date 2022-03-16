@@ -37,7 +37,7 @@
                         <td>
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
                                 <%= GH.hero_avatar(hero) %><br/>
-                                <h4 class="mb-0"><img src="/images/league_<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%= hero.name %></h4>
+                                <h4 class="mb-0"><img src="/images/league/<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%= hero.name %></h4>
                                 <small class="text-dark">Level <%= hero.level %> <%= hero.avatar.name %></small>
                             <% end %>
                         </td>
@@ -107,7 +107,7 @@
                                 <%= for hero <- user.hero_collection do %>
                                     <div style="width: 80px;" class='avatar-container mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
                                         <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar" style="max-width: 100%";/>
-                                        <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo" style="margin-top: -20px">
+                                        <img src="/images/league/<%= hero["tier"] %>.png" class="league-logo" style="margin-top: -20px">
                                     </div>
                             <% end %>
                             </td>

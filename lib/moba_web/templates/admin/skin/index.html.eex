@@ -67,7 +67,7 @@
 
                 <td><%= skin.avatar_code %></td>
 
-                <td><img src="/images/league_<%=skin.league_tier%>.png" style="max-width: 50px;"/></td>
+                <td><img src="/images/league/<%=skin.league_tier%>.png" style="max-width: 50px;"/></td>
 
               <td class="torch-actions">
                 <span><%= link "Show", to: Routes.skin_path(@conn, :show, skin) %></span>

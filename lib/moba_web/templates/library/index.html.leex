@@ -196,7 +196,7 @@
     <div class="row">
         <%= for avatar <- @avatars do %>
             <div class="col-12 col-md-6 col-lg-4 col-xl-3 text-center mb-3 select-avatar">
-                <div class="card-box">
+                <div class="card-box mb-0">
                     <img src="<%=GH.image_url(avatar)%>" class="avatar img-border" style="width: 150px;max-width: unset;"  data-toggle="tooltip" title="<img src='<%=GH.background_url(avatar)%>' style='max-width:500px'/>"/>
 
                     <br/>
@@ -238,7 +238,7 @@
         <%= for {_code, levels} <- @skills do %>
             <% first = levels |> List.first() %>
             <div class="col-12 col-md-6 col-lg-4 col-xl-3 text-center mb-3 select-avatar">
-                <div class="card-box">
+                <div class="card-box mb-0">
                     <img src="<%=GH.image_url(first)%>" class="skill-img img-border-sm <%=if first.passive, do: "passive"%>" style="width: 80px"/>
                     <br/>
                     <div>

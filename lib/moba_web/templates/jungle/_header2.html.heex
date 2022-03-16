@@ -1,0 +1,28 @@
+<div class="card dark-bg">
+    <div class="card-body pb-0">
+        <div class="row mt-3 mb-3 d-flex justify-content-center">
+            <div class="col pve-tier-container text-center">
+                <img src={"/images/league/#{@current_hero.league_tier}.png"} class="league-rank"/>
+                <h5 class="text-uppercase text-white mb-0"><%= Moba.leagues[@current_hero.league_tier] %></h5>
+            </div>
+            <div class="col-8">
+                <h4 class="text-center mb-0 mt-0">Bar below to be color of current league</h4>
+                <div class="progress mt-3" style="height:50px;">
+                    <div style={"width:#{20}%"} class="progress-bar league-bar"></div>
+                    <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
+                        <%= @current_hero.pve_current_turns-5 %>/5 Turns
+                    </h5>
+                </div>
+                <div class="mt-4 text-center">
+                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-light" do %>
+                        <i class="fa fa-history mr-1"></i>Battle History
+                    <% end %>  
+                </div>
+            </div>
+            <div class="col pve-tier-container text-center">
+                <img src={"/images/league/#{@current_hero.league_tier+1}.png"} class="league-rank"/>
+                <h5 class="text-uppercase text-white mb-0"><%= Moba.leagues[@current_hero.league_tier+1] %></h5>
+            </div>
+        </div>
+    </div>
+</div>

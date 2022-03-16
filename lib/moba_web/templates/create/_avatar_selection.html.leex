@@ -10,7 +10,7 @@
                 <%= for hero <- @current_user.hero_collection do %>
                         <div style="width: 100px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
                             <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar"/>
-                            <img src="/images/league_<%= hero["tier"] %>.png" class="league-logo">
+                            <img src="/images/league/<%= hero["tier"] %>.png" class="league-logo">
                         </div>
                 <% end %>
                 <%= for avatar <- @blank_collection do %>

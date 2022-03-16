@@ -4,7 +4,7 @@
             <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic font-20"><%= if @hero.pve_ranking do %>#<%= @hero.pve_ranking %><% end %></span>
                 <div>
-                    <img src="/images/league_<%= @hero.league_tier %>.png" class="league-logo">
+                    <img src="/images/league/<%= @hero.league_tier %>.png" class="league-logo">
                     <%= @hero.name %>
                 </div>
                 <span class="font-15 font-italic" data-toggle="tooltip" title="<%= GH.hero_stats_string(@hero, false) %>">Level <%= @hero.level %></span>

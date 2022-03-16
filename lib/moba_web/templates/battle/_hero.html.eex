@@ -11,7 +11,7 @@
                 <span class="font-italic level font-20">Level<br/><span class="font-italic font-20"><%=@last_hero && @last_hero.level || @hero.level%></span></span>
             <% end %>
             <div>
-                <img src="/images/league_<%=@snapshot && @snapshot.league_tier || @hero.league_tier%>.png" class="league-logo mr-1">
+                <img src="/images/league/<%=@snapshot && @snapshot.league_tier || @hero.league_tier%>.png" class="league-logo mr-1">
                 <%=@hero.name%>
             </div>
             <%=if @battle.type == "pve" && @hero.bot_difficulty do %>

@@ -1,85 +1,53 @@
-<header id="topnav">
-    <div class="topbar-menu">
-        <div class="container-fluid clean-container">
-            <div id="inner-navigation">
-                <div class="col-xl-11 margin-auto">
-                    <%= if @current_user do %>
-                        <%= if @current_user.is_guest do %>
-                            <div class="row d-flex justify-content-center">
-                                <%= link to: Routes.pow_session_path(@conn, :delete), method: :delete, class: "nav-link" do %>
-                                    <i class="fa fa-sign-out-alt"></i> Create an account to play the full game
-                                <% end %>
-                            </div>
-                        <% else %>
-                            <div class="row d-flex justify-content-center text-center game-nav no-gutters">
-                                <div class="col">
-                                    <%=if @current_user.is_admin do %>
-                                        <a href="/admin" class="nav-link d-none d-md-block">
-                                            <i class="fa fa-user-shield"></i>
-                                            <br/>
-                                            Admin Panel
-                                        </a>
-                                    <% end %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.AboutLiveView), class: "nav-link" do %>
-                                        <i class="fa fa-users"></i>
-                                        <br/>
-                                        <span class="d-none d-md-inline">About Us</span>
-                                    <% end %>
-                                    <div class="d-flex justify-content-end">
-                                        <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), class: "nav-link" do %>
-                                            <i class="fa fa-store-alt"></i>
-                                            <br/>
-                                            <span class="d-none d-md-inline">Tavern</span>
-                                        <% end %>
-                                        <%= live_redirect to: Routes.live_path(@conn, MobaWeb.HallLiveView), class: "nav-link" do %>
-                                            <i class="fa fa-trophy"></i>
-                                            <br/>
-                                            <span class="d-none d-md-inline">Ranking</span>
-                                        <% end %>
-                                    </div>
-                                </div>
-                                <div class="col-1 flex-center d-none d-md-flex">
-                                    <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
-                                        <%= live_redirect to: Routes.live_path(@conn, MobaWeb.JungleLiveView) do %>
-                                            <%= GH.hero_avatar(@current_hero) %>
-                                        <% end %>
-                                    <% else %>
-                                        <%= live_redirect to: Routes.base_path(@conn, :base), class: "nav-link" do %>
-                                            <i class="fa fa-home"></i>
-                                            <br/>
-                                            <span class="d-none d-md-inline">Base</span>
-                                        <% end %>
-                                    <% end %>
-                                </div>
-                                <div class="col">
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.LibraryLiveView), class: "nav-link"  do %>
-                                        <i class="fa fa-book"></i>
-                                        <br/>
-                                        <span class="d-none d-md-inline">Game Info</span>
-                                    <% end %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
-                                        <i class="fa fa-user"></i>
-                                        <br/>
-                                        <span class="d-none d-md-inline">Profile</span>
-                                    <% end %>
-                                    <a href="https://discord.gg/QNwEdPS" target="_blank" class="nav-link d-none d-md-block float-right">
-                                        <i class="fab fa-discord"></i>
-                                        <br/>
-                                        Join our Discord!
-                                    </a>
-                                </div>
-                            </div>
-                        <% end %>
-                    <% else %>
-                        <div class="row d-flex justify-content-end">
-                            <%= link to: "/session/new", class: "nav-link" do %>
-                                <i class="fa fa-sign-in mr-1"></i>
-                                Already registered? Sign in
-                            <% end %>
-                        </div>
-                    <% end %>
-                </div>
-            </div>
-        </div>
-    </div>
-</header>
+<div class="sidebar-nav">
+    <%= if @current_user do %>
+        <%= if @current_user.is_guest do %>
+            <%= link to: Routes.pow_session_path(@conn, :delete), method: :delete, class: "nav-link" do %>
+                <i class="fa fa-sign-out-alt"></i> Create an account to play the full game
+            <% end %>
+        <% else %>
+            <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
+                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.JungleLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: "active"  do %>
+                    <i class="fa fa-crosshairs"></i>
+                <% end %>              
+            <% end %>
+            <%= if length(@current_user.hero_collection) > 0 do %>
+                <%= live_redirect to: Routes.base_path(@conn, :base), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Base</h3>" do %>
+                    <i class="fa fa-home"></i>
+                <% end %>
+            <% end %>
+            <%= if @current_user.pve_tier > 0 do %>
+                <%= live_redirect to: Routes.arena_path(@conn, :arena), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>" do %>
+                    <i class="fa fa-chess-rook"></i>
+                <% end %>
+            <% end %>
+            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Profile</h3>" do %>
+                <i class="fa fa-user"></i>
+            <% end %>
+            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.HallLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Ranking</h3>" do %>
+                <i class="fa fa-trophy"></i>
+            <% end %>
+            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Tavern</h3>" do %>
+                <i class="fa fa-store-alt"></i>
+            <% end %>
+            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.LibraryLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Info</h3>"  do %>
+                <i class="fa fa-book"></i>
+            <% end %>
+            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.AboutLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>About Us</h3>" do %>
+                <i class="fa fa-users"></i>
+            <% end %>
+            <%= if @current_user.is_admin do %>
+                <a href="/admin">
+                    <i class="fa fa-user-shield"></i>
+                </a>
+            <% end %>
+            <a href="https://discord.gg/QNwEdPS" target="_blank" data-toggle="tooltip" data-tippy-placement="right" data-tippy-arrow="false" title="<h3 class='ml-2 mr-2'>Join our Discord!</h3>">
+                <i class="fab fa-discord"></i>
+            </a>
+        <% end %>
+    <% else %>
+        <%= link to: "/session/new", class: "nav-link" do %>
+            <i class="fa fa-sign-in mr-1"></i>
+            Already registered? Sign in
+        <% end %>
+    <% end %>
+</div>

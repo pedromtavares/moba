@@ -3,7 +3,7 @@
     <div class="row mt-2">
         <div class="col text-center">
             <div class="card-box mb-0 pt-2 p-1">
-                <img src="/images/league_<%= next %>.png" style="height: 100px"/>
+                <img src="/images/league/<%= next %>.png" style="height: 100px"/>
                 <h3><%= Moba.leagues[next] %> Challenge</h3>
                 <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
                         <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
