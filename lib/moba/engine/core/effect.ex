@@ -293,9 +293,9 @@ defmodule Moba.Engine.Core.Effect do
     %{turn | final_effects: final_effects ++ [resource]}
   end
 
-  def add_buff(%{resource: %{duration: duration} = resource, attacker: attacker} = turn) do
+  def add_buff(%{resource: %{duration: duration} = resource, attacker: attacker} = turn, extra_duration \\ 0) do
     turn
-    |> update_attacker(:buffs, attacker.buffs ++ [%Buff{resource: resource, duration: duration}])
+    |> update_attacker(:buffs, attacker.buffs ++ [%Buff{resource: resource, duration: duration + extra_duration}])
     |> Map.put(:resource, %{resource | buff: true})
   end
 

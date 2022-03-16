@@ -188,12 +188,16 @@ defmodule Moba.Engine.Core.Logger do
     "Apparently a ninja now, #{opponent_for(defender, heroes)} threw a shuriken at #{defender} dealing [damage]#{damage} damage[/damage]"
   end
 
-  defp description_for("static_link", %{"damage" => {damage, defender}, "turn_atk" => {atk, _}}, heroes) do
-    "#{opponent_for(defender, heroes)} linked with #{defender}'s powers, dealing [damage]#{damage} damage[/damage] and [hp]sapping #{atk * -1} ATK[/hp]"
+  defp description_for("static_link", %{"damage" => {damage, defender}, "turn_atk" => [{_, _}, {atk, attacker}]}, _) do
+    "#{attacker} linked with #{defender}'s powers, dealing [damage]#{damage} damage[/damage] and [hp]sapping #{atk} ATK[/hp]"
   end
 
-  defp description_for("static_link", %{"turn_atk" => {atk, defender}}, heroes) do
-    "#{opponent_for(defender, heroes)} is still linked with #{defender}, [hp]sapping #{atk * -1} ATK[/hp]"
+  defp description_for("static_link", %{"turn_atk" => [{_, defender}, {atk, attacker}]}, _) do
+    "#{attacker} is still linked with #{defender}, [hp]sapping #{atk} ATK[/hp]"
+  end
+
+  defp description_for("static_link", %{"turn_atk" => {atk, attacker}}, _) do
+    "The link is weakening, giving #{attacker} a final boost of [hp]#{atk} ATK[/hp]"
   end
 
   # ULTIMATES

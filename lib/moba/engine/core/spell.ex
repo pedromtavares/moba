@@ -164,22 +164,22 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.pierce_turn_armor()
   end
 
-  defp effects_for(%{resource: %Skill{code: "static_link", debuff: nil, buff: nil}} = turn, _options) do
+  defp effects_for(%{resource: %Skill{code: "static_link", buff: nil, debuff: nil}} = turn, _options) do
     turn
     |> Effect.base_damage()
     |> Effect.atk_damage()
     |> Effect.add_debuff()
-    |> Effect.add_buff()
-  end
-
-  defp effects_for(%{resource: %Skill{code: "static_link", debuff: nil}} = turn, _options) do
-    turn
-    |> Effect.add_turn_atk()
+    |> Effect.add_buff(1)
   end
 
   defp effects_for(%{resource: %Skill{code: "static_link", buff: nil}} = turn, _options) do
     turn
     |> Effect.remove_turn_atk()
+  end
+
+  defp effects_for(%{resource: %Skill{code: "static_link"}} = turn, _options) do
+    turn
+    |> Effect.add_turn_atk()
   end
 
   # BOSS
@@ -487,7 +487,7 @@ defmodule Moba.Engine.Core.Spell do
 
   # ULTIMATES
 
-  defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn, %{is_attacking: false}) do
+  defp effects_for(%{resource: %Skill{code: "battle_trance", final: true}} = turn, _options) do
     result = turn.defender.current_hp - Helper.calculate_final_defender_damage(turn.attacker, turn.defender)
 
     if result / turn.defender.total_hp * 100 <= turn.resource.base_amount do
@@ -501,6 +501,10 @@ defmodule Moba.Engine.Core.Spell do
     else
       turn
     end
+  end
+
+  defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn, %{is_attacking: false}) do
+    Effect.add_to_final(turn)
   end
 
   defp effects_for(%{resource: %Skill{code: "battle_trance"}} = turn, %{is_attacking: true}) do
