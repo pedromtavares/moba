@@ -278,7 +278,8 @@ defmodule Moba.Game.Heroes do
           pve_farming_started_at: started,
           pve_state: state
         } = hero
-      ) do
+      )
+      when state in ["meditating", "mining"] do
     remaining_turns = zero_limit(current_turns - farming_turns)
 
     {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
@@ -294,6 +295,8 @@ defmodule Moba.Game.Heroes do
       pve_current_turns: remaining_turns
     })
   end
+
+  def finish_farming!(hero), do: hero
 
   # --------------------------------
 
