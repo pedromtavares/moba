@@ -19,7 +19,7 @@
                                         <a href="javascript:;" class={if @featured.id == hero["hero_id"], do: "current-featured"} phx-click="set-featured" phx-value-id={hero["hero_id"]} phx-hook="Loading" id={"set-featured-#{hero["hero_id"]}"}>
                                             <div class='avatar-container'>
                                                 <img src={GH.image_url(hero["avatar"])} class="avatar"/>
-                                                <img src={"/images/league_#{hero["tier"]}.png"} class="league-logo">
+                                                <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo">
                                             </div>
 
                                         </a>
