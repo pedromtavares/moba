@@ -19,7 +19,7 @@ defmodule MobaWeb.GameControllerTest do
       |> Pow.Plug.assign_current_user(hero.user, otp_app: :moba)
       |> get(redir_path)
 
-    assert html_response(conn, 200) =~ "Turns available"
+    assert html_response(conn, 200) =~ "Battle Log"
   end
 
   test "start loads", %{conn: conn} do

@@ -1,7 +1,7 @@
 defmodule MobaWeb.DashboardLiveView do
   use MobaWeb, :live_view
 
-  def mount(_, session, socket) do
+  def mount(_, _session, socket) do
     {:ok, socket |> pve_assigns() |> quest_assigns() |> assign(sidebar_code: "base")}
   end
 
@@ -34,7 +34,7 @@ defmodule MobaWeb.DashboardLiveView do
     {:noreply, assign(socket, visible_heroes: visible, all_heroes: all_heroes, loaded: loaded ++ [display])}
   end
 
-  def handle_event("archive", %{"id" => id}, %{assigns: %{current_user: user, current_hero: current_hero}} = socket) do
+  def handle_event("archive", %{"id" => id}, %{assigns: %{current_hero: current_hero}} = socket) do
     hero = Game.get_hero!(id)
     Game.archive_hero!(hero)
     if hero.finished_at, do: Game.update_hero_collection!(hero)
@@ -48,7 +48,7 @@ defmodule MobaWeb.DashboardLiveView do
      )}
   end
 
-  def handle_event("continue", %{"id" => id}, %{assigns: %{current_user: user, current_hero: current_hero}} = socket) do
+  def handle_event("continue", %{"id" => id}, %{assigns: %{current_user: user}} = socket) do
     hero = Game.get_hero!(id)
 
     if hero.user_id == user.id do
