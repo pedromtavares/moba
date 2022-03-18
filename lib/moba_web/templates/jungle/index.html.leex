@@ -12,14 +12,14 @@
             </div>
 
             <%= if dead?(@current_hero) do %>
-                <div class="row mt-2">
+                <div class="row">
                     <div class="col">
                         <%= render "_dead.html", assigns %>
                     </div>
                 </div>
             <% else %>
                 <%= if display_farm_tabs?(assigns) do %>
-                    <div class="row mt-2">
+                    <div class="row">
                         <div class="col">
                             <%= render "_farm_tabs.html", assigns %>
                         </div>

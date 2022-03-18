@@ -1,4 +1,4 @@
-<div class="card dark-bg">
+<div class="card dark-bg mb-3">
     <div class="card-body pb-0">
         <div class="row mt-3 mb-3 d-flex justify-content-center">
             <%= if next = next_pve_tier(@current_user) do %>
@@ -16,11 +16,11 @@
                     </div>
                     <div class="mt-4 text-center">
                         <%= unless @current_user.season_tier == Moba.max_season_tier() do %>
-                            <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#pve-tier-rewards">
+                            <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#pve-tier-rewards">
                                 <i class="fa fa-crown mr-1"></i>Progression Rewards
                             </button>
                         <% end %>
-                        <button type="button" class="btn btn-xs btn-light" data-toggle="modal" data-target="#daily-quests">
+                        <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#daily-quests">
                             <i class="fa fa-clock-o mr-1"></i>Daily Quests
                         </button>
                     </div>

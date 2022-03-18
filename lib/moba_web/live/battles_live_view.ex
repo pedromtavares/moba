@@ -22,7 +22,8 @@ defmodule MobaWeb.BattlesLiveView do
        pages: %{
          pve: initial_page_for(pve_list),
          league: initial_page_for(league_list)
-       }
+       },
+       sidebar_code: "training"
      )}
   end
 

@@ -179,18 +179,18 @@ const Tutorial = {
           }
         });
         break;
-      case 11:
+      case 10:
         tour.addStep({
           id: 'eleventh-tutorial-first-step',
           text: "<p class='text-center'>You have ranked up to Silver League, congratulations!<br/> Keep farming until you reach at least the Platinum League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and to level up your skills. Have fun!</p>",
           attachTo: {
-            element: '#jungle-stats',
+            element: '#current-jungle-rank',
             on: 'bottom'
           },
           buttons: [
             {
               text: 'Finish Tutorial',
-              action: function () { hookInstance.pushEvent("tutorial12", {}); this.complete() }
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
           popperOptions: {

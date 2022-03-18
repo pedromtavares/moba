@@ -3,11 +3,6 @@
         <div class="row">
             <div class="col d-flex align-items-center justify-content-around text-center">
                 <%= if finished?(@duel) do %>
-                    <%= live_redirect to: Routes.arena_path(@socket, :arena), class: "h3 mt-2 nav-link text-muted mb-0" do %>
-                        <i class="fa fa-chess-rook fa-2x align-middle"></i>
-                        <br/>
-                        Return to Arena
-                    <% end %>
                     <%= if show_rematch?(assigns) do %>
                         <a href="javascript:;" class="h3 mt-2 nav-link text-danger mb-0" phx-click="rematch">
                             <i class="fa fa-refresh fa-2x align-middle"></i>

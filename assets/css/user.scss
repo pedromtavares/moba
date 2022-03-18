@@ -9,7 +9,7 @@
   }
 
   .hero-card{
-    min-height: 400px;
+    min-height: 370px;
   }
 
   .featured-hero{
@@ -23,6 +23,7 @@
   }
 
   .collection{
+    max-height: 52vh;
     .avatar{
       max-width: 100%;
     }
@@ -47,7 +48,7 @@
 
     .card-body{
       padding: 0 !important;
-      max-height: 870px;
+      max-height: 87vh;
       overflow: auto;
     }
 
@@ -58,7 +59,7 @@
 
 
   .duels{
-    max-height: 570px;
+    max-height: 53vh;
     overflow: auto;
 
     h5{

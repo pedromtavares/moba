@@ -54,7 +54,7 @@ defmodule MobaWeb do
 
   def live_view do
     quote do
-      use Phoenix.LiveView
+      use Phoenix.LiveView, layout: {MobaWeb.LayoutView, "live.html"}
 
       unquote(view_helpers())
     end

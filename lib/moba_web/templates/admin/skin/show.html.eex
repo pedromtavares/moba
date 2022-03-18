@@ -39,7 +39,7 @@
 
         <li>
           <div class="torch-show-label">League Tier:</div>
-          <div class="torch-show-data"><img src="/images/league_<%=@skin.league_tier%>.png" style="max-width: 50px;"/></div>
+          <div class="torch-show-data"><img src="/images/league/<%=@skin.league_tier%>.png" style="max-width: 50px;"/></div>
         </li>
 
     </ul>

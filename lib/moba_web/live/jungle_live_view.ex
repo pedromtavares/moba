@@ -3,15 +3,8 @@ defmodule MobaWeb.JungleLiveView do
 
   alias MobaWeb.{Tutorial, Shop, JungleView}
 
-  def mount(_, %{"user_id" => user_id}, socket) do
-    socket =
-      %{assigns: %{current_user: user}} = assign_new(socket, :current_user, fn -> Accounts.get_user!(user_id) end)
-
-    socket =
-      %{assigns: %{current_hero: hero}} = assign_new(socket, :current_hero, fn -> Game.current_pve_hero(user) end)
-
+  def mount(_, _, %{assigns: %{current_hero: hero}} = socket) do
     hero = Game.maybe_finish_pve(hero)
-    Cachex.del(:game_cache, user_id)
 
     cond do
       hero && hero.finished_at ->
@@ -24,6 +17,7 @@ defmodule MobaWeb.JungleLiveView do
           |> Tutorial.subscribe()
         end
 
+        Cachex.del(:game_cache, hero.user_id)
         targets = Game.list_targets(hero)
         targets = if length(targets) > 0, do: targets, else: Game.generate_targets!(hero) |> Game.list_targets()
         farm_tab = current_farm_tab(hero)
@@ -39,7 +33,8 @@ defmodule MobaWeb.JungleLiveView do
            farm_rewards: [],
            selected_turns: hero.pve_current_turns,
            current_time: Timex.now(),
-           farm_rewards: farm_rewards_for(hero, "meditating")
+           farm_rewards: farm_rewards_for(hero, "meditating"),
+           sidebar_code: "training"
          )}
 
       true ->

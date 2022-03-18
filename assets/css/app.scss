@@ -24,8 +24,60 @@
   src: url("/static/fonts/bravada-arma.ttf");
 }
 
+.sidebar-nav{
+  position: fixed;
+  top: 0;
+  left: 0;
+  background: rgba(0, 0, 0, 0.2) !important;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  width: 8.3vw;
+  border-right: 1px solid #36404a;
+
+  a{
+    color: white;
+    text-align: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-right: auto;
+    margin-left: auto;
+    @media (min-height: 830px) {
+      margin-bottom: 1rem;
+      margin-top: 1rem;
+    }
+  }
+
+  a:first-child{
+    margin-top: 1rem;
+  }
+
+  a:hover, a.active{
+    color: #1abc9c;
+  }
+
+  i{
+    font-size: 35px;
+    padding: 1rem;
+    background-color: #3a4550;
+    border-radius: 2rem;
+
+    @media (min-height: 830px) {
+      font-size: 40px;
+    }
+  }
+
+  i:hover{
+    border-radius: 1rem;
+    transition: all 0.3s;
+  }
+
+  
+}
+
 body{
   background: #272E35;
+  padding-bottom: 12px;
 }
 
 .modal-backdrop{
@@ -220,6 +272,11 @@ hr{
 
 .darker{
   background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.shadow-box{
+  background: #38414a;
+  box-shadow: inset 0px 0px 300px black;
 }
 
 .original-bg{
@@ -471,25 +528,6 @@ b, strong {
 
 .text-medal-7{
   color: rgb(213, 96, 78);
-}
-
-
-.dont-break-out {
-  /* These are technically the same, but use both */
-  overflow-wrap: break-word;
-  word-wrap: break-word;
-
-  -ms-word-break: break-all;
-  /* This is the dangerous one in WebKit, as it breaks things wherever */
-  word-break: break-all;
-  /* Instead use this non-standard one: */
-  word-break: break-word;
-
-  /* Adds a hyphen where the word breaks, if supported (No Blink) */
-  -ms-hyphens: auto;
-  -moz-hyphens: auto;
-  -webkit-hyphens: auto;
-  hyphens: auto;
 }
 
 .hero-card{

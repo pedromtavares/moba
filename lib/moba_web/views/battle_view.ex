@@ -1,8 +1,9 @@
 defmodule MobaWeb.BattleView do
   use MobaWeb, :view
+  alias MobaWeb.JungleView
 
-  defdelegate difficulty_color(diff), to: MobaWeb.JungleView
-  defdelegate difficulty_label(diff), to: MobaWeb.JungleView
+  defdelegate difficulty_color(diff), to: JungleView
+  defdelegate difficulty_label(diff), to: JungleView
 
   def active_attacker?(%{attacker: attacker} = battle, last_turn, %{id: user_id}) do
     is_current? = attacker.user_id == user_id

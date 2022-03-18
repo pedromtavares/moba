@@ -20,7 +20,7 @@
     <td class="text-center">
         <img src="<%=GH.image_url(@hero.avatar)%>" style="width: 80px;" class="img-border-xs"><br/>
         <h5 class="mb-0 text-center">
-            <img src="/images/league_<%=@hero.league_tier%>.png" style="width: 20px;">
+            <img src="/images/league/<%=@hero.league_tier%>.png" style="width: 20px;">
             <%= live_redirect @hero.avatar.name, to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero), class: "text-white"%>
         </h5>
         <span class="text-center text-success"><%=@hero.pvp_points%> Points</span>

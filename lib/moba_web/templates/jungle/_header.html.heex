@@ -1,0 +1,51 @@
+<div class="card dark-bg mb-3">
+    <div class="card-body pb-0">
+        <div class="row mt-3 mb-2 d-flex justify-content-center">
+            <div class="col pve-tier-container text-center" id="current-jungle-rank">
+                <img src={"/images/league/#{@current_hero.league_tier}.png"} class="league-rank"/>
+                <h5 class="text-uppercase text-white mb-0"><%= Moba.leagues[@current_hero.league_tier] %></h5>
+            </div>
+            <div class="col-8">
+                <h4 class="text-center mb-0 mt-0">Reach the <span class={"text-league-#{max_available_league(@current_hero)}"}><%= Moba.leagues[max_available_league(@current_hero)] %></span> by spending your turns on Ganking, Meditating or Mining.</h4>
+                <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" title={"Total turns left: #{@current_hero.pve_current_turns + @current_hero.pve_total_turns}"}>
+                    <div style={"width:#{turn_percentage(@current_hero)}%"} class={"progress-bar league-bar-#{@current_hero.league_tier}"}></div>
+                    <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
+                        <%= 5 - @current_hero.pve_current_turns %>/5 Turns
+                    </h5>
+                </div>
+                <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <div>
+                        <%= if assigns[:origin] do %>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-light" do %>
+                                <i class="fa fa-crosshairs mr-1 fa-2x"></i><br/>Return to Training
+                            <% end %>
+                        <% else %>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-light" do %>
+                                <i class="fa fa-list-ul mr-1 fa-2x"></i><br/>Battle Log
+                            <% end %>
+                            <%= if @current_hero.pve_current_turns > 0 && @current_hero.refresh_targets_count > 0 do %>
+                                <a href="javascript:;" data-toggle="tooltip" title={"#{@current_hero.refresh_targets_count} refreshes remaining"} phx-click="refresh-targets" class="btn btn-light"><i class="fa fa-refresh fa-2x mr-1"></i><br/>Refresh Targets</a>
+                            <% end %>
+                        <% end %>
+                    </div>
+                    <div class="d-flex justify-content-center">
+                        <h3 class="pve-info text-primary" data-toggle="tooltip" title={@current_hero.total_xp_farm}>
+                            <%= GH.farming_amount_label @current_hero.total_xp_farm %>
+                            <br/>
+                            <small class="text-muted">Total XP farm</small>
+                        </h3>
+                        <h3 class="pve-info text-warning" data-toggle="tooltip" title={@current_hero.total_gold_farm}>
+                            <%= GH.farming_amount_label @current_hero.total_gold_farm %>
+                            <br/>
+                            <small class="text-muted">Total gold farm</small>
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col pve-tier-container text-center">
+                <img src={"/images/league/#{@current_hero.league_tier+1}.png"} class="league-rank"/>
+                <h5 class="text-uppercase text-white mb-0"><%= Moba.leagues[@current_hero.league_tier+1] %></h5>
+            </div>
+        </div>
+    </div>
+</div>

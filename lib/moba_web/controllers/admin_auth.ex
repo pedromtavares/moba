@@ -10,8 +10,7 @@ defmodule MobaWeb.AdminAuth do
     if user && user.is_admin do
       conn
     else
-      conn
-      |> redirect(to: "/")
+      redirect(conn, to: "/")
     end
   end
 end

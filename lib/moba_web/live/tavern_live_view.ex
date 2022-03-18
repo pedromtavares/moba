@@ -1,28 +1,15 @@
 defmodule MobaWeb.TavernLiveView do
   use MobaWeb, :live_view
 
-  def mount(_, session, socket) do
-    hero_id = Map.get(session, "hero_id")
-    hero = hero_id && Game.get_hero!(hero_id)
+  def mount(_, _session, socket) do
+    {:ok, socket}
+  end
 
-    user = Accounts.get_user_with_unlocks!(session["user_id"])
-
+  def handle_params(params, _uri, %{assigns: %{current_user: user}} = socket) do
+    user = Accounts.get_user_with_unlocks!(user.id)
     skills = Game.list_unlockable_skills()
     avatars = Game.list_unlockable_avatars()
     all_avatars = Game.list_avatars() |> Enum.sort_by(& &1.level_requirement, :desc)
-
-    {:ok,
-     assign(socket,
-       current_user: user,
-       current_hero: hero,
-       skills: skills,
-       avatars: avatars,
-       all_avatars: all_avatars,
-       current_index: 0
-     )}
-  end
-
-  def handle_params(params, _uri, %{assigns: %{all_avatars: all_avatars}} = socket) do
     avatar_code = Map.get(params, "avatar")
     current_avatar = Enum.find(all_avatars, &(&1.code == avatar_code)) || List.first(all_avatars)
     current_skins = Game.list_skins_for(current_avatar.code)
@@ -30,10 +17,16 @@ defmodule MobaWeb.TavernLiveView do
 
     {:noreply,
      assign(socket,
+       all_avatars: all_avatars,
+       avatars: avatars,
        avatar_code: avatar_code,
        current_avatar: current_avatar,
+       current_index: 0,
        current_skins: current_skins,
-       current_skin: current_skin
+       current_skin: current_skin,
+       current_user: user,
+       sidebar_code: "tavern",
+       skills: skills
      )}
   end
 

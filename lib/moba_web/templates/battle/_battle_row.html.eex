@@ -20,7 +20,7 @@
             <ul class="nav nav-pills nav-justified form-wizard-header flex-center">
                 <%= if @battle.winner && @battle.winner.id == @current_hero.id do %>
                     <%= if @battle.attacker_snapshot.league_step == 0 do %>
-                        <img src="/images/league_<%=@battle.attacker_snapshot.league_tier%>.png" class="mr-1 league-rank"/>
+                        <img src="/images/league/<%=@battle.attacker_snapshot.league_tier%>.png" class="mr-1 league-rank"/>
                     <% else %>
                         <li class="nav-item">
                             <a href="javascript:;" class="nav-link success">

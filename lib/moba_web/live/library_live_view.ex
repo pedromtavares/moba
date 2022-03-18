@@ -1,10 +1,7 @@
 defmodule MobaWeb.LibraryLiveView do
   use MobaWeb, :live_view
 
-  def mount(_, session, socket) do
-    hero_id = Map.get(session, "hero_id")
-    hero = hero_id && Game.get_hero!(hero_id)
-
+  def mount(_, _session, socket) do
     avatars = Game.list_avatars()
     ultimates = Game.list_ultimate_skills()
 
@@ -12,7 +9,7 @@ defmodule MobaWeb.LibraryLiveView do
       Game.list_normal_skills()
       |> Enum.group_by(fn skill -> skill.code end)
 
-    {:ok, assign(socket, avatars: avatars, ultimates: ultimates, skills: normals, current_hero: hero)}
+    {:ok, assign(socket, avatars: avatars, ultimates: ultimates, skills: normals, sidebar_code: "library")}
   end
 
   def render(assigns) do

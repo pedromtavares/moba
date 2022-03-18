@@ -77,30 +77,31 @@
                 </div>
             </div>
             
-            <div class="row text-center">
-                <div class="col">
-                    <div class="card mb-0">
-                        <h5 class="card-header text-center font-17 text-white"><i class="fa fa-chess-rook mr-1"></i> Arena</h5>
-                        <%= if @user.id != @current_user.id do %>
-                            <div class="card-body p-1 score">
-                                <div class="row no-gutters">
-                                    <div class="col">
-                                        <h4 class="text-right">
-                                            <%= @current_user.username %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_user.duel_score["#{@user.id}"] || 0 %></span>
-                                        </h4>
-                                    </div>
-                                    <div class="col-1 d-flex align-items-center justify-content-center">
-                                        <i class="fa fa-times"></i>
-                                    </div>
-                                    <div class="col">
-                                        <h4 class="text-left">
-                                            <span class="badge badge-pill badge-light-danger font-15"><%= @user.duel_score["#{@current_user.id}"] || 0 %></span> <%= @user.username %>
-                                        </h4>
+            <%= unless length(@duels) == 0 do %>
+                <div class="row text-center">
+                    <div class="col">
+                        <div class="card mb-0">
+                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-gopuram mr-1"></i> Arena</h5>
+                            <%= if @user.id != @current_user.id do %>
+                                <div class="card-body p-1 score">
+                                    <div class="row no-gutters">
+                                        <div class="col">
+                                            <h4 class="text-right">
+                                                <%= @current_user.username %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_user.duel_score["#{@user.id}"] || 0 %></span>
+                                            </h4>
+                                        </div>
+                                        <div class="col-1 d-flex align-items-center justify-content-center">
+                                            <i class="fa fa-times"></i>
+                                        </div>
+                                        <div class="col">
+                                            <h4 class="text-left">
+                                                <span class="badge badge-pill badge-light-danger font-15"><%= @user.duel_score["#{@current_user.id}"] || 0 %></span> <%= @user.username %>
+                                            </h4>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        <% end %>
-                        <%= unless length(@duels) == 0 do %>
+                            <% end %>
+                            
                             <div class="transparent card-footer p-0 duels">
                                 <table class="table table-dark text-center table-sm m-0">
                                     <%= for duel <- @duels do %>
@@ -134,10 +135,10 @@
                                     <% end %>
                                 </table>
                             </div>
-                        <% end %>
+                        </div>
                     </div>
                 </div>
-            </div>
+            <% end %>
         </div>
         <div class="col-md-6 col-xl-4">
             <div class={if @user.is_bot, do: "card bot-ranking ranking", else: "card ranking"}>
@@ -172,11 +173,6 @@
                             </tr>
                         <% end %>
                     </table>
-                </div>
-                <div class="transparent card-footer p-0">
-                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), class: "btn btn-block btn-light btn-sm" do %>
-                        <i class="fa fa-table mr-1"></i>See Top Users
-                    <% end %>
                 </div>
             </div>
         </div>

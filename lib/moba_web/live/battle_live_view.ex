@@ -36,6 +36,7 @@ defmodule MobaWeb.BattleLiveView do
        debug: Map.get(params, "debug"),
        hero: battle.attacker_snapshot,
        turn: turn,
+       hide_sidebar: !battle.finished,
        last_turn: Engine.last_turn(battle),
        skill: BattleView.preselected_skill(turn.attacker, turn)
      )}

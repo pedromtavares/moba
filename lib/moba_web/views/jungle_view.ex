@@ -132,6 +132,10 @@ defmodule MobaWeb.JungleView do
 
   def show_league_challenge?(_), do: false
 
+  def turn_percentage(%{pve_current_turns: turns}) do
+    (5 - turns) * 100 / 5
+  end
+
   defp with_display_stats(hero, heroes) do
     minimum = minimum_stats(heroes)
     units = Moba.avatar_stat_units()
