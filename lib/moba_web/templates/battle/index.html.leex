@@ -1,26 +1,8 @@
 <div class="battles" id="battle-history">
 
-    <div class="row mt-3">
+    <div class="row mt-2 jungle-header">
         <div class="col">
-            <div class="card-box p-2 darker mb-3 pl-4">
-                <div class="row">
-                    <div class="col">
-                        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView) do %>
-                            <h2 class="page-title text-left text-muted">
-                                <i class="fa fa-crosshairs mr-1"></i>
-                                Back to Ganking
-                            </h2>
-                        <% end %>
-                    </div>
-                    <div class="col">
-                        <h1 class="page-title text-center">
-                            <i class="fa fa-history mr-1"></i>Battle History
-                        </h1>
-                    </div>
-                    <div class="col">
-                    </div>
-                </div>
-            </div>
+            <%= JungleView.render "_header.html", Map.merge(assigns, %{origin: "battles"}) %>
         </div>
     </div>
 

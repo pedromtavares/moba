@@ -36,17 +36,4 @@ defmodule MobaWeb.GameController do
     |> put_session(:guest_user_id, user.id)
     |> redirect(to: "/jungle")
   end
-
-  def continue(conn, %{"hero_id" => hero_id}) do
-    hero = Game.get_hero!(hero_id)
-    user = conn.assigns.current_user
-
-    if hero.user_id == user.id do
-      Accounts.set_current_pve_hero!(user, hero_id)
-
-      redirect(conn, to: "/jungle")
-    else
-      redirect(conn, to: "/base")
-    end
-  end
 end

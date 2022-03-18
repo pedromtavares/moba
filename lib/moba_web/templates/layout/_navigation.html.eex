@@ -1,53 +1,34 @@
 <div class="sidebar-nav">
-    <%= if @current_user do %>
-        <%= if @current_user.is_guest do %>
-            <%= link to: Routes.pow_session_path(@conn, :delete), method: :delete, class: "nav-link" do %>
-                <i class="fa fa-sign-out-alt"></i> Create an account to play the full game
-            <% end %>
-        <% else %>
-            <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
-                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.JungleLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: "active"  do %>
-                    <i class="fa fa-crosshairs"></i>
-                <% end %>              
-            <% end %>
-            <%= if length(@current_user.hero_collection) > 0 do %>
-                <%= live_redirect to: Routes.base_path(@conn, :base), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Base</h3>" do %>
-                    <i class="fa fa-home"></i>
-                <% end %>
-            <% end %>
-            <%= if @current_user.pve_tier > 0 do %>
-                <%= live_redirect to: Routes.arena_path(@conn, :arena), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>" do %>
-                    <i class="fa fa-chess-rook"></i>
-                <% end %>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Profile</h3>" do %>
-                <i class="fa fa-user"></i>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.HallLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Ranking</h3>" do %>
-                <i class="fa fa-trophy"></i>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Tavern</h3>" do %>
-                <i class="fa fa-store-alt"></i>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.LibraryLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Info</h3>"  do %>
-                <i class="fa fa-book"></i>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.AboutLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>About Us</h3>" do %>
-                <i class="fa fa-users"></i>
-            <% end %>
-            <%= if @current_user.is_admin do %>
-                <a href="/admin">
-                    <i class="fa fa-user-shield"></i>
-                </a>
-            <% end %>
-            <a href="https://discord.gg/QNwEdPS" target="_blank" data-toggle="tooltip" data-tippy-placement="right" data-tippy-arrow="false" title="<h3 class='ml-2 mr-2'>Join our Discord!</h3>">
-                <i class="fab fa-discord"></i>
-            </a>
+    <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: sidebar_class("training", assigns) do %>
+            <i class="fa fa-crosshairs"></i>
+        <% end %>              
+    <% end %>
+    <%= if length(@current_user.hero_collection) > 0 do %>
+        <%= live_redirect to: Routes.base_path(@socket, :base), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Base</h3>", class: sidebar_class("base", assigns) do %>
+            <i class="fa fa-home"></i>
         <% end %>
-    <% else %>
-        <%= link to: "/session/new", class: "nav-link" do %>
-            <i class="fa fa-sign-in mr-1"></i>
-            Already registered? Sign in
+    <% end %>
+    <%= if @current_user.pve_tier > 0 do %>
+        <%= live_redirect to: Routes.arena_path(@socket, :arena), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
+            <i class="fa fa-gopuram"></i>
         <% end %>
+    <% end %>
+    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, @current_user.id), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Profile</h3>", class: sidebar_class("user", assigns) do %>
+        <i class="fa fa-user"></i>
+    <% end %>
+    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HallLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Ranking</h3>", class: sidebar_class("hall", assigns) do %>
+        <i class="fa fa-trophy"></i>
+    <% end %>
+    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Tavern</h3>", class: sidebar_class("tavern", assigns) do %>
+        <i class="fa fa-store-alt"></i>
+    <% end %>
+    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.LibraryLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Info</h3>", class: sidebar_class("library", assigns)  do %>
+        <i class="fa fa-book"></i>
+    <% end %>
+    <%= if @current_user.is_admin do %>
+        <a href="/admin">
+            <i class="fa fa-user-shield"></i>
+        </a>
     <% end %>
 </div>

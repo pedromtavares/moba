@@ -1,19 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-    <%= render "_head.html", conn: @conn %>
+    <%= render "_head.html", assigns %>
     <body>
+        <%= if is_nil(assigns[:current_user]) || assigns[:current_user].is_guest do %>   
+            <%= render "_guest_navigation.html", assigns %>
+        <% end %>
         <div class="wrapper" id="main-wrapper">
             <div class="container-fluid">
-                <div class="row">
-                    <%= unless assigns[:hide_sidebar] do %>
-                        <div class="col-1">
-                            <%= render "_navigation.html", assigns %>
-                        </div>
-                    <% end %>
-                    <div class="col">
-                        <%= @inner_content %>
-                    </div>
-                </div>
+                <%= @inner_content %>
             </div>
         </div>
         <%= csrf_meta_tag() %>

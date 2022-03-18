@@ -11,7 +11,7 @@
                 <p class="text-muted font-italic">
                     Click above to start your <span class="text-league-<%= next %>"><%= Moba.leagues[next] %> Challenge</span>.
                     <br/>
-                    You will face consecutive random opponents and must win all the battles in order to rank up to the <span class="text-league-<%=next%>"><%= Moba.leagues[next] %></span>.</span>
+                    You will face consecutive random opponents and must win all the battles in order to rank up.</span>
                 </p>
             </div>
         </div>
@@ -43,13 +43,6 @@
 <% end %>
 
 <%= if @current_hero.pve_current_turns > 0 do %>
-    <%= if @current_hero.refresh_targets_count > 0 do %>
-        <div class="row mt-2">
-            <div class="col">
-                <a href="javascript:;" phx-click="refresh-targets" class="btn btn-primary btn-block btn-lg"><i class="fa fa-refresh mr-1"></i>Refresh Targets (<%= @current_hero.refresh_targets_count %> remaining)</a>
-            </div>
-        </div>
-    <% end %>
     <div class="row mt-2">
         <div class="col">
             <div class="row d-flex align-items-center targets">

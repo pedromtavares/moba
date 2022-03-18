@@ -1,6 +1,8 @@
 <div class="card">
     <div class="card-body p-0 text-center">
-        <a href="/invoke" class="btn p-2 btn-block btn-lg btn-success col-xl-4 margin-auto mt-2 <%= if @current_user.is_guest, do: "disabled" %>"><i class="fa fa-user-plus mr-1"></i>Train a new Hero</a>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CreateLiveView), class: "btn p-2 btn-block btn-lg btn-success col-xl-4 margin-auto mt-2 #{if @current_user.is_guest, do: "disabled"}" do %>
+            <i class="fa fa-user-plus mr-1"></i>Train a new Hero
+        <% end %>
         <div class="pt-3">
             <div class="collection">
                 <%= for hero <- @current_user.hero_collection do %>
@@ -72,10 +74,10 @@
                                                     Customize
                                                 <% end %>
                                             <% else %>
-                                                <%= link to: "/game/continue?hero_id=#{hero.id}", class: "btn btn-success", method: :post do %>
+                                                <button type="button" class="btn btn-success" phx-click="continue" phx-value-id="<%= hero.id %>">
                                                     <i class="fa fa-crosshairs mr-1"></i>
                                                     Continue (<%= hero.pve_total_turns + hero.pve_current_turns %> turns left)
-                                                <% end %>
+                                                </button>
                                             <% end %>
                                             <div class="btn-group">
                                                 <button class="btn btn-icon btn-outline-dark text-warning" data-toggle="tooltip" title="Total farm: <%= hero.total_xp_farm + hero.total_gold_farm %>. Gold farm: <%= hero.total_gold_farm %>. XP farm: <%= hero.total_xp_farm %><br/>">

@@ -35,10 +35,6 @@ defmodule MobaWeb.Router do
     plug MobaWeb.AdminAuth
   end
 
-  pipeline :with_hero do
-    plug MobaWeb.HeroAuth
-  end
-
   pipeline :user_helper do
     plug MobaWeb.AuthHelper
   end
@@ -61,33 +57,28 @@ defmodule MobaWeb.Router do
   scope "/", MobaWeb do
     pipe_through [:browser, :root_layout, :protected, :user_helper]
 
-    live "/base", DashboardLiveView, :base, as: :base
-    live "/arena", ArenaLiveView, :arena, as: :arena
-    live "/arena/:id", DuelLiveView
+    live_session :default, on_mount: MobaWeb.UserLiveAuth do
+      live "/invoke", CreateLiveView
 
-    live "/hall", HallLiveView
+      live "/jungle", JungleLiveView
 
-    live "/about", AboutLiveView
+      live "/battles", BattlesLiveView
 
-    live "/tavern", TavernLiveView
+      live "/base", DashboardLiveView, :base, as: :base
 
-    live "/user/:id", UserLiveView
+      live "/arena", ArenaLiveView, :arena, as: :arena
+      live "/arena/:id", DuelLiveView
 
-    live "/hero/:id", HeroLiveView
+      live "/user/:id", UserLiveView
 
-    live "/library", LibraryLiveView
-    
-    live "/invoke", CreateLiveView
+      live "/hero/:id", HeroLiveView
 
-    post "/game/continue", GameController, :continue
-  end
+      live "/tavern", TavernLiveView
 
-  scope "/", MobaWeb do
-    pipe_through [:browser, :root_layout, :protected, :user_helper, :with_hero]
+      live "/hall", HallLiveView
 
-    live "/battles", BattlesLiveView
-
-    live "/jungle", JungleLiveView
+      live "/library", LibraryLiveView
+    end
   end
 
   scope "/admin", MobaWeb do

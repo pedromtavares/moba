@@ -62,7 +62,7 @@
     <div class="row battle-border-top pt-1 mt-1">
         <div class="col-4">
             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-outline-secondary btn-lg btn-block", "phx-hook": "Loading", id: "load-battles" do %>
-                <span class="loading-text"><i class="fa fa-history"></i> View Battle History</span>
+                <span class="loading-text"><i class="fa fa-list-ul"></i> View Battle Log</span>
             <% end %>
         </div>
         <div class="col">

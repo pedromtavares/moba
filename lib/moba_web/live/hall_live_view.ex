@@ -2,14 +2,9 @@ defmodule MobaWeb.HallLiveView do
   use MobaWeb, :live_view
 
   def mount(_, session, socket) do
-    hero_id = Map.get(session, "hero_id")
-    hero = hero_id && Game.get_hero!(hero_id)
-
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
-
     pve = Game.pve_ranking(20)
 
-    {:ok, assign(socket, current_hero: hero, pve: pve, master: nil, grandmaster: nil, users: nil, active_tab: "pve")}
+    {:ok, assign(socket, pve: pve, users: nil, active_tab: "pve", sidebar_code: "hall")}
   end
 
   def handle_event("show-users", _, socket) do

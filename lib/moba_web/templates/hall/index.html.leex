@@ -1,27 +1,15 @@
-<div class="row mt-3">
-    <div class="col">
-        <div class="title-container">
-            <i class="fa fa-trophy text-warning"></i>
-            <h3>Ranking</h3>
-            <p class="text-muted">
-                View the current best heroes and all time top users of Browser MOBA.
-            </p>
-        </div>
-    </div>
-</div>
-
-<div class="row mt-3 hall-of-fame">
+<div class="row mt-2 hall-of-fame">
     <div class="col text-center">
         <ul class="nav nav-tabs nav-bordered nav-justified">
             <li class="nav-item">
-                <a href="javascript:;" class="nav-link <%=if @active_tab == "pve", do: "active"%>" phx-click="show-pve" phx-hook="Loading" id="show-pve-link">
-                    <span class="loading-text"><i class="fa fa-crosshairs text-success mr-1"></i>Hero Ranking</span>
+                <a href="javascript:;" class="h5 nav-link <%=if @active_tab == "pve", do: "active"%>" phx-click="show-pve" phx-hook="Loading" id="show-pve-link">
+                    <span class="loading-text"><i class="fa fa-crosshairs fa-2x text-success"></i><br/>Hero Ranking</span>
                 </a>
             </li>
 
             <li class="nav-item">
-                <a href="javascript:;" class="nav-link <%=if @active_tab == "users", do: "active"%>" phx-click="show-users" phx-hook="Loading" id="show-users-link">
-                    <span class="loading-text"><i class="fa fa-globe text-primary mr-1"></i>Season Ranking</span>
+                <a href="javascript:;" class="h5 nav-link <%=if @active_tab == "users", do: "active"%>" phx-click="show-users" phx-hook="Loading" id="show-users-link">
+                    <span class="loading-text"><i class="fa fa-gopuram fa-2x text-primary"></i><br/>Season Ranking</span>
                 </a>
             </li>
         </ul>
@@ -105,7 +93,7 @@
                             </td>
                             <td style="width: 1000px">
                                 <%= for hero <- user.hero_collection do %>
-                                    <div style="width: 80px;" class='avatar-container mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
+                                    <div style="width: 75px;" class='avatar-container mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
                                         <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar" style="max-width: 100%";/>
                                         <img src="/images/league/<%= hero["tier"] %>.png" class="league-logo" style="margin-top: -20px">
                                     </div>

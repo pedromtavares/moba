@@ -1,9 +1,7 @@
 defmodule MobaWeb.ArenaLiveView do
   use MobaWeb, :live_view
 
-  def mount(_, session, socket) do
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
-    user = socket.assigns.current_user
+  def mount(_, session, %{assigns: %{current_user: user}} = socket) do
     duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
     normal_count = Accounts.normal_matchmaking_count(user)
     elite_count = Accounts.elite_matchmaking_count(user)
@@ -20,7 +18,8 @@ defmodule MobaWeb.ArenaLiveView do
        normal_count: normal_count,
        matchmaking: matchmaking,
        pending_match: pending_match,
-       closest_bot_time: closest_bot_time
+       closest_bot_time: closest_bot_time,
+       sidebar_code: "arena"
      )}
   end
 

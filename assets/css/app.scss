@@ -35,20 +35,21 @@
   width: 8.3vw;
   border-right: 1px solid #36404a;
 
-  img{
-    width: 100%;
-    border: 0;
-    border-radius: 2rem;
-    padding: 1rem;
-  }
-
   a{
     color: white;
     text-align: center;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
     margin-right: auto;
     margin-left: auto;
+    @media (min-height: 830px) {
+      margin-bottom: 1rem;
+      margin-top: 1rem;
+    }
+  }
+
+  a:first-child{
+    margin-top: 1rem;
   }
 
   a:hover, a.active{
@@ -56,16 +57,22 @@
   }
 
   i{
-    font-size: 2.2rem;
+    font-size: 35px;
     padding: 1rem;
     background-color: #3a4550;
     border-radius: 2rem;
+
+    @media (min-height: 830px) {
+      font-size: 40px;
+    }
   }
 
   i:hover{
     border-radius: 1rem;
     transition: all 0.3s;
   }
+
+  
 }
 
 body{
@@ -265,6 +272,11 @@ hr{
 
 .darker{
   background: rgba(0, 0, 0, 0.2) !important;
+}
+
+.shadow-box{
+  background: #38414a;
+  box-shadow: inset 0px 0px 300px black;
 }
 
 .original-bg{

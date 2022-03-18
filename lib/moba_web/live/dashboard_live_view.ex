@@ -2,9 +2,7 @@ defmodule MobaWeb.DashboardLiveView do
   use MobaWeb, :live_view
 
   def mount(_, session, socket) do
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
-
-    {:ok, socket |> pve_assigns() |> quest_assigns()}
+    {:ok, socket |> pve_assigns() |> quest_assigns() |> assign(sidebar_code: "base")}
   end
 
   def handle_event("pve-show-finished", _, %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket) do
@@ -36,12 +34,32 @@ defmodule MobaWeb.DashboardLiveView do
     {:noreply, assign(socket, visible_heroes: visible, all_heroes: all_heroes, loaded: loaded ++ [display])}
   end
 
-  def handle_event("archive", %{"id" => id}, socket) do
+  def handle_event("archive", %{"id" => id}, %{assigns: %{current_user: user, current_hero: current_hero}} = socket) do
     hero = Game.get_hero!(id)
     Game.archive_hero!(hero)
     if hero.finished_at, do: Game.update_hero_collection!(hero)
 
-    {:noreply, assign(socket, visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id)))}
+    current_hero = if current_hero && hero.id == current_hero.id, do: nil, else: current_hero
+
+    {:noreply,
+     assign(socket,
+       current_hero: current_hero,
+       visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id))
+     )}
+  end
+
+  def handle_event("continue", %{"id" => id}, %{assigns: %{current_user: user, current_hero: current_hero}} = socket) do
+    hero = Game.get_hero!(id)
+
+    if hero.user_id == user.id do
+      user = Accounts.set_current_pve_hero!(user, id)
+
+      {:noreply,
+       assign(socket, current_hero: hero, current_user: user)
+       |> push_redirect(to: Routes.live_path(socket, MobaWeb.JungleLiveView))}
+    else
+      {:noreply, socket}
+    end
   end
 
   def render(assigns) do

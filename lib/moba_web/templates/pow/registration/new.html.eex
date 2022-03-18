@@ -18,7 +18,7 @@
         <%= if hero = current_hero(@conn) do %>
             <% avatar = current_avatar(hero) %>
             <% avatars = creation_avatars() %>
-            <div class="row justify-content-center align-items-center border py-3 mb-3" id="create-bar">
+            <div class="row justify-content-center align-items-center border py-3 mb-3 shadow-box" id="create-bar">
                 <div class="col-4 text-center">
                     <img src="<%=GH.image_url(avatar)%>" class="avatar img-border mt-2" style="max-width: 160px"/>
                     <h3 class="mb-0"><%=avatar.name%></h3>

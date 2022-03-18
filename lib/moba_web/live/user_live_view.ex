@@ -1,13 +1,8 @@
 defmodule MobaWeb.UserLiveView do
   use MobaWeb, :live_view
 
-  def mount(_, session, socket) do
-    hero_id = Map.get(session, "hero_id")
-    hero = hero_id && Game.get_hero!(hero_id)
-
-    socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
-
-    {:ok, assign(socket, current_hero: hero)}
+  def mount(_, _session, socket) do
+    {:ok, assign(socket, sidebar_code: "user")}
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
