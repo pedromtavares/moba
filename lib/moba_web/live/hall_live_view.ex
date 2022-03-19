@@ -2,7 +2,7 @@ defmodule MobaWeb.HallLiveView do
   use MobaWeb, :live_view
 
   def mount(_, _session, socket) do
-    pve = Game.pve_ranking(20)
+    pve = Game.pve_ranking(21)
 
     {:ok, assign(socket, pve: pve, users: nil, active_tab: "pve", sidebar_code: "hall")}
   end

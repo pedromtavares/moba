@@ -8,6 +8,7 @@ defmodule Moba do
   # General constants
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
   @user_level_xp 10_000
+  @base_hero_count 6
   @leagues %{
     0 => "Bronze League",
     1 => "Silver League",
@@ -73,6 +74,7 @@ defmodule Moba do
   @boss_regeneration_multiplier 0.5
   @boss_win_bonus 2000
 
+  def base_hero_count, do: @base_hero_count
   def items_base_price, do: @items_base_price
   def normal_items_price, do: @items_base_price * 1
   def rare_items_price, do: @items_base_price * 3

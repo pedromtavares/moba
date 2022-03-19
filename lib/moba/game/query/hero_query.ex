@@ -11,6 +11,7 @@ defmodule Moba.Game.Query.HeroQuery do
 
   @platinum_league_tier Moba.platinum_league_tier()
   @current_ranking_date Moba.current_ranking_date()
+  @base_hero_count Moba.base_hero_count()
 
   def load(queryable \\ Hero) do
     queryable
@@ -42,7 +43,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(1)
   end
 
-  def latest(user_id, limit \\ 10) do
+  def latest(user_id, limit \\ @base_hero_count) do
     base = load() |> with_user(user_id) |> unarchived()
 
     from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])

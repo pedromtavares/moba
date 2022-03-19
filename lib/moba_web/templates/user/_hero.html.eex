@@ -3,7 +3,7 @@
         <h4 class="card-header font-17 text-white d-flex justify-content-between align-items-center mb-0">
             <span class="font-italic"><%= if @hero.pve_ranking do %>#<%= @hero.pve_ranking %><% end %></span>
             <div>
-                <img src="/images/league/<%= @hero.league_tier %>.png" class="league-logo">
+                <%= GH.hero_league(@hero) %>
                 <%= @hero.name %>
             </div>
             <span class="font-15 font-italic" data-toggle="tooltip" title="<%= GH.hero_stats_string(@hero, true) %>">Level <%= @hero.level %> <%= @hero.avatar.name %></span>

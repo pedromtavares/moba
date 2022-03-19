@@ -13,57 +13,11 @@
                 </a>
             </li>
         </ul>
-        <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "pve", do: "d-none"%>">
-            <tbody id="hall-of-heroes">
-                <%= for hero <- @pve do %>
-                    <tr id="hero-<%=hero.id%>">
-                        <td>
-                            <h1 class="mb-0">
-                                #<%= hero.pve_ranking %>
-                            </h1>
-                        </td>
-                        <td>
-                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero.id) do %>
-                                <%= GH.hero_avatar(hero) %><br/>
-                                <h4 class="mb-0"><img src="/images/league/<%=hero.league_tier%>.png" style="width: 20px" class="mr-1"/><%= hero.name %></h4>
-                                <small class="text-dark">Level <%= hero.level %> <%= hero.avatar.name %></small>
-                            <% end %>
-                        </td>
-                        <td>
-                            <div class="row d-flex mb-3">
-                                <div class="col">
-                                    <h4 class="text-info" data-toggle="tooltip" title="Total XP Farm: <%= hero.total_xp_farm %>">
-                                        <i class="fa fa-spa mr-1"></i><%= GH.farming_amount_label hero.total_xp_farm %>
-                                    </h4>
-                                </div>
-                                <div class="col">
-                                    <h4 class="text-warning" data-toggle="tooltip" title="Total Gold Farm: <%= hero.total_gold_farm %>">
-                                        <i class="fa fa-coins mr-1"></i><%= GH.farming_amount_label hero.total_gold_farm %>
-                                    </h4>
-                                </div>
-                                <div class="col">
-                                    <h4 class="text-danger" data-toggle="tooltip" title="Time it took to finish Training">
-                                        <i class="fa fa-clock-o mr-1"></i>
-                                        <%= if hero.finished_at do %>
-                                            <%= GH.finished_time(hero) %> minutes
-                                        <% else %>
-                                            ??
-                                        <% end %>
-                                    </h4>
-                                </div>
-                            </div>
-
-                            <%= GH.hero_stats(hero, true) %>
-                        </td>
-                        <td>
-                            <%= GH.hero_skill_list(hero) %>
-                            <br/>
-                            <%= GH.hero_item_list(hero, true) %>
-                        </td>
-                    </tr>
-              <% end %>
-            </tbody>
-        </table>
+        <div class="row <%=unless @active_tab == "pve", do: "d-none"%> mt-1">
+            <%= for hero <- @pve do %>
+                <%= render "_hero.html", hero: hero, socket: @socket %>
+            <% end %>
+        </div>
         <%= if @users do %>
             <table class="table table-dark mb-0 ranking border-left border-right border-bottom <%=unless @active_tab == "users", do: "d-none"%>">
                 <tbody id="hall-of-users">

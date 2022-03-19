@@ -66,6 +66,10 @@ defmodule MobaWeb.GameHelpers do
     end
   end
 
+  def hero_league(hero) do
+    img_tag("/images/league/#{hero.league_tier}.png", class: "league-logo")
+  end
+
   def hero_stats(hero, show_speed \\ false) do
     MobaWeb.HeroView.render("_stats.html", hero: hero, show_speed: show_speed)
   end

@@ -3,16 +3,21 @@
         <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
             <span class="font-italic font-20"><%= if @hero.pve_ranking do %>#<%= @hero.pve_ranking %><% end %></span>
             <div>
-                <img src="/images/league/<%=@hero.league_tier%>.png" class="league-logo">
-                <%=@hero.name%>
+                <%= GH.hero_league(@hero) %>
+                <%= @hero.name %>
             </div>
-            <span class="font-15 font-italic" data-toggle="tooltip" title="<%= GH.hero_stats_string(@hero, false) %>">Level <%= @hero.level %> <%= @hero.avatar.name %></span>
+            <span class="font-15 font-italic">Level <%= @hero.level %> <%= @hero.avatar.name %></span>
         </h4>
 
     </div>
     <div class="card-body text-center">
     </div>
     <div class="transparent card-footer p-0 text-center">
+        <div class="row my-1">
+            <div class="col justify-content-center d-flex">
+                <%= GH.hero_stats(@hero, true) %>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="skills-container d-flex justify-content-between">

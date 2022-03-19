@@ -1,19 +1,21 @@
 defmodule MobaWeb.DashboardLiveView do
   use MobaWeb, :live_view
 
+  @base_hero_count Moba.base_hero_count()
+
   def mount(_, _session, socket) do
     {:ok, socket |> pve_assigns() |> quest_assigns() |> assign(sidebar_code: "base")}
   end
 
   def handle_event("pve-show-finished", _, %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket) do
     visible = finished_heroes(all_heroes)
-    loaded = if length(visible) < 10, do: loaded ++ ["finished"], else: loaded
+    loaded = if length(visible) < @base_hero_count, do: loaded ++ ["finished"], else: loaded
     {:noreply, assign(socket, loaded: loaded, visible_heroes: visible, pve_display: "finished")}
   end
 
   def handle_event("pve-show-unfinished", _, %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket) do
     visible = unfinished_heroes(all_heroes)
-    loaded = if length(visible) < 10, do: loaded ++ ["unfinished"], else: loaded
+    loaded = if length(visible) < @base_hero_count, do: loaded ++ ["unfinished"], else: loaded
     {:noreply, assign(socket, loaded: loaded, visible_heroes: visible, pve_display: "unfinished")}
   end
 
@@ -36,7 +38,7 @@ defmodule MobaWeb.DashboardLiveView do
 
   def handle_event("archive", %{"id" => id}, %{assigns: %{current_user: user, current_hero: current_hero}} = socket) do
     hero = Game.get_hero!(id)
-    
+
     if hero.user_id == user.id do
       Game.archive_hero!(hero)
       if hero.finished_at, do: Game.update_hero_collection!(hero)
@@ -51,7 +53,6 @@ defmodule MobaWeb.DashboardLiveView do
     else
       {:noreply, socket}
     end
-    
   end
 
   def handle_event("continue", %{"id" => id}, %{assigns: %{current_user: user}} = socket) do
@@ -80,7 +81,7 @@ defmodule MobaWeb.DashboardLiveView do
     visible_heroes = if pve_display == "unfinished", do: unfinished_heroes, else: finished_heroes
     collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
-    loaded = if length(visible_heroes) < 10, do: [pve_display], else: []
+    loaded = if length(visible_heroes) < @base_hero_count, do: [pve_display], else: []
 
     assign(socket,
       all_heroes: all_heroes,
