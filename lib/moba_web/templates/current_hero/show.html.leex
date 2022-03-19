@@ -13,7 +13,7 @@
             </div>
             <div class="col col-md-5 col-lg-5 col-xl-4 <%=if @show_build, do: "d-none"%>">
                 <div class="flex-column">
-                    <div class="row">
+                    <div class="row  d-none d-md-block">
                         <div class="col">
                             <div class="progress progress-fixed xp-bar" data-toggle="tooltip" title="Experience: <%= @current_hero.experience %>/<%= xp_to_next_level(@current_hero) %>">
                                 <div style="width:<%= xp_percentage(@current_hero) %>%" class="progress-bar bg-white">
@@ -78,7 +78,7 @@
                                 <%= if @editing do %>
                                     <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
                                 <% else %>
-                                    <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle." class="badge badge-pill badge-light-warning py-1 px-3 font-14"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
+                                    <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle." class="badge badge-pill badge-light-warning py-1 px-3 font-14 d-none d-md-inline"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
                                 <% end %>
                             <% end %>
                         <% end %>

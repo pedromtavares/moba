@@ -4,6 +4,8 @@
     <body>
         <%= if is_nil(assigns[:current_user]) || assigns[:current_user].is_guest do %>   
             <%= render "_guest_navigation.html", assigns %>
+        <% else %>
+            <%= render "_mobile_navigation.html", assigns %>
         <% end %>
         <div class="wrapper" id="main-wrapper">
             <div class="container-fluid">

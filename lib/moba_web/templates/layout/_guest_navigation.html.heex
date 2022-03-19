@@ -3,12 +3,12 @@
         <div class="container-fluid text-right">
             <div id="inner-navigation">
                 <%= if is_nil(assigns[:current_user]) do %>
-                    <%= link to: "/session/new", class: "h4 text-white" do %>
+                    <%= link to: "/session/new", class: "h4 text-white mr-2" do %>
                         <i class="fa fa-sign-in mr-1"></i>
                         Already registered? Sign in
                     <% end %>
                 <% else %>
-                    <%= link to: Routes.pow_session_path(@conn, :delete), method: :delete, class: "h4 text-white" do %>
+                    <%= link to: Routes.pow_session_path(@conn, :delete), method: :delete, class: "h4 text-white mr-2" do %>
                         <i class="fa fa-sign-out-alt mr-1"></i>Create an account to play the full game
                     <% end %>
                 <% end %>

@@ -1,4 +1,4 @@
-<%= if @battle do %>
+<%= if @battle && @battle.winner do %>
     <div class="d-flex justify-content-center">
         <div class="text-center">
             <img src={GH.image_url(@battle.attacker.avatar)} class="avatar"/>

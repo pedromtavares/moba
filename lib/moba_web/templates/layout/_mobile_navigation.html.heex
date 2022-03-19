@@ -1,0 +1,36 @@
+<header id="topnav" class="d-md-none">
+    <div class="topbar-menu">
+        <div class="container-fluid clean-container">
+            <div id="inner-navigation">
+                <div class="col-xl-11 margin-auto">
+                    <div class="row text-center game-nav no-gutters">
+                        <div class="col d-flex justify-content-center">
+                            <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
+                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TrainingLiveView), class: "nav-link" do %>
+                                    <i class="fa fa-crosshairs"></i>
+                                <% end %>
+                            <% end %>
+                            <%= live_redirect to: Routes.base_path(@conn, :base), class: "nav-link" do %>
+                                <i class="fa fa-home"></i>
+                            <% end %>
+                            <%= if length(@current_user.hero_collection) > 0 do %>
+                                <%= live_redirect to: Routes.arena_path(@conn, :arena), class: "nav-link" do %>
+                                    <i class="fa fa-gopuram"></i>
+                                <% end %>
+                            <% end %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
+                                <i class="fa fa-user"></i>
+                            <% end %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.HallLiveView), class: "nav-link" do %>
+                                <i class="fa fa-trophy"></i>
+                            <% end %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), class: "nav-link" do %>
+                                <i class="fa fa-store-alt"></i>
+                            <% end %>  
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
