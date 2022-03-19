@@ -1,8 +1,8 @@
 <div class="battles" id="battle-history">
 
-    <div class="row mt-2 jungle-header">
+    <div class="row mt-2 training-header">
         <div class="col">
-            <%= JungleView.render "_header.html", Map.merge(assigns, %{origin: "battles"}) %>
+            <%= TrainingView.render "_header.html", Map.merge(assigns, %{origin: "battles"}) %>
         </div>
     </div>
 
@@ -32,7 +32,7 @@
                     </div>
                 </div>
                 <table class="table table-dark mb-2 text-center">
-                    <tbody phx-update="append" id="history-jungle">
+                    <tbody phx-update="append" id="history-ganks">
                         <%= for battle <- @battles[:pve] do %>
                             <%= render "_battle_row.html", battle: battle, current_hero: @current_hero %>
                         <% end %>

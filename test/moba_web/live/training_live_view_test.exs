@@ -1,4 +1,4 @@
-defmodule MobaWeb.JungleLiveViewTest do
+defmodule MobaWeb.TrainingLiveViewTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
@@ -7,7 +7,7 @@ defmodule MobaWeb.JungleLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
-    {:ok, _view, html} = live(conn, "/jungle")
+    {:ok, _view, html} = live(conn, "/training")
     assert html =~ "Meditate"
   end
 
@@ -18,7 +18,7 @@ defmodule MobaWeb.JungleLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, user, otp_app: :moba)
 
-    live(conn, "/jungle") |> follow_redirect(conn, "/base")
+    live(conn, "/training") |> follow_redirect(conn, "/base")
   end
 
   test "battle event", %{conn: conn} do
@@ -28,7 +28,7 @@ defmodule MobaWeb.JungleLiveViewTest do
 
     target = Game.list_targets(hero) |> List.first()
 
-    {:ok, view, _html} = live(conn, "/jungle")
+    {:ok, view, _html} = live(conn, "/training")
 
     {:ok, _, html} = render_click(view, :battle, %{"id" => target.id}) |> follow_redirect(conn)
 

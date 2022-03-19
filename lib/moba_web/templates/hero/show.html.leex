@@ -1,5 +1,5 @@
 <div class="hero-review content-with-hero-bar" id="hero-review">
-    <%= if finished_hero = just_finished_jungle?(@current_user, @hero) do %>
+    <%= if finished_hero = just_finished_training?(@current_user, @hero) do %>
         <%= render "_finished_hero.html", Map.put(assigns, :finished_hero, finished_hero) %>
     <% end %>
     <div class="row mt-3">

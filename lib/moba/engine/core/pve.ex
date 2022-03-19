@@ -1,6 +1,6 @@
 defmodule Moba.Engine.Core.Pve do
   @moduledoc """
-  Encapsulates all logic for PVE battles - the ones fought in the Jungle
+  Encapsulates all logic for Training battles
   """
   alias Moba.{Game, Engine}
   alias Engine.Schema.Battle

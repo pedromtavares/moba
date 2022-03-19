@@ -39,16 +39,16 @@ defmodule MobaWeb.DashboardView do
     |> progression_level_sort()
   end
 
-  def jungle_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
-  def jungle_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
-  def jungle_bonus_for(%{quest: %{level: 5}}), do: "Ability to refresh Targets up to 10 times"
-  def jungle_bonus_for(%{quest: %{level: 6}}), do: "Ability to refresh Targets up to 15 times"
-  def jungle_bonus_for(_), do: nil
+  def training_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
+  def training_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
+  def training_bonus_for(%{quest: %{level: 5}}), do: "Ability to refresh Targets up to 10 times"
+  def training_bonus_for(%{quest: %{level: 6}}), do: "Ability to refresh Targets up to 15 times"
+  def training_bonus_for(_), do: nil
 
-  def jungle_difficulty_for(%{quest: %{level: 1}}), do: "3 Easy targets + 6 Medium targets"
-  def jungle_difficulty_for(%{quest: %{level: 2}}), do: "6 Medium targets + 3 Hard targets"
-  def jungle_difficulty_for(%{quest: %{level: 3}}), do: "3 Medium targets + 6 Hard targets"
-  def jungle_difficulty_for(_), do: "9 Hard targets"
+  def training_difficulty_for(%{quest: %{level: 1}}), do: "3 Easy targets + 6 Medium targets"
+  def training_difficulty_for(%{quest: %{level: 2}}), do: "6 Medium targets + 3 Hard targets"
+  def training_difficulty_for(%{quest: %{level: 3}}), do: "3 Medium targets + 6 Hard targets"
+  def training_difficulty_for(_), do: "9 Hard targets"
 
   def max_league_allowed_for(%{quest: %{level: 1}}), do: "Master League"
   def max_league_allowed_for(_), do: "Grandmaster League"

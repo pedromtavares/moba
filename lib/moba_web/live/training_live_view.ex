@@ -1,7 +1,7 @@
-defmodule MobaWeb.JungleLiveView do
+defmodule MobaWeb.TrainingLiveView do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{Tutorial, Shop, JungleView}
+  alias MobaWeb.{Tutorial, Shop, TrainingView}
 
   def mount(_, _, %{assigns: %{current_hero: hero}} = socket) do
     hero = Game.maybe_finish_pve(hero)
@@ -91,7 +91,7 @@ defmodule MobaWeb.JungleLiveView do
     skills = Enum.map(hero.active_build.skills, &Game.get_skill_by_code!(&1.code, true, 1))
     Moba.create_current_pve_hero!(%{name: hero.name}, user, hero.avatar, skills)
 
-    {:noreply, socket |> redirect(to: "/jungle")}
+    {:noreply, socket |> redirect(to: "/training")}
   end
 
   def handle_event("show-meditation", _, %{assigns: %{current_hero: hero}} = socket) do
@@ -163,7 +163,7 @@ defmodule MobaWeb.JungleLiveView do
   end
 
   def handle_info(:current_time, %{assigns: %{current_hero: hero}} = socket) do
-    if JungleView.farming_progression(hero, %{current_time: Timex.now()}) < 100 do
+    if TrainingView.farming_progression(hero, %{current_time: Timex.now()}) < 100 do
       Process.send_after(self(), :current_time, 1000)
     end
 
@@ -173,7 +173,7 @@ defmodule MobaWeb.JungleLiveView do
   def handle_info(:current_time, socket), do: {:noreply, socket}
 
   def render(assigns) do
-    MobaWeb.JungleView.render("index.html", assigns)
+    MobaWeb.TrainingView.render("index.html", assigns)
   end
 
   defp current_farm_tab(%{pve_state: "meditating"}), do: "meditation"

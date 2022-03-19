@@ -1,9 +1,9 @@
 defmodule MobaWeb.BattleView do
   use MobaWeb, :view
-  alias MobaWeb.JungleView
+  alias MobaWeb.TrainingView
 
-  defdelegate difficulty_color(diff), to: JungleView
-  defdelegate difficulty_label(diff), to: JungleView
+  defdelegate difficulty_color(diff), to: TrainingView
+  defdelegate difficulty_label(diff), to: TrainingView
 
   def active_attacker?(%{attacker: attacker} = battle, last_turn, %{id: user_id}) do
     is_current? = attacker.user_id == user_id
@@ -389,7 +389,7 @@ defmodule MobaWeb.BattleView do
 
   def link_for(%{id: id, bot_difficulty: diff}, _) when is_nil(diff), do: "/hero/#{id}"
   def link_for(_, %{type: "pvp"}), do: "/arena"
-  def link_for(_, _), do: "/jungle"
+  def link_for(_, _), do: "/training"
 
   def battler_skill_list(battler) do
     (battler.active_skills ++ battler.passive_skills)

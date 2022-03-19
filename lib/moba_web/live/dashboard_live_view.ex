@@ -34,18 +34,24 @@ defmodule MobaWeb.DashboardLiveView do
     {:noreply, assign(socket, visible_heroes: visible, all_heroes: all_heroes, loaded: loaded ++ [display])}
   end
 
-  def handle_event("archive", %{"id" => id}, %{assigns: %{current_hero: current_hero}} = socket) do
+  def handle_event("archive", %{"id" => id}, %{assigns: %{current_user: user, current_hero: current_hero}} = socket) do
     hero = Game.get_hero!(id)
-    Game.archive_hero!(hero)
-    if hero.finished_at, do: Game.update_hero_collection!(hero)
+    
+    if hero.user_id == user.id do
+      Game.archive_hero!(hero)
+      if hero.finished_at, do: Game.update_hero_collection!(hero)
 
-    current_hero = if current_hero && hero.id == current_hero.id, do: nil, else: current_hero
+      current_hero = if current_hero && hero.id == current_hero.id, do: nil, else: current_hero
 
-    {:noreply,
-     assign(socket,
-       current_hero: current_hero,
-       visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id))
-     )}
+      {:noreply,
+       assign(socket,
+         current_hero: current_hero,
+         visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id))
+       )}
+    else
+      {:noreply, socket}
+    end
+    
   end
 
   def handle_event("continue", %{"id" => id}, %{assigns: %{current_user: user}} = socket) do
@@ -56,7 +62,7 @@ defmodule MobaWeb.DashboardLiveView do
 
       {:noreply,
        assign(socket, current_hero: hero, current_user: user)
-       |> push_redirect(to: Routes.live_path(socket, MobaWeb.JungleLiveView))}
+       |> push_redirect(to: Routes.live_path(socket, MobaWeb.TrainingLiveView))}
     else
       {:noreply, socket}
     end

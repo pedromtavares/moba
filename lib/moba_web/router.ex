@@ -60,7 +60,7 @@ defmodule MobaWeb.Router do
     live_session :default, on_mount: MobaWeb.UserLiveAuth do
       live "/invoke", CreateLiveView
 
-      live "/jungle", JungleLiveView
+      live "/training", TrainingLiveView
 
       live "/battles", BattlesLiveView
 

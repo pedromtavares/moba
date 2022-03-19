@@ -1,4 +1,4 @@
-defmodule MobaWeb.JungleView do
+defmodule MobaWeb.TrainingView do
   use MobaWeb, :view
 
   alias MobaWeb.BattleView

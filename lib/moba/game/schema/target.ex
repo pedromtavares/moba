@@ -1,6 +1,6 @@
 defmodule Moba.Game.Schema.Target do
   @moduledoc """
-  Targets are what Heroes battle against in the Jungle (PVE),
+  Targets are what Heroes battle against when Training,
   they are automatically generated after every battle according
   to their difficulty.
   """

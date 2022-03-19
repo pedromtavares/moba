@@ -3,12 +3,6 @@ defmodule Moba.Game.Schema.Build do
   A Build represents a battle strategy one can use to defeat oppoennts.
 
   Hero -> Build -> Skills
-
-  While in the Jungle (PVE), a Hero can only have one Build, but once
-  moving to the Arena (PVP), another Build can be created.
-
-  Each Build may also store different skill and item orders, useful when
-  defending in the Arena.
   """
 
   use Ecto.Schema

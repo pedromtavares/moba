@@ -1,4 +1,4 @@
-.jungle{
+.training{
   margin-bottom: 150px;
 
   @media (max-width: 992px) {
@@ -48,10 +48,46 @@
   .mine-tab a.active{
     border: 2px solid #f7b84b !important;
   }
+
+  .farm-tabs{
+    .nav-link h2{
+      line-height: 1.4;
+    }
+  }
+
+  .farming-bg{
+    background: 0;
+    width: 100%;
+    min-height: 700px;
+    border: 2px solid rgba(206, 212, 218, 0.2);
+    border-top: 0;
+
+    .table{
+      background-color: rgba(54, 64, 74, 0.8);
+    }
+
+    .farming-history{
+      max-height: 500px;
+      overflow: auto;
+    }
+
+    .card-box {
+      background-color: rgba(54, 64, 74, 0.8);
+    }
+  }
+
+  .mining-bg{
+    input[type='range']::-webkit-slider-thumb {
+      width: 16px;
+      -webkit-appearance: none;
+      height: 16px;
+      background: #f7b84b;
+      border-radius: 10px;
+    }
+  }
 }
 
-.jungle-header{
-
+.training-header{
   .league-bar-0{
     background: rgba(219, 175, 131, 0.7) !important;
   }
@@ -117,43 +153,6 @@
       border-image-source: radial-gradient(white, rgb(47, 60, 74));
       border-image-slice: 1;
     }
-  }
-}
-
-.farm-tabs{
-  .nav-link h2{
-    line-height: 1.4;
-  }
-}
-
-.farming-bg{
-  background: 0;
-  width: 100%;
-  min-height: 700px;
-  border: 2px solid rgba(206, 212, 218, 0.2);
-  border-top: 0;
-
-  .table{
-    background-color: rgba(54, 64, 74, 0.8);
-  }
-
-  .farming-history{
-    max-height: 500px;
-    overflow: auto;
-  }
-
-  .card-box {
-    background-color: rgba(54, 64, 74, 0.8);
-  }
-}
-
-.mining-bg{
-  input[type='range']::-webkit-slider-thumb {
-    width: 16px;
-    -webkit-appearance: none;
-    height: 16px;
-    background: #f7b84b;
-    border-radius: 10px;
   }
 }
 

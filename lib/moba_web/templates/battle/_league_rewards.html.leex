@@ -74,7 +74,7 @@
     <%= if Game.master_league?(@hero) || @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
         <div class="row battle-border-top pt-1 mt-2">
             <div class="col">
-                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), class: "btn btn-outline-info btn-lg btn-block", "phx-hook": "Loading", id: "load-jungle" do %>
+                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), class: "btn btn-outline-info btn-lg btn-block", "phx-hook": "Loading", id: "load-training" do %>
                     <span class="loading-text"><i class="fa fa-play"></i> Continue</span>
                 <% end %>
             </div>

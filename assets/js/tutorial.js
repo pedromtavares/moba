@@ -184,7 +184,7 @@ const Tutorial = {
           id: 'eleventh-tutorial-first-step',
           text: "<p class='text-center'>You have ranked up to Silver League, congratulations!<br/> Keep farming until you reach at least the Platinum League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and to level up your skills. Have fun!</p>",
           attachTo: {
-            element: '#current-jungle-rank',
+            element: '#current-training-rank',
             on: 'bottom'
           },
           buttons: [

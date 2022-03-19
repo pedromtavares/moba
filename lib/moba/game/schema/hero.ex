@@ -4,7 +4,7 @@ defmodule Moba.Game.Schema.Hero do
   for all of the base stats: HP, MP, ATK, Power, Armor, Speed.
 
   A Hero starts at level 1 and levels up by gaining XP when beating
-  opponents in the Jungle.
+  opponents while Training.
 
   It manages Items directly: Hero -> Items, but needs a Build to manage its skills:
   Hero -> Build -> Skills.

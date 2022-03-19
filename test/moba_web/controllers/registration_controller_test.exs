@@ -25,7 +25,7 @@ defmodule MobaWeb.RegistrationControllerTest do
         }
       })
 
-    assert "/jungle" = redirected_to(conn, 302)
+    assert "/training" = redirected_to(conn, 302)
   end
 
   test "create with guest", %{conn: conn} do
@@ -43,7 +43,7 @@ defmodule MobaWeb.RegistrationControllerTest do
         }
       })
 
-    assert "/jungle" = redirected_to(conn, 302)
+    assert "/training" = redirected_to(conn, 302)
 
     hero = Game.get_hero!(hero.id)
 

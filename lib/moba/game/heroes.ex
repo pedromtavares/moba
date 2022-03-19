@@ -104,9 +104,7 @@ defmodule Moba.Game.Heroes do
   end
 
   @doc """
-  Only attackers are rewarded with XP in PVE (Jungle) battles.
-  If they happen to reach the max league (Master), they are
-  automatically pushed to level 25 (max level).
+  Only attackers are rewarded with XP in Training battles.
   """
   def update_attacker!(hero, updates) do
     {xp, updates} = Map.pop(updates, :total_xp)

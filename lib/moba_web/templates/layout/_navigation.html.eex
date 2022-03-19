@@ -1,6 +1,6 @@
 <div class="sidebar-nav">
     <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
-        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: sidebar_class("training", assigns) do %>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: sidebar_class("training", assigns) do %>
             <i class="fa fa-crosshairs"></i>
         <% end %>              
     <% end %>

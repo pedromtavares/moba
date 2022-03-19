@@ -6,12 +6,12 @@ defmodule MobaWeb.GameControllerTest do
     assert html_response(conn, 200) =~ "PRESS START"
   end
 
-  test "user has active pve hero and is redirected to jungle", %{conn: conn} do
+  test "user has active pve hero and is redirected to training", %{conn: conn} do
     hero = create_base_hero()
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba) |> get("/")
 
-    assert "/jungle" = redir_path = redirected_to(conn, 302)
+    assert "/training" = redir_path = redirected_to(conn, 302)
 
     conn =
       conn
@@ -33,6 +33,6 @@ defmodule MobaWeb.GameControllerTest do
 
     conn = post(conn, "/start", %{"skills" => skills, "avatar" => avatar})
 
-    assert "/jungle" = redirected_to(conn, 302)
+    assert "/training" = redirected_to(conn, 302)
   end
 end

@@ -2,15 +2,16 @@ defmodule MobaWeb.UserLiveView do
   use MobaWeb, :live_view
 
   def mount(_, _session, socket) do
-    {:ok, assign(socket, sidebar_code: "user")}
+    {:ok, socket}
   end
 
-  def handle_params(%{"id" => id}, _uri, socket) do
+  def handle_params(%{"id" => id}, _uri, %{assigns: %{current_user: current_user}} = socket) do
     if connected?(socket) do
       MobaWeb.subscribe("user-ranking")
     end
 
     user = Accounts.get_user_with_current_heroes!(id)
+    code = if user.id == current_user.id, do: "user", else: nil
 
     featured =
       if length(user.hero_collection) > 0 do
@@ -31,7 +32,8 @@ defmodule MobaWeb.UserLiveView do
        featured: featured,
        ranking: ranking,
        blank_collection: blank_collection,
-       duels: duels
+       duels: duels,
+       sidebar_code: code
      )}
   end
 

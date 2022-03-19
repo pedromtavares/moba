@@ -1,9 +1,9 @@
 defmodule MobaWeb.HeroView do
   use MobaWeb, :view
 
-  def just_finished_jungle?(_, %{finished_at: nil}), do: nil
+  def just_finished_training?(_, %{finished_at: nil}), do: nil
 
-  def just_finished_jungle?(user, %{finished_at: finished_at} = hero) do
+  def just_finished_training?(user, %{finished_at: finished_at} = hero) do
     ago = Timex.now() |> Timex.shift(days: -1)
 
     if user.current_pve_hero_id && finished_at > ago do

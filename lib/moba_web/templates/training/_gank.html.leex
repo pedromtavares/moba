@@ -24,7 +24,7 @@
     </div>
     <div class="row">
         <div class="col text-center">
-            <img src="/images/league_6.png" style="height: 100px"/>
+            <img src="/images/league/6.png" style="height: 100px"/>
             <br/>
             <button class="btn btn-warning btn-lg mt-1 mb-1 btn-boss" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
                 <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Boss Fight</span>
@@ -47,7 +47,7 @@
         <div class="col">
             <div class="row d-flex align-items-center targets">
                 <%= for target <- @targets do %>
-                    <%= render "_jungle_target.html", target: target, targets: @targets, current_hero: @current_hero %>
+                    <%= render "_target.html", target: target, targets: @targets, current_hero: @current_hero %>
                 <% end %>
             </div>
         </div>

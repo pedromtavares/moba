@@ -6,7 +6,7 @@ defmodule MobaWeb.GameController do
     user = conn.assigns.current_user
 
     cond do
-      user && Game.current_pve_hero(user) -> redirect(conn, to: "/jungle")
+      user && Game.current_pve_hero(user) -> redirect(conn, to: "/training")
       user -> redirect(conn, to: "/base")
       true -> render(conn, "homepage.html", layout: {MobaWeb.LayoutView, "homepage.html"})
     end
@@ -34,6 +34,6 @@ defmodule MobaWeb.GameController do
 
     conn
     |> put_session(:guest_user_id, user.id)
-    |> redirect(to: "/jungle")
+    |> redirect(to: "/training")
   end
 end

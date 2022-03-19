@@ -35,14 +35,7 @@
                         <div class="row">
                             <div class="text-center col-12">
                                 <%= if @battle.type == "pve" do %>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.JungleLiveView), "phx-hook": "Loading", id: "battle-over-jungle" do %>
-                                        <button class="btn btn-danger width-lg text-white">
-                                            <span class="loading-text">Battle Over!</span>
-                                        </button>
-                                    <% end %>
-                                <% end %>
-                                <%= if @battle.type == "pvp" do %>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLiveView), "phx-hook": "Loading", id: "battle-over-arena" do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), "phx-hook": "Loading", id: "battle-over-training" do %>
                                         <button class="btn btn-danger width-lg text-white">
                                             <span class="loading-text">Battle Over!</span>
                                         </button>

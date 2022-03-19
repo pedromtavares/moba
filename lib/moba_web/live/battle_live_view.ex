@@ -74,7 +74,7 @@ defmodule MobaWeb.BattleLiveView do
     if battle.id != String.to_integer(id) && battle.type == "league" do
       {:noreply, socket |> push_patch(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
     else
-      {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.JungleLiveView))}
+      {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.TrainingLiveView))}
     end
   end
 

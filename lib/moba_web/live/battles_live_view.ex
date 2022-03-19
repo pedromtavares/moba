@@ -3,9 +3,7 @@ defmodule MobaWeb.BattlesLiveView do
 
   alias MobaWeb.{BattleView, BattleLiveView}
 
-  def mount(_, %{"hero_id" => hero_id}, socket) do
-    socket = assign_new(socket, :current_hero, fn -> Game.get_hero!(hero_id) end)
-
+  def mount(_, _session, socket) do
     {:ok, assign(socket, battles: %{pve: [], league: []}), temporary_assigns: [extra_battles: []]}
   end
 
