@@ -23,7 +23,9 @@
   }
 
   .collection{
-    max-height: 52vh;
+    .card-body{
+      padding-bottom: -1rem;
+    }
     .avatar{
       max-width: 100%;
     }

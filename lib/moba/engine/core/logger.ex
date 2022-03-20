@@ -243,11 +243,6 @@ defmodule Moba.Engine.Core.Logger do
     "Merciful blow! #{hero}'s [power]Power significantly increased by #{power}[/power] this turn"
   end
 
-  # TODO: Remove later
-  defp description_for("culling_blade", %{"extra" => {true, hero}}, heroes) do
-    "#{hero} has been instantly executed by #{opponent_for(hero, heroes)}. [status]RIP[/status]"
-  end
-
   defp description_for("culling_blade", %{"executed" => {true, hero}}, heroes) do
     "#{hero} has been instantly executed by #{opponent_for(hero, heroes)}. [status]RIP[/status]"
   end
