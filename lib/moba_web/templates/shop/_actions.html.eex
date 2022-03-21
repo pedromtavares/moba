@@ -1,6 +1,6 @@
 <hr class="img-border-xs"/>
 <div class="row selected-shop">
-    <div class="col center">
+    <div class="col d-flex justify-content-center">
         <img src="<%=GH.image_url(@selected_shop)%>" data-toggle="tooltip" title="<%=GH.item_description(@selected_shop)%>" class="item-img" />
     </div>
 </div>
