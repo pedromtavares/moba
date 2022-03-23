@@ -46,62 +46,64 @@
         <% end %>
     </div>
 
-    <div class="<%= unless @active_tab == "skins", do: "d-none" %> mt-2">
-        <div class="row">
-            <div class="col-xl-5 col-lg-7 col-12 margin-auto">
-                <div class="card hero-card">
-                    <div class="card-header p-0">
-                        <div class="name d-flex justify-content-between align-items-center">
-                            <img src="/images/league/<%= @current_skin.league_tier %>.png" style="height: 40px;" class="px-3">
-                           <h3 class="m-0 text-center p-2 text-white"> <%= @current_skin.name %></h3>
-                           <a href="<%= @current_skin.author_link %>" target="_blank" class="font-italic float-right text-white px-1">by <%= @current_skin.author_name %></a>
-                        </div>
-                    </div>
-                    <div class="card-body" style="background-image: url(<%=GH.background_url(@current_skin)%>">
-                    </div>
-                    <div class="transparent card-footer text-center">
-                        <div class="row">
-                            <div class="col-3">
-                                <%= if @current_index > 0 do %>
-                                    <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="previous-skin"><i class="fa fa-chevron-left mr-1"></i> Prev</a>
-                                <% end %>
+    <%= if @current_skin do %>
+        <div class="<%= unless @active_tab == "skins", do: "d-none" %> mt-2">
+            <div class="row">
+                <div class="col-xl-5 col-lg-7 col-12 margin-auto">
+                    <div class="card hero-card">
+                        <div class="card-header p-0">
+                            <div class="name d-flex justify-content-between align-items-center">
+                                <img src="/images/league/<%= @current_skin.league_tier %>.png" style="height: 40px;" class="px-3">
+                               <h3 class="m-0 text-center p-2 text-white"> <%= @current_skin.name %></h3>
+                               <a href="<%= @current_skin.author_link %>" target="_blank" class="font-italic float-right text-white px-1">by <%= @current_skin.author_name %></a>
                             </div>
-                            <div class="col-6">
-                                <%=if unlocked?(@current_skin, @current_user) do %>
-                                    <a href="javascript:;" class="btn btn-outline-secondary no-action btn-rounded" data-toggle="tooltip" title="You already own this Skin and can select it when joining the Arena with this hero."><i class="fa fa-unlock mr-1"></i>Unlocked</a>
-                                <% else %>
-                                    <%= if can_unlock?(@current_skin, @current_user) do %>
-                                        <a href="javascript:;" class="btn btn-outline-warning btn-lg" phx-click="unlock-skin" phx-value-code="<%= @current_skin.code %>" phx-hook="Loading" id="unlock-<%= @current_skin.code %>">
-                                            <span class="loading-text">
-                                                <i class="fab fa-ethereum mr-1"></i>Unlock for <%= price_to_unlock(@current_skin) %> Shards
-                                            </span>
-                                        </a>
-                                    <% else %>
-                                        <a href="javascript:;" class="btn btn-secondary no-action"><i class="fa fa-lock mr-1"></i><%=unlock_error_message(@current_skin, @current_user)%></a>
+                        </div>
+                        <div class="card-body" style="background-image: url(<%=GH.background_url(@current_skin)%>">
+                        </div>
+                        <div class="transparent card-footer text-center">
+                            <div class="row">
+                                <div class="col-3">
+                                    <%= if @current_index > 0 do %>
+                                        <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="previous-skin"><i class="fa fa-chevron-left mr-1"></i> Prev</a>
                                     <% end %>
-                                <% end %>
-                            </div>
-                            <div class="col-3">
-                                <%= if length(@current_skins) > @current_index + 1 do %>
-                                    <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="next-skin">Next<i class="fa fa-chevron-right ml-1"></i> </a>
-                                <% end %>
+                                </div>
+                                <div class="col-6">
+                                    <%=if unlocked?(@current_skin, @current_user) do %>
+                                        <a href="javascript:;" class="btn btn-outline-secondary no-action btn-rounded" data-toggle="tooltip" title="You already own this Skin and can select it when joining the Arena with this hero."><i class="fa fa-unlock mr-1"></i>Unlocked</a>
+                                    <% else %>
+                                        <%= if can_unlock?(@current_skin, @current_user) do %>
+                                            <a href="javascript:;" class="btn btn-outline-warning btn-lg" phx-click="unlock-skin" phx-value-code="<%= @current_skin.code %>" phx-hook="Loading" id="unlock-<%= @current_skin.code %>">
+                                                <span class="loading-text">
+                                                    <i class="fab fa-ethereum mr-1"></i>Unlock for <%= price_to_unlock(@current_skin) %> Shards
+                                                </span>
+                                            </a>
+                                        <% else %>
+                                            <a href="javascript:;" class="btn btn-secondary no-action"><i class="fa fa-lock mr-1"></i><%=unlock_error_message(@current_skin, @current_user)%></a>
+                                        <% end %>
+                                    <% end %>
+                                </div>
+                                <div class="col-3">
+                                    <%= if length(@current_skins) > @current_index + 1 do %>
+                                        <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="next-skin">Next<i class="fa fa-chevron-right ml-1"></i> </a>
+                                    <% end %>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row">
-            <div class="card">
-                <div class="col-12">
-                <%= for avatar <- @all_avatars do %>
-                    <a class='avatar-container m-1' href="javascript:;" data-toggle="tooltip" title="<%=avatar.name%>" phx-click="set-avatar" phx-value-code="<%=avatar.code%>">
-                        <img src="<%=GH.image_url(avatar)%>" class="avatar img-border <%=if @current_avatar && @current_avatar.id == avatar.id, do: "current"%>"/>
-                    </a>
-                <% end %>
+            <div class="row">
+                <div class="card">
+                    <div class="col-12">
+                    <%= for avatar <- @all_avatars do %>
+                        <a class='avatar-container m-1' href="javascript:;" data-toggle="tooltip" title="<%=avatar.name%>" phx-click="set-avatar" phx-value-code="<%=avatar.code%>">
+                            <img src="<%=GH.image_url(avatar)%>" class="avatar img-border <%=if @current_avatar && @current_avatar.id == avatar.id, do: "current"%>"/>
+                        </a>
+                    <% end %>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    <% end %>
 </div>
