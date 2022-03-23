@@ -169,7 +169,7 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.base_damage()
     |> Effect.atk_damage()
     |> Effect.add_debuff()
-    |> Effect.add_buff(1)
+    |> Effect.add_buff()
   end
 
   defp effects_for(%{resource: %Skill{code: "static_link", buff: nil}} = turn, _options) do
