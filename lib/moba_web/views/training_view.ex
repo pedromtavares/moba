@@ -15,6 +15,57 @@ defmodule MobaWeb.TrainingView do
       user.shard_count >= Accounts.shard_buyback_price(user)
   end
 
+  def dead?(%{pve_state: "dead"}), do: true
+  def dead?(_), do: false
+
+  def difficulty_color(difficulty) do
+    case difficulty do
+      "weak" -> "success"
+      "moderate" -> "primary"
+      "strong" -> "danger"
+      _ -> "dark"
+    end
+  end
+
+  def difficulty_label(difficulty) do
+    case difficulty do
+      "weak" -> "Easy"
+      "moderate" -> "Medium"
+      "strong" -> "Hard"
+      _ -> "??"
+    end
+  end
+
+  def display_farm_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
+
+  def display_defense_percentage(target, targets) do
+    heroes = Enum.map(targets, & &1.defender)
+    with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
+    max = Enum.max_by(with_stats, fn hero -> hero.display_defense end) || target.defender
+
+    if max.display_defense && max.display_defense > 0 do
+      max.display_defense && with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
+    else
+      100
+    end
+  end
+
+  def display_offense_percentage(target, targets) do
+    heroes = Enum.map(targets, & &1.defender)
+    with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
+    max = Enum.max_by(with_stats, fn hero -> hero.display_offense end) || target.defender
+
+    if max.display_offense && max.display_offense > 0 do
+      with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
+    else
+      100
+    end
+  end
+
+  def elapsed_time(%{inserted_at: inserted_at}) do
+    Timex.diff(Timex.now(), inserted_at, :minutes)
+  end
+
   def farming_container_background(hero, assigns) do
     if farming_progression(hero, assigns) >= 100 do
       "rgba(54, 64, 74, 0.8)"
@@ -48,59 +99,6 @@ defmodule MobaWeb.TrainingView do
     Timex.shift(started, seconds: turn_seconds) |> Timex.format("{relative}", :relative) |> elem(1)
   end
 
-  def difficulty_color(difficulty) do
-    case difficulty do
-      "weak" -> "success"
-      "moderate" -> "primary"
-      "strong" -> "danger"
-      _ -> "dark"
-    end
-  end
-
-  def difficulty_label(difficulty) do
-    case difficulty do
-      "weak" -> "Easy"
-      "moderate" -> "Medium"
-      "strong" -> "Hard"
-      _ -> "??"
-    end
-  end
-
-  def display_farm_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
-
-  def dead?(hero), do: hero.pve_state == "dead"
-
-  def offense_percentage(target, targets) do
-    heroes = Enum.map(targets, & &1.defender)
-    with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
-    max = Enum.max_by(with_stats, fn hero -> hero.display_offense end) || target.defender
-
-    if max.display_offense && max.display_offense > 0 do
-      with_display_stats(target.defender, heroes).display_offense * 100 / max.display_offense
-    else
-      100
-    end
-  end
-
-  def defense_percentage(target, targets) do
-    heroes = Enum.map(targets, & &1.defender)
-    with_stats = Enum.map(heroes, &with_display_stats(&1, heroes))
-    max = Enum.max_by(with_stats, fn hero -> hero.display_defense end) || target.defender
-
-    if max.display_defense && max.display_defense > 0 do
-      max.display_defense && with_display_stats(target.defender, heroes).display_defense * 100 / max.display_defense
-    else
-      100
-    end
-  end
-
-  def next_league(%{league_tier: current_tier}) do
-    cond do
-      current_tier + 1 >= Moba.max_league_tier() -> nil
-      true -> current_tier + 1
-    end
-  end
-
   def max_available_league(%{pve_tier: pve_tier, league_attempts: attempts} = hero) do
     max = Moba.max_available_league(pve_tier)
 
@@ -111,15 +109,20 @@ defmodule MobaWeb.TrainingView do
     end
   end
 
-  def reward_badges_for(hero, difficulty) do
-    rewards = Moba.pve_battle_rewards(difficulty, hero.pve_tier)
+  def next_league(%{league_tier: current_tier}) do
+    cond do
+      current_tier + 1 >= Moba.max_league_tier() -> nil
+      true -> current_tier + 1
+    end
+  end
 
-    xp_reward = content_tag(:span, "+#{rewards} XP", class: "badge badge-pill badge-light-primary mr-1")
+  def reward_badges_for(%{pve_tier: pve_tier}, difficulty) do
+    rewards = Moba.pve_battle_rewards(difficulty, pve_tier)
 
     safe_to_string(
       content_tag :div do
         [
-          xp_reward,
+          content_tag(:span, "+#{rewards} XP", class: "badge badge-pill badge-light-primary mr-1"),
           content_tag(:span, "+#{rewards} Gold", class: "badge badge-pill badge-light-warning mr-1")
         ]
       end

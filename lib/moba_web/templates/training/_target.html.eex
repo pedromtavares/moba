@@ -35,7 +35,7 @@
                         </div>
                         <div class="col">
                             <div class="progress progress-fixed">
-                                <div style="width:<%= offense_percentage(@target, @targets) %>%" class="progress-bar bg-pink">
+                                <div style="width:<%= display_offense_percentage(@target, @targets) %>%" class="progress-bar bg-pink">
                                     <span></span>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                         </div>
                         <div class="col">
                             <div class="progress progress-fixed">
-                                <div style="width:<%= defense_percentage(@target, @targets) %>%" class="progress-bar bg-warning">
+                                <div style="width:<%= display_defense_percentage(@target, @targets) %>%" class="progress-bar bg-warning">
                                     <span></span>
                                 </div>
                             </div>

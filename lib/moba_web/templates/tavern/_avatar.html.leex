@@ -1,26 +1,29 @@
-<div class="col-xl-4 col-lg-6 col-sm-12 mb-4" id="avatar-<%=@avatar.id%>">
-    <div class="hero-card card">
+<div class="col-xl-4 col-lg-6 col-sm-12 mb-2" id="avatar-<%=@avatar.id%>">
+    <div class="hero-card card ribbon-box">
+        <%= if unlocked?(@avatar, @user) do %>
+            <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
+        <% end %>
         <div class="card-body text-center p-0" style="background-image: url(<%=GH.background_url(@avatar)%>">
             <div class="name">
-               <h3 class="m-0 text-center p-2 text-white"><%=@avatar.name%></h3>
+               <h3 class="m-0 text-center p-2 text-white"><%= @avatar.name %></h3>
             </div>
-            <div class="ultimate" data-toggle="tooltip" title="<%=GH.skill_description(@avatar.ultimate)%>">
+            <div class="ultimate" data-toggle="tooltip" title="<%= GH.skill_description(@avatar.ultimate) %>">
                 <h4 class="mt-0">Ultimate</h4>
-                <img src="<%=GH.image_url(@avatar.ultimate)%>" style="width: 70px" class="img-border-sm"/>
-                <h5 class="mb-0"><%=@avatar.ultimate.name%></h5>
+                <img src="<%= GH.image_url(@avatar.ultimate) %>" style="width: 70px" class="img-border-sm"/>
+                <h5 class="mb-0"><%= @avatar.ultimate.name %></h5>
                 <small><em>(mouse over for info)</em></small>
             </div>
         </div>
 
         <div class="transparent card-footer text-center">
-            <%=CreateView.render "_stats.html", avatar: @avatar, avatars: @avatars%>
+            <%= CreateView.render "_stats.html", avatar: @avatar, avatars: @avatars %>
             <div class="row mt-3">
                 <div class="col">
                     <h4 class="mt-0 d-none d-lg-block">Gameplay</h4>
                     <div class="description">
                         <em><%=@avatar.description%></em>
                     </div>
-                    <%=unless unlocked?(@avatar, @user), do: render("_actions.html", resource: @avatar, user: @user, action: "unlock-avatar")%>
+                    <%= unless unlocked?(@avatar, @user), do: render("_actions.html", resource: @avatar, user: @user, action: "unlock-avatar") %>
                 </div>
             </div>
         </div>

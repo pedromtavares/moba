@@ -75,7 +75,14 @@ Hooks.Loading = {
     let page = $(el).attr("phx-value-page");
     let loading = $(el).attr("loading") || "<span class='d-none d-md-inline'>Loading...</span>"
     el.addEventListener("click", e => {
-      $(el).find(".loading-text").html("<i class='fas fa-spinner fa-spin mr-1'></i>"+loading);
+      const loadingText = $(el).find(".loading-text");
+      
+      if (loadingText.find(".fa-2x")[0]){
+        loadingText.html("<i class='fas fa-spinner fa-spin fa-2x'></i><br/>"+loading);
+      }else{
+        loadingText.html("<i class='fas fa-spinner fa-spin mr-1'></i>"+loading);
+      }
+      
       if (click){
         let payload = {number: val, id: id, type: type, page: page, code: code}
         if (target){

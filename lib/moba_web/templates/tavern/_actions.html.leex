@@ -1,6 +1,6 @@
-<div class="text-center mb-2">
+<div class="text-center my-2">
     <%= if can_unlock?(@resource, @user) do %>
-        <a href="javascript:;" class="btn btn-outline-warning" phx-click="<%=@action%>" phx-value-code="<%=@resource.code%>" phx-hook="Loading" id="unlock-<%=@resource.code%>">
+        <a href="javascript:;" class="btn btn-outline-warning btn-lg" phx-click="<%=@action%>" phx-value-code="<%=@resource.code%>" phx-hook="Loading" id="unlock-<%=@resource.code%>">
             <span class="loading-text">
                 <i class="fab fa-ethereum mr-1"></i>Unlock for <%= price_to_unlock(@resource) %> Shards
             </span>

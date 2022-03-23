@@ -29,6 +29,13 @@
                         <% end %>
                     </div>
                     <div class="d-flex justify-content-center">
+                        <%= if @current_hero.pve_tier >= 4 do %>
+                            <h3 class="pve-info text-success" data-toggle="tooltip" title="Time since creation">
+                                <%= elapsed_time(@current_hero) %>
+                                <br/>
+                                <small class="text-muted">min</small>
+                            </h3>
+                        <% end %>
                         <h3 class="pve-info text-primary" data-toggle="tooltip" title={@current_hero.total_xp_farm}>
                             <%= GH.farming_amount_label @current_hero.total_xp_farm %>
                             <br/>

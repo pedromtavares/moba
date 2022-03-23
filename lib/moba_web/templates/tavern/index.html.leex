@@ -1,73 +1,52 @@
 <div class="tavern" id="tavern">
-
-    <div class="row mt-3">
+    <div class="row mt-2">
         <div class="col">
-            <div class="title-container">
-                <i class="fa fa-store-alt text-primary"></i>
-                <h1>Tavern</h1>
+            <div class="card dark-bg mb-3 text-center p-2">
+                <h1 class="text-warning"><i class="fab fa-ethereum mr-2"></i><%= @current_user.shard_count %></h1>
                 <p class="text-muted">
-                    Unlock new heroes, skills and skins to play with by using your Shards. You can acquire Shards by finishing Quests.
+                    Unlock new avatars, skills and skins to play with by using your Shards. You can acquire Shards by finishing daily quests in the Base or by matchmaking in the Arena.
                 </p>
             </div>
         </div>
     </div>
 
     <div class="row">
-        <div class="col-md-3 m-auto">
-            <div class="widget-simple text-center card-box">
-                <h2 class="text-warning counter mt-0"><i class="fab fa-ethereum mr-2"></i><%=@current_user.shard_count%></h3>
-                <p class="text-muted mb-0">Shards</p>
-            </div>
-        </div>
-    </div>
-
-    <div class="row mt-3">
         <div class="col">
-            <h2 class="page-title mb-3 text-center">
-                <i class="fa fa-users mr-2"></i>Avatars
-                <br/>
-                <small class="font-italic">Unlocked Avatars will show up when creating a new Hero</small>
-            </h2>
+            <ul class="nav nav-tabs nav-bordered nav-justified">
+                <li class="nav-item">
+                    <a href="javascript:;" class="h5 mt-0 nav-link <%=if @active_tab == "avatars", do: "active"%>" phx-click="show-avatars" phx-hook="Loading" id="show-avatars-link">
+                        <span class="loading-text"><i class="fa fa-users fa-2x text-success"></i><br/>Avatars</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="javascript:;" class="h5 mt-0 nav-link <%=if @active_tab == "skills", do: "active"%>" phx-click="show-skills" phx-hook="Loading" id="show-skills-link">
+                        <span class="loading-text"><i class="fa fa-magic fa-2x text-primary"></i><br/>Skills</span>
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a href="javascript:;" class="h5 mt-0 nav-link <%=if @active_tab == "skins", do: "active"%>" phx-click="show-skins" phx-hook="Loading" id="show-skins-link">
+                        <span class="loading-text"><i class="fa fa-palette fa-2x text-pink"></i><br/>Skins</span>
+                    </a>
+                </li>
+            </ul>
         </div>
     </div>
 
-    <div class="row">
+    <div class="row <%= unless @active_tab == "avatars", do: "d-none" %> mt-2">
         <%= for avatar <- @avatars do %>
             <%= render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
         <% end %>
     </div>
 
-    <div class="row">
-        <div class="col">
-            <h2 class="page-title mb-3 mt-3 text-center">
-                <i class="fa fa-magic mr-2"></i>Skills
-                <br/>
-                <small class="font-italic">Unlocked Skills will show up when creating a new Hero</small>
-            </h2>
-        </div>
-    </div>
-
-    <div class="row">
+    <div class="row <%= unless @active_tab == "skills", do: "d-none" %> mt-2">
         <%= for skill <- @skills do %>
             <%= render "_skill.html", skill: skill, user: @current_user %>
         <% end %>
     </div>
 
-    <%= if @avatar_code do %>
-        <div id="scroll-to-skins" phx-hook="Scroll"></div>
-    <% end %>
-
-    <%= if @current_skin do %>
-        <div class="row">
-            <div class="col">
-                <h2 class="page-title mb-3 text-center">
-                    <i class="fa fa-palette mr-2"></i>Skins
-                    <br/>
-                    <small class="font-italic">Unlocked Skins can be used in the Arena</small>
-                </h2>
-            </div>
-        </div>
-
+    <div class="<%= unless @active_tab == "skins", do: "d-none" %> mt-2">
         <div class="row">
             <div class="col-xl-5 col-lg-7 col-12 margin-auto">
                 <div class="card hero-card">
@@ -92,7 +71,7 @@
                                     <a href="javascript:;" class="btn btn-outline-secondary no-action btn-rounded" data-toggle="tooltip" title="You already own this Skin and can select it when joining the Arena with this hero."><i class="fa fa-unlock mr-1"></i>Unlocked</a>
                                 <% else %>
                                     <%= if can_unlock?(@current_skin, @current_user) do %>
-                                        <a href="javascript:;" class="btn btn-outline-warning" phx-click="unlock-skin" phx-value-code="<%= @current_skin.code %>" phx-hook="Loading" id="unlock-<%= @current_skin.code %>">
+                                        <a href="javascript:;" class="btn btn-outline-warning btn-lg" phx-click="unlock-skin" phx-value-code="<%= @current_skin.code %>" phx-hook="Loading" id="unlock-<%= @current_skin.code %>">
                                             <span class="loading-text">
                                                 <i class="fab fa-ethereum mr-1"></i>Unlock for <%= price_to_unlock(@current_skin) %> Shards
                                             </span>
@@ -124,5 +103,5 @@
                 </div>
             </div>
         </div>
-    <% end %>
+    </div>
 </div>

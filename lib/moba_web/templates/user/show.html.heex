@@ -1,5 +1,5 @@
 <div class={if @user.is_bot, do: "user-profile bot-profile", else: "user-profile"}>
-    <div class="row mt-3">
+    <div class="row mt-2">
         <div class="col-md-6 col-xl-4">
             <div class="row">
                 <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
@@ -26,7 +26,7 @@
                                     </div>
                                 <% end %>
                                 <%= for avatar <- @blank_collection do %>
-                                    <div class="col-3 mb-1 text-center">
+                                    <div class="col-3 mb-2 text-center">
                                         <div class='avatar-container'>
                                             <img src={GH.image_url(avatar)} class="avatar blank-avatar"/>
                                         </div>

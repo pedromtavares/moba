@@ -11,12 +11,14 @@ defmodule MobaWeb.TavernLiveView do
     avatars = Game.list_unlockable_avatars()
     all_avatars = Game.list_avatars() |> Enum.sort_by(& &1.level_requirement, :desc)
     avatar_code = Map.get(params, "avatar")
+    active_tab = if avatar_code, do: "skins", else: "avatars"
     current_avatar = Enum.find(all_avatars, &(&1.code == avatar_code)) || List.first(all_avatars)
     current_skins = Game.list_skins_for(current_avatar.code)
     current_skin = List.first(current_skins)
 
     {:noreply,
      assign(socket,
+       active_tab: active_tab,
        all_avatars: all_avatars,
        avatars: avatars,
        avatar_code: avatar_code,
@@ -28,6 +30,18 @@ defmodule MobaWeb.TavernLiveView do
        sidebar_code: "tavern",
        skills: skills
      )}
+  end
+
+  def handle_event("show-avatars", _, socket) do
+    {:noreply, assign(socket, active_tab: "avatars")}
+  end
+
+  def handle_event("show-skills", _, socket) do
+    {:noreply, assign(socket, active_tab: "skills")}
+  end
+
+  def handle_event("show-skins", _, socket) do
+    {:noreply, assign(socket, active_tab: "skins")}
   end
 
   def handle_event("previous-skin", _, socket) do
