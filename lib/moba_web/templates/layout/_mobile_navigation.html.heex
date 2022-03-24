@@ -10,11 +10,11 @@
                                     <i class="fa fa-crosshairs"></i>
                                 <% end %>
                             <% end %>
-                            <%= live_redirect to: Routes.base_path(@conn, :base), class: "nav-link" do %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLiveView), class: "nav-link" do %>
                                 <i class="fa fa-home"></i>
                             <% end %>
                             <%= if length(@current_user.hero_collection) > 0 do %>
-                                <%= live_redirect to: Routes.arena_path(@conn, :arena), class: "nav-link" do %>
+                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLiveView), class: "nav-link" do %>
                                     <i class="fa fa-gopuram"></i>
                                 <% end %>
                             <% end %>

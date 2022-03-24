@@ -503,7 +503,9 @@ defmodule Moba.Engine.Core.Spell do
     end
   end
 
-  defp effects_for(%{resource: %Skill{code: "battle_trance"}, defender: %{executed: false}} = turn, %{is_attacking: false}) do
+  defp effects_for(%{resource: %Skill{code: "battle_trance"}, defender: %{executed: false}} = turn, %{
+         is_attacking: false
+       }) do
     Effect.add_to_final(turn)
   end
 

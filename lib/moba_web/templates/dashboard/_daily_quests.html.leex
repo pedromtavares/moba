@@ -6,7 +6,7 @@
                 <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">×</button>
             </div>
             <div class="modal-body">
-                <h5 class="text-success text-center mb-3">New quests will replace your completed quests <%= replenish_time() %></h5>
+                <h4 class="text-success text-center mb-3">Complete the quests below to earn Shards that can be used to unlock content in the Tavern. <br/>New quests will replace your completed quests <%= replenish_time() %></h4>
 
                 <table class="table table-dark mb-0 border">
                     <%= for progression <- pve_daily_progressions(@daily_progressions) do %>

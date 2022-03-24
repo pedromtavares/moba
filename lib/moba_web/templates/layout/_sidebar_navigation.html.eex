@@ -5,12 +5,12 @@
         <% end %>              
     <% end %>
     <%= if length(@current_user.hero_collection) > 0 do %>
-        <%= live_redirect to: Routes.base_path(@socket, :base), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Base</h3>", class: sidebar_class("base", assigns) do %>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DashboardLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Base</h3>", class: sidebar_class("base", assigns) do %>
             <i class="fa fa-home"></i>
         <% end %>
     <% end %>
     <%= if @current_user.pve_tier > 0 do %>
-        <%= live_redirect to: Routes.arena_path(@socket, :arena), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
             <i class="fa fa-gopuram"></i>
         <% end %>
     <% end %>

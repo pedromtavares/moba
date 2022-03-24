@@ -7,6 +7,9 @@ defmodule MobaWeb.BattleLiveView do
     %{assigns: %{current_user: current_user}} =
       socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
 
+    %{assigns: %{current_hero: current_hero}} =
+      socket = assign_new(socket, :current_hero, fn -> current_user && Game.current_pve_hero(current_user) end)
+
     {:ok,
      assign(socket,
        battle: nil,

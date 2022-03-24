@@ -5,9 +5,10 @@ defmodule MobaWeb.CurrentHeroLiveView do
 
   def mount(_, %{"hero" => hero} = session, socket) do
     if connected?(socket) do
+      Tutorial.subscribe(hero.user_id)
+
       hero.id
       |> Game.subscribe_to_hero()
-      |> Tutorial.subscribe()
       |> Shop.subscribe()
     end
 

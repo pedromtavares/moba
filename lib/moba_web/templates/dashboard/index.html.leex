@@ -17,3 +17,4 @@
 
 <%= render "_pve_tier_rewards.html", Map.put(assigns, :pve_tier, @current_user.pve_tier + 1) %>
 <%= render "_daily_quests.html", assigns %>
+<%= Phoenix.LiveView.Helpers.live_component(MobaWeb.Tutorial, step: @tutorial_step) %>

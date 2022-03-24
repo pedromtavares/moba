@@ -47,11 +47,10 @@ defmodule MobaWeb.Router do
 
     get "/start", MobaWeb.GameController, :start
     post "/start", MobaWeb.GameController, :create
-    get "/", MobaWeb.GameController, :index
 
-    live_session :battle, root_layout: {MobaWeb.LayoutView, "root.html"} do
-      live "/battles/:id", MobaWeb.BattleLiveView
-    end
+    live "/battles/:id", MobaWeb.BattleLiveView
+
+    get "/", MobaWeb.GameController, :index
   end
 
   scope "/", MobaWeb do
@@ -64,9 +63,9 @@ defmodule MobaWeb.Router do
 
       live "/battles", BattlesLiveView
 
-      live "/base", DashboardLiveView, :base, as: :base
+      live "/base", DashboardLiveView
 
-      live "/arena", ArenaLiveView, :arena, as: :arena
+      live "/arena", ArenaLiveView
       live "/arena/:id", DuelLiveView
 
       live "/user/:id", UserLiveView

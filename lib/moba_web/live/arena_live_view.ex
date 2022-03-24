@@ -1,7 +1,11 @@
 defmodule MobaWeb.ArenaLiveView do
   use MobaWeb, :live_view
 
+  alias MobaWeb.Tutorial
+
   def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
+    if connected?(socket), do: Tutorial.subscribe(user.id)
+
     duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
     normal_count = Accounts.normal_matchmaking_count(user)
     elite_count = Accounts.elite_matchmaking_count(user)
@@ -19,7 +23,8 @@ defmodule MobaWeb.ArenaLiveView do
        matchmaking: matchmaking,
        pending_match: pending_match,
        closest_bot_time: closest_bot_time,
-       sidebar_code: "arena"
+       sidebar_code: "arena",
+       tutorial_step: user.tutorial_step
      )}
   end
 
@@ -42,6 +47,18 @@ defmodule MobaWeb.ArenaLiveView do
          elite_count: Accounts.elite_matchmaking_count(user)
        )}
     end
+  end
+
+  def handle_event("tutorial1", _, socket) do
+    {:noreply, socket |> Tutorial.next_step(31)}
+  end
+
+  def handle_event("finish-tutorial", _, socket) do
+    {:noreply, Tutorial.finish_arena(socket)}
+  end
+
+  def handle_info({"tutorial-step", %{step: step}}, socket) do
+    {:noreply, assign(socket, tutorial_step: step)}
   end
 
   def render(assigns) do

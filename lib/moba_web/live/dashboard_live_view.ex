@@ -1,10 +1,19 @@
 defmodule MobaWeb.DashboardLiveView do
   use MobaWeb, :live_view
 
+  alias MobaWeb.Tutorial
+
   @base_hero_count Moba.base_hero_count()
 
-  def mount(_, _session, socket) do
-    {:ok, socket |> pve_assigns() |> quest_assigns() |> assign(sidebar_code: "base")}
+  def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
+    if connected?(socket), do: Tutorial.subscribe(user.id)
+
+    {:ok,
+     socket
+     |> assign(sidebar_code: "base", tutorial_step: user.tutorial_step)
+     |> pve_assigns()
+     |> quest_assigns()
+     |> check_tutorial()}
   end
 
   def handle_event("pve-show-finished", _, %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket) do
@@ -69,8 +78,32 @@ defmodule MobaWeb.DashboardLiveView do
     end
   end
 
+  def handle_event("tutorial1", _, socket) do
+    {:noreply, socket |> Tutorial.next_step(21)}
+  end
+
+  def handle_event("finish-tutorial", _, socket) do
+    {:noreply, Tutorial.finish_base(socket)}
+  end
+
+  def handle_info({"tutorial-step", %{step: step}}, socket) do
+    {:noreply, assign(socket, tutorial_step: step)}
+  end
+
   def render(assigns) do
     MobaWeb.DashboardView.render("index.html", assigns)
+  end
+
+  defp check_tutorial(%{assigns: %{tutorial_step: step, current_user: user}} = socket) do
+    %{assigns: %{tutorial_step: step}} = socket = Tutorial.next_step(socket, 20)
+
+    if step == 29 && user.pve_tier > 0 do
+      socket
+      |> Tutorial.next_step(30)
+      |> push_redirect(to: Routes.live_path(socket, MobaWeb.ArenaLiveView))
+    else
+      socket
+    end
   end
 
   defp pve_assigns(%{assigns: %{current_user: user}} = socket) do

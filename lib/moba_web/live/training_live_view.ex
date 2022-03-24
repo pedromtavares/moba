@@ -12,9 +12,8 @@ defmodule MobaWeb.TrainingLiveView do
 
       hero ->
         if connected?(socket) do
-          hero.id
-          |> Game.subscribe_to_hero()
-          |> Tutorial.subscribe()
+          Game.subscribe_to_hero(hero.id)
+          Tutorial.subscribe(hero.user_id)
         end
 
         Cachex.del(:game_cache, hero.user_id)
@@ -54,7 +53,6 @@ defmodule MobaWeb.TrainingLiveView do
     {:noreply,
      socket
      |> Tutorial.next_step(2)
-     |> Tutorial.next_step(12)
      |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLiveView, battle.id))}
   end
 
@@ -116,12 +114,8 @@ defmodule MobaWeb.TrainingLiveView do
     {:noreply, socket |> Tutorial.next_step(5)}
   end
 
-  def handle_event("tutorial12", _, socket) do
-    {:noreply, socket |> Tutorial.next_step(12)}
-  end
-
   def handle_event("finish-tutorial", _, socket) do
-    {:noreply, Tutorial.finish(socket)}
+    {:noreply, Tutorial.finish_training(socket)}
   end
 
   def handle_event("select-turns", params, %{assigns: %{current_hero: hero}} = socket) do

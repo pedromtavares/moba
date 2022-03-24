@@ -94,12 +94,7 @@ const Tutorial = {
           },
           buttons: [
             {
-              text: 'Skip Tutorial',
-              secondary: true,
-              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
-            },
-            {
-              text: 'Next',
+              text: 'OK, back to ganking',
               action: function () { hookInstance.pushEvent("tutorial5", {}); this.complete() }
             }
           ]
@@ -179,10 +174,10 @@ const Tutorial = {
           }
         });
         break;
-      case 10:
+      case 11:
         tour.addStep({
-          id: 'eleventh-tutorial-first-step',
-          text: "<p class='text-center'>You have ranked up to Silver League, congratulations!<br/> Keep farming until you reach at least the Platinum League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and to level up your skills. Have fun!</p>",
+          id: 'tenth-tutorial-first-step',
+          text: "<p class='text-center'>You have ranked up to Silver League, congratulations!<br/> Keep farming until you reach at least the Platinum League. Also, remember to keep buying items at <span class='text-warning'>the Shop</span> and to level up your skills on the bottom bar. Have fun!</p>",
           attachTo: {
             element: '#current-training-rank',
             on: 'bottom'
@@ -195,6 +190,78 @@ const Tutorial = {
           ],
           popperOptions: {
             modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          }
+        });
+        break;
+      case 20:
+        tour.addStep({
+          id: 'twentieth-tutorial-first-step',
+          text: "<p class='text-center'>Welcome to your Base!<br/>This is where you manage all of your Heroes and view your Training progression towards becoming an Invoker. </p>",
+          attachTo: {
+            element: '#pve-progression',
+            on: 'bottom'
+          },
+          buttons: [
+            {
+              text: 'Next',
+              action: function () { hookInstance.pushEvent("tutorial1", {}); this.complete() }
+            }
+          ],
+          popperOptions: {
+            modifiers: [{ name: 'offset', options: { offset: [0, -60] } }]
+          }
+        });
+        break;
+      case 21:
+        tour.addStep({
+          id: 'twenty-first-tutorial-first-step',
+          text: "<p class='text-center'>This is your Hero collection. You progress through the game by training with all of the Avatars below. Each Avatar has a specific playstyle and Training gets harder (and more fun!) as you rank up.<br/><br/>For now, try Training a new Hero (preferably with another Avatar) to be allowed into the Arena, which is where PvP happens. Have fun!</p>",
+          attachTo: {
+            element: '#hero-list-container',
+            on: 'top'
+          },
+          buttons: [
+            {
+              text: 'Finish Tutorial',
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            }
+          ],
+          popperOptions: {
+            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          }
+        });
+        break;
+      case 30:
+        tour.addStep({
+          id: 'twentieth-tutorial-first-step',
+          text: "<p class='text-center'>Welcome to the Arena! Here you get to play with your finished Heroes in 1v1 matches against other players to earn Season Points.<br/><br/>Each match consists of 2 battles with alternating picks, meaning you get to pick first on the first battle and your opponent picks first on the second battle, giving both a chance to outpick each other, so it's important to have a diverse collection of Heroes in order to properly pick against what your opponent throws at you.</p>",
+          attachTo: {
+            element: '#pvp-progression',
+            on: 'bottom'
+          },
+          buttons: [
+            {
+              text: 'Next',
+              action: function () { hookInstance.pushEvent("tutorial1", {}); this.complete() }
+            }
+          ],
+          popperOptions: {
+            modifiers: [{ name: 'offset', options: { offset: [0, -60] } }]
+          }
+        });
+        break;
+      case 31:
+        tour.addStep({
+          id: 'twentieth-tutorial-first-step',
+          text: "<p class='text-center'>There are 2 modes in the Arena: Matchmaking and Duels (PvP).<br/><br/>In Matchmaking you play on your time (similar to Training) against players controlled by the AI. In Duels, however, you play a live match against a real player, so obviously another player has to be online at the same time and accept your Duel request. Players will appear at the bottom of the page when online.<br/><br/>Duels reward 3 times as much Season Points as Matchmaking, but do not reward Shards. Make sure you play against all available opponents in Elite Matchmaking to maximize your daily Shard rewards.<br/><br/>If you have any more questions, visit the Game Info page on the sidebar which also has a link to our Discord server where you're welcome to come hang out. Have fun!</p>",
+          buttons: [
+            {
+              text: 'Finish Tutorial',
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
+            }
+          ],
+          popperOptions: {
+            modifiers: [{ name: 'offset', options: { offset: [0, -60] } }]
           }
         });
         break;

@@ -39,7 +39,6 @@ defmodule Moba do
     7 => "Invoker"
   }
   @turn_mp_regen_multiplier 0.01
-  @final_tutorial_step 14
   @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
   @shard_buyback_minimum 5
@@ -86,7 +85,6 @@ defmodule Moba do
   def pvp_tiers, do: @pvp_tiers
   def pve_tiers, do: @pve_tiers
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
-  def final_tutorial_step, do: @final_tutorial_step
   def season_quest_codes, do: @season_quest_codes
   def current_ranking_date, do: @current_ranking_date
   def shard_buyback_minimum, do: @shard_buyback_minimum

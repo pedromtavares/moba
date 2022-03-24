@@ -13,7 +13,7 @@
                 </a>
             </li>
         </ul>
-        <div class="row <%= unless @active_tab == "pve", do: "d-none" %> mt-1">
+        <div class="row <%= unless @active_tab == "pve", do: "d-none" %> mt-2">
             <%= for hero <- @pve do %>
                 <%= render "_hero.html", hero: hero, socket: @socket %>
             <% end %>
