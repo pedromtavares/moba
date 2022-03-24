@@ -204,7 +204,7 @@ defmodule Moba.Engine.Core.Processor do
   end
 
   defp defend_effects(%{defender: %{undisarmable: true} = defender} = turn) do
-    %{turn | defender: %{defender | disarmed: false}}
+    %{turn | defender: %{defender | disarmed: false, undisarmable: false}}
   end
 
   defp defend_effects(turn), do: turn
