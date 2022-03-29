@@ -4,6 +4,14 @@ defmodule MobaWeb.UserView do
 
   defdelegate avatar_class(hero), to: DashboardView
 
+  def avatar_title(hero) do
+    if hero["ranking"] do
+      "##{hero["ranking"]}"
+    else
+      "Unranked"
+    end
+  end
+
   def opponent_for(duel, %{id: id}) when duel.user_id == id, do: duel.opponent
   def opponent_for(duel, _), do: duel.user
 

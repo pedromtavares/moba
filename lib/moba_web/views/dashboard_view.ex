@@ -9,6 +9,14 @@ defmodule MobaWeb.DashboardView do
     end
   end
 
+  def avatar_title(hero) do
+    if hero["ranking"] do
+      "##{hero["ranking"]} - #{hero["avatar"]["name"]}"
+    else
+      hero["avatar"]["name"]
+    end
+  end
+
   def can_enter_arena?(%{all_heroes: heroes}) do
     Enum.reject(heroes, &is_nil(&1.finished_at)) |> length() >= 2
   end

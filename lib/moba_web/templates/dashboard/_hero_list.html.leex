@@ -6,7 +6,7 @@
         <div class="pt-3">
             <div class="collection">
                 <%= for hero <- @current_user.hero_collection do %>
-                    <div style="width: 100px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
+                    <div style="width: 100px;" class='avatar-container text-center mx-1' data-toggle="tooltip" title="<%= avatar_title(hero) %>">
                         <img src="<%= GH.image_url(hero["avatar"]) %>" class="<%= avatar_class(hero) %>" />
                         <img src="/images/league/<%= hero["tier"] %>.png" class="league-logo">
                     </div>
