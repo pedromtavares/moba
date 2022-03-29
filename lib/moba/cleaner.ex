@@ -10,9 +10,6 @@ defmodule Moba.Cleaner do
     query = from b in Battle, where: b.inserted_at <= ^ago, where: b.type != "duel", order_by: b.id, limit: 20
     Repo.all(query) |> delete_records()
 
-    query = from d in Duel, join: u in assoc(d, :user), where: u.is_bot == true, where: d.inserted_at <= ^ago, limit: 20
-    Repo.all(query) |> delete_records()
-
     query =
       from h in Hero,
         where: not is_nil(h.archived_at),
@@ -60,6 +57,11 @@ defmodule Moba.Cleaner do
     yesterday = Timex.now() |> Timex.shift(days: -1)
     query = from u in Accounts.Schema.User, where: u.is_guest == true, where: u.inserted_at < ^yesterday
     Repo.update_all(query, set: [current_pve_hero_id: nil])
+
+    query =
+      from d in Duel, join: u in assoc(d, :user), where: u.is_bot == true, where: d.inserted_at <= ^yesterday, limit: 20
+
+    Repo.all(query) |> delete_records()
 
     query =
       from h in Hero,

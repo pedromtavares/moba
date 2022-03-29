@@ -202,7 +202,7 @@ defmodule Moba.Game do
   def update_hero_collection!(hero) do
     hero = Repo.preload(hero, :user)
     collection = Heroes.collection_for(hero.user_id)
-    Accounts.update_collection!(hero.user, collection)
+    if length(collection) > 0, do: Accounts.update_collection!(hero.user, collection)
 
     hero
   end

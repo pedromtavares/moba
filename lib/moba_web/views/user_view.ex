@@ -2,6 +2,14 @@ defmodule MobaWeb.UserView do
   use MobaWeb, :view
   alias MobaWeb.ArenaView
 
+  def avatar_class(hero) do
+    if hero["ranking"] && hero["total_farm"] == Moba.maximum_total_farm() do
+      "avatar max-farm"
+    else
+      "avatar"
+    end
+  end
+
   def opponent_for(duel, %{id: id}) when duel.user_id == id, do: duel.opponent
   def opponent_for(duel, _), do: duel.user
 

@@ -224,6 +224,8 @@ defmodule Moba.Game.Heroes do
 
   def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
 
+  def collection_for(nil), do: []
+
   def collection_for(user_id) do
     HeroQuery.finished_pve()
     |> HeroQuery.load_avatar()
@@ -234,12 +236,21 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{&1.league_tier, &1.total_gold_farm + &1.total_xp_farm, &1.id}, :desc)
+        Enum.sort_by(heroes, &{&1.league_tier, total_farm(&1), !is_nil(&1.pve_ranking), &1.id}, :desc)
         |> List.first()
       }
     end)
-    |> Enum.sort_by(fn {_code, hero} -> {hero.league_tier, hero.total_gold_farm + hero.total_xp_farm} end, :desc)
-    |> Enum.map(fn {code, hero} -> %{code: code, hero_id: hero.id, tier: hero.league_tier, avatar: hero.avatar} end)
+    |> Enum.sort_by(fn {_code, hero} -> {hero.pve_ranking, hero.league_tier * -1} end, :asc)
+    |> Enum.map(fn {code, hero} ->
+      %{
+        code: code,
+        hero_id: hero.id,
+        tier: hero.league_tier,
+        avatar: hero.avatar,
+        ranking: hero.pve_ranking,
+        total_farm: total_farm(hero)
+      }
+    end)
   end
 
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
@@ -375,6 +386,12 @@ defmodule Moba.Game.Heroes do
     do: (tier - 1) * 4800
 
   defp bot_total_gold_farm_base(tier, _), do: tier * 4800
+
+  defp has_max_farm?(hero) do
+    hero.pve_ranking && hero.total_gold_farm + hero.total_xp_farm == Moba.maximum_total_farm()
+  end
+
+  defp total_farm(hero), do: hero.total_gold_farm + hero.total_xp_farm
 
   defp zero_limit(total) when total < 0, do: 0
   defp zero_limit(total), do: total

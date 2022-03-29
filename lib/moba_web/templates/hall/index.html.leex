@@ -45,7 +45,7 @@
                                     <%= Moba.pve_tiers[user.pve_tier] %>
                                 </h3>
                             </td>
-                            <td style="width: 1000px">
+                            <td width="90%">
                                 <%= for hero <- user.hero_collection do %>
                                     <div style="width: 75px;" class='avatar-container mx-1' data-toggle="tooltip" title="<%= hero["avatar"]["name"] %>">
                                         <img src="<%= GH.image_url(hero["avatar"]) %>" class="avatar" style="max-width: 100%";/>

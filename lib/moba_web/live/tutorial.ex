@@ -32,6 +32,7 @@ defmodule MobaWeb.Tutorial do
 
     assign(socket, tutorial_step: step)
   end
+
   def set_step(socket, _), do: socket
 
   def finish_training(socket), do: set_step(socket, @final_training_step)
