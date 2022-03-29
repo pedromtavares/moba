@@ -26,7 +26,7 @@ defmodule MobaWeb.Tutorial do
   def next_step(socket, _), do: socket
 
   def set_step(%{assigns: %{current_hero: hero}} = socket, step) do
-    Moba.Accounts.update_tutorial_step!(hero.user, step)
+    if hero.user, do: Moba.Accounts.update_tutorial_step!(hero.user, step)
 
     MobaWeb.broadcast("tutorial-#{hero.user_id}", "tutorial-step", %{step: step})
 

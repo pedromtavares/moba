@@ -94,7 +94,7 @@ defmodule MobaWeb.DashboardLiveView do
     MobaWeb.DashboardView.render("index.html", assigns)
   end
 
-  defp check_tutorial(%{assigns: %{tutorial_step: step, current_user: user}} = socket) do
+  defp check_tutorial(%{assigns: %{current_user: user}} = socket) do
     %{assigns: %{tutorial_step: step}} = socket = Tutorial.next_step(socket, 20)
 
     if step == 29 && user.pve_tier > 0 do

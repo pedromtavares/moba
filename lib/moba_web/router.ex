@@ -48,9 +48,13 @@ defmodule MobaWeb.Router do
     get "/start", MobaWeb.GameController, :start
     post "/start", MobaWeb.GameController, :create
 
-    live "/battles/:id", MobaWeb.BattleLiveView
-
     get "/", MobaWeb.GameController, :index
+  end
+
+  scope "/" do
+    pipe_through [:browser, :user_helper, :root_layout]
+
+    live "/battles/:id", MobaWeb.BattleLiveView
   end
 
   scope "/", MobaWeb do
