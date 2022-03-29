@@ -1,6 +1,14 @@
 defmodule MobaWeb.DashboardView do
   use MobaWeb, :view
 
+  def avatar_class(hero) do
+    if hero["ranking"] && hero["total_farm"] == Moba.maximum_total_farm() do
+      "avatar max-farm"
+    else
+      "avatar"
+    end
+  end
+
   def can_enter_arena?(%{all_heroes: heroes}) do
     Enum.reject(heroes, &is_nil(&1.finished_at)) |> length() >= 2
   end
