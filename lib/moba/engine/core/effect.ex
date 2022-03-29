@@ -435,8 +435,6 @@ defmodule Moba.Engine.Core.Effect do
   def charging(%{attacker: attacker} = turn) do
     turn
     |> update_attacker(:charging, true)
-    |> update_attacker_number(:next_power_magic, attacker.turn_power_magic)
-    |> update_attacker_number(:next_power_normal, attacker.turn_power_normal)
   end
 
   # EXTRAS
