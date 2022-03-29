@@ -25,13 +25,14 @@ defmodule MobaWeb.Tutorial do
 
   def next_step(socket, _), do: socket
 
-  def set_step(%{assigns: %{current_hero: hero}} = socket, step) do
-    if hero.user, do: Moba.Accounts.update_tutorial_step!(hero.user, step)
+  def set_step(%{assigns: %{current_hero: hero}} = socket, step) when not is_nil(hero) do
+    Moba.Accounts.update_tutorial_step!(hero.user, step)
 
     MobaWeb.broadcast("tutorial-#{hero.user_id}", "tutorial-step", %{step: step})
 
     assign(socket, tutorial_step: step)
   end
+  def set_step(socket, _), do: socket
 
   def finish_training(socket), do: set_step(socket, @final_training_step)
   def finish_base(socket), do: set_step(socket, @final_base_step)
