@@ -41,6 +41,8 @@ defmodule Moba.Accounts.Schema.User do
     field :unread_messages_count, :integer, default: 0
     field :match_history, :map, default: %{}
 
+    embeds_one :preferences, Accounts.Schema.Preferences, on_replace: :update
+
     has_many :heroes, Game.Schema.Hero
     has_many :arena_picks, Game.Schema.ArenaPick
     has_many :unlocks, Accounts.Schema.Unlock
@@ -107,6 +109,7 @@ defmodule Moba.Accounts.Schema.User do
       :title_quest_id,
       :match_history
     ])
+    |> cast_embed(:preferences)
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)
     |> unique_constraint(:email)

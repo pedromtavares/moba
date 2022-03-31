@@ -432,9 +432,8 @@ defmodule Moba.Engine.Core.Effect do
     update_defender(turn, :immortal, true)
   end
 
-  def charging(%{attacker: attacker} = turn) do
-    turn
-    |> update_attacker(:charging, true)
+  def charging(turn) do
+    update_attacker(turn, :charging, true)
   end
 
   # EXTRAS

@@ -28,8 +28,16 @@
                             <% end %>
                         <% end %>
                     </div>
+                    <%= if expert_hero?(@current_hero) do %>
+                        <div>
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="show-farm-tabs" phx-click="show-farm-tabs" checked={if @current_user.preferences.show_farm_tabs, do: "checked"}>
+                                <label class="custom-control-label" for="show-farm-tabs">Show farm tabs</label>
+                            </div>
+                        </div>
+                    <% end %>
                     <div class="d-flex justify-content-center">
-                        <%= if @current_hero.pve_tier >= 4 do %>
+                        <%= if expert_hero?(@current_hero) do %>
                             <h3 class="pve-info text-success" data-toggle="tooltip" title="Time since creation">
                                 <%= elapsed_time(@current_hero) %>
                                 <br/>

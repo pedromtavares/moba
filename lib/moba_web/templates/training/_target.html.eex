@@ -3,7 +3,7 @@
         <div class="card-header pt-0 pb-1">
             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic text-center level text-<%= difficulty_color(@target.difficulty) %>">
-                    <%= if @current_hero.pve_tier < 4 do %>
+                    <%= unless expert_hero?(@current_hero) do %>
                         <%= difficulty_label @target.difficulty %>
                         <br/>
                     <% end %>

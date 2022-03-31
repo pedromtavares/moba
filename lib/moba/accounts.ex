@@ -24,7 +24,9 @@ defmodule Moba.Accounts do
 
   def update_user!(user, attrs), do: Users.update!(user, attrs)
 
-  def update_tutorial_step!(user, step), do: Users.update_tutorial_step!(user, step)
+  defdelegate update_tutorial_step!(user, step), to: Users
+
+  defdelegate update_preferences!(user, preferences), to: Users
 
   def add_user_experience(user, experience), do: Users.add_experience(user, experience)
 

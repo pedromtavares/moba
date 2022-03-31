@@ -92,6 +92,12 @@ defmodule MobaWeb.TrainingLiveView do
     {:noreply, socket |> redirect(to: "/training")}
   end
 
+  def handle_event("show-farm-tabs", params, %{assigns: %{current_user: user}} = socket) do
+    show = not is_nil(Map.get(params, "value"))
+    user = Accounts.update_preferences!(user, %{show_farm_tabs: show})
+    {:noreply, assign(socket, current_user: user)}
+  end
+
   def handle_event("show-meditation", _, %{assigns: %{current_hero: hero}} = socket) do
     time_trigger()
     {:noreply, assign(socket, farm_tab: "meditation", farm_rewards: farm_rewards_for(hero, "meditating"))}

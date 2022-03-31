@@ -37,6 +37,11 @@ defmodule Moba.Accounts.Users do
 
   def update_tutorial_step!(user, step), do: update!(user, %{tutorial_step: step})
 
+  def update_preferences!(user, preferences) do
+    current_preferences = Map.from_struct(user.preferences)
+    update!(user, %{preferences: Map.merge(current_preferences, preferences)})
+  end
+
   def set_online_now(user) do
     UserQuery.by_user(User, user)
     |> Repo.update_all(set: [last_online_at: DateTime.utc_now()])

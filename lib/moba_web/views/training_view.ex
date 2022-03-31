@@ -36,7 +36,9 @@ defmodule MobaWeb.TrainingView do
     end
   end
 
-  def display_farm_tabs?(%{current_hero: %{league_tier: tier}}), do: tier != Moba.master_league_tier()
+  def display_farm_tabs?(%{current_hero: %{league_tier: tier}, current_user: user}) do
+    tier != Moba.master_league_tier() && user.preferences.show_farm_tabs
+  end
 
   def display_defense_percentage(target, targets) do
     heroes = Enum.map(targets, & &1.defender)
@@ -65,6 +67,9 @@ defmodule MobaWeb.TrainingView do
   def elapsed_time(%{inserted_at: inserted_at}) do
     Timex.diff(Timex.now(), inserted_at, :minutes)
   end
+
+  def expert_hero?(%{pve_tier: tier}) when tier >= 4, do: true
+  def expert_hero?(_), do: false
 
   def farming_container_background(hero, assigns) do
     if farming_progression(hero, assigns) >= 100 do
@@ -130,7 +135,7 @@ defmodule MobaWeb.TrainingView do
   end
 
   def show_guest_signup?(%{current_hero: hero}) do
-    hero.user.is_guest && (hero.pve_current_turns + hero.pve_total_turns) <= 5
+    hero.user.is_guest && hero.pve_current_turns + hero.pve_total_turns <= 5
   end
 
   def show_league_challenge?(%{pve_current_turns: 0, league_tier: league_tier}) do

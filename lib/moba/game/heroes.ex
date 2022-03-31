@@ -387,10 +387,6 @@ defmodule Moba.Game.Heroes do
 
   defp bot_total_gold_farm_base(tier, _), do: tier * 4800
 
-  defp has_max_farm?(hero) do
-    hero.pve_ranking && hero.total_gold_farm + hero.total_xp_farm == Moba.maximum_total_farm()
-  end
-
   defp total_farm(hero), do: hero.total_gold_farm + hero.total_xp_farm
 
   defp zero_limit(total) when total < 0, do: 0
