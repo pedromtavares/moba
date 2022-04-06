@@ -4,7 +4,7 @@ defmodule MobaWeb.CommunityLiveView do
   def mount(_, _session, socket) do
     pve = Game.pve_ranking(21)
     messages = Accounts.latest_messages("general", 20) |> Enum.reverse()
-    updates = Accounts.latest_messages("updates", 20) |> Enum.reverse()
+    updates = Accounts.latest_messages("updates", 20)
     changeset = Accounts.change_message()
 
     if connected?(socket), do: MobaWeb.subscribe("messages")
