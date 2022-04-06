@@ -80,7 +80,7 @@ defmodule MobaWeb.CommunityLiveView do
     {:noreply, assign(socket, messages: messages ++ [message])}
   end
   def handle_info({"updates", message}, %{assigns: %{updates: updates}} = socket) do
-    {:noreply, assign(socket, updates: updates ++ [message])}
+    {:noreply, assign(socket, updates: [message] ++ updates)}
   end
 
   def render(assigns) do
