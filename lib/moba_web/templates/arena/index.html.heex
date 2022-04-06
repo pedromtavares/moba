@@ -21,4 +21,4 @@
 </div>
 
 <%= render "_season_rankings.html" %>
-<%= Phoenix.LiveView.Helpers.live_component(MobaWeb.Tutorial, step: @tutorial_step) %>
+<%= live_component(MobaWeb.Tutorial, step: @tutorial_step) %>

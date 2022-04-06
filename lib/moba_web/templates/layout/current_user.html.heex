@@ -1,0 +1,3 @@
+<%= if @challenge do %>
+    <div phx-hook={if @challenge.challenger, do: "DuelChallenger", else: "DuelChallenged"} id="duel-challenge" data-other={@challenge.other.username}/>
+<% end %>

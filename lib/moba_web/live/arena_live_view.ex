@@ -28,9 +28,9 @@ defmodule MobaWeb.ArenaLiveView do
      )}
   end
 
-  def handle_event("challenge", %{"id" => opponent_id}, socket) do
+  def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_user: user}} = socket) do
     opponent = Accounts.get_user!(opponent_id)
-    Game.duel_challenge(socket.assigns.current_user, opponent)
+    Game.duel_challenge(user, opponent)
 
     {:noreply, socket}
   end

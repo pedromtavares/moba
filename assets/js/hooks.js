@@ -55,14 +55,6 @@ Hooks.ScrollToTarget = {
   }
 }
 
-Hooks.ToggleChatButton = {
-  mounted(){
-    this.el.addEventListener("click", e => {
-      $("body").toggleClass("right-bar-enabled");
-    });
-  }
-}
-
 Hooks.Loading = {
   mounted(){
     let el = this.el;
@@ -197,19 +189,6 @@ Hooks.ToggleShop = {
   }
 }
 
-Hooks.MessageToast = {
-  mounted(){
-    let el = this.el;
-    $(el).toast("show");
-
-    el.addEventListener("click", e => {
-      $('.toast').toast("hide");
-      $("body").toggleClass("right-bar-enabled");
-      this.pushEvent("show-chat", {});
-    });
-  }
-}
-
 Hooks.DuelChallenger = {
   mounted(){
     swal(`You have challenged ${this.el.dataset.other}, waiting for response...`, {
@@ -240,7 +219,7 @@ Hooks.DuelChallenged = {
     }).then((value) => {
       switch(value){
         case "start":
-        this.pushEventTo("#chat", "accept", {});
+        this.pushEventTo("#current-user", "accept", {});
         break;
       }
     });

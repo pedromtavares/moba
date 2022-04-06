@@ -234,7 +234,7 @@ const Tutorial = {
       case 30:
         tour.addStep({
           id: 'twentieth-tutorial-first-step',
-          text: "<p class='text-center'>Welcome to the Arena! Here you get to play with your finished Heroes in 1v1 matches against other players to earn Season Points.<br/><br/>Each match consists of 2 battles with alternating picks, meaning you get to pick first on the first battle and your opponent picks first on the second battle, giving both a chance to outpick each other, so it's important to have a diverse collection of Heroes in order to properly pick against what your opponent throws at you.</p>",
+          text: "<p class='text-center'>Welcome to the Arena! Here you get to play with your fully trained Heroes in 1v1 matches against other players to earn Season Points.<br/><br/>Each match consists of 2 battles with alternating picks, meaning you get to pick first on the first battle and your opponent picks first on the second battle, giving both a chance to outpick each other, so it's important to have a diverse collection of Heroes in order to properly pick against what your opponent throws at you.</p>",
           attachTo: {
             element: '#pvp-progression',
             on: 'bottom'

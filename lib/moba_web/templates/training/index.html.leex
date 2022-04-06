@@ -34,4 +34,4 @@
 
 <%= live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero" => @current_hero, "tutorial_step" => @tutorial_step}, id: "hero-bar") %>
 
-<%= Phoenix.LiveView.Helpers.live_component(MobaWeb.Tutorial, step: @tutorial_step) %>
+<%= live_component(MobaWeb.Tutorial, step: @tutorial_step) %>

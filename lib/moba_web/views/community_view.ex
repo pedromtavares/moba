@@ -1,7 +1,7 @@
-defmodule MobaWeb.ChatView do
+defmodule MobaWeb.CommunityView do
   use MobaWeb, :view
 
-  def chat_message(body) do
+  def formatted_body(%{body: body}) do
     body
     |> String.replace(
       ~r/https:\/\/browsermoba.com\/battles\/([0-9]+)/,
@@ -9,6 +9,4 @@ defmodule MobaWeb.ChatView do
     )
     |> raw()
   end
-
-  def message_alerts(alerts), do: alerts |> Enum.filter(fn alert -> alert.type == "message" end)
 end

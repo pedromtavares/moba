@@ -1,4 +1,4 @@
-defmodule MobaWeb.HallLiveViewTest do
+defmodule MobaWeb.CommunityLiveViewTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
@@ -7,7 +7,7 @@ defmodule MobaWeb.HallLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
-    {:ok, _view, html} = live(conn, "/hall")
+    {:ok, _view, html} = live(conn, "/community")
     assert html =~ "Ranking"
   end
 end

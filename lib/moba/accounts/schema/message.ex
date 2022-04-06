@@ -1,21 +1,17 @@
 defmodule Moba.Accounts.Schema.Message do
   @moduledoc """
-  Message schema, used in the sidebar Chat.
-   - tier is used to show the current hero's current League
-   - code refers to an Avatar code or any other resource
+  Message schema, used in the season message board.
   """
   use Ecto.Schema
-  use Arc.Ecto.Schema
   import Ecto.Changeset
   alias Moba.Accounts
 
   schema "messages" do
-    field :image, Moba.Image.Type
-    field :code, :string
-
-    field :tier, :integer
     field :author, :string
+    field :title, :string
     field :body, :string
+    field :channel, :string
+    field :tier, :integer
     field :is_admin, :boolean
 
     belongs_to :user, Accounts.Schema.User
@@ -25,7 +21,6 @@ defmodule Moba.Accounts.Schema.Message do
 
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:image, :code, :tier, :author, :body, :user_id, :is_admin])
-    |> validate_length(:body, min: 2, max: 500)
+    |> cast(attrs, [:author, :title, :body, :channel, :tier, :is_admin, :user_id])
   end
 end

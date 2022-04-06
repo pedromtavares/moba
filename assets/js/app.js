@@ -29,13 +29,6 @@ window.addEventListener("phx:page-loading-stop", () => {
   topbar.hide();
 });
 
-// Close chat window
-window.addEventListener("keydown", event => {
-  if (event.key == "Escape" && $("body").hasClass("right-bar-enabled")){
-    $("body").toggleClass("right-bar-enabled");
-  }
-})
-
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {hooks: Hooks, params: {_csrf_token: csrfToken}});
 liveSocket.connect();
@@ -48,9 +41,7 @@ window.liveSocket = liveSocket;
 $(document).on('phx:update', event => {
   initTooltips();
 
-  initToasts();
-
-  setChatSidebarHeight();
+  scrollChat();
 });
 
 function initTooltips(){
@@ -70,27 +61,7 @@ function initTooltips(){
   })
 }
 
-function initToasts(){
-  $('.toast').toast();
-}
-
-function setChatSidebarHeight(){
-  const wHeight = $(window).height();
-  const bar = currentBar();
-  const barHeight = bar && bar.offsetHeight || 0;
-  const result = wHeight - barHeight;
-
-  $('#chat').css("height", result);
-  const container = $("#chat .messages-container");
-  container[0] && container.css("height", result - 165);
+function scrollChat(){
+  const container = $(".inbox-widget");
   container[0] && container.scrollTop(container[0].scrollHeight);
-}
-
-function currentBar() {
-  const element = document.getElementById("hero-bar");
-  if (element){
-    return element;
-  }else{
-    return document.getElementById("battle-bar");
-  }
 }

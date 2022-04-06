@@ -21,8 +21,8 @@
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
                                 <i class="fa fa-user"></i>
                             <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.HallLiveView), class: "nav-link" do %>
-                                <i class="fa fa-trophy"></i>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLiveView), class: "nav-link" do %>
+                                <i class="fa fa-comments"></i>
                             <% end %>
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), class: "nav-link" do %>
                                 <i class="fa fa-store-alt"></i>

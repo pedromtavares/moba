@@ -78,7 +78,7 @@ defmodule MobaWeb.Router do
 
       live "/tavern", TavernLiveView
 
-      live "/hall", HallLiveView
+      live "/community", CommunityLiveView
 
       live "/library", LibraryLiveView
     end

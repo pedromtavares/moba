@@ -1,6 +1,6 @@
 defmodule Moba.Accounts.Messages do
   @moduledoc """
-  Manages Messages for the sidebar Chat
+  Manages Messages for the Community page
   """
 
   alias Moba.{Repo, Accounts}
@@ -8,15 +8,10 @@ defmodule Moba.Accounts.Messages do
 
   import Ecto.Query, only: [from: 2]
 
-  @doc """
-  Pulls messages from the latest day only
-  """
-  def latest(limit) do
-    ago = Timex.now() |> Timex.shift(hours: -24)
-
+  def latest(channel, limit) do
     query =
       from message in Message,
-        where: message.inserted_at > ^ago,
+        where: message.channel == ^channel,
         limit: ^limit,
         order_by: [desc: :id]
 

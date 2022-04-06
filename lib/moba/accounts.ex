@@ -81,7 +81,7 @@ defmodule Moba.Accounts do
 
   # MESSAGES
 
-  def latest_messages(limit \\ 10), do: Messages.latest(limit)
+  def latest_messages(channel, limit), do: Messages.latest(channel, limit)
 
   def get_message!(id), do: Messages.get!(id)
 
@@ -89,7 +89,7 @@ defmodule Moba.Accounts do
 
   def create_message!(attrs \\ %{}) do
     message = Messages.create!(attrs)
-    MobaWeb.broadcast("chat", "message", message)
+    MobaWeb.broadcast("messages", message.channel, message)
     message
   end
 

@@ -1,14 +1,7 @@
-<%= if assigns[:current_user] && not assigns[:current_user].is_guest do %>
-    <div class="row">
-        <%= unless assigns[:hide_sidebar] do %>
-            <div class="col-1">
-                <%= render "_sidebar_navigation.html", assigns %>
-            </div>
-        <% end %>
-        <div class="col">
-            <%= @inner_content %>
-        </div>
-    </div>
+<%= if non_guest?(assigns), do: live_render(@socket, MobaWeb.CurrentUserLiveView, id: "current-user") %>
+
+<%= if show_sidebar?(assigns) do %>
+    <%= live_component(MobaWeb.Sidebar, assigns) %>
 <% else %>
     <%= @inner_content %>
 <% end %>

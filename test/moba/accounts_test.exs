@@ -58,7 +58,7 @@ defmodule Moba.AccountsTest do
 
   describe "messages" do
     test "#create_message" do
-      MobaWeb.subscribe("chat")
+      MobaWeb.subscribe("messages")
       message = Accounts.create_message!(%{body: "hi"})
 
       assert message.body == "hi"
