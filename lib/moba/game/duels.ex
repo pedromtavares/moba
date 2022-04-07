@@ -95,10 +95,12 @@ defmodule Moba.Game.Duels do
     update!(duel, %{winner_id: winner && winner.id, rewards: rewards, phase: "finished"})
   end
 
-  defp available_bot_hero(%{inserted_at: duel_inserted_at}, user_id) do
-    Game.eligible_heroes_for_pvp(user_id, duel_inserted_at)
-    |> Enum.shuffle()
-    |> List.first()
+  defp available_bot_hero(user_id, nil) do
+    HeroQuery.unarchived() |> HeroQuery.with_user(user_id) |> HeroQuery.random() |> HeroQuery.limit_by(1)
+  end
+
+  defp available_bot_hero(user_id, hero_id) do
+    available_bot_hero(user_id, nil) |> HeroQuery.exclude_ids([hero_id])
   end
 
   defp base_query(%{id: user_id}) do
@@ -110,14 +112,14 @@ defmodule Moba.Game.Duels do
 
   defp maybe_auto_next_phase(%{user: %{is_bot: true, id: user_id}, phase: phase} = duel)
        when phase in ["user_first_pick", "user_second_pick"] do
-    bot = available_bot_hero(duel, user_id)
-    if bot, do: Game.next_duel_phase!(get!(duel.id), bot), else: duel
+    bot = available_bot_hero(user_id, duel.user_first_pick_id) |> Repo.all() |> List.first()
+    Game.next_duel_phase!(get!(duel.id), bot)
   end
 
   defp maybe_auto_next_phase(%{opponent: %{is_bot: true, id: user_id}, phase: phase} = duel)
        when phase in ["opponent_first_pick", "opponent_second_pick"] do
-    bot = available_bot_hero(duel, user_id)
-    if bot, do: Game.next_duel_phase!(get!(duel.id), bot), else: duel
+    bot = available_bot_hero(user_id, duel.opponent_first_pick_id) |> Repo.all() |> List.first()
+    Game.next_duel_phase!(get!(duel.id), bot)
   end
 
   defp maybe_auto_next_phase(duel), do: duel
