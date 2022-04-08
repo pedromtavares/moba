@@ -1266,6 +1266,8 @@ Repo.update_all(Item, set: [current: true])
 Repo.update_all(Skill, set: [current: true])
 Repo.update_all(Avatar, set: [current: true])
 
+Moba.regenerate_pvp_bots!()
+
 Repo.insert(%Quest{code: "season", level: 1, shard_prize: 100, initial_value: 0, final_value: 2})
 Repo.insert(%Quest{code: "season", level: 2, shard_prize: 150, initial_value: 0, final_value: 5})
 Repo.insert(%Quest{code: "season", level: 3, shard_prize: 200, initial_value: 0, final_value: 10})
