@@ -360,15 +360,23 @@ defmodule Moba.Game do
 
   def get_duel!(id), do: Duels.get!(id)
 
-  def create_duel!(user, opponent, type) do
+  def create_pvp_duel!(user, opponent) do
+    duel = Duels.create!(user, opponent, "pvp")
+
+    Accounts.set_unavailable!(user) && Accounts.set_unavailable!(opponent)
+
+    MobaWeb.broadcast("user-#{user.id}", "duel", %{id: duel.id})
+    MobaWeb.broadcast("user-#{opponent.id}", "duel", %{id: duel.id})
+
+    duel
+  end
+
+  def create_matchmaking!(_, nil), do: nil
+  def create_matchmaking!(user, opponent) do
+    type = if opponent.season_tier <= user.season_tier, do: "normal_matchmaking", else: "elite_matchmaking"
     duel = Duels.create!(user, opponent, type)
 
-    unless type == "pvp", do: Accounts.manage_match_history(user, opponent)
-
-    unless opponent.is_bot do
-      MobaWeb.broadcast("user-#{user.id}", "duel", %{id: duel.id})
-      MobaWeb.broadcast("user-#{opponent.id}", "duel", %{id: duel.id})
-    end
+    Accounts.manage_match_history(user, opponent)
 
     duel
   end
@@ -380,6 +388,10 @@ defmodule Moba.Game do
     updated
   end
 
+  def finish_duel!(%{type: "pvp"} = duel, winner, rewards) do
+    Accounts.set_available!(duel.user) && Accounts.set_available!(duel.opponent)
+    Duels.finish!(duel, winner, rewards)
+  end
   def finish_duel!(duel, winner, rewards), do: Duels.finish!(duel, winner, rewards)
 
   def duel_challenge(%{id: user_id}, %{id: opponent_id}) do

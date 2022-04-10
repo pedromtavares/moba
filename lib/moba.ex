@@ -218,21 +218,15 @@ defmodule Moba do
     Accounts.update_ranking!()
   end
 
-  def normal_matchmaking!(user) do
-    opponent = Accounts.normal_matchmaking(user)
+  def bot_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.bot_opponent(user))
 
-    if opponent, do: Game.create_duel!(user, opponent, "normal_matchmaking")
-  end
+  def normal_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.normal_opponent(user))
 
-  def elite_matchmaking!(user) do
-    opponent = Accounts.elite_matchmaking(user)
-
-    if opponent, do: Game.create_duel!(user, opponent, "elite_matchmaking")
-  end
+  def elite_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.elite_opponent(user))
 
   def basic_attack, do: Game.basic_attack()
 
-  def add_user_experience(user, experience), do: Accounts.add_user_experience(user, experience)
+  def add_user_experience(user, experience), do: Accounts.add_experience(user, experience)
 
   def update_user!(user, updates), do: Accounts.update_user!(user, updates)
 

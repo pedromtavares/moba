@@ -98,10 +98,6 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in User, order_by: [desc: u.season_points])
   end
 
-  def with_pvp_heroes(query \\ User) do
-    from(u in query, where: not is_nil(u.current_pvp_hero_id))
-  end
-
   def by_bot_tier(query, tier) do
     from(u in query, where: u.bot_tier == ^tier)
   end
@@ -110,16 +106,22 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in by_season_points(), where: u.is_bot == true)
   end
 
-  def matchmaking(season_tier) do
+  def bot_opponents(season_tier) do
     from bot in bots(),
-      where: bot.season_tier <= ^season_tier,
+      where: bot.season_tier <= ^season_tier + 1,
       order_by: [desc: bot.season_points]
   end
 
-  def elite_matchmaking(season_tier) do
-    from bot in bots(),
-      where: bot.season_tier >= ^season_tier,
-      order_by: [asc: bot.season_points]
+  def normal_opponents(season_tier) do
+    from user in with_season_points(),
+      where: user.season_tier <= ^season_tier,
+      order_by: [desc: user.season_points]
+  end
+
+  def elite_opponents(season_tier) do
+    from user in with_season_points(),
+      where: user.season_tier >= ^season_tier,
+      order_by: [asc: user.season_points]
   end
 
   def limit_by(query, limit) do
@@ -136,5 +138,9 @@ defmodule Moba.Accounts.Query.UserQuery do
 
     from bot in base,
       where: is_nil(bot.last_online_at) or bot.last_online_at < ^timestamp
+  end
+
+  def with_season_points do
+    from user in User, where: user.season_points > 0
   end
 end

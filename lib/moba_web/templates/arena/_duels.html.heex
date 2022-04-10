@@ -1,8 +1,14 @@
-<%= if length(@duel_users) > 0 do %>
-    <div class="card">
-        <div class="card-body p-0">
+<div class="card">
+    <div class="card-body p-0">
+        <div class="d-flex justify-content-center my-2">
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="set-status" phx-click="set-status" checked={@current_user.status == "available"}>
+                <label class="custom-control-label" for="set-status">I am available for PvP Duels</label>
+            </div>
+        </div>
+        <%= if length(@duel_opponents) > 0 do %>
             <table class="table-dark table mt-3">
-                <%= for user <- @duel_users do %>
+                <%= for user <- @duel_opponents do %>
                 <tr>
                     <td>
                         <img src={"/images/pvp/#{user.season_tier}.png"} style="max-height:  50px"/>
@@ -22,6 +28,6 @@
                 </tr>
                 <% end %>
             </table>
-        </div>
+        <% end %>
     </div>
-<% end %>
+</div>

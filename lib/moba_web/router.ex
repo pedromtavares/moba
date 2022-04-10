@@ -27,8 +27,6 @@ defmodule MobaWeb.Router do
   pipeline :protected do
     plug Pow.Plug.RequireAuthenticated,
       error_handler: Pow.Phoenix.PlugErrorHandler
-
-    plug MobaWeb.OnlineHelper
   end
 
   pipeline :admin_protected do

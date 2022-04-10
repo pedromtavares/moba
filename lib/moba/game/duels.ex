@@ -96,7 +96,7 @@ defmodule Moba.Game.Duels do
   end
 
   defp available_bot_hero(user_id, nil) do
-    HeroQuery.unarchived() |> HeroQuery.with_user(user_id) |> HeroQuery.random() |> HeroQuery.limit_by(1)
+    HeroQuery.unarchived() |> HeroQuery.with_user(user_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(1)
   end
 
   defp available_bot_hero(user_id, hero_id) do
@@ -116,8 +116,8 @@ defmodule Moba.Game.Duels do
     Game.next_duel_phase!(get!(duel.id), bot)
   end
 
-  defp maybe_auto_next_phase(%{opponent: %{is_bot: true, id: user_id}, phase: phase} = duel)
-       when phase in ["opponent_first_pick", "opponent_second_pick"] do
+  defp maybe_auto_next_phase(%{opponent: %{id: user_id}, phase: phase, type: type} = duel)
+       when phase in ["opponent_first_pick", "opponent_second_pick"] and type != "pvp" do
     bot = available_bot_hero(user_id, duel.opponent_first_pick_id) |> Repo.all() |> List.first()
     Game.next_duel_phase!(get!(duel.id), bot)
   end

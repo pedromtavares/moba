@@ -261,7 +261,7 @@ defmodule Moba.Conductor do
       bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
 
       if bot do
-        duel = Moba.elite_matchmaking!(bot) || Moba.normal_matchmaking!(bot)
+        duel = Moba.bot_matchmaking!(bot)
 
         if duel do
           Logger.info("Created duel ##{duel.id} for #{bot.username}")

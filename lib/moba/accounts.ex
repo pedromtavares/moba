@@ -28,15 +28,19 @@ defmodule Moba.Accounts do
 
   defdelegate update_preferences!(user, preferences), to: Users
 
-  def add_user_experience(user, experience), do: Users.add_experience(user, experience)
+  defdelegate add_experience(user, experience), to: Users
 
   defdelegate create_guest(conn), to: Users
 
-  def set_user_online_now(user), do: Users.set_online_now(user)
+  defdelegate set_online_now(user), to: Users
 
-  def user_search(user), do: Users.search(user)
+  defdelegate set_available!(user), to: Users
 
-  def list_duel_users(user), do: Users.duel_list(user)
+  defdelegate set_unavailable!(user), to: Users
+
+  defdelegate search(user), to: Users
+
+  defdelegate duel_opponents(user), to: Users
 
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 
@@ -46,9 +50,9 @@ defmodule Moba.Accounts do
 
   defdelegate season_tier_for(season_points), to: Users
 
-  def user_duel_updates!(nil, _), do: nil
+  def user_duel_updates!(nil, _, _), do: nil
 
-  def user_duel_updates!(user, updates), do: Users.duel_updates!(user, updates)
+  def user_duel_updates!(user, duel_type, updates), do: Users.duel_updates!(user, duel_type, updates)
 
   defdelegate ranking(limit), to: Users
 
@@ -67,9 +71,11 @@ defmodule Moba.Accounts do
 
   defdelegate shard_buyback!(user), to: Users
 
-  defdelegate normal_matchmaking(user), to: Users
+  defdelegate normal_opponent(user), to: Users
 
-  defdelegate elite_matchmaking(user), to: Users
+  defdelegate elite_opponent(user), to: Users
+
+  defdelegate bot_opponent(user), to: Users
 
   defdelegate manage_match_history(user, opponent), to: Users
 
@@ -81,7 +87,7 @@ defmodule Moba.Accounts do
 
   # MESSAGES
 
-  def latest_messages(channel, limit), do: Messages.latest(channel, limit)
+  def latest_messages(channel, topic, limit), do: Messages.latest(channel, topic, limit)
 
   def get_message!(id), do: Messages.get!(id)
 
@@ -89,7 +95,7 @@ defmodule Moba.Accounts do
 
   def create_message!(attrs \\ %{}) do
     message = Messages.create!(attrs)
-    MobaWeb.broadcast("messages", message.channel, message)
+    MobaWeb.broadcast(message.channel, message.topic, message)
     message
   end
 

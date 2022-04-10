@@ -1,4 +1,8 @@
 .duel{
+  .header{
+    height: 160px;
+    padding-top: 1.5rem;
+  }
   .pick-button{
     background: rgba(54, 64, 74, 0.8);
     color: #f1556c;
@@ -25,6 +29,26 @@
       background-color: rgba(54, 64, 74, 0.95) !important;
     }
   }
+  .inbox-widget{
+    height: 110px;
+    overflow: auto;
+  }
+  .inbox-item{
+    padding-bottom: 0.25rem !important;
+    padding-top: 0.25rem !important;
+
+    p{
+      margin: 0;
+      float: left;
+      margin-top: -1px;
+    }
+  }
+  .inbox-item-img, .inbox-item img{
+    width: 20px !important;
+  }
+  .inbox-item-img{
+    margin-right: 5px !important;
+  }
   .btn-success {
     color: #1abc9c;
     background: rgba(26,188,156, 0.2) !important;
@@ -46,5 +70,11 @@
   }
   .dead{
     height: 30px;
+  }
+}
+
+.duel-battle-bar{
+  .nav-link{
+    text-align: center;
   }
 }

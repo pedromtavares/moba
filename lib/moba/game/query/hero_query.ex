@@ -50,11 +50,10 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def eligible_for_pvp(user_id, duel_inserted_at) do
-    base = with_user(Hero, user_id) |> unarchived() |> finished()
+    base = with_user(Hero, user_id) |> unarchived() |> finished() |> order_by_pvp()
 
     from(hero in base,
       limit: 50,
-      order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]],
       where: hero.league_tier >= @platinum_league_tier,
       where: is_nil(hero.pvp_last_picked) or hero.pvp_last_picked < ^duel_inserted_at
     )
@@ -210,5 +209,9 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def created_before(query, time) do
     from hero in query, where: hero.inserted_at < ^time
+  end
+
+  def order_by_pvp(query) do
+    from hero in query, order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]]
   end
 end

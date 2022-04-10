@@ -42,12 +42,16 @@ defmodule Moba.Accounts.Users do
     update!(user, %{preferences: Map.merge(current_preferences, preferences)})
   end
 
+  def set_available!(user), do: update!(user, %{status: "available"})
+
+  def set_unavailable!(user), do: update!(user, %{status: "unavailable"})
+
   def set_online_now(user) do
     UserQuery.by_user(User, user)
     |> Repo.update_all(set: [last_online_at: DateTime.utc_now()])
   end
 
-  def duel_list(user) do
+  def duel_opponents(user) do
     UserQuery.online_users()
     |> UserQuery.order_by_online()
     |> UserQuery.with_status("available")
@@ -95,21 +99,26 @@ defmodule Moba.Accounts.Users do
   Increments duel counts and sets the duel_score map that is displayed on the user's profile
   Each user holds the score count of every other user they have dueled against
   """
-  def duel_updates!(user, updates) do
-    loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
-    current_score = user.duel_score[loser_id] || 0
-    duel_score = loser_id && Map.put(user.duel_score, loser_id, current_score + 1)
-    extra_win = if updates[:duel_winner], do: 1, else: 0
+  def duel_updates!(user, duel_type, updates) do
     season_points = updates[:season_points] || user.season_points
     season_tier = season_tier_for(season_points)
+    base_updates = %{season_points: season_points, season_tier: season_tier}
 
-    update!(user, %{
-      duel_score: duel_score || user.duel_score,
-      duel_wins: user.duel_wins + extra_win,
-      duel_count: user.duel_count + 1,
-      season_points: season_points,
-      season_tier: season_tier
-    })
+    score_updates = if duel_type == "pvp" do
+      loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
+      current_score = user.duel_score[loser_id] || 0
+      duel_score = loser_id && Map.put(user.duel_score, loser_id, current_score + 1)
+      extra_win = if updates[:duel_winner], do: 1, else: 0
+      %{
+        duel_score: duel_score || user.duel_score,
+        duel_wins: user.duel_wins + extra_win,
+        duel_count: user.duel_count + 1,
+      }
+    else
+      %{}
+    end
+
+    update!(user, Map.merge(base_updates, score_updates))
   end
 
   @doc """
@@ -219,7 +228,7 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  def normal_matchmaking(user) do
+  def normal_opponent(user) do
     opponent = normal_matchmaking_opponent(user)
 
     if opponent do
@@ -228,13 +237,23 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  def elite_matchmaking(user) do
+  def elite_opponent(user) do
     opponent = elite_matchmaking_opponent(user)
 
     if opponent do
       update!(user, %{shard_count: user.shard_count + Moba.elite_matchmaking_shards()})
       opponent
     end
+  end
+
+  def bot_opponent(user) do
+    exclusions = match_exclusions(user) ++ [user.id]
+
+    UserQuery.bot_opponents(user.season_tier) 
+    |> UserQuery.exclude_ids(exclusions)
+    |> UserQuery.limit_by(1) 
+    |> Repo.all() 
+    |> List.first()
   end
 
   def manage_match_history(%{match_history: history} = user, opponent) do
@@ -286,24 +305,24 @@ defmodule Moba.Accounts.Users do
   defp maximum_tier(tier) when tier > @max_season_tier, do: @max_season_tier
   defp maximum_tier(tier), do: tier
 
-  def normal_matchmaking_opponent(user) do
+  defp normal_matchmaking_opponent(user) do
     normal_matchmaking_query(user) |> UserQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
-  def elite_matchmaking_opponent(user) do
+  defp elite_matchmaking_opponent(user) do
     elite_matchmaking_query(user) |> UserQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
   defp normal_matchmaking_query(%{season_tier: user_tier} = user) do
     exclusions = match_exclusions(user) ++ [user.id]
 
-    UserQuery.matchmaking(user_tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.normal_opponents(user_tier) |> UserQuery.exclude_ids(exclusions)
   end
 
   defp elite_matchmaking_query(%{season_tier: user_tier} = user) do
     exclusions = match_exclusions(user) ++ [user.id]
     tier = maximum_tier(user_tier + 1)
 
-    UserQuery.elite_matchmaking(tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.elite_opponents(tier) |> UserQuery.exclude_ids(exclusions)
   end
 end

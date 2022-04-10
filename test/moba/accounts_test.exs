@@ -12,7 +12,7 @@ defmodule Moba.AccountsTest do
     end
 
     test "#set_user_online_now", %{user: user} do
-      {1, nil} = Accounts.set_user_online_now(user)
+      {1, nil} = Accounts.set_online_now(user)
       user = Accounts.get_user!(user.id)
 
       assert user.last_online_at
@@ -30,36 +30,40 @@ defmodule Moba.AccountsTest do
   describe "#add_user_experience" do
     test "levels up when reaching max xp" do
       user = create_user()
-      # MobaWeb.subscribe("user-#{user.id}")
-      user = Accounts.add_user_experience(user, Moba.user_level_xp() + 100)
+      user = Accounts.add_experience(user, Moba.user_level_xp() + 100)
 
       assert user.level == 2
       assert user.experience == 100
-      # assert user.shard_count == 1
-      # assert_receive {"alert", %{level: 2, type: "battle"}}
     end
   end
 
   describe "#user_duel_updates!" do
     test "sets score correctly", %{user: winner} do
       loser = create_user()
-      user = Accounts.user_duel_updates!(winner, %{loser_id: loser.id})
+      user = Accounts.user_duel_updates!(winner, "pvp", %{loser_id: loser.id})
 
       assert user.duel_score["#{loser.id}"] == 1
     end
 
     test "sets wins/losses/points correctly", %{user: winner} do
-      user = Accounts.user_duel_updates!(winner, %{duel_winner: winner, pvp_points: 10})
+      user = Accounts.user_duel_updates!(winner, "pvp", %{duel_winner: winner, pvp_points: 10})
 
       assert user.duel_wins == winner.duel_wins + 1
       assert user.duel_count == winner.duel_count + 1
+    end
+
+    test "does not set score for non-pvp duels", %{user: winner} do
+      loser = create_user()
+      user = Accounts.user_duel_updates!(winner, "normal_matchmaking", %{loser_id: loser.id})
+
+      assert user.duel_score == %{}
     end
   end
 
   describe "messages" do
     test "#create_message" do
-      MobaWeb.subscribe("messages")
-      message = Accounts.create_message!(%{body: "hi"})
+      MobaWeb.subscribe("community")
+      message = Accounts.create_message!(%{body: "hi", channel: "community"})
 
       assert message.body == "hi"
       assert_receive _message

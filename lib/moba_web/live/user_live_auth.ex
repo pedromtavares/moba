@@ -11,6 +11,8 @@ defmodule MobaWeb.UserLiveAuth do
     user = socket.assigns.current_user
 
     if user do
+      Accounts.set_online_now(user)
+      
       socket =
         assign_new(socket, :current_hero, fn ->
           Game.current_pve_hero(user)

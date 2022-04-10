@@ -6,7 +6,7 @@ defmodule MobaWeb.ArenaLiveView do
   def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
     if connected?(socket), do: Tutorial.subscribe(user.id)
 
-    duel_users = if user.status == "available", do: Accounts.list_duel_users(user), else: []
+    duel_opponents = if user.status == "available", do: Accounts.duel_opponents(user), else: []
     normal_count = Accounts.normal_matchmaking_count(user)
     elite_count = Accounts.elite_matchmaking_count(user)
     matchmaking = Game.list_matchmaking(user)
@@ -17,7 +17,7 @@ defmodule MobaWeb.ArenaLiveView do
     {:ok,
      assign(socket,
        battles: battles,
-       duel_users: duel_users,
+       duel_opponents: duel_opponents,
        elite_count: elite_count,
        normal_count: normal_count,
        matchmaking: matchmaking,
@@ -30,9 +30,13 @@ defmodule MobaWeb.ArenaLiveView do
 
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_user: user}} = socket) do
     opponent = Accounts.get_user!(opponent_id)
-    Game.duel_challenge(user, opponent)
 
-    {:noreply, socket}
+    if opponent.status == "available" do
+      Game.duel_challenge(user, opponent)
+      {:noreply, socket}
+    else
+      {:noreply, assign(socket, duel_opponents: Accounts.duel_opponents(user))}
+    end
   end
 
   def handle_event("matchmaking", %{"type" => type}, %{assigns: %{current_user: user}} = socket) do
@@ -47,6 +51,15 @@ defmodule MobaWeb.ArenaLiveView do
          elite_count: Accounts.elite_matchmaking_count(user)
        )}
     end
+  end
+
+  def handle_event("set-status", params, %{assigns: %{current_user: user}} = socket) do
+    {user, duel_opponents} = if is_nil(Map.get(params, "value")) do
+      {Accounts.set_unavailable!(user), []}
+    else
+      {Accounts.set_available!(user), Accounts.duel_opponents(user)}
+    end
+    {:noreply, assign(socket, current_user: user, duel_opponents: duel_opponents)}
   end
 
   def handle_event("tutorial1", _, socket) do

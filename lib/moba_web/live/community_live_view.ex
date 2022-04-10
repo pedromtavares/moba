@@ -3,11 +3,12 @@ defmodule MobaWeb.CommunityLiveView do
 
   def mount(_, _session, socket) do
     pve = Game.pve_ranking(21)
-    messages = Accounts.latest_messages("general", 20) |> Enum.reverse()
-    updates = Accounts.latest_messages("updates", 20)
+    channel = "community"
+    messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse()
+    updates = Accounts.latest_messages(channel, "updates", 20)
     changeset = Accounts.change_message()
 
-    if connected?(socket), do: MobaWeb.subscribe("messages")
+    if connected?(socket), do: MobaWeb.subscribe("community")
 
     {:ok,
      assign(socket,
@@ -39,7 +40,8 @@ defmodule MobaWeb.CommunityLiveView do
         body: body,
         author: user.username,
         tier: user.season_tier,
-        channel: "general",
+        channel: "community",
+        topic: "general",
         is_admin: user.is_admin,
         user_id: user.id
       })
@@ -59,7 +61,8 @@ defmodule MobaWeb.CommunityLiveView do
       body: body,
       author: user.username,
       tier: user.season_tier,
-      channel: "updates",
+      channel: "community",
+      topic: "updates",
       is_admin: true,
       user_id: user.id
     })

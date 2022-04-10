@@ -8,10 +8,11 @@ defmodule Moba.Accounts.Messages do
 
   import Ecto.Query, only: [from: 2]
 
-  def latest(channel, limit) do
+  def latest(channel, topic, limit) do
     query =
       from message in Message,
         where: message.channel == ^channel,
+        where: message.topic == ^topic,
         limit: ^limit,
         order_by: [desc: :id]
 

@@ -1,11 +1,15 @@
 defmodule MobaWeb.DuelView do
   use MobaWeb, :view
 
+  alias MobaWeb.CommunityView
+
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 
-  def phase_class(%{phase: phase}, current_phase) when phase == current_phase, do: "active"
-  def phase_class(_, _), do: ""
+  defdelegate formatted_body(body), to: CommunityView
+
+  def phase_class(%{phase: phase}, current_phase) when phase == current_phase, do: "nav-link no-action active"
+  def phase_class(_, _), do: "nav-link no-action"
 
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false

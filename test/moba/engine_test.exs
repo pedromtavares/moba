@@ -207,9 +207,9 @@ defmodule Moba.EngineTest do
     end
   end
 
-  describe "duel" do
+  describe "pvp duel" do
     test "full cycle", %{strong_hero: attacker, weak_hero: defender} do
-      duel = Game.create_duel!(attacker.user, defender.user, "pvp")
+      duel = Game.create_pvp_duel!(attacker.user, defender.user)
       Game.next_duel_phase!(duel, attacker)
       duel = Game.get_duel!(duel.id)
       Game.next_duel_phase!(duel, defender)

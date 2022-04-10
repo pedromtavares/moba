@@ -553,7 +553,7 @@ defmodule Moba.GameTest do
       user_hero = Game.create_hero!(%{name: "User"}, user, strong_avatar(), skills)
       opp_hero = Game.create_hero!(%{name: "Opponent"}, opponent, weak_avatar(), skills)
 
-      duel = Game.create_duel!(user, opponent, "pvp")
+      duel = Game.create_pvp_duel!(user, opponent)
 
       assert duel.phase == "user_first_pick"
 

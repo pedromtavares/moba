@@ -11,6 +11,7 @@ defmodule Moba.Accounts.Schema.Message do
     field :title, :string
     field :body, :string
     field :channel, :string
+    field :topic, :string
     field :tier, :integer
     field :is_admin, :boolean
 
@@ -21,6 +22,6 @@ defmodule Moba.Accounts.Schema.Message do
 
   def changeset(message, attrs) do
     message
-    |> cast(attrs, [:author, :title, :body, :channel, :tier, :is_admin, :user_id])
+    |> cast(attrs, [:author, :title, :body, :channel, :topic, :tier, :is_admin, :user_id])
   end
 end
