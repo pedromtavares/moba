@@ -42,7 +42,7 @@
 
 <div class="row mt-3">
     <%= for guest <- @guests do %>
-        <%= render "_guest.html", user: guest %>
+        <%= if guest.current_pve_hero, do: render "_guest.html", user: guest %>
     <% end %>
 </div>
 
