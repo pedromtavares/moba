@@ -12,7 +12,7 @@
                                 <img src={"/images/pve/#{@user.pve_tier}.png"} class="pve-rank"/> <%= Moba.pve_tiers[@user.pve_tier] %> Collection
                             </h5>
                         <% end %>
-                        <div class="card-body pb-2">
+                        <div class="card-body pb-1">
                             <div class="row">
                                 <%= for hero <- @user.hero_collection do %>
                                     <div class="col-3 mb-1 text-center">

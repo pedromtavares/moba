@@ -5,7 +5,7 @@ defmodule Moba.Admin.Matches do
 
   alias Moba.{Repo, Game, Accounts}
   alias Game.Schema.Match
-  alias Game.Query.HeroQuery
+  alias Game.Query.{SkillQuery, HeroQuery}
   alias Accounts.Query.UserQuery
 
   import Ecto.Query
@@ -89,6 +89,15 @@ defmodule Moba.Admin.Matches do
       |> Map.put(:latest_heroes, heroes)
       |> Map.put(:hero_count, count)
     end)
+  end
+
+  def current_guests do
+    UserQuery.non_bots()
+    |> UserQuery.guests()
+    |> UserQuery.online_users(24)
+    |> UserQuery.order_by_online()
+    |> Repo.all()
+    |> Repo.preload(current_pve_hero: [:avatar, :items, active_build: [skills: SkillQuery.ordered()]])
   end
 
   defp skill_winrates(heroes) do

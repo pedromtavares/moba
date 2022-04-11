@@ -41,6 +41,12 @@
 </div>
 
 <div class="row mt-3">
+    <%= for guest <- @guests do %>
+        <%= render "_guest.html", user: guest %>
+    <% end %>
+</div>
+
+<div class="row mt-3">
     <div class="col-xl-6 col-lg-8 margin-auto col-xs-12">
         <table class="table table-dark mb-0 border-left border-right border-bottom text-center">
             <%= for duel <- @duels do %>

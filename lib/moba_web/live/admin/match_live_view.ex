@@ -25,6 +25,7 @@ defmodule MobaWeb.Admin.MatchLiveView do
 
     assign(socket,
       players: data.players,
+      guests: data.guests,
       user_stats: user_stats,
       last_updated: Timex.now()
     )

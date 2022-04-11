@@ -37,10 +37,9 @@ defmodule Moba.Admin.Server do
   end
 
   defp current_state do
-    players = Admin.current_active_players()
-
     %{
-      players: players
+      players: Admin.current_active_players(),
+      guests: Admin.current_guests()
     }
   end
 end

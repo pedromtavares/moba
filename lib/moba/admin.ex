@@ -94,6 +94,8 @@ defmodule Moba.Admin do
 
   defdelegate current_active_players, to: Matches
 
+  defdelegate current_guests, to: Matches
+
   # SKINS
 
   def paginate_skins(params \\ %{}), do: Skins.paginate(params)
