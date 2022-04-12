@@ -1,12 +1,11 @@
 defmodule MobaWeb.ArenaLiveView do
   use MobaWeb, :live_view
 
-  alias MobaWeb.Tutorial
+  alias MobaWeb.{ArenaView, Tutorial}
 
   def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
     if connected?(socket), do: Tutorial.subscribe(user.id)
 
-    duel_opponents = if user.status == "available", do: Accounts.duel_opponents(user), else: []
     normal_count = Accounts.normal_matchmaking_count(user)
     elite_count = Accounts.elite_matchmaking_count(user)
     matchmaking = Game.list_matchmaking(user)
@@ -14,10 +13,13 @@ defmodule MobaWeb.ArenaLiveView do
     pending_match = Enum.find(matchmaking, &(&1.phase != "finished"))
     closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user)
 
+    Process.send_after(self(), :refresh_duel_opponents, 500)
+
     {:ok,
      assign(socket,
        battles: battles,
-       duel_opponents: duel_opponents,
+       current_time: Timex.now(),
+       duel_opponents: [],
        elite_count: elite_count,
        normal_count: normal_count,
        matchmaking: matchmaking,
@@ -31,7 +33,7 @@ defmodule MobaWeb.ArenaLiveView do
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_user: user}} = socket) do
     opponent = Accounts.get_user!(opponent_id)
 
-    if opponent.status == "available" do
+    if can_duel?(user) && can_duel?(opponent) do
       Game.duel_challenge(user, opponent)
       {:noreply, socket}
     else
@@ -74,7 +76,19 @@ defmodule MobaWeb.ArenaLiveView do
     {:noreply, assign(socket, tutorial_step: step)}
   end
 
+  def handle_info(:refresh_duel_opponents, %{assigns: %{current_user: user}} = socket) do
+    duel_opponents = if user.status == "available", do: Accounts.duel_opponents(user), else: []
+
+    Process.send_after(self(), :refresh_duel_opponents, 5000)
+
+    {:noreply, assign(socket, duel_opponents: duel_opponents, current_time: Timex.now())}
+  end
+
   def render(assigns) do
-    MobaWeb.ArenaView.render("index.html", assigns)
+    ArenaView.render("index.html", assigns)
+  end
+
+  defp can_duel?(user) do
+    user.status == "available" && ArenaView.can_be_challenged?(user, Timex.now())
   end
 end

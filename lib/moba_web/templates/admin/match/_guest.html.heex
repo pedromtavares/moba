@@ -25,11 +25,10 @@
         <span class="text-primary"><%= @user.tutorial_step %></span>
         |
         <span class="text-success"><%= @user.current_pve_hero.total_gold_farm + @user.current_pve_hero.total_xp_farm %></span>
-        </p>
+        <br/>
         <small class="text-dark font-italic">
             O <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-            <br/>
-            R <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
         </small>
+        </p>
     </div>
 </div>

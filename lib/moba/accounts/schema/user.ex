@@ -40,6 +40,7 @@ defmodule Moba.Accounts.Schema.User do
     field :pve_tier, :integer, default: 0
     field :unread_messages_count, :integer, default: 0
     field :match_history, :map, default: %{}
+    field :last_challenge_at, :utc_datetime
 
     embeds_one :preferences, Accounts.Schema.Preferences, on_replace: :update
 
@@ -107,7 +108,8 @@ defmodule Moba.Accounts.Schema.User do
       :shard_limit,
       :pve_tier,
       :title_quest_id,
-      :match_history
+      :match_history,
+      :last_challenge_at
     ])
     |> cast_embed(:preferences)
     |> validate_required([:username, :email])

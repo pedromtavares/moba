@@ -28,15 +28,29 @@ defmodule MobaWeb.CurrentUserLiveView do
     {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.DuelLiveView, id))}
   end
 
-  def handle_info({"challenge", %{user_id: user_id, opponent_id: opponent_id}}, %{assigns: %{current_user: user}} = socket) do
+  def handle_info({"challenge", %{user_id: user_id, opponent_id: opponent_id}}, %{assigns: %{current_user: current_user}} = socket) do
     challenge =
-      if user.id == user_id do
+      if current_user.id == user_id do
         %{challenger: true, other: Accounts.get_user!(opponent_id), other_id: opponent_id}
       else
         %{challenger: false, other: Accounts.get_user!(user_id), other_id: user_id}
       end
 
-    {:noreply, assign(socket, challenge: challenge)}
+    user = Accounts.update_user!(current_user, %{last_challenge_at: Timex.now()})
+
+    {:noreply, assign(socket, challenge: challenge, current_user: user)}
+  end
+
+  def handle_event("reject", _, %{assigns: %{challenge: challenge, current_user: current_user}} = socket) do
+    MobaWeb.broadcast("user-#{challenge.other_id}", "reject", %{})
+    user = Accounts.update_user!(current_user, %{last_challenge_at: nil})
+
+    {:noreply, assign(socket, challenge: nil, user: user)}
+  end
+
+  def handle_info({"reject", _}, %{assigns: %{current_user: current_user}} = socket) do
+    user = Accounts.update_user!(current_user, %{last_challenge_at: nil})
+    {:noreply, assign(socket, challenge: nil, user: user)}
   end
 
   def render(assigns) do

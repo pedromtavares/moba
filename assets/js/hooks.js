@@ -191,7 +191,7 @@ Hooks.ToggleShop = {
 
 Hooks.DuelChallenger = {
   mounted(){
-    swal(`You have challenged ${this.el.dataset.other}, waiting for response...`, {
+    swal(`You have challenged ${this.el.dataset.other}, they have 30 seconds to respond...`, {
       closeOnClickOutside: false,
       title: "Duel Challenge",
       buttons: {
@@ -199,8 +199,12 @@ Hooks.DuelChallenger = {
           className: "btn btn-danger btn-block challenge-button",
           text: "Close",
         }
-      }
+      },
+      timer: 30000
     })
+  },
+  destroyed() {
+    swal.close();
   }
 }
 
@@ -210,17 +214,28 @@ Hooks.DuelChallenged = {
       closeOnClickOutside: false,
       title: "Duel Challenge",
       buttons: {
+        cancel: {
+          text: "Reject",
+          value: "reject",
+          visible: true,
+          className: "btn btn-secondary mr-3",
+          closeModal: true,
+        },
         confirm: {
-          className: "btn btn-danger btn-block challenge-button",
-          text: "Accept Challenge",
-          value: "start"
+          className: "btn btn-danger challenge-button",
+          text: "Accept",
+          value: "accept"
         }
-      }
+      },
+      timer: 30000
     }).then((value) => {
       switch(value){
-        case "start":
-        this.pushEventTo("#current-user", "accept", {});
-        break;
+        case "accept":
+          this.pushEventTo("#current-user", "accept", {});
+          break;
+        case "reject":
+          this.pushEventTo("#current-user", "reject", {})
+          break;
       }
     });
   }

@@ -106,7 +106,7 @@ defmodule Moba.Game.Duels do
   defp base_query(%{id: user_id}) do
     from duel in simple_load(),
       where: duel.user_id == ^user_id or duel.opponent_id == ^user_id,
-      limit: 20,
+      limit: 10,
       order_by: [desc: duel.inserted_at]
   end
 
