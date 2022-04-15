@@ -136,7 +136,7 @@ Hooks.AttackButton = {
       let item = $(el).attr("data-item") || "";
       $(el).find(".loading-text").html("<i class='fas fa-spinner fa-spin mr-1'></i> Attacking...");
       $(el).prop("disabled", true);
-      this.pushEvent("next-turn", {skill: skill, item: item});
+      this.pushEvent("next-turn", {skill_id: skill, item_id: item});
       e.stopPropagation();
     })
   }
@@ -196,11 +196,18 @@ Hooks.DuelChallenger = {
       title: "Duel Challenge",
       buttons: {
         confirm: {
+          value: "close",
           className: "btn btn-danger btn-block challenge-button",
           text: "Close",
         }
       },
       timer: 30000
+    }).then((value) => {
+      switch(value){
+        case "close":
+          this.pushEventTo("#current-user", "close", {});
+          break;
+      }
     })
   },
   destroyed() {
@@ -240,5 +247,37 @@ Hooks.DuelChallenged = {
     });
   }
 }
+
+Hooks.TurnTimer = {
+  mounted(){
+    const self = this;
+    const el = this.el;
+
+    setInterval(function () {
+      let timer = $(el).attr("data-timer");
+
+      if (timer <= 0){
+        let attack = $("#attack-button");
+        if (attack[0]){
+          let skill = attack.attr("data-skill") || "";
+          let item = attack.attr("data-item") || "";
+          self.pushEvent("next-turn", {skill_id: skill, item_id: item});
+        }else{
+          setTimeout(function(){
+            self.pushEvent("check-timer", {});
+          }, 2000);
+        }
+      }else{
+        timer = timer - 1;
+      }
+
+      $(el).attr("data-timer", timer); 
+      $(el).text(timer);
+
+    }, 1000)    
+  }
+}
+
+
 
 export default Hooks;

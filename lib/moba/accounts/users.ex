@@ -51,11 +51,12 @@ defmodule Moba.Accounts.Users do
     |> Repo.update_all(set: [last_online_at: DateTime.utc_now()])
   end
 
-  def duel_opponents(user) do
-    UserQuery.online_users()
+  def duel_opponents(user, online_ids) do
+    UserQuery.non_bots()
     |> UserQuery.order_by_online()
     |> UserQuery.with_status("available")
     |> UserQuery.exclude_ids([user.id])
+    |> UserQuery.with_ids(online_ids)
     |> Repo.all()
   end
 
@@ -104,19 +105,21 @@ defmodule Moba.Accounts.Users do
     season_tier = season_tier_for(season_points)
     base_updates = %{season_points: season_points, season_tier: season_tier}
 
-    score_updates = if duel_type == "pvp" do
-      loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
-      current_score = user.duel_score[loser_id] || 0
-      duel_score = loser_id && Map.put(user.duel_score, loser_id, current_score + 1)
-      extra_win = if updates[:duel_winner], do: 1, else: 0
-      %{
-        duel_score: duel_score || user.duel_score,
-        duel_wins: user.duel_wins + extra_win,
-        duel_count: user.duel_count + 1,
-      }
-    else
-      %{}
-    end
+    score_updates =
+      if duel_type == "pvp" do
+        loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
+        current_score = user.duel_score[loser_id] || 0
+        duel_score = loser_id && Map.put(user.duel_score, loser_id, current_score + 1)
+        extra_win = if updates[:duel_winner], do: 1, else: 0
+
+        %{
+          duel_score: duel_score || user.duel_score,
+          duel_wins: user.duel_wins + extra_win,
+          duel_count: user.duel_count + 1
+        }
+      else
+        %{}
+      end
 
     update!(user, Map.merge(base_updates, score_updates))
   end
@@ -249,10 +252,10 @@ defmodule Moba.Accounts.Users do
   def bot_opponent(user) do
     exclusions = match_exclusions(user) ++ [user.id]
 
-    UserQuery.bot_opponents(user.season_tier) 
+    UserQuery.bot_opponents(user.season_tier)
     |> UserQuery.exclude_ids(exclusions)
-    |> UserQuery.limit_by(1) 
-    |> Repo.all() 
+    |> UserQuery.limit_by(1)
+    |> Repo.all()
     |> List.first()
   end
 

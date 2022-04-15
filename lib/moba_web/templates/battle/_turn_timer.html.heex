@@ -1,0 +1,5 @@
+<%= if show_timer?(assigns) do %>
+    <button class="btn btn-outline-warning ml-2 no-action" data-toggle="tooltip" title="Seconds left to act">
+        <i class="fa fa-hourglass mr-1"></i><span phx-hook="TurnTimer" data-timer={@turn_timer} id="turn-timer"><%= @turn_timer %></span>
+    </button>
+<% end %>

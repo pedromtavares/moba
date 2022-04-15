@@ -9,11 +9,13 @@
         </div>
         <div class="col-12 col-md-2 text-center versus-box">
             <h1>VS</h1>
-            <p>
-                <strong>Battle #<%= @battle.id %></strong>
-                <br/>
-                <span class="text-dark"><em><%= Timex.format!(@battle.inserted_at, "{relative}", :relative) %></em></span>
-            </p>
+            <%= if @battle.finished do %>
+                <p>
+                    <strong>Battle #<%= @battle.id %></strong>
+                    <br/>
+                    <span class="text-dark"><em><%= Timex.format!(@battle.inserted_at, "{relative}", :relative) %></em></span>
+                </p>
+            <% end %>
         </div>
         <div class="col-12 col-md-5">
             <%= render "_hero.html", hero: @battle.defender, last_hero: last_hero_for(@battle.defender, @last_turn), battle: @battle, snapshot: @battle.defender_snapshot %>
@@ -83,7 +85,7 @@
                 <%= if @battle.finished do %>
                     <%= render_rewards(@battle, assigns) %>
                 <% else %>
-                    <%= render "_active_battle.html", battle: @battle, turn: @turn, skill: @skill, item: @item, last_turn: @last_turn, current_user: @current_user %>
+                    <%= render "_active_battle.html", assigns %>
                 <% end %>
             </div>
             <%= render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.defender, turn_hero: if @turn.attacker.hero_id == @battle.attacker_id, do: @turn.defender, else: @turn.attacker %>

@@ -10,6 +10,7 @@ defmodule Moba.Game.Schema.Duel do
   schema "duels" do
     field :phase, :string
     field :type, :string
+    field :phase_changed_at, :utc_datetime
 
     embeds_one :rewards, Engine.Schema.Rewards, on_replace: :update
 
@@ -36,7 +37,8 @@ defmodule Moba.Game.Schema.Duel do
       :opponent_first_pick_id,
       :user_second_pick_id,
       :opponent_second_pick_id,
-      :winner_id
+      :winner_id,
+      :phase_changed_at
     ])
     |> cast_embed(:rewards)
   end

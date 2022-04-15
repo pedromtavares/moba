@@ -61,6 +61,10 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in query, where: u.status == ^status)
   end
 
+  def with_ids(query, ids) do
+    from user in query, where: user.id in ^ids
+  end
+
   def exclude_ids(query, ids) do
     from user in query, where: user.id not in ^ids
   end

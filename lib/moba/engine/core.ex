@@ -137,7 +137,16 @@ defmodule Moba.Engine.Core do
   defp finalize_boss(battle), do: battle
 
   # Skips to the next turn if the current action is to be performed by an automated opponent
-  defp maybe_skip_next_turn(%{type: "duel", attacker: attacker, defender: defender, initiator: initiator, duel: %{type: duel_type, user: %{id: user_id, is_bot: false}}} = battle) when duel_type != "pvp" do
+  defp maybe_skip_next_turn(
+         %{
+           type: "duel",
+           attacker: attacker,
+           defender: defender,
+           initiator: initiator,
+           duel: %{type: duel_type, user: %{id: user_id, is_bot: false}}
+         } = battle
+       )
+       when duel_type != "pvp" do
     battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
     last_turn = List.last(battle.turns)
 
@@ -152,6 +161,7 @@ defmodule Moba.Engine.Core do
       battle
     end
   end
+
   defp maybe_skip_next_turn(%{attacker: attacker, defender: defender, initiator: initiator} = battle) do
     battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
     last_turn = List.last(battle.turns)

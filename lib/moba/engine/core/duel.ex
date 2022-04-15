@@ -76,7 +76,10 @@ defmodule Moba.Engine.Core.Duel do
 
   defp manage_duel_winner(battle), do: {nil, Engine.update_battle!(battle, %{rewards: %{}})}
 
-  defp update_users({duel_winner, %{rewards: rewards, duel: %{user: user, opponent: opponent, phase: phase, type: duel_type}} = battle})
+  defp update_users(
+         {duel_winner,
+          %{rewards: rewards, duel: %{user: user, opponent: opponent, phase: phase, type: duel_type}} = battle}
+       )
        when phase == "opponent_battle" do
     user_points = points_limits(user.season_points + rewards.attacker_pvp_points)
     opponent_points = points_limits(opponent.season_points + rewards.defender_pvp_points)

@@ -13,6 +13,7 @@ defmodule Moba.Application do
       MobaWeb.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: Moba.PubSub},
+      MobaWeb.Presence,
       # Start the endpoint when the application starts
       MobaWeb.Endpoint,
       # Cache for hero creation

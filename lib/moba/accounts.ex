@@ -40,7 +40,7 @@ defmodule Moba.Accounts do
 
   defdelegate search(user), to: Users
 
-  defdelegate duel_opponents(user), to: Users
+  defdelegate duel_opponents(user, online_ids), to: Users
 
   # Player-related, should be extracted to Game context eventually: user -> player -> heroes
 

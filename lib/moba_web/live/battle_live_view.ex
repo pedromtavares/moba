@@ -7,12 +7,10 @@ defmodule MobaWeb.BattleLiveView do
     %{assigns: %{current_user: current_user}} =
       socket = assign_new(socket, :current_user, fn -> Accounts.get_user!(session["user_id"]) end)
 
-    %{assigns: %{current_hero: current_hero}} =
-      socket = assign_new(socket, :current_hero, fn -> current_user && Game.current_pve_hero(current_user) end)
+    socket = assign_new(socket, :current_hero, fn -> current_user && Game.current_pve_hero(current_user) end)
 
     {:ok,
      assign(socket,
-       battle: nil,
        hero: nil,
        skill: nil,
        item: nil,
@@ -26,13 +24,14 @@ defmodule MobaWeb.BattleLiveView do
 
   def handle_params(%{"id" => id} = params, _uri, socket) do
     battle = Engine.get_battle!(id)
+    turn = Engine.next_battle_turn(battle)
+    last_turn = Engine.last_turn(battle)
 
     if connected?(socket) && battle.type == "duel" do
       MobaWeb.subscribe("battle-#{battle.id}")
     end
 
-    turn = Engine.next_battle_turn(battle)
-
+    
     {:noreply,
      assign(socket,
        battle: battle,
@@ -40,23 +39,17 @@ defmodule MobaWeb.BattleLiveView do
        hero: battle.attacker_snapshot,
        turn: turn,
        hide_sidebar: !battle.finished,
-       last_turn: Engine.last_turn(battle),
-       skill: BattleView.preselected_skill(turn.attacker, turn)
+       last_turn: last_turn,
+       skill: BattleView.preselected_skill(turn.attacker, turn),
+       turn_timer: turn_timer(last_turn, battle)
      )}
   end
 
-  def handle_info({"turn", %{battle_id: battle_id, turn_number: turn_number}}, socket) do
-    battle = Engine.get_battle!(battle_id)
-    turn = Engine.next_battle_turn(battle)
-
-    {:noreply, turn_assigns(socket, battle, turn, turn_number)}
-  end
-
-  def handle_event("next-turn", %{"skill" => skill_id, "item" => item_id}, %{assigns: %{battle: battle}} = socket) do
+  def handle_event("next-turn", %{"skill_id" => skill_id, "item_id" => item_id}, %{assigns: %{battle: battle}} = socket) do
     skill = skill_id != "" && Game.get_skill!(skill_id)
     item = item_id != "" && Game.get_item!(item_id)
     current_turn = Engine.last_turn(battle)
-    battle = battle |> Engine.continue_battle!(%{skill: skill, item: item})
+    battle = Engine.continue_battle!(battle, %{skill: skill, item: item})
     next_turn = Engine.next_battle_turn(battle)
     turn_number = (current_turn && current_turn.number + 1) || 1
 
@@ -69,6 +62,21 @@ defmodule MobaWeb.BattleLiveView do
      |> assign(hero: battle.attacker_snapshot)}
   end
 
+  def handle_event("check-timer", _, %{assigns: %{battle: battle, last_turn: last_turn}} = socket) do
+    timer = turn_timer(last_turn, battle)
+
+    if timer < 0 do
+      battle = Engine.continue_battle!(battle, %{auto: true})
+      next_turn = Engine.next_battle_turn(battle)
+      turn_number = (last_turn && last_turn.number + 1) || 1
+      MobaWeb.broadcast("battle-#{battle.id}", "turn", %{battle_id: battle.id, turn_number: turn_number})
+
+      {:noreply, turn_assigns(socket, battle, next_turn, turn_number)}
+    else
+      {:noreply, socket}
+    end
+  end
+
   def handle_event("next-battle", %{"id" => id}, socket) do
     battle =
       socket.assigns.battle.attacker.id
@@ -79,6 +87,13 @@ defmodule MobaWeb.BattleLiveView do
     else
       {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.TrainingLiveView))}
     end
+  end
+
+  def handle_info({"turn", %{battle_id: battle_id, turn_number: turn_number}}, socket) do
+    battle = Engine.get_battle!(battle_id)
+    turn = Engine.next_battle_turn(battle)
+
+    {:noreply, turn_assigns(socket, battle, turn, turn_number)}
   end
 
   def render(assigns) do
@@ -97,13 +112,22 @@ defmodule MobaWeb.BattleLiveView do
   end
 
   defp turn_assigns(socket, battle, turn, turn_number) do
+    last_turn = Engine.last_turn(battle)
+
     assign(socket,
       battle: battle,
       action_turn_number: turn_number,
-      last_turn: Engine.last_turn(battle),
+      last_turn: last_turn,
       turn: turn,
       skill: BattleView.preselected_skill(turn.attacker, turn),
-      item: nil
+      item: nil,
+      turn_timer: turn_timer(last_turn, battle)
     )
+  end
+
+  defp turn_timer(last_turn, battle) do
+    turn_time = (last_turn && last_turn.inserted_at) || battle.inserted_at
+    target = Timex.shift(turn_time, seconds: Moba.turn_timer_in_seconds())
+    Timex.diff(target, Timex.now(), :seconds)
   end
 end

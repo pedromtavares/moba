@@ -20,13 +20,13 @@
                             <%= user.season_points %> Season Points
                         </td>
                         <td>
-                            Online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                            Last active <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
                         </td>
                         <td>
-                            <%= if can_be_challenged?(user, @current_time) do %>
+                            <%= if can_be_challenged?(@current_user, @current_time) && can_be_challenged?(user, @current_time) do %>
                                 <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id={user.id}><i class="fa fa-bullseye mr-1" id={"can-duel-#{user.id}"}></i>Duel</button>
                             <% else %>
-                                <button type="button" class="btn btn-danger btn-block disabled no-action" data-toggle="tooltip" title="This user has been challenged recently, please wait a few seconds." id={"cannot-duel-#{user.id}"}><i class="fa fa-bullseye mr-1"></i>Duel</button>
+                                <button type="button" class="btn btn-danger btn-block disabled no-action" data-toggle="tooltip" title="You currently cannot challenge this player, please wait a few seconds." id={"cannot-duel-#{user.id}"}><i class="fa fa-bullseye mr-1"></i>Duel</button>
                             <% end %>
                         </td>
                     </tr>

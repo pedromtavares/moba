@@ -1,10 +1,12 @@
 defmodule MobaWeb.ArenaLiveView do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{ArenaView, Tutorial}
+  alias MobaWeb.{ArenaView, Presence, Tutorial}
 
   def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
-    if connected?(socket), do: Tutorial.subscribe(user.id)
+    if connected?(socket) do
+      Tutorial.subscribe(user.id)
+    end
 
     normal_count = Accounts.normal_matchmaking_count(user)
     elite_count = Accounts.elite_matchmaking_count(user)
@@ -37,7 +39,7 @@ defmodule MobaWeb.ArenaLiveView do
       Game.duel_challenge(user, opponent)
       {:noreply, socket}
     else
-      {:noreply, assign(socket, duel_opponents: Accounts.duel_opponents(user))}
+      {:noreply, assign(socket, duel_opponents: opponents_from_presence(user))}
     end
   end
 
@@ -56,11 +58,13 @@ defmodule MobaWeb.ArenaLiveView do
   end
 
   def handle_event("set-status", params, %{assigns: %{current_user: user}} = socket) do
-    {user, duel_opponents} = if is_nil(Map.get(params, "value")) do
-      {Accounts.set_unavailable!(user), []}
-    else
-      {Accounts.set_available!(user), Accounts.duel_opponents(user)}
-    end
+    {user, duel_opponents} =
+      if is_nil(Map.get(params, "value")) do
+        {Accounts.set_unavailable!(user), []}
+      else
+        {Accounts.set_available!(user), opponents_from_presence(user)}
+      end
+
     {:noreply, assign(socket, current_user: user, duel_opponents: duel_opponents)}
   end
 
@@ -77,7 +81,7 @@ defmodule MobaWeb.ArenaLiveView do
   end
 
   def handle_info(:refresh_duel_opponents, %{assigns: %{current_user: user}} = socket) do
-    duel_opponents = if user.status == "available", do: Accounts.duel_opponents(user), else: []
+    duel_opponents = if user.status == "available", do: opponents_from_presence(user), else: []
 
     Process.send_after(self(), :refresh_duel_opponents, 5000)
 
@@ -90,5 +94,14 @@ defmodule MobaWeb.ArenaLiveView do
 
   defp can_duel?(user) do
     user.status == "available" && ArenaView.can_be_challenged?(user, Timex.now())
+  end
+
+  defp opponents_from_presence(user) do
+    online_ids =
+      Presence.list("online")
+      |> Enum.map(fn {_user_id, data} ->  List.first(data[:metas]) end)
+      |> Enum.map(& &1.user_id)
+
+    Accounts.duel_opponents(user, online_ids)
   end
 end

@@ -372,6 +372,7 @@ defmodule Moba.Game do
   end
 
   def create_matchmaking!(_, nil), do: nil
+
   def create_matchmaking!(user, opponent) do
     type = if opponent.season_tier <= user.season_tier, do: "normal_matchmaking", else: "elite_matchmaking"
     duel = Duels.create!(user, opponent, type)
@@ -388,10 +389,17 @@ defmodule Moba.Game do
     updated
   end
 
+  def auto_next_duel_phase!(duel) do
+    updated = Duels.auto_next_phase!(duel)
+    MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
+    updated
+  end
+
   def finish_duel!(%{type: "pvp"} = duel, winner, rewards) do
     Accounts.set_available!(duel.user) && Accounts.set_available!(duel.opponent)
     Duels.finish!(duel, winner, rewards)
   end
+
   def finish_duel!(duel, winner, rewards), do: Duels.finish!(duel, winner, rewards)
 
   def duel_challenge(%{id: user_id}, %{id: opponent_id}) do

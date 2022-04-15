@@ -67,8 +67,7 @@ defmodule MobaWeb.CommunityLiveView do
       user_id: user.id
     })
 
-    {:noreply,
-     assign(socket, changeset: Accounts.change_message(%{user_id: Timex.now()}))}
+    {:noreply, assign(socket, changeset: Accounts.change_message(%{user_id: Timex.now()}))}
   end
 
   def handle_event("delete-message", %{"id" => id}, socket) do
@@ -82,6 +81,7 @@ defmodule MobaWeb.CommunityLiveView do
   def handle_info({"general", message}, %{assigns: %{messages: messages}} = socket) do
     {:noreply, assign(socket, messages: messages ++ [message])}
   end
+
   def handle_info({"updates", message}, %{assigns: %{updates: updates}} = socket) do
     {:noreply, assign(socket, updates: [message] ++ updates)}
   end

@@ -21,9 +21,9 @@
                             <%= if pvp?(@duel) do %>
                                 <h4 class="mt-0" data-toggle="tooltip" title="All-time score between players">
                                     <span class="badge badge-pill badge-light-primary">
-                                        <%=@duel.user.duel_score["#{@duel.opponent_id}"] || 0 %>
+                                        <%= @duel.user.duel_score["#{@duel.opponent_id}"] || 0 %>
                                          x 
-                                        <%=@duel.opponent.duel_score["#{@duel.user_id}"] || 0 %>    
+                                        <%= @duel.opponent.duel_score["#{@duel.user_id}"] || 0 %>    
                                     </span>
                                 </h4>
                             <% end %>
@@ -51,8 +51,13 @@
                                 </h3>
                             </div>
                         <% else %>
-                            <h2><%= user_instructions(@duel) %></h2>
-                            <h2><%= opponent_instructions(@duel) %></h2>
+                            <div>
+                                <h2 class="text-white"><%= user_instructions(@duel) %></h2>
+                                <h2 class="text-white"><%= opponent_instructions(@duel) %></h2>
+                                <%= if show_timer?(@duel) do %>
+                                    <h3 class="text-warning"><%= pick_timer(@duel, @current_time) %> seconds left</h3>
+                                <% end %>
+                            </div>
                         <% end %>
                     </div>
                     <%= if show_rematch?(assigns) do %>
@@ -91,7 +96,6 @@
             </div>
         <% end %>
     </div>
-    
 
     <div class="duel-details">
         <%= if @first_battle && @first_battle.finished do %>
@@ -150,7 +154,7 @@
             </div>
         <% end %>
         <%= if @first_battle && @first_battle.finished do %>
-            <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2" phx-hook={unless finished?(@duel), do: "Scroll"}>
+            <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2">
                 <li class="nav-item">
                     <a href="javascript:;" class={phase_class(@duel, "opponent_second_pick")}>
                         <span class="number">4</span>

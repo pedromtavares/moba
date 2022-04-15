@@ -3,7 +3,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="Description" content="Train your own custom heroes with MOBA abilities and items to battle against other players in turn-based strategy matches. Online, no downloads, for free.">
-    <title><%= assigns[:title] || "Browser MOBA - Free Strategy Game" %></title>
+    <%= live_title_tag assigns[:page_title] || "Browser MOBA - Free Strategy Game" %>
     <link rel="stylesheet" href="<%= Routes.static_path(@conn, "/css/app.css") %>"/>
     <link rel="shortcut icon" href="<%= assigns[:favicon] || Routes.static_path(@conn, "/images/favicon.png") %>" />
     <script src="https://kit.fontawesome.com/26d6de301e.js"></script>

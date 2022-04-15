@@ -11,6 +11,7 @@ defmodule MobaWeb.ArenaView do
   end
 
   def can_be_challenged?(%{last_challenge_at: nil}, _), do: true
+
   def can_be_challenged?(%{last_challenge_at: time}, current_time) do
     Timex.diff(Timex.shift(time, seconds: 30), current_time) < 0
   end
