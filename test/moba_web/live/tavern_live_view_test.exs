@@ -8,6 +8,6 @@ defmodule MobaWeb.TavernLiveViewTest do
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
     {:ok, _view, html} = live(conn, "/tavern")
-    assert html =~ "Tavern"
+    assert html =~ "Skins"
   end
 end

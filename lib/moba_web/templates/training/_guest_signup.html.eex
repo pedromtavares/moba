@@ -1,9 +1,0 @@
-<div class="row" style="margin-top: 300px">
-    <div class="col-12 text-center">
-        <div class="alert alert-warning bg-light-shadow border-warning text-warning">
-            <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-warning" do %>
-                <i class="fa fa-sign-out-alt"></i> Enjoying the game? Click to create an account and continue leveling your hero!
-            <% end %>
-        </div>
-    </div>
-</div>

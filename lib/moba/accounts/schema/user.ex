@@ -6,8 +6,7 @@ defmodule Moba.Accounts.Schema.User do
   use Ecto.Schema
   use Pow.Ecto.Schema, password_min_length: 6
 
-  use Pow.Extension.Ecto.Schema,
-    extensions: [PowResetPassword, PowEmailConfirmation]
+  use Pow.Extension.Ecto.Schema, extensions: [PowResetPassword]
 
   import Ecto.Changeset
 
@@ -71,7 +70,8 @@ defmodule Moba.Accounts.Schema.User do
       :current_pve_hero_id,
       :current_pvp_hero_id
     ])
-    |> pow_changeset(attrs)
+    |> pow_user_id_field_changeset(attrs)
+    |> pow_password_changeset(attrs)
     |> pow_extension_changeset(attrs)
     |> validate_required([:username])
     |> validate_length(:username, min: 3, max: 15)

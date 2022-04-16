@@ -17,7 +17,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   def new_users(query \\ User, since_hours_ago \\ 24) do
     ago = Timex.now() |> Timex.shift(hours: -since_hours_ago)
 
-    from(user in non_bots(query), where: user.inserted_at > ^ago)
+    from(user in non_bots(query), where: user.inserted_at > ^ago, order_by: [desc: user.inserted_at])
   end
 
   def bots(query \\ User) do
@@ -144,7 +144,7 @@ defmodule Moba.Accounts.Query.UserQuery do
       where: is_nil(bot.last_online_at) or bot.last_online_at < ^timestamp
   end
 
-  def with_season_points do
-    from user in User, where: user.season_points > 0
+  def with_season_points(query \\ User) do
+    from user in query, where: user.season_points > 0
   end
 end

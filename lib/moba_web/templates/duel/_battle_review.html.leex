@@ -32,7 +32,7 @@
     <div class="row">
         <div class="col">
             <div style="min-height: 250px" class="d-flex">
-                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-outline-danger btn-block btn-lg pt-5", "phx-hook": "Loading", "loading": "Entering...", id: "loading-battle-#{@battle.id}" do %>
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLiveView, @battle), class: "btn btn-outline-danger btn-block btn-lg pt-5", "phx-hook": "Loading", loading: "Entering...", id: "loading-battle-#{@battle.id}" do %>
                     <span class="loading-text">
                         <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
                         <strong class="font-20 d-block">Enter Battle</strong>

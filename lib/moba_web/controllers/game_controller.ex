@@ -4,9 +4,10 @@ defmodule MobaWeb.GameController do
 
   def index(conn, _params) do
     user = conn.assigns.current_user
+    hero = Game.current_pve_hero(user)
 
     cond do
-      user && Game.current_pve_hero(user) -> redirect(conn, to: "/training")
+      user && hero && is_nil(hero.finished_at) -> redirect(conn, to: "/training")
       user -> redirect(conn, to: "/base")
       true -> render(conn, "homepage.html", layout: {MobaWeb.LayoutView, "homepage.html"})
     end

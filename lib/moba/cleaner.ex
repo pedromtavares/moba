@@ -14,7 +14,7 @@ defmodule Moba.Cleaner do
       from h in Hero,
         where: not is_nil(h.archived_at),
         where: h.archived_at <= ^ago,
-        where: h.bot_difficulty != "boss",
+        where: is_nil(h.bot_difficulty) or h.bot_difficulty != "boss",
         limit: 20
 
     Repo.all(query) |> delete_records()

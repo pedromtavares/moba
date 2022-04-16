@@ -1,66 +1,153 @@
-<div class="account-pages mt-2">
-    <div class="container">
-        <div class="row">
-                    <div class="col-12 text-center">
-                        <p class="text-muted"><a href="/user/<%=@current_user.id%>" class="text-muted font-weight-medium ml-1">Back to Profile</a></p>
-                    </div> <!-- end col -->
-                </div>
-        <div class="row justify-content-center">
-            <div class="col-md-8 col-lg-6 col-xl-5">
-                <div class="card">
-                    <div class="card-body p-4">
-                        <div class="text-center w-75 m-auto">
-                            <h3>Edit Profile</h3>
+<%= if guest_user(@conn) do %>
+    <style>
+        body::before {
+          background-image: url(/images/home.jpg);
+          background-size: cover;
+          content: "";
+          display: block;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -2;
+          opacity: 0.2;
+        }
+    </style>
+    <div class="account-pages mt-2">
+        <div class="container-fluid">
+            <%= if hero = current_hero(@conn) do %>
+                <% avatar = current_avatar(hero) %>
+                <% avatars = creation_avatars() %>
+                <div class="row justify-content-center align-items-center border py-3 mb-3 shadow-box" id="create-bar">
+                    <div class="col-4 text-center">
+                        <img src="<%=GH.image_url(avatar)%>" class="avatar img-border mt-2" style="max-width: 160px"/>
+                        <h3 class="mb-0"><%=avatar.name%></h3>
+                        <h5>Level <%=hero.level%></h5>
+                    </div>
 
+                    <div class="d-none d-md-block col-3">
+                        <%=MobaWeb.CreateView.render "_stats.html", avatar: avatar, avatars: avatars%>
+                    </div>
+
+                    <div class="d-none d-md-block col-5">
+                        <div class="row align-items-center">
+                            <div class="col text-center font-weight-bold">
+                                <h4 class="m-0">Skill Build</h4>
+                            </div>
                         </div>
-
-                        <%= form_for @changeset, @action, [as: :user], fn f -> %>
-                            <%= if @changeset.action do %>
-                                <p class="alert alert-danger">Oops, something went wrong! Please check the errors below.</p>
+                        <div class="skills-container mt-2">
+                            <%= for skill <- hero.active_build.skills do %>
+                                <div class="skill-container">
+                                    <img src="<%=GH.image_url(skill)%>" class="skill img-border-sm <%=if skill.passive, do: "passive"%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" id="skill_<%=skill.id%>"/>
+                                    <br/>
+                                    <strong><%=skill.name%></strong>
+                                </div>
                             <% end %>
-
-                            <div class="form-group">
-                                <label for="email">Current Password</label>
-                                <%= error_tag f, :current_password %>
-                                <%= password_input f, :current_password, class: "form-control" %>
-
-                            </div>
-                            <div class="form-group">
-                                <label for="username">Username</label>
-                                <%= error_tag f, :username %>
-                                <%= text_input f, :username, class: "form-control"  %>
-
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Password</label>
-                                <%= error_tag f, :password %>
-                                <%= password_input f, :password, class: "form-control"  %>
-
-                            </div>
-                            <div class="form-group">
-                                <label for="password">Confirm Password</label>
-                                <%= error_tag f, :confirm_password %>
-                                <%= password_input f, :confirm_password, class: "form-control"  %>
-
-                            </div>
-
-                            <div class="form-group mb-0 text-center">
-                                <button class="btn btn-primary btn-block" type="submit"> Update </button>
-                            </div>
-
-                        <% end %>
-
-
-                    </div> <!-- end card-body -->
+                        </div>
+                    </div>
                 </div>
-                <!-- end card -->
+            <% end %>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-4">
+                    <div class="card black-bar">
+                        <div class="card-body p-4">
+                            <div class="text-center m-auto">
+                                <h3 class="text-primary">Create an account to continue</h3>
+                                <p class="text-white">Your hero has almost finished Training, so you need an account to save your progress</p>
+                            </div>
 
+                            <%= form_for @changeset, @action, [as: :user], fn f -> %>
+                                <%= if @changeset.action do %>
+                                    <p class="alert alert-danger">Oops, something went wrong! Please check the errors below.</p>
+                                <% end %>
 
-                <!-- end row -->
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <%= error_tag f, :username %>
+                                    <%= text_input f, :username, class: "form-control", value: nil  %>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <%= error_tag f, :password %>
+                                    <%= password_input f, :password, class: "form-control", required: true  %>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Confirm Password</label>
+                                    <%= error_tag f, :confirm_password %>
+                                    <%= password_input f, :confirm_password, class: "form-control", required: true  %>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="email">E-mail <small>(used only for account recovery)</small></label>
+                                    <%= error_tag f, Pow.Ecto.Schema.user_id_field(@changeset) %>
+                                    <%= text_input f, Pow.Ecto.Schema.user_id_field(@changeset), class: "form-control", value: nil %>
+                                </div>
+                                <%= hidden_input f, :is_guest, value: false %>
 
-            </div> <!-- end col -->
+                                <div class="form-group mb-0 text-center">
+                                    <button class="btn btn-primary btn-block" type="submit">Continue playing</button>
+                                </div>
+                            <% end %>
+                        </div>
+                        <div class="row mt-1">
+                            <div class="col-12 text-center">
+                                <p class="text-muted">Already have account?  <a href="/session/new" class="text-muted font-weight-medium ml-1">Sign In</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <!-- end row -->
     </div>
-    <!-- end container -->
-</div>
+<% else %>
+    <div class="account-pages mt-2">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="text-muted"><a href="/user/<%=@current_user.id%>" class="text-muted font-weight-medium ml-1">Back to Profile</a></p>
+                </div>
+            </div>
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card">
+                        <div class="card-body p-4">
+                            <div class="text-center w-75 m-auto">
+                                <h3>Edit Profile</h3>
+                            </div>
+
+                            <%= form_for @changeset, @action, [as: :user], fn f -> %>
+                                <%= if @changeset.action do %>
+                                    <p class="alert alert-danger">Oops, something went wrong! Please check the errors below.</p>
+                                <% end %>
+                                <div class="form-group">
+                                    <label for="username">Username</label>
+                                    <%= error_tag f, :username %>
+                                    <%= text_input f, :username, class: "form-control"  %>
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="email">E-mail</label>
+                                    <%= error_tag f, Pow.Ecto.Schema.user_id_field(@changeset) %>
+                                    <%= text_input f, Pow.Ecto.Schema.user_id_field(@changeset), class: "form-control" %>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Password</label>
+                                    <%= error_tag f, :password %>
+                                    <%= password_input f, :password, class: "form-control"  %>
+                                </div>
+                                <div class="form-group">
+                                    <label for="password">Confirm Password</label>
+                                    <%= error_tag f, :confirm_password %>
+                                    <%= password_input f, :confirm_password, class: "form-control"  %>
+                                </div>
+
+                                <div class="form-group mb-0 text-center">
+                                    <button class="btn btn-primary btn-block" type="submit"> Update </button>
+                                </div>
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+<% end %>

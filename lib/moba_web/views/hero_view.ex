@@ -5,8 +5,9 @@ defmodule MobaWeb.HeroView do
 
   def just_finished_training?(user, %{finished_at: finished_at} = hero) do
     ago = Timex.now() |> Timex.shift(days: -1)
+    diff = Timex.diff(finished_at, ago)
 
-    if user.current_pve_hero_id && finished_at > ago do
+    if user.current_pve_hero_id && diff > 0 do
       current_hero = Game.get_hero!(user.current_pve_hero_id)
       current_hero.finished_at && hero.id == current_hero.id && hero
     end

@@ -64,7 +64,7 @@ defmodule MobaWeb.DuelLiveView do
     if current_user.status == "available" && other.status == "available" do
       Game.duel_challenge(current_user, other)
     end
-    
+
     {:noreply, socket}
   end
 

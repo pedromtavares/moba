@@ -94,8 +94,7 @@ defmodule Moba.Admin.Matches do
   def current_guests do
     UserQuery.non_bots()
     |> UserQuery.guests()
-    |> UserQuery.online_users(24)
-    |> UserQuery.order_by_online()
+    |> UserQuery.new_users(24)
     |> Repo.all()
     |> Repo.preload(current_pve_hero: [:avatar, :items, active_build: [skills: SkillQuery.ordered()]])
   end

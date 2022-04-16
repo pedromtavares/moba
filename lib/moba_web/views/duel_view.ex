@@ -51,7 +51,7 @@ defmodule MobaWeb.DuelView do
   defp both_online?(%{user_id: user_id, opponent_id: opponent_id}, current_user) do
     online_ids =
       Presence.list("online")
-      |> Enum.map(fn {_user_id, data} ->  List.first(data[:metas]) end)
+      |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)
       |> Enum.map(& &1.user_id)
       |> Kernel.++([current_user.id])
 

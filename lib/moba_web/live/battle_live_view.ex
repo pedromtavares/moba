@@ -31,7 +31,6 @@ defmodule MobaWeb.BattleLiveView do
       MobaWeb.subscribe("battle-#{battle.id}")
     end
 
-    
     {:noreply,
      assign(socket,
        battle: battle,

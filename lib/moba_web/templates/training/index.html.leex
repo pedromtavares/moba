@@ -2,32 +2,28 @@
     <%= if @pending_battle do %>
         <%= MobaWeb.GameView.render "_pending_battle.html", battle: @pending_battle %>
     <% else %>
-        <%= if show_guest_signup?(assigns) do %>
-            <%= render "_guest_signup.html", assigns %>
-        <% else %>
-            <div class="row mt-2 training-header">
+        <div class="row mt-2 training-header">
+            <div class="col">
+                <%= render "_header.html", assigns %>
+            </div>
+        </div>
+
+        <%= if dead?(@current_hero) do %>
+            <div class="row">
                 <div class="col">
-                    <%= render "_header.html", assigns %>
+                    <%= render "_dead.html", assigns %>
                 </div>
             </div>
-
-            <%= if dead?(@current_hero) do %>
+        <% else %>
+            <%= if display_farm_tabs?(assigns) do %>
                 <div class="row">
                     <div class="col">
-                        <%= render "_dead.html", assigns %>
+                        <%= render "_farm_tabs.html", assigns %>
                     </div>
                 </div>
-            <% else %>
-                <%= if display_farm_tabs?(assigns) do %>
-                    <div class="row">
-                        <div class="col">
-                            <%= render "_farm_tabs.html", assigns %>
-                        </div>
-                    </div>
-                <% end %>
-
-                <%= render "_#{@farm_tab}.html", assigns %>
             <% end %>
+
+            <%= render "_#{@farm_tab}.html", assigns %>
         <% end %>
     <% end %>
 </div>

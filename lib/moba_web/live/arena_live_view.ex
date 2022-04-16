@@ -99,7 +99,7 @@ defmodule MobaWeb.ArenaLiveView do
   defp opponents_from_presence(user) do
     online_ids =
       Presence.list("online")
-      |> Enum.map(fn {_user_id, data} ->  List.first(data[:metas]) end)
+      |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)
       |> Enum.map(& &1.user_id)
 
     Accounts.duel_opponents(user, online_ids)

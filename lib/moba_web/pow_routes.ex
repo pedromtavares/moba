@@ -3,5 +3,4 @@ defmodule MobaWeb.PowRoutes do
 
   def after_user_updated_path(_), do: "/"
   def after_registration_path(_), do: "/training"
-  def after_sign_out_path(_conn), do: "/registration/new"
 end

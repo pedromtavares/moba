@@ -134,10 +134,6 @@ defmodule MobaWeb.TrainingView do
     )
   end
 
-  def show_guest_signup?(%{current_hero: hero}) do
-    hero.user.is_guest && hero.pve_current_turns + hero.pve_total_turns <= 5
-  end
-
   def show_league_challenge?(%{pve_current_turns: 0, league_tier: league_tier}) do
     league_tier < Moba.master_league_tier()
   end
