@@ -112,11 +112,13 @@
             </div>
         </div>
         <div class="col-md-6 col-xl-6">
-            <div class="row">
-                <div class="col">
-                    <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
+            <%= unless @hero.user.is_guest do %>
+                <div class="row">
+                    <div class="col">
+                        <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
+                    </div>
                 </div>
-            </div>
+            <% end %>
             
             <div class="row">
                 <div class="col">

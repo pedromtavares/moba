@@ -52,20 +52,10 @@
                         <% end %>
 
                         <p class="text-center mt-4 mb-0"> <a href="/reset-password/new" class="text-muted ml-1">Forgot your password?</a></p>
-                    </div> <!-- end card-body -->
+                    </div>
                 </div>
-                <!-- end card -->
 
-                <div class="row mt-3">
-                    <div class="col-12 text-center">
-                        <h3><a href="/registration/new" class="text-info font-weight-medium ml-1">Don't have an account? Sign Up!</a></p></h3>
-                    </div> <!-- end col -->
-                </div>
-                <!-- end row -->
-
-            </div> <!-- end col -->
+            </div>
         </div>
-        <!-- end row -->
     </div>
-    <!-- end container -->
 </div>

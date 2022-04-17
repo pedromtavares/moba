@@ -94,16 +94,18 @@
                     </div>
                     <%= if Enum.count(@selected_skills) == 3 && @selected_avatar do %>
                         <%= if @current_user do %>
-                            <div class="row mb-3">
-                                <div class="col text-center">
-                                    <form phx-change="validate">
-                                        <input type="text" maxlength="15" minlength="3" class="form-control text-center" name="name" value="<%= @current_user.username %>" style="max-width: 300px; margin:auto" data-toggle="tooltip" title="Edit your Hero's name"/>
-                                        <%= if @error do %>
-                                            <span class="text-danger"><%=@error%></span>
-                                        <% end %>
-                                    </form>
+                            <%= unless @current_user.is_guest do %>
+                                <div class="row mb-3">
+                                    <div class="col text-center">
+                                        <form phx-change="validate">
+                                            <input type="text" maxlength="15" minlength="3" class="form-control text-center" name="name" value="<%= @current_user.username %>" style="max-width: 300px; margin:auto" data-toggle="tooltip" title="Edit your Hero's name"/>
+                                            <%= if @error do %>
+                                                <span class="text-danger"><%=@error%></span>
+                                            <% end %>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
+                            <% end %>
                             <%= unless @error do %>
                                 <div class="row">
                                     <div class="col">

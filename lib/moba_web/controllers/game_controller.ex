@@ -7,6 +7,7 @@ defmodule MobaWeb.GameController do
     hero = Game.current_pve_hero(user)
 
     cond do
+      user && user.tutorial_step == 30 -> redirect(conn, to: "/arena")
       user && hero && is_nil(hero.finished_at) -> redirect(conn, to: "/training")
       user -> redirect(conn, to: "/base")
       true -> render(conn, "homepage.html", layout: {MobaWeb.LayoutView, "homepage.html"})

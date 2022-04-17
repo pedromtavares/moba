@@ -14,47 +14,15 @@
           opacity: 0.2;
         }
     </style>
-    <div class="account-pages mt-2">
+    <div class="account-pages mt-5">
         <div class="container-fluid">
-            <%= if hero = current_hero(@conn) do %>
-                <% avatar = current_avatar(hero) %>
-                <% avatars = creation_avatars() %>
-                <div class="row justify-content-center align-items-center border py-3 mb-3 shadow-box" id="create-bar">
-                    <div class="col-4 text-center">
-                        <img src="<%=GH.image_url(avatar)%>" class="avatar img-border mt-2" style="max-width: 160px"/>
-                        <h3 class="mb-0"><%=avatar.name%></h3>
-                        <h5>Level <%=hero.level%></h5>
-                    </div>
-
-                    <div class="d-none d-md-block col-3">
-                        <%=MobaWeb.CreateView.render "_stats.html", avatar: avatar, avatars: avatars%>
-                    </div>
-
-                    <div class="d-none d-md-block col-5">
-                        <div class="row align-items-center">
-                            <div class="col text-center font-weight-bold">
-                                <h4 class="m-0">Skill Build</h4>
-                            </div>
-                        </div>
-                        <div class="skills-container mt-2">
-                            <%= for skill <- hero.active_build.skills do %>
-                                <div class="skill-container">
-                                    <img src="<%=GH.image_url(skill)%>" class="skill img-border-sm <%=if skill.passive, do: "passive"%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" id="skill_<%=skill.id%>"/>
-                                    <br/>
-                                    <strong><%=skill.name%></strong>
-                                </div>
-                            <% end %>
-                        </div>
-                    </div>
-                </div>
-            <% end %>
             <div class="row justify-content-center">
                 <div class="col-md-8 col-lg-6 col-xl-4">
                     <div class="card black-bar">
                         <div class="card-body p-4">
                             <div class="text-center m-auto">
                                 <h3 class="text-primary">Create an account to continue</h3>
-                                <p class="text-white">Your hero has almost finished Training, so you need an account to save your progress</p>
+                                <p class="text-white">You must have an account before playing in the PvP Arena</p>
                             </div>
 
                             <%= form_for @changeset, @action, [as: :user], fn f -> %>

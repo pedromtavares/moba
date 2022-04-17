@@ -14,14 +14,20 @@
                     <i class="fa fa-gopuram"></i>
                 <% end %>
             <% end %>
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, @current_user.id), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Profile</h3>", class: sidebar_class("user", assigns) do %>
-                <i class="fa fa-id-card"></i>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Tavern</h3>", class: sidebar_class("tavern", assigns) do %>
-                <i class="fa fa-store-alt"></i>
-            <% end %>
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CommunityLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Community</h3>", class: sidebar_class("community", assigns) do %>
-                <i class="fa fa-comments"></i>
+            <%= if @current_user.is_guest do %>
+                <%= link to: "/registration/edit", data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Create an Account</h3>" do %>
+                    <i class="fa fa-user-plus"></i>
+                <% end %>
+            <% else %>
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, @current_user.id), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Profile</h3>", class: sidebar_class("user", assigns) do %>
+                    <i class="fa fa-id-card"></i>
+                <% end %>
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Tavern</h3>", class: sidebar_class("tavern", assigns) do %>
+                    <i class="fa fa-store-alt"></i>
+                <% end %>
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CommunityLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Community</h3>", class: sidebar_class("community", assigns) do %>
+                    <i class="fa fa-comments"></i>
+                <% end %>
             <% end %>
             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.LibraryLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Info</h3>", class: sidebar_class("library", assigns)  do %>
                 <i class="fa fa-book"></i>

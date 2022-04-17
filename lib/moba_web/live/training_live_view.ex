@@ -34,8 +34,7 @@ defmodule MobaWeb.TrainingLiveView do
            current_time: Timex.now(),
            farm_rewards: farm_rewards_for(hero, "meditating"),
            sidebar_code: "training"
-         )
-         |> maybe_guest_redirect()}
+         )}
 
       true ->
         {:ok, socket |> redirect(to: "/base")}
@@ -152,8 +151,7 @@ defmodule MobaWeb.TrainingLiveView do
        farm_rewards: farm_rewards_for(updated, state),
        targets: Game.list_targets(updated),
        selected_turns: updated.pve_current_turns
-     )
-     |> maybe_guest_redirect()}
+     )}
   end
 
   def handle_info({"tutorial-step", %{step: step}}, socket) do
@@ -184,16 +182,6 @@ defmodule MobaWeb.TrainingLiveView do
 
   defp farm_rewards_for(hero, state),
     do: Enum.filter(hero.pve_farming_rewards, &(&1.state == state)) |> Enum.sort_by(& &1.started_at, {:desc, DateTime})
-
-  defp maybe_guest_redirect(%{assigns: %{current_hero: hero, current_user: %{is_guest: true}}} = socket) do
-    if hero.pve_current_turns + hero.pve_total_turns <= 5 do
-      redirect(socket, to: "/registration/edit")
-    else
-      socket
-    end
-  end
-
-  defp maybe_guest_redirect(socket), do: socket
 
   defp time_trigger, do: Process.send_after(self(), :current_time, 100)
 end

@@ -45,9 +45,9 @@ defmodule MobaWeb.CreateLiveView do
        custom: false,
        cache_key: user.id,
        filter: nil,
-       error: nil,
-       name: user.username
-     )}
+       error: nil
+     )
+     |> set_name(cached.selected_avatar)}
   end
 
   def handle_event("filter", %{"role" => role}, %{assigns: %{all_avatars: all_avatars, filter: filter}} = socket) do
@@ -73,7 +73,8 @@ defmodule MobaWeb.CreateLiveView do
 
     put_cache(cache_key, avatar, [], nil)
 
-    {:noreply, assign(socket, selected_avatar: avatar, selected_skills: [], selected_build_index: nil)}
+    {:noreply,
+     assign(socket, selected_avatar: avatar, selected_skills: [], selected_build_index: nil) |> set_name(avatar)}
   end
 
   def handle_event("repick-avatar", _, %{assigns: %{cache_key: cache_key}} = socket) do
@@ -131,7 +132,7 @@ defmodule MobaWeb.CreateLiveView do
 
     put_cache(cache_key, selected_avatar, [], nil)
 
-    {:noreply, assign(socket, selected_avatar: selected_avatar, selected_skills: [])}
+    {:noreply, assign(socket, selected_avatar: selected_avatar, selected_skills: []) |> set_name(selected_avatar)}
   end
 
   def handle_event(
@@ -145,7 +146,12 @@ defmodule MobaWeb.CreateLiveView do
       |> Enum.map(fn skill -> skill.id end)
       |> Game.list_chosen_skills()
 
-    hero_name = if !is_nil(name) && is_nil(validation_error(name, socket)), do: name, else: user.username
+    hero_name =
+      cond do
+        user.is_guest -> avatar.name
+        !is_nil(name) && is_nil(validation_error(name, socket)) -> name
+        true -> user.username
+      end
 
     Moba.create_current_pve_hero!(%{name: hero_name}, user, avatar, skills)
 
@@ -184,6 +190,16 @@ defmodule MobaWeb.CreateLiveView do
       selected_build_index: selected_build_index
     })
   end
+
+  defp set_name(%{assigns: %{current_user: %{is_guest: true}}} = socket, avatar) when not is_nil(avatar) do
+    assign(socket, name: avatar.name)
+  end
+
+  defp set_name(%{assigns: %{current_user: %{username: username}}} = socket, _) do
+    assign(socket, name: username)
+  end
+
+  defp set_name(socket, _), do: assign(socket, name: nil)
 
   defp validation_error(name, %{assigns: %{current_user: user}}) do
     length = String.length(name)

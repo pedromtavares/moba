@@ -1,9 +1,9 @@
-<div class="col-1" id={"guest-#{@user.id}"}>
+<div class="col-md-1 col-2" id={"guest-#{@user.id}"}>
     <div class="card-box p-1">
         <img src={GH.image_url(@user.current_pve_hero.avatar)} style="width: 100%" class="img-border-xs"><br/>
         <h5 class="text-white text-center">
             <img src={"/images/league/#{@user.current_pve_hero.league_tier}.png"} style="width: 20px;">
-            Lv <span class={if @user.current_pve_hero.pve_state == "dead", do: "text-muted"}><%= @user.current_pve_hero.level %></span>
+            Lv <span class={if @user.current_pve_hero.pve_state == "dead", do: "text-muted"}><%= @user.current_pve_hero.level %></span> (<%= length(@user.hero_collection) %>)
         </h5>
         <div>
             <%= for skill <- @user.current_pve_hero.active_build.skills do %>

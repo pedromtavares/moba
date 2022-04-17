@@ -13,7 +13,7 @@ defmodule MobaWeb.RegistrationControllerTest do
     conn = Pow.Plug.assign_current_user(conn, guest, otp_app: :moba)
 
     conn = init_test_session(conn, guest_user_id: guest.id) |> get("/registration/edit")
-    assert html_response(conn, 200) =~ "Skill Build"
+    assert html_response(conn, 200) =~ "Create an account"
   end
 
   test "create without guest", %{conn: conn} do
