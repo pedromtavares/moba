@@ -44,7 +44,6 @@ defmodule Moba.Accounts.Schema.User do
     embeds_one :preferences, Accounts.Schema.Preferences, on_replace: :update
 
     has_many :heroes, Game.Schema.Hero
-    has_many :arena_picks, Game.Schema.ArenaPick
     has_many :unlocks, Accounts.Schema.Unlock
     has_many :duels, Game.Schema.Duel
 
