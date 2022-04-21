@@ -152,10 +152,12 @@ defmodule Moba.Game do
     hero =
       hero
       |> update_hero!(%{finished_at: Timex.now()})
-      |> update_hero_collection!()
       |> track_pve_quests()
 
-    Moba.run_async(fn -> update_pve_ranking!() end)
+    Moba.run_async(fn -> 
+      update_pve_ranking!()
+      update_hero_collection!(hero)
+    end)
 
     hero
   end
