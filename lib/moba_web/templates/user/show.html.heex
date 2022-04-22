@@ -107,8 +107,8 @@
                                     <%= for duel <- @duels do %>
                                         <tr>
                                             <td>
-                                                <small class={ArenaView.match_badge_class(duel)} style="font-size: 0.6rem">
-                                                    <%= ArenaView.match_label(duel) %>
+                                                <small class={ArenaView.duel_badge_class(duel)} style="font-size: 0.6rem">
+                                                    <%= ArenaView.duel_label(duel) %>
                                                 </small>
                                             </td>
 
@@ -118,7 +118,7 @@
                                             </td>
 
                                             <td class="text-center">
-                                                <%= ArenaView.match_result(duel, @user.id) %>
+                                                <%= ArenaView.duel_result(duel, @user.id) %>
                                                 <%= if duel.user_id == @user.id do %>
                                                     <%= rewards_badge(duel.rewards.attacker_pvp_points) %>
                                                 <% else %>

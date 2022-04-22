@@ -358,7 +358,9 @@ defmodule Moba.Game do
 
   # DUELS
 
-  def list_duels(user), do: Duels.list(user)
+  def list_finished_duels(user), do: Duels.list_finished(user)
+
+  def list_pvp_duels(user), do: Duels.list_pvp(user)
 
   def get_duel!(id), do: Duels.get!(id)
 

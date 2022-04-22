@@ -5,10 +5,18 @@ defmodule Moba.Game.Duels do
 
   import Ecto.Query
 
-  def list(user) do
+  def list_finished(user) do
     query =
       from duel in base_query(user),
         where: duel.phase == "finished"
+
+    Repo.all(query)
+  end
+
+  def list_pvp(user) do
+    query =
+      from duel in base_query(user),
+        where: duel.type == "pvp"
 
     Repo.all(query)
   end

@@ -27,7 +27,7 @@ defmodule MobaWeb.ArenaView do
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 
-  def match_badge_class(%{type: type}) do
+  def duel_badge_class(%{type: type}) do
     case type do
       "pvp" -> "badge badge-light-danger"
       "elite_matchmaking" -> "badge badge-light-warning"
@@ -35,17 +35,17 @@ defmodule MobaWeb.ArenaView do
     end
   end
 
-  def match_label(%{type: "elite_matchmaking"}), do: "Elite MM"
-  def match_label(%{type: "pvp"}), do: "Duel"
-  def match_label(_), do: "Normal MM"
+  def duel_label(%{type: "elite_matchmaking"}), do: "Elite MM"
+  def duel_label(%{type: "pvp"}), do: "Duel"
+  def duel_label(_), do: "Normal MM"
 
-  def match_result(match, user_id \\ nil) do
-    user_id = user_id || match.user_id
+  def duel_result(duel, user_id \\ nil) do
+    user_id = user_id || duel.user_id
 
     cond do
-      match.phase != "finished" -> content_tag(:h5, "In Progress")
-      is_nil(match.winner) -> content_tag(:h5, "Tie", class: "text-white")
-      match.winner_id == user_id -> content_tag(:h5, "Victory", class: "text-success")
+      duel.phase != "finished" -> content_tag(:h5, "In Progress")
+      is_nil(duel.winner) -> content_tag(:h5, "Tie", class: "text-white")
+      duel.winner_id == user_id -> content_tag(:h5, "Victory", class: "text-success")
       true -> content_tag(:h5, "Defeat", class: "text-muted")
     end
   end
@@ -61,6 +61,9 @@ defmodule MobaWeb.ArenaView do
       true -> current_tier + 1
     end
   end
+
+  def pvp?(%{type: "pvp"}), do: true
+  def pvp?(_), do: false
 
   defp duel_battle(duel_id, hero_id, battles) do
     Enum.find(battles, &(&1.attacker_id == hero_id && &1.duel_id == duel_id))

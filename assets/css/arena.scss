@@ -36,15 +36,29 @@
       margin: 0;
     }
 
-    .match-history{
-    	max-height: 300px;
+    .history{
+    	max-height: 220px;
     	overflow: auto;
+
+      h4{
+        margin: 0;
+      }
     }
 
     .matchmaking-button{
     	.badge{
     		font-size: 0.7rem;
     	}
+    }
+  }
+
+  .duels {
+    .avatar{
+      max-height: 25px;
+    }
+
+    h5{
+      margin: 0;
     }
   }
 }

@@ -14,6 +14,9 @@ defmodule MobaWeb.ArenaLiveView do
     battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles()
     pending_match = Enum.find(matchmaking, &(&1.phase != "finished"))
     closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user)
+    duels = Game.list_pvp_duels(user)
+    duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles()
+    pending_duel = Enum.find(duels, &(&1.phase != "finished"))
 
     Process.send_after(self(), :refresh_duel_opponents, 500)
 
@@ -21,10 +24,13 @@ defmodule MobaWeb.ArenaLiveView do
      assign(socket,
        battles: battles,
        current_time: Timex.now(),
+       duels: duels,
+       duel_battles: duel_battles,
        duel_opponents: [],
        elite_count: elite_count,
        normal_count: normal_count,
        matchmaking: matchmaking,
+       pending_duel: pending_duel,
        pending_match: pending_match,
        closest_bot_time: closest_bot_time,
        sidebar_code: "arena",

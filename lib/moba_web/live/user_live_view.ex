@@ -24,7 +24,7 @@ defmodule MobaWeb.UserLiveView do
     collection_codes = Enum.map(user.hero_collection, & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
     ranking = Accounts.search(user)
-    duels = Game.list_duels(user)
+    duels = Game.list_finished_duels(user)
 
     {:noreply,
      assign(socket,

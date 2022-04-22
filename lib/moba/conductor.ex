@@ -278,7 +278,9 @@ defmodule Moba.Conductor do
 
     Enum.map(old_users, fn user ->
       loss = ceil(user.season_points * deflation)
-      Accounts.update_user!(user, %{season_points: user.season_points - loss})
+      result = user.season_points - loss
+      tier = Accounts.season_tier_for(result)
+      Accounts.update_user!(user, %{season_points: result, season_tier: tier})
     end)
   end
 end
