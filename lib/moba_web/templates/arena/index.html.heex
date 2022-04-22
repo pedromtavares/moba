@@ -11,11 +11,13 @@
                     <%= render "_matchmaking.html", assigns %>
                 </div>
             </div>
-            <div class="row">
-                <div class="col">
-                    <%= render "_duels.html", assigns %>
+            <%= unless @current_user.status == "silenced" do %>
+                <div class="row">
+                    <div class="col">
+                        <%= render "_duels.html", assigns %>
+                    </div>
                 </div>
-            </div>
+            <% end %>
         </div>
     </div>
 </div>

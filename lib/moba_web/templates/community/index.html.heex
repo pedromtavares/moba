@@ -60,10 +60,12 @@
                             </div>
                         <% end %>
                     </div>
-                    <hr class="my-2">
-                    <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
-                        <%= text_input form, :body, class: "form-control", placeholder: "Type and press Enter to send", maxlength: 500, minlength: 2 %>
-                    </.form>
+                    <%= unless @current_user.status == "silenced" do %>
+                        <hr class="my-2">
+                        <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
+                            <%= text_input form, :body, class: "form-control", placeholder: "Type and press Enter to send", maxlength: 500, minlength: 2 %>
+                        </.form>
+                    <% end %>
                 </div>
             </div>
         </div>
