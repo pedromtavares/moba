@@ -1,9 +1,9 @@
 <tr>
     <td class="d-flex justify-content-center">
-        <img src={"/images/pvp/#{@duel.opponent.season_tier}.png"} class="mr-2" style="max-height:  40px"/>
+        <img src={"/images/pvp/#{@opponent.season_tier}.png"} class="mr-2" style="max-height:  40px"/>
         <div style="width: 50%">
             <h4>
-                <%= live_redirect @duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @duel.opponent), class: if elite?(@duel), do: "text-warning", else: "text-primary" %>       
+                <%= live_redirect @opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @opponent), class: if elite?(@duel), do: "text-warning", else: "text-primary" %>       
             </h4>
             <%= unless pvp?(@duel) do %>
                 <small class={if elite?(@duel), do: "badge badge-pill badge-light-warning", else: "badge badge-pill badge-light-primary"} style="font-size: 0.6rem">
@@ -14,12 +14,12 @@
     </td>
 
     <td width="15%" class="text-center">
-        <%= duel_result(@duel) %>
+        <%= duel_result(@duel, @user_id) %>
         <%= if finished?(@duel) && @duel.rewards.attacker_pvp_points != 0 do %>
-            <%= if @duel.rewards.attacker_pvp_points > 0 do %>
-                <span class="badge badge-pill badge-light-success">+<%= @duel.rewards.attacker_pvp_points %> Season Points</span>
+            <%= if @duel.user_id == @user_id do %>
+                <%= rewards_badge(@duel.rewards.attacker_pvp_points) %>
             <% else %>
-                <span class="badge badge-pill badge-light-dark"><%= @duel.rewards.attacker_pvp_points %> Season Points</span>
+                <%= rewards_badge(@duel.rewards.defender_pvp_points) %>
             <% end %>
         <% end %>
     </td>

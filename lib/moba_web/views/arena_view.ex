@@ -62,6 +62,19 @@ defmodule MobaWeb.ArenaView do
     end
   end
 
+  def opponent_for(duel, %{id: id}) when duel.user_id == id, do: duel.opponent
+  def opponent_for(duel, _), do: duel.user
+
+  def rewards_badge(rewards) when rewards == 0, do: ""
+
+  def rewards_badge(rewards) when rewards > 0 do
+    content_tag("span", "+#{rewards} Season Points", class: "badge badge-pill badge-light-success")
+  end
+
+  def rewards_badge(rewards) do
+    content_tag("span", "#{rewards} Season Points", class: "badge badge-pill badge-light-dark")
+  end
+
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false
 
