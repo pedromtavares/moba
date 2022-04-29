@@ -5,7 +5,7 @@
     <div class="hero-card card">
         <div class="card-body text-center p-0" style="background-image: url(<%=GH.background_url(@avatar)%>">
             <div class="name">
-               <h3 class="m-0 text-center p-2 text-white"><%=@avatar.name%></h3>
+               <h3 class="m-0 text-center p-2 text-white f-rpg"><%=@avatar.name%></h3>
             </div>
             <%= unless @selected do %>
                 <div class="ultimate p-2 tooltip-mobile" data-toggle="tooltip" title="<%=GH.skill_description(@avatar.ultimate)%>">
@@ -37,7 +37,7 @@
                         <em><%=@avatar.description%></em>
                     </div>
                     <%= unless @selected do %>
-                        <a href="javascript:;" id="pick-avatar-<%=@avatar.id%>" class="col-xl-8 col-12 margin-auto mt-2 btn btn-secondary btn-block btn-lg text-white" phx-click="pick-avatar" phx-hook="AnimateScroll" phx-target-element="#create-new" phx-value-id="<%=@avatar.id%>"><img src="<%=GH.image_url(@avatar)%>" class="avatar mr-2" style="max-width: 70px"/> Pick <%=@avatar.name%></a>
+                        <a href="javascript:;" id="pick-avatar-<%=@avatar.id%>" class="col-xl-9 col-12 margin-auto mt-2 btn btn-secondary btn-block btn-lg text-white dark-button" phx-click="pick-avatar" phx-hook="AnimateScroll" phx-target-element="#create-new" phx-value-id="<%=@avatar.id%>"><img src="<%=GH.image_url(@avatar)%>" class="avatar mr-2" style="max-width: 70px;white-space: nowrap;"/> Pick <%=@avatar.name%></a>
                     <% end %>
                 </div>
             </div>

@@ -9,9 +9,9 @@
                     <div class="hero-card card">
                         <div class="card-header pt-0 pb-1">
                             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-                                <span class="font-italic level">Level<br/><span class="font-italic font-20"><%= @hero.level %></span></span>
-                                <%=live_redirect class: "text-white", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%= @hero.name %><%end %>
-                                <span class="font-15 font-italic"><%= @hero.avatar.name %></span>
+                                <span class="font-italic font-15">Level <%= @hero.level %></span></span>
+                                <%=live_redirect class: "text-white font-20", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%= @hero.name %><%end %>
+                                <span class="font-italic font-15"><%= @hero.avatar.name %></span>
                             </h4>
                         </div>
                         <div class="card-body text-center">
@@ -104,7 +104,7 @@
                         </div>
                         <%= if @hero.finished_at do %>
                             <div class="card-footer text-center font-italic text-muted">
-                                Finished <%= @hero.finished_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                                Trained <%= @hero.finished_at |> Timex.format("{relative}", :relative) |> elem(1) %>
                             </div>
                         <% end %>
                     </div>
@@ -130,12 +130,12 @@
                             <th>Rank</th>
                             <th>Hero</th>
                             <th>Total Farm</th>
-                            <th>Finished in</th>
+                            <th>Time</th>
                         </tr>
                         <%= for hero <- @ranking do %>
                             <tr id="ranking-<%= hero.id %>">
                                 <td>
-                                    <h1 class="<%= if hero.id == @hero.id, do: "text-danger" %>">
+                                    <h1 class="<%= if hero.id == @hero.id, do: "text-danger f-rpg", else: "f-rpg" %>">
                                         <%= if hero.pve_ranking do %>
                                             #<%= hero.pve_ranking %>
                                         <% else %>

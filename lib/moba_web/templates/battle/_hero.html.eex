@@ -1,15 +1,7 @@
 <%=live_redirect class: "hero-card card", style: "background-image: url(#{GH.background_url(@hero)})", to: link_for(@hero, @battle)do %>
     <div class="card-header pt-0 pb-1">
         <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-            <%= if @battle.type == "pvp" do %>
-                <span class="font-italic level font-20">
-                    <%= if ranking = @snapshot && @snapshot.pvp_ranking || @hero.pvp_ranking do %>
-                        #<%=ranking%>
-                    <% end %>
-                </span>
-            <% else %>
-                <span class="font-italic level font-20">Level<br/><span class="font-italic font-20"><%=@last_hero && @last_hero.level || @hero.level%></span></span>
-            <% end %>
+            <span class="font-italic level font-20">Level <span class="font-italic font-20"><%=@last_hero && @last_hero.level || @hero.level%></span></span>
             <div>
                 <img src="/images/league/<%=@snapshot && @snapshot.league_tier || @hero.league_tier%>.png" class="league-logo mr-1">
                 <%=@hero.name%>

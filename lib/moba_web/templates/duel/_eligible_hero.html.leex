@@ -2,7 +2,7 @@
     <div class="hero-card card mb-3" style="background-image: url(<%= GH.background_url(@hero) %>);min-height: 100px;">
         <div class="card-header pt-0 pb-1">
             <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-                <span class="font-italic font-20"><%= if @hero.pve_ranking do %>#<%= @hero.pve_ranking %><% end %></span>
+                <span class="font-italic font-20 f-rpg"><%= if @hero.pve_ranking do %>#<%= @hero.pve_ranking %><% end %></span>
                 <div>
                     <%= GH.hero_league(@hero) %>
                     <%= @hero.name %>

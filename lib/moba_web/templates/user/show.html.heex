@@ -55,7 +55,7 @@
                         <% end %>
                         <div class="card-body p-2 text-center">
                             <img src={"/images/pvp/#{@user.season_tier}.png"} class="pvp-rank" data-toggle="tooltip" title={Moba.pvp_tiers[@user.season_tier]}/>
-                            <h2 class={"text-medal-#{@user.season_tier}"}><%= @user.username %></h2>
+                            <h2 class="text-white f-rpg"><%= @user.username %></h2>
                         </div>
                         <div class="card-footer mt-1">
                             <%= if @user.is_bot do %>
@@ -153,7 +153,7 @@
                         <%= for {user, index} <- Enum.with_index(@ranking, 1) do %>
                             <tr>
                                 <td>
-                                    <h1 class={if user.id == @user.id, do: "text-info"}>
+                                    <h1 class={if user.id == @user.id, do: "text-info f-rpg", else: "f-rpg"}>
                                         <%=if user.ranking || user.is_bot do %>
                                             #<%= user.ranking || index %>
                                         <% else %>

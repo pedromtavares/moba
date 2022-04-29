@@ -7,7 +7,7 @@
                 <% end %>
             <% else %>
                 <%= if @normal_count > 0 do %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a moderate or weaker opponent" phx-click="matchmaking" phx-value-type="normal" class="btn p-2 btn-block btn-lg btn-primary col-md-4 margin-auto matchmaking-button">
+                    <a href="javascript:;" data-toggle="tooltip" title="Match against a moderate or weaker opponent" phx-click="matchmaking" phx-value-type="normal" class="btn p-2 btn-block btn-lg btn-primary col-md-4 margin-auto matchmaking-button dark-button shadow-fx">
                         <i class="fa fa-gauge-simple mr-1 fa-2x"></i>
                         <br/>
                         Matchmaking
@@ -28,7 +28,7 @@
                     <i class="fa fa-hourglass mt-4 fa-2x text-danger" data-toggle="tooltip" title={bot_timer(@closest_bot_time)}></i>
                 <% end %>
                 <%= if @elite_count > 0 do %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a stronger opponent" phx-click="matchmaking" phx-value-type="elite" class="btn p-2 btn-block btn-lg btn-warning col-md-4 margin-auto matchmaking-button">
+                    <a href="javascript:;" data-toggle="tooltip" title="Match against a stronger opponent" phx-click="matchmaking" phx-value-type="elite" class="btn p-2 btn-block btn-lg btn-warning col-md-4 margin-auto matchmaking-button dark-button shadow-fx">
                         <i class="fa fa-gauge-high mr-1 fa-2x"></i>
                         <br/>
                         Elite Matchmaking
@@ -37,7 +37,7 @@
                         <span class="badge badge-light-warning"><i class="fa fa-user"></i> <%= @elite_count %> opponent<%=if @elite_count > 1, do: "s"%> available</span>
                     </a>
                 <% else %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a stronger opponent" class="btn p-2 btn-block btn-lg btn-outline-dark col-xl-4 margin-auto no-action matchmaking-button">
+                    <a href="javascript:;" data-toggle="tooltip" title="Match against a stronger opponent" class="btn p-2 btn-block btn-lg btn-outline-dark col-xl-4 margin-auto no-action matchmaking-button dark-button">
                         <i class="fa fa-gauge-high mr-1 fa-2x"></i>
                         <br/>
                         Elite Matchmaking

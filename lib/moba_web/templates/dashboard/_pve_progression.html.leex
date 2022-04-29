@@ -4,7 +4,7 @@
             <%= if next = next_pve_tier(@current_user) do %>
                 <div class="col pve-tier-container text-center">
                     <img src="/images/pve/<%= @current_user.pve_tier %>.png" class="pve-rank"/>
-                    <h5 class="text-uppercase text-white my-0"><%= Moba.pve_tiers[@current_user.pve_tier] %></h5>
+                    <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[@current_user.pve_tier] %></h4>
                 </div>
                 <div class="col-8">
                     <h4 class="text-center mb-0 mt-0"><%= @current_season_progression.quest.description %></h4>
@@ -27,12 +27,12 @@
                 </div>
                 <div class="col pve-tier-container text-center">
                     <img src="/images/pve/<%= next %>.png" class="pve-rank"/>
-                    <h5 class="text-uppercase text-white my-0"><%= Moba.pve_tiers[next] %></h5>
+                    <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[next] %></h4>
                 </div>
             <% else %>
                 <div class="col text-center">
                     <img src="/images/pve/<%= @current_user.pve_tier %>.png" class="user-rank"/>
-                    <h5 class="my-0 text-uppercase text-white"><%= Moba.pve_tiers[@current_user.pve_tier] %></h5>
+                    <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pve_tiers[@current_user.pve_tier] %></h4>
                 </div>
             <% end %>
         </div>

@@ -11,7 +11,7 @@
                     <%= render "_matchmaking.html", assigns %>
                 </div>
             </div>
-            <%= unless @current_user.status == "silenced" do %>
+            <%= unless silenced?(assigns) do %>
                 <div class="row">
                     <div class="col">
                         <%= render "_duels.html", assigns %>
@@ -22,5 +22,5 @@
     </div>
 </div>
 
-<%= render "_season_rankings.html" %>
+
 <%= live_component(MobaWeb.Tutorial, step: @tutorial_step) %>

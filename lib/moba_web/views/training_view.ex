@@ -125,7 +125,7 @@ defmodule MobaWeb.TrainingView do
     rewards = Moba.pve_battle_rewards(difficulty, pve_tier)
 
     safe_to_string(
-      content_tag :div do
+      content_tag :div, class: "text-center" do
         [
           content_tag(:span, "+#{rewards} XP", class: "badge badge-pill badge-light-primary mr-1"),
           content_tag(:span, "+#{rewards} Gold", class: "badge badge-pill badge-light-warning mr-1")

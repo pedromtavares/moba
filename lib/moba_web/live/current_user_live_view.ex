@@ -10,17 +10,7 @@ defmodule MobaWeb.CurrentUserLiveView do
 
     if connected?(socket) do
       MobaWeb.subscribe("user-#{user_id}")
-
-      Presence.track(
-        self(),
-        "online",
-        current_user.id,
-        %{
-          season_tier: current_user.season_tier,
-          season_points: current_user.season_points,
-          user_id: current_user.id
-        }
-      )
+      Presence.track_user(self(), current_user)
     end
 
     {:ok, assign(socket, challenge: nil)}
@@ -45,13 +35,13 @@ defmodule MobaWeb.CurrentUserLiveView do
 
   def handle_event("reject", _, %{assigns: %{challenge: challenge, current_user: current_user}} = socket) do
     MobaWeb.broadcast("user-#{challenge.other_id}", "reject", %{})
-    user = Accounts.update_user!(current_user, %{last_challenge_at: nil})
+    user = update_user!(current_user, nil)
 
     {:noreply, assign(socket, challenge: nil, user: user, page_title: @default_title)}
   end
 
   def handle_info({"reject", _}, %{assigns: %{current_user: current_user}} = socket) do
-    user = Accounts.update_user!(current_user, %{last_challenge_at: nil})
+    user = update_user!(current_user, nil)
     {:noreply, assign(socket, challenge: nil, user: user)}
   end
 
@@ -70,7 +60,7 @@ defmodule MobaWeb.CurrentUserLiveView do
         %{challenger: false, other: Accounts.get_user!(user_id), other_id: user_id}
       end
 
-    user = Accounts.update_user!(current_user, %{last_challenge_at: Timex.now()})
+    user = update_user!(current_user, Timex.now())
     title = unless challenge.challenger, do: "CHALLENGE!", else: nil
 
     {:noreply, assign(socket, challenge: challenge, current_user: user, page_title: title)}
@@ -78,5 +68,13 @@ defmodule MobaWeb.CurrentUserLiveView do
 
   def render(assigns) do
     MobaWeb.LayoutView.render("current_user.html", assigns)
+  end
+
+  def update_user!(user, last_challenge_at) do
+    user = Accounts.update_user!(user, %{last_challenge_at: last_challenge_at})
+
+    Presence.update_user(self(), user)
+
+    user
   end
 end

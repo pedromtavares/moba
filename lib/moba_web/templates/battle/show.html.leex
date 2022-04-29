@@ -8,7 +8,7 @@
             <%= render "_hero.html", hero: @battle.attacker, last_hero: last_hero_for(@battle.attacker, @last_turn), battle: @battle, snapshot: @battle.attacker_snapshot %>
         </div>
         <div class="col-12 col-md-2 text-center versus-box">
-            <h1>VS</h1>
+            <h1 class="f-rpg">VS</h1>
             <%= if @battle.finished do %>
                 <p>
                     <strong>Battle #<%= @battle.id %></strong>

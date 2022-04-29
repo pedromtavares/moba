@@ -6,6 +6,7 @@ defmodule MobaWeb.ArenaLiveView do
   def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
     if connected?(socket) do
       Tutorial.subscribe(user.id)
+      MobaWeb.subscribe("online")
     end
 
     normal_count = Accounts.normal_matchmaking_count(user)
@@ -17,8 +18,6 @@ defmodule MobaWeb.ArenaLiveView do
     duels = Game.list_pvp_duels(user)
     duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles()
     pending_duel = Enum.find(duels, &(&1.phase != "finished"))
-
-    Process.send_after(self(), :refresh_duel_opponents, 500)
 
     {:ok,
      assign(socket,
@@ -83,16 +82,14 @@ defmodule MobaWeb.ArenaLiveView do
     {:noreply, Tutorial.finish_arena(socket)}
   end
 
-  def handle_info({"tutorial-step", %{step: step}}, socket) do
-    {:noreply, assign(socket, tutorial_step: step)}
-  end
-
-  def handle_info(:refresh_duel_opponents, %{assigns: %{current_user: user}} = socket) do
+  def handle_info(%{event: "presence_diff"}, %{assigns: %{current_user: user}} = socket) do
     duel_opponents = if user.status == "available", do: opponents_from_presence(user), else: []
 
-    Process.send_after(self(), :refresh_duel_opponents, 5000)
+    {:noreply, assign(socket, duel_opponents: duel_opponents)}
+  end
 
-    {:noreply, assign(socket, duel_opponents: duel_opponents, current_time: Timex.now())}
+  def handle_info({"tutorial-step", %{step: step}}, socket) do
+    {:noreply, assign(socket, tutorial_step: step)}
   end
 
   def render(assigns) do

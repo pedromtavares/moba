@@ -2,7 +2,7 @@
     <%= live_redirect class: "hero-card card mb-3", style: "background-image: url(#{GH.background_url(@hero)})", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero) do %>
         <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
             <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-                <span class="font-italic" style="font-size: 30px;">#<%= @hero.pve_ranking %></span>
+                <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @hero.pve_ranking %></span>
                 <div data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
                     <img src={"/images/pve/#{@hero.user.pve_tier}.png"} class="league-logo">
                     <%= @hero.name %>
