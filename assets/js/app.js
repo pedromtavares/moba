@@ -58,7 +58,7 @@ function initTooltips(){
     arrow: true,
     allowHTML: true,
     inertia: true,
-    hideOnClick: false
+    hideOnClick: "toggle"
   })
 }
 
