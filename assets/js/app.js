@@ -57,8 +57,7 @@ function initTooltips(){
     },
     arrow: true,
     allowHTML: true,
-    inertia: true,
-    hideOnClick: "toggle"
+    inertia: true
   })
 }
 
