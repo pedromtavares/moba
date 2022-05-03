@@ -3,7 +3,7 @@
         <div class="row mt-3 mb-2 d-flex justify-content-center">
             <div class="col pve-tier-container text-center" id="current-training-rank">
                 <%= GH.hero_league(@current_hero) %>
-                <h5 class="text-uppercase text-white mb-0"><%= Moba.leagues[@current_hero.league_tier] %></h5>
+                <h5 class="text-uppercase text-white mb-0 mt-2"><%= Moba.leagues[@current_hero.league_tier] %></h5>
             </div>
             <div class="col-8">
                 <h4 class="text-center mb-0 mt-0">Reach the <span class={"text-league-#{max_available_league(@current_hero)}"}><%= Moba.leagues[max_available_league(@current_hero)] %></span> by spending your turns on Ganking, Meditating or Mining.</h4>
@@ -17,7 +17,7 @@
                     <div>
                         <%= if assigns[:origin] do %>
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), class: "btn btn-light" do %>
-                                <i class="fa fa-crosshairs mr-1 fa-2x"></i><br/>Return to Training
+                                <i class="fa fa-swords mr-1 fa-2x"></i><br/>Return to Training
                             <% end %>
                         <% else %>
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-light" do %>
@@ -39,18 +39,18 @@
                     <div class="d-flex justify-content-center">
                         <%= if expert_hero?(@current_hero) do %>
                             <h3 class="pve-info text-success" data-toggle="tooltip" title="Time since creation">
-                                <%= elapsed_time(@current_hero) %>
+                                <span class="f-rpg"><%= elapsed_time(@current_hero) %></span>
                                 <br/>
                                 <small class="text-muted">min</small>
                             </h3>
                         <% end %>
                         <h3 class="pve-info text-primary" data-toggle="tooltip" title={@current_hero.total_xp_farm}>
-                            <%= GH.farming_amount_label @current_hero.total_xp_farm %>
+                            <span class="f-rpg"><%= GH.farming_amount_label @current_hero.total_xp_farm %></span>
                             <br/>
                             <small class="text-muted">Total XP farm</small>
                         </h3>
                         <h3 class="pve-info text-warning" data-toggle="tooltip" title={@current_hero.total_gold_farm}>
-                            <%= GH.farming_amount_label @current_hero.total_gold_farm %>
+                            <span class="f-rpg"><%= GH.farming_amount_label @current_hero.total_gold_farm %></span>
                             <br/>
                             <small class="text-muted">Total gold farm</small>
                         </h3>
@@ -59,7 +59,7 @@
             </div>
             <div class="col pve-tier-container text-center">
                 <%= GH.hero_league(%{@current_hero | league_tier: @current_hero.league_tier + 1}) %>
-                <h5 class="text-uppercase text-white mb-0"><%= Moba.leagues[@current_hero.league_tier+1] %></h5>
+                <h5 class="text-uppercase text-white mb-0 mt-2"><%= Moba.leagues[@current_hero.league_tier+1] %></h5>
             </div>
         </div>
     </div>

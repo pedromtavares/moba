@@ -55,7 +55,7 @@
                         <% end %>
                         <div class="card-body p-2 text-center">
                             <img src={"/images/pvp/#{@user.season_tier}.png"} class="pvp-rank" data-toggle="tooltip" title={Moba.pvp_tiers[@user.season_tier]}/>
-                            <h2 class="text-white f-rpg"><%= @user.username %></h2>
+                            <h2 class="text-white f-rpg"><span class={"shadow-medal-#{@user.season_tier}"}><%= @user.username %></span></h2>
                         </div>
                         <div class="card-footer mt-1">
                             <%= if @user.is_bot do %>
@@ -81,7 +81,7 @@
                 <div class="row text-center">
                     <div class="col">
                         <div class="card mb-0">
-                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-gopuram mr-1"></i> Arena</h5>
+                            <h5 class="card-header text-center font-17 text-white"><i class="fa fa-castle mr-1"></i> Arena</h5>
                             <%= if @user.id != @current_user.id do %>
                                 <div class="card-body p-1 score">
                                     <div class="row no-gutters">

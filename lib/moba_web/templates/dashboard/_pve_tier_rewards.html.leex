@@ -14,13 +14,13 @@
                 <table class="table table-dark border margin-auto">
                     <tr>
                         <tr>
-                            <td class="text-center text-danger"><i class="fa fa-crosshairs fa-2x"></i><br/> Training Difficulty</td>
+                            <td class="text-center text-danger"><i class="fa fa-swords fa-2x"></i><br/> Training Difficulty</td>
                             <td class="text-left"><h5><%= training_difficulty_for(@current_season_progression) %></h5></td>
                         </tr>
                     </tr>
                     <%= if bonus = training_bonus_for(@current_season_progression) do %>
                         <tr>
-                            <td class="text-center text-success"><i class="fa fa-crosshairs fa-2x"></i><br/> Training Bonus</td>
+                            <td class="text-center text-success"><i class="fa fa-swords fa-2x"></i><br/> Training Bonus</td>
                             <td class="text-left"><h5><%= bonus %></h5></td>
                         </tr>
                     <% end %>

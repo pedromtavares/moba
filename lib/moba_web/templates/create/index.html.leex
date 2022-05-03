@@ -25,7 +25,7 @@
                                                 <br/>
                                                 <h5 class="mt-0 mb-0"><%=skill.name%></h5>
                                                 <%= if skill.mp_cost && skill.mp_cost > 0 do %>
-                                                    <span class="badge badge-light-primary" data-toggle="tooltip" title="MP Cost"><i class="fa fa-flask mr-1"></i><%=skill.mp_cost%></span>
+                                                    <span class="badge badge-light-primary" data-toggle="tooltip" title="Energy Cost"><i class="fa fa-bolt mr-1"></i><%=skill.mp_cost%></span>
                                                 <% end %>
                                                 <%= if skill.passive do %>
                                                     <span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>
@@ -65,7 +65,7 @@
                                             <br/><strong class="d-none d-lg-block"><%=skill.name%></strong>
                                             <%= if @custom && skill.mp_cost && skill.mp_cost > 0 do %>
                                                 <div>
-                                                    <span class="badge badge-light-primary" data-toggle="tooltip" title="MP Cost"><i class="fa fa-flask mr-1"></i><%=skill.mp_cost%></span>
+                                                    <span class="badge badge-light-primary" data-toggle="tooltip" title="Energy Cost"><i class="fa fa-bolt mr-1"></i><%=skill.mp_cost%></span>
                                                 </div>
                                             <% end %>
                                         </div>
@@ -81,7 +81,7 @@
                                             <br/><strong class="d-none d-lg-block"><%=@selected_avatar.ultimate.name%></strong>
                                             <%= if @custom && !@selected_avatar.ultimate.passive do %>
                                                 <div>
-                                                    <span class="badge badge-light-primary" data-toggle="tooltip" title="MP Cost"><i class="fa fa-flask mr-1"></i><%=@selected_avatar.ultimate.mp_cost%></span>
+                                                    <span class="badge badge-light-primary" data-toggle="tooltip" title="Energy Cost"><i class="fa fa-bolt mr-1"></i><%=@selected_avatar.ultimate.mp_cost%></span>
                                                 </div>
                                             <% end %>
                                         </div>

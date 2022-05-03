@@ -96,11 +96,11 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("death_pulse", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
-    "A skull of undeath was conjured to [damage]damage #{defender} for #{damage}[/damage] and [hp]regenerate #{attacker} for #{regen} HP[/hp]"
+    "A skull of undeath was conjured to [damage]damage #{defender} for #{damage}[/damage] and [hp]regenerate #{attacker} for #{regen} Health[/hp]"
   end
 
   defp description_for("decay", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
-    "#{attacker} decayed the earth underneath to [hp]renegerate #{regen} HP[/hp] while dealing [damage]#{damage} damage[/damage] to #{defender}"
+    "#{attacker} decayed the earth underneath to [hp]renegerate #{regen} Health[/hp] while dealing [damage]#{damage} damage[/damage] to #{defender}"
   end
 
   defp description_for("double_edge", %{"damage" => [{self_damage, attacker}, {damage, defender}]}, _) do
@@ -132,7 +132,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("feast", %{"hp_regen" => {regen, attacker}}, _) do
-    "Feasting on the opponents life energies, #{attacker} [hp]regenerated #{regen} HP[/hp]"
+    "Feasting on the opponents life energies, #{attacker} [hp]regenerated #{regen} Health[/hp]"
   end
 
   defp description_for("fiery_soul", %{"battle_power" => {power, attacker}}, _) do
@@ -152,7 +152,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("mana_burn", %{"damage" => {damage, defender}, "mp_burn" => {burn, _}}, _) do
-    "#{defender} was burned for [mp]#{burn} MP[/mp], also taking [damage]#{damage} damage[/damage] in the process"
+    "#{defender} was burned for [mp]#{burn} Energy[/mp], also taking [damage]#{damage} damage[/damage] in the process"
   end
 
   defp description_for("mana_shield", %{"damage" => {damage, defender}, "next_armor" => {armor, attacker}}, _) do
@@ -168,7 +168,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("shadow_word", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
-    "Cursed by the shadows, #{defender} took [damage]#{damage} damage[/damage] while #{attacker} regenerated [hp]#{regen} HP[/hp]"
+    "Cursed by the shadows, #{defender} took [damage]#{damage} damage[/damage] while #{attacker} regenerated [hp]#{regen} Health[/hp]"
   end
 
   defp description_for("shadow_word", %{"damage" => {damage, defender}}, _) do
@@ -176,7 +176,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("shadow_word", %{"hp_regen" => {regen, attacker}}, _) do
-    "Benevolently cursed by the shadows, #{attacker} regenerated [hp]#{regen} HP[/hp]"
+    "Benevolently cursed by the shadows, #{attacker} regenerated [hp]#{regen} Health[/hp]"
   end
 
   defp description_for("shuriken_toss", %{"damage" => {damage, defender}, "turn_armor" => {armor, _}}, heroes)
@@ -189,15 +189,15 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("static_link", %{"damage" => {damage, defender}, "turn_atk" => [{_, _}, {atk, attacker}]}, _) do
-    "#{attacker} linked with #{defender}'s powers, dealing [damage]#{damage} damage[/damage] and [hp]sapping #{atk} ATK[/hp]"
+    "#{attacker} linked with #{defender}'s powers, dealing [damage]#{damage} damage[/damage] and [hp]sapping #{atk} Attack[/hp]"
   end
 
   defp description_for("static_link", %{"turn_atk" => [{_, defender}, {atk, attacker}]}, _) do
-    "#{attacker} is still linked with #{defender}, [hp]sapping #{atk} ATK[/hp]"
+    "#{attacker} is still linked with #{defender}, [hp]sapping #{atk} Attack[/hp]"
   end
 
   defp description_for("static_link", %{"turn_atk" => {atk, attacker}}, _) do
-    "The link is weakening, giving #{attacker} a final boost of [hp]#{atk} ATK[/hp]"
+    "The link is weakening, giving #{attacker} a final boost of [hp]#{atk} Attack[/hp]"
   end
 
   # ULTIMATES
@@ -236,7 +236,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("borrowed_time", %{"hp_regen" => {regen, hero}}, heroes) do
-    "Surrounded by undeath, #{hero} has regenereated [hp]#{regen} HP[/hp] from damage dealt by #{opponent_for(hero, heroes)}"
+    "Surrounded by undeath, #{hero} has regenereated [hp]#{regen} Health[/hp] from damage dealt by #{opponent_for(hero, heroes)}"
   end
 
   defp description_for("coup", %{"turn_power" => {power, hero}}, _) do
@@ -268,7 +268,7 @@ defmodule Moba.Engine.Core.Logger do
          %{"damage" => {damage, defender}, "turn_power" => {power, hero}, "hp_regen" => {regen, _}},
          _
        ) do
-    "Now a majestic dragon, #{hero} gained [power]#{power} Power[/power] this turn and has [hp]regenerated #{regen}HP[/hp], also dealing [damage]#{damage} damage[/damage] to #{defender}"
+    "Now a majestic dragon, #{hero} gained [power]#{power} Power[/power] this turn and has [hp]regenerated #{regen} Health[/hp], also dealing [damage]#{damage} damage[/damage] to #{defender}"
   end
 
   defp description_for("gods_strength", %{"next_power_normal" => {power, attacker}}, _) do
@@ -276,7 +276,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("guardian_angel", %{"hp_regen" => {regen, attacker}, "next_armor" => {armor, _}}, _) do
-    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} HP[/hp] and gaining [armor]#{armor} Armor[/armor]"
+    "#{attacker} has been [status]#blessed[/status], [hp]regenerating #{regen} Health[/hp] and gaining [armor]#{armor} Armor[/armor]"
   end
 
   defp description_for("laguna_blade", %{"damage" => {damage, defender}}, heroes) do
@@ -284,7 +284,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("life_drain", %{"damage" => {damage, defender}, "hp_regen" => {regen, attacker}}, _) do
-    "#{attacker} is channeling the vital essence out of #{defender}, dealing [damage]#{damage} damage[/damage] and [hp]regenerating #{regen} HP[/hp]"
+    "#{attacker} is channeling the vital essence out of #{defender}, dealing [damage]#{damage} damage[/damage] and [hp]regenerating #{regen} Health[/hp]"
   end
 
   defp description_for("life_drain", %{"damage" => {damage, defender}}, heroes) do
@@ -308,7 +308,7 @@ defmodule Moba.Engine.Core.Logger do
          %{"damage" => {damage, hero}, "turn_armor" => {armor, _}, "turn_atk" => {atk, _}},
          _
        ) do
-    "#{hero} has been psyqued, taking [damage]#{damage} damage[/damage], losing [armor]#{armor * -1} armor[/armor] and [hp]#{atk * -1} ATK[/hp]"
+    "#{hero} has been psyqued, taking [damage]#{damage} damage[/damage], losing [armor]#{armor * -1} armor[/armor] and [hp]#{atk * -1} Attack[/hp]"
   end
 
   defp description_for("rearm", %{"damage" => {damage, defender}, "spell_count" => {_, attacker}}, _) do
@@ -336,7 +336,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("time_lapse", %{"damage" => {damage, defender}}, heroes) do
-    "#{opponent_for(defender, heroes)} has jumped back in time, restoring its HP back to what it was last turn and dealing [damage]#{damage} damage[/damage] to #{defender}"
+    "#{opponent_for(defender, heroes)} has jumped back in time, restoring their Health back to what it was last turn and dealing [damage]#{damage} damage[/damage] to #{defender}"
   end
 
   defp description_for("walrus_punch", %{"damage" => {damage, defender}}, heroes) do
@@ -364,15 +364,15 @@ defmodule Moba.Engine.Core.Logger do
   # ITEMS
 
   defp description_for("magic_stick", %{"hp_regen" => {hp, hero}, "mp_regen" => {mp, _}}, _) do
-    "#{hero} regenerated [hp]#{hp} HP[/hp] and [mp]#{mp} MP[/mp] by activating the Magic Stick"
+    "#{hero} regenerated [hp]#{hp} Health[/hp] and [mp]#{mp} Energy[/mp] by activating the Magic Stick"
   end
 
   defp description_for("ring_of_tarrasque", %{"hp_regen" => {hp, hero}}, _) do
-    "#{hero} regenerated [hp]#{hp} HP[/hp] from the soul of Tarrasque"
+    "#{hero} regenerated [hp]#{hp} Health[/hp] from the soul of Tarrasque"
   end
 
   defp description_for("sages_mask", %{"mp_regen" => {mp, hero}}, _) do
-    "#{hero} regenerated [mp]#{mp} MP[/mp] by wearing wisdom"
+    "#{hero} regenerated [mp]#{mp} Energy[/mp] by wearing wisdom"
   end
 
   defp description_for("pipe_of_insight", %{"next_armor" => {armor, hero}}, _) do
@@ -392,19 +392,19 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("silver_edge", %{"extra" => {true, hero}}, heroes) do
-    "#{hero} has impaled #{opponent_for(hero, heroes)} with the Edge, [damage]reducing HP regeneration[/damage] for the next 2 turns"
+    "#{hero} has impaled #{opponent_for(hero, heroes)} with the Edge, [damage]reducing Health regeneration[/damage] for the next 2 turns"
   end
 
   defp description_for("silver_edge", %{"hp_regen" => {regen, hero}}, heroes) do
-    "#{opponent_for(hero, heroes)}'s Edge is still deep in the flesh of #{hero}, [damage]reducing HP regeneration by #{regen * -1}[/damage]"
+    "#{opponent_for(hero, heroes)}'s Edge is still deep in the flesh of #{hero}, [damage]reducing Health regeneration by #{regen * -1}[/damage]"
   end
 
   defp description_for("tranquil_boots", %{"hp_regen" => {hp, hero}}, _) do
-    "#{hero} regenerated [hp]#{hp} HP[/hp] through a mist of tranquility"
+    "#{hero} regenerated [hp]#{hp} Health[/hp] through a mist of tranquility"
   end
 
   defp description_for("arcane_boots", %{"mp_regen" => {mp, hero}}, _) do
-    "Drawing Arcane powers, #{hero} regenerated [mp]#{mp} MP[/mp]"
+    "Drawing Arcane powers, #{hero} regenerated [mp]#{mp} Energy[/mp]"
   end
 
   defp description_for("crystalys", %{"turn_power" => {power, hero}}, _) do
@@ -424,7 +424,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("diffusal_blade", %{"mp_burn" => {mp, defender}, "damage" => {damage, _}}, heroes) do
-    "#{opponent_for(defender, heroes)} has cut straight into #{defender}'s soul, burning [mp]#{mp} MP[/mp] and dealing [damage]#{damage} damage[/damage]"
+    "#{opponent_for(defender, heroes)} has cut straight into #{defender}'s soul, burning [mp]#{mp} Energy[/mp] and dealing [damage]#{damage} damage[/damage]"
   end
 
   defp description_for("assault_cuirass", %{"turn_armor" => {armor, hero}}, _) do
@@ -464,7 +464,7 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   defp description_for("satanic", %{"hp_regen" => {hp, hero}}, heroes) do
-    "#{hero} has demonically regenerated [hp]#{round(hp)} HP[/hp] by stealing life from #{opponent_for(hero, heroes)}"
+    "#{hero} has demonically regenerated [hp]#{round(hp)} Health[/hp] by stealing life from #{opponent_for(hero, heroes)}"
   end
 
   defp description_for("daedalus", %{"turn_power" => {power, hero}}, _) do

@@ -20,33 +20,33 @@ defmodule MobaWeb.CurrentHeroView do
   end
 
   def total_hp_description(hero) do
-    title = "Total HP: #{hero.total_hp + hero.item_hp}"
-    sub = "Your total Hit Points. When they reach 0 in a battle, you die and are defeated, with no rewards given."
+    title = "Health: #{hero.total_hp + hero.item_hp}"
+    sub = "Main survival stat. When it reaches 0 in a battle, you die and receive no rewards."
 
     main =
-      "Current base HP: #{hero.total_hp} <br/>HP given by items: #{hero.item_hp}<br/><br/>HP gain on level up: #{hero.avatar.hp_per_level}"
+      "Current base Health: #{hero.total_hp} <br/>Health given by items: #{hero.item_hp}<br/><br/>Health gain on level up: #{hero.avatar.hp_per_level}"
 
     attribute_description(title, sub, main)
   end
 
   def total_mp_description(hero) do
-    title = "Total MP: #{hero.total_mp + hero.item_mp}"
+    title = "Energy: #{hero.total_mp + hero.item_mp}"
 
     sub =
-      "Your total Mana Points. Your 'fuel' in a battle, used to power abilities and active items. When they reach 0 in a battle, you will hit with a Basic Attack, which deals 100% ATK as Normal Damage."
+      "Main spending stat, used to power abilities and active items. When it reaches 0 in a battle, you will hit with a Basic Attack, which deals 100% Attack as Normal Damage."
 
     main =
-      "Current base MP: #{hero.total_mp} <br/>MP given by items: #{hero.item_mp}<br/><br/>MP gain on level up: #{hero.avatar.mp_per_level}"
+      "Current base Energy: #{hero.total_mp} <br/>Energy given by items: #{hero.item_mp}<br/><br/>Energy gain on level up: #{hero.avatar.mp_per_level}"
 
     attribute_description(title, sub, main)
   end
 
   def total_atk_description(hero) do
-    title = "ATK: #{hero.atk + hero.item_atk}"
-    sub = "Your total Attack (ATK). This is the base stat used to calculate damage in most skills and items."
+    title = "Attack: #{hero.atk + hero.item_atk}"
+    sub = "Base stat used to calculate damage in most skills and items."
 
     main =
-      "Current ATK: #{hero.atk} <br/>ATK given by items: #{hero.item_atk}<br/><br/>ATK gain on level up: #{hero.avatar.atk_per_level}"
+      "Current Attack: #{hero.atk} <br/>Attack given by items: #{hero.item_atk}<br/><br/>Attack gain on level up: #{hero.avatar.atk_per_level}"
 
     attribute_description(title, sub, main)
   end
@@ -55,7 +55,7 @@ defmodule MobaWeb.CurrentHeroView do
     title = "Power: #{hero.power + hero.item_power}"
 
     sub =
-      "Your total Power. Amplifies your total damage output and regeneration in a turn by 1% for every point in Power. E.g. 10 Power will give you 10% amplification."
+      "Amplifies your total damage output and regeneration in a turn by 1% for every point in Power. E.g. 10 Power will give you 10% amplification."
 
     main = "Current Power: #{hero.power} <br/>Power given by items: #{hero.item_power}"
     attribute_description(title, sub, main)
@@ -65,7 +65,7 @@ defmodule MobaWeb.CurrentHeroView do
     title = "Armor: #{hero.armor + hero.item_armor}"
 
     sub =
-      "Your total Armor. Reduces the total damage input you take on a defending turn, applied after the amplification from the opponent's Power. Each point of Armor will give 1% of damage reduction before 25 points, 0.5% after 25 points and 0.1% after 50 points. E.g. 150 Armor will give 47.5% reduction."
+      "Reduces the total damage you take on a defending turn, applied after the amplification from the opponent's Power. Each point of Armor will give 1% of damage reduction before 25 points, 0.5% after 25 points and 0.1% after 50 points. E.g. 150 Armor will give 47.5% reduction."
 
     main = "Current base Armor: #{hero.armor} <br/>Armor given by items: #{hero.item_armor}"
     attribute_description(title, sub, main)
@@ -75,7 +75,7 @@ defmodule MobaWeb.CurrentHeroView do
     title = "Speed: #{hero.speed + hero.item_speed}"
 
     sub =
-      "Your total Speed. Each point in Speed gives you 1% chance to initiate a battle. E.g. 50 Speed will give you 50% chance to initiate. Speed only applies to whom is attacking."
+      "Each point in Speed gives you 1% chance to initiate a battle. E.g. 50 Speed will give you 50% chance to initiate. Speed only applies to whom is attacking."
 
     main = "Current base Speed: #{hero.speed} <br/>Speed given by items: #{hero.item_speed}"
     attribute_description(title, sub, main)

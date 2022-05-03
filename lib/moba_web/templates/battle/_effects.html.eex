@@ -4,16 +4,16 @@
         <div class="float-right">
         <%= if @is_attacker do %>
           <%= if @hero.power != 0 do %>
-            <span data-toggle="tooltip" title="<%=power_description(@hero)%>" class="badge badge-light-pink tooltip-mobile"><i class="fa fa-bolt mr-1"></i><%=@hero.power%></span>
+            <span data-toggle="tooltip" title="<%=power_description(@hero)%>" class="badge badge-light-pink tooltip-mobile"><i class="fa fa-galaxy mr-1"></i><%=@hero.power%></span>
           <% end %>
           <%= if @hero.atk != @hero.base_atk do %>
             <span data-toggle="tooltip" title="<%=atk_description(@hero)%>" class="badge badge-light-success tooltip-mobile">
-              <i class="fa fa-gavel mr-1"></i><%=@hero.atk%>
+              <i class="fa fa-dagger mr-1"></i><%=@hero.atk%>
             </span>
           <% end %>
         <% else %>
           <%= if @hero.armor > 0 do %>
-            <span data-toggle="tooltip" title="<%=armor_description(@hero)%>" class="badge badge-light-warning tooltip-mobile"><i class="fa fa-shield mr-1"></i><%=@hero.armor%></span>
+            <span data-toggle="tooltip" title="<%=armor_description(@hero)%>" class="badge badge-light-warning tooltip-mobile"><i class="fa fa-shield-halved mr-1"></i><%=@hero.armor%></span>
           <% end %>
         <% end %>
         </div>

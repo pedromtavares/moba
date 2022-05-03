@@ -143,7 +143,7 @@ defmodule MobaWeb.GameHelpers do
 
     mp_cost =
       item.mp_cost && item.mp_cost > 0 &&
-        "<span class='badge badge-light-primary'><i class='fa fa-flask mr-1'></i> #{item.mp_cost}</span>"
+        "<span class='badge badge-light-primary'><i class='fa fa-bolt mr-1'></i> #{item.mp_cost}</span>"
 
     cooldown =
       item.cooldown && item.cooldown > 0 &&
@@ -151,23 +151,23 @@ defmodule MobaWeb.GameHelpers do
 
     base_hp =
       item.base_hp && item.base_hp > 0 &&
-        "<span class='badge badge-light-danger'><i class='fa fa-heart mr-1'></i> +#{item.base_hp} HP</span>"
+        "<span class='badge badge-light-danger'><i class='fa fa-heart mr-1'></i> +#{item.base_hp} Health</span>"
 
     base_mp =
       item.base_mp && item.base_mp > 0 &&
-        "<span class='badge badge-light-info'><i class='fa fa-flask mr-1'></i> +#{item.base_mp} MP</span>"
+        "<span class='badge badge-light-info'><i class='fa fa-bolt mr-1'></i> +#{item.base_mp} Energy</span>"
 
     base_atk =
       item.base_atk && item.base_atk > 0 &&
-        "<span class='badge badge-light-success'><i class='fa fa-gavel mr-1'></i> +#{item.base_atk} ATK</span>"
+        "<span class='badge badge-light-success'><i class='fa fa-dagger mr-1'></i> +#{item.base_atk} Attack</span>"
 
     base_power =
       item.base_power && item.base_power > 0 &&
-        "<span class='badge badge-light-pink'><i class='fa fa-bolt mr-1'></i> +#{item.base_power} Power</span>"
+        "<span class='badge badge-light-pink'><i class='fa fa-galaxy mr-1'></i> +#{item.base_power} Power</span>"
 
     base_armor =
       item.base_armor && item.base_armor > 0 &&
-        "<span class='badge badge-light-warning'><i class='fa fa-shield mr-1'></i> +#{item.base_armor} Armor</span>"
+        "<span class='badge badge-light-warning'><i class='fa fa-shield-halved mr-1'></i> +#{item.base_armor} Armor</span>"
 
     base_speed =
       item.base_speed && item.base_speed > 0 &&
@@ -200,7 +200,7 @@ defmodule MobaWeb.GameHelpers do
 
     mp_cost =
       skill.mp_cost && skill.mp_cost > 0 &&
-        "<span class='badge badge-light-primary'><i class='fa fa-flask mr-1'></i>#{skill.mp_cost}</span>"
+        "<span class='badge badge-light-primary'><i class='fa fa-bolt mr-1'></i>#{skill.mp_cost}</span>"
 
     cooldown =
       skill.cooldown && skill.cooldown > 0 &&

@@ -53,7 +53,7 @@ defmodule Moba.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:sweet_xml, "~> 0.7"},
       {:phoenix_live_view, "~> 0.17.7", override: true},
-      {:torch, github: "mojotech/torch", branch: "v4"},
+      {:torch, "~> 4.1.0"},
       {:distillery, "~> 2.1", runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:timex, "~> 3.5"},

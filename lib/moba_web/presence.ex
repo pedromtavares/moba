@@ -16,7 +16,6 @@ defmodule MobaWeb.Presence do
     update(pid, "online", id, metas)
   end
 
-
   defp user_payload(user) do
     %{
       season_tier: user.season_tier,

@@ -19,11 +19,11 @@
         <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
             <div class="col">
                 <div class="btn-group mt-1">
-                    <button class="btn btn-icon waves-effect btn-outline-dark text-danger" data-toggle="tooltip" title="Total HP"> <i class="fa fa-heart mr-1"></i> <%=total_hp_for(@hero, @last_hero)%></button>
-                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-primary" data-toggle="tooltip" title="Total MP"> <i class="fa fa-flask"></i> <%=total_mp_for(@hero, @last_hero)%></button>
-                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-success" data-toggle="tooltip" title="ATK"> <i class="fa fa-gavel"></i> <%=total_atk_for(@hero, @last_hero)%></button>
-                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-pink" data-toggle="tooltip" title="Power"> <i class="fa fa-bolt"></i> <%=total_power_for(@hero, @last_hero)%></button>
-                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-warning" data-toggle="tooltip" title="Armor"> <i class="fa fa-shield"></i> <%=total_armor_for(@hero, @last_hero)%></button>
+                    <button class="btn btn-icon waves-effect btn-outline-dark text-danger" data-toggle="tooltip" title="Health"> <i class="fa fa-heart mr-1"></i> <%=total_hp_for(@hero, @last_hero)%></button>
+                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-primary" data-toggle="tooltip" title="Energy"> <i class="fa fa-bolt"></i> <%=total_mp_for(@hero, @last_hero)%></button>
+                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-success" data-toggle="tooltip" title="Attack"> <i class="fa fa-dagger"></i> <%=total_atk_for(@hero, @last_hero)%></button>
+                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-pink" data-toggle="tooltip" title="Power"> <i class="fa fa-galaxy"></i> <%=total_power_for(@hero, @last_hero)%></button>
+                    <button class="btn btn-icon waves-effect btn-outline-dark waves-light text-warning" data-toggle="tooltip" title="Armor"> <i class="fa fa-shield-halved"></i> <%=total_armor_for(@hero, @last_hero)%></button>
                 </div>
             </div>
         </div>

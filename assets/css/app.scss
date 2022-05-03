@@ -487,6 +487,10 @@ b, strong {
   color: #F4825D;
 }
 
+.text-orange{
+  color: chocolate !important;
+}
+
 .text-league-0{
   color: rgb(219, 175, 131) !important;
 }
@@ -545,6 +549,50 @@ b, strong {
 
 .text-medal-7{
   color: rgb(213, 96, 78);
+}
+
+.success-shadow{
+  text-shadow: 0 0 7px #1abc9c, 0 0 10px #1abc9c;
+}
+
+.primary-shadow{
+  text-shadow: 0 0 7px #3bafda, 0 0 10px #3bafda;
+}
+
+.warning-shadow{
+  text-shadow: 0 0 7px #f7b84b , 0 0 10px #f7b84b;
+}
+
+.shadow-medal-0{
+  text-shadow: 0 0 7px rgb(154, 221, 101), 0 0 10px rgb(154, 221, 101);
+}
+
+.shadow-medal-1{
+  text-shadow: 0 0 7px rgb(159, 116, 81), 0 0 10px rgb(159, 116, 81);
+}
+
+.shadow-medal-2{
+  text-shadow: 0 0 7px rgb(43, 151, 150), 0 0 10px rgb(43, 151, 150);
+}
+
+.shadow-medal-3{
+  text-shadow: 0 0 7px rgb(197, 195, 189), 0 0 10px rgb(197, 195, 189);
+}
+
+.shadow-medal-4{
+  text-shadow: 0 0 7px rgb(196, 156, 74), 0 0 10px rgb(196, 156, 74);
+}
+
+.shadow-medal-5{
+  text-shadow: 0 0 7px rgb(171, 61, 190), 0 0 10px rgb(171, 61, 190);
+}
+
+.shadow-medal-6{
+  text-shadow: 0 0 7px rgb(123, 141, 212), 0 0 10px rgb(123, 141, 212);
+}
+
+.shadow-medal-7{
+  text-shadow: 0 0 7px rgb(213, 96, 78), 0 0 10px rgb(213, 96, 78);
 }
 
 .hero-card{

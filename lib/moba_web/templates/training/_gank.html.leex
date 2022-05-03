@@ -6,10 +6,10 @@
                 <img src="/images/league/<%= next %>.png" style="height: 100px"/>
                 <h3><%= Moba.leagues[next] %> Challenge</h3>
                 <button class="btn btn-warning btn-lg mt-1 mb-1" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
-                        <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Start</span>
+                        <span class="loading-text f-rpg"><i class="fa fa-trophy mr-1"></i> Begin</span>
                     </button>
                 <p class="text-muted font-italic">
-                    Click above to start your <span class="text-league-<%= next %>"><%= Moba.leagues[next] %> Challenge</span>.
+                    Click above to begin your <span class="text-league-<%= next %>"><%= Moba.leagues[next] %> Challenge</span>.
                     <br/>
                     You will face consecutive random opponents and must win all the battles in order to rank up.</span>
                 </p>
@@ -27,7 +27,7 @@
             <img src="/images/league/6.png" style="height: 100px"/>
             <br/>
             <button class="btn btn-warning btn-lg mt-1 mb-1 btn-boss" phx-hook="Loading" loading="Starting..." phx-click="league" id="start-league-challenge">
-                <span class="loading-text"><i class="fa fa-trophy mr-1"></i> Boss Fight</span>
+                <span class="loading-text f-rpg"><i class="fa fa-trophy mr-1"></i> Boss Fight</span>
             </button>
             <%= if boss.league_attempts == 0 do %>
                 <p class="text-muted font-italic">

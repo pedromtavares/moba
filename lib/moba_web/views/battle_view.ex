@@ -68,7 +68,7 @@ defmodule MobaWeb.BattleView do
 
     cond do
       resource.mp_cost && battler.current_mp < resource.mp_cost ->
-        icon = content_tag(:i, "", class: "fa fa-flask")
+        icon = content_tag(:i, "", class: "fa fa-bolt")
         content_tag(:span, [icon, " #{resource.mp_cost}"], class: "badge badge-pill badge-primary cooldown")
 
       cooldown ->
@@ -309,31 +309,31 @@ defmodule MobaWeb.BattleView do
   def minimal_percentage(original), do: original
 
   def hp_description(hero) do
-    damage = (hero.damage != 0 && "Total #{hero.damage_type} damage: #{hero.damage} ") || ""
-    regen = (hero.hp_regen != 0 && "Total HP regeneration: #{hero.hp_regen} ") || ""
+    damage = (hero.damage != 0 && "Total #{hero.damage_type} damage: #{hero.damage}. ") || ""
+    regen = (hero.hp_regen != 0 && "Health regeneration: #{hero.hp_regen} ") || ""
     "#{damage}#{regen}"
   end
 
   def mp_description(hero) do
-    costs = (hero_mp_costs(hero) != 0 && "MP costs: #{hero_mp_costs(hero)} ") || ""
-    regen = (hero.mp_regen != 0 && "Total MP regeneration: #{hero.mp_regen} ") || ""
+    costs = (hero_mp_costs(hero) != 0 && "Energy costs: #{hero_mp_costs(hero)}. ") || ""
+    regen = (hero.mp_regen != 0 && "Energy regeneration: #{hero.mp_regen} ") || ""
     "#{costs}#{regen}"
   end
 
   def power_description(hero) do
-    power = (hero.power != 0 && "Total Power: #{hero.power} ") || ""
+    power = (hero.power != 0 && "Power: #{hero.power}. ") || ""
     buff = (hero.power != 0 && "Total Damage/Regen Buff: #{Kernel.round(hero.total_buff * 100)}% ") || ""
     "#{power}#{buff}"
   end
 
   def armor_description(hero) do
-    armor = (hero.armor != 0 && "Total Armor: #{hero.armor} ") || ""
-    reduction = (hero.armor != 0 && "Total Damage Reduction: #{Kernel.round(hero.total_reduction * 100)}% ") || ""
+    armor = (hero.armor != 0 && "Armor: #{hero.armor}. ") || ""
+    reduction = (hero.armor != 0 && "Damage Reduction: #{Kernel.round(hero.total_reduction * 100)}% ") || ""
     "#{armor}#{reduction}"
   end
 
   def atk_description(hero) do
-    "Current ATK: #{hero.atk}"
+    "Current Attack: #{hero.atk}"
   end
 
   def turn_skill_description(turn) do
