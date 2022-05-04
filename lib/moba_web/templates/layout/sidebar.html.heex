@@ -3,7 +3,7 @@
         <div class="sidebar-nav d-none d-md-flex">
             <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: sidebar_class("training", assigns) do %>
-                    <i class="fa-duotone fa-swords"></i>
+                    <i class="fa-duotone fa-sword"></i>
                 <% end %>              
             <% end %>
             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DashboardLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Base</h3>", class: sidebar_class("base", assigns) do %>
@@ -11,7 +11,7 @@
             <% end %>
             <%= if @current_user.pve_tier > 0 do %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
-                    <i class="fa-duotone fa-helmet-battle"></i>
+                    <i class="fa-duotone fa-swords"></i>
                 <% end %>
             <% end %>
             <%= if @current_user.is_guest do %>
@@ -20,7 +20,7 @@
                 <% end %>
             <% else %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, @current_user.id), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Profile</h3>", class: sidebar_class("user", assigns) do %>
-                    <i class="fa-duotone fa-address-card"></i>
+                    <i class="fa-duotone fa-helmet-battle"></i>
                 <% end %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Tavern</h3>", class: sidebar_class("tavern", assigns) do %>
                     <i class="fa-duotone fa-dungeon"></i>

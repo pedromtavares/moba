@@ -7,7 +7,7 @@
                         <div class="col d-flex justify-content-center">
                             <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
                                 <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TrainingLiveView), class: "nav-link" do %>
-                                    <i class="fa fa-swords"></i>
+                                    <i class="fa fa-sword"></i>
                                 <% end %>
                             <% end %>
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLiveView), class: "nav-link" do %>
@@ -15,11 +15,11 @@
                             <% end %>
                             <%= if length(@current_user.hero_collection) > 0 do %>
                                 <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLiveView), class: "nav-link" do %>
-                                    <i class="fa fa-helmet-battle"></i>
+                                    <i class="fa fa-swords"></i>
                                 <% end %>
                             <% end %>
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
-                                <i class="fa fa-user"></i>
+                                <i class="fa fa-helmet-battle"></i>
                             <% end %>
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLiveView), class: "nav-link" do %>
                                 <i class="fa fa-comments"></i>

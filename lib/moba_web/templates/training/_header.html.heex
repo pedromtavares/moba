@@ -17,7 +17,7 @@
                     <div>
                         <%= if assigns[:origin] do %>
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), class: "btn btn-light" do %>
-                                <i class="fa fa-swords mr-1 fa-2x"></i><br/>Return to Training
+                                <i class="fa fa-sword mr-1 fa-2x"></i><br/>Return to Training
                             <% end %>
                         <% else %>
                             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-light" do %>

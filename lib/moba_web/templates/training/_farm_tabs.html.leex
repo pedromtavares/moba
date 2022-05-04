@@ -3,14 +3,14 @@
         <%= if @current_hero.pve_state == "alive" do %>
             <a href="javascript:;" phx-click="show-gank" class="nav-link <%=if @farm_tab == "gank", do: "active"%>">
                 <h2 class="d-none d-sm-inline-block f-rpg">
-                    <i class="fa fa-swords text-success"></i> <span class="success-shadow">GANK</span>
+                    <i class="fa fa-sword text-success"></i> <span class="success-shadow">GANK</span>
                 </h2>
                 <h4 class="m-0"><i class="fa fa-angle-up mr-1 text-primary"></i>XP <i class="fa fa-angle-up ml-1 mr-1 text-warning"></i>Gold</h4>
             </a>
         <% else %>
             <a href="javascript:;" class="no-action nav-link">
                 <h2 class="d-none d-sm-inline-block text-muted f-rpg">
-                    <i class="fa fa-swords"></i> GANK
+                    <i class="fa fa-sword"></i> GANK
                 </h2>
                 <h4 class="m-0"><i class="fa fa-angle-up mr-1"></i>XP <i class="fa fa-angle-up ml-1 mr-1"></i>Gold</h4>
             </a>

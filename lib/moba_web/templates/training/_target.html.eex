@@ -13,11 +13,11 @@
             <div class="gank-button">
                 <%= if @current_hero.pve_current_turns > 0 do %>
                     <button phx-click="battle" id="gank-<%= @target.id %>" phx-value-id="<%= @target.id %>" class="battle-button btn btn-lg btn-icon loading-text dark-button btn-<%= difficulty_color(@target.difficulty) %>" phx-hook="Loading" loading="Ganking...">
-                      <span class="loading-text"><i class="fa-regular fa-swords mr-1"></i>Gank</span>
+                      <span class="loading-text"><i class="fa-regular fa-sword mr-1"></i>Gank</span>
                     </button>
                 <% else %>
                     <button class="battle-button btn btn-icon btn-lg waves-effect btn-<%= difficulty_color(@target.difficulty) %> disabled f-rpg" data-toggle="tooltip" title="You do not have available ganks">
-                        <i class="fa-regular fa-swords mr-1"></i>Gank
+                        <i class="fa-regular fa-sword mr-1"></i>Gank
                     </button>
                 <% end %>
             </div>
@@ -27,7 +27,7 @@
                 <div class="col pl-0">
                     <div class="row align-items-center">
                         <div class="col-6 text-right text-pink font-weight-bold no-wrap">
-                            <i class="fa fa-sword mr-1"></i>Offense
+                            <i class="fa fa-hand-fist mr-1"></i>Offense
                         </div>
                         <div class="col">
                             <div class="progress progress-fixed">
