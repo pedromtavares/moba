@@ -15,7 +15,7 @@
                             <% end %>
                             <%= if length(@current_user.hero_collection) > 0 do %>
                                 <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLiveView), class: "nav-link" do %>
-                                    <i class="fa fa-castle"></i>
+                                    <i class="fa fa-helmet-battle"></i>
                                 <% end %>
                             <% end %>
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
@@ -25,8 +25,8 @@
                                 <i class="fa fa-comments"></i>
                             <% end %>
                             <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), class: "nav-link" do %>
-                                <i class="fa fa-store-alt"></i>
-                            <% end %>  
+                                <i class="fa fa-dungeon"></i>
+                            <% end %>
                         </div>
                     </div>
                 </div>

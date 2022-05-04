@@ -101,8 +101,18 @@
   .stats-group{
     width: 100%;
 
+    button{
+      font-size: 1rem;
+    }
+
     @media (max-width: 992px) {
       margin: 0 !important;
+    }
+
+    @media (max-width : 1420px){
+      button{
+        font-size: 0.8rem;
+      }
     }
   }
 

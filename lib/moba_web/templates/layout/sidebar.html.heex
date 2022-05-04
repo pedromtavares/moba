@@ -1,5 +1,5 @@
 <div class="row">
-    <div class="col-1">
+    <div class="sidebar-nav-container">
         <div class="sidebar-nav d-none d-md-flex">
             <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Return to Training</h3>", class: sidebar_class("training", assigns) do %>
@@ -11,7 +11,7 @@
             <% end %>
             <%= if @current_user.pve_tier > 0 do %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
-                    <i class="fa-duotone fa-castle"></i>
+                    <i class="fa-duotone fa-helmet-battle"></i>
                 <% end %>
             <% end %>
             <%= if @current_user.is_guest do %>
@@ -34,7 +34,7 @@
             <% end %>
             <%= if @current_user.is_admin do %>
                 <a href="/admin">
-                    <i class="fa fa-user-shield"></i>
+                    <i class="fa-duotone fa-user-shield"></i>
                 </a>
             <% end %>
         </div>

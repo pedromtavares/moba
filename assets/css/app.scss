@@ -33,6 +33,10 @@
   font-family: 'Nunito', sans-serif;
 }
 
+.sidebar-nav-container{
+  width: 6vw;
+}
+
 .sidebar-nav{
   position: fixed;
   top: 0;
@@ -41,7 +45,7 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  width: 8.3vw;
+  width: 6vw;
   border-right: 1px solid #36404a;
 
   a{
@@ -52,8 +56,8 @@
     margin-right: auto;
     margin-left: auto;
     @media (min-height: 830px) {
-      margin-bottom: 1rem;
-      margin-top: 1rem;
+      margin-bottom: 0.7rem;
+      margin-top: 0.7rem;
     }
   }
 
@@ -66,13 +70,17 @@
   }
 
   i{
-    font-size: 35px;
+    font-size: 2.5rem;
     padding: 1rem;
-    background-color: #3a4550;
-    border-radius: 2rem;
+    // background-color: #3a4550;
+    // border-radius: 2rem;
 
     @media (min-height: 830px) {
-      font-size: 40px;
+      font-size: 2.8rem;
+    }
+
+    @media (max-width: 1198.98px) {
+      font-size: 1.8rem;
     }
   }
 
