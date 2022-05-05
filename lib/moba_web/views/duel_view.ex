@@ -1,7 +1,7 @@
 defmodule MobaWeb.DuelView do
   use MobaWeb, :view
 
-  alias MobaWeb.{CommunityView, Presence}
+  alias MobaWeb.Presence
 
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false

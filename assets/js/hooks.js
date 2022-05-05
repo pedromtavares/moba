@@ -249,34 +249,51 @@ Hooks.DuelChallenged = {
   }
 }
 
+let interval;
+
 Hooks.TurnTimer = {
   mounted(){
     const self = this;
     const el = this.el;
-    const heroId = el.dataset.hero;
+    let autoAttacked = false;
+    let offlineCounter = 0;
 
-    setInterval(function () {
+    interval = setInterval(function () {
       let timer = $(el).attr("data-timer");
+      let attack = $("#attack-button");
 
       if (timer <= 0){
-        let attack = $("#attack-button");
-        if (attack[0]){
+        if (attack[0] && !autoAttacked){
+          attack.prop("disabled", true);
           let skill = attack.attr("data-skill") || "";
           let item = attack.attr("data-item") || "";
+          let heroId = $(el).attr("data-hero");
+          console.log("Turn timer up, auto attacking");
           self.pushEvent("next-turn", {skill_id: skill, item_id: item, hero_id: heroId});
+          autoAttacked = true
         }else{
-          setTimeout(function(){
+          if (offlineCounter >= 3){
+            console.log("Player currently offline, auto attacking.");
             self.pushEvent("check-timer", {});
-          }, 2000);
+            offlineCounter = 0;
+          }else{
+            offlineCounter += 1;
+          }
         }
       }else{
         timer = timer - 1;
+        attack.prop("disabled", false);
+        autoAttacked = false;
       }
 
       $(el).attr("data-timer", timer); 
       $(el).text(timer);
 
     }, 1000)    
+  },
+
+  destroyed(){
+    clearInterval(interval);
   }
 }
 

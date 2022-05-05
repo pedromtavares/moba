@@ -44,7 +44,8 @@ defmodule MobaWeb.BattleLiveView do
      )}
   end
 
-  def handle_event("next-turn", %{"skill_id" => skill_id, "item_id" => item_id, "hero_id" => hero_id}, %{assigns: %{battle: battle}} = socket) do
+  def handle_event("next-turn", %{"skill_id" => skill_id, "item_id" => item_id, "hero_id" => hero_id}, %{assigns: %{battle: %{id: battle_id}}} = socket) do
+    battle = Engine.get_battle!(battle_id)
     skill = skill_id != "" && Game.get_skill!(skill_id)
     item = item_id != "" && Game.get_item!(item_id)
     current_turn = Engine.last_turn(battle)
@@ -65,7 +66,9 @@ defmodule MobaWeb.BattleLiveView do
     end
   end
 
-  def handle_event("check-timer", _, %{assigns: %{battle: battle, last_turn: last_turn}} = socket) do
+  def handle_event("check-timer", _, %{assigns: %{battle: %{id: id}}} = socket) do
+    battle = Engine.get_battle!(id)
+    last_turn = Engine.last_turn(battle)
     timer = turn_timer(last_turn, battle)
 
     if timer < 0 do
