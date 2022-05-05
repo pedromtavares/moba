@@ -48,7 +48,6 @@ defmodule Moba do
   @elite_matchmaking_shards 15
   @minimum_duel_points 2
   @maximum_duel_points 100
-  @season_deflation_rate 0.01
   @duel_timer_in_seconds 60
   @turn_timer_in_seconds 20
 
@@ -104,7 +103,6 @@ defmodule Moba do
   def defeat_duel_points(diff), do: victory_duel_points(-diff)
   def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points() |> maximum_duel_points())
   def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points() |> maximum_duel_points()
-  def season_deflation_rate, do: @season_deflation_rate
   def duel_timer_in_seconds, do: @duel_timer_in_seconds
   def turn_timer_in_seconds, do: @turn_timer_in_seconds
 
