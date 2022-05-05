@@ -26,7 +26,7 @@
                     <i class="fa-duotone fa-dungeon"></i>
                 <% end %>
                 <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CommunityLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Community</h3>", class: sidebar_class("community", assigns) do %>
-                    <i class="fa-duotone fa-messages"></i>
+                    <i class="fa-duotone fa-globe"></i>
                 <% end %>
             <% end %>
             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.LibraryLiveView), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Info</h3>", class: sidebar_class("library", assigns)  do %>

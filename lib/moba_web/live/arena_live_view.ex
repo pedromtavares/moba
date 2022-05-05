@@ -35,7 +35,7 @@ defmodule MobaWeb.ArenaLiveView do
        sidebar_code: "arena",
        tutorial_step: user.tutorial_step
      )
-     |> maybe_guest_redirect()}
+     |> maybe_redirect()}
   end
 
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_user: user}} = socket) do
@@ -100,11 +100,15 @@ defmodule MobaWeb.ArenaLiveView do
     user.status == "available" && ArenaView.can_be_challenged?(user, Timex.now())
   end
 
-  defp maybe_guest_redirect(%{assigns: %{current_user: %{is_guest: true}}} = socket) do
+  defp maybe_redirect(%{assigns: %{current_user: %{is_guest: true}}} = socket) do
     redirect(socket, to: "/registration/edit")
   end
 
-  defp maybe_guest_redirect(socket), do: socket
+  defp maybe_redirect(%{assigns: %{current_user: %{hero_collection: collection}}} = socket) when length(collection) < 2 do
+    redirect(socket, to: "/base")
+  end
+
+  defp maybe_redirect(socket), do: socket
 
   defp opponents_from_presence(user) do
     online_ids =

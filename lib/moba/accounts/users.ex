@@ -53,6 +53,7 @@ defmodule Moba.Accounts.Users do
 
   def duel_opponents(user, online_ids) do
     UserQuery.non_bots()
+    |> UserQuery.non_guests()
     |> UserQuery.order_by_online()
     |> UserQuery.with_status("available")
     |> UserQuery.exclude_ids([user.id])

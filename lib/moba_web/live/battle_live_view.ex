@@ -44,21 +44,25 @@ defmodule MobaWeb.BattleLiveView do
      )}
   end
 
-  def handle_event("next-turn", %{"skill_id" => skill_id, "item_id" => item_id}, %{assigns: %{battle: battle}} = socket) do
+  def handle_event("next-turn", %{"skill_id" => skill_id, "item_id" => item_id, "hero_id" => hero_id}, %{assigns: %{battle: battle}} = socket) do
     skill = skill_id != "" && Game.get_skill!(skill_id)
     item = item_id != "" && Game.get_item!(item_id)
     current_turn = Engine.last_turn(battle)
-    battle = Engine.continue_battle!(battle, %{skill: skill, item: item})
-    next_turn = Engine.next_battle_turn(battle)
-    turn_number = (current_turn && current_turn.number + 1) || 1
+    if is_nil(current_turn) || current_turn.defender.hero_id == String.to_integer(hero_id) do
+      battle = Engine.continue_battle!(battle, %{skill: skill, item: item})
+      next_turn = Engine.next_battle_turn(battle)
+      turn_number = (current_turn && current_turn.number + 1) || 1
 
-    MobaWeb.broadcast("battle-#{battle.id}", "turn", %{battle_id: battle.id, turn_number: turn_number})
+      MobaWeb.broadcast("battle-#{battle.id}", "turn", %{battle_id: battle.id, turn_number: turn_number})
 
-    {:noreply,
-     socket
-     |> check_tutorial(battle)
-     |> turn_assigns(battle, next_turn, turn_number)
-     |> assign(hero: battle.attacker_snapshot)}
+      {:noreply,
+       socket
+       |> check_tutorial(battle)
+       |> turn_assigns(battle, next_turn, turn_number)
+       |> assign(hero: battle.attacker_snapshot)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("check-timer", _, %{assigns: %{battle: battle, last_turn: last_turn}} = socket) do

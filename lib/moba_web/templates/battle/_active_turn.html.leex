@@ -1,6 +1,6 @@
 <div class="row mt-2">
     <div class="col center">
-        <button class="btn btn-danger attack-button" phx-hook="AttackButton" id="attack-button" data-skill="<%=@skill && @skill.id%>" data-item="<%= @item && @item.id %>">
+        <button class="btn btn-danger attack-button" phx-hook="AttackButton" id="attack-button" data-skill="<%=@skill && @skill.id%>" data-item="<%= @item && @item.id %>" data-hero="<%=@hero.id%>">
             <span class="loading-text">
                 Attack with <span id="active-skill-name"><%=skill_name(@skill)%></span> <span id="active-item-name"><%=item_name(@item)%></span>
             </span>

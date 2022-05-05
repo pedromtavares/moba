@@ -79,13 +79,16 @@
                                 <div class="inbox-item-img">
                                     <img src={"/images/pvp/#{message.tier}.png"}/>
                                 </div>
-                                <p class="inbox-item-text"><%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: "text-dark mr-1" %> <%= formatted_body(message) %></p>
-                                <p class="inbox-item-date">
-                                    <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>
-                                    <%= if @current_user.is_admin do %>
-                                        <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3">Delete</a>
-                                    <% end %>        
+                                <p class="inbox-item-text">
+                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: "text-dark mr-1" %>
+                                     <%= message.body %>
                                 </p>
+                                <p class="inbox-item-date">
+                                    <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>       
+                                </p>
+                                <%= if @current_user.is_admin do %>
+                                    <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3"><i class="fa fa-trash"></i></a>
+                                <% end %>
                             </div>
                         <% end %>
                     </div>

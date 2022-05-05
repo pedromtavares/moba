@@ -134,9 +134,10 @@ Hooks.AttackButton = {
     el.addEventListener("click", e => {
       let skill = $(el).attr("data-skill") || "";
       let item = $(el).attr("data-item") || "";
+      const heroId = el.dataset.hero;
       $(el).find(".loading-text").html("<i class='fas fa-spinner fa-spin mr-1'></i> Attacking...");
       $(el).prop("disabled", true);
-      this.pushEvent("next-turn", {skill_id: skill, item_id: item});
+      this.pushEvent("next-turn", {skill_id: skill, item_id: item, hero_id: heroId});
       e.stopPropagation();
     })
   }
@@ -252,6 +253,7 @@ Hooks.TurnTimer = {
   mounted(){
     const self = this;
     const el = this.el;
+    const heroId = el.dataset.hero;
 
     setInterval(function () {
       let timer = $(el).attr("data-timer");
@@ -261,7 +263,7 @@ Hooks.TurnTimer = {
         if (attack[0]){
           let skill = attack.attr("data-skill") || "";
           let item = attack.attr("data-item") || "";
-          self.pushEvent("next-turn", {skill_id: skill, item_id: item});
+          self.pushEvent("next-turn", {skill_id: skill, item_id: item, hero_id: heroId});
         }else{
           setTimeout(function(){
             self.pushEvent("check-timer", {});

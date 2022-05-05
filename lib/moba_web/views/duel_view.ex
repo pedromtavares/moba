@@ -6,8 +6,6 @@ defmodule MobaWeb.DuelView do
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 
-  defdelegate formatted_body(body), to: CommunityView
-
   def pick_timer(%{phase_changed_at: changed}, current_time) do
     seconds_per_pick = Moba.duel_timer_in_seconds()
     target = Timex.shift(changed, seconds: seconds_per_pick)

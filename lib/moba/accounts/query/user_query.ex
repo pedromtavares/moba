@@ -117,13 +117,13 @@ defmodule Moba.Accounts.Query.UserQuery do
   end
 
   def normal_opponents(season_tier) do
-    from user in with_season_points(),
+    from user in available_opponents(),
       where: user.season_tier <= ^season_tier,
       order_by: [desc: user.season_points]
   end
 
   def elite_opponents(season_tier) do
-    from user in with_season_points(),
+    from user in available_opponents(),
       where: user.season_tier >= ^season_tier,
       order_by: [asc: user.season_points]
   end
@@ -144,7 +144,7 @@ defmodule Moba.Accounts.Query.UserQuery do
       where: is_nil(bot.last_online_at) or bot.last_online_at < ^timestamp
   end
 
-  def with_season_points(query \\ User) do
-    from user in query, where: user.season_points > 0
+  def available_opponents(query \\ User) do
+    from user in non_guests(query), where: user.season_points > 0
   end
 end

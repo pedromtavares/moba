@@ -20,14 +20,44 @@
             <%=render "_stats.html", avatar: @avatar, avatars: @avatars%>
             <%= if @selected do %>
                 <div class="btn-group mt-2">
-                    <button class="btn btn-icon waves-effect btn-outline-dark text-danger"><i class="fa fa-heart mr-1"></i> Health: <%=@avatar.total_hp%><br/><small><%=@avatar.hp_per_level%> per level</small></button>
-                    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-info"><i class="fa fa-bolt"></i>  Energy: <%=@avatar.total_mp%><br/><small><%=@avatar.mp_per_level%> per level</small></button>
-                    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-success"><i class="fa fa-dagger"></i>  Attack: <%=@avatar.atk%><br/><small><%=@avatar.atk_per_level%> per level</small></button>
+                    <button class="btn btn-outline-dark text-danger">
+                        <i class="fa fa-heart mr-1"></i>Health
+                        <br/>
+                        <strong><%=@avatar.total_hp%></strong>
+                        <br/>
+                        <small class="font-italic"><%=@avatar.hp_per_level%> per level</small>
+                    </button>
+                    <button class="btn btn-outline-dark text-info">
+                        <i class="fa fa-bolt mr-1"></i>Energy
+                        <br/>
+                        <strong><%=@avatar.total_mp%></strong>
+                        <br/>
+                        <small class="font-italic"><%=@avatar.mp_per_level%> per level</small>
+                    </button>
+                    <button class="btn btn-outline-dark text-success">
+                        <i class="fa fa-dagger mr-1"></i>Attack
+                        <br/>
+                        <strong><%=@avatar.atk%></strong>
+                        <br/>
+                        <small class="font-italic"><%=@avatar.atk_per_level%> per level</small>
+                    </button>
                 </div>
                 <div class="btn-group mt-1">
-                    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-warning"><i class="fa fa-shield"></i> Armor: <%=@avatar.armor%></button>
-                    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-pink"><i class="fa fa-galaxy"></i> Power: <%=@avatar.power%></button>
-                    <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-orange"><i class="fa fa-running"></i> Speed: <%=@avatar.speed%></button>
+                    <button class="btn btn-outline-dark text-warning">
+                        <i class="fa fa-shield-halved mr-1"></i>Armor
+                        <br/>
+                        <strong><%=@avatar.armor%></strong>
+                    </button>
+                    <button class="btn btn-outline-dark text-pink">
+                        <i class="fa fa-galaxy mr-1"></i>Power
+                        <br/>
+                        <strong><%=@avatar.power%></strong>
+                    </button>
+                    <button class="btn btn-outline-dark text-orange">
+                        <i class="fa fa-running mr-1"></i>Speed
+                        <br/>
+                        <strong><%=@avatar.speed%></strong>
+                    </button>
                 </div>
             <% end %>
             <div class="row mt-3">
