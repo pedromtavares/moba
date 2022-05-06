@@ -49,7 +49,7 @@ defmodule Moba do
   @minimum_duel_points 2
   @maximum_duel_points 100
   @duel_timer_in_seconds 60
-  @turn_timer_in_seconds 20
+  @turn_timer_in_seconds 30
 
   # PVE constants
   @total_pve_turns 25
