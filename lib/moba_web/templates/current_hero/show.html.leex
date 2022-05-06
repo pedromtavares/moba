@@ -74,12 +74,10 @@
                         <%= if @current_hero.skill_levels_available > 0 do %>
                             <em class="text-warning">You have <%= @current_hero.skill_levels_available %> available skill point<%= if @current_hero.skill_levels_available > 1, do: "s" %>, click on a skill to level it up!</em>
                         <% else %>
-                            <%= unless @current_hero.finished_at do %>
-                                <%= if @editing do %>
-                                    <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
-                                <% else %>
-                                    <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle." class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
-                                <% end %>
+                            <%= if @editing do %>
+                                <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
+                            <% else %>
+                                <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle." class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
                             <% end %>
                         <% end %>
                     </div>
