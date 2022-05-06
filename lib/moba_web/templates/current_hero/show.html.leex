@@ -77,7 +77,7 @@
                             <%= if @editing do %>
                                 <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">Save</a>
                             <% else %>
-                                <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle." class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
+                                <a href="javascript:;" id="edit-button" phx-click="start-edit" phx-target="#hero-bar" data-toggle="tooltip" title="<%=edit_orders_label(@current_hero)%>" class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"><i class="fa fa-edit mr-1"></i>Edit Orders</a>
                             <% end %>
                         <% end %>
                     </div>

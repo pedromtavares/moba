@@ -1,6 +1,14 @@
 defmodule MobaWeb.CurrentHeroView do
   use MobaWeb, :view
 
+  def edit_orders_label(%{finished_at: finished_at}) when is_nil(finished_at) do
+    "Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle."
+  end
+
+  def edit_orders_label(_) do
+    "Click to edit the skill and item orders that will be used when other players attack you in Matchmaking."
+  end
+
   def sorted_items(%{items: items}), do: Game.sort_items(items)
 
   def sorted_skills(%{active_build: %{skills: skills}}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
