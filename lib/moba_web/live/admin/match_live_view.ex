@@ -22,7 +22,7 @@ defmodule MobaWeb.Admin.MatchLiveView do
   defp set_vars(socket) do
     data = Admin.get_server_data(socket.assigns.match)
     user_stats = Admin.get_user_stats()
-    sorted_guests = Enum.sort_by(data.guests, &(&1.current_pve_hero.league_tier), :desc)
+    sorted_guests = Enum.sort_by(data.guests, & &1.current_pve_hero.league_tier, :desc)
 
     assign(socket,
       players: data.players,

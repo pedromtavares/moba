@@ -1,4 +1,4 @@
-.season{
+.community{
 
   .h5{
     line-height: 1.5rem;
@@ -17,6 +17,14 @@
   .messages{
     height: 300px;
     overflow: auto;
+
+    p{
+      margin: 0;
+    }
+
+    .inbox-item{
+      padding: 0.5rem 0;
+    }
   }
 
   .ranking{

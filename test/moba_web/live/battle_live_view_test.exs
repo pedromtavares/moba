@@ -25,6 +25,7 @@ defmodule MobaWeb.BattleLiveViewTest do
     skill = base_skill()
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
 
-    assert render_click(view, "next-turn", %{"skill_id" => skill.id, "item_id" => "", "hero_id" => attacker.id}) =~ "used #{skill.name}"
+    assert render_click(view, "next-turn", %{"skill_id" => skill.id, "item_id" => "", "hero_id" => attacker.id}) =~
+             "used #{skill.name}"
   end
 end

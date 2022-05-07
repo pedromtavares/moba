@@ -104,7 +104,8 @@ defmodule MobaWeb.ArenaLiveView do
     redirect(socket, to: "/registration/edit")
   end
 
-  defp maybe_redirect(%{assigns: %{current_user: %{hero_collection: collection}}} = socket) when length(collection) < 2 do
+  defp maybe_redirect(%{assigns: %{current_user: %{hero_collection: collection}}} = socket)
+       when length(collection) < 2 do
     redirect(socket, to: "/base")
   end
 
