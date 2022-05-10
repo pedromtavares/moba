@@ -56,8 +56,8 @@ defmodule Moba.Game.Duels do
 
   def get!(id), do: load() |> Repo.get!(id)
 
-  def create!(user, opponent, type) do
-    %Duel{phase: "user_first_pick", user: user, user_id: user.id, opponent_id: opponent.id, type: type}
+  def create!(user, opponent, type, auto) do
+    %Duel{phase: "user_first_pick", auto: auto, user: user, user_id: user.id, opponent_id: opponent.id, type: type}
     |> Duel.changeset(%{phase_changed_at: Timex.now()})
     |> Repo.insert!()
     |> maybe_auto_next_phase()
@@ -135,6 +135,8 @@ defmodule Moba.Game.Duels do
       limit: 10,
       order_by: [desc: duel.inserted_at]
   end
+
+  defp maybe_auto_next_phase(%{auto: true} = duel), do: auto_next_phase!(duel)
 
   defp maybe_auto_next_phase(%{user: %{is_bot: true}} = duel), do: auto_next_phase!(duel)
 

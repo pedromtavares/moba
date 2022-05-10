@@ -365,7 +365,7 @@ defmodule Moba.Game do
   def get_duel!(id), do: Duels.get!(id)
 
   def create_pvp_duel!(user, opponent) do
-    duel = Duels.create!(user, opponent, "pvp")
+    duel = Duels.create!(user, opponent, "pvp", false)
 
     Accounts.set_unavailable!(user) && Accounts.set_unavailable!(opponent)
 
@@ -375,11 +375,11 @@ defmodule Moba.Game do
     duel
   end
 
-  def create_matchmaking!(_, nil), do: nil
+  def create_matchmaking!(_, nil, _), do: nil
 
-  def create_matchmaking!(user, opponent) do
+  def create_matchmaking!(user, opponent, auto) do
     type = if opponent.season_tier <= user.season_tier, do: "normal_matchmaking", else: "elite_matchmaking"
-    duel = Duels.create!(user, opponent, type)
+    duel = Duels.create!(user, opponent, type, auto)
 
     Accounts.manage_match_history(user, opponent)
 

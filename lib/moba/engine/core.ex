@@ -137,6 +137,11 @@ defmodule Moba.Engine.Core do
   defp finalize_boss(battle), do: battle
 
   # Skips to the next turn if the current action is to be performed by an automated opponent
+  defp maybe_skip_next_turn(%{duel: %{auto: true}} = battle) do
+    battle = Repo.preload(battle, :turns)
+    create_turn!(battle, %{auto: true})
+  end
+
   defp maybe_skip_next_turn(
          %{
            type: "duel",

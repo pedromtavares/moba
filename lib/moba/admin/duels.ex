@@ -9,7 +9,7 @@ defmodule Moba.Admin.Duels do
   import Ecto.Query
 
   def list_recent do
-    Repo.all(from d in Duel, limit: 20, join: u in assoc(d, :user), where: u.is_bot == false, order_by: [desc: d.id])
+    Repo.all(from d in Duel, limit: 20, join: u in assoc(d, :user), where: u.is_bot == false, where: d.auto == false, order_by: [desc: d.id])
     |> Repo.preload([:user, :opponent, :winner])
   end
 

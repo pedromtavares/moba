@@ -220,11 +220,13 @@ defmodule Moba do
     Accounts.update_ranking!()
   end
 
-  def bot_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.bot_opponent(user))
+  def auto_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.matchmaking_opponent(user), true)
 
-  def normal_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.normal_opponent(user))
+  def bot_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.bot_opponent(user), false)
 
-  def elite_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.elite_opponent(user))
+  def normal_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.normal_opponent(user), false)
+
+  def elite_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.elite_opponent(user), false)
 
   def basic_attack, do: Game.basic_attack()
 

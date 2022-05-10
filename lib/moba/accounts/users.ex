@@ -232,6 +232,10 @@ defmodule Moba.Accounts.Users do
     end
   end
 
+  def matchmaking_opponent(user) do
+    elite_matchmaking_opponent(user) || normal_matchmaking_opponent(user)
+  end
+
   def normal_opponent(user) do
     opponent = normal_matchmaking_opponent(user)
 

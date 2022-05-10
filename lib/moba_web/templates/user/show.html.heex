@@ -58,20 +58,17 @@
                             <h2 class="text-white f-rpg"><span class={"shadow-medal-#{@user.season_tier}"}><%= @user.username %></span></h2>
                         </div>
                         <div class="card-footer mt-1">
-                            <%= if @user.is_bot do %>
-                                <div class="row">
-                                    <div class="col text-center">
-                                        <span class="font-italic text-dark">A.I. Player</span>
-                                    </div>
+                            <div class="row">
+                                <div class="col text-center">
+                                    <span class="font-italic text-dark">
+                                        <%= if @user.is_bot do %>
+                                            A.I. Player
+                                        <% else %>
+                                            Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                                        <% end %>
+                                    </span>
                                 </div>
-                            <% else %>
-                                <div class="row">
-                                    <div class="col text-center d-flex justify-content-between">
-                                        <small class="font-italic text-dark float-left">Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
-                                        <small class="font-italic text-dark float-right">Last online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></small>
-                                    </div>
-                                </div>
-                            <% end %>
+                            </div>
                         </div>
                     </div>
                 </div>

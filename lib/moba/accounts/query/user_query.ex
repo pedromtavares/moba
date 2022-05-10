@@ -46,11 +46,10 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in query, order_by: [desc: u.last_online_at])
   end
 
-  def online_before(days_ago) do
-    base = non_bots() |> non_guests()
+  def online_before(query, days_ago) do
     ago = Timex.now() |> Timex.shift(days: -days_ago)
 
-    from(u in base, where: u.last_online_at < ^ago)
+    from(u in query, where: u.last_online_at < ^ago)
   end
 
   def by_user(query \\ User, user) do
@@ -95,7 +94,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   end
 
   def by_level(query, level) do
-    from user in query, where: user.level == ^level, order_by: fragment("RANDOM()")
+    from user in query, where: user.level == ^level
   end
 
   def by_season_points do
@@ -146,5 +145,11 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   def available_opponents(query \\ User) do
     from user in non_guests(query), where: user.season_points > 0
+  end
+
+  def auto_matchmaking do
+    base = non_bots() |> available_opponents() |> online_before(7) |> random()
+
+    from user in base, where: user.last_online_at > ^@current_ranking_date
   end
 end
