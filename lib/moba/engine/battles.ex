@@ -111,14 +111,9 @@ defmodule Moba.Engine.Battles do
       skill_levels_available: hero.skill_levels_available,
       wins: hero.wins,
       losses: hero.losses,
-      ties: hero.ties,
-      pvp_points: hero.pvp_points,
       league_step: hero.league_step,
       previous_league_step: battle_hero.league_step,
-      league_tier: hero.league_tier,
-      pvp_wins: hero.pvp_wins,
-      pvp_losses: hero.pvp_losses,
-      pvp_ranking: hero.pvp_ranking
+      league_tier: hero.league_tier
     }
   end
 end

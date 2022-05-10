@@ -43,7 +43,6 @@ defmodule Moba.GameTest do
       assert bot_level_7.level == 7
       assert bot_level_7.league_tier == 1
       refute bot_level_7.pvp_last_picked
-      refute bot_level_7.pvp_active
 
       bot_level_0 = Game.create_bot_hero!(avatar, 0, "weak")
 

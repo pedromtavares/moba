@@ -84,8 +84,6 @@ defmodule MobaWeb.GameHelpers do
     diff_now * 100 / diff_ending
   end
 
-  def pvp_win_rate(hero), do: Moba.Game.pvp_win_rate(hero)
-
   def pve_win_rate(hero), do: Moba.Game.pve_win_rate(hero)
 
   def finished_time(%{finished_at: nil}), do: nil

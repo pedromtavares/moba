@@ -43,9 +43,9 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def create!(attrs, user, avatar) do
+  def create!(attrs, user, avatar, skills, items \\ nil) do
     %Hero{}
-    |> Hero.create_changeset(attrs, user, avatar)
+    |> Hero.create_changeset(attrs, user, avatar, skills, items)
     |> Repo.insert!()
   end
 
@@ -56,33 +56,30 @@ defmodule Moba.Game.Heroes do
   """
   def create_bot!(avatar, level, difficulty, league_tier, user \\ nil) do
     name = if user, do: user.username, else: avatar.name
-
     finished_at = if user, do: Timex.now() |> Timex.shift(hours: 1), else: nil
 
-    bot =
-      create!(
-        %{
-          bot_difficulty: difficulty,
-          name: name,
-          gold: 100_000,
-          league_tier: league_tier,
-          total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
-          finished_at: finished_at
-        },
-        user,
-        avatar
-      )
+    attrs = %{
+      bot_difficulty: difficulty,
+      name: name,
+      gold: 100_000,
+      league_tier: league_tier,
+      total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
+      finished_at: finished_at
+    }
+
+    build = Game.generate_bot_build(attrs, avatar)
+    skills = build.skills ++ [avatar.ultimate]
+    attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
+    bot = create!(attrs, user, avatar, skills, build.items)
 
     if level > 0 do
       xp = Moba.xp_until_hero_level(level)
 
       bot
       |> add_experience!(xp)
-      |> Game.generate_bot_build!()
       |> level_up_skills()
     else
       bot
-      |> Game.generate_bot_build!()
       |> update!(%{
         total_hp: bot.total_hp - avatar.hp_per_level * 3,
         total_mp: bot.total_mp - avatar.mp_per_level * 3,
@@ -94,11 +91,10 @@ defmodule Moba.Game.Heroes do
 
   def update!(nil, _), do: nil
 
-  def update!(hero, attrs, items \\ nil) do
-    hero = if items, do: Repo.preload(hero, :items), else: hero
-
+  def update!(hero, attrs, items \\ nil, skills \\ nil) do
     hero
     |> Hero.replace_items(items)
+    |> Hero.replace_skills(skills)
     |> Hero.changeset(attrs)
     |> Repo.update!()
   end
@@ -133,20 +129,10 @@ defmodule Moba.Game.Heroes do
   end
 
   def pve_win_rate(hero) do
-    sum = hero.wins + hero.ties + hero.losses
+    sum = hero.wins + hero.losses
 
     if sum > 0 do
       round(hero.wins * 100 / sum)
-    else
-      0
-    end
-  end
-
-  def pvp_win_rate(hero) do
-    sum = hero.pvp_wins + hero.pvp_losses
-
-    if sum > 0 do
-      round(hero.pvp_wins * 100 / sum)
     else
       0
     end
@@ -351,12 +337,11 @@ defmodule Moba.Game.Heroes do
 
   # randomly levels up skills for a bot
   defp level_up_skills(hero) do
-    hero = Repo.preload(hero, active_build: [:skills])
-    ultimate = Enum.find(hero.active_build.skills, fn skill -> skill.ultimate end)
+    ultimate = Enum.find(hero.skills, fn skill -> skill.ultimate end)
     hero = Enum.reduce(1..3, hero, fn _, acc -> Game.level_up_skill!(acc, ultimate.code) end)
 
     Enum.reduce(1..100, hero, fn _, acc ->
-      skill = Enum.shuffle(acc.active_build.skills) |> List.first()
+      skill = Enum.shuffle(acc.skills) |> List.first()
       Game.level_up_skill!(acc, skill.code)
     end)
   end

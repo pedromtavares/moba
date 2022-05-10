@@ -12,89 +12,16 @@ defmodule Moba.Game.Builds do
 
   # -------------------------------- PUBLIC API
 
-  def get!(id) do
-    Repo.get(Build, id) |> Repo.preload(skills: SkillQuery.ordered())
-  end
-
-  def update!(build, attrs) do
-    Build.changeset(build, attrs)
-    |> Repo.update!()
-  end
-
-  def replace_skills!(build, new_skills) do
-    Build.replace_skills(build, new_skills)
-    |> Repo.update!()
-  end
-
-  def create!(type, hero, skills, skill_order \\ nil, item_order \\ nil) do
-    hero = Repo.preload(hero, [:items, avatar: [:ultimate]])
-    skills = [hero.avatar.ultimate] ++ Enum.slice(skills, 0, 3)
-
-    Build.create_changeset(
-      %Build{},
-      %{
-        type: type,
-        skill_order: skill_order || skills_to_order(skills),
-        item_order: item_order || items_to_order(hero.items)
-      },
-      hero,
-      skills
-    )
-    |> Repo.insert!()
-  end
-
   @doc """
-  Grabs a pre-defined skill/item list and generates a build for a bot. These lists vary in effectiveness
+  Grabs a pre-defined skill/item list for a bot. These lists vary in effectiveness
   and strength depending on the difficulty and level. Weak bots have more random skills and less items, whilst
   strong bots have a proper skill build and a high tier inventory
   """
-  def generate_for_bot!(bot) do
-    lists = get_lists(bot)
-    name = if bot.user, do: "pvp", else: "pve"
-
-    bot =
-      Enum.reduce(lists.items, bot, fn item, acc ->
-        Game.buy_item!(acc, item)
-      end)
-
-    create!(name, bot, lists.skills, lists.skill_order, items_to_order(lists.items))
-  end
-
-  def skill_builds_for(role) do
-    lists_for(role)
-    |> codes_to_skills()
-  end
-
-  def skill_build_for(role, index) do
-    skill_builds_for(role)
-    |> Enum.at(index)
-  end
-
-  @doc """
-  Resets the item_order for all of the Hero's builds with a new inventory
-  """
-  def reset_item_orders!(hero, new_inventory) do
-    %{builds: builds} = Repo.preload(hero, :builds)
-
-    updated_builds =
-      Enum.map(builds, fn build ->
-        update!(build, %{item_order: items_to_order(new_inventory)})
-      end)
-
-    Map.put(hero, :builds, updated_builds)
-  end
-
-  # --------------------------------
-
-  defp get_lists(%{
-         level: level,
-         bot_difficulty: difficulty,
-         total_gold_farm: total_gold_farm,
-         avatar: %{code: code, ultimate_code: ultimate_code}
-       }) do
-    {skill_list, item_list, _} =
-      lists_for(code)
-      |> Enum.fetch!(Enum.random(0..1))
+  def generate_for_bot(
+        %{level: level, bot_difficulty: difficulty, total_gold_farm: total_gold_farm},
+        %{code: code, ultimate_code: ultimate_code}
+      ) do
+    {skill_list, item_list, _} = lists_for(code) |> Enum.fetch!(Enum.random(0..1))
 
     skills = skills_list(skill_list, difficulty, ultimate_code)
 
@@ -102,9 +29,15 @@ defmodule Moba.Game.Builds do
       skills: skills,
       items: items_list(item_list, difficulty, level, total_gold_farm),
       skill_order: skill_order(skill_list, skills, ultimate_code),
-      item_order: item_list |> Enum.reverse()
+      item_order: Enum.reverse(item_list)
     }
   end
+
+  def skill_builds_for(role), do: lists_for(role) |> codes_to_skills()
+
+  def skill_build_for(role, index), do: skill_builds_for(role) |> Enum.at(index)
+
+  # --------------------------------
 
   # random skill set depending on difficulty, the higher the difficulty the less random
   defp skills_list(skill_list, difficulty, ultimate_code) do
@@ -219,14 +152,6 @@ defmodule Moba.Game.Builds do
     ["maelstrom", "shadow_blade", "vanguard", "pipe_of_insight"]
   end
 
-  defp skills_to_order(skills) do
-    skills |> Enum.filter(&(!&1.passive)) |> Enum.map(& &1.code)
-  end
-
-  defp items_to_order(items) do
-    items |> Enum.filter(& &1.active) |> Enum.map(& &1.code)
-  end
-
   defp items_difficulty("strong", level) when level > 27, do: "pvp_grandmaster"
   defp items_difficulty(difficulty, _), do: difficulty
 
@@ -241,6 +166,8 @@ defmodule Moba.Game.Builds do
       }
     end)
   end
+
+  # ROLES
 
   defp lists_for(code) when code == "tank" do
     [
@@ -326,6 +253,8 @@ defmodule Moba.Game.Builds do
       }
     ]
   end
+
+  # HEROES
 
   defp lists_for(code) when code == "abaddon" do
     [

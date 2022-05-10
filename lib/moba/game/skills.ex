@@ -50,18 +50,14 @@ defmodule Moba.Game.Skills do
   @doc """
   Levels up a skill by replacing the current one (via its code) with its higher level version
   """
-  def level_up!(%{active_build: %{skills: skills} = build} = hero, code) do
+  def level_up!(%{skills: skills} = hero, code) do
     current = Enum.find(skills, fn skill -> skill.code == code end)
 
     if current && can_level?(hero, current) && !max_level?(current) do
       leveled = get_by_code!(code, true, current.level + 1)
       replaced = skills -- [current]
 
-      build = Game.replace_build_skills!(build, replaced ++ [leveled])
-
-      hero
-      |> Game.update_hero!(%{skill_levels_available: hero.skill_levels_available - 1})
-      |> Map.put(:active_build, build)
+      Game.update_hero!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, replaced)
     else
       hero
     end

@@ -126,8 +126,6 @@ defmodule Moba.Game.Items do
   defp equip(hero, item) do
     new_inventory = hero.items ++ [item]
 
-    updated = if item.active, do: Game.reset_item_orders!(hero, new_inventory), else: hero
-
     Game.update_hero!(
       updated,
       new_inventory_stats(new_inventory),
@@ -138,8 +136,6 @@ defmodule Moba.Game.Items do
   defp unequip(hero, items) do
     items_codes = Enum.map(items, & &1.code)
     new_inventory = Enum.filter(hero.items, fn item -> !Enum.member?(items_codes, item.code) end)
-
-    if Enum.find(items, fn item -> item.active end), do: Game.reset_item_orders!(hero, new_inventory)
 
     Game.update_hero!(
       hero,
@@ -167,7 +163,8 @@ defmodule Moba.Game.Items do
       item_atk: attribute_sum(inventory, :base_atk),
       item_speed: speed_sum(inventory),
       item_power: attribute_sum(inventory, :base_power),
-      item_armor: attribute_sum(inventory, :base_armor)
+      item_armor: attribute_sum(inventory, :base_armor),
+      item_order: items_to_order(inventory)
     }
   end
 
@@ -189,6 +186,8 @@ defmodule Moba.Game.Items do
   end
 
   defp single_boots_collection(items), do: items
+
+  defp items_to_order(items), do: Enum.filter(items, & &1.active) |> Enum.map(& &1.code)
 
   defp normal?(item), do: item.rarity == "normal"
 

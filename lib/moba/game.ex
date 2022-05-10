@@ -38,8 +38,7 @@ defmodule Moba.Game do
   def eligible_heroes_for_pvp(user_id, duel_inserted_at), do: Heroes.list_pvp_eligible(user_id, duel_inserted_at)
 
   @doc """
-  Orchestrates the creation of a Hero, which involves creating its initial build, activating it
-  and generating its first Training targets
+  Orchestrates the creation of a Hero, which involves creating it and generating its first Training targets
   """
   def create_hero!(attrs, user, avatar, skills) do
     attrs =
@@ -49,11 +48,8 @@ defmodule Moba.Game do
         attrs
       end
 
-    hero = Heroes.create!(attrs, user, avatar)
-    build = Builds.create!("pve", hero, skills)
-
-    hero
-    |> activate_build!(build)
+    attrs
+    |> Heroes.create!(user, avatar, skills)
     |> generate_targets!()
   end
 
@@ -107,8 +103,6 @@ defmodule Moba.Game do
     do: league_tier == Moba.max_available_league(pve_tier)
 
   def pve_win_rate(hero), do: Heroes.pve_win_rate(hero)
-
-  def pvp_win_rate(hero), do: Heroes.pvp_win_rate(hero)
 
   def pve_search(hero), do: Heroes.pve_search(hero)
 
@@ -169,12 +163,9 @@ defmodule Moba.Game do
       Heroes.create!(
         %{name: "Roshan", league_tier: 6, level: 25, bot_difficulty: "boss", boss_id: hero.id},
         nil,
-        Avatars.boss!()
+        Avatars.boss!(),
+        Skills.boss!()
       )
-
-    build = Builds.create!("pve", boss, Skills.boss!())
-
-    activate_build!(boss, build)
 
     update_hero!(hero, %{boss_id: boss.id})
   end
@@ -228,28 +219,11 @@ defmodule Moba.Game do
 
   # BUILDS
 
-  def get_build!(build_id), do: Builds.get!(build_id)
-
-  def update_build!(build, attrs), do: Builds.update!(build, attrs)
-
-  def replace_build_skills!(build, new_skills), do: Builds.replace_skills!(build, new_skills)
-
-  def generate_bot_build!(bot) do
-    build = Builds.generate_for_bot!(bot)
-    activate_build!(build.hero, build)
-  end
-
-  def activate_build!(hero, build) do
-    hero
-    |> update_hero!(%{active_build_id: build.id})
-    |> Map.put(:active_build, build)
-  end
+  def generate_bot_build(attrs, avatar), do: Builds.generate_for_bot(attrs, avatar)
 
   defdelegate skill_builds_for(role), to: Builds
 
   defdelegate skill_build_for(avatar, index), to: Builds
-
-  defdelegate reset_item_orders!(hero, new_inventory), to: Builds
 
   # LEAGUES
 

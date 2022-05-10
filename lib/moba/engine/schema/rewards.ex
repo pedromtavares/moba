@@ -13,8 +13,6 @@ defmodule Moba.Engine.Schema.Rewards do
     field :win_xp, :integer, default: 0
     field :difficulty_percentage, :integer, default: 0
     field :total_gold, :integer, default: 0
-    field :total_pve_points, :integer, default: 0
-    field :total_pvp_battles, :integer, default: 0
     field :attacker_pvp_points, :integer, default: 0
     field :defender_pvp_points, :integer, default: 0
   end
@@ -27,8 +25,6 @@ defmodule Moba.Engine.Schema.Rewards do
       :battle_xp,
       :win_xp,
       :difficulty_percentage,
-      :total_pve_points,
-      :total_pvp_battles,
       :attacker_pvp_points,
       :defender_pvp_points
     ])

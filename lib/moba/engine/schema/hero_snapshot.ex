@@ -12,17 +12,11 @@ defmodule Moba.Engine.Schema.HeroSnapshot do
     field :leveled_up, :boolean, default: false
     field :wins, :integer
     field :losses, :integer
-    field :ties, :integer
     field :gold, :integer
     field :skill_levels_available, :integer
-    field :pvp_points, :integer
-    field :pve_points, :integer
     field :league_step, :integer
     field :previous_league_step, :integer
     field :league_tier, :integer
-    field :pvp_wins, :integer
-    field :pvp_losses, :integer
-    field :pvp_ranking, :integer
   end
 
   def changeset(model, params \\ %{}) do
@@ -33,17 +27,11 @@ defmodule Moba.Engine.Schema.HeroSnapshot do
       :leveled_up,
       :wins,
       :losses,
-      :ties,
       :gold,
-      :pve_points,
-      :pvp_points,
       :skill_levels_available,
       :league_step,
       :previous_league_step,
-      :league_tier,
-      :pvp_wins,
-      :pvp_losses,
-      :pvp_ranking
+      :league_tier
     ])
   end
 end

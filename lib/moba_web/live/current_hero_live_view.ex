@@ -51,7 +51,7 @@ defmodule MobaWeb.CurrentHeroLiveView do
 
   def handle_event("finalize-edit", params, %{assigns: %{current_hero: current}} = socket) do
     build =
-      Game.update_build!(current.active_build, %{
+      Game.update_hero!(current, %{
         skill_order: params_to_order(params["skill_order"]),
         item_order: params_to_order(params["item_order"])
       })

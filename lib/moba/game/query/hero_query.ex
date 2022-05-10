@@ -15,7 +15,14 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def load(queryable \\ Hero) do
     queryable
-    |> preload([:items, :avatar, :skin, :user, active_build: [skills: ^SkillQuery.ordered()]])
+    |> preload([
+      :items,
+      :avatar,
+      :skin,
+      :user,
+      skills: ^SkillQuery.ordered(),
+      active_build: [skills: ^SkillQuery.ordered()]
+    ])
   end
 
   def load_avatar(queryable \\ Hero) do

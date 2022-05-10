@@ -102,7 +102,8 @@ defmodule Moba.Admin.Matches do
   defp skill_winrates(heroes) do
     heroes
     |> Enum.reduce([], fn hero, acc ->
-      winrate = Game.pvp_win_rate(hero)
+      # Game.pvp_win_rate(hero)
+      winrate = 0
 
       if winrate == 0 do
         acc

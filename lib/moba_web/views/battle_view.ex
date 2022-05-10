@@ -29,8 +29,8 @@ defmodule MobaWeb.BattleView do
 
   def active_defender?(_, _, _), do: false
 
-  def can_use?(_, %Moba.Game.Schema.Item{active: false}), do: false
-  def can_use?(_, %Moba.Game.Schema.Skill{passive: true}), do: false
+  def can_use?(_, %Game.Schema.Item{active: false}), do: false
+  def can_use?(_, %Game.Schema.Skill{passive: true}), do: false
   def can_use?(turn, resource), do: Engine.can_use_resource?(turn, resource)
 
   def preselected_skill(%{double_skill: skill}, _) when not is_nil(skill), do: skill
@@ -53,8 +53,8 @@ defmodule MobaWeb.BattleView do
   def item_activated(item), do: item && item["name"]
 
   def cooldown_for(nil, _), do: nil
-  def cooldown_for(%Moba.Game.Schema.Item{active: false}, _), do: nil
-  def cooldown_for(%Moba.Game.Schema.Skill{passive: true}, _), do: nil
+  def cooldown_for(%Game.Schema.Item{active: false}, _), do: nil
+  def cooldown_for(%Game.Schema.Skill{passive: true}, _), do: nil
 
   def cooldown_for(resource, battler) do
     cd = battler.cooldowns[resource.code]
