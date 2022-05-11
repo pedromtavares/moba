@@ -148,7 +148,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   end
 
   def auto_matchmaking do
-    base = non_bots() |> available_opponents() |> online_before(7) |> random()
+    base = non_bots() |> available_opponents() |> online_before(7) |> random() |> limit_by(1)
 
     from user in base, where: user.last_online_at > ^@current_ranking_date
   end
