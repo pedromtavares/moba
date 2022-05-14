@@ -14,6 +14,13 @@
                             <%=Accounts.season_points_for(next) - @current_user.season_points%> Season Points to next rank
                         </h5>
                     </div>
+                    <%= if @current_user.season_points >= 400 do %>
+                        <div class="mt-4 text-center">
+                            <button type="button" class="btn btn-sm btn-light" data-toggle="tooltip" title="<%= season_rankings_string() %>" data-tippy-placement="bottom">
+                                <i class="fa fa-list-ul mr-1"></i>Endgame Season Rankings
+                            </button>
+                        </div>
+                    <% end %>
                 </div>
                 <div class="col pvp-tier-container text-center">
                     <img src="/images/pvp/<%= next %>.png" class="pvp-rank"/>
