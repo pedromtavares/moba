@@ -149,7 +149,7 @@
                                 <td>
                                     <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
                                         <img src={"/images/pvp/#{user.season_tier}.png"} class="pvp-rank" />
-                                        <h5 class="text-primary mb-0 mt-1"><%= user.username %></h5>
+                                        <h5 class={"text-white font-weight-bold mb-0 mt-1 #{if user.id == @user.id, do: "text-info"}"}><%= user.username %></h5>
                                     <% end %>
                                 </td>
                                 <td>

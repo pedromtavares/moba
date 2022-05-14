@@ -42,7 +42,7 @@
                         <%= for message <- @messages do %>
                             <div class="inbox-item">              
                                 <div class="inbox-item-img">
-                                    <img src={"/images/pvp/#{message.tier}.png"}/>
+                                    <img src={"/images/pvp/#{message.user.season_tier}.png"}/>
                                 </div>
                                 <p class="inbox-item-author">
                                     <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
