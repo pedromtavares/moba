@@ -20,13 +20,24 @@ defmodule Moba do
   }
   @pvp_tiers %{
     0 => "Herald",
-    1 => "Guardian",
-    2 => "Crusader",
-    3 => "Archon",
-    4 => "Legend",
-    5 => "Ancient",
-    6 => "Divine",
-    7 => "Immortal"
+    1 => "Herald Superior",
+    2 => "Herald Elite",
+    3 => "Guardian",
+    4 => "Guardian Superior",
+    5 => "Guardian Elite",
+    6 => "Crusader",
+    7 => "Crusader Superior",
+    8 => "Crusader Elite",
+    9 => "Archon",
+    10 => "Supreme Archon",
+    11 => "Ultimate Archon",
+    12 => "Centurion",
+    13 => "Gladiator",
+    14 => "Champion",
+    15 => "Legend",
+    16 => "Ancient",
+    17 => "Divine",
+    18 => "Immortal"
   }
   @pve_tiers %{
     0 => "Initiate",
@@ -42,7 +53,7 @@ defmodule Moba do
   @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
   @shard_buyback_minimum 5
-  @max_season_tier 7
+  @max_season_tier 18
   @match_timeout_in_hours 24
   @normal_matchmaking_shards 5
   @elite_matchmaking_shards 15

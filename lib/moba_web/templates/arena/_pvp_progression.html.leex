@@ -14,11 +14,6 @@
                             <%= @current_user.season_points%>/<%=Accounts.season_points_for(next)%> Season Points
                         </h5>
                     </div>
-                    <div class="mt-4 text-center">
-                        <button type="button" class="btn btn-sm btn-light" data-toggle="tooltip" title="<%= season_rankings_string() %>" data-tippy-placement="bottom">
-                            <i class="fa fa-list-ul mr-1"></i>Season Rankings
-                        </button>
-                    </div>
                 </div>
                 <div class="col pvp-tier-container text-center">
                     <img src="/images/pvp/<%= next %>.png" class="pvp-rank"/>

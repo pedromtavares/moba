@@ -257,7 +257,7 @@ defmodule Moba.Conductor do
   defp skynet(%{last_server_update_at: updated_at, inserted_at: inserted_at}) do
     time = updated_at || inserted_at
 
-    Enum.each(1..5, fn _n ->
+    Enum.each(1..2, fn _n ->
       bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
 
       if bot do
@@ -273,7 +273,7 @@ defmodule Moba.Conductor do
   end
 
   defp auto_matchmaking do
-    Enum.each(1..5, fn _n ->
+    Enum.each(1..2, fn _n ->
       user = UserQuery.auto_matchmaking() |> Repo.all() |> List.first()
 
       if user do
