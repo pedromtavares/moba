@@ -2,7 +2,7 @@
     <%= for {tier, label} <- Moba.pvp_tiers() |> Enum.slice(12, 9) do %>
         <tr>
             <td class="text-center"><img src="/images/pvp/<%= tier %>.png" style="max-height: 50px"/></td>
-            <td class="text-center"><h5 class="text-medal-<%= tier %> f-rpg"><%= label %></h5></td>
+            <td class="text-center"><h5 class="shadow-medal-<%= tier %> f-rpg"><%= label %></h5></td>
             <td class="text-center"><strong><%= Accounts.season_points_for(tier) %></strong> <em class="text-muted">SP</em></td>
         </tr>
     <% end %>
