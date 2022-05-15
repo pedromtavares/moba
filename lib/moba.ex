@@ -108,6 +108,7 @@ defmodule Moba do
   def minimum_duel_points(points), do: points
   def maximum_duel_points(points) when points > @maximum_duel_points, do: @maximum_duel_points
   def maximum_duel_points(points), do: points
+  def victory_duel_points(diff) when diff < -200, do: 0
   def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
   def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
   def victory_duel_points(diff), do: ceil(diff * 0.15) |> maximum_duel_points()
