@@ -9,6 +9,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   import Ecto.Query
 
   @current_ranking_date Moba.current_ranking_date()
+  @maximum_points_difference Moba.maximum_points_difference()
 
   def load(queryable \\ User) do
     queryable
@@ -115,15 +116,17 @@ defmodule Moba.Accounts.Query.UserQuery do
       order_by: [desc: bot.season_points]
   end
 
-  def normal_opponents(season_tier) do
+  def normal_opponents(season_tier, user_points) do
     from user in available_opponents(),
       where: user.season_tier <= ^season_tier,
+      where: user.season_points > (^user_points - @maximum_points_difference),
       order_by: [desc: user.season_points]
   end
 
-  def elite_opponents(season_tier) do
+  def elite_opponents(season_tier, user_points) do
     from user in available_opponents(),
       where: user.season_tier >= ^season_tier,
+      where: user.season_points < (^user_points + @maximum_points_difference),
       order_by: [asc: user.season_points]
   end
 

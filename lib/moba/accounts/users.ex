@@ -332,16 +332,16 @@ defmodule Moba.Accounts.Users do
     elite_matchmaking_query(user) |> UserQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
-  defp normal_matchmaking_query(%{season_tier: user_tier} = user) do
+  defp normal_matchmaking_query(%{season_tier: user_tier, season_points: user_points} = user) do
     exclusions = match_exclusions(user) ++ [user.id]
 
-    UserQuery.normal_opponents(user_tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.normal_opponents(user_tier, user_points) |> UserQuery.exclude_ids(exclusions)
   end
 
-  defp elite_matchmaking_query(%{season_tier: user_tier} = user) do
+  defp elite_matchmaking_query(%{season_tier: user_tier, season_points: user_points} = user) do
     exclusions = match_exclusions(user) ++ [user.id]
     tier = maximum_tier(user_tier + 1)
 
-    UserQuery.elite_opponents(tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.elite_opponents(tier, user_points) |> UserQuery.exclude_ids(exclusions)
   end
 end
