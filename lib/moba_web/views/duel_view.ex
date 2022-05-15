@@ -3,6 +3,13 @@ defmodule MobaWeb.DuelView do
 
   alias MobaWeb.Presence
 
+  def casual?(%{user: %{season_points: user_sp}, opponent: %{season_points: opponent_sp}})
+      when user_sp - opponent_sp < -200 or user_sp - opponent_sp > 200 do
+    true
+  end
+
+  def casual?(_), do: false
+
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 

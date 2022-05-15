@@ -58,7 +58,6 @@ defmodule Moba do
   @normal_matchmaking_shards 5
   @elite_matchmaking_shards 15
   @minimum_duel_points 2
-  @maximum_duel_points 100
   @duel_timer_in_seconds 60
   @turn_timer_in_seconds 30
 
@@ -106,15 +105,14 @@ defmodule Moba do
   def elite_matchmaking_shards, do: @elite_matchmaking_shards
   def minimum_duel_points(points) when points < @minimum_duel_points, do: @minimum_duel_points
   def minimum_duel_points(points), do: points
-  def maximum_duel_points(points) when points > @maximum_duel_points, do: @maximum_duel_points
-  def maximum_duel_points(points), do: points
-  def victory_duel_points(diff) when diff < -200, do: 0
+  def victory_duel_points(diff) when diff < -200 or diff > 200, do: 0
   def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
   def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
-  def victory_duel_points(diff), do: ceil(diff * 0.15) |> maximum_duel_points()
+  def victory_duel_points(diff), do: ceil(diff * 0.15)
   def defeat_duel_points(diff), do: victory_duel_points(-diff)
-  def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points() |> maximum_duel_points())
-  def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points() |> maximum_duel_points()
+  def tie_duel_points(diff) when diff < -200 or diff > 200, do: 0
+  def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points())
+  def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points()
   def duel_timer_in_seconds, do: @duel_timer_in_seconds
   def turn_timer_in_seconds, do: @turn_timer_in_seconds
 

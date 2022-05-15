@@ -18,14 +18,15 @@
                                 <%= live_redirect @duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @duel.opponent) %>
                                 <img src={"/images/pvp/#{@duel.opponent.season_tier}.png"} style="max-height:  50px"/>
                             </h2>
+                            <%= if casual?(@duel) do %>
+                                <span class="font-15 badge badge-pill badge-light-success" data-toggle="tooltip" title="This duel is worth no Season Points because the points difference of players is too high">Casual</span>
+                            <% end %>
                             <%= if pvp?(@duel) do %>
-                                <h4 class="mt-0" data-toggle="tooltip" title="All-time score between players">
-                                    <span class="badge badge-pill badge-light-primary">
-                                        <%= @duel.user.duel_score["#{@duel.opponent_id}"] || 0 %>
-                                         x 
-                                        <%= @duel.opponent.duel_score["#{@duel.user_id}"] || 0 %>    
-                                    </span>
-                                </h4>
+                                <span class="font-15 badge badge-pill badge-light-danger" data-toggle="tooltip" title="All-time score between players">
+                                    <%= @duel.user.duel_score["#{@duel.opponent_id}"] || 0 %>
+                                     x 
+                                    <%= @duel.opponent.duel_score["#{@duel.user_id}"] || 0 %>    
+                                </span>
                             <% end %>
                         </div>
                     </div>
@@ -37,18 +38,20 @@
                                 <% else %>
                                     <h1 class="text-center text-muted"><i class="fa fa-adjust mr-1"></i> Tie</h1>
                                 <% end %>
-                                <h3 class="center">
-                                    <%= if @duel.rewards.attacker_pvp_points > 0 do %>
-                                        <span class="badge badge-pill badge-light-success"><%= @duel.user.username %>: +<%= @duel.rewards.attacker_pvp_points %> SP</span>
-                                    <% else %>
-                                        <span class="badge badge-pill badge-light-dark"><%= @duel.user.username %>: <%= @duel.rewards.attacker_pvp_points %> SP</span>
-                                    <% end %>
-                                    <%= if @duel.rewards.defender_pvp_points > 0 do %>
-                                        <span class="badge badge-pill badge-light-success"><%= @duel.opponent.username %>: +<%= @duel.rewards.defender_pvp_points %> SP</span>
-                                    <% else %>
-                                        <span class="badge badge-pill badge-light-dark"><%= @duel.opponent.username %>: <%= @duel.rewards.defender_pvp_points %> SP</span>
-                                    <% end %>
-                                </h3>
+                                <%= unless casual?(@duel) do %>
+                                    <h3 class="center">
+                                        <%= if @duel.rewards.attacker_pvp_points > 0 do %>
+                                            <span class="badge badge-pill badge-light-success"><%= @duel.user.username %>: +<%= @duel.rewards.attacker_pvp_points %> SP</span>
+                                        <% else %>
+                                            <span class="badge badge-pill badge-light-dark"><%= @duel.user.username %>: <%= @duel.rewards.attacker_pvp_points %> SP</span>
+                                        <% end %>
+                                        <%= if @duel.rewards.defender_pvp_points > 0 do %>
+                                            <span class="badge badge-pill badge-light-success"><%= @duel.opponent.username %>: +<%= @duel.rewards.defender_pvp_points %> SP</span>
+                                        <% else %>
+                                            <span class="badge badge-pill badge-light-dark"><%= @duel.opponent.username %>: <%= @duel.rewards.defender_pvp_points %> SP</span>
+                                        <% end %>
+                                    </h3>
+                                <% end %>
                             </div>
                         <% else %>
                             <div>

@@ -53,7 +53,7 @@ defmodule MobaWeb.ArenaView do
   def next_pvp_tier_percentage(%{season_tier: current_tier, season_points: season_points}) do
     current = Accounts.season_points_for(current_tier)
     max = Accounts.season_points_for(current_tier + 1)
-    (season_points-current) * 100 / (max-current)
+    (season_points - current) * 100 / (max - current)
   end
 
   def next_pvp_tier(%{season_tier: current_tier}) do
