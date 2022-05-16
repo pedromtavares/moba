@@ -20,13 +20,24 @@ defmodule Moba do
   }
   @pvp_tiers %{
     0 => "Herald",
-    1 => "Guardian",
-    2 => "Crusader",
-    3 => "Archon",
-    4 => "Legend",
-    5 => "Ancient",
-    6 => "Divine",
-    7 => "Immortal"
+    1 => "Herald Superior",
+    2 => "Herald Elite",
+    3 => "Guardian",
+    4 => "Guardian Superior",
+    5 => "Guardian Elite",
+    6 => "Crusader",
+    7 => "Crusader Superior",
+    8 => "Crusader Elite",
+    9 => "Archon",
+    10 => "Supreme Archon",
+    11 => "Ultimate Archon",
+    12 => "Centurion",
+    13 => "Gladiator",
+    14 => "Champion",
+    15 => "Legend",
+    16 => "Ancient",
+    17 => "Divine",
+    18 => "Immortal"
   }
   @pve_tiers %{
     0 => "Initiate",
@@ -42,12 +53,12 @@ defmodule Moba do
   @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
   @shard_buyback_minimum 5
-  @max_season_tier 7
+  @max_season_tier 18
   @match_timeout_in_hours 24
   @normal_matchmaking_shards 5
   @elite_matchmaking_shards 15
   @minimum_duel_points 2
-  @maximum_duel_points 100
+  @maximum_points_difference 200
   @duel_timer_in_seconds 60
   @turn_timer_in_seconds 30
 
@@ -93,16 +104,17 @@ defmodule Moba do
   def match_timeout_in_hours, do: @match_timeout_in_hours
   def normal_matchmaking_shards, do: @normal_matchmaking_shards
   def elite_matchmaking_shards, do: @elite_matchmaking_shards
+  def maximum_points_difference, do: @maximum_points_difference
   def minimum_duel_points(points) when points < @minimum_duel_points, do: @minimum_duel_points
   def minimum_duel_points(points), do: points
-  def maximum_duel_points(points) when points > @maximum_duel_points, do: @maximum_duel_points
-  def maximum_duel_points(points), do: points
+  def victory_duel_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference, do: 0
   def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
   def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
-  def victory_duel_points(diff), do: ceil(diff * 0.15) |> maximum_duel_points()
+  def victory_duel_points(diff), do: ceil(diff * 0.15)
   def defeat_duel_points(diff), do: victory_duel_points(-diff)
-  def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points() |> maximum_duel_points())
-  def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points() |> maximum_duel_points()
+  def tie_duel_points(diff) when diff < -@maximum_points_difference  or diff > @maximum_points_difference, do: 0
+  def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points())
+  def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points()
   def duel_timer_in_seconds, do: @duel_timer_in_seconds
   def turn_timer_in_seconds, do: @turn_timer_in_seconds
 
@@ -220,11 +232,13 @@ defmodule Moba do
     Accounts.update_ranking!()
   end
 
-  def bot_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.bot_opponent(user))
+  def auto_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.matchmaking_opponent(user), true)
 
-  def normal_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.normal_opponent(user))
+  def bot_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.bot_opponent(user), false)
 
-  def elite_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.elite_opponent(user))
+  def normal_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.normal_opponent(user), false)
+
+  def elite_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.elite_opponent(user), false)
 
   def basic_attack, do: Game.basic_attack()
 

@@ -50,7 +50,7 @@
         <div class="history">
             <table class="table-dark table mb-0">
                 <%= for duel <- @matchmaking do %>
-                    <%= render "_duel_row.html", duel: duel, battles: @battles, opponent: duel.opponent, user_id: @current_user.id, socket: @socket %>
+                    <%= render "_duel_row.html", duel: duel, battles: @battles, opponent: opponent_for(duel, @current_user), user_id: @current_user.id, socket: @socket %>
                 <% end %>
             </table>
         </div>

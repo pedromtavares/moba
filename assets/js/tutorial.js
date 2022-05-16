@@ -253,7 +253,7 @@ const Tutorial = {
       case 31:
         tour.addStep({
           id: 'twentieth-tutorial-first-step',
-          text: "<p class='text-center'>There are 2 modes in the Arena: Matchmaking and Duels (PvP).<br/><br/>In Matchmaking you play on your time (similar to Training) against players controlled by the AI. In Duels, however, you play a live match against a real player, so they have to be online to accept your Duel request. Players will appear at the bottom of the page when online.<br/><br/>Duels reward 3 times as much Season Points as Matchmaking, but do not reward Shards. Make sure you play against all available opponents in Elite Matchmaking to maximize your daily Shard rewards.<br/><br/>If you have any more questions, visit the Game Info page on the sidebar which also has a link to our Discord server where you're welcome to come hang out. Have fun!</p>",
+          text: "<p class='text-center'>There are 2 modes in the Arena: Matchmaking and Duels (PvP).<br/><br/>In Matchmaking you play on your time (similar to Training) against players controlled by the AI. In Duels, however, you play a live match against a real player, so they have to be online to accept your Duel request. Players will appear at the bottom of the page when online.<br/><br/>Duels reward twice as much Season Points as Matchmaking, but do not reward Shards. Make sure you play against all available opponents in Elite Matchmaking to maximize your daily Shard rewards.<br/><br/>If you have any more questions, visit the Game Info page on the sidebar which also has a link to our Discord server where you're welcome to come hang out. Have fun!</p>",
           buttons: [
             {
               text: 'Finish Tutorial',

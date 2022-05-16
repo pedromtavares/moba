@@ -1,7 +1,7 @@
 .user-profile{
 
   .pve-rank{
-    max-height: 30px;
+    max-height: 40px;
   }
 
   .pvp-rank{
@@ -9,6 +9,8 @@
   }
 
   .hero-card{
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
     min-height: 370px;
   }
 
@@ -27,6 +29,10 @@
   }
 
   .collection{
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    height: 55vh;
+
     .card-body{
       padding-bottom: -1rem;
     }
@@ -54,7 +60,7 @@
 
     .card-body{
       padding: 0 !important;
-      max-height: 87vh;
+      max-height: 88.5vh;
       overflow: auto;
     }
 
@@ -65,7 +71,7 @@
 
 
   .duels{
-    max-height: 53vh;
+    height: 64vh;
     overflow: auto;
 
     h5{

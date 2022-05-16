@@ -56,8 +56,8 @@ defmodule Moba.Game.Duels do
 
   def get!(id), do: load() |> Repo.get!(id)
 
-  def create!(user, opponent, type) do
-    %Duel{phase: "user_first_pick", user: user, user_id: user.id, opponent_id: opponent.id, type: type}
+  def create!(user, opponent, type, auto) do
+    %Duel{phase: "user_first_pick", auto: auto, user: user, user_id: user.id, opponent_id: opponent.id, type: type}
     |> Duel.changeset(%{phase_changed_at: Timex.now()})
     |> Repo.insert!()
     |> maybe_auto_next_phase()
@@ -109,20 +109,24 @@ defmodule Moba.Game.Duels do
 
   def auto_next_phase!(%{phase: phase, user_id: user_id} = duel)
       when phase in ["user_first_pick", "user_second_pick"] do
-    hero = available_hero(user_id, duel.user_first_pick_id) |> Repo.all() |> List.first()
+    hero = available_random_hero(user_id, duel.user_first_pick_id)
     Game.next_duel_phase!(get!(duel.id), hero)
   end
 
   def auto_next_phase!(%{phase: phase, opponent_id: opponent_id} = duel)
       when phase in ["opponent_first_pick", "opponent_second_pick"] do
-    hero = available_hero(opponent_id, duel.opponent_first_pick_id) |> Repo.all() |> List.first()
+    hero = available_random_hero(opponent_id, duel.opponent_first_pick_id)
     Game.next_duel_phase!(get!(duel.id), hero)
   end
 
   def auto_next_phase!(duel), do: duel
 
+  defp available_random_hero(user_id, pick_id) do
+    available_hero(user_id, pick_id) |> Repo.all() |> Enum.shuffle() |> List.first()
+  end
+
   defp available_hero(user_id, nil) do
-    HeroQuery.unarchived() |> HeroQuery.with_user(user_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(1)
+    HeroQuery.unarchived() |> HeroQuery.with_user(user_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(5)
   end
 
   defp available_hero(user_id, hero_id) do
@@ -132,9 +136,11 @@ defmodule Moba.Game.Duels do
   defp base_query(%{id: user_id}) do
     from duel in simple_load(),
       where: duel.user_id == ^user_id or duel.opponent_id == ^user_id,
-      limit: 10,
+      limit: 12,
       order_by: [desc: duel.inserted_at]
   end
+
+  defp maybe_auto_next_phase(%{auto: true} = duel), do: auto_next_phase!(duel)
 
   defp maybe_auto_next_phase(%{user: %{is_bot: true}} = duel), do: auto_next_phase!(duel)
 

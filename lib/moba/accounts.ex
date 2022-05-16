@@ -71,6 +71,8 @@ defmodule Moba.Accounts do
 
   defdelegate shard_buyback!(user), to: Users
 
+  defdelegate matchmaking_opponent(user), to: Users
+
   defdelegate normal_opponent(user), to: Users
 
   defdelegate elite_opponent(user), to: Users

@@ -67,6 +67,7 @@ defmodule Moba.Conductor do
   """
   def server_update!(match \\ Moba.current_match()) do
     skynet(match)
+    auto_matchmaking()
     Accounts.update_ranking!()
 
     match
@@ -256,7 +257,7 @@ defmodule Moba.Conductor do
   defp skynet(%{last_server_update_at: updated_at, inserted_at: inserted_at}) do
     time = updated_at || inserted_at
 
-    Enum.each(1..5, fn _n ->
+    Enum.each(1..2, fn _n ->
       bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
 
       if bot do
@@ -266,6 +267,20 @@ defmodule Moba.Conductor do
           Logger.info("Created duel ##{duel.id} for #{bot.username}")
           later = Timex.shift(time, minutes: 190)
           Accounts.update_user!(bot, %{last_online_at: later})
+        end
+      end
+    end)
+  end
+
+  defp auto_matchmaking do
+    Enum.each(1..2, fn _n ->
+      user = UserQuery.auto_matchmaking() |> Repo.all() |> List.first()
+
+      if user do
+        duel = Moba.auto_matchmaking!(user)
+
+        if duel do
+          Logger.info("Created duel ##{duel.id} for #{user.username}")
         end
       end
     end)

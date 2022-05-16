@@ -59,7 +59,11 @@ defmodule Moba.Cleaner do
     Repo.update_all(query, set: [current_pve_hero_id: nil])
 
     query =
-      from d in Duel, join: u in assoc(d, :user), where: u.is_bot == true, where: d.inserted_at <= ^yesterday, limit: 20
+      from d in Duel,
+        join: u in assoc(d, :user),
+        where: u.is_bot == true or d.auto == true,
+        where: d.inserted_at <= ^yesterday,
+        limit: 20
 
     Repo.all(query) |> delete_records()
 

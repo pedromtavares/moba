@@ -1,4 +1,4 @@
-<%=live_redirect class: "hero-card card", style: "background-image: url(#{GH.background_url(@hero)})", to: link_for(@hero, @battle)do %>
+<div class="hero-card card" style="background-image: url(<%=GH.background_url(@hero)%>)">
     <div class="card-header pt-0 pb-1">
         <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
             <span class="font-italic level font-15">Level <%=@last_hero && @last_hero.level || @hero.level%></span>
@@ -41,4 +41,4 @@
             </div>
         </div>
     </div>
-<% end %>
+</div>

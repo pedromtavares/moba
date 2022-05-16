@@ -158,7 +158,7 @@ defmodule Moba.Accounts.Users do
       if ranking <= 5 do
         {1, 10}
       else
-        {ranking - 4, ranking + 4}
+        {ranking - 4, ranking + 5}
       end
 
     UserQuery.non_bots()
@@ -180,22 +180,33 @@ defmodule Moba.Accounts.Users do
 
   def season_points_for(tier) do
     case tier do
-      1 -> 100
-      2 -> 200
-      3 -> 300
-      4 -> 500
-      5 -> 1000
-      6 -> 2000
-      7 -> 4000
+      1 -> 30
+      2 -> 60
+      3 -> 100
+      4 -> 130
+      5 -> 160
+      6 -> 200
+      7 -> 230
+      8 -> 260
+      9 -> 300
+      10 -> 330
+      11 -> 360
+      12 -> 400
+      13 -> 430
+      14 -> 460
+      15 -> 500
+      16 -> 600
+      17 -> 750
+      18 -> 1000
       _ -> 0
     end
   end
 
-  def season_tier_for(points) when points < 4000 do
-    Enum.find(0..7, fn tier -> season_points_for(tier + 1) > points end)
+  def season_tier_for(points) when points < 1000 do
+    Enum.find(0..18, fn tier -> season_points_for(tier + 1) > points end)
   end
 
-  def season_tier_for(_), do: 7
+  def season_tier_for(_), do: 18
 
   def update_collection!(user, hero_collection) do
     update!(user, %{hero_collection: hero_collection})
@@ -230,6 +241,10 @@ defmodule Moba.Accounts.Users do
     else
       nil
     end
+  end
+
+  def matchmaking_opponent(user) do
+    elite_matchmaking_opponent(user) || normal_matchmaking_opponent(user)
   end
 
   def normal_opponent(user) do
@@ -317,16 +332,16 @@ defmodule Moba.Accounts.Users do
     elite_matchmaking_query(user) |> UserQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
-  defp normal_matchmaking_query(%{season_tier: user_tier} = user) do
+  defp normal_matchmaking_query(%{season_tier: user_tier, season_points: user_points} = user) do
     exclusions = match_exclusions(user) ++ [user.id]
 
-    UserQuery.normal_opponents(user_tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.normal_opponents(user_tier, user_points) |> UserQuery.exclude_ids(exclusions)
   end
 
-  defp elite_matchmaking_query(%{season_tier: user_tier} = user) do
+  defp elite_matchmaking_query(%{season_tier: user_tier, season_points: user_points} = user) do
     exclusions = match_exclusions(user) ++ [user.id]
     tier = maximum_tier(user_tier + 1)
 
-    UserQuery.elite_opponents(tier) |> UserQuery.exclude_ids(exclusions)
+    UserQuery.elite_opponents(tier, user_points) |> UserQuery.exclude_ids(exclusions)
   end
 end

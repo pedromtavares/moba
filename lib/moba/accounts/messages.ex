@@ -16,7 +16,7 @@ defmodule Moba.Accounts.Messages do
         limit: ^limit,
         order_by: [desc: :id]
 
-    Repo.all(query)
+    Repo.all(query) |> Repo.preload(:user)
   end
 
   def get!(id), do: Repo.get!(Message, id)

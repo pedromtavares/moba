@@ -11,6 +11,7 @@ defmodule Moba.Game.Schema.Duel do
     field :phase, :string
     field :type, :string
     field :phase_changed_at, :utc_datetime
+    field :auto, :boolean
 
     embeds_one :rewards, Engine.Schema.Rewards, on_replace: :update
 
@@ -29,6 +30,7 @@ defmodule Moba.Game.Schema.Duel do
   def changeset(duel, attrs) do
     duel
     |> cast(attrs, [
+      :auto,
       :type,
       :phase,
       :user_id,
