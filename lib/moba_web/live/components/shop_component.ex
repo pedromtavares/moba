@@ -19,7 +19,8 @@ defmodule MobaWeb.Shop do
      assign(socket,
        items: Moba.cached_items(),
        current_hero: hero,
-       tutorial_step: step
+       tutorial_step: step,
+       current_user: hero.user
      )}
   end
 
