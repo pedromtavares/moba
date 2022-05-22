@@ -22,7 +22,7 @@ defmodule MobaWeb.GameController do
         put_session(conn, :cache_key, UUID.uuid1())
       end
 
-    live_render(conn, MobaWeb.CreateLiveView,
+    live_render(conn, MobaWeb.CreateLive,
       session: %{"token" => get_csrf_token(), "cache_key" => get_session(conn, :cache_key)}
     )
   end

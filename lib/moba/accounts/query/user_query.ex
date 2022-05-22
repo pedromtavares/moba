@@ -119,14 +119,14 @@ defmodule Moba.Accounts.Query.UserQuery do
   def normal_opponents(season_tier, user_points) do
     from user in available_opponents(),
       where: user.season_tier <= ^season_tier,
-      where: user.season_points > (^user_points - @maximum_points_difference),
+      where: user.season_points > ^user_points - @maximum_points_difference,
       order_by: [desc: user.season_points]
   end
 
   def elite_opponents(season_tier, user_points) do
     from user in available_opponents(),
       where: user.season_tier >= ^season_tier,
-      where: user.season_points < (^user_points + @maximum_points_difference),
+      where: user.season_points < ^user_points + @maximum_points_difference,
       order_by: [asc: user.season_points]
   end
 

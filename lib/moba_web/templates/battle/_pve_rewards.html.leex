@@ -26,7 +26,7 @@
             <ul class="pagination pagination-rounded mb-0">
                 <li class="page-item">
                     <div class="page-link hero-level bg-white">
-                        <%= if @hero.leveled_up, do: @hero.level - 1, else: @hero.level %>
+                        <%= if @snapshot.leveled_up, do: @snapshot.level - 1, else: @snapshot.level %>
                     </div>
                 </li>
             </ul>
@@ -43,8 +43,8 @@
         <div class="float-left center level-bubble">
             <ul class="pagination pagination-rounded mb-0">
                 <li class="page-item">
-                    <div class="page-link hero-next-level <%= if @hero.leveled_up, do: "hero-leveled" %>">
-                        <%= if @hero.leveled_up, do: @hero.level, else: @hero.level + 1 %>
+                    <div class="page-link hero-next-level <%= if @snapshot.leveled_up, do: "hero-leveled" %>">
+                        <%= if @snapshot.leveled_up, do: @snapshot.level, else: @snapshot.level + 1 %>
                     </div>
                 </li>
             </ul>
@@ -52,7 +52,7 @@
     </div>
     <div class="d-none d-md-block col-2">
         <div class="ribbon-box leveled">
-            <%= if @hero.leveled_up do %>
+            <%= if @snapshot.leveled_up do %>
                 <div class="ribbon ribbon-primary float-left shape"> Level Up!</div>
             <% end %>
         </div>
@@ -61,12 +61,12 @@
 <%= if @current_user do %>
     <div class="row battle-border-top pt-1 mt-1">
         <div class="col-4">
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-outline-secondary btn-lg btn-block", "phx-hook": "Loading", id: "load-battles" do %>
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLive), class: "btn btn-outline-secondary btn-lg btn-block", "phx-hook": "Loading", id: "load-battles" do %>
                 <span class="loading-text"><i class="fa fa-list-ul"></i> View Battle Log</span>
             <% end %>
         </div>
         <div class="col">
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), class: "btn btn-outline-success btn-lg btn-block", "phx-hook": "Loading", id: "load-training" do %>
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLive), class: "btn btn-outline-success btn-lg btn-block", "phx-hook": "Loading", id: "load-training" do %>
                 <span class="loading-text"><i class="fa fa-sword"></i> Back to Training</span>
             <% end %>
         </div>

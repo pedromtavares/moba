@@ -1,4 +1,4 @@
-defmodule MobaWeb.DashboardLiveViewTest do
+defmodule MobaWeb.DashboardLiveTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 

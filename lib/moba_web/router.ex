@@ -52,33 +52,33 @@ defmodule MobaWeb.Router do
   scope "/" do
     pipe_through [:browser, :user_helper, :root_layout]
 
-    live "/battles/:id", MobaWeb.BattleLiveView
+    live "/battles/:id", MobaWeb.BattleLive
   end
 
   scope "/", MobaWeb do
     pipe_through [:browser, :root_layout, :protected, :user_helper]
 
     live_session :default, on_mount: MobaWeb.UserLiveAuth do
-      live "/invoke", CreateLiveView
+      live "/invoke", CreateLive
 
-      live "/training", TrainingLiveView
+      live "/training", TrainingLive
 
-      live "/battles", BattlesLiveView
+      live "/battles", BattlesLive
 
-      live "/base", DashboardLiveView
+      live "/base", DashboardLive
 
-      live "/arena", ArenaLiveView
-      live "/arena/:id", DuelLiveView
+      live "/arena", ArenaLive
+      live "/arena/:id", DuelLive
 
-      live "/user/:id", UserLiveView
+      live "/user/:id", UserLive
 
-      live "/hero/:id", HeroLiveView
+      live "/hero/:id", HeroLive
 
-      live "/tavern", TavernLiveView
+      live "/tavern", TavernLive
 
-      live "/community", CommunityLiveView
+      live "/community", CommunityLive
 
-      live "/library", LibraryLiveView
+      live "/library", LibraryLive
     end
   end
 

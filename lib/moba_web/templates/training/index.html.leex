@@ -1,6 +1,6 @@
 <div class="training">
     <%= if @pending_battle do %>
-        <%= MobaWeb.GameView.render "_pending_battle.html", battle: @pending_battle %>
+        <%= render "_pending_battle.html", battle: @pending_battle %>
     <% else %>
         <div class="row mt-2 training-header">
             <div class="col">
@@ -28,6 +28,6 @@
     <% end %>
 </div>
 
-<%= live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero" => @current_hero, "tutorial_step" => @tutorial_step}, id: "hero-bar") %>
+<%= live_render(@socket, MobaWeb.CurrentHeroLive, session: %{"hero" => @current_hero, "tutorial_step" => @tutorial_step}, id: "hero-bar") %>
 
-<%= live_component(MobaWeb.Tutorial, step: @tutorial_step) %>
+<%= live_component(MobaWeb.TutorialComponent, step: @tutorial_step) %>

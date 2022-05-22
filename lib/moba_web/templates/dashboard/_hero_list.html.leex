@@ -1,6 +1,6 @@
 <div class="card">
     <div class="card-body p-0 text-center" id="hero-list-container">
-        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CreateLiveView), class: "btn p-2 btn-block btn-lg btn-outline-success col-xl-4 margin-auto mt-2 dark-button" do %>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CreateLive), class: "btn p-2 btn-block btn-lg btn-outline-success col-xl-4 margin-auto mt-2 dark-button" do %>
             <i class="fa fa-plus-large mr-1"></i>Train a new Hero
         <% end %>
         <div class="pt-3">
@@ -24,15 +24,15 @@
                 <div class="col d-flex justify-content-center">
                     <div class="pt-3 pb-3 pr-3">
                         <div class="btn-group">
-                            <%= if @pve_display == "unfinished" do %>
+                            <%= if @filter == "unfinished" do %>
                                 <button type="button" class="btn btn-secondary no-action">
                                     <span class="loading-text">In Progress</span>
                                 </button>
-                                <button type="button" class="btn btn-light" phx-click="pve-show-finished" phx-hook="Loading" id="finished-heroes-btn">
+                                <button type="button" class="btn btn-light" phx-click="show-finished" phx-hook="Loading" id="finished-heroes-btn">
                                     <span class="loading-text">Finished</span>
                                 </button>
                             <% else %>
-                                <button type="button" class="btn btn-light" phx-click="pve-show-unfinished" phx-hook="Loading" id="in-progress-heroes-btn">
+                                <button type="button" class="btn btn-light" phx-click="show-unfinished" phx-hook="Loading" id="in-progress-heroes-btn">
                                     <span class="loading-text">In Progress</span>
                                 </button>
                                 <button type="button" class="btn btn-secondary no-action">
@@ -43,16 +43,16 @@
                     </div>
                 </div>
             </div>
-            <div class="w-100 hero-list darker" id="hero-list-<%= @pve_display %>">
+            <div class="w-100 hero-list darker" id="hero-list-<%= @filter %>">
                 <div class="row no-gutters">
                     <%= for hero <- @visible_heroes do %>
                         <%= render "_hero.html", Map.merge(assigns, %{hero: hero}) %>
                     <% end %>
                 </div>
-                <%= unless Enum.member?(@loaded, @pve_display) do %>
+                <%= unless Enum.member?(@loaded, @filter) do %>
                     <div class="row">
                         <div class="col">
-                            <button type="button" class="btn btn-light btn-block btn-lg img-border-sm" phx-click="load-all" phx-hook="Loading" id="load-all-heroes-<%= @pve_display %>">
+                            <button type="button" class="btn btn-light btn-block btn-lg img-border-sm" phx-click="load-all" phx-hook="Loading" id="load-all-heroes-<%= @filter %>">
                                 <span class="loading-text"><i class="fa fa-plus mr-1"></i>Load All</span>
                             </button>
                         </div>

@@ -21,7 +21,7 @@
                         </button>
                     <% end %>
                     <%= if @hero.finished_at do %>
-                        <%= live_redirect class: "btn btn-primary", to: Routes.live_path(@socket, MobaWeb.HeroLiveView, @hero) do %>
+                        <%= live_redirect class: "btn btn-primary", to: Routes.live_path(@socket, MobaWeb.HeroLive, @hero) do %>
                             <i class="fa fa-address-card mr-1"></i>
                             Customize
                         <% end %>

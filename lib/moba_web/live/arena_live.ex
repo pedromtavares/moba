@@ -1,41 +1,17 @@
-defmodule MobaWeb.ArenaLiveView do
+defmodule MobaWeb.ArenaLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{ArenaView, Presence, Tutorial}
+  alias MobaWeb.{ArenaView, Presence, TutorialComponent}
 
   def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
-    if connected?(socket) do
-      Tutorial.subscribe(user.id)
-      MobaWeb.subscribe("online")
+    with socket = socket_init(socket) do
+      if connected?(socket) do
+        TutorialComponent.subscribe(user.id)
+        MobaWeb.subscribe("online")
+      end
+
+      {:ok, socket}
     end
-
-    normal_count = Accounts.normal_matchmaking_count(user)
-    elite_count = Accounts.elite_matchmaking_count(user)
-    matchmaking = Game.list_matchmaking(user)
-    battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles()
-    pending_match = Enum.find(matchmaking, &(&1.phase != "finished"))
-    closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user)
-    duels = Game.list_pvp_duels(user)
-    duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles()
-    pending_duel = Enum.find(duels, &(&1.phase != "finished"))
-
-    {:ok,
-     assign(socket,
-       battles: battles,
-       current_time: Timex.now(),
-       duels: duels,
-       duel_battles: duel_battles,
-       duel_opponents: [],
-       elite_count: elite_count,
-       normal_count: normal_count,
-       matchmaking: matchmaking,
-       pending_duel: pending_duel,
-       pending_match: pending_match,
-       closest_bot_time: closest_bot_time,
-       sidebar_code: "arena",
-       tutorial_step: user.tutorial_step
-     )
-     |> maybe_redirect()}
   end
 
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_user: user}} = socket) do
@@ -53,7 +29,7 @@ defmodule MobaWeb.ArenaLiveView do
     duel = if type == "elite", do: Moba.elite_matchmaking!(user), else: Moba.normal_matchmaking!(user)
 
     if duel do
-      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLiveView, duel.id))}
+      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLive, duel.id))}
     else
       {:noreply,
        assign(socket,
@@ -75,21 +51,21 @@ defmodule MobaWeb.ArenaLiveView do
   end
 
   def handle_event("tutorial1", _, socket) do
-    {:noreply, socket |> Tutorial.next_step(31)}
+    {:noreply, socket |> TutorialComponent.next_step(31)}
   end
 
   def handle_event("finish-tutorial", _, socket) do
-    {:noreply, Tutorial.finish_arena(socket)}
+    {:noreply, TutorialComponent.finish_arena(socket)}
+  end
+
+  def handle_info({:tutorial, %{step: step}}, socket) do
+    {:noreply, assign(socket, tutorial_step: step)}
   end
 
   def handle_info(%{event: "presence_diff"}, %{assigns: %{current_user: user}} = socket) do
     duel_opponents = if user.status == "available", do: opponents_from_presence(user), else: []
 
     {:noreply, assign(socket, duel_opponents: duel_opponents)}
-  end
-
-  def handle_info({"tutorial-step", %{step: step}}, socket) do
-    {:noreply, assign(socket, tutorial_step: step)}
   end
 
   def render(assigns) do
@@ -118,5 +94,36 @@ defmodule MobaWeb.ArenaLiveView do
       |> Enum.map(& &1.user_id)
 
     Accounts.duel_opponents(user, online_ids)
+  end
+
+  defp socket_init(%{assigns: %{current_user: user}} = socket) do
+    with current_time = Timex.now(),
+         sidebar_code = "arena",
+         normal_count = Accounts.normal_matchmaking_count(user),
+         elite_count = Accounts.elite_matchmaking_count(user),
+         matchmaking = Game.list_matchmaking(user),
+         battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
+         pending_match = Enum.find(matchmaking, &(&1.phase != "finished")),
+         closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user),
+         duels = Game.list_pvp_duels(user),
+         duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
+         pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
+      assign(socket,
+        battles: battles,
+        closest_bot_time: closest_bot_time,
+        current_time: current_time,
+        duels: duels,
+        duel_battles: duel_battles,
+        duel_opponents: [],
+        elite_count: elite_count,
+        matchmaking: matchmaking,
+        normal_count: normal_count,
+        pending_duel: pending_duel,
+        pending_match: pending_match,
+        sidebar_code: sidebar_code,
+        tutorial_step: user.tutorial_step
+      )
+      |> maybe_redirect()
+    end
   end
 end

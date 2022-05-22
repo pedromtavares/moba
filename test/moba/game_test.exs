@@ -1,22 +1,6 @@
 defmodule Moba.GameTest do
   use Moba.DataCase, async: true
 
-  describe "matches" do
-    test "#current_match" do
-      assert Game.current_match().active
-    end
-
-    test "#create_match!" do
-      match = Game.create_match!(%{next_changelog: "hi"})
-      assert match.next_changelog == "hi"
-    end
-
-    test "update_match!" do
-      match = Game.update_match!(Moba.current_match(), %{next_changelog: "hi"})
-      assert match.next_changelog == "hi"
-    end
-  end
-
   describe "heroes" do
     test "#create_hero!" do
       avatar = base_avatar()
@@ -26,9 +10,8 @@ defmodule Moba.GameTest do
       hero = Game.get_hero!(hero.id)
       targets = Game.list_targets(hero)
 
-      assert hero.active_build.type == "pve"
       assert hero.gold == 800
-      assert length(hero.active_build.skills) == 4
+      assert length(hero.skills) == 4
       assert length(targets) > 0
 
       veteran_hero = Game.create_hero!(%{name: "Foo"}, create_user(%{pve_tier: 1}), avatar, skills)
@@ -93,18 +76,6 @@ defmodule Moba.GameTest do
     test "#master_league?" do
       assert build_base_hero(%{league_tier: 5}) |> Game.master_league?()
       refute build_base_hero(%{league_tier: 6}) |> Game.master_league?()
-    end
-
-    test "#pve_win_rate" do
-      hero = build_base_hero(%{wins: 60, ties: 20, losses: 20})
-      assert Game.pve_win_rate(hero) == 60
-      assert build_base_hero() |> Game.pve_win_rate() == 0
-    end
-
-    test "#pvp_win_rate?" do
-      hero = build_base_hero(%{pvp_wins: 60, pvp_losses: 40})
-      assert Game.pvp_win_rate(hero) == 60
-      assert build_base_hero() |> Game.pvp_win_rate() == 0
     end
 
     test "#update_pve_ranking" do
@@ -298,36 +269,14 @@ defmodule Moba.GameTest do
   end
 
   describe "builds" do
-    test "#update_build!" do
-      skill_order = ["decay", "shuriken_toss"]
-      build = base_build() |> Game.update_build!(%{skill_order: skill_order})
-      assert build.skill_order == skill_order
-    end
-
-    test "#replace_build_skills!" do
-      build = base_build() |> Game.replace_build_skills!(alternate_skills())
-
-      assert build.skills == alternate_skills()
-    end
-
     test "#generate_bot_build!" do
       hero =
         create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
-        |> Game.generate_bot_build!()
+        |> Game.generate_bot_build(base_avatar())
 
-      assert hero.active_build.type == "pvp"
-      assert hero.active_build.item_order
-      assert hero.active_build.skill_order
+      assert hero.item_order
+      assert hero.skill_order
       assert length(hero.items) > 0
-    end
-
-    test "#reset_item_orders!" do
-      base_hero =
-        create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
-        |> Game.generate_bot_build!()
-
-      reset_hero = Game.reset_item_orders!(base_hero, [base_rare_item()])
-      assert List.first(reset_hero.builds).item_order == ["tranquil_boots"]
     end
 
     test "#skill_builds_for" do
@@ -512,7 +461,7 @@ defmodule Moba.GameTest do
 
       assert hero.skill_levels_available == 0
 
-      decay = Enum.find(hero.active_build.skills, fn s -> s.code == skill.code end)
+      decay = Enum.find(hero.skills, fn s -> s.code == skill.code end)
       assert decay.level == 2
     end
 

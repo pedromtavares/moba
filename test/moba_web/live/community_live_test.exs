@@ -1,4 +1,4 @@
-defmodule MobaWeb.LibraryLiveViewTest do
+defmodule MobaWeb.CommunityLiveTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
@@ -7,7 +7,7 @@ defmodule MobaWeb.LibraryLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
-    {:ok, _view, html} = live(conn, "/library")
-    assert html =~ "Frequently Asked Questions"
+    {:ok, _view, html} = live(conn, "/community")
+    assert html =~ "Ranking"
   end
 end

@@ -225,15 +225,13 @@ defmodule Moba.Engine.Core do
 
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
   defp build_battler(hero, battle) do
-    hero = Repo.preload(hero, [:items, :avatar, active_build: [:skills]])
-    skills = hero.active_build.skills
-    items = hero.items
+    %{skills: skills, items: items, avatar: avatar} = hero = Repo.preload(hero, [:avatar, :items, :skills])
 
     %Battler{
       hero_id: hero.id,
       name: hero.name,
-      code: hero.avatar.code,
-      image: hero.avatar.image,
+      code: avatar.code,
+      image: avatar.image,
       is_bot: !is_nil(hero.bot_difficulty),
       level: hero.level,
       total_hp: buffed_total(hero, battle, hero.total_hp + hero.item_hp),
@@ -252,8 +250,8 @@ defmodule Moba.Engine.Core do
       passive_skills: skills |> Enum.filter(& &1.passive),
       active_items: items |> Enum.filter(& &1.active),
       passive_items: items |> Enum.filter(& &1.passive),
-      skill_order: codes_to_resources(hero.active_build.skill_order, [Moba.basic_attack() | skills]),
-      item_order: codes_to_resources(hero.active_build.item_order, items)
+      skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
+      item_order: codes_to_resources(hero.item_order, items)
     }
   end
 

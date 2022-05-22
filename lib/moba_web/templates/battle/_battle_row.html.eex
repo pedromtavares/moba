@@ -1,4 +1,4 @@
-<tr id="battle-<%=@battle.id%>" class="battle-row <%=if @battle.unread_id == @current_hero.id, do: "unread-row"%>" phx-click="redirect" phx-value-id="<%=@battle.id%>" phx-hook="Loading">
+<tr id="battle-<%=@battle.id%>" class="battle-row" phx-click="redirect" phx-value-id="<%=@battle.id%>" phx-hook="Loading">
     <td>
         <%=result_badge(@battle, @current_hero)%>
     </td>

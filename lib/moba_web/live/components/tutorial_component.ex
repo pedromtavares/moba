@@ -1,4 +1,4 @@
-defmodule MobaWeb.Tutorial do
+defmodule MobaWeb.TutorialComponent do
   use MobaWeb, :live_component
 
   @final_training_step 19
@@ -7,10 +7,6 @@ defmodule MobaWeb.Tutorial do
 
   def mount(socket) do
     {:ok, socket}
-  end
-
-  def render(assigns) do
-    MobaWeb.GameView.render("tutorial.html", assigns)
   end
 
   def subscribe(user_id) do
@@ -25,10 +21,10 @@ defmodule MobaWeb.Tutorial do
 
   def next_step(socket, _), do: socket
 
-  def set_step(%{assigns: %{current_hero: hero}} = socket, step) when not is_nil(hero) do
-    Moba.Accounts.update_tutorial_step!(hero.user, step)
+  def set_step(%{assigns: %{current_user: user}} = socket, step) when not is_nil(user) do
+    Moba.Accounts.update_tutorial_step!(user, step)
 
-    MobaWeb.broadcast("tutorial-#{hero.user_id}", "tutorial-step", %{step: step})
+    MobaWeb.broadcast("tutorial-#{user.id}", :tutorial, %{step: step})
 
     assign(socket, tutorial_step: step)
   end

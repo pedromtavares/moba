@@ -13,7 +13,7 @@ defmodule Moba.Game.Targets do
 
   def get!(id) do
     Repo.get!(Target, id)
-    |> Repo.preload(attacker: [:items, active_build: [:skills]], defender: [:items, active_build: [:skills]])
+    |> Repo.preload(attacker: [:items, :skills], defender: [:items, :skills])
   end
 
   def list(hero_id, farm_sort \\ :asc) do

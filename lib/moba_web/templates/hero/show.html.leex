@@ -10,7 +10,7 @@
                         <div class="card-header pt-0 pb-1">
                             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                                 <span class="font-italic font-15">Level <%= @hero.level %></span></span>
-                                <%=live_redirect class: "text-white font-20", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><%= @hero.name %><%end %>
+                                <%=live_redirect class: "text-white font-20", to: Routes.live_path(@socket, MobaWeb.UserLive, @hero.user_id) do %><%= @hero.name %><%end %>
                                 <span class="font-italic font-15"><%= @hero.avatar.name %></span>
                             </h4>
                         </div>
@@ -37,7 +37,7 @@
                                 <div class="row">
                                     <%= if @skin_selection do %>
                                         <div class="col">
-                                            <%= live_redirect class: "btn btn-light btn-block mt-1", to: Routes.live_path(@socket, MobaWeb.TavernLiveView, %{avatar: @hero.avatar.code}) do %>
+                                            <%= live_redirect class: "btn btn-light btn-block mt-1", to: Routes.live_path(@socket, MobaWeb.TavernLive, %{avatar: @hero.avatar.code}) do %>
                                                 <i class="fa fa-palette mr-1"></i>View Skins
                                             <% end %>
                                         </div>
@@ -115,7 +115,7 @@
             <%= unless @hero.user.is_guest do %>
                 <div class="row">
                     <div class="col">
-                        <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLiveView, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
+                        <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLive, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
                     </div>
                 </div>
             <% end %>
@@ -144,7 +144,7 @@
                                     </h1>
                                 </td>
                                 <td>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLiveView, hero) do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLive, hero) do %>
                                         <%= GH.hero_avatar(hero) %>
                                         <br/>
                                         <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>
@@ -168,7 +168,7 @@
                     </table>
                 </div>
                 <div class="transparent card-footer p-0">
-                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CommunityLiveView), class: "btn btn-block btn-light btn-sm" do %>
+                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CommunityLive), class: "btn btn-block btn-light btn-sm" do %>
                         <i class="fa fa-table mr-1"></i>See Top Heroes
                     <% end %>
                 </div>
@@ -179,4 +179,4 @@
     </div>
 </div>
 
-<%= if @hero.user_id == @current_user.id, do: live_render(@socket, MobaWeb.CurrentHeroLiveView, session: %{"hero" => @hero}, id: "hero-bar") %>
+<%= if @hero.user_id == @current_user.id, do: live_render(@socket, MobaWeb.CurrentHeroLive, session: %{"hero" => @hero}, id: "hero-bar") %>

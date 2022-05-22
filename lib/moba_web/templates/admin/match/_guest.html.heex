@@ -6,7 +6,7 @@
             Lv <span class={if @user.current_pve_hero.pve_state == "dead", do: "text-muted"}><%= @user.current_pve_hero.level %></span> (<%= length(@user.hero_collection) %>)
         </h5>
         <div>
-            <%= for skill <- @user.current_pve_hero.active_build.skills do %>
+            <%= for skill <- @user.current_pve_hero.skills do %>
                 <%= img_tag(GH.image_url(skill), style: "width: 20%") %>
             <% end %>
         </div>

@@ -2,7 +2,7 @@
     <div class="card-body p-0">
         <div class="row d-flex justify-content-around my-3">
             <%= if @pending_match do %>
-                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
                     <i class="fa fa-hourglass mr-1"></i>You have a pending match, click to continue
                 <% end %>
             <% else %>

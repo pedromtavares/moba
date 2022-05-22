@@ -46,7 +46,7 @@
                                         <%= if !skill.passive do %>
                                             <div class="form-group">
                                                 <select class="custom-select" name="skill_order[<%= skill.code %>]">
-                                                    <%= for {code, index} <- Enum.with_index(@current_hero.active_build.skill_order, 1) do %>
+                                                    <%= for {code, index} <- Enum.with_index(@current_hero.skill_order, 1) do %>
                                                         <option value=<%= index %> <%= if code == skill.code, do: "selected" %>><%= index %></option>
                                                     <% end %>
                                                 </select>
@@ -99,7 +99,7 @@
                                         <%= if item.active do %>
                                             <div class="form-group">
                                                 <select class="custom-select" name="item_order[<%=item.code%>]">
-                                                    <%= for {code, index} <- Enum.with_index(@current_hero.active_build.item_order, 1) do %>
+                                                    <%= for {code, index} <- Enum.with_index(@current_hero.item_order, 1) do %>
                                                         <option value=<%= index %> <%= if code == item.code, do: "selected" %>><%= index %></option>
                                                     <% end %>
                                                 </select>

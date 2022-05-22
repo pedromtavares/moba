@@ -5,7 +5,7 @@
 <div id='hero-battle' class="battle mt-3">
     <div class="row">
         <div class="col-12 col-md-5">
-            <%= render "_hero.html", hero: @battle.attacker, last_hero: last_hero_for(@battle.attacker, @last_turn), battle: @battle, snapshot: @battle.attacker_snapshot %>
+            <%= render "_hero.html", hero: @battle.attacker, last_hero: last_hero_for(@battle.attacker, @last_turn), battle: @battle, snapshot: @snapshot %>
         </div>
         <div class="col-12 col-md-2 text-center versus-box">
             <h1 class="f-rpg">VS</h1>
@@ -37,7 +37,7 @@
                         <div class="row">
                             <div class="text-center col-12">
                                 <%= if @battle.type == "pve" do %>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), "phx-hook": "Loading", id: "battle-over-training" do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLive), "phx-hook": "Loading", id: "battle-over-training" do %>
                                         <button class="btn btn-danger width-lg text-white">
                                             <span class="loading-text">Battle Over!</span>
                                         </button>
@@ -49,7 +49,7 @@
                                     </a>
                                 <% end %>
                                 <%= if @battle.type == "duel" do %>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @battle.duel_id), "phx-hook": "Loading", id: "battle-over-duel" do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @battle.duel_id), "phx-hook": "Loading", id: "battle-over-duel" do %>
                                         <button class="btn btn-danger width-lg text-white">
                                             <span class="loading-text">Battle Over!</span>
                                         </button>

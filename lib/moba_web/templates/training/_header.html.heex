@@ -16,11 +16,11 @@
                 <div class="mt-4 d-flex justify-content-between align-items-center">
                     <div>
                         <%= if assigns[:origin] do %>
-                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), class: "btn btn-light" do %>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLive), class: "btn btn-light" do %>
                                 <i class="fa fa-sword mr-1 fa-2x"></i><br/>Return to Training
                             <% end %>
                         <% else %>
-                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLiveView), class: "btn btn-light" do %>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattlesLive), class: "btn btn-light" do %>
                                 <i class="fa fa-list-ul mr-1 fa-2x"></i><br/>Battle Log
                             <% end %>
                             <%= if @current_hero.pve_current_turns > 0 && @current_hero.refresh_targets_count > 0 do %>

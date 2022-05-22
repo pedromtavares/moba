@@ -1,7 +1,7 @@
 defmodule MobaWeb.Shop do
   use MobaWeb, :live_component
 
-  alias MobaWeb.Tutorial
+  alias MobaWeb.TutorialComponent
 
   def mount(socket) do
     {:ok,
@@ -47,7 +47,7 @@ defmodule MobaWeb.Shop do
     {:noreply,
      socket
      |> assign(transmute: assigns.selected_shop, selected_shop: nil, selected_inventory: nil, recipe: [])
-     |> Tutorial.next_step(8)}
+     |> TutorialComponent.next_step(8)}
   end
 
   def handle_event("cancel-transmute", _, socket) do
@@ -58,7 +58,7 @@ defmodule MobaWeb.Shop do
     hero = Game.transmute_item!(assigns.current_hero, assigns.recipe, assigns.transmute)
     Game.broadcast_to_hero(hero.id)
 
-    {:noreply, assign(socket, transmute: nil, recipe: []) |> Tutorial.next_step(9)}
+    {:noreply, assign(socket, transmute: nil, recipe: []) |> TutorialComponent.next_step(9)}
   end
 
   def handle_event("buy", _, %{assigns: assigns} = socket) do
@@ -122,10 +122,10 @@ defmodule MobaWeb.Shop do
   defp check_tutorial(%{assigns: %{tutorial_step: step}} = socket, hero) do
     if length(hero.items) > 1 && step == 3 do
       socket
-      |> Tutorial.next_step(4)
+      |> TutorialComponent.next_step(4)
       |> close()
     else
-      socket |> Tutorial.next_step(7)
+      socket |> TutorialComponent.next_step(7)
     end
   end
 end

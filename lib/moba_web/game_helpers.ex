@@ -20,7 +20,7 @@ defmodule MobaWeb.GameHelpers do
   def farming_amount_label(value) when value >= 1000, do: "#{div(value, 1000)}K"
   def farming_amount_label(value), do: value
 
-  def hero_skill_list(%{active_build: %{skills: skills}, id: id}) do
+  def hero_skill_list(%{skills: skills, id: id}) do
     Enum.map(skills, fn skill ->
       img_tag(image_url(skill),
         data: [toggle: "tooltip"],
@@ -83,8 +83,6 @@ defmodule MobaWeb.GameHelpers do
     diff_now = Timex.diff(start, Timex.now(), :minutes)
     diff_now * 100 / diff_ending
   end
-
-  def pve_win_rate(hero), do: Moba.Game.pve_win_rate(hero)
 
   def finished_time(%{finished_at: nil}), do: nil
   def finished_time(hero), do: Timex.diff(hero.finished_at, hero.inserted_at, :minutes)

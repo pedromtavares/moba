@@ -51,7 +51,7 @@
                 <div class="d-flex w-100 justify-content-center text-center p-2 rounded" style="background: #323b44;">
                     <div class="row d-block">
                         <div class="col">
-                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLiveView), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.TavernLive), "data-toggle": "tooltip", title: "Shards are the in-game currency that you can use to unlock game content, which you can check out by clicking this link." do %>
                                 <h4><i class="fab fa-ethereum text-info fa-2x"></i></h4>
                                 <h4>Shards</h4>
                                 <h5 class="text-info">+<%= Enum.map(@completed_daily_progressions, &(&1.quest.shard_prize)) |> Enum.sum()%></h5>

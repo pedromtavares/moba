@@ -33,7 +33,6 @@ defmodule Moba.Engine.Core.League do
     %Battle{
       attacker: attacker,
       defender: defender,
-      match_id: attacker.match_id,
       type: Engine.battle_types().league
     }
   end

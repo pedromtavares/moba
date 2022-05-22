@@ -56,8 +56,9 @@ defmodule Moba.Game.Skills do
     if current && can_level?(hero, current) && !max_level?(current) do
       leveled = get_by_code!(code, true, current.level + 1)
       replaced = skills -- [current]
+      added = replaced ++ [leveled]
 
-      Game.update_hero!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, replaced)
+      Game.update_hero!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, added)
     else
       hero
     end

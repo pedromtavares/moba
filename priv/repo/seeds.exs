@@ -72,7 +72,7 @@ defmodule SeedHelper do
       end
     end)
 
-    # creates 40 grandmaster bots, each with 4 avatar coces
+    # creates 40 grandmaster bots, each with 4 avatar codes
     Enum.reduce(1..40, codes, fn _, acc ->
       used = Enum.shuffle(acc) |> Enum.take(4)
       total = length(used)

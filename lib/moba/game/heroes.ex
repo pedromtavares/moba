@@ -43,7 +43,10 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def create!(attrs, user, avatar, skills, items \\ nil) do
+  def create!(attrs, user, avatar, skills, items \\ []) do
+    avatar = Repo.preload(avatar, :ultimate)
+    skills = [avatar.ultimate] ++ Enum.slice(skills, 0, 3)
+
     %Hero{}
     |> Hero.create_changeset(attrs, user, avatar, skills, items)
     |> Repo.insert!()
@@ -67,10 +70,10 @@ defmodule Moba.Game.Heroes do
       finished_at: finished_at
     }
 
-    build = Game.generate_bot_build(attrs, avatar)
-    skills = build.skills ++ [avatar.ultimate]
+    build_attrs = Map.put(attrs, :level, level)
+    build = Game.generate_bot_build(build_attrs, avatar)
     attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
-    bot = create!(attrs, user, avatar, skills, build.items)
+    bot = create!(attrs, user, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
 
     if level > 0 do
       xp = Moba.xp_until_hero_level(level)
@@ -125,16 +128,6 @@ defmodule Moba.Game.Heroes do
       update!(updated, %{league_tier: 5}) |> Game.generate_boss!()
     else
       updated
-    end
-  end
-
-  def pve_win_rate(hero) do
-    sum = hero.wins + hero.losses
-
-    if sum > 0 do
-      round(hero.wins * 100 / sum)
-    else
-      0
     end
   end
 

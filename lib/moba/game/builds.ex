@@ -7,7 +7,6 @@ defmodule Moba.Game.Builds do
   """
 
   alias Moba.{Repo, Game}
-  alias Game.Schema.Build
   alias Game.Query.SkillQuery
 
   # -------------------------------- PUBLIC API

@@ -1,7 +1,7 @@
-<%= if non_guest?(assigns), do: live_render(@socket, MobaWeb.CurrentUserLiveView, id: "current-user") %>
+<%= if non_guest?(assigns), do: live_render(@socket, MobaWeb.CurrentUserLive, id: "current-user") %>
 
 <%= if show_sidebar?(assigns) do %>
-    <%= live_component(MobaWeb.Sidebar, assigns) %>
+    <%= render "sidebar.html", assigns %>
 <% else %>
     <%= @inner_content %>
 <% end %>

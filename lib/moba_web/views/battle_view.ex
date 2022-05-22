@@ -200,7 +200,7 @@ defmodule MobaWeb.BattleView do
   end
 
   def league_success_rate(%{league_attempts: attempts, league_successes: successes}) when attempts > 0 do
-    Float.round(successes * 100 / attempts)
+    round(successes * 100 / attempts)
   end
 
   def league_success_rate(_), do: 0
@@ -446,6 +446,16 @@ defmodule MobaWeb.BattleView do
   end
 
   def show_timer?(_), do: false
+
+  def win_rate(hero) do
+    sum = hero.wins + hero.losses
+
+    if sum > 0 do
+      round(hero.wins * 100 / sum)
+    else
+      0
+    end
+  end
 
   defp get_resource(turn, code) do
     skills =

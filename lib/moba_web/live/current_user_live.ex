@@ -1,4 +1,4 @@
-defmodule MobaWeb.CurrentUserLiveView do
+defmodule MobaWeb.CurrentUserLive do
   use MobaWeb, :live_view
   alias MobaWeb.Presence
 
@@ -46,7 +46,7 @@ defmodule MobaWeb.CurrentUserLiveView do
   end
 
   def handle_info({"duel", %{id: id}}, socket) do
-    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.DuelLiveView, id))}
+    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.DuelLive, id))}
   end
 
   def handle_info(

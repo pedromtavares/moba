@@ -1,4 +1,4 @@
-defmodule MobaWeb.TavernLiveViewTest do
+defmodule MobaWeb.UserLiveTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
@@ -7,7 +7,9 @@ defmodule MobaWeb.TavernLiveViewTest do
 
     conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
 
-    {:ok, _view, html} = live(conn, "/tavern")
-    assert html =~ "Skins"
+    username = hero.user.username
+
+    {:ok, _view, html} = live(conn, "/user/#{hero.user_id}")
+    assert html =~ username
   end
 end

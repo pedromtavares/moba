@@ -10,16 +10,6 @@ defmodule Moba.Game do
   alias Moba.{Repo, Game, Accounts}
   alias Game.{Heroes, Matches, Leagues, Targets, Items, Skills, Avatars, Builds, Skins, Duels, Quests}
 
-  # MATCHES
-
-  def current_match, do: Matches.current()
-
-  def last_match, do: Matches.last_active()
-
-  def create_match!(attrs \\ %{}), do: Matches.create!(attrs)
-
-  def update_match!(match, attrs), do: Matches.update!(match, attrs)
-
   # HEROES
 
   def get_hero!(hero_id), do: Heroes.get!(hero_id)
@@ -72,8 +62,8 @@ defmodule Moba.Game do
     create_bot_hero!(avatar, level, difficulty, tier, user)
   end
 
-  def update_hero!(hero, attrs, items \\ nil) do
-    updated = Heroes.update!(hero, attrs, items)
+  def update_hero!(hero, attrs, items \\ nil, skills \\ nil) do
+    updated = Heroes.update!(hero, attrs, items, skills)
     broadcast_to_hero(hero.id)
     updated
   end
@@ -101,8 +91,6 @@ defmodule Moba.Game do
 
   def max_league?(%{league_tier: league_tier, pve_tier: pve_tier}),
     do: league_tier == Moba.max_available_league(pve_tier)
-
-  def pve_win_rate(hero), do: Heroes.pve_win_rate(hero)
 
   def pve_search(hero), do: Heroes.pve_search(hero)
 
@@ -406,4 +394,14 @@ defmodule Moba.Game do
   def generate_daily_quest_progressions!(user_id \\ nil), do: Quests.generate_daily_progressions!(user_id)
 
   def list_daily_quest_progressions(user_id), do: Quests.list_progressions(user_id, true)
+
+  # MATCHES
+
+  def current_match, do: Matches.current()
+
+  def last_match, do: Matches.last_active()
+
+  def create_match!(attrs \\ %{}), do: Matches.create!(attrs)
+
+  def update_match!(match, attrs), do: Matches.update!(match, attrs)
 end

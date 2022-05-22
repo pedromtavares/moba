@@ -25,10 +25,6 @@ defmodule Test.GameHelper do
     )
   end
 
-  def base_build(type \\ "pve", hero \\ create_base_hero(), skills \\ base_skills()) do
-    Game.Builds.create!(type, hero, skills)
-  end
-
   def base_avatar, do: Game.get_avatar_by_code!("phantom_assassin")
 
   def weak_avatar do

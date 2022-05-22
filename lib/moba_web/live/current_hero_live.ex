@@ -1,27 +1,20 @@
-defmodule MobaWeb.CurrentHeroLiveView do
+defmodule MobaWeb.CurrentHeroLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{Tutorial, Shop}
+  alias MobaWeb.{TutorialComponent, Shop}
 
-  def mount(_, %{"hero" => hero} = session, socket) do
-    if connected?(socket) do
-      Tutorial.subscribe(hero.user_id)
+  def mount(_, session, socket) do
+    with %{assigns: %{current_hero: hero}} = socket = socket_init(session, socket) do
+      if connected?(socket) do
+        TutorialComponent.subscribe(hero.user_id)
 
-      hero.id
-      |> Game.subscribe_to_hero()
-      |> Shop.subscribe()
+        hero.id
+        |> Game.subscribe_to_hero()
+        |> Shop.subscribe()
+      end
+
+      {:ok, socket}
     end
-
-    step = session["tutorial_step"] || hero.user.tutorial_step
-
-    {:ok,
-     assign(socket,
-       current_hero: hero,
-       editing: false,
-       show_build: false,
-       show_shop: Enum.member?([3, 7, 8, 9], step),
-       tutorial_step: step
-     )}
   end
 
   # cheat mechanism for easy levels, unavailable to live players
@@ -38,11 +31,10 @@ defmodule MobaWeb.CurrentHeroLiveView do
   end
 
   def handle_event("skill", %{"code" => code}, %{assigns: %{current_hero: current}} = socket) do
-    hero = Game.level_up_skill!(current, code)
-
-    Game.broadcast_to_hero(hero.id)
-
-    {:noreply, assign(socket, current_hero: hero)}
+    with hero = Game.level_up_skill!(current, code) do
+      Game.broadcast_to_hero(hero.id)
+      {:noreply, assign(socket, current_hero: hero)}
+    end
   end
 
   def handle_event("start-edit", _, socket) do
@@ -50,13 +42,13 @@ defmodule MobaWeb.CurrentHeroLiveView do
   end
 
   def handle_event("finalize-edit", params, %{assigns: %{current_hero: current}} = socket) do
-    build =
+    hero =
       Game.update_hero!(current, %{
         skill_order: params_to_order(params["skill_order"]),
         item_order: params_to_order(params["item_order"])
       })
 
-    {:noreply, assign(socket, editing: false, current_hero: %{current | active_build: build})}
+    {:noreply, assign(socket, editing: false, current_hero: hero)}
   end
 
   def handle_event("show-build", _, socket) do
@@ -68,7 +60,7 @@ defmodule MobaWeb.CurrentHeroLiveView do
   end
 
   def handle_event("close-shop", _, socket) do
-    {:noreply, assign(socket, show_shop: false) |> Tutorial.next_step(10)}
+    {:noreply, assign(socket, show_shop: false) |> TutorialComponent.next_step(10)}
   end
 
   def handle_event("toggle-shop", _, socket) do
@@ -91,7 +83,7 @@ defmodule MobaWeb.CurrentHeroLiveView do
     {:noreply, assign(socket, current_hero: Game.get_hero!(id))}
   end
 
-  def handle_info({"tutorial-step", %{step: step}}, socket) do
+  def handle_info({:tutorial, %{step: step}}, socket) do
     {:noreply, assign(socket, tutorial_step: step)}
   end
 
@@ -108,5 +100,18 @@ defmodule MobaWeb.CurrentHeroLiveView do
     |> Enum.map(fn {code, _} ->
       code
     end)
+  end
+
+  defp socket_init(%{"hero" => hero} = session, socket) do
+    with step = session["tutorial_step"] || hero.user.tutorial_step,
+         show_shop = Enum.member?([3, 7, 8, 9], step) do
+      assign(socket,
+        current_hero: hero,
+        editing: false,
+        show_build: false,
+        show_shop: show_shop,
+        tutorial_step: step
+      )
+    end
   end
 end

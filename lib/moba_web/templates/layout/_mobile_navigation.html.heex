@@ -6,25 +6,25 @@
                     <div class="row text-center game-nav no-gutters">
                         <div class="col d-flex justify-content-center">
                             <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
-                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TrainingLiveView), class: "nav-link" do %>
+                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TrainingLive), class: "nav-link" do %>
                                     <i class="fa fa-sword"></i>
                                 <% end %>
                             <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLiveView), class: "nav-link" do %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLive), class: "nav-link" do %>
                                 <i class="fa fa-home"></i>
                             <% end %>
                             <%= if length(@current_user.hero_collection) > 0 do %>
-                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLiveView), class: "nav-link" do %>
+                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLive), class: "nav-link" do %>
                                     <i class="fa fa-swords"></i>
                                 <% end %>
                             <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLiveView, @current_user.id), class: "nav-link" do %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.UserLive, @current_user.id), class: "nav-link" do %>
                                 <i class="fa fa-helmet-battle"></i>
                             <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLiveView), class: "nav-link" do %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLive), class: "nav-link" do %>
                                 <i class="fa fa-globe"></i>
                             <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLiveView), class: "nav-link" do %>
+                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLive), class: "nav-link" do %>
                                 <i class="fa fa-dungeon"></i>
                             <% end %>
                         </div>

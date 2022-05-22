@@ -3,7 +3,7 @@
         <img src={"/images/pvp/#{@opponent.season_tier}.png"} class="mr-2" style="max-height:  40px"/>
         <div style="width: 50%">
             <h4>
-                <%= live_redirect @opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @opponent), class: if elite?(@duel), do: "text-warning", else: "text-primary" %>       
+                <%= live_redirect @opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLive, @opponent), class: if elite?(@duel), do: "text-warning", else: "text-primary" %>       
             </h4>
             <%= unless pvp?(@duel) do %>
                 <small class={if elite?(@duel), do: "badge badge-pill badge-light-warning", else: "badge badge-pill badge-light-primary"} style="font-size: 0.6rem">
@@ -33,7 +33,7 @@
     </td>
     
     <td>
-        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @duel), class: "btn btn-light" do %>
+        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @duel), class: "btn btn-light" do %>
             <i class="fa fa-eye mr-1"></i>
             View
         <% end %>

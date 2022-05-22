@@ -127,7 +127,7 @@ defmodule Moba.Game.Items do
     new_inventory = hero.items ++ [item]
 
     Game.update_hero!(
-      updated,
+      hero,
       new_inventory_stats(new_inventory),
       new_inventory
     )

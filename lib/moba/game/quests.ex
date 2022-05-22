@@ -38,7 +38,7 @@ defmodule Moba.Game.Quests do
 
   def get_by_code_and_level!(code, level), do: Repo.get_by!(Quest, code: code, level: level)
 
-  def last_completed_progressions(%{finished_at: nil}), do: nil
+  def last_completed_progressions(%{finished_at: nil}), do: []
 
   def last_completed_progressions(%{user_id: user_id, finished_at: hero_finished_at}) do
     Repo.all(from p in progressions_by_user(user_id), where: p.completed_at >= ^hero_finished_at)

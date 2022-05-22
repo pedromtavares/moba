@@ -20,7 +20,7 @@
             <div class="img-container mr-4 float-left inactive">
                 <img src="/images/basic_attack.png" data-toggle="tooltip" title="<%=GH.basic_attack_description()%>" class="skill-img <%=if @last_turn && @last_turn.skill && @last_turn.skill.code == "basic_attack", do: "last-skill"%>""/>
             </div>
-            <%= for skill <- @hero.active_build.skills do %>
+            <%= for skill <- @hero.skills do %>
                 <div class="img-container float-left inactive skill-container">
                     <img src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" class="skill-img <%=if @last_turn && @last_turn.skill && @last_turn.skill.id == skill.id, do: "last-skill"%>"/>
                     <%= resource_status(skill, @turn.defender) %>

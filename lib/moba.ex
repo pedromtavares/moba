@@ -112,7 +112,7 @@ defmodule Moba do
   def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
   def victory_duel_points(diff), do: ceil(diff * 0.15)
   def defeat_duel_points(diff), do: victory_duel_points(-diff)
-  def tie_duel_points(diff) when diff < -@maximum_points_difference  or diff > @maximum_points_difference, do: 0
+  def tie_duel_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference, do: 0
   def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points())
   def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points()
   def duel_timer_in_seconds, do: @duel_timer_in_seconds

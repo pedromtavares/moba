@@ -139,6 +139,8 @@ defmodule Moba.Game.Schema.Hero do
 
   def create_changeset(hero, attrs, user, avatar, skills, items) do
     pve_tier = (user && user.pve_tier) || 0
+    skill_order = Enum.filter(skills, &(!&1.passive)) |> Enum.map(& &1.code)
+    item_order = Enum.filter(items, & &1.active) |> Enum.map(& &1.code)
 
     hero
     |> change(%{
@@ -147,7 +149,9 @@ defmodule Moba.Game.Schema.Hero do
       total_mp: avatar.total_mp,
       speed: avatar.speed,
       armor: avatar.armor,
-      power: avatar.power
+      power: avatar.power,
+      skill_order: skill_order,
+      item_order: item_order
     })
     |> change(%{
       pve_state: "alive",
@@ -176,7 +180,7 @@ defmodule Moba.Game.Schema.Hero do
   def replace_skills(hero, nil), do: hero
 
   def replace_skills(hero, skills) do
-    build
+    hero
     |> changeset(%{})
     |> put_assoc(:skills, skills)
   end

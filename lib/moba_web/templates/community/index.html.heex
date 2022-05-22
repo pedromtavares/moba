@@ -45,7 +45,7 @@
                                     <img src={"/images/pvp/#{message.user.season_tier}.png"}/>
                                 </div>
                                 <p class="inbox-item-author">
-                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
+                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLive, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
                                     <%= if message.is_admin do %>
                                         <small class="text-danger">(admin)</small>
                                     <% end %>
@@ -86,14 +86,14 @@
                 </li>
             </ul>
             <div class={"row mt-2 #{unless @active_tab == "pve", do: "d-none"}"}>
-                <%= for hero <- @pve do %>
+                <%= for hero <- @pve_ranking do %>
                     <%= render "_hero.html", hero: hero, socket: @socket %>
                 <% end %>
             </div>
-            <%= if @users do %>
+            <%= if @user_ranking do %>
                 <table class={"table table-dark mb-0 ranking border-left border-right border-bottom #{unless @active_tab == "users", do: "d-none"}"}>
                     <tbody id="hall-of-users">
-                        <%= for {user, index} <- Enum.with_index(@users, 1) do %>
+                        <%= for {user, index} <- Enum.with_index(@user_ranking, 1) do %>
                             <tr id={"user-#{user.id}"}>
                                 <td>
                                     <img src={"/images/pvp/#{user.season_tier}.png"} style="max-height: 90px"/>
@@ -103,7 +103,7 @@
                                 </td>
                                 <td>
                                     <h2>
-                                        <%= live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, user.id), class: "text-reset" %>
+                                        <%= live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLive, user.id), class: "text-reset" %>
                                         <br/>
                                         <small class="text-dark"><em>Last online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
                                     </h2>

@@ -1,6 +1,6 @@
 defmodule Moba.Conductor do
   @moduledoc """
-  Server responsible for orchestrating the main gameplay loop
+  Server responsible for orchestrating the game's main timers and global tasks
   """
   use GenServer
 
@@ -162,8 +162,8 @@ defmodule Moba.Conductor do
     ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
     Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
 
-    Logger.info("Updating build skills...")
-    update_build_skills()
+    Logger.info("Updating hero skills...")
+    update_hero_skills()
     Logger.info("Updating hero items...")
     update_hero_items()
     Logger.info("Updating hero avatars...")
@@ -206,7 +206,7 @@ defmodule Moba.Conductor do
   defp time_diff_in_seconds(nil), do: 0
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
-  defp update_build_skills do
+  defp update_hero_skills do
     canon = SkillQuery.base_canon() |> Repo.all()
     all_current = SkillQuery.base_current() |> Repo.all()
 
@@ -216,7 +216,7 @@ defmodule Moba.Conductor do
       if current do
         query = SkillQuery.non_current() |> SkillQuery.with_level(skill.level) |> SkillQuery.with_code(skill.code)
         skill_ids = Repo.all(query) |> Enum.map(& &1.id)
-        query = SkillQuery.build_skills_by_skill_ids(skill_ids)
+        query = SkillQuery.hero_skills_by_skill_ids(skill_ids)
         Repo.update_all(query, set: [skill_id: current.id])
       end
     end)

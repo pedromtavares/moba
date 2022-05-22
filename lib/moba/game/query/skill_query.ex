@@ -4,7 +4,7 @@ defmodule Moba.Game.Query.SkillQuery do
   """
 
   alias Moba.Game
-  alias Game.Schema.{Skill, BuildSkill}
+  alias Game.Schema.{Skill, HeroSkill}
 
   import Ecto.Query, only: [from: 2]
 
@@ -100,7 +100,7 @@ defmodule Moba.Game.Query.SkillQuery do
     from s in query, where: s.id not in ^ids
   end
 
-  def build_skills_by_skill_ids(ids) do
-    from bs in BuildSkill, where: bs.skill_id in ^ids
+  def hero_skills_by_skill_ids(ids) do
+    from hs in HeroSkill, where: hs.skill_id in ^ids
   end
 end

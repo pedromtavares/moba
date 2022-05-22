@@ -13,9 +13,9 @@
                             <% end %>
                             <h2 class="mb-0">
                                 <img src={"/images/pvp/#{@duel.user.season_tier}.png"} style="max-height:  50px"/>
-                                <%= live_redirect @duel.user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @duel.user) %>
+                                <%= live_redirect @duel.user.username, to: Routes.live_path(@socket, MobaWeb.UserLive, @duel.user) %>
                                  vs 
-                                <%= live_redirect @duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, @duel.opponent) %>
+                                <%= live_redirect @duel.opponent.username, to: Routes.live_path(@socket, MobaWeb.UserLive, @duel.opponent) %>
                                 <img src={"/images/pvp/#{@duel.opponent.season_tier}.png"} style="max-height:  50px"/>
                             </h2>
                             <%= if casual?(@duel) do %>
@@ -83,7 +83,7 @@
                                     <img src={"/images/pvp/#{message.tier}.png"}/>
                                 </div>
                                 <p class="inbox-item-text">
-                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLiveView, message.user_id), class: "text-dark mr-1" %>
+                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLive, message.user_id), class: "text-dark mr-1" %>
                                      <%= message.body %>
                                 </p>
                                 <p class="inbox-item-date">

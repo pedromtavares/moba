@@ -86,7 +86,7 @@
 
                                             <td class="text-left">
                                                 <img src={"/images/pvp/#{opponent_for(duel, @user).season_tier}.png"} class="pvp-rank"/>
-                                                <span class="opponent"><%= live_redirect opponent_for(duel, @user).username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, opponent_for(duel, @user)) %></span>
+                                                <span class="opponent"><%= live_redirect opponent_for(duel, @user).username, to: Routes.live_path(@socket, MobaWeb.UserLive, opponent_for(duel, @user)) %></span>
                                             </td>
 
                                             <td class="text-center">
@@ -99,7 +99,7 @@
                                             </td>
                                             
                                             <td>
-                                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, duel), class: "btn btn-light btn-sm" do %>
+                                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, duel), class: "btn btn-light btn-sm" do %>
                                                     <i class="fa fa-eye"></i>
                                                 <% end %>
                                             </td>
@@ -147,7 +147,7 @@
                                     </h1>
                                 </td>
                                 <td>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) do %>
+                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLive, user) do %>
                                         <img src={"/images/pvp/#{user.season_tier}.png"} class="pvp-rank" />
                                         <h5 class={"text-white font-weight-bold mb-0 mt-1 #{if user.id == @user.id, do: "text-info"}"}><%= user.username %></h5>
                                     <% end %>

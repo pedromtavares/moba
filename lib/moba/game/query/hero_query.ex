@@ -20,8 +20,7 @@ defmodule Moba.Game.Query.HeroQuery do
       :avatar,
       :skin,
       :user,
-      skills: ^SkillQuery.ordered(),
-      active_build: [skills: ^SkillQuery.ordered()]
+      skills: ^SkillQuery.ordered()
     ])
   end
 

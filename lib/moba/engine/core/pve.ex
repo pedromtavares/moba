@@ -34,7 +34,6 @@ defmodule Moba.Engine.Core.Pve do
       attacker: attacker,
       defender: defender,
       difficulty: difficulty,
-      match_id: attacker.match_id,
       type: Engine.battle_types().pve
     }
   end

@@ -1,18 +1,18 @@
 <div class="row">
     <div class="col center victory-title margin-auto mt-2">
-        <h3><%=battle_result(@battle, @hero) |> raw()%></h3>
+        <h3><%=battle_result(@battle, @snapshot) |> raw()%></h3>
     </div>
 </div>
 
 <%= if @battle.winner && @battle.winner_id == @battle.attacker_id do %>
-    <%= if @hero.league_step == 0 do %>
+    <%= if @snapshot.league_step == 0 do %>
         <div class="row">
             <div class="col center">
                 <ul class="nav nav-pills navtab-bg flex-center promotion">
                     <li class="nav-item">
                         <a href="javascript:;" class="nav-link">
-                            <img src="/images/league/<%=@hero.league_tier-1%>.png" class="mr-1 league-rank"/>
-                            <span class="d-none d-md-inline-block"><%=Moba.leagues[@hero.league_tier-1]%></span>
+                            <img src="/images/league/<%=@snapshot.league_tier-1%>.png" class="mr-1 league-rank"/>
+                            <span class="d-none d-md-inline-block"><%=Moba.leagues[@snapshot.league_tier-1]%></span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -20,18 +20,18 @@
                     </li>
                     <li class="nav-item">
                         <a href="javascript:;" class="nav-link">
-                            <img src="/images/league/<%=@hero.league_tier%>.png" class="mr-1 league-rank"/>
-                            <span class="d-none d-md-inline-block"><%=Moba.leagues[@hero.league_tier]%></span>
+                            <img src="/images/league/<%=@snapshot.league_tier%>.png" class="mr-1 league-rank"/>
+                            <span class="d-none d-md-inline-block"><%=Moba.leagues[@snapshot.league_tier]%></span>
                         </a>
                     </li>
                     <li class="nav-item ml-4">
                         <div class="ribbon-box reward-box">
-                            <div class="ribbon ribbon-warning float-left shape">+<%=league_bonus(@hero)%>g</div>
+                            <div class="ribbon ribbon-warning float-left shape">+<%=league_bonus(@snapshot)%>g</div>
                         </div>
                     </li>
                     <li class="nav-item ml-4">
                         <div class="ribbon-box reward-box">
-                            <div class="ribbon ribbon-primary float-left shape">+<%=league_bonus(@hero)%> XP</div>
+                            <div class="ribbon ribbon-primary float-left shape">+<%=league_bonus(@snapshot)%> XP</div>
                         </div>
                     </li>
                 </ul>
@@ -41,14 +41,14 @@
         <div class="row">
             <div class="col center">
                 <ul class="nav nav-pills nav-justified form-wizard-header d-none d-md-flex">
-                    <%=render "_winner_league_step.html", hero: @hero, step: 1, label: "Easiest"%>
-                    <%=render "_winner_league_step.html", hero: @hero, step: 2, label: "Easy"%>
-                    <%=render "_winner_league_step.html", hero: @hero, step: 3, label: "Medium"%>
-                    <%=render "_winner_league_step.html", hero: @hero, step: 4, label: "Hard"%>
-                    <%=render "_winner_league_step.html", hero: @hero, step: 5, label: "Hardest"%>
+                    <%=render "_winner_league_step.html", hero: @snapshot, step: 1, label: "Easiest"%>
+                    <%=render "_winner_league_step.html", hero: @snapshot, step: 2, label: "Easy"%>
+                    <%=render "_winner_league_step.html", hero: @snapshot, step: 3, label: "Medium"%>
+                    <%=render "_winner_league_step.html", hero: @snapshot, step: 4, label: "Hard"%>
+                    <%=render "_winner_league_step.html", hero: @snapshot, step: 5, label: "Hardest"%>
                 </ul>
                 <%= unless @battle.attacker.league_step == 0 do %>
-                    <a href="javascript:;" phx-click="next-battle" phx-value-id="<%=@battle.id%>" class="btn btn-primary mt-2"><i class="fa fa-arrow-right mr-1"></i> Proceed to Battle #<%=@hero.league_step%></a>
+                    <a href="javascript:;" phx-click="next-battle" phx-value-id="<%=@battle.id%>" class="btn btn-primary mt-2"><i class="fa fa-arrow-right mr-1"></i> Proceed to Battle #<%=@snapshot.league_step%></a>
                 <% end %>
             </div>
         </div>
@@ -56,25 +56,25 @@
 <% else %>
     <div class="row">
         <div class="col center">
-            <%= if Game.master_league?(@hero) do %>
+            <%= if Game.master_league?(@snapshot) do %>
                 <div class="mt-2"></div>
             <% else %>
                 <ul class="nav nav-pills nav-justified form-wizard-header d-none d-md-flex">
-                    <%=render "_loser_league_step.html", hero: @hero, step: 1, label: "Easiest"%>
-                    <%=render "_loser_league_step.html", hero: @hero, step: 2, label: "Easy"%>
-                    <%=render "_loser_league_step.html", hero: @hero, step: 3, label: "Medium"%>
-                    <%=render "_loser_league_step.html", hero: @hero, step: 4, label: "Hard"%>
-                    <%=render "_loser_league_step.html", hero: @hero, step: 5, label: "Hardest"%>
+                    <%=render "_loser_league_step.html", hero: @snapshot, step: 1, label: "Easiest"%>
+                    <%=render "_loser_league_step.html", hero: @snapshot, step: 2, label: "Easy"%>
+                    <%=render "_loser_league_step.html", hero: @snapshot, step: 3, label: "Medium"%>
+                    <%=render "_loser_league_step.html", hero: @snapshot, step: 4, label: "Hard"%>
+                    <%=render "_loser_league_step.html", hero: @snapshot, step: 5, label: "Hardest"%>
                 </ul>
             <% end %>
         </div>
     </div>
 <% end %>
 <%= if @current_user do %>
-    <%= if Game.master_league?(@hero) || @hero.league_step == 0 || @battle.attacker.league_step == 0 do %>
+    <%= if Game.master_league?(@snapshot) || @snapshot.league_step == 0 || @battle.attacker.league_step == 0 do %>
         <div class="row battle-border-top pt-1 mt-2">
             <div class="col">
-                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLiveView), class: "btn btn-outline-info btn-lg btn-block", "phx-hook": "Loading", id: "load-training" do %>
+                <%=live_redirect to: Routes.live_path(@socket, MobaWeb.TrainingLive), class: "btn btn-outline-info btn-lg btn-block", "phx-hook": "Loading", id: "load-training" do %>
                     <span class="loading-text"><i class="fa fa-play"></i> Continue</span>
                 <% end %>
             </div>

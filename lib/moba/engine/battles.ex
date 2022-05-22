@@ -29,14 +29,10 @@ defmodule Moba.Engine.Battles do
     |> Repo.update!()
   end
 
-  def list(hero, type, page, limit) do
-    offset = (page - 1) * limit
-
+  def list(hero, type) do
     base =
       from b in Battle,
-        limit: ^limit,
         where: b.finished == true,
-        offset: ^offset,
         order_by: [desc: b.id]
 
     query =

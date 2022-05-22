@@ -1,8 +1,8 @@
 <div class="row mt-2">
     <div class="col center">
-        <button class="btn btn-danger attack-button" phx-hook="AttackButton" id="attack-button" data-skill="<%=@skill && @skill.id%>" data-item="<%= @item && @item.id %>" data-hero="<%=@hero.id%>">
+        <button class="btn btn-danger attack-button" phx-hook="AttackButton" id="attack-button" data-skill="<%=@skill && @skill.id%>" data-hero="<%=@hero.id%>">
             <span class="loading-text">
-                Attack with <span id="active-skill-name"><%=skill_name(@skill)%></span> <span id="active-item-name"><%=item_name(@item)%></span>
+                Attack with <span id="active-skill-name"><%=skill_name(@skill)%></span> <span id="active-item-name"></span>
             </span>
         </button>
         <%= render "_turn_timer.html", assigns %>
@@ -11,7 +11,7 @@
 <div class="row mb-1 mt-1">
     <div class="col">
         <div class="skills-container">
-            <%= for skill <- @hero.active_build.skills do %>
+            <%= for skill <- @hero.skills do %>
                 <%= if can_use?(@turn, skill) && !@turn.attacker.double_skill do %>
                     <div class="img-container skill-container float-left" data-resource="<%=skill.id%>">
                         <img phx-value-id="<%=skill.id%>" src="<%=GH.image_url(skill)%>" data-toggle="tooltip" title="<%=GH.skill_description(skill)%>" data-name="<%=skill.name%>" class="skill-img can-use <%=if @skill && @skill.code == skill.code, do: "current-skill"%>" phx-hook="InstaSkill" id="active-skill-<%=skill.id%>"/>
@@ -37,7 +37,7 @@
             <%= for item <- @hero.items do %>
                 <%= if can_use?(@turn, item) do %>
                     <div class="img-container item-container float-left">
-                        <img phx-value-id="<%=item.id%>" phx-hook="InstaItem" src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" data-name="<%=item.name%>" class="item-img can-use <%=if @item == item, do: "current-item"%>" id="attacker-item-<%=item.id%>" />
+                        <img phx-value-id="<%=item.id%>" phx-hook="InstaItem" src="<%=GH.image_url(item)%>" data-toggle="tooltip" title="<%=GH.item_description(item)%>" data-name="<%=item.name%>" class="item-img can-use" id="attacker-item-<%=item.id%>" />
                         <%= if item.mp_cost > 0 do %>
                             <span class="badge badge-pill badge-primary mp-cost"><%=item.mp_cost%></span>
                         <% end %>

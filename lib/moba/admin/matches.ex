@@ -66,7 +66,7 @@ defmodule Moba.Admin.Matches do
   def recent_winrates(match_time) do
     HeroQuery.pvp_picked_recently(match_time)
     |> Repo.all()
-    |> Repo.preload(active_build: [:skills])
+    |> Repo.preload(:skills)
     |> skill_winrates()
     |> Map.new(fn {_key, {skill, list}} ->
       count = Enum.count(list)
@@ -96,7 +96,7 @@ defmodule Moba.Admin.Matches do
     |> UserQuery.guests()
     |> UserQuery.new_users(24)
     |> Repo.all()
-    |> Repo.preload(current_pve_hero: [:avatar, :items, active_build: [skills: SkillQuery.ordered()]])
+    |> Repo.preload(current_pve_hero: [:avatar, :items, skills: SkillQuery.ordered()])
   end
 
   defp skill_winrates(heroes) do
@@ -109,7 +109,7 @@ defmodule Moba.Admin.Matches do
         acc
       else
         rates =
-          hero.active_build.skills
+          hero.skills
           |> Enum.map(fn skill ->
             {skill.code, skill, winrate}
           end)

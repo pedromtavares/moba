@@ -1,7 +1,7 @@
 <div class="card duels">
     <div class="card-body p-0">
         <%= if @pending_duel do %>
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLiveView, @pending_duel), class: "btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3" do %>
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_duel), class: "btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3" do %>
                     <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
                 <% end %>
         <% else %>
@@ -19,7 +19,7 @@
                                 <img src={"/images/pvp/#{user.season_tier}.png"} style="max-height:  50px"/>
                             </td>
                             <td>
-                                <h5><%= live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLiveView, user) %></h5>
+                                <h5><%= live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLive, user) %></h5>
                             </td>
                             <td>
                                 <%= user.season_points %> Season Points

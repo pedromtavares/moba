@@ -52,7 +52,7 @@
             <%= for duel <- @duels do %>
                 <tr>
                     <td>
-                       <h5><%= live_redirect "Duel ##{duel.id}", to: Routes.live_path(@socket, MobaWeb.DuelLiveView, duel)%></h5>
+                       <h5><%= live_redirect "Duel ##{duel.id}", to: Routes.live_path(@socket, MobaWeb.DuelLive, duel)%></h5>
                     </td>
                     <td>
                         <%= duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>

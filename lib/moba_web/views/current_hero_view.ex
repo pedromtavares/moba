@@ -11,7 +11,7 @@ defmodule MobaWeb.CurrentHeroView do
 
   def sorted_items(%{items: items}), do: Game.sort_items(items)
 
-  def sorted_skills(%{active_build: %{skills: skills}}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
+  def sorted_skills(%{skills: skills}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
 
   def can_level_skill?(hero, skill), do: Game.can_level_skill?(hero, skill)
 

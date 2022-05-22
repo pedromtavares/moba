@@ -40,7 +40,7 @@ const Tutorial = {
       case 1:
         tour.addStep({
           id: 'first-tutorial-first-step',
-          text: "Welcome to Training! Now that you've created your hero, it's time to put it to the test. Gank this target to start your first battle.",
+          text: "Welcome to Training! Now that you've created your hero, it's time to put it to the test. Battle this target to start your first battle.",
           attachTo: {
             element: '.targets .battle-button',
             on: 'right'
@@ -56,7 +56,7 @@ const Tutorial = {
       case 2:
         tour.addStep({
           id: 'second-tutorial-first-step',
-          text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>By Training here you can farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by ganking other opponents or by passively farming through Meditation or Mining.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
+          text: "<h3 class='text-center mb-4'>Congrats on your first battle!</h3><p>By Training here you can farm <span class='text-primary'>Experience</span> and <span class='text-warning'>Gold</span> by battling other opponents or by passively farming through Meditation or Mining.</p><p><span class='text-primary'>Experience</span> is used to level up and become stronger, while <span class='text-warning'>Gold</span> is used to buy items in the <span class='text-warning'>Shop</span>, in fact, let's head there now.</p>",
           buttons: [
             {
               text: 'Skip Tutorial',
@@ -94,7 +94,7 @@ const Tutorial = {
           },
           buttons: [
             {
-              text: 'OK, back to ganking',
+              text: 'OK, back to battling',
               action: function () { hookInstance.pushEvent("tutorial5", {}); this.complete() }
             }
           ]
@@ -165,7 +165,7 @@ const Tutorial = {
           },
           buttons: [
             {
-              text: 'OK, back to Ganking',
+              text: 'OK, back to Battling',
               action: function () { hookInstance.pushEventTo("#hero-bar", "close-shop", {}); this.complete() }
             }
           ],

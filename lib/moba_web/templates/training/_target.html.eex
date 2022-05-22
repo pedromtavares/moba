@@ -12,12 +12,12 @@
         <div class="card-body p-0 d-flex align-items-center justify-content-center">
             <div class="gank-button">
                 <%= if @current_hero.pve_current_turns > 0 do %>
-                    <button phx-click="battle" id="gank-<%= @target.id %>" phx-value-id="<%= @target.id %>" class="battle-button btn btn-lg btn-icon loading-text dark-button btn-<%= difficulty_color(@target.difficulty) %>" phx-hook="Loading" loading="Ganking...">
-                      <span class="loading-text"><i class="fa-regular fa-sword mr-1"></i>Gank</span>
+                    <button phx-click="battle" id="gank-<%= @target.id %>" phx-value-id="<%= @target.id %>" class="battle-button btn btn-lg btn-icon loading-text dark-button btn-<%= difficulty_color(@target.difficulty) %>" phx-hook="Loading" loading="Preparing...">
+                      <span class="loading-text"><i class="fa-regular fa-sword mr-1"></i>Battle</span>
                     </button>
                 <% else %>
-                    <button class="battle-button btn btn-icon btn-lg waves-effect btn-<%= difficulty_color(@target.difficulty) %> disabled f-rpg" data-toggle="tooltip" title="You do not have available ganks">
-                        <i class="fa-regular fa-sword mr-1"></i>Gank
+                    <button class="battle-button btn btn-icon btn-lg waves-effect btn-<%= difficulty_color(@target.difficulty) %> disabled f-rpg" data-toggle="tooltip" title="You do not have available turns">
+                        <i class="fa-regular fa-sword mr-1"></i>Battle
                     </button>
                 <% end %>
             </div>
