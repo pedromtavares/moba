@@ -9,38 +9,52 @@ defmodule Moba.Game.Heroes do
 
   # -------------------------------- PUBLIC API
 
-  def get!(nil), do: nil
+  def buyback!(%{pve_state: "dead"} = hero) do
+    price = buyback_price(hero)
 
-  def get!(id), do: HeroQuery.load() |> Repo.get(id)
-
-  def list_all_unfinished(user_id) do
-    HeroQuery.latest(user_id, 100)
-    |> HeroQuery.unfinished()
-    |> Repo.all()
+    if hero.gold >= price do
+      update!(hero, %{
+        pve_state: "alive",
+        buybacks: hero.buybacks + 1,
+        gold: hero.gold - price,
+        total_gold_farm: hero.total_gold_farm - price
+      })
+    else
+      hero
+    end
   end
 
-  def list_all_finished(user_id) do
-    HeroQuery.latest(user_id, 100)
-    |> HeroQuery.finished()
-    |> Repo.all()
-  end
+  def buyback!(hero), do: hero
 
-  def list_latest_unfinished(user_id) do
-    HeroQuery.latest(user_id)
-    |> HeroQuery.unfinished()
-    |> Repo.all()
-  end
+  def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
 
-  def list_latest_finished(user_id) do
-    HeroQuery.latest(user_id)
-    |> HeroQuery.finished()
-    |> Repo.all()
-  end
+  def collection_for(nil), do: []
 
-  def list_pvp_eligible(user_id, duel_inserted_at) do
-    HeroQuery.eligible_for_pvp(user_id, duel_inserted_at)
-    |> HeroQuery.load()
+  def collection_for(user_id) do
+    HeroQuery.finished_pve()
+    |> HeroQuery.load_avatar()
+    |> HeroQuery.with_user(user_id)
+    |> HeroQuery.unarchived()
     |> Repo.all()
+    |> Enum.group_by(& &1.avatar.code)
+    |> Enum.map(fn {code, heroes} ->
+      {
+        code,
+        Enum.sort_by(heroes, &{&1.league_tier, total_farm(&1), !is_nil(&1.pve_ranking), &1.id}, :desc)
+        |> List.first()
+      }
+    end)
+    |> Enum.sort_by(fn {_code, hero} -> {hero.pve_ranking, hero.league_tier * -1} end, :asc)
+    |> Enum.map(fn {code, hero} ->
+      %{
+        code: code,
+        hero_id: hero.id,
+        tier: hero.league_tier,
+        avatar: hero.avatar,
+        ranking: hero.pve_ranking,
+        total_farm: total_farm(hero)
+      }
+    end)
   end
 
   def create!(attrs, user, avatar, skills, items \\ []) do
@@ -92,26 +106,37 @@ defmodule Moba.Game.Heroes do
     end
   end
 
-  def update!(nil, _), do: nil
+  def finish_farming!(
+        %{
+          pve_farming_turns: farming_turns,
+          pve_current_turns: current_turns,
+          pve_farming_rewards: rewards,
+          pve_farming_started_at: started,
+          pve_state: state
+        } = hero
+      )
+      when state in ["meditating", "mining"] do
+    remaining_turns = zero_limit(current_turns - farming_turns)
 
-  def update!(hero, attrs, items \\ nil, skills \\ nil) do
+    {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
+
+    new_reward = [%{state: state, started_at: started, turns: farming_turns, amount: amount}]
+
     hero
-    |> Hero.replace_items(items)
-    |> Hero.replace_skills(skills)
-    |> Hero.changeset(attrs)
-    |> Repo.update!()
+    |> Hero.replace_farming_rewards(rewards ++ new_reward)
+    |> update!(%{
+      pve_state: "alive",
+      pve_farming_turns: 0,
+      pve_farming_started_at: nil,
+      pve_current_turns: remaining_turns
+    })
   end
 
-  @doc """
-  Only attackers are rewarded with XP in Training battles.
-  """
-  def update_attacker!(hero, updates) do
-    {xp, updates} = Map.pop(updates, :total_xp)
+  def finish_farming!(hero), do: hero
 
-    hero
-    |> update!(updates)
-    |> add_experience!(xp)
-  end
+  def get_hero!(nil), do: nil
+
+  def get_hero!(id), do: HeroQuery.load() |> Repo.get!(id)
 
   @doc """
   Used for easy testing in development, unavailable in production
@@ -129,6 +154,46 @@ defmodule Moba.Game.Heroes do
     else
       updated
     end
+  end
+
+  def list_all_unfinished_heroes(user_id) do
+    HeroQuery.latest(user_id, 100)
+    |> HeroQuery.unfinished()
+    |> Repo.all()
+  end
+
+  def list_all_finished_heroes(user_id) do
+    HeroQuery.latest(user_id, 100)
+    |> HeroQuery.finished()
+    |> Repo.all()
+  end
+
+  def latest_unfinished_heroes(user_id) do
+    HeroQuery.latest(user_id)
+    |> HeroQuery.unfinished()
+    |> Repo.all()
+  end
+
+  def latest_finished_heroes(user_id) do
+    HeroQuery.latest(user_id)
+    |> HeroQuery.finished()
+    |> Repo.all()
+  end
+
+  def list_pickable_heroes(user_id, duel_inserted_at) do
+    HeroQuery.pickable(user_id, duel_inserted_at)
+    |> HeroQuery.load()
+    |> Repo.all()
+  end
+
+  @doc """
+  Retrieves top PVE ranked Heroes
+  """
+  def pve_ranking(limit) do
+    HeroQuery.pve_ranked()
+    |> HeroQuery.limit_by(limit)
+    |> HeroQuery.load()
+    |> Repo.all()
   end
 
   @doc """
@@ -175,14 +240,34 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {elem, _} -> elem end)
   end
 
+  def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
+
+  def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
+  def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
+
+  def start_farming!(hero, state, turns) do
+    update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+  end
+
+  def update!(nil, _), do: nil
+
+  def update!(hero, attrs, items \\ nil, skills \\ nil) do
+    hero
+    |> Hero.replace_items(items)
+    |> Hero.replace_skills(skills)
+    |> Hero.changeset(attrs)
+    |> Repo.update!()
+  end
+
   @doc """
-  Retrieves top PVE ranked Heroes
+  Only attackers are rewarded with XP in Training battles.
   """
-  def pve_ranking(limit) do
-    HeroQuery.pve_ranked()
-    |> HeroQuery.limit_by(limit)
-    |> HeroQuery.load()
-    |> Repo.all()
+  def update_attacker!(hero, updates) do
+    {xp, updates} = Map.pop(updates, :total_xp)
+
+    hero
+    |> update!(updates)
+    |> add_experience!(xp)
   end
 
   @doc """
@@ -200,91 +285,6 @@ defmodule Moba.Game.Heroes do
       update!(hero, %{pve_ranking: index})
     end)
   end
-
-  def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
-
-  def collection_for(nil), do: []
-
-  def collection_for(user_id) do
-    HeroQuery.finished_pve()
-    |> HeroQuery.load_avatar()
-    |> HeroQuery.with_user(user_id)
-    |> HeroQuery.unarchived()
-    |> Repo.all()
-    |> Enum.group_by(& &1.avatar.code)
-    |> Enum.map(fn {code, heroes} ->
-      {
-        code,
-        Enum.sort_by(heroes, &{&1.league_tier, total_farm(&1), !is_nil(&1.pve_ranking), &1.id}, :desc)
-        |> List.first()
-      }
-    end)
-    |> Enum.sort_by(fn {_code, hero} -> {hero.pve_ranking, hero.league_tier * -1} end, :asc)
-    |> Enum.map(fn {code, hero} ->
-      %{
-        code: code,
-        hero_id: hero.id,
-        tier: hero.league_tier,
-        avatar: hero.avatar,
-        ranking: hero.pve_ranking,
-        total_farm: total_farm(hero)
-      }
-    end)
-  end
-
-  def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
-  def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
-
-  def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
-
-  def buyback!(%{pve_state: "dead"} = hero) do
-    price = buyback_price(hero)
-
-    if hero.gold >= price do
-      update!(hero, %{
-        pve_state: "alive",
-        buybacks: hero.buybacks + 1,
-        gold: hero.gold - price,
-        total_gold_farm: hero.total_gold_farm - price
-      })
-    else
-      hero
-    end
-  end
-
-  def buyback!(hero), do: hero
-
-  def start_farming!(hero, state, turns) do
-    update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
-  end
-
-  def finish_farming!(
-        %{
-          pve_farming_turns: farming_turns,
-          pve_current_turns: current_turns,
-          pve_farming_rewards: rewards,
-          pve_farming_started_at: started,
-          pve_state: state
-        } = hero
-      )
-      when state in ["meditating", "mining"] do
-    remaining_turns = zero_limit(current_turns - farming_turns)
-
-    {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
-
-    new_reward = [%{state: state, started_at: started, turns: farming_turns, amount: amount}]
-
-    hero
-    |> Hero.replace_farming_rewards(rewards ++ new_reward)
-    |> update!(%{
-      pve_state: "alive",
-      pve_farming_turns: 0,
-      pve_farming_started_at: nil,
-      pve_current_turns: remaining_turns
-    })
-  end
-
-  def finish_farming!(hero), do: hero
 
   # --------------------------------
 
@@ -314,31 +314,6 @@ defmodule Moba.Game.Heroes do
     {hero, rewards}
   end
 
-  defp check_if_leveled(%{data: data, changes: changes} = changeset) do
-    level = changes[:level] || data.level
-    xp = changes[:experience] || 0
-    diff = Moba.xp_to_next_hero_level(level + 1) - xp
-
-    if diff <= 0 do
-      changeset
-      |> Hero.level_up(level, diff * -1)
-      |> check_if_leveled()
-    else
-      changeset
-    end
-  end
-
-  # randomly levels up skills for a bot
-  defp level_up_skills(hero) do
-    ultimate = Enum.find(hero.skills, fn skill -> skill.ultimate end)
-    hero = Enum.reduce(1..3, hero, fn _, acc -> Game.level_up_skill!(acc, ultimate.code) end)
-
-    Enum.reduce(1..100, hero, fn _, acc ->
-      skill = Enum.shuffle(acc.skills) |> List.first()
-      Game.level_up_skill!(acc, skill.code)
-    end)
-  end
-
   defp bot_total_gold_farm(league_tier, difficulty) do
     base = bot_total_gold_farm_base(league_tier, difficulty)
     extra_farm = zero_limit(league_tier - 3)
@@ -364,6 +339,31 @@ defmodule Moba.Game.Heroes do
     do: (tier - 1) * 4800
 
   defp bot_total_gold_farm_base(tier, _), do: tier * 4800
+
+  defp check_if_leveled(%{data: data, changes: changes} = changeset) do
+    level = changes[:level] || data.level
+    xp = changes[:experience] || 0
+    diff = Moba.xp_to_next_hero_level(level + 1) - xp
+
+    if diff <= 0 do
+      changeset
+      |> Hero.level_up(level, diff * -1)
+      |> check_if_leveled()
+    else
+      changeset
+    end
+  end
+
+  # randomly levels up skills for a bot
+  defp level_up_skills(hero) do
+    ultimate = Enum.find(hero.skills, fn skill -> skill.ultimate end)
+    hero = Enum.reduce(1..3, hero, fn _, acc -> Game.level_up_skill!(acc, ultimate.code) end)
+
+    Enum.reduce(1..100, hero, fn _, acc ->
+      skill = Enum.shuffle(acc.skills) |> List.first()
+      Game.level_up_skill!(acc, skill.code)
+    end)
+  end
 
   defp total_farm(hero), do: hero.total_gold_farm + hero.total_xp_farm
 

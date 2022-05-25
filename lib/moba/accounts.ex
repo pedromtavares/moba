@@ -1,10 +1,6 @@
 defmodule Moba.Accounts do
   @moduledoc """
   Top-level domain of all account-wide logic
-
-  As a top-level domain, it can access its siblings like Engine and Game, its parent (Moba)
-  and all of its children (Users, Messages, etc). It cannot, however, access children of its
-  siblings.
   """
 
   alias Moba.Accounts
@@ -12,17 +8,17 @@ defmodule Moba.Accounts do
 
   # USERS
 
-  def get_user!(id), do: Users.get!(id)
+  defdelegate get_user!(id), to: Users
 
-  def get_user_by_username(username), do: Users.get_by_username(username)
+  defdelegate get_user_by_username(username), to: Users
 
-  def get_user_with_unlocks!(id), do: Users.get_with_unlocks!(id)
+  defdelegate get_user_with_unlocks!(id), to: Users
 
-  def get_user_with_current_heroes!(id), do: Users.get_with_current_heroes!(id)
+  defdelegate get_user_with_current_heroes!(id), to: Users
 
-  def create_user(attrs), do: Users.create(attrs)
+  defdelegate create_user(attrs), to: Users
 
-  def update_user!(user, attrs), do: Users.update!(user, attrs)
+  defdelegate update_user!(user, attrs), to: Users
 
   defdelegate update_tutorial_step!(user, step), to: Users
 
@@ -87,27 +83,27 @@ defmodule Moba.Accounts do
 
   defdelegate closest_bot_time(user), to: Users
 
-  # MESSAGES
+  # MESSAGES  
 
-  def latest_messages(channel, topic, limit), do: Messages.latest(channel, topic, limit)
-
-  def get_message!(id), do: Messages.get!(id)
-
-  def change_message(attrs \\ %{}), do: Messages.change(attrs)
+  defdelegate change_message(attrs \\ %{}), to: Messages
 
   def create_message!(attrs \\ %{}) do
-    message = Messages.create!(attrs)
+    message = Messages.create_message!(attrs)
     MobaWeb.broadcast(message.channel, message.topic, message)
     message
   end
 
-  def delete_message(message), do: Messages.delete(message)
+  defdelegate delete_message(message), to: Messages
+
+  defdelegate get_message!(id), to: Messages
+
+  defdelegate latest_messages(channel, topic, limit), to: Messages
 
   # UNLOCKS
 
-  def create_unlock!(user, resource), do: Unlocks.create!(user, resource)
+  defdelegate create_unlock!(user, resource), to: Unlocks
 
-  def unlocked_codes_for(user), do: Unlocks.resource_codes_for(user)
+  defdelegate unlocked_codes_for(user), to: Unlocks
 
-  def price_to_unlock(resource), do: Unlocks.price(resource)
+  defdelegate price_to_unlock(resource), to: Unlocks
 end

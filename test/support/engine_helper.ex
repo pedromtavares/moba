@@ -7,7 +7,7 @@ defmodule Test.EngineHelper do
 
   def create_basic_battle(attacker, defender) do
     build_basic_battle(attacker, defender)
-    |> Engine.start_battle!()
+    |> Engine.begin_battle!()
     |> Repo.preload(:winner)
   end
 

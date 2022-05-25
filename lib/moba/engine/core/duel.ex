@@ -9,7 +9,7 @@ defmodule Moba.Engine.Core.Duel do
   def create_battle!(attrs) do
     if valid?(attrs) do
       battle_for(attrs)
-      |> Engine.start_battle!()
+      |> Engine.begin_battle!()
     else
       {:error, "Invalid target"}
     end

@@ -15,7 +15,7 @@ defmodule Moba.Engine.Core.League do
 
   def create_battle!(attacker, defender) do
     battle_for(attacker, defender)
-    |> Engine.start_battle!()
+    |> Engine.begin_battle!()
     |> manage_first_step()
     |> update_attacker()
   end

@@ -11,12 +11,14 @@ defmodule Moba.Game.Quests do
 
   @platinum_league_tier Moba.platinum_league_tier()
 
+  def active_quest_progression?(progressions), do: Enum.find(progressions, &is_nil(&1.completed_at))
+
   def find_progression_by!(user_id, quest_id) do
     Repo.insert(%QuestProgression{user_id: user_id, quest_id: quest_id}, on_conflict: :nothing)
     Repo.get_by!(QuestProgression, user_id: user_id, quest_id: quest_id) |> Repo.preload([:user, :quest])
   end
 
-  def generate_daily_progressions!(nil) do
+  def generate_daily_quest_progressions!(nil) do
     query =
       from qp in QuestProgression,
         join: q in assoc(qp, :quest),
@@ -26,10 +28,10 @@ defmodule Moba.Game.Quests do
     user_ids = Repo.all(query) |> Enum.map(& &1.user_id)
     Repo.delete_all(query)
 
-    Enum.map(user_ids, &generate_daily_progressions!(&1))
+    Enum.map(user_ids, &generate_daily_quest_progressions!(&1))
   end
 
-  def generate_daily_progressions!(user_id) do
+  def generate_daily_quest_progressions!(user_id) do
     quests = Repo.all(from q in Quest, where: q.daily == true)
     find_progressions(quests, user_id)
   end
@@ -38,32 +40,32 @@ defmodule Moba.Game.Quests do
 
   def get_by_code_and_level!(code, level), do: Repo.get_by!(Quest, code: code, level: level)
 
-  def last_completed_progressions(%{finished_at: nil}), do: []
+  def last_completed_quest_progressions(%{finished_at: nil}), do: []
 
-  def last_completed_progressions(%{user_id: user_id, finished_at: hero_finished_at}) do
+  def last_completed_quest_progressions(%{user_id: user_id, finished_at: hero_finished_at}) do
     Repo.all(from p in progressions_by_user(user_id), where: p.completed_at >= ^hero_finished_at)
   end
 
-  def list_progressions(user_id, daily) do
-    Repo.all(from p in progressions_by_user(user_id), join: q in assoc(p, :quest), where: q.daily == ^daily)
+  def list_daily_quest_progressions(user_id) do
+    Repo.all(from p in progressions_by_user(user_id), join: q in assoc(p, :quest), where: q.daily == true)
   end
 
-  def list_progressions_by_code(user_id, nil), do: progressions_by_user(user_id)
+  def list_quest_progressions(user_id, nil), do: progressions_by_user(user_id)
 
-  def list_progressions_by_code(user_id, quest_code) do
+  def list_quest_progressions(user_id, quest_code) do
     quest_code
     |> get_all_by_code()
     |> find_progressions(user_id)
   end
 
-  def list_season_progressions(user_id) do
+  def list_season_quest_progressions(user_id) do
     Moba.season_quest_codes()
     |> Enum.map(&get_all_by_code(&1))
     |> List.flatten()
     |> find_progressions(user_id)
   end
 
-  def track_pve(%{user_id: user_id, league_tier: league_tier} = hero)
+  def track_pve_quests(%{user_id: user_id, league_tier: league_tier} = hero)
       when league_tier >= @platinum_league_tier do
     track("season", user_id, hero)
 
@@ -85,7 +87,9 @@ defmodule Moba.Game.Quests do
     hero
   end
 
-  def track_pve(hero), do: hero
+  def track_pve_quests(hero), do: hero
+
+  # ---------------------------------------------------------------------
 
   defp apply_rewards(%{quest: quest, user: user} = progression) do
     base_rewards = %{shard_count: user.shard_count + quest.shard_prize}

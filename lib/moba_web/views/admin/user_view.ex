@@ -5,6 +5,6 @@ defmodule MobaWeb.Admin.UserView do
   import Torch.FilterView
 
   def hero_for(user) do
-    Moba.Game.current_pve_hero(user)
+    Moba.current_pve_hero(user)
   end
 end

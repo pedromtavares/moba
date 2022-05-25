@@ -15,16 +15,6 @@ defmodule Test.GameHelper do
 
   def build_base_hero(attrs \\ %{}), do: Map.merge(%Game.Schema.Hero{}, attrs)
 
-  def create_bot_hero(level \\ 1, difficulty \\ "strong") do
-    Game.create_bot_hero!(
-      base_avatar(),
-      level,
-      difficulty,
-      nil,
-      create_user()
-    )
-  end
-
   def base_avatar, do: Game.get_avatar_by_code!("phantom_assassin")
 
   def weak_avatar do
@@ -93,4 +83,11 @@ defmodule Test.GameHelper do
   end
 
   def base_rare_item, do: Game.get_item_by_code!("tranquil_boots")
+
+  def full_legendary_inventory do
+    Enum.map(
+      ["boots_of_travel", "linkens_sphere", "scythe_of_vyse", "orchid_malevolence", "shivas_guard", "daedalus"],
+      &Game.get_item_by_code!(&1)
+    )
+  end
 end

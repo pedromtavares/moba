@@ -75,9 +75,7 @@ defmodule Moba.Game.Schema.Hero do
     many_to_many :skills, Game.Schema.Skill, join_through: Game.Schema.HeroSkill, on_replace: :delete
 
     has_many :targets, Game.Schema.Target, foreign_key: :attacker_id
-    has_many :builds, Game.Schema.Build
 
-    belongs_to :active_build, Game.Schema.Build
     belongs_to :match, Game.Schema.Match
     belongs_to :avatar, Game.Schema.Avatar
     belongs_to :user, Accounts.Schema.User
@@ -127,7 +125,6 @@ defmodule Moba.Game.Schema.Hero do
       :total_mp,
       :atk,
       :user_id,
-      :active_build_id,
       :archived_at,
       :boss_id,
       :skin_id,

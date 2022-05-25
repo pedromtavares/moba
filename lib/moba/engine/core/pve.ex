@@ -12,7 +12,7 @@ defmodule Moba.Engine.Core.Pve do
   def create_battle!(target) do
     target
     |> battle_for()
-    |> Engine.start_battle!()
+    |> Engine.begin_battle!()
     |> manage_current_turns()
     |> update_attacker()
     |> generate_targets()

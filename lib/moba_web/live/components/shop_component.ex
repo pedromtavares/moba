@@ -108,7 +108,7 @@ defmodule MobaWeb.Shop do
   end
 
   defp update_item_recipe(item, current_recipe, current_transmute) do
-    rarity = Game.previous_rarity_item(current_transmute)
+    rarity = Game.previous_item_rarity(current_transmute)
 
     updated =
       if item.rarity == rarity do

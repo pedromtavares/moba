@@ -99,7 +99,7 @@ defmodule MobaWeb.DuelLive do
          changeset = Accounts.change_message(),
          current_time = Timex.now(),
          duel = Game.get_duel!(duel_id),
-         heroes = Game.eligible_heroes_for_pvp(user_id, duel.inserted_at),
+         heroes = Game.list_pickable_heroes(user_id, duel.inserted_at),
          first_battle = Engine.first_duel_battle(duel),
          last_battle = Engine.last_duel_battle(duel),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse() do

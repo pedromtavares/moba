@@ -1,6 +1,6 @@
 defmodule MobaWeb.UserLiveAuth do
   import Phoenix.LiveView
-  alias Moba.{Accounts, Game}
+  alias Moba.Accounts
 
   def on_mount(:default, _params, %{"user_id" => user_id} = _session, socket) do
     socket =
@@ -15,7 +15,7 @@ defmodule MobaWeb.UserLiveAuth do
 
       socket =
         assign_new(socket, :current_hero, fn ->
-          Game.current_pve_hero(user)
+          Moba.current_pve_hero(user)
         end)
 
       {:cont, socket}

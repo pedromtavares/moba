@@ -1,42 +1,48 @@
 defmodule Moba.Engine do
   @moduledoc """
-  Top-level domain of all battle related logic
-
-  As a top-level domain, it can access its siblings like Game and Accounts, its parent (Moba)
-  and all of its children (Core, Battles). It cannot, however, access children of its
-  siblings.
+  Top-level domain of all logic related to the battle engine
   """
 
   alias Moba.{Game, Engine}
   alias Engine.{Battles, Core}
 
-  def battle_types, do: %{pve: "pve", pvp: "pvp", league: "league", duel: "duel"}
+  def battle_types, do: %{pve: "pve", league: "league", duel: "duel"}
 
-  # BATTLES MANAGEMENT
+  # BATTLE MANAGEMENT
 
-  def get_battle!(id), do: Battles.get!(id)
+  defdelegate first_duel_battle(duel), to: Battles
 
-  def update_battle!(battle, attrs), do: Battles.update!(battle, attrs)
+  defdelegate generate_attacker_snapshot!(tuple), to: Battles
 
-  def list_battles(hero, type), do: Battles.list(hero, type)
+  defdelegate generate_defender_snapshot!(tuple), to: Battles
 
-  def list_duel_battles(duel_ids), do: Battles.list_for_duels(duel_ids)
+  defdelegate get_battle!(id), to: Battles
 
-  def first_duel_battle(duel), do: Battles.first_from_duel(duel)
+  defdelegate last_duel_battle(duel), to: Battles
 
-  def last_duel_battle(duel), do: Battles.last_from_duel(duel)
+  defdelegate latest_battle(hero_id), to: Battles
 
-  def pending_battle(hero_id), do: Battles.pending_for(hero_id)
+  defdelegate list_battles(hero, type), to: Battles
 
-  def latest_battle(hero_id), do: Battles.latest_for(hero_id)
+  defdelegate list_duel_battles(duel_ids), to: Battles
 
-  def generate_attacker_snapshot!(tuple), do: Battles.generate_attacker_snapshot!(tuple)
+  defdelegate ordered_turns_query, to: Battles
 
-  def generate_defender_snapshot!(tuple), do: Battles.generate_defender_snapshot!(tuple)
+  defdelegate pending_battle(hero_id), to: Battles
 
-  def ordered_turns_query, do: Battles.ordered_turns_query()
+  defdelegate update_battle!(battle, attrs), to: Battles
 
   # CORE MECHANICS
+
+  defdelegate auto_finish_battle!(battle, orders \\ %{auto: true}), to: Core
+
+  defdelegate begin_battle!(battle), to: Core
+
+  defdelegate build_turn(battle, orders \\ %{}), to: Core
+
+  defdelegate can_use_resource?(turn, resource), to: Core
+
+  defdelegate continue_battle!(battle, orders), to: Core
 
   defdelegate create_pve_battle!(target), to: Core
 
@@ -46,17 +52,7 @@ defmodule Moba.Engine do
 
   defdelegate create_duel_battle!(attrs), to: Core
 
-  defdelegate start_battle!(battle), to: Core
-
-  defdelegate continue_battle!(battle, orders), to: Core
-
-  defdelegate auto_finish_battle!(battle, orders \\ %{auto: true}), to: Core
-
-  def next_battle_turn(battle), do: Core.build_turn(battle, %{})
-
-  defdelegate last_turn(battle), to: Core
-
   defdelegate effect_descriptions(turn), to: Core
 
-  defdelegate can_use_resource?(turn, resource), to: Core
+  defdelegate last_turn(battle), to: Core
 end

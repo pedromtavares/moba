@@ -8,14 +8,14 @@ defmodule MobaWeb.ShopView do
 
   def transmute_instructions_for(item) do
     count = Game.item_ingredients_count(item)
-    rarity = Game.previous_rarity_item(item)
+    rarity = Game.previous_item_rarity(item)
     "Choose #{count} #{String.capitalize(rarity)} items"
   end
 
   def can_select_inventory(_, nil, _), do: true
 
   def can_select_inventory(item, transmute, recipe) do
-    !Enum.member?(recipe, item) && item.rarity == Game.previous_rarity_item(transmute)
+    !Enum.member?(recipe, item) && item.rarity == Game.previous_item_rarity(transmute)
   end
 
   def proper_recipe(recipe, transmute) do
@@ -37,7 +37,7 @@ defmodule MobaWeb.ShopView do
   def ingredients_count_for(item), do: Game.item_ingredients_count(item)
 
   def update_recipe(item, current_recipe, current_transmute) do
-    rarity = Game.previous_rarity_item(current_transmute)
+    rarity = Game.previous_item_rarity(current_transmute)
 
     updated =
       if item.rarity == rarity do

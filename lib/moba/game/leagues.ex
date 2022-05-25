@@ -11,24 +11,13 @@ defmodule Moba.Game.Leagues do
 
   # -------------------------------- PUBLIC API
 
-  def max_step_for(tier) do
-    case tier do
-      0 -> 2
-      1 -> 3
-      2 -> 4
-      3 -> 5
-      4 -> 5
-      _ -> 1
-    end
-  end
-
   @doc """
   When in a League Challenge, the attacker faces consecutive defenders in order to rank up.
   These defenders get stronger with higher levels and difficulty as the challenge progresses
   """
-  def defender_for(%{league_tier: tier} = attacker) when tier == @master_league_tier, do: boss_defender(attacker)
+  def league_defender_for(%{league_tier: tier} = attacker) when tier == @master_league_tier, do: boss_defender(attacker)
 
-  def defender_for(%{league_step: step} = attacker) do
+  def league_defender_for(%{league_step: step} = attacker) do
     case step do
       0 -> easiest_defender(attacker)
       1 -> easy_defender(attacker)
@@ -39,13 +28,24 @@ defmodule Moba.Game.Leagues do
     end
   end
 
-  def tier_for(level) when level > 25, do: 6
+  def max_league_step_for(tier) do
+    case tier do
+      0 -> 2
+      1 -> 3
+      2 -> 4
+      3 -> 5
+      4 -> 5
+      _ -> 1
+    end
+  end
 
-  def tier_for(level) do
+  def league_tier_for(level) when level > 25, do: 6
+
+  def league_tier_for(level) do
     Enum.find(0..5, fn tier -> base_level(tier) + 3 > level end) || 0
   end
 
-  def level_range_for(tier), do: base_level(tier)..(base_level(tier) + 3)
+  def league_level_range_for(tier), do: base_level(tier)..(base_level(tier) + 3)
 
   # --------------------------------
 

@@ -39,7 +39,7 @@ defmodule MobaWeb.TavernLive do
 
   def handle_event("set-avatar", %{"code" => code}, %{assigns: %{all_avatars: all_avatars}} = socket) do
     with avatar = Enum.find(all_avatars, &(&1.code == code)),
-         skins = Game.list_skins_for(code),
+         skins = Game.list_avatar_skins(code),
          skin = List.first(skins) do
       {:noreply, assign(socket, current_avatar: avatar, current_skins: skins, current_skin: skin, current_index: 0)}
     end
@@ -84,7 +84,7 @@ defmodule MobaWeb.TavernLive do
          user = Accounts.get_user_with_unlocks!(user.id),
          skills = Game.list_unlockable_skills(),
          current_avatar = Enum.find(all_avatars, &(&1.code == avatar_code)) || List.first(all_avatars),
-         current_skins = Game.list_skins_for(current_avatar.code),
+         current_skins = Game.list_avatar_skins(current_avatar.code),
          current_skin = List.first(current_skins) do
       assign(socket,
         active_tab: active_tab,

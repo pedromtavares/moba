@@ -33,7 +33,7 @@ defmodule MobaWeb.HeroLive do
         %{assigns: %{skin_selection: selection, hero: hero}} = socket
       ) do
     with skin = Enum.find(selection.skins, &(&1.code == skin_code)),
-         updated_hero = Game.set_hero_skin!(hero, skin),
+         updated_hero = Game.set_skin!(hero, skin),
          skin_index = Enum.find_index(selection.skins, &(&1.code == skin_code)),
          updated_selection = Map.put(selection, :index, skin_index) do
       {:noreply, assign(socket, hero: updated_hero, skin_selection: updated_selection)}
@@ -90,7 +90,7 @@ defmodule MobaWeb.HeroLive do
   defp progressions_assigns(socket), do: socket
 
   defp socket_init(%{assigns: %{current_user: current_user}} = socket) do
-    assign_new(socket, :current_hero, fn -> Game.current_pve_hero(current_user) end)
+    assign_new(socket, :current_hero, fn -> Moba.current_pve_hero(current_user) end)
   end
 
   defp tab_display_priority(season) when not is_nil(season), do: "season"

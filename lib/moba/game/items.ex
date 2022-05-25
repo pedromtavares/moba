@@ -14,72 +14,41 @@ defmodule Moba.Game.Items do
 
   # -------------------------------- PUBLIC API
 
-  def get!(id) when id == "", do: nil
-  def get!(id), do: Repo.get!(Item, id)
+  def buy_item!(hero, nil), do: hero
 
-  def get_by_code!(code) when code == "", do: nil
-  def get_by_code!(code), do: Repo.get_by!(ItemQuery.single_current(), code: code)
-
-  def shop_list, do: ItemQuery.base_current() |> Repo.all()
-
-  def buy!(hero, nil), do: hero
-
-  def buy!(hero, item) do
+  def buy_item!(hero, item) do
     hero = Repo.preload(hero, :items)
 
-    if can_buy?(hero, item) do
+    if can_buy_item?(hero, item) do
       hero
       |> equip(item)
       |> Game.update_hero!(%{
-        gold: hero.gold - price(item)
+        gold: hero.gold - item_price(item)
       })
     else
       hero
     end
   end
 
-  def sell!(hero, nil), do: hero
-
-  def sell!(hero, item) do
+  def can_equip_item?(hero, item) do
     hero = Repo.preload(hero, :items)
 
-    if has_item?(hero, item) do
-      hero
-      |> unequip([item])
-      |> Game.update_hero!(%{
-        gold: hero.gold + sell_price(hero, item)
-      })
-    else
-      hero
-    end
+    !has_item?(hero, item)
   end
 
-  @doc """
-  A Hero can transform weaker items into stronger items by merging them at no extra gold cost
-  """
-  def transmute!(hero, _, nil), do: hero
-
-  def transmute!(hero, ingredients, result) do
+  def can_buy_item?(hero, item) do
     hero = Repo.preload(hero, :items)
 
-    if can_equip?(hero, result) && has_items?(hero, ingredients) && correct_recipe?(ingredients, result) do
-      hero
-      |> unequip(ingredients)
-      |> equip(result)
-    else
-      hero
-    end
+    !full_inventory?(hero) && can_equip_item?(hero, item) && hero.gold >= item_price(item)
   end
 
-  def previous_rarity_for(item) do
-    cond do
-      rare?(item) -> "normal"
-      epic?(item) -> "rare"
-      legendary?(item) -> "epic"
-    end
-  end
+  def get_item!(id) when id == "", do: nil
+  def get_item!(id), do: Repo.get!(Item, id)
 
-  def ingredients_count_for(item) do
+  def get_item_by_code!(code) when code == "", do: nil
+  def get_item_by_code!(code), do: Repo.get_by!(ItemQuery.single_current(), code: code)
+
+  def item_ingredients_count(item) do
     cond do
       rare?(item) -> 3
       epic?(item) -> 2
@@ -88,7 +57,7 @@ defmodule Moba.Game.Items do
     end
   end
 
-  def price(item) do
+  def item_price(item) do
     cond do
       normal?(item) -> Moba.normal_items_price()
       rare?(item) -> Moba.rare_items_price()
@@ -98,22 +67,53 @@ defmodule Moba.Game.Items do
     end
   end
 
-  def sell_price(%{finished_at: finished}, item) when not is_nil(finished), do: price(item)
-  def sell_price(_, item), do: trunc(price(item) * 0.9)
+  def item_sell_price(%{finished_at: finished}, item) when not is_nil(finished), do: item_price(item)
+  def item_sell_price(_, item), do: trunc(item_price(item) * 0.9)
 
-  def can_equip?(hero, item) do
-    hero = Repo.preload(hero, :items)
-
-    !has_item?(hero, item)
+  def previous_item_rarity(item) do
+    cond do
+      rare?(item) -> "normal"
+      epic?(item) -> "rare"
+      legendary?(item) -> "epic"
+    end
   end
 
-  def can_buy?(hero, item) do
+  def sell_item!(hero, nil), do: hero
+
+  def sell_item!(hero, item) do
     hero = Repo.preload(hero, :items)
 
-    !full_inventory?(hero) && can_equip?(hero, item) && hero.gold >= price(item)
+    if has_item?(hero, item) do
+      hero
+      |> unequip([item])
+      |> Game.update_hero!(%{
+        gold: hero.gold + item_sell_price(hero, item)
+      })
+    else
+      hero
+    end
   end
 
-  def sort(list), do: Enum.sort_by(list, fn item -> !item.active end)
+  def shop_list, do: ItemQuery.base_current() |> Repo.all()
+
+  @doc """
+  A Hero can transform weaker items into stronger items by merging them at no extra gold cost
+  """
+  def transmute_item!(hero, _, nil), do: hero
+
+  def transmute_item!(hero, ingredients, result) do
+    hero = Repo.preload(hero, :items)
+
+    if can_equip_item?(hero, result) && has_items?(hero, ingredients) && correct_recipe?(ingredients, result) do
+      hero
+      |> unequip(ingredients)
+      |> equip(result)
+    else
+      hero
+    end
+  end
+
+  def sort_items(list), do: Enum.sort_by(list, fn item -> !item.active end)
 
   # --------------------------------
 
@@ -147,7 +147,7 @@ defmodule Moba.Game.Items do
   defp correct_recipe?(ingredients, result) do
     ingredients = Enum.uniq(ingredients)
 
-    length(ingredients) == ingredients_count_for(result) &&
+    length(ingredients) == item_ingredients_count(result) &&
       cond do
         rare?(result) -> Enum.all?(ingredients, fn item -> normal?(item) end)
         epic?(result) -> Enum.all?(ingredients, fn item -> rare?(item) end)

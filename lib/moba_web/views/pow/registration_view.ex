@@ -6,7 +6,7 @@ defmodule MobaWeb.Pow.RegistrationView do
   def current_hero(conn) do
     conn
     |> guest_user()
-    |> Game.current_pve_hero()
+    |> Moba.current_pve_hero()
   end
 
   def guest_user(conn) do

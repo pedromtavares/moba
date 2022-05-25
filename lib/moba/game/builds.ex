@@ -1,9 +1,6 @@
 defmodule Moba.Game.Builds do
   @moduledoc """
-  Manages Build records and queries.
-  See Moba.Game.Schema.Build for more info.
-
-  Also lists all builds used by bots and recommended starting builds (by role)
+  Lists all builds used by bots and recommended starting builds (by role)
   """
 
   alias Moba.{Repo, Game}
@@ -16,7 +13,7 @@ defmodule Moba.Game.Builds do
   and strength depending on the difficulty and level. Weak bots have more random skills and less items, whilst
   strong bots have a proper skill build and a high tier inventory
   """
-  def generate_for_bot(
+  def generate_bot_build(
         %{level: level, bot_difficulty: difficulty, total_gold_farm: total_gold_farm},
         %{code: code, ultimate_code: ultimate_code}
       ) do

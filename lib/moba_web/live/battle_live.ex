@@ -64,7 +64,7 @@ defmodule MobaWeb.BattleLive do
 
   def handle_info({:turn, %{battle_id: battle_id, turn_number: turn_number}}, socket) do
     with battle = Engine.get_battle!(battle_id),
-         turn = Engine.next_battle_turn(battle) do
+         turn = Engine.build_turn(battle) do
       {:noreply, turn_assigns(socket, battle, turn, turn_number)}
     end
   end
@@ -76,7 +76,7 @@ defmodule MobaWeb.BattleLive do
   defp battle_assigns(params, socket) do
     with battle = Engine.get_battle!(params["id"]),
          last_turn = Engine.last_turn(battle),
-         turn = Engine.next_battle_turn(battle) do
+         turn = Engine.build_turn(battle) do
       assign(socket,
         action_turn_number: nil,
         battle: battle,
@@ -103,7 +103,7 @@ defmodule MobaWeb.BattleLive do
 
   defp next_turn(socket, battle, battle_opts, last_turn) do
     with battle = Engine.continue_battle!(battle, battle_opts),
-         next_turn = Engine.next_battle_turn(battle),
+         next_turn = Engine.build_turn(battle),
          turn_number = (last_turn && last_turn.number + 1) || 1 do
       MobaWeb.broadcast("battle-#{battle.id}", :turn, %{battle_id: battle.id, turn_number: turn_number})
       turn_assigns(socket, battle, next_turn, turn_number)

@@ -27,41 +27,12 @@ defmodule Moba.Game.Skills do
     }
   end
 
-  def get!(""), do: nil
-  def get!(id), do: Repo.get!(Skill, id)
-
-  def get_by_code!(code, current \\ true, level \\ 1)
-  def get_by_code!("", _, _), do: nil
-
-  def get_by_code!(code, current, level) do
-    query = if current, do: SkillQuery.single_current(), else: SkillQuery.canon()
-
-    Repo.get_by!(query, code: code, level: level)
-  end
-
   def boss! do
     [
-      get_by_code!("boss_slam", false, 1),
-      get_by_code!("boss_bash", false, 1),
-      get_by_code!("boss_spell_block", false, 1)
+      get_skill_by_code!("boss_slam", false, 1),
+      get_skill_by_code!("boss_bash", false, 1),
+      get_skill_by_code!("boss_spell_block", false, 1)
     ]
-  end
-
-  @doc """
-  Levels up a skill by replacing the current one (via its code) with its higher level version
-  """
-  def level_up!(%{skills: skills} = hero, code) do
-    current = Enum.find(skills, fn skill -> skill.code == code end)
-
-    if current && can_level?(hero, current) && !max_level?(current) do
-      leveled = get_by_code!(code, true, current.level + 1)
-      replaced = skills -- [current]
-      added = replaced ++ [leveled]
-
-      Game.update_hero!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, added)
-    else
-      hero
-    end
   end
 
   @doc """
@@ -69,7 +40,7 @@ defmodule Moba.Game.Skills do
   the skill they are trying to level. Ultimates can only be leveled at levels 10 and 20, whilst normal skills
   follow smaller intervals to not allow leveling of a single skill up to 5 immediately.
   """
-  def can_level?(%{skill_levels_available: levels} = hero, %{ultimate: true} = skill) when levels > 0 do
+  def can_level_skill?(%{skill_levels_available: levels} = hero, %{ultimate: true} = skill) when levels > 0 do
     case skill.level do
       1 -> hero.level >= 10
       2 -> hero.level >= 20
@@ -77,7 +48,7 @@ defmodule Moba.Game.Skills do
     end
   end
 
-  def can_level?(%{skill_levels_available: levels} = hero, skill) when levels > 0 do
+  def can_level_skill?(%{skill_levels_available: levels} = hero, skill) when levels > 0 do
     case skill.level do
       1 -> true
       2 -> hero.level >= 6
@@ -87,36 +58,53 @@ defmodule Moba.Game.Skills do
     end
   end
 
-  def can_level?(_, _), do: false
+  def can_level_skill?(_, _), do: false
 
-  def max_levels(skills), do: Enum.map(skills, &get_by_code!(&1.code, true, max_level(&1)))
-
-  def max_level(skill) do
-    cond do
-      skill.ultimate -> 3
-      true -> 5
-    end
-  end
-
-  def get_current_from(skills) do
+  def get_current_skills_from(skills) do
     Enum.map(skills, fn old ->
-      get_by_code!(old.code, true, old.level)
+      get_skill_by_code!(old.code, true, old.level)
     end)
   end
 
-  def list_normals do
-    SkillQuery.base_canon()
+  def get_current_skill!(code, level), do: get_skill_by_code!(code, true, level)
+
+  def get_skill!(""), do: nil
+  def get_skill!(id), do: Repo.get!(Skill, id)
+
+  def get_skill_by_code!(code, current \\ true, level \\ 1)
+  def get_skill_by_code!("", _, _), do: nil
+
+  def get_skill_by_code!(code, current, level) do
+    query = if current, do: SkillQuery.single_current(), else: SkillQuery.canon()
+
+    Repo.get_by!(query, code: code, level: level)
+  end
+
+  @doc """
+  Levels up a skill by replacing the current one (via its code) with its higher level version
+  """
+  def level_up_skill!(%{skills: skills} = hero, code) do
+    current = Enum.find(skills, fn skill -> skill.code == code end)
+
+    if current && can_level_skill?(hero, current) && !max_level?(current) do
+      leveled = get_skill_by_code!(code, true, current.level + 1)
+      replaced = skills -- [current]
+      added = replaced ++ [leveled]
+
+      Game.update_hero!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, added)
+    else
+      hero
+    end
+  end
+
+  def list_chosen_skills(ids) do
+    SkillQuery.base_current()
     |> SkillQuery.normals()
+    |> SkillQuery.get_all(ids)
     |> Repo.all()
   end
 
-  def list_ultimates do
-    SkillQuery.base_canon()
-    |> SkillQuery.ultimates()
-    |> Repo.all()
-  end
-
-  def list_creation(level, codes \\ []) do
+  def list_creation_skills(level, codes \\ []) do
     base_list =
       SkillQuery.base_current()
       |> SkillQuery.normals()
@@ -128,14 +116,19 @@ defmodule Moba.Game.Skills do
     |> Enum.sort_by(fn skill -> skill.mp_cost end)
   end
 
-  def list_chosen(ids) do
-    SkillQuery.base_current()
+  def list_normal_skills do
+    SkillQuery.base_canon()
     |> SkillQuery.normals()
-    |> SkillQuery.get_all(ids)
     |> Repo.all()
   end
 
-  def list_unlockable do
+  def list_ultimate_skills do
+    SkillQuery.base_canon()
+    |> SkillQuery.ultimates()
+    |> Repo.all()
+  end
+
+  def list_unlockable_skills do
     SkillQuery.canon()
     |> SkillQuery.enabled()
     |> SkillQuery.normals()
@@ -144,11 +137,18 @@ defmodule Moba.Game.Skills do
     |> Repo.all()
   end
 
-  def ordered_query, do: SkillQuery.ordered()
+  def max_leveled_skills(skills), do: Enum.map(skills, &get_skill_by_code!(&1.code, true, max_skill_level(&1)))
+
+  def max_skill_level(skill) do
+    cond do
+      skill.ultimate -> 3
+      true -> 5
+    end
+  end
 
   # --------------------------------
 
-  defp max_level?(skill), do: skill.level >= max_level(skill)
+  defp max_level?(skill), do: skill.level >= max_skill_level(skill)
 
   defp unlocked_list(codes, level) when length(codes) > 0 do
     SkillQuery.base_current()

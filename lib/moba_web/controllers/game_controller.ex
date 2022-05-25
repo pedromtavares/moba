@@ -4,7 +4,7 @@ defmodule MobaWeb.GameController do
 
   def index(conn, _params) do
     user = conn.assigns.current_user
-    hero = Game.current_pve_hero(user)
+    hero = user && Moba.current_pve_hero(user)
 
     cond do
       user && user.tutorial_step == 30 -> redirect(conn, to: "/arena")

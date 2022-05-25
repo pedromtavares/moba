@@ -5,14 +5,14 @@ defmodule MobaWeb.PowControllerCallbacks do
   """
 
   use Pow.Extension.Phoenix.ControllerCallbacks.Base
-  alias Moba.Game
+  alias Moba.{Accounts, Game}
 
   def before_respond(Pow.Phoenix.RegistrationController, :update, {:ok, user, conn}, _config) do
     guest_user_id = Plug.Conn.get_session(conn, :guest_user_id)
 
     conn =
       if guest_user_id do
-        hero = Game.current_pve_hero(user)
+        hero = Moba.current_pve_hero(user)
         Game.update_hero!(hero, %{name: user.username})
         Game.generate_daily_quest_progressions!(user.id)
         Plug.Conn.put_session(conn, :guest_user_id, nil)

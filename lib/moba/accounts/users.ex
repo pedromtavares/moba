@@ -14,37 +14,38 @@ defmodule Moba.Accounts.Users do
 
   # -------------------------------- PUBLIC API
 
-  def get!(nil), do: nil
-  def get!(id), do: Repo.get!(User, id)
+  def get_user!(nil), do: nil
+  def get_user!(id), do: Repo.get!(User, id)
 
-  def get_with_unlocks!(id), do: get!(id) |> Repo.preload(:unlocks)
+  def get_user_with_unlocks!(id), do: get_user!(id) |> Repo.preload(:unlocks)
 
-  def get_with_current_heroes!(id), do: get!(id) |> Repo.preload(current_pve_hero: :avatar, current_pvp_hero: :avatar)
+  def get_user_with_current_heroes!(id),
+    do: get_user!(id) |> Repo.preload(current_pve_hero: :avatar, current_pvp_hero: :avatar)
 
-  def get_by_username(username), do: Repo.get_by(User, username: username)
+  def get_user_by_username(username), do: Repo.get_by(User, username: username)
 
-  def create(attrs \\ %{}) do
+  def create_user(attrs \\ %{}) do
     %User{}
     |> User.changeset(attrs)
     |> Repo.insert()
   end
 
-  def update!(%User{} = user, attrs) do
+  def update_user!(%User{} = user, attrs) do
     user
     |> User.update_changeset(attrs)
     |> Repo.update!()
   end
 
-  def update_tutorial_step!(user, step), do: update!(user, %{tutorial_step: step})
+  def update_tutorial_step!(user, step), do: update_user!(user, %{tutorial_step: step})
 
   def update_preferences!(user, preferences) do
     current_preferences = Map.from_struct(user.preferences)
-    update!(user, %{preferences: Map.merge(current_preferences, preferences)})
+    update_user!(user, %{preferences: Map.merge(current_preferences, preferences)})
   end
 
-  def set_available!(user), do: update!(user, %{status: "available"})
+  def set_available!(user), do: update_user!(user, %{status: "available"})
 
-  def set_unavailable!(user), do: update!(user, %{status: "unavailable"})
+  def set_unavailable!(user), do: update_user!(user, %{status: "unavailable"})
 
   def set_online_now(user) do
     UserQuery.by_user(User, user)
@@ -95,7 +96,7 @@ defmodule Moba.Accounts.Users do
     end
   end
 
-  def set_current_pve_hero!(user, hero_id), do: update!(user, %{current_pve_hero_id: hero_id})
+  def set_current_pve_hero!(user, hero_id), do: update_user!(user, %{current_pve_hero_id: hero_id})
 
   @doc """
   Increments duel counts and sets the duel_score map that is displayed on the user's profile
@@ -122,7 +123,7 @@ defmodule Moba.Accounts.Users do
         %{}
       end
 
-    update!(user, Map.merge(base_updates, score_updates))
+    update_user!(user, Map.merge(base_updates, score_updates))
   end
 
   @doc """
@@ -140,7 +141,7 @@ defmodule Moba.Accounts.Users do
     |> Repo.all()
     |> Enum.with_index(1)
     |> Enum.each(fn {user, index} ->
-      update!(user, %{ranking: index})
+      update_user!(user, %{ranking: index})
     end)
   end
 
@@ -209,7 +210,7 @@ defmodule Moba.Accounts.Users do
   def season_tier_for(_), do: 18
 
   def update_collection!(user, hero_collection) do
-    update!(user, %{hero_collection: hero_collection})
+    update_user!(user, %{hero_collection: hero_collection})
   end
 
   def increment_unread_messages_count_for_all_online_except(user) do
@@ -237,7 +238,7 @@ defmodule Moba.Accounts.Users do
     price = shard_buyback_price(user)
 
     if count >= price do
-      update!(user, %{shard_count: count - price})
+      update_user!(user, %{shard_count: count - price})
     else
       nil
     end
@@ -251,7 +252,7 @@ defmodule Moba.Accounts.Users do
     opponent = normal_matchmaking_opponent(user)
 
     if opponent do
-      update!(user, %{shard_count: user.shard_count + Moba.normal_matchmaking_shards()})
+      update_user!(user, %{shard_count: user.shard_count + Moba.normal_matchmaking_shards()})
       opponent
     end
   end
@@ -260,7 +261,7 @@ defmodule Moba.Accounts.Users do
     opponent = elite_matchmaking_opponent(user)
 
     if opponent do
-      update!(user, %{shard_count: user.shard_count + Moba.elite_matchmaking_shards()})
+      update_user!(user, %{shard_count: user.shard_count + Moba.elite_matchmaking_shards()})
       opponent
     end
   end
@@ -278,7 +279,7 @@ defmodule Moba.Accounts.Users do
   def manage_match_history(%{match_history: history} = user, opponent) do
     timeout = Timex.shift(Timex.now(), hours: Moba.match_timeout_in_hours())
     history = Map.put(history, Integer.to_string(opponent.id), timeout)
-    update!(user, %{match_history: history})
+    update_user!(user, %{match_history: history})
   end
 
   def normal_matchmaking_count(user) do

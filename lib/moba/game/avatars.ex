@@ -8,7 +8,7 @@ defmodule Moba.Game.Avatars do
   relatively based on the minimum of a stat that an Avatar can have as
   well as a unit of value for each stat.
   Example: 1 ATK can be loosely translated to 5 HP and 4 MP, and the
-  lowest any Avatar can have is 12.
+  lowest ATK any Avatar can have is 12.
   By using these measures and real stats from Avatars, we can generate
   progress bars of how much Offense, Defense, Speed and Magic each Avatar
   has in relation to other Avatars.
@@ -21,13 +21,9 @@ defmodule Moba.Game.Avatars do
 
   # -------------------------------- PUBLIC API
 
-  def get!(nil), do: nil
-  def get!(""), do: nil
-  def get!(id), do: Repo.get!(Avatar, id) |> Repo.preload(:ultimate) |> with_extra_stats()
-  def get_by_code!(code), do: unlocked_list([code]) |> List.first()
   def boss!, do: Repo.get_by!(Avatar, code: "boss")
 
-  def create!(%Avatar{} = avatar, attrs, match) do
+  def create_avatar!(%Avatar{} = avatar, attrs, match) do
     ultimate_code = Map.get(avatar, :ultimate_code) || attrs["ultimate_code"]
     current = match != nil
     ultimate = ultimate_code && Game.get_skill_by_code!(ultimate_code, current)
@@ -37,9 +33,14 @@ defmodule Moba.Game.Avatars do
     |> Repo.insert!()
   end
 
-  def list, do: AvatarQuery.base_canon() |> Repo.all() |> with_extra_stats()
+  def get_avatar!(nil), do: nil
+  def get_avatar!(""), do: nil
+  def get_avatar!(id), do: Repo.get!(Avatar, id) |> Repo.preload(:ultimate) |> with_extra_stats()
+  def get_avatar_by_code!(code), do: unlocked_list([code]) |> List.first()
 
-  def creation_list(codes) do
+  def list_avatars, do: AvatarQuery.base_canon() |> Repo.all() |> with_extra_stats()
+
+  def list_creation_avatars(codes) do
     base_list = AvatarQuery.base_current() |> Repo.all()
 
     (unlocked_list(codes) ++ base_list)
@@ -47,7 +48,7 @@ defmodule Moba.Game.Avatars do
     |> with_extra_stats()
   end
 
-  def unlockable_list do
+  def list_unlockable_avatars do
     AvatarQuery.canon()
     |> AvatarQuery.enabled()
     |> AvatarQuery.with_level_requirement()

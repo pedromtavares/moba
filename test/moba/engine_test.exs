@@ -245,14 +245,14 @@ defmodule Moba.EngineTest do
   end
 
   describe "core" do
-    test "#start_battle!", %{strong_hero: attacker, alternate_hero: defender} do
-      battle = build_basic_battle(attacker, %{defender | bot_difficulty: "test"}) |> Engine.start_battle!()
+    test "#begin_battle!", %{strong_hero: attacker, alternate_hero: defender} do
+      battle = build_basic_battle(attacker, %{defender | bot_difficulty: "test"}) |> Engine.begin_battle!()
 
       assert battle.initiator == attacker
       assert length(battle.turns) == 0
 
       no_speed = %{attacker | speed: 0, pve_tier: 3}
-      battle = build_basic_battle(no_speed, %{defender | bot_difficulty: "test"}) |> Engine.start_battle!()
+      battle = build_basic_battle(no_speed, %{defender | bot_difficulty: "test"}) |> Engine.begin_battle!()
 
       assert battle.initiator.id == defender.id
       assert length(battle.turns) == 1
@@ -328,9 +328,9 @@ defmodule Moba.EngineTest do
       assert battle.finished
     end
 
-    test "#next_battle_turn", %{strong_hero: attacker, alternate_hero: defender} do
+    test "#build_turn", %{strong_hero: attacker, alternate_hero: defender} do
       battle = create_basic_battle(attacker, defender)
-      turn = Engine.next_battle_turn(battle)
+      turn = Engine.build_turn(battle)
 
       assert turn.number == 1
       assert turn.attacker.hero_id == attacker.id
@@ -350,9 +350,9 @@ defmodule Moba.EngineTest do
     test "#can_use_resource?", %{strong_hero: attacker, alternate_hero: defender} do
       skill = base_skill()
       battle = create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
-      assert Engine.next_battle_turn(battle) |> Engine.can_use_resource?(skill)
+      assert Engine.build_turn(battle) |> Engine.can_use_resource?(skill)
       battle = Engine.continue_battle!(battle, %{skill: skill, item: nil})
-      refute Engine.next_battle_turn(battle) |> Engine.can_use_resource?(skill)
+      refute Engine.build_turn(battle) |> Engine.can_use_resource?(skill)
     end
   end
 

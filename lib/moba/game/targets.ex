@@ -11,12 +11,14 @@ defmodule Moba.Game.Targets do
 
   # -------------------------------- PUBLIC API
 
-  def get!(id) do
+  def get_target!(id) do
     Repo.get!(Target, id)
     |> Repo.preload(attacker: [:items, :skills], defender: [:items, :skills])
   end
 
-  def list(hero_id, farm_sort \\ :asc) do
+  def list_targets(%{id: hero_id, pve_tier: pve_tier}) do
+    farm_sort = if pve_tier >= 2, do: :desc, else: :asc
+
     Repo.all(from t in Target, where: t.attacker_id == ^hero_id)
     |> Repo.preload(defender: HeroQuery.load())
     |> Enum.sort_by(fn target -> target.defender.total_gold_farm + target.defender.total_xp_farm end, farm_sort)

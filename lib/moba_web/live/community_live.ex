@@ -46,7 +46,6 @@ defmodule MobaWeb.CommunityLive do
         title: params["message"]["title"],
         body: params["message"]["body"],
         author: user.username,
-        tier: user.season_tier,
         channel: "community",
         topic: "updates",
         is_admin: true,

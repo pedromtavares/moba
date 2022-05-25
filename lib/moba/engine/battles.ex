@@ -9,27 +9,15 @@ defmodule Moba.Engine.Battles do
 
   import Ecto.Query
 
-  def load(queryable \\ Battle) do
-    queryable
-    |> preload([
-      :initiator,
-      :winner,
-      duel: [:user, :opponent],
-      turns: ^ordered_turns_query(),
-      attacker: ^HeroQuery.load(),
-      defender: ^HeroQuery.load()
-    ])
-  end
+  def get_battle!(id), do: Repo.get!(load(), id)
 
-  def get!(id), do: Repo.get!(load(), id)
-
-  def update!(battle, attrs) do
+  def update_battle!(battle, attrs) do
     battle
     |> Battle.changeset(attrs)
     |> Repo.update!()
   end
 
-  def list(hero, type) do
+  def list_battles(hero, type) do
     base =
       from b in Battle,
         where: b.finished == true,
@@ -47,36 +35,36 @@ defmodule Moba.Engine.Battles do
 
   def ordered_turns_query, do: from(t in Turn, order_by: t.number)
 
-  def pending_for(hero_id) do
+  def pending_battle(hero_id) do
     from(b in Battle, where: b.attacker_id == ^hero_id, where: b.finished == false, limit: 1, where: b.type != "duel")
     |> Repo.all()
     |> List.first()
   end
 
-  def latest_for(hero_id) do
+  def latest_battle(hero_id) do
     from(b in Battle, where: b.attacker_id == ^hero_id, order_by: [desc: :id], limit: 1)
     |> Repo.all()
     |> List.first()
   end
 
-  def list_for_duels(duel_ids) do
+  def list_duel_battles(duel_ids) do
     from(b in Battle, where: b.duel_id in ^duel_ids)
     |> Repo.all()
     |> Repo.preload([:winner, attacker: :avatar, defender: :avatar])
   end
 
-  def first_from_duel(%{user_first_pick_id: pick_id}) when is_nil(pick_id), do: nil
+  def first_duel_battle(%{user_first_pick_id: pick_id}) when is_nil(pick_id), do: nil
 
-  def first_from_duel(%{user_first_pick_id: pick_id, id: id}) do
+  def first_duel_battle(%{user_first_pick_id: pick_id, id: id}) do
     from(b in for_duel(id), where: b.attacker_id == ^pick_id, order_by: [desc: :id], limit: 1)
     |> load()
     |> Repo.all()
     |> List.first()
   end
 
-  def last_from_duel(%{opponent_second_pick_id: pick_id}) when is_nil(pick_id), do: nil
+  def last_duel_battle(%{opponent_second_pick_id: pick_id}) when is_nil(pick_id), do: nil
 
-  def last_from_duel(%{opponent_second_pick_id: pick_id, id: id}) do
+  def last_duel_battle(%{opponent_second_pick_id: pick_id, id: id}) do
     from(b in for_duel(id), where: b.attacker_id == ^pick_id, order_by: [desc: :id], limit: 1)
     |> load()
     |> Repo.all()
@@ -89,14 +77,26 @@ defmodule Moba.Engine.Battles do
   def generate_attacker_snapshot!({battle, attacker}), do: generate_attacker_snapshot!({battle, attacker, nil})
 
   def generate_attacker_snapshot!({battle, attacker, _}) do
-    update!(battle, %{attacker_snapshot: snapshot_for(attacker, battle.attacker)})
+    update_battle!(battle, %{attacker_snapshot: snapshot_for(attacker, battle.attacker)})
   end
 
   def generate_defender_snapshot!({battle, _, defender}) do
-    update!(battle, %{defender_snapshot: snapshot_for(defender, battle.defender)})
+    update_battle!(battle, %{defender_snapshot: snapshot_for(defender, battle.defender)})
   end
 
   defp for_duel(query \\ Battle, duel_id), do: from(b in query, where: b.duel_id == ^duel_id)
+
+  defp load(queryable \\ Battle) do
+    queryable
+    |> preload([
+      :initiator,
+      :winner,
+      duel: [:user, :opponent],
+      turns: ^ordered_turns_query(),
+      attacker: ^HeroQuery.load(),
+      defender: ^HeroQuery.load()
+    ])
+  end
 
   defp snapshot_for(hero, battle_hero) do
     %{

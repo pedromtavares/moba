@@ -26,34 +26,30 @@ defmodule Moba.Conductor do
     {:ok, state}
   end
 
-  def schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
-
   def handle_info(:server_check, state) do
-    schedule_check()
-
-    match = Moba.current_match()
-
-    if time_diff_in_seconds(match.inserted_at) >= @reset_diff_in_seconds do
-      Moba.start!()
+    with state = server_check(state) do
+      {:noreply, state}
     end
-
-    if time_diff_in_seconds(match.last_server_update_at) >= @update_diff_in_seconds do
-      server_update!(match)
-    end
-
-    {:noreply, state}
   end
 
   @doc """
-  The game's starting point. Also creates PVP bots and generates new resources
-  Matches last for 24h and will automatically be restarted by Moba.Game.Server
+  Runs the automated bot battles and touches a datetime field
+  so Conductor knows when to run this again, currently every 10 mins.
   """
-  def start_match! do
-    end_active_match!()
+  def server_update!(match \\ Moba.current_match()) do
+    auto_matchmaking_bots(match)
+    auto_matchmaking_users()
+    Accounts.update_ranking!()
 
-    match =
-      create_match!()
-      |> server_update!()
+    Game.update_match!(match, %{last_server_update_at: DateTime.utc_now()})
+  end
+
+  def start_match! do
+    current = Moba.current_match()
+
+    if current, do: Game.update_match!(current, %{active: false})
+
+    match = Game.create_match!(%{}) |> server_update!()
 
     Game.generate_daily_quest_progressions!()
     Accounts.update_ranking!()
@@ -61,25 +57,32 @@ defmodule Moba.Conductor do
     match
   end
 
-  @doc """
-  Right now only runs the automated bot battles and touches a datetime field
-  so Moba.Game.Server knows when to run this again, currently every 10 mins.
-  """
-  def server_update!(match \\ Moba.current_match()) do
-    skynet(match)
-    auto_matchmaking()
-    Accounts.update_ranking!()
+  # Generates new resources based on canon so edits in the admin panel don't affect the current match (only the next)
+  # also updating current records to current: false 
+  def regenerate_resources! do
+    match = Game.current_match()
+
+    Logger.info("Generating skills...")
+
+    ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
+    Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), set: [current: false])
+
+    Logger.info("Generating items...")
+
+    ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
+    Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), set: [current: false])
+
+    Logger.info("Generating avatars...")
+
+    ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
+    Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
+
+    # updates all existing hero-record relations to link to the newly created resources
+    update_hero_skills()
+    update_hero_items()
+    update_hero_avatars()
 
     match
-    |> Game.update_match!(%{last_server_update_at: DateTime.utc_now()})
-  end
-
-  @doc """
-  Creates all necessary resources and locks them against
-  further edits in the admin panel. Also creates PVE bots.
-  """
-  def regenerate_resources! do
-    Game.current_match() |> generate_resources!()
   end
 
   def regenerate_pve_bots!(level_range) do
@@ -91,13 +94,13 @@ defmodule Moba.Conductor do
       Logger.info("Generating #{avatar.name}s...")
 
       Enum.each(level_range, fn level ->
-        Game.create_bot_hero!(avatar, level, "weak")
-        Game.create_bot_hero!(avatar, level, "moderate")
+        create_bot_hero!(avatar, level, "weak")
+        create_bot_hero!(avatar, level, "moderate")
 
         if level > 0 do
-          Game.create_bot_hero!(avatar, level, "strong")
-          Game.create_bot_hero!(avatar, level, "strong")
-          Game.create_bot_hero!(avatar, level, "strong")
+          create_bot_hero!(avatar, level, "strong")
+          create_bot_hero!(avatar, level, "strong")
+          create_bot_hero!(avatar, level, "strong")
         end
       end)
     end)
@@ -121,7 +124,7 @@ defmodule Moba.Conductor do
         user.bot_codes
         |> Enum.map(fn code -> Enum.find(all_avatars, &(&1.code == code)) end)
         |> Enum.filter(& &1)
-        |> Enum.map(&Game.create_pvp_bot_hero!(user, &1))
+        |> Enum.map(&create_pvp_bot_hero!(user, &1))
       end)
 
     archive_previous_bots!(HeroQuery.pvp_bots(), timestamp)
@@ -131,53 +134,63 @@ defmodule Moba.Conductor do
     |> Enum.map(&Game.update_hero_collection!(&1))
   end
 
-  # Deactivates the current match and all pvp heroes, also assigning its winners and clearing all current heroes
-  defp end_active_match! do
-    active = Moba.current_match()
-
-    if active, do: Game.update_match!(active, %{active: false})
-  end
-
-  defp create_match!(attrs \\ %{}) do
-    Logger.info("Creating new match...")
-    Game.create_match!(attrs)
-  end
-
-  # Generates new resources based on canon so edits in the admin panel doesn't affect the current match (only the next)
-  defp generate_resources!(match) do
-    Logger.info("Generating resources...")
-
-    Logger.info("Generating skills...")
-
-    ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
-    Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), set: [current: false])
-
-    Logger.info("Generating items...")
-
-    ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(match) |> Enum.map(& &1.id)
-    Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), set: [current: false])
-
-    Logger.info("Generating avatars...")
-
-    ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(match) |> Enum.map(& &1.id)
-    Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
-
-    Logger.info("Updating hero skills...")
-    update_hero_skills()
-    Logger.info("Updating hero items...")
-    update_hero_items()
-    Logger.info("Updating hero avatars...")
-    update_hero_avatars()
-
-    match
-  end
-
   # Archives all current bots so they can be removed later by Cleaner
   defp archive_previous_bots!(query, time) do
     query
     |> HeroQuery.created_before(time)
     |> HeroQuery.unarchived()
     |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
+  end
+
+  defp auto_matchmaking_bots(%{last_server_update_at: updated_at, inserted_at: inserted_at}) do
+    time = updated_at || inserted_at
+
+    Enum.each(1..2, fn _n ->
+      bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
+
+      if bot do
+        duel = Moba.bot_matchmaking!(bot)
+
+        if duel do
+          Logger.info("Created duel ##{duel.id} for #{bot.username}")
+          later = Timex.shift(time, minutes: 190)
+          Accounts.update_user!(bot, %{last_online_at: later})
+        end
+      end
+    end)
+  end
+
+  defp auto_matchmaking_users do
+    Enum.each(1..2, fn _n ->
+      user = UserQuery.auto_matchmaking() |> Repo.all() |> List.first()
+
+      if user do
+        duel = Moba.auto_matchmaking!(user)
+
+        if duel do
+          Logger.info("Created duel ##{duel.id} for #{user.username}")
+        end
+      end
+    end)
+  end
+
+  defp create_bot_hero!(avatar, level, difficulty, league_tier \\ nil, user \\ nil) do
+    tier = league_tier || Game.league_tier_for(level)
+
+    Game.create_bot!(avatar, level, difficulty, tier, user)
+  end
+
+  defp create_pvp_bot_hero!(%{bot_tier: tier} = user, avatar) do
+    level = Game.league_level_range_for(tier) |> Enum.random()
+
+    difficulty =
+      cond do
+        tier == Moba.master_league_tier() -> "pvp_master"
+        tier == Moba.max_league_tier() -> "pvp_grandmaster"
+        true -> "strong"
+      end
+
+    create_bot_hero!(avatar, level, difficulty, tier, user)
   end
 
   # by nilifing :id here we can make a perfect clone of a record
@@ -203,10 +216,30 @@ defmodule Moba.Conductor do
     end)
   end
 
+  defp schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
+
+  defp server_check(state) do
+    schedule_check()
+
+    match = Moba.current_match()
+
+    if time_diff_in_seconds(match.inserted_at) >= @reset_diff_in_seconds do
+      Moba.start!()
+    end
+
+    if time_diff_in_seconds(match.last_server_update_at) >= @update_diff_in_seconds do
+      server_update!(match)
+    end
+
+    state
+  end
+
   defp time_diff_in_seconds(nil), do: 0
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
   defp update_hero_skills do
+    Logger.info("Updating hero skills...")
+
     canon = SkillQuery.base_canon() |> Repo.all()
     all_current = SkillQuery.base_current() |> Repo.all()
 
@@ -223,6 +256,8 @@ defmodule Moba.Conductor do
   end
 
   defp update_hero_items do
+    Logger.info("Updating hero items...")
+
     canon = ItemQuery.base_canon() |> Repo.all()
     all_current = ItemQuery.base_current() |> Repo.all()
 
@@ -239,6 +274,8 @@ defmodule Moba.Conductor do
   end
 
   defp update_hero_avatars do
+    Logger.info("Updating hero avatars...")
+
     canon = AvatarQuery.base_canon() |> Repo.all()
     all_current = AvatarQuery.all_current() |> Repo.all()
 
@@ -250,38 +287,6 @@ defmodule Moba.Conductor do
         avatar_ids = Repo.all(query) |> Enum.map(& &1.id)
         query = HeroQuery.with_avatar_ids(Game.Schema.Hero, avatar_ids)
         Repo.update_all(query, set: [avatar_id: current.id])
-      end
-    end)
-  end
-
-  defp skynet(%{last_server_update_at: updated_at, inserted_at: inserted_at}) do
-    time = updated_at || inserted_at
-
-    Enum.each(1..2, fn _n ->
-      bot = UserQuery.skynet_bot(time) |> Repo.all() |> List.first()
-
-      if bot do
-        duel = Moba.bot_matchmaking!(bot)
-
-        if duel do
-          Logger.info("Created duel ##{duel.id} for #{bot.username}")
-          later = Timex.shift(time, minutes: 190)
-          Accounts.update_user!(bot, %{last_online_at: later})
-        end
-      end
-    end)
-  end
-
-  defp auto_matchmaking do
-    Enum.each(1..2, fn _n ->
-      user = UserQuery.auto_matchmaking() |> Repo.all() |> List.first()
-
-      if user do
-        duel = Moba.auto_matchmaking!(user)
-
-        if duel do
-          Logger.info("Created duel ##{duel.id} for #{user.username}")
-        end
       end
     end)
   end

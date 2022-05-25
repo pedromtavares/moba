@@ -5,7 +5,7 @@ defmodule Moba.Game.Duels do
 
   import Ecto.Query
 
-  def list_finished(user) do
+  def list_finished_duels(user) do
     query =
       from duel in base_query(user),
         where: duel.phase == "finished"
@@ -13,7 +13,7 @@ defmodule Moba.Game.Duels do
     Repo.all(query)
   end
 
-  def list_pvp(user) do
+  def list_pvp_duels(user) do
     query =
       from duel in base_query(user),
         where: duel.type == "pvp"
@@ -54,7 +54,7 @@ defmodule Moba.Game.Duels do
     ])
   end
 
-  def get!(id), do: load() |> Repo.get!(id)
+  def get_duel!(id), do: load() |> Repo.get!(id)
 
   def create!(user, opponent, type, auto) do
     %Duel{phase: "user_first_pick", auto: auto, user: user, user_id: user.id, opponent_id: opponent.id, type: type}
@@ -110,13 +110,13 @@ defmodule Moba.Game.Duels do
   def auto_next_phase!(%{phase: phase, user_id: user_id} = duel)
       when phase in ["user_first_pick", "user_second_pick"] do
     hero = available_random_hero(user_id, duel.user_first_pick_id)
-    Game.next_duel_phase!(get!(duel.id), hero)
+    Game.next_duel_phase!(get_duel!(duel.id), hero)
   end
 
   def auto_next_phase!(%{phase: phase, opponent_id: opponent_id} = duel)
       when phase in ["opponent_first_pick", "opponent_second_pick"] do
     hero = available_random_hero(opponent_id, duel.opponent_first_pick_id)
-    Game.next_duel_phase!(get!(duel.id), hero)
+    Game.next_duel_phase!(get_duel!(duel.id), hero)
   end
 
   def auto_next_phase!(duel), do: duel

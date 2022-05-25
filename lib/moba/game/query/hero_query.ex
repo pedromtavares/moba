@@ -55,7 +55,7 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])
   end
 
-  def eligible_for_pvp(user_id, duel_inserted_at) do
+  def pickable(user_id, duel_inserted_at) do
     base = with_user(Hero, user_id) |> unarchived() |> finished() |> order_by_pvp()
 
     from(hero in base,

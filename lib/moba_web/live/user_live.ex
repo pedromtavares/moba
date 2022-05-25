@@ -34,7 +34,7 @@ defmodule MobaWeb.UserLive do
     Game.get_hero!(hero["hero_id"])
   end
 
-  defp featured_hero(user), do: Game.current_pve_hero(user)
+  defp featured_hero(user), do: Moba.current_pve_hero(user)
 
   defp user_assigns(user_id, %{assigns: %{current_user: current_user}} = socket) do
     with user = Accounts.get_user_with_current_heroes!(user_id),

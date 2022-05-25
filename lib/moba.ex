@@ -183,6 +183,8 @@ defmodule Moba do
     }
   end
 
+  def current_pve_hero(%{current_pve_hero_id: hero_id}), do: Game.get_hero!(hero_id)
+
   def xp_to_next_hero_level(level) when level < 1, do: 0
   def xp_to_next_hero_level(level), do: base_xp() + (level - 2) * xp_increment()
 

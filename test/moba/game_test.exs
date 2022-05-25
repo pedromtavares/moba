@@ -18,23 +18,6 @@ defmodule Moba.GameTest do
       assert veteran_hero.gold == 2000
     end
 
-    test "#create_bot_hero! pve" do
-      avatar = base_avatar()
-
-      bot_level_7 = Game.create_bot_hero!(avatar, 7, "strong")
-
-      assert bot_level_7.level == 7
-      assert bot_level_7.league_tier == 1
-      refute bot_level_7.pvp_last_picked
-
-      bot_level_0 = Game.create_bot_hero!(avatar, 0, "weak")
-
-      assert bot_level_0.league_tier == 0
-      assert bot_level_0.atk < avatar.atk
-      assert bot_level_0.total_hp < avatar.total_hp
-      assert bot_level_0.total_mp < avatar.total_mp
-    end
-
     test "#update_hero!" do
       %{id: id} = hero = create_base_hero()
       Game.subscribe_to_hero(id)
@@ -438,7 +421,7 @@ defmodule Moba.GameTest do
 
       refute Game.can_buy_item?(base_hero, item)
 
-      hero_with_full_inventory = create_bot_hero(40, "strong")
+      hero_with_full_inventory = create_base_hero(%{}) |> Game.update_hero!(%{}, full_legendary_inventory())
 
       refute Game.can_buy_item?(hero_with_full_inventory, item)
 
