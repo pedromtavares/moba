@@ -48,7 +48,11 @@ defmodule Moba.Accounts do
 
   def user_duel_updates!(nil, _, _), do: nil
 
-  def user_duel_updates!(user, duel_type, updates), do: Users.duel_updates!(user, duel_type, updates)
+  def user_duel_updates!(user, duel_type, updates) do
+    updated = Users.duel_updates!(user, duel_type, updates)
+    Moba.update_pvp_ranking()
+    updated
+  end
 
   defdelegate ranking(limit), to: Users
 

@@ -30,7 +30,6 @@ defmodule Moba.Engine.Core.Duel do
     %Battle{
       attacker: attacker,
       defender: defender,
-      match_id: Moba.current_match().id,
       duel_id: duel_id,
       type: Engine.battle_types().duel,
       duel: Game.get_duel!(duel_id)

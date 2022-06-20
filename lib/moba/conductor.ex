@@ -1,8 +1,7 @@
 defmodule Moba.Conductor do
   @moduledoc """
-  Server responsible for orchestrating the game's main timers and global tasks
+  Module responsible for orchestrating the game's global tasks
   """
-  use GenServer
 
   alias Moba.{Repo, Game, Accounts}
   alias Game.Query.{ItemQuery, HeroQuery, AvatarQuery, SkillQuery}
@@ -10,31 +9,9 @@ defmodule Moba.Conductor do
 
   require Logger
 
-  # 30 secs
-  @check_timeout 1000 * 30
-
-  # 10mins
-  @update_diff_in_seconds 60 * 10
-
-  # 1 day
-  @reset_diff_in_seconds 60 * 60 * 24
-
-  def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
-
-  def init(state) do
-    schedule_check()
-    {:ok, state}
-  end
-
-  def handle_info(:server_check, state) do
-    with state = server_check(state) do
-      {:noreply, state}
-    end
-  end
-
   @doc """
   Runs the automated bot battles and touches a datetime field
-  so Conductor knows when to run this again, currently every 10 mins.
+  so Moba.Server knows when to run this again, currently every 10 mins.
   """
   def server_update!(match \\ Moba.current_match()) do
     auto_matchmaking_bots(match)
@@ -215,27 +192,6 @@ defmodule Moba.Conductor do
       )
     end)
   end
-
-  defp schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
-
-  defp server_check(state) do
-    schedule_check()
-
-    match = Moba.current_match()
-
-    if time_diff_in_seconds(match.inserted_at) >= @reset_diff_in_seconds do
-      Moba.start!()
-    end
-
-    if time_diff_in_seconds(match.last_server_update_at) >= @update_diff_in_seconds do
-      server_update!(match)
-    end
-
-    state
-  end
-
-  defp time_diff_in_seconds(nil), do: 0
-  defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
   defp update_hero_skills do
     Logger.info("Updating hero skills...")

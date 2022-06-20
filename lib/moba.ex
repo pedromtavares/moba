@@ -3,7 +3,7 @@ defmodule Moba do
   High-level helpers, core variables and cross-context orchestration
   """
 
-  alias Moba.{Game, Accounts, Conductor, Cleaner}
+  alias Moba.{Accounts, Cleaner, Conductor, Game, Ranker}
 
   # General constants
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
@@ -191,6 +191,8 @@ defmodule Moba do
   def xp_until_hero_level(level) when level < 2, do: 0
   def xp_until_hero_level(level), do: xp_to_next_hero_level(level) + xp_until_hero_level(level - 1)
 
+  defdelegate server_update!(match \\ Moba.current_match()), to: Conductor
+
   def start! do
     IO.puts("Starting match...")
     Conductor.start_match!()
@@ -212,7 +214,7 @@ defmodule Moba do
     Conductor.regenerate_pvp_bots!()
   end
 
-  def current_match, do: Game.current_match()
+  defdelegate current_match, to: Game
 
   def create_current_pve_hero!(
         attrs,
@@ -227,11 +229,16 @@ defmodule Moba do
 
   @doc """
   Game pve_ranking is defined by who has the highest total_farm (gold + xp)
+  """
+  def update_pve_ranking do
+    if test?(), do: Game.update_pve_ranking!(), else: GenServer.cast(Ranker, :pve)
+  end
+
+  @doc """
   Accounts ranking is defined by who has the highest season_points
   """
-  def update_rankings! do
-    Game.update_pve_ranking!()
-    Accounts.update_ranking!()
+  def update_pvp_ranking do
+    if test?(), do: Accounts.update_ranking!(), else: GenServer.cast(Ranker, :pvp)
   end
 
   def auto_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.matchmaking_opponent(user), true)
@@ -277,7 +284,7 @@ defmodule Moba do
   end
 
   def run_async(fun) do
-    if Application.get_env(:moba, :env) == :test do
+    if test?() do
       fun.()
     else
       Task.start(fun)
@@ -289,4 +296,6 @@ defmodule Moba do
     Cachex.put(:game_cache, "items-#{match_id}", items)
     items
   end
+
+  defp test?, do: Application.get_env(:moba, :env) == :test
 end

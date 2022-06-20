@@ -20,7 +20,8 @@ defmodule Moba.Application do
       {Cachex, name: :game_cache},
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
-      Moba.Conductor,
+      Moba.Server,
+      Moba.Ranker,
       Moba.Admin.Server,
       # Moba.Ranker,
       {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
