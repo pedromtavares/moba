@@ -21,7 +21,7 @@ defmodule Moba.Game.Query.ItemQuery do
   end
 
   def canon(query \\ Item) do
-    from s in query, where: is_nil(s.match_id)
+    from s in query, where: is_nil(s.resource_uuid)
   end
 
   def enabled(query \\ Item) do

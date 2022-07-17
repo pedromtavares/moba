@@ -76,7 +76,7 @@ defmodule MobaWeb.TavernLive do
     MobaWeb.TavernView.render("index.html", assigns)
   end
 
-  defp index_assigns(params, %{assigns: %{current_user: user}} = socket) do
+  defp index_assigns(params, %{assigns: %{current_player: %{user: user}}} = socket) do
     with avatar_code = Map.get(params, "avatar"),
          active_tab = if(avatar_code, do: "skins", else: "avatars"),
          avatars = Game.list_unlockable_avatars(),

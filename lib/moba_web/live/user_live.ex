@@ -6,8 +6,16 @@ defmodule MobaWeb.UserLive do
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do
-    with socket = user_assigns(id, socket) do
-      if connected?(socket), do: MobaWeb.subscribe("user-ranking")
+    with socket = user_assigns(id, nil, socket) do
+      if connected?(socket), do: MobaWeb.subscribe("player-ranking")
+      {:noreply, socket}
+    end
+  end
+
+  def handle_params(%{"player_id" => id}, _uri, socket) do
+    with %{user_id: user_id} = player <- Game.get_player!(id),
+         socket = user_assigns(user_id, player, socket) do
+      if connected?(socket), do: MobaWeb.subscribe("player-ranking")
       {:noreply, socket}
     end
   end
@@ -18,10 +26,10 @@ defmodule MobaWeb.UserLive do
     end
   end
 
-  def handle_info({"ranking", _}, %{assigns: %{user: %{id: id}}} = socket) do
-    with user = Accounts.get_user!(id),
-         ranking = Accounts.search(user) do
-      {:noreply, assign(socket, ranking: ranking, user: user)}
+  def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}}} = socket) do
+    with player = Game.get_player!(id),
+         ranking = ranking_for(player) do
+      {:noreply, assign(socket, ranking: ranking, player: player)}
     end
   end
 
@@ -34,20 +42,25 @@ defmodule MobaWeb.UserLive do
     Game.get_hero!(hero["hero_id"])
   end
 
-  defp featured_hero(user), do: Moba.current_pve_hero(user)
+  defp featured_hero(player), do: player.current_pve_hero
 
-  defp user_assigns(user_id, %{assigns: %{current_user: current_user}} = socket) do
-    with user = Accounts.get_user_with_current_heroes!(user_id),
-         collection_codes = Enum.map(user.hero_collection, & &1["code"]),
+  defp ranking_for(%{bot_options: options}) when not is_nil(options), do: Game.bot_ranking()
+  defp ranking_for(_), do: Game.player_ranking(50)
+
+  defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do
+    with user = Accounts.get_user!(user_id),
+         player = cached_player || Moba.player_for(user),
+         collection_codes = Enum.map(player.hero_collection, & &1["code"]),
          blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes)),
-         duels = Game.list_finished_duels(user),
-         featured = featured_hero(user),
-         ranking = Accounts.search(user),
-         sidebar_code = if(user.id == current_user.id, do: "user", else: nil) do
+         duels = Game.list_finished_duels(player),
+         featured = featured_hero(player),
+         ranking = ranking_for(player),
+         sidebar_code = if(player.id == current_player.id, do: "user", else: nil) do
       assign(socket,
         blank_collection: blank_collection,
         duels: duels,
         featured: featured,
+        player: player,
         ranking: ranking,
         sidebar_code: sidebar_code,
         user: user

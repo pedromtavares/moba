@@ -5,16 +5,13 @@ defmodule Moba.Game.Schema.Item do
 
   Active Items usually cost MP to be activated and have a cooldown in order to be activated again.
   Passive Items usually cost no MP and activate by themselves.
-
-  This is a match-locked resource, meaning once a match starts, its stats cannot be changed,
-  and any changes made on the admin panel will only be applied on the next match.
   """
 
   use Ecto.Schema
   use Arc.Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, except: [:__meta__, :match]}
+  @derive {Jason.Encoder, except: [:__meta__]}
   schema "items" do
     field :image, Moba.Image.Type
 
@@ -27,6 +24,7 @@ defmodule Moba.Game.Schema.Item do
     field :passive, :boolean, default: false
     field :enabled, :boolean
     field :current, :boolean
+    field :resource_uuid, :string
     field :mp_cost, :integer, default: 0
     field :cooldown, :integer, default: 0
     field :duration, :integer, default: 0
@@ -63,7 +61,7 @@ defmodule Moba.Game.Schema.Item do
     field :defender_buff, :boolean, virtual: true
     field :attacker_debuff, :boolean, virtual: true
 
-    belongs_to :match, Moba.Game.Schema.Match
+    # belongs_to :match, Moba.Game.Schema.Match
 
     timestamps()
   end
@@ -103,7 +101,8 @@ defmodule Moba.Game.Schema.Item do
       :extra_amount,
       :base_amount,
       :enabled,
-      :current
+      :current,
+      :resource_uuid
     ])
     |> cast_attachments(attrs, [:image])
   end

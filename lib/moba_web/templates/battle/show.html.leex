@@ -67,7 +67,7 @@
                     <% end %>
                 </div>
             <% else %>
-                <%= if active_attacker?(@battle, @last_turn, @current_user) do %>
+                <%= if active_attacker?(@battle, @last_turn, @current_player) do %>
                     <div class="text-center mt-5">
                         <h3 class="mt-5">Click to select a skill on the battle bar below and then click the Attack button to start the battle!</h3>
                     </div>

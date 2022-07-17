@@ -3,8 +3,8 @@ defmodule MobaWeb.DuelView do
 
   alias MobaWeb.Presence
 
-  def casual?(%{user: %{season_points: user_sp}, opponent: %{season_points: opponent_sp}})
-      when user_sp - opponent_sp < -200 or user_sp - opponent_sp > 200 do
+  def casual?(%{player: %{pvp_points: player_sp}, opponent_player: %{pvp_points: opponent_sp}})
+      when player_sp - opponent_sp < -200 or player_sp - opponent_sp > 200 do
     true
   end
 
@@ -25,13 +25,13 @@ defmodule MobaWeb.DuelView do
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false
 
-  def show_rematch?(%{duel: %{type: "pvp"} = duel, current_user: user}) do
-    finished?(duel) && both_online?(duel, user) && (user.id == duel.user_id || user.id == duel.opponent_id)
+  def show_rematch?(%{duel: %{type: "pvp"} = duel, current_user: user, current_player: player}) do
+    finished?(duel) && both_online?(duel, user) && (player.id == duel.player_id || player.id == duel.opponent_player_id)
   end
 
   def show_rematch?(_), do: false
 
-  def show_timer?(%{type: "pvp", phase: phase}) when phase not in ["user_battle", "opponent_battle", "finished"],
+  def show_timer?(%{type: "pvp", phase: phase}) when phase not in ["player_battle", "opponent_battle", "finished"],
     do: true
 
   def show_timer?(_), do: false
@@ -40,20 +40,20 @@ defmodule MobaWeb.DuelView do
   def title(%{type: "elite_matchmaking"}), do: "Elite Matchmaking"
   def title(_), do: ""
 
-  def user_instructions(%{phase: phase, user: user}) when phase in ["user_first_pick", "user_second_pick"] do
-    "#{user.username}, it's your turn to pick"
+  def user_instructions(%{phase: phase, player: player}) when phase in ["player_first_pick", "player_second_pick"] do
+    "#{player.user.username}, it's your turn to pick"
   end
 
   def user_instructions(_), do: ""
 
-  def opponent_instructions(%{phase: phase, opponent: opponent})
+  def opponent_instructions(%{phase: phase, opponent_player: opponent})
       when phase in ["opponent_first_pick", "opponent_second_pick"] do
-    "#{opponent.username}, it's your turn to pick"
+    "#{opponent.user.username}, it's your turn to pick"
   end
 
   def opponent_instructions(_), do: ""
 
-  defp both_online?(%{user_id: user_id, opponent_id: opponent_id}, current_user) do
+  defp both_online?(%{player: %{user_id: user_id}, opponent_player: %{user_id: opponent_id}}, current_user) do
     online_ids =
       Presence.list("online")
       |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)

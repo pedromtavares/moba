@@ -5,18 +5,16 @@ defmodule MobaWeb.TrainingLiveTest do
   test "connected mount", %{conn: conn} do
     hero = create_base_hero()
 
-    conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
+    conn = init_test_session(conn, player_id: hero.player_id)
 
     {:ok, _view, html} = live(conn, "/training")
     assert html =~ "MEDITATE"
   end
 
   test "connected mount redirects if there is no pve hero", %{conn: conn} do
-    user = create_user()
+    player = create_player!(%{current_pve_hero_id: nil})
 
-    user = Accounts.get_user!(user.id) |> Accounts.update_user!(%{current_pve_hero_id: nil})
-
-    conn = Pow.Plug.assign_current_user(conn, user, otp_app: :moba)
+    conn = init_test_session(conn, player_id: player.id)
 
     live(conn, "/training") |> follow_redirect(conn, "/base")
   end
@@ -24,7 +22,7 @@ defmodule MobaWeb.TrainingLiveTest do
   test "battle event", %{conn: conn} do
     hero = create_base_hero()
 
-    conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
+    conn = init_test_session(conn, player_id: hero.player_id)
 
     target = Game.list_targets(hero) |> List.first()
 

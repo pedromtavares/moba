@@ -110,22 +110,22 @@ defmodule Moba.Accounts.Query.UserQuery do
     from(u in by_season_points(), where: u.is_bot == true)
   end
 
-  def bot_opponents(season_tier) do
+  def bot_opponents(pvp_tier) do
     from bot in bots(),
-      where: bot.season_tier <= ^season_tier + 1,
+      where: bot.pvp_tier <= ^pvp_tier + 1,
       order_by: [desc: bot.season_points]
   end
 
-  def normal_opponents(season_tier, user_points) do
+  def normal_opponents(pvp_tier, user_points) do
     from user in available_opponents(),
-      where: user.season_tier <= ^season_tier,
+      where: user.pvp_tier <= ^pvp_tier,
       where: user.season_points > ^user_points - @maximum_points_difference,
       order_by: [desc: user.season_points]
   end
 
-  def elite_opponents(season_tier, user_points) do
+  def elite_opponents(pvp_tier, user_points) do
     from user in available_opponents(),
-      where: user.season_tier >= ^season_tier,
+      where: user.pvp_tier >= ^pvp_tier,
       where: user.season_points < ^user_points + @maximum_points_difference,
       order_by: [asc: user.season_points]
   end

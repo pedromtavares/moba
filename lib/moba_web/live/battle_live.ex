@@ -4,7 +4,7 @@ defmodule MobaWeb.BattleLive do
   alias MobaWeb.{BattleView, TutorialComponent}
 
   def mount(_, session, socket) do
-    with socket = socket_init(session["user_id"], socket) do
+    with socket = socket_init(session["player_id"], socket) do
       {:ok, socket}
     end
   end
@@ -110,11 +110,11 @@ defmodule MobaWeb.BattleLive do
     end
   end
 
-  defp socket_init(user_id, socket) do
-    %{assigns: %{current_user: current_user}} =
-      socket = assign_new(socket, :current_user, fn -> user_id && Accounts.get_user!(user_id) end)
+  defp socket_init(player_id, socket) do
+    %{assigns: %{current_player: current_player}} =
+      socket = assign_new(socket, :current_player, fn -> player_id && Game.get_player!(player_id) end)
 
-    assign(socket, tutorial_step: current_user && current_user.tutorial_step)
+    assign(socket, tutorial_step: current_player && current_player.tutorial_step)
   end
 
   defp turn_assigns(socket, battle, turn, turn_number) do

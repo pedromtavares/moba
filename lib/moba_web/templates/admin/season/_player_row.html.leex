@@ -1,26 +1,24 @@
-<tr id="user-<%= @user.id %>">
+<tr id="user-<%= @player.id %>">
     <td class="text-center">
-        <%= live_redirect to: Routes.live_path(@socket, MobaWeb.UserLive, @user), class: "text-white" do %>
-            <img src="/images/pve/<%= @user.pve_tier %>.png" style="max-height:  50px"/>
-            <%= if @user.season_points > 0 do %>
-                <img src="/images/pvp/<%= @user.season_tier %>.png" style="max-height:  50px"/>
+        <%= live_redirect to: Routes.player_path(@socket, :show, @player), class: "text-white" do %>
+            <img src="/images/pve/<%= @player.pve_tier %>.png" style="max-height:  50px"/>
+            <%= if @player.pvp_points > 0 do %>
+                <img src="/images/pvp/<%= @player.pvp_tier %>.png" style="max-height:  50px"/>
             <% end %>
             <br/>
-            <span class="text-white"><%= @user.username %></span>
-            <span class="badge badge-pill badge-light-success"><%= @user.hero_count%></span>
-            <span class="badge badge-pill badge-light-dark"><%= @user.shard_count%></span>
+            <span class="text-white"><%= @player.user.username %></span>
+            <span class="badge badge-pill badge-light-success"><%= @player.hero_count%></span>
+            <span class="badge badge-pill badge-light-dark"><%= @player.user.shard_count%></span>
         <% end %>
         <br/>
         <small class="text-dark font-italic">
-            <%=unless @user.is_bot do %>
-                Online <%= @user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-                <br/>
-                Registered <%= @user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-            <% end %>
+            Online <%= @player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+            <br/>
+            Registered <%= @player.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
         </small>
     </td>
-    <%= for hero <- @user.latest_heroes do %>
-        <td class="text-center <%= if hero.id == @user.current_pve_hero_id, do: "border" %>">
+    <%= for hero <- @player.latest_heroes do %>
+        <td class="text-center <%= if hero.id == @player.current_pve_hero_id, do: "border" %>">
             <img src="<%= GH.image_url(hero.avatar) %>" style="width: 100px;" class="img-border-xs"><br/>
             <h5 class="mb-0 text-center">
                 <img src="/images/league/<%= hero.league_tier %>.png" style="width: 20px;">

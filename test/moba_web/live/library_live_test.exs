@@ -5,7 +5,7 @@ defmodule MobaWeb.LibraryLiveTest do
   test "connected mount", %{conn: conn} do
     hero = create_base_hero()
 
-    conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
+    conn = Pow.Plug.assign_current_user(conn, hero.player.user, otp_app: :moba)
 
     {:ok, _view, html} = live(conn, "/library")
     assert html =~ "Frequently Asked Questions"

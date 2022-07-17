@@ -5,10 +5,10 @@ defmodule Moba.Engine.Schema.Battle do
   use Ecto.Schema
   import Ecto.Changeset
   alias Moba.{Engine, Game}
-  alias Game.Schema.{Match, Hero, Duel}
+  alias Game.Schema.{Hero, Duel}
 
   schema "battles" do
-    belongs_to :match, Match
+    # belongs_to :match, Match
     belongs_to :attacker, Hero
     belongs_to :defender, Hero
     belongs_to :winner, Hero
@@ -34,7 +34,7 @@ defmodule Moba.Engine.Schema.Battle do
     initiator_id = initiator && initiator.id
 
     battle
-    |> cast(attrs, [:difficulty, :finished, :unread_id, :match_id, :duel_id])
+    |> cast(attrs, [:difficulty, :finished, :unread_id, :duel_id])
     |> cast_embed(:rewards)
     |> cast_embed(:attacker_snapshot)
     |> cast_embed(:defender_snapshot)

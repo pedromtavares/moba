@@ -9,7 +9,7 @@ defmodule MobaWeb.HeroLive do
 
   def handle_params(%{"id" => id}, _uri, socket) do
     with hero = Game.get_hero!(id),
-         ranking = Game.pve_search(hero) do
+         ranking = Game.pve_ranking(200) do
       if connected?(socket) do
         Game.subscribe_to_hero(id)
         MobaWeb.subscribe("hero-ranking")
@@ -19,12 +19,8 @@ defmodule MobaWeb.HeroLive do
        socket
        |> assign(hero: hero, ranking: ranking)
        |> owner_assigns()
-       |> progressions_assigns()}
+       |> quest_assigns()}
     end
-  end
-
-  def handle_event("tab-display", %{"display" => display}, socket) do
-    {:noreply, assign(socket, tab_display: display)}
   end
 
   def handle_event(
@@ -46,7 +42,7 @@ defmodule MobaWeb.HeroLive do
 
   def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
     with hero = Game.get_hero!(id),
-         ranking = Game.pve_search(hero) do
+         ranking = Game.pve_ranking(200) do
       {:noreply, assign(socket, ranking: ranking, hero: hero)}
     end
   end
@@ -56,11 +52,15 @@ defmodule MobaWeb.HeroLive do
   end
 
   defp owner_assigns(
-         %{assigns: %{hero: %{user_id: user_id} = hero, current_user: %{id: current_user_id} = user}} = socket
+         %{
+           assigns: %{
+             hero: %{player_id: player_id} = hero,
+             current_player: %{id: current_player_id, user: user}
+           }
+         } = socket
        )
-       when user_id == current_user_id do
-    with socket = progressions_assigns(socket),
-         skins = Accounts.unlocked_codes_for(user) |> Game.list_skins_with_codes(),
+       when player_id == current_player_id and not is_nil(user) do
+    with skins = Accounts.unlocked_codes_for(user) |> Game.list_skins_with_codes(),
          avatar_code = hero.avatar.code,
          avatar_skins = [Game.default_skin(avatar_code)] ++ Enum.filter(skins, &(&1.avatar_code == avatar_code)),
          skin_index = Enum.find_index(avatar_skins, &(&1.id == hero.skin_id)),
@@ -71,28 +71,16 @@ defmodule MobaWeb.HeroLive do
 
   defp owner_assigns(socket), do: socket
 
-  defp progressions_assigns(%{assigns: %{hero: %{id: hero_id} = hero, current_hero: %{id: current_hero_id}}} = socket)
+  defp quest_assigns(%{assigns: %{hero: %{id: hero_id} = hero, current_hero: %{id: current_hero_id}}} = socket)
        when hero_id == current_hero_id do
-    with completed_progressions = Game.last_completed_quest_progressions(hero),
-         quest_codes = Moba.season_quest_codes(),
-         completed_season_progression = Enum.find(completed_progressions, &Enum.member?(quest_codes, &1.quest.code)),
-         completed_daily_progressions = Enum.filter(completed_progressions, & &1.quest.daily),
-         tab_display = tab_display_priority(completed_season_progression) do
-      assign(socket,
-        completed_progressions: completed_progressions,
-        completed_season_progression: completed_season_progression,
-        completed_daily_progressions: completed_daily_progressions,
-        tab_display: tab_display
-      )
+    with completed_quest = Game.last_completed_quest(hero) do
+      assign(socket, completed_quest: completed_quest)
     end
   end
 
-  defp progressions_assigns(socket), do: socket
+  defp quest_assigns(socket), do: socket
 
-  defp socket_init(%{assigns: %{current_user: current_user}} = socket) do
-    assign_new(socket, :current_hero, fn -> Moba.current_pve_hero(current_user) end)
+  defp socket_init(%{assigns: %{current_player: player}} = socket) do
+    assign_new(socket, :current_hero, fn -> player.current_pve_hero end)
   end
-
-  defp tab_display_priority(season) when not is_nil(season), do: "season"
-  defp tab_display_priority(_), do: "daily"
 end

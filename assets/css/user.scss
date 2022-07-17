@@ -60,8 +60,29 @@
 
     .card-body{
       padding: 0 !important;
-      max-height: 88.5vh;
+      max-height: 93vh;
       overflow: auto;
+
+      thead th {
+        position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #414d59;
+        border-top: 0;
+        padding: 0.7rem;
+      }
+
+      tfoot th{
+        position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        background: #3a454f;
+        border-top: 0;
+        padding: 0.75rem;
+        vertical-align: middle;
+      }
     }
 
     .pvp-rank{

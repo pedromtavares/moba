@@ -21,6 +21,7 @@
                     <div class="card-body p-4">
                         <div class="text-center w-75 m-auto">
                             <h3 class="text-primary">Create an account</h3>
+                            <p class="text-white">You must have an account before playing in the PvP Arena</p>
                         </div>
 
                         <%= form_for @changeset, @action, [as: :user], fn f -> %>

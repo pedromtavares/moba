@@ -15,10 +15,10 @@
                     <tr>
                         <tr>
                             <td class="text-center text-danger"><i class="fa fa-sword fa-2x"></i><br/> Training Difficulty</td>
-                            <td class="text-left"><h5><%= training_difficulty_for(@current_season_progression) %></h5></td>
+                            <td class="text-left"><h5><%= training_difficulty_for(@pve_tier) %></h5></td>
                         </tr>
                     </tr>
-                    <%= if bonus = training_bonus_for(@current_season_progression) do %>
+                    <%= if bonus = training_bonus_for(@pve_tier) do %>
                         <tr>
                             <td class="text-center text-success"><i class="fa fa-sword fa-2x"></i><br/> Training Bonus</td>
                             <td class="text-left"><h5><%= bonus %></h5></td>
@@ -34,7 +34,7 @@
 
                     <tr>
                         <td class="text-center text-warning"><i class="fa fa-trophy fa-2x"></i><br/> Maximum League</td>
-                        <td class="text-left"><h4><%= max_league_allowed_for(@current_season_progression) %></h4></td>
+                        <td class="text-left"><h4><%= max_league_allowed_for(@pve_tier) %></h4></td>
                     </tr>
 
                     <tr>
@@ -44,7 +44,7 @@
                             <% end %>
                         </td>
                         <td class="text-left">
-                            <h4>+ <%= @current_season_progression.quest.shard_prize %></h4>
+                            <h4>+ <%= quest_shard_prize(@pve_tier) %></h4>
                         </td>
                     </tr>
                 </table>

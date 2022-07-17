@@ -10,14 +10,14 @@ defmodule Moba.Admin.Duels do
 
   def list_recent do
     Repo.all(
-      from d in Duel,
+      from duel in Duel,
         limit: 20,
-        join: u in assoc(d, :user),
-        where: u.is_bot == false,
-        where: d.auto == false,
-        order_by: [desc: d.id]
+        join: player in assoc(duel, :player),
+        where: is_nil(player.bot_options),
+        where: duel.auto == false,
+        order_by: [desc: duel.id]
     )
-    |> Repo.preload([:user, :opponent, :winner])
+    |> Repo.preload(player: :user, opponent_player: :user, winner_player: :user)
   end
 
   def get!(id), do: Repo.get!(Duel, id)

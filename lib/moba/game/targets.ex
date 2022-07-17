@@ -29,7 +29,7 @@ defmodule Moba.Game.Targets do
   Currently 2 Targets of each difficulty is generated after every PVE battle.
   """
   def generate!(hero, unlocked_codes \\ [])
-  def generate!(%{user_id: user_id} = hero, _) when is_nil(user_id), do: hero
+  def generate!(%{player_id: player_id} = hero, _) when is_nil(player_id), do: hero
 
   def generate!(%{pve_tier: pve_tier} = hero, unlocked_codes) do
     Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)

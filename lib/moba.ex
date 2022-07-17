@@ -7,7 +7,6 @@ defmodule Moba do
 
   # General constants
   @damage_types %{normal: "normal", magic: "magic", pure: "pure"}
-  @user_level_xp 10_000
   @base_hero_count 6
   @leagues %{
     0 => "Bronze League",
@@ -50,10 +49,9 @@ defmodule Moba do
     7 => "Invoker"
   }
   @turn_mp_regen_multiplier 0.01
-  @season_quest_codes ["season", "season_master", "season_grandmaster", "season_perfect"]
   @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
   @shard_buyback_minimum 5
-  @max_season_tier 18
+  @max_pvp_tier 18
   @match_timeout_in_hours 24
   @normal_matchmaking_shards 5
   @elite_matchmaking_shards 15
@@ -73,7 +71,7 @@ defmodule Moba do
   @items_base_price 400
   @buyback_multiplier 10
   @refresh_targets_count 5
-  @maximum_total_farm 60_000
+  @max_total_farm 60_000
   @seconds_per_turn 2
   @max_pve_tier 7
 
@@ -92,15 +90,13 @@ defmodule Moba do
   def epic_items_price, do: @items_base_price * 6
   def legendary_items_price, do: @items_base_price * 12
   def damage_types, do: @damage_types
-  def user_level_xp, do: @user_level_xp
   def leagues, do: @leagues
   def pvp_tiers, do: @pvp_tiers
   def pve_tiers, do: @pve_tiers
   def turn_mp_regen_multiplier, do: @turn_mp_regen_multiplier
-  def season_quest_codes, do: @season_quest_codes
   def current_ranking_date, do: @current_ranking_date
   def shard_buyback_minimum, do: @shard_buyback_minimum
-  def max_season_tier, do: @max_season_tier
+  def max_pvp_tier, do: @max_pvp_tier
   def match_timeout_in_hours, do: @match_timeout_in_hours
   def normal_matchmaking_shards, do: @normal_matchmaking_shards
   def elite_matchmaking_shards, do: @elite_matchmaking_shards
@@ -129,7 +125,7 @@ defmodule Moba do
   def initial_gold(_), do: @initial_gold
   def buyback_multiplier, do: @buyback_multiplier
   def refresh_targets_count, do: @refresh_targets_count
-  def maximum_total_farm, do: @maximum_total_farm
+  def max_total_farm, do: @max_total_farm
   def seconds_per_turn, do: @seconds_per_turn
   def farm_per_turn(0), do: 800..1200
   def farm_per_turn(1), do: 850..1200
@@ -185,17 +181,26 @@ defmodule Moba do
 
   def current_pve_hero(%{current_pve_hero_id: hero_id}), do: Game.get_hero!(hero_id)
 
+  def player_for(%{id: user_id}) do
+    with existing <- Game.get_player_from_user!(user_id) do
+      existing
+    else
+      _ ->
+        %{id: player_id} = Game.create_player!(%{user_id: user_id})
+        Game.get_player!(player_id)
+    end
+  end
+
   def xp_to_next_hero_level(level) when level < 1, do: 0
   def xp_to_next_hero_level(level), do: base_xp() + (level - 2) * xp_increment()
 
   def xp_until_hero_level(level) when level < 2, do: 0
   def xp_until_hero_level(level), do: xp_to_next_hero_level(level) + xp_until_hero_level(level - 1)
 
-  defdelegate server_update!(match \\ Moba.current_match()), to: Conductor
-
-  def start! do
-    IO.puts("Starting match...")
-    Conductor.start_match!()
+  def server_tick!(season \\ Moba.current_season()) do
+    IO.puts("Ticking season...")
+    Conductor.season_tick!(season)
+    IO.puts("Cleaning up records...")
     Cleaner.cleanup_old_records()
   end
 
@@ -214,54 +219,75 @@ defmodule Moba do
     Conductor.regenerate_pvp_bots!()
   end
 
-  defdelegate current_match, to: Game
+  defdelegate current_season, to: Game
+
+  defdelegate unlocked_codes_for(user), to: Accounts
 
   def create_current_pve_hero!(
         attrs,
-        user,
+        player,
         avatar,
         skills
       ) do
-    hero = Game.create_hero!(attrs, user, avatar, skills)
-    Accounts.set_current_pve_hero!(user, hero.id)
+    hero = Game.create_hero!(attrs, player, avatar, skills)
+    Game.set_current_pve_hero!(player, hero.id)
     hero
   end
 
+  def can_shard_buyback?(%{player: %{user: %{shard_count: count}}} = hero) do
+    Game.can_shard_buyback?(hero) && count >= shard_buyback_price(count) && count
+  end
+
+  def shard_buyback_price(shard_count) do
+    minimum = shard_buyback_minimum()
+    percentage_price = trunc(shard_count * minimum / 100)
+
+    if percentage_price > minimum do
+      percentage_price
+    else
+      minimum
+    end
+  end
+
+  def shard_buyback!(%{player: %{user: %{shard_count: count} = user}} = hero) do
+    if can_shard_buyback?(hero) do
+      price = shard_buyback_price(count)
+      update_user!(user, %{shard_count: count - price})
+      Game.shard_buyback!(hero)
+    else
+      hero
+    end
+  end
+
+  def reward_shards!(%{user: %{shard_count: current_count} = user}, shard_reward) do
+    update_user!(user, %{shard_count: current_count + shard_reward})
+  end
+
+  def reward_shards!(player, _), do: player
+
   @doc """
-  Game pve_ranking is defined by who has the highest total_farm (gold + xp)
+  Game pve_ranking is defined by which hero has the highest total_farm (gold + xp)
   """
   def update_pve_ranking do
     if test?(), do: Game.update_pve_ranking!(), else: GenServer.cast(Ranker, :pve)
   end
 
   @doc """
-  Accounts ranking is defined by who has the highest season_points
+  Game pvp_ranking is defined by which player has the highest pvp_points
   """
   def update_pvp_ranking do
-    if test?(), do: Accounts.update_ranking!(), else: GenServer.cast(Ranker, :pvp)
+    if test?(), do: Game.update_pvp_ranking!(), else: GenServer.cast(Ranker, :pvp)
   end
-
-  def auto_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.matchmaking_opponent(user), true)
-
-  def bot_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.bot_opponent(user), false)
-
-  def normal_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.normal_opponent(user), false)
-
-  def elite_matchmaking!(user), do: Game.create_matchmaking!(user, Accounts.elite_opponent(user), false)
 
   def basic_attack, do: Game.basic_attack()
 
-  def add_user_experience(user, experience), do: Accounts.add_experience(user, experience)
-
   def update_user!(user, updates), do: Accounts.update_user!(user, updates)
 
-  def restarting?, do: is_nil(Game.current_match().last_server_update_at)
-
   def cached_items do
-    match_id = if restarting?(), do: Game.last_match().id, else: Game.current_match().id
+    %{resource_uuid: uuid} = Game.current_season()
 
-    case Cachex.get(:game_cache, "items-#{match_id}") do
-      {:ok, nil} -> put_items_cache(match_id)
+    case Cachex.get(:game_cache, "items-#{uuid}") do
+      {:ok, nil} -> put_items_cache(uuid)
       {:ok, items} -> items
     end
   end
@@ -291,9 +317,9 @@ defmodule Moba do
     end
   end
 
-  defp put_items_cache(match_id) do
+  defp put_items_cache(uuid) do
     items = Game.shop_list()
-    Cachex.put(:game_cache, "items-#{match_id}", items)
+    Cachex.put(:game_cache, "items-#{uuid}", items)
     items
   end
 

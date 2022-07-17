@@ -6,14 +6,7 @@ defmodule MobaWeb.TrainingView do
   def boss_available?(%{pve_current_turns: 0, boss_id: boss_id}) when not is_nil(boss_id), do: Game.get_hero!(boss_id)
   def boss_available?(_), do: false
 
-  def boss_percentage(boss) do
-    boss.total_hp * 100 / boss.avatar.total_hp
-  end
-
-  def can_shard_buyback?(%{user: user} = hero) do
-    hero.pve_tier > 3 && hero.league_tier < Moba.master_league_tier() &&
-      user.shard_count >= Accounts.shard_buyback_price(user)
-  end
+  def boss_percentage(boss), do: boss.total_hp * 100 / boss.avatar.total_hp
 
   def dead?(%{pve_state: "dead"}), do: true
   def dead?(_), do: false
@@ -36,8 +29,8 @@ defmodule MobaWeb.TrainingView do
     end
   end
 
-  def display_farm_tabs?(%{current_hero: %{league_tier: tier}, current_user: user}) do
-    tier != Moba.master_league_tier() && user.preferences.show_farm_tabs
+  def display_farm_tabs?(%{current_hero: %{league_tier: tier}, current_player: player}) do
+    tier != Moba.master_league_tier() && player.preferences.show_farm_tabs
   end
 
   def display_defense_percentage(target, targets) do

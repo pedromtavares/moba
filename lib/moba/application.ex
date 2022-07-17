@@ -8,22 +8,18 @@ defmodule Moba.Application do
   def start(_type, _args) do
     # List all child processes to be supervised
     children = [
-      # Start the Ecto repository
       Moba.Repo,
       MobaWeb.Telemetry,
-      # Start the PubSub system
       {Phoenix.PubSub, name: Moba.PubSub},
       MobaWeb.Presence,
-      # Start the endpoint when the application starts
       MobaWeb.Endpoint,
       # Cache for hero creation
       {Cachex, name: :game_cache},
       # Starts a worker by calling: Moba.Worker.start_link(arg)
       # {Moba.Worker, arg},
       Moba.Server,
-      Moba.Ranker,
       Moba.Admin.Server,
-      # Moba.Ranker,
+      Moba.Ranker,
       {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
     ]
 

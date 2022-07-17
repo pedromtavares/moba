@@ -3,7 +3,7 @@ defmodule Moba.Engine.Core.Duel do
   Encapsulates all logic for Duel battles
   """
 
-  alias Moba.{Accounts, Game, Engine}
+  alias Moba.{Game, Engine}
   alias Engine.Schema.Battle
 
   def create_battle!(attrs) do
@@ -21,7 +21,7 @@ defmodule Moba.Engine.Core.Duel do
   def finalize_battle(battle) do
     battle
     |> manage_duel_winner()
-    |> update_users()
+    |> update_players()
     |> generate_snapshots()
     |> next_duel_phase()
   end
@@ -40,14 +40,15 @@ defmodule Moba.Engine.Core.Duel do
        when phase == "opponent_battle" do
     first_battle = Engine.first_duel_battle(duel)
 
-    user_win =
-      last_winner_id && first_battle.winner_id == duel.user_first_pick_id && last_winner_id == duel.user_second_pick_id
+    player_win =
+      last_winner_id && first_battle.winner_id == duel.player_first_pick_id &&
+        last_winner_id == duel.player_second_pick_id
 
     opponent_win =
       last_winner_id && first_battle.winner_id == duel.opponent_first_pick_id &&
         last_winner_id == duel.opponent_second_pick_id
 
-    diff = duel.opponent.season_points - duel.user.season_points
+    diff = duel.opponent_player.pvp_points - duel.player.pvp_points
     multiplier = if duel.type == "pvp", do: 2, else: 1
     victory_points = Moba.victory_duel_points(diff) * multiplier
     defeat_points = Moba.defeat_duel_points(diff) * multiplier
@@ -55,11 +56,11 @@ defmodule Moba.Engine.Core.Duel do
 
     {duel_winner, attacker_points, defender_points} =
       cond do
-        user_win ->
-          {duel.user, victory_points, victory_points * -1}
+        player_win ->
+          {duel.player, victory_points, victory_points * -1}
 
         opponent_win ->
-          {duel.opponent, defeat_points * -1, defeat_points}
+          {duel.opponent_player, defeat_points * -1, defeat_points}
 
         true ->
           {nil, tie_points, tie_points * -1}
@@ -75,27 +76,28 @@ defmodule Moba.Engine.Core.Duel do
 
   defp manage_duel_winner(battle), do: {nil, Engine.update_battle!(battle, %{rewards: %{}})}
 
-  defp update_users(
+  defp update_players(
          {duel_winner,
-          %{rewards: rewards, duel: %{user: user, opponent: opponent, phase: phase, type: duel_type}} = battle}
+          %{rewards: rewards, duel: %{player: player, opponent_player: opponent, phase: phase, type: duel_type}} =
+            battle}
        )
        when phase == "opponent_battle" do
-    user_points = points_limits(user.season_points + rewards.attacker_pvp_points)
-    opponent_points = points_limits(opponent.season_points + rewards.defender_pvp_points)
+    player_points = points_limits(player.pvp_points + rewards.attacker_pvp_points)
+    opponent_points = points_limits(opponent.pvp_points + rewards.defender_pvp_points)
 
-    user_updates =
-      if duel_winner && user.id == duel_winner.id, do: %{duel_winner: user, loser_id: opponent.id}, else: %{}
+    player_updates =
+      if duel_winner && player.id == duel_winner.id, do: %{duel_winner: player, loser_id: opponent.id}, else: %{}
 
     opponent_updates =
-      if duel_winner && opponent.id == duel_winner.id, do: %{duel_winner: opponent, loser_id: user.id}, else: %{}
+      if duel_winner && opponent.id == duel_winner.id, do: %{duel_winner: opponent, loser_id: player.id}, else: %{}
 
-    Accounts.user_duel_updates!(user, duel_type, Map.merge(user_updates, %{season_points: user_points}))
-    Accounts.user_duel_updates!(opponent, duel_type, Map.merge(opponent_updates, %{season_points: opponent_points}))
+    Game.player_duel_updates!(player, duel_type, Map.merge(player_updates, %{pvp_points: player_points}))
+    Game.player_duel_updates!(opponent, duel_type, Map.merge(opponent_updates, %{pvp_points: opponent_points}))
 
     {duel_winner, battle}
   end
 
-  defp update_users({duel_winner, battle}), do: {duel_winner, battle}
+  defp update_players({duel_winner, battle}), do: {duel_winner, battle}
 
   defp generate_snapshots({duel_winner, battle}) do
     battle = Engine.generate_attacker_snapshot!({battle, battle.attacker, battle.defender})

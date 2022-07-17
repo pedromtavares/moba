@@ -49,7 +49,7 @@ defmodule Moba.Admin.Avatars do
   def get!(id), do: Repo.get!(Avatar, id)
 
   def create(attrs \\ %{}) do
-    Game.create_avatar!(%Avatar{}, attrs, nil)
+    Game.create_avatar!(%Avatar{}, attrs)
   end
 
   def update(%Avatar{} = avatar, attrs) do

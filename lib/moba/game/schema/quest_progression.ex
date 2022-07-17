@@ -1,6 +1,6 @@
 defmodule Moba.Game.Schema.QuestProgression do
   @moduledoc """
-  Represents the connection between users and quests, where progress is recorded
+  Represents the connection between players and quests, where progress is recorded
   """
   use Ecto.Schema
   import Ecto.Changeset
@@ -13,6 +13,7 @@ defmodule Moba.Game.Schema.QuestProgression do
 
     belongs_to :user, Accounts.Schema.User
     belongs_to :quest, Game.Schema.Quest
+    belongs_to :player, Game.Schema.Player
 
     timestamps()
   end

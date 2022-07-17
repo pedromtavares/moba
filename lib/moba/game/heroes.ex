@@ -28,12 +28,14 @@ defmodule Moba.Game.Heroes do
 
   def buyback_price(%{level: level}), do: level * Moba.buyback_multiplier()
 
+  def can_shard_buyback?(hero), do: hero.pve_tier > 3 && hero.league_tier < Moba.master_league_tier()
+
   def collection_for(nil), do: []
 
-  def collection_for(user_id) do
+  def collection_for(player_id) do
     HeroQuery.finished_pve()
     |> HeroQuery.load_avatar()
-    |> HeroQuery.with_user(user_id)
+    |> HeroQuery.with_player(player_id)
     |> HeroQuery.unarchived()
     |> Repo.all()
     |> Enum.group_by(& &1.avatar.code)
@@ -57,12 +59,12 @@ defmodule Moba.Game.Heroes do
     end)
   end
 
-  def create!(attrs, user, avatar, skills, items \\ []) do
+  def create!(attrs, player, avatar, skills, items \\ []) do
     avatar = Repo.preload(avatar, :ultimate)
     skills = [avatar.ultimate] ++ Enum.slice(skills, 0, 3)
 
     %Hero{}
-    |> Hero.create_changeset(attrs, user, avatar, skills, items)
+    |> Hero.create_changeset(attrs, player, avatar, skills, items)
     |> Repo.insert!()
   end
 
@@ -71,9 +73,9 @@ defmodule Moba.Game.Heroes do
   Level 0 bots exist to serve as weak targets for newly created player Heroes,
   and thus have their stats greatly reduced
   """
-  def create_bot!(avatar, level, difficulty, league_tier, user \\ nil) do
-    name = if user, do: user.username, else: avatar.name
-    finished_at = if user, do: Timex.now() |> Timex.shift(hours: 1), else: nil
+  def create_bot!(avatar, level, difficulty, league_tier, player \\ nil) do
+    name = if player, do: player.bot_options.name, else: avatar.name
+    finished_at = if player, do: Timex.now() |> Timex.shift(hours: 1), else: nil
 
     attrs = %{
       bot_difficulty: difficulty,
@@ -87,7 +89,7 @@ defmodule Moba.Game.Heroes do
     build_attrs = Map.put(attrs, :level, level)
     build = Game.generate_bot_build(build_attrs, avatar)
     attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
-    bot = create!(attrs, user, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
+    bot = create!(attrs, player, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
 
     if level > 0 do
       xp = Moba.xp_until_hero_level(level)
@@ -156,32 +158,32 @@ defmodule Moba.Game.Heroes do
     end
   end
 
-  def list_all_unfinished_heroes(user_id) do
-    HeroQuery.latest(user_id, 100)
+  def list_all_unfinished_heroes(player_id) do
+    HeroQuery.latest(player_id, 100)
     |> HeroQuery.unfinished()
     |> Repo.all()
   end
 
-  def list_all_finished_heroes(user_id) do
-    HeroQuery.latest(user_id, 100)
+  def list_all_finished_heroes(player_id) do
+    HeroQuery.latest(player_id, 100)
     |> HeroQuery.finished()
     |> Repo.all()
   end
 
-  def latest_unfinished_heroes(user_id) do
-    HeroQuery.latest(user_id)
+  def latest_unfinished_heroes(player_id) do
+    HeroQuery.latest(player_id)
     |> HeroQuery.unfinished()
     |> Repo.all()
   end
 
-  def latest_finished_heroes(user_id) do
-    HeroQuery.latest(user_id)
+  def latest_finished_heroes(player_id) do
+    HeroQuery.latest(player_id)
     |> HeroQuery.finished()
     |> Repo.all()
   end
 
-  def list_pickable_heroes(user_id, duel_inserted_at) do
-    HeroQuery.pickable(user_id, duel_inserted_at)
+  def list_pickable_heroes(player_id, duel_inserted_at) do
+    HeroQuery.pickable(player_id, duel_inserted_at)
     |> HeroQuery.load()
     |> Repo.all()
   end
@@ -192,58 +194,23 @@ defmodule Moba.Game.Heroes do
   def pve_ranking(limit) do
     HeroQuery.pve_ranked()
     |> HeroQuery.limit_by(limit)
+    |> HeroQuery.load_avatar()
+    |> Repo.all()
+  end
+
+  def community_pve_ranking do
+    HeroQuery.pve_ranked()
+    |> HeroQuery.limit_by(21)
     |> HeroQuery.load()
     |> Repo.all()
-  end
-
-  @doc """
-  Grabs heroes with pve_rankings close to the target hero
-  """
-  def pve_search(%{pve_ranking: ranking}) when not is_nil(ranking) do
-    {min, max} =
-      if ranking <= 6 do
-        {1, 10}
-      else
-        {ranking - 5, ranking + 5}
-      end
-
-    HeroQuery.non_bots()
-    |> HeroQuery.by_pve_ranking(min, max)
-    |> HeroQuery.load_avatar()
-    |> Repo.all()
-  end
-
-  def pve_search(%{total_gold_farm: total_gold_farm, bot_difficulty: bot}) when not is_nil(bot) do
-    HeroQuery.non_bots()
-    |> HeroQuery.by_total_gold_farm(total_gold_farm - 2000, total_gold_farm + 2000)
-    |> HeroQuery.limit_by(10)
-    |> HeroQuery.load_avatar()
-    |> Repo.all()
-  end
-
-  def pve_search(%{total_gold_farm: total_gold_farm, id: id} = hero) do
-    by_farm =
-      HeroQuery.non_bots()
-      |> HeroQuery.by_total_gold_farm(total_gold_farm - 5000, total_gold_farm + 5000)
-      |> HeroQuery.load_avatar()
-      |> Repo.all()
-
-    with_hero = Enum.sort_by(by_farm ++ [hero], &(&1.total_gold_farm + &1.total_xp_farm), :desc)
-
-    hero_index = Enum.find_index(with_hero, &(&1.id == id))
-
-    with_hero
-    |> Enum.with_index()
-    |> Enum.filter(fn {_, index} ->
-      index >= hero_index - 4 && index <= hero_index + 5
-    end)
-    |> Enum.map(fn {elem, _} -> elem end)
   end
 
   def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
 
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
   def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
+
+  def shard_buyback!(hero), do: update!(hero, %{pve_state: "alive"})
 
   def start_farming!(hero, state, turns) do
     update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
@@ -291,9 +258,6 @@ defmodule Moba.Game.Heroes do
   defp add_experience!(hero, nil), do: hero
 
   defp add_experience!(hero, experience) do
-    hero = Repo.preload(hero, :user)
-    if hero.user, do: Moba.add_user_experience(hero.user, experience)
-
     hero
     |> Hero.changeset(%{experience: hero.experience + experience, total_xp_farm: hero.total_xp_farm + experience})
     |> check_if_leveled()

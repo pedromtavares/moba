@@ -64,6 +64,7 @@ defmodule Moba.Game.Builds do
         "pvp_grandmaster" -> random_legendaries() ++ random_epics()
       end
       |> Enum.map(fn item_code -> Game.get_item_by_code!(item_code) end)
+      |> Enum.take(6)
       |> Enum.reduce({[], total_gold_farm}, fn item, {items, remaining} ->
         price = Game.item_price(item)
 

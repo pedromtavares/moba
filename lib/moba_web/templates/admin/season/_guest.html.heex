@@ -1,0 +1,34 @@
+<div class="col-md-1 col-2" id={"guest-#{@player.id}"}>
+    <div class="card-box p-1">
+        <img src={GH.image_url(@player.current_pve_hero.avatar)} style="width: 100%" class="img-border-xs"><br/>
+        <h5 class="text-white text-center">
+            <img src={"/images/league/#{@player.current_pve_hero.league_tier}.png"} style="width: 20px;">
+            Lv <span class={if @player.current_pve_hero.pve_state == "dead", do: "text-muted"}><%= @player.current_pve_hero.level %></span> (<%= length(@player.hero_collection) %>)
+        </h5>
+        <div>
+            <%= for skill <- @player.current_pve_hero.skills do %>
+                <%= img_tag(GH.image_url(skill), style: "width: 20%") %>
+            <% end %>
+        </div>
+        <div>
+            <%= for item <- @player.current_pve_hero.items do %>
+                <%= img_tag(GH.image_url(item), style: "width: 20%") %>
+            <% end %>
+        </div>
+        <div class="progress mb-1 mt-2 margin-auto" style="max-width: 150px">
+            <div class="progress-bar" style={"width: #{xp_farm_percentage(@player.current_pve_hero)}%"}> <%= xp_farm_percentage(@player.current_pve_hero) %></div>
+            <div class="progress-bar bg-warning" style={"width: #{gold_farm_percentage(@player.current_pve_hero)}%"}> <%= gold_farm_percentage(@player.current_pve_hero) %></div>
+        </div>
+        <p class="text-center m-0">
+        <span class="text-muted"><%= @player.current_pve_hero.pve_total_turns + @player.current_pve_hero.pve_current_turns %>t</span>
+        |
+        <span class="text-primary"><%= @player.tutorial_step %></span>
+        |
+        <span class="text-success"><%= @player.current_pve_hero.total_gold_farm + @player.current_pve_hero.total_xp_farm %></span>
+        <br/>
+        <small class="text-dark font-italic">
+            <%= @player.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+        </small>
+        </p>
+    </div>
+</div>

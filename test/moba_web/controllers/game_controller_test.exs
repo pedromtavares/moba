@@ -9,14 +9,14 @@ defmodule MobaWeb.GameControllerTest do
   test "user has active pve hero and is redirected to training", %{conn: conn} do
     hero = create_base_hero()
 
-    conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba) |> get("/")
+    conn = Pow.Plug.assign_current_user(conn, hero.player.user, otp_app: :moba) |> get("/")
 
     assert "/training" = redir_path = redirected_to(conn, 302)
 
     conn =
       conn
       |> recycle()
-      |> Pow.Plug.assign_current_user(hero.user, otp_app: :moba)
+      |> Pow.Plug.assign_current_user(hero.player.user, otp_app: :moba)
       |> get(redir_path)
 
     assert html_response(conn, 200) =~ "Battle Log"

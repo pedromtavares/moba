@@ -1,0 +1,14 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link "Cancel", to: Routes.season_path(@conn, :index), class: "torch-button" %>
+  </div>
+</section>
+
+<section id="torch-header-and-content">
+  <div class="torch-container">
+    <div class="header">
+      <h3>Edit Season</h3>
+    </div>
+    <%= render "form.html", Map.put(assigns, :action, Routes.season_path(@conn, :update, @season)) %>
+  </div>
+</section>

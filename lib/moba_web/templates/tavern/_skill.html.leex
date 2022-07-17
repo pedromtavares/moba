@@ -1,16 +1,16 @@
-<div class="col-12 col-md-6 col-lg-4 col-xl-3" id="skill-<%=@skill.id%>">
+<div class="col-12 col-md-6 col-lg-4 col-xl-3" id="skill-<%= @skill.id %>">
     <div class="card ribbon-box">
         <%= if unlocked?(@skill, @user) do %>
             <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
         <% end %>
         <div class="card-body text-center">
-            <img src="<%=GH.image_url(@skill)%>" class="skill-img img-border <%=if @skill.passive, do: "passive" %>" data-toggle="tooltip" title="<%=GH.skill_description(@skill)%>"/>
+            <img src="<%= GH.image_url(@skill) %>" class="skill-img img-border <%= if @skill.passive, do: "passive" %>" data-toggle="tooltip" title="<%= GH.skill_description(@skill) %>"/>
             <br/>
             <h3>
-                <%=@skill.name%><br/>
+                <%= @skill.name %><br/>
                 <small class="font-italic text-muted">(mouse over image for info)</small>
             </h3>
         </div>
-        <%=unless unlocked?(@skill, @user), do: render("_actions.html", resource: @skill, user: @user, action: "unlock-skill")%>
+        <%= unless unlocked?(@skill, @user), do: render("_actions.html", resource: @skill, user: @user, action: "unlock-skill") %>
     </div>
 </div>

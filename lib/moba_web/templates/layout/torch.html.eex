@@ -40,17 +40,17 @@
             <a href="/admin/quests">
               <h3>Quests</h3>
             </a>
-            <a href="/admin/users?_utf8=✓&filters%5B%5D=user%5Busername_contains%5D&filters%5B%5D=user%5Bemail_contains%5D&user%5Bis_bot_equals%5D=false&filters%5B%5D=user%5Blevel_equals%5D&filters%5B%5D=user%5Bexperience_equals%5D&user%5Bis_guest_equals%5D=false">
+            <a href="/admin/users">
               <h3>Users</h3>
             </a>
             <a href="/admin/dashboard">
               <h3>Phx Dashboard</h3>
             </a>
-            <a href="/admin/matches">
-              <h3>Matches</h3>
+            <a href="/admin/seasons">
+              <h3>Seasons</h3>
             </a>
-            <a href="/admin/matches/current">
-              <h3>Current Match</h3>
+            <a href="/admin/seasons/current">
+              <h3>Current Season</h3>
             </a>
           </nav>
         </div>

@@ -7,12 +7,10 @@ defmodule MobaWeb.RegistrationControllerTest do
   end
 
   test "loads with guest", %{conn: conn} do
-    guest = create_guest()
-    create_base_hero(%{}, guest)
+    player = create_player!()
+    create_base_hero(%{}, player)
 
-    conn = Pow.Plug.assign_current_user(conn, guest, otp_app: :moba)
-
-    conn = init_test_session(conn, guest_user_id: guest.id) |> get("/registration/edit")
+    conn = init_test_session(conn, player_id: player.id) |> get("/registration/new")
     assert html_response(conn, 200) =~ "Create an account"
   end
 
@@ -27,18 +25,16 @@ defmodule MobaWeb.RegistrationControllerTest do
         }
       })
 
-    assert "/training" = redirected_to(conn, 302)
+    assert "/" = redirected_to(conn, 302)
   end
 
-  test "update with guest", %{conn: conn} do
-    guest = create_guest()
-    hero = create_base_hero(%{}, guest)
-
-    conn = Pow.Plug.assign_current_user(conn, guest, otp_app: :moba)
+  test "create with guest", %{conn: conn} do
+    player = create_player!()
+    hero = create_base_hero(%{}, player)
 
     conn =
-      init_test_session(conn, guest_user_id: guest.id)
-      |> put("/registration", %{
+      init_test_session(conn, player_id: player.id)
+      |> post("/registration", %{
         "user" => %{
           email: "test@test.com",
           username: "someonetest",

@@ -1,12 +1,13 @@
 <div class="row mt-3">
-    <%= if @completed_progressions && length(@completed_progressions) > 0 do %>
-        <%= render "_quests.html", assigns %>
+    <%= if @completed_quest do %>
+        <%= render "_quest.html", assigns %>
     <% else %>
         <div class="col-xl-6 margin-auto">
             <div class="card collection">
                 <div class="card-header">
                     <h3 class="text-center m-0">
-                        <img src="/images/league/<%= @finished_hero.league_tier %>.png" style="max-width: 35px"/>
+                        <img class="mb-2" src="/images/league/<%= @finished_hero.league_tier %>.png" style="max-width: 100px"/>
+                        <br/>
                         <%= if @finished_hero.league_tier >= Moba.platinum_league_tier() do %>
                             Congratulations on reaching the </strong><span class="text-league-<%=@finished_hero.league_tier%>"><%=Moba.leagues[@finished_hero.league_tier]%></span>!
                         <% else %>
@@ -17,8 +18,8 @@
                 <div class="card-body p-0">
                     <%= if @finished_hero.league_tier >= Moba.platinum_league_tier() do %>
                         <a href="/base" class="btn btn-success btn-block btn-lg">
-                            <i class="fa fa-home fa-2x mr-1 mt-2"></i>
-                            <strong class="font-20 d-block">Proceed to Base</strong>
+                            <i class="fa fa-home font-20 mr-1 mt-2 pb-3 pt-2"></i>
+                            <strong class="font-20">Proceed to your Base</strong>
                         </a>
                     <% else %>
                         <a href="/invoke" class="btn btn-success btn-block btn-lg">

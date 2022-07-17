@@ -13,7 +13,7 @@
                         <%= for update <- @updates do %>
                             <li class="timeline-sm-item">
                                 <span class="timeline-sm-date"><%= Timex.format(update.inserted_at, "%B %d", :strftime) |> elem(1) %></span>
-                                <%= if @current_user.is_admin do %>
+                                <%= if @current_player.user.is_admin do %>
                                     <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={update.id} class="text-left text-danger float-right small ml-3">Delete</a>
                                 <% end %> 
                                 <h5 class="mt-0 mb-1"><%= update.title %></h5>
@@ -21,7 +21,7 @@
                             </li>
                         <% end %>
                     </ul>
-                    <%= if @current_user.is_admin do %>
+                    <%= if @current_player.user.is_admin do %>
                         <hr/>
                         <.form let={form} for={@changeset} phx-submit="create-update" class="form-horizontal">
                             <%= text_input form, :title, class: "form-control" %>
@@ -42,7 +42,7 @@
                         <%= for message <- @messages do %>
                             <div class="inbox-item">              
                                 <div class="inbox-item-img">
-                                    <img src={"/images/pvp/#{message.user.season_tier}.png"}/>
+                                    <img src={"/images/pvp/#{message.tier}.png"}/>
                                 </div>
                                 <p class="inbox-item-author">
                                     <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLive, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
@@ -53,14 +53,14 @@
                                 <p class="inbox-item-text"><%= formatted_body(message) %></p>
                                 <p class="inbox-item-date">
                                     <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>
-                                    <%= if @current_user.is_admin do %>
+                                    <%= if @current_player.user.is_admin do %>
                                         <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3">Delete</a>
                                     <% end %>        
                                 </p>
                             </div>
                         <% end %>
                     </div>
-                    <%= unless @current_user.status == "silenced" do %>
+                    <%= unless @current_player.status == "silenced" do %>
                         <hr class="my-2">
                         <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
                             <%= text_input form, :body, class: "form-control", placeholder: "Type and press Enter to send", maxlength: 500, minlength: 2 %>
@@ -90,35 +90,35 @@
                     <%= render "_hero.html", hero: hero, socket: @socket %>
                 <% end %>
             </div>
-            <%= if @user_ranking do %>
+            <%= if @player_ranking do %>
                 <table class={"table table-dark mb-0 ranking border-left border-right border-bottom #{unless @active_tab == "users", do: "d-none"}"}>
                     <tbody id="hall-of-users">
-                        <%= for {user, index} <- Enum.with_index(@user_ranking, 1) do %>
-                            <tr id={"user-#{user.id}"}>
+                        <%= for {player, index} <- Enum.with_index(@player_ranking, 1) do %>
+                            <tr id={"player-#{player.id}"}>
                                 <td>
-                                    <img src={"/images/pvp/#{user.season_tier}.png"} style="max-height: 90px"/>
+                                    <img src={"/images/pvp/#{player.pvp_tier}.png"} style="max-height: 90px"/>
                                     <h1 class="mb-0">
                                         #<%= index %>
                                     </h1>
                                 </td>
                                 <td>
                                     <h2>
-                                        <%= live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLive, user.id), class: "text-reset" %>
+                                        <%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id), class: "text-reset" %>
                                         <br/>
-                                        <small class="text-dark"><em>Last online <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
+                                        <small class="text-dark"><em>Registered <%= player.user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
                                     </h2>
                                     <span class="font-15 badge badge-pill badge-light-success py-1 px-2 text-reset m-1">
-                                        <i class="fa fa-globe mr-1"></i><%= user.season_points %> Season Points
+                                        <i class="fa fa-globe mr-1"></i><%= player.pvp_points %> Season Points
                                     </span>
                                 </td>
                                 <td>
-                                    <img src={"/images/pve/#{user.pve_tier}.png"} style="max-height: 50px"/>
+                                    <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height: 50px"/>
                                     <h3 class="mb-0">
-                                        <%= Moba.pve_tiers[user.pve_tier] %>
+                                        <%= Moba.pve_tiers[player.pve_tier] %>
                                     </h3>
                                 </td>
                                 <td width="90%">
-                                    <%= for hero <- user.hero_collection do %>
+                                    <%= for hero <- player.hero_collection do %>
                                         <div style="width: 70px;" class='avatar-container mx-1' data-toggle="tooltip" title={hero["avatar"]["name"]}>
                                             <img src={GH.image_url(hero["avatar"])} class="avatar" style="max-width: 100%";/>
                                             <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo" style="margin-top: -20px">

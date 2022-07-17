@@ -4,7 +4,7 @@ defmodule Moba.Admin do
   """
 
   alias Moba.Admin
-  alias Admin.{Skills, Items, Avatars, Matches, Users, Server, Skins, Quests, Duels}
+  alias Admin.{Skills, Items, Avatars, Seasons, Users, Server, Skins, Quests, Duels}
 
   # SKILLS
 
@@ -74,27 +74,27 @@ defmodule Moba.Admin do
 
   def get_user_stats, do: Users.get_stats()
 
-  # MATCHES
+  # SEASONS
 
-  def paginate_matches(params \\ %{}), do: Matches.paginate(params)
+  def paginate_seasons(params \\ %{}), do: Seasons.paginate(params)
 
-  def list_matches, do: Matches.list()
+  def list_seasons, do: Seasons.list()
 
-  def list_recent_matches, do: Matches.list_recent()
+  def list_recent_seasons, do: Seasons.list_recent()
 
-  def get_match!(id), do: Matches.get!(id)
+  def get_season!(id), do: Seasons.get!(id)
 
-  def update_match(match, attrs), do: Matches.update(match, attrs)
+  def update_season(season, attrs), do: Seasons.update(season, attrs)
 
-  def change_match(match), do: Matches.change(match)
+  def change_season(season), do: Seasons.change(season)
 
-  def get_server_data(match), do: Server.get_data(match)
+  def get_server_data(), do: Server.get_data()
 
-  defdelegate recent_winrates(match_time), to: Matches
+  defdelegate recent_winrates(season_time), to: Seasons
 
-  defdelegate current_active_players, to: Matches
+  defdelegate current_active_players, to: Seasons
 
-  defdelegate current_guests, to: Matches
+  defdelegate current_guests, to: Seasons
 
   # SKINS
 

@@ -5,66 +5,73 @@ defmodule Moba.Game.Duels do
 
   import Ecto.Query
 
-  def list_finished_duels(user) do
+  def list_finished_duels(player) do
     query =
-      from duel in base_query(user),
+      from duel in base_query(player),
         where: duel.phase == "finished"
 
     Repo.all(query)
   end
 
-  def list_pvp_duels(user) do
+  def list_pvp_duels(player) do
     query =
-      from duel in base_query(user),
+      from duel in base_query(player),
         where: duel.type == "pvp"
 
     Repo.all(query)
   end
 
-  def list_matchmaking(user) do
+  def list_matchmaking(player) do
     types = ["normal_matchmaking", "elite_matchmaking"]
-    query = from duel in base_query(user), where: duel.type in ^types
+    query = from duel in base_query(player), where: duel.type in ^types
 
     Repo.all(query)
   end
 
   def load(queryable \\ Duel) do
     queryable
-    |> preload([
-      :user,
-      :opponent,
-      :winner,
-      user_first_pick: ^HeroQuery.load(),
+    |> preload(
+      player: :user,
+      opponent_player: :user,
+      winner_player: :user,
+      player_first_pick: ^HeroQuery.load(),
       opponent_first_pick: ^HeroQuery.load(),
-      user_second_pick: ^HeroQuery.load(),
+      player_second_pick: ^HeroQuery.load(),
       opponent_second_pick: ^HeroQuery.load()
-    ])
+    )
   end
 
   def simple_load(queryable \\ Duel) do
     queryable
-    |> preload([
-      :user,
-      :opponent,
-      :winner,
-      user_first_pick: ^HeroQuery.load_avatar(),
+    |> preload(
+      player: :user,
+      opponent_player: :user,
+      winner_player: :user,
+      player_first_pick: ^HeroQuery.load_avatar(),
       opponent_first_pick: ^HeroQuery.load_avatar(),
-      user_second_pick: ^HeroQuery.load_avatar(),
+      player_second_pick: ^HeroQuery.load_avatar(),
       opponent_second_pick: ^HeroQuery.load_avatar()
-    ])
+    )
   end
 
   def get_duel!(id), do: load() |> Repo.get!(id)
 
-  def create!(user, opponent, type, auto) do
-    %Duel{phase: "user_first_pick", auto: auto, user: user, user_id: user.id, opponent_id: opponent.id, type: type}
+  def create!(player, opponent, type, auto) do
+    %Duel{
+      phase: "player_first_pick",
+      auto: auto,
+      player: player,
+      player_id: player.id,
+      opponent_player_id: opponent.id,
+      type: type
+    }
     |> Duel.changeset(%{phase_changed_at: Timex.now()})
     |> Repo.insert!()
     |> maybe_auto_next_phase()
   end
 
   def finish!(duel, winner, rewards) do
-    update!(duel, %{winner_id: winner && winner.id, rewards: rewards, phase: "finished"})
+    update!(duel, %{winner_player_id: winner && winner.id, rewards: rewards, phase: "finished"})
   end
 
   def next_phase!(%{phase: phase} = duel, hero) do
@@ -72,26 +79,26 @@ defmodule Moba.Game.Duels do
 
     updated =
       case phase do
-        "user_first_pick" ->
-          update!(duel, %{user_first_pick_id: hero_id, phase: "opponent_first_pick", phase_changed_at: Timex.now()})
+        "player_first_pick" ->
+          update!(duel, %{player_first_pick_id: hero_id, phase: "opponent_first_pick", phase_changed_at: Timex.now()})
 
         "opponent_first_pick" ->
           updated =
-            update!(duel, %{opponent_first_pick_id: hero_id, phase: "user_battle", phase_changed_at: Timex.now()})
+            update!(duel, %{opponent_first_pick_id: hero_id, phase: "player_battle", phase_changed_at: Timex.now()})
 
           defender = Game.get_hero!(hero_id)
-          Engine.create_duel_battle!(%{attacker: duel.user_first_pick, defender: defender, duel_id: duel.id})
+          Engine.create_duel_battle!(%{attacker: duel.player_first_pick, defender: defender, duel_id: duel.id})
           updated
 
-        "user_battle" ->
+        "player_battle" ->
           update!(duel, %{phase: "opponent_second_pick", phase_changed_at: Timex.now()})
 
         "opponent_second_pick" ->
-          update!(duel, %{opponent_second_pick_id: hero_id, phase: "user_second_pick", phase_changed_at: Timex.now()})
+          update!(duel, %{opponent_second_pick_id: hero_id, phase: "player_second_pick", phase_changed_at: Timex.now()})
 
-        "user_second_pick" ->
+        "player_second_pick" ->
           updated =
-            update!(duel, %{user_second_pick_id: hero_id, phase: "opponent_battle", phase_changed_at: Timex.now()})
+            update!(duel, %{player_second_pick_id: hero_id, phase: "opponent_battle", phase_changed_at: Timex.now()})
 
           defender = Game.get_hero!(hero_id)
           Engine.create_duel_battle!(%{attacker: duel.opponent_second_pick, defender: defender, duel_id: duel.id})
@@ -107,13 +114,13 @@ defmodule Moba.Game.Duels do
     maybe_auto_next_phase(updated)
   end
 
-  def auto_next_phase!(%{phase: phase, user_id: user_id} = duel)
-      when phase in ["user_first_pick", "user_second_pick"] do
-    hero = available_random_hero(user_id, duel.user_first_pick_id)
+  def auto_next_phase!(%{phase: phase, player_id: player_id} = duel)
+      when phase in ["player_first_pick", "player_second_pick"] do
+    hero = available_random_hero(player_id, duel.player_first_pick_id)
     Game.next_duel_phase!(get_duel!(duel.id), hero)
   end
 
-  def auto_next_phase!(%{phase: phase, opponent_id: opponent_id} = duel)
+  def auto_next_phase!(%{phase: phase, opponent_player_id: opponent_id} = duel)
       when phase in ["opponent_first_pick", "opponent_second_pick"] do
     hero = available_random_hero(opponent_id, duel.opponent_first_pick_id)
     Game.next_duel_phase!(get_duel!(duel.id), hero)
@@ -121,28 +128,29 @@ defmodule Moba.Game.Duels do
 
   def auto_next_phase!(duel), do: duel
 
-  defp available_random_hero(user_id, pick_id) do
-    available_hero(user_id, pick_id) |> Repo.all() |> Enum.shuffle() |> List.first()
+  defp available_random_hero(player_id, pick_id) do
+    available_hero(player_id, pick_id) |> Repo.all() |> Enum.shuffle() |> List.first()
   end
 
-  defp available_hero(user_id, nil) do
-    HeroQuery.unarchived() |> HeroQuery.with_user(user_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(5)
+  defp available_hero(player_id, nil) do
+    HeroQuery.unarchived() |> HeroQuery.with_player(player_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(5)
   end
 
-  defp available_hero(user_id, hero_id) do
-    available_hero(user_id, nil) |> HeroQuery.exclude_ids([hero_id])
+  defp available_hero(player_id, hero_id) do
+    available_hero(player_id, nil) |> HeroQuery.exclude_ids([hero_id])
   end
 
-  defp base_query(%{id: user_id}) do
+  defp base_query(%{id: player_id}) do
     from duel in simple_load(),
-      where: duel.user_id == ^user_id or duel.opponent_id == ^user_id,
+      where: duel.player_id == ^player_id or duel.opponent_player_id == ^player_id,
       limit: 12,
       order_by: [desc: duel.inserted_at]
   end
 
   defp maybe_auto_next_phase(%{auto: true} = duel), do: auto_next_phase!(duel)
 
-  defp maybe_auto_next_phase(%{user: %{is_bot: true}} = duel), do: auto_next_phase!(duel)
+  defp maybe_auto_next_phase(%{player: %{bot_options: options}} = duel) when not is_nil(options),
+    do: auto_next_phase!(duel)
 
   defp maybe_auto_next_phase(%{phase: phase, type: type} = duel)
        when phase in ["opponent_first_pick", "opponent_second_pick"] and type != "pvp" do

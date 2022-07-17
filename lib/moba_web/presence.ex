@@ -3,24 +3,24 @@ defmodule MobaWeb.Presence do
     otp_app: :moba,
     pubsub_server: Moba.PubSub
 
-  def track_user(pid, user) do
-    track(pid, "online", user.id, user_payload(user))
+  def track_player(pid, player) do
+    track(pid, "online", player.id, player_payload(player))
   end
 
-  def update_user(pid, %{id: id} = user) do
+  def update_player(pid, %{id: id} = player) do
     metas =
       get_by_key("online", id)[:metas]
       |> List.first()
-      |> Map.merge(user_payload(user))
+      |> Map.merge(player_payload(player))
 
     update(pid, "online", id, metas)
   end
 
-  defp user_payload(user) do
+  defp player_payload(player) do
     %{
-      season_tier: user.season_tier,
-      season_points: user.season_points,
-      user_id: user.id
+      pvp_tier: player.pvp_tier,
+      pvp_points: player.pvp_points,
+      player_id: player.id
     }
   end
 end

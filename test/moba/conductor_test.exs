@@ -2,26 +2,12 @@ defmodule Moba.ConductorTest do
   use Moba.DataCase
 
   describe "main game loop" do
-    test "#start" do
-      old = Moba.current_match()
+    test "season_tick!" do
+      current = Moba.current_season()
 
-      current = Conductor.start_match!()
-      old = Admin.get_match!(old.id)
+      season = Conductor.season_tick!(current)
 
-      assert current.active
-      refute old.active
-      assert current.last_server_update_at
-
-      assert Game.get_current_skill!("coup")
-      assert Game.get_item_by_code!("boots_of_speed")
-    end
-
-    test "server_update!" do
-      current = Moba.current_match()
-
-      match = Conductor.server_update!(current)
-
-      assert Date.compare(match.last_server_update_at, DateTime.utc_now()) == :eq
+      assert Date.compare(season.last_server_update_at, DateTime.utc_now()) == :eq
     end
   end
 end

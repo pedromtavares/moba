@@ -1,158 +1,125 @@
 defmodule Moba.Game.Quests do
   @moduledoc """
-  Manages Quest records and queries.
-  See Moba.Game.Schema.Quest for more info.
-
+  Manages tracking of player PVE progression
   """
 
-  alias Moba.{Repo, Game, Accounts}
-  alias Game.Schema.{Quest, QuestProgression}
-  import Ecto.Query
+  alias Moba.Game
+  alias Game.Schema.PveProgression
 
   @platinum_league_tier Moba.platinum_league_tier()
 
-  def active_quest_progression?(progressions), do: Enum.find(progressions, &is_nil(&1.completed_at))
+  @all %{
+    1 => %{
+      title: "Novice",
+      description: "Finish training with 2 different Avatars on the Platinum League or above",
+      training_bonus: "+1000 starting gold (1000 -> 2000)",
+      difficulty: "3 Easy targets + 6 Medium targets",
+      max_league: "Master League",
+      prize: 200,
+      goal: 2,
+      field: :season_codes
+    },
+    2 => %{
+      title: "Adept",
+      description: "Finish training with 5 different Avatars on the Platinum League or above",
+      difficulty: "6 Medium targets + 3 Hard targets",
+      prize: 300,
+      goal: 5,
+      field: :season_codes
+    },
+    3 => %{
+      title: "Veteran",
+      description: "Finish training with 10 different Avatars on the Platinum League or above",
+      difficulty: "3 Medium targets + 6 Hard targets",
+      prize: 400,
+      goal: 10,
+      field: :season_codes
+    },
+    4 => %{
+      title: "Expert",
+      description: "Finish training with 15 different Avatars on the Platinum League or above",
+      training_bonus: "Ability to refresh Targets up to 5 times",
+      prize: 500,
+      goal: 15,
+      field: :season_codes
+    },
+    5 => %{
+      title: "Master",
+      description: "Finish training with all Avatars on the Master League or above",
+      training_bonus: "Ability to refresh Targets up to 10 times",
+      prize: 1000,
+      goal: 20,
+      field: :master_codes
+    },
+    6 => %{
+      title: "Grandmaster",
+      description: "Finish training with all Avatars on the Grandmaster League",
+      training_bonus: "Ability to refresh Targets up to 15 times",
+      prize: 2500,
+      goal: 20,
+      field: :grandmaster_codes
+    },
+    7 => %{
+      title: "Invoker",
+      description: "Finish training with all avatars in the Grandmaster League with a perfect 60K of total farm",
+      difficulty: "9 Hard targets",
+      max_league: "Grandmaster League",
+      prize: 5000,
+      goal: 20,
+      field: :invoker_codes
+    }
+  }
 
-  def find_progression_by!(user_id, quest_id) do
-    Repo.insert(%QuestProgression{user_id: user_id, quest_id: quest_id}, on_conflict: :nothing)
-    Repo.get_by!(QuestProgression, user_id: user_id, quest_id: quest_id) |> Repo.preload([:user, :quest])
+  def get_quest(tier), do: @all[tier]
+
+  def last_completed_quest(%{player: %{pve_progression: %{history: history}}} = hero) do
+    with {tier, _} <- Enum.find(history, fn {_, time} -> Timex.parse!(time, "{ISO:Extended:Z}") >= hero.finished_at end) do
+      get_quest(String.to_integer(tier))
+    else
+      _ -> nil
+    end
   end
 
-  def generate_daily_quest_progressions!(nil) do
-    query =
-      from qp in QuestProgression,
-        join: q in assoc(qp, :quest),
-        where: not is_nil(qp.completed_at),
-        where: q.daily == true
-
-    user_ids = Repo.all(query) |> Enum.map(& &1.user_id)
-    Repo.delete_all(query)
-
-    Enum.map(user_ids, &generate_daily_quest_progressions!(&1))
-  end
-
-  def generate_daily_quest_progressions!(user_id) do
-    quests = Repo.all(from q in Quest, where: q.daily == true)
-    find_progressions(quests, user_id)
-  end
-
-  def get_all_by_code(code), do: Repo.all(from q in Quest, where: q.code == ^code, order_by: [asc: :level])
-
-  def get_by_code_and_level!(code, level), do: Repo.get_by!(Quest, code: code, level: level)
-
-  def last_completed_quest_progressions(%{finished_at: nil}), do: []
-
-  def last_completed_quest_progressions(%{user_id: user_id, finished_at: hero_finished_at}) do
-    Repo.all(from p in progressions_by_user(user_id), where: p.completed_at >= ^hero_finished_at)
-  end
-
-  def list_daily_quest_progressions(user_id) do
-    Repo.all(from p in progressions_by_user(user_id), join: q in assoc(p, :quest), where: q.daily == true)
-  end
-
-  def list_quest_progressions(user_id, nil), do: progressions_by_user(user_id)
-
-  def list_quest_progressions(user_id, quest_code) do
-    quest_code
-    |> get_all_by_code()
-    |> find_progressions(user_id)
-  end
-
-  def list_season_quest_progressions(user_id) do
-    Moba.season_quest_codes()
-    |> Enum.map(&get_all_by_code(&1))
-    |> List.flatten()
-    |> find_progressions(user_id)
-  end
-
-  def track_pve_quests(%{user_id: user_id, league_tier: league_tier} = hero)
+  def track_pve_progression!(%{player: player, league_tier: league_tier, avatar: %{code: avatar_code}} = hero)
       when league_tier >= @platinum_league_tier do
-    track("season", user_id, hero)
+    progression = player.pve_progression || %PveProgression{}
 
-    if league_tier >= Moba.master_league_tier() do
-      track("daily_master", user_id, hero)
-      track("season_master", user_id, hero)
-    end
-
-    if league_tier >= Moba.max_league_tier() do
-      track("daily_grandmaster", user_id, hero)
-      track("season_grandmaster", user_id, hero)
-
-      if hero.total_xp_farm + hero.total_gold_farm >= Moba.maximum_total_farm() do
-        track("daily_perfect", user_id, hero)
-        track("season_perfect", user_id, hero)
-      end
-    end
-
-    hero
-  end
-
-  def track_pve_quests(hero), do: hero
-
-  # ---------------------------------------------------------------------
-
-  defp apply_rewards(%{quest: quest, user: user} = progression) do
-    base_rewards = %{shard_count: user.shard_count + quest.shard_prize}
-
-    rewards =
-      if String.contains?(quest.code, "season"), do: season_rewards(user, quest, base_rewards), else: base_rewards
-
-    Accounts.update_user!(user, rewards)
-
-    progression
-  end
-
-  defp find_progressions(quests, user_id), do: Enum.map(quests, &find_progression_by!(user_id, &1.id))
-
-  defp load_progression(queryable \\ QuestProgression), do: preload(queryable, [:quest])
-
-  defp progressions_by_user(user_id) do
-    from p in load_progression(), where: p.user_id == ^user_id
-  end
-
-  defp season_rewards(_, %{level: quest_level}, base_rewards) do
-    rewards = Map.put(base_rewards, :pve_tier, quest_level)
-
-    if quest_level >= 1 do
-      Map.put(rewards, :status, "available")
-    else
-      rewards
-    end
-  end
-
-  defp track(code, user_id, hero) do
-    get_all_by_code(code)
-    |> find_progressions(user_id)
-    |> Enum.map(&track_progression(code, &1, hero))
-  end
-
-  defp track_progression(_, %{completed_at: completed_at} = progression, _) when not is_nil(completed_at) do
-    progression
-  end
-
-  defp track_progression(_, %{quest: %{final_value: final_value}} = progression, %{avatar: %{code: avatar_code}}) do
-    update_or_complete!(progression, avatar_code, final_value)
-  end
-
-  defp update_or_complete!(%{history_codes: current_codes} = progression, avatar_code, final_value) do
-    new_codes = Enum.uniq(current_codes ++ [avatar_code])
-    current_value = length(new_codes)
-
-    if current_value >= final_value do
+    updates =
       progression
-      |> update_completed!(final_value, new_codes)
-      |> apply_rewards()
+      |> track(:season_codes, avatar_code, true)
+      |> track(:master_codes, avatar_code, league_tier >= Moba.master_league_tier())
+      |> track(:grandmaster_codes, avatar_code, league_tier >= Moba.max_league_tier())
+      |> track(:invoker_codes, avatar_code, hero.total_xp_farm + hero.total_gold_farm >= Moba.max_total_farm())
+      |> maybe_complete(player)
+
+    if updates[:shard_prize], do: Moba.reward_shards!(player, updates[:shard_prize])
+    Game.update_player!(player, updates)
+  end
+
+  def track_pve_progression!(hero), do: hero
+
+  # --------------------------------------------------------
+
+  defp track(progression, field, avatar_code, true) do
+    updated_codes = Map.get(progression, field) ++ [avatar_code]
+    Map.put(progression, field, Enum.uniq(updated_codes))
+  end
+
+  defp track(progression, _, _, false), do: progression
+
+  defp maybe_complete(%{history: history} = progression, %{pve_tier: tier, status: current_status, user_id: user_id}) do
+    next_tier = tier + 1
+    quest = Map.get(@all, next_tier)
+    quest_codes = Map.get(progression, quest.field)
+    progression_map = Map.from_struct(progression)
+
+    if length(quest_codes) == quest.goal do
+      history = Map.put(history, next_tier, Timex.now() |> Timex.shift(seconds: +1))
+      progression = Map.put(progression_map, :history, history)
+      status = if next_tier == 1 && user_id, do: "available", else: current_status
+      %{pve_progression: progression, pve_tier: next_tier, status: status, shard_prize: quest.prize}
     else
-      update!(progression, %{current_value: current_value, history_codes: new_codes})
+      %{pve_progression: progression_map}
     end
-  end
-
-  defp update_completed!(progression, final_value, history_codes) do
-    update!(progression, %{completed_at: Timex.now(), current_value: final_value, history_codes: history_codes})
-  end
-
-  defp update!(progression, attrs) do
-    QuestProgression.changeset(progression, attrs)
-    |> Repo.update!()
   end
 end

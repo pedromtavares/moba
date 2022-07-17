@@ -11,8 +11,8 @@ defmodule Moba.Admin.Server do
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
-  def get_data(match) do
-    GenServer.call(__MODULE__, {:data, match})
+  def get_data do
+    GenServer.call(__MODULE__, :data)
   end
 
   def init(_) do
@@ -32,7 +32,7 @@ defmodule Moba.Admin.Server do
   @doc """
   Returns current match state or fetches from cache in the case of past matches
   """
-  def handle_call({:data, _match}, _from, state) do
+  def handle_call(:data, _from, state) do
     {:reply, state, state}
   end
 

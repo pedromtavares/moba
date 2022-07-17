@@ -8,10 +8,7 @@ defmodule Moba.Server do
   @check_timeout 1000 * 30
 
   # 10mins
-  @update_diff_in_seconds 60 * 10
-
-  # 1 day
-  @reset_diff_in_seconds 60 * 60 * 24
+  @tick_diff_in_seconds 60 * 10
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
@@ -31,14 +28,10 @@ defmodule Moba.Server do
   defp server_check(state) do
     schedule_check()
 
-    match = Moba.current_match()
+    season = Moba.current_season()
 
-    if time_diff_in_seconds(match.inserted_at) >= @reset_diff_in_seconds do
-      Moba.start!()
-    end
-
-    if time_diff_in_seconds(match.last_server_update_at) >= @update_diff_in_seconds do
-      Moba.server_update!(match)
+    if time_diff_in_seconds(season.last_server_update_at) >= @tick_diff_in_seconds do
+      Moba.server_tick!(season)
     end
 
     state

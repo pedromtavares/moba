@@ -2,7 +2,7 @@ defmodule MobaWeb.DashboardView do
   use MobaWeb, :view
 
   def avatar_class(hero) do
-    if hero["ranking"] && hero["total_farm"] == Moba.maximum_total_farm() do
+    if hero["ranking"] && hero["total_farm"] == Moba.max_total_farm() do
       "avatar max-farm"
     else
       "avatar"
@@ -29,55 +29,32 @@ defmodule MobaWeb.DashboardView do
 
   def next_pve_tier(%{pve_tier: current_tier}) do
     cond do
-      current_tier >= Moba.max_season_tier() -> nil
+      current_tier >= Moba.max_pve_tier() -> nil
       true -> current_tier + 1
     end
   end
 
-  def has_active_season_progression?(progressions) do
-    Game.active_quest_progression?(progressions)
+  def current_quest_description(%{pve_tier: tier}) do
+    Game.get_quest(tier + 1).description
   end
 
-  def max_season_progression_level(progressions) do
-    last = Game.active_quest_progression?(progressions)
-    if last.quest.level >= 3, do: 4, else: last.quest.level + 1
+  def current_quest_progression_label(%{pve_tier: tier, pve_progression: progression}) do
+    quest = Game.get_quest(tier + 1)
+    current_count = Map.get(progression, quest.field) |> length()
+    "#{current_count}/#{quest.goal} Avatars"
   end
 
-  def progression_percentage(%{quest: quest} = progression) do
-    total = quest.final_value
-
-    progression.current_value * 100 / total
+  def current_quest_progression_percentage(%{pve_tier: tier, pve_progression: progression}) do
+    quest = Game.get_quest(tier + 1)
+    current_count = Map.get(progression, quest.field) |> length()
+    current_count * 100 / quest.goal
   end
 
-  def pve_daily_progressions(progressions) do
-    progressions
-    |> Enum.filter(&Enum.member?(["daily_master", "daily_perfect", "daily_grandmaster"], &1.quest.code))
-    |> progression_level_sort()
-  end
+  def quest_shard_prize(tier), do: Game.get_quest(tier).prize
 
-  def training_bonus_for(%{quest: %{level: 1}}), do: "+1000 starting gold (1000 -> 2000)"
-  def training_bonus_for(%{quest: %{level: 4}}), do: "Ability to refresh Targets up to 5 times"
-  def training_bonus_for(%{quest: %{level: 5}}), do: "Ability to refresh Targets up to 10 times"
-  def training_bonus_for(%{quest: %{level: 6}}), do: "Ability to refresh Targets up to 15 times"
-  def training_bonus_for(_), do: nil
+  def training_bonus_for(tier), do: Map.get(Game.get_quest(tier), :training_bonus)
 
-  def training_difficulty_for(%{quest: %{level: 1}}), do: "3 Easy targets + 6 Medium targets"
-  def training_difficulty_for(%{quest: %{level: 2}}), do: "6 Medium targets + 3 Hard targets"
-  def training_difficulty_for(%{quest: %{level: 3}}), do: "3 Medium targets + 6 Hard targets"
-  def training_difficulty_for(_), do: "9 Hard targets"
+  def training_difficulty_for(tier), do: Map.get(Game.get_quest(tier), :difficulty) || Game.get_quest(7).difficulty
 
-  def max_league_allowed_for(%{quest: %{level: 1}}), do: "Master League"
-  def max_league_allowed_for(_), do: "Grandmaster League"
-
-  def replenish_time do
-    match = Game.current_match()
-
-    match &&
-      match.inserted_at
-      |> Timex.shift(days: +1)
-      |> Timex.format("{relative}", :relative)
-      |> elem(1)
-  end
-
-  defp progression_level_sort(progressions), do: Enum.sort_by(progressions, & &1.quest.level)
+  def max_league_allowed_for(tier), do: Map.get(Game.get_quest(tier), :max_league) || Game.get_quest(7).max_league
 end

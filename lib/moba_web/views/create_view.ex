@@ -1,6 +1,8 @@
 defmodule MobaWeb.CreateView do
   use MobaWeb, :view
 
+  def guest?(%{user_id: user_id}), do: is_nil(user_id)
+
   def selected_skills(skills) do
     skills
     |> Enum.map(fn skill -> skill.name end)

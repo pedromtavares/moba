@@ -76,11 +76,12 @@ defmodule Moba.Game.Schema.Hero do
 
     has_many :targets, Game.Schema.Target, foreign_key: :attacker_id
 
-    belongs_to :match, Game.Schema.Match
+    # belongs_to :match, Game.Schema.Match
     belongs_to :avatar, Game.Schema.Avatar
     belongs_to :user, Accounts.Schema.User
     belongs_to :boss, Game.Schema.Hero
     belongs_to :skin, Game.Schema.Skin
+    belongs_to :player, Game.Schema.Player
 
     timestamps()
   end
@@ -124,18 +125,17 @@ defmodule Moba.Game.Schema.Hero do
       :total_hp,
       :total_mp,
       :atk,
-      :user_id,
+      :player_id,
       :archived_at,
       :boss_id,
       :skin_id,
-      :match_id,
       :refresh_targets_count
     ])
     |> cast_embed(:pve_farming_rewards)
   end
 
-  def create_changeset(hero, attrs, user, avatar, skills, items) do
-    pve_tier = (user && user.pve_tier) || 0
+  def create_changeset(hero, attrs, player, avatar, skills, items) do
+    pve_tier = (player && player.pve_tier) || 0
     skill_order = Enum.filter(skills, &(!&1.passive)) |> Enum.map(& &1.code)
     item_order = Enum.filter(items, & &1.active) |> Enum.map(& &1.code)
 
@@ -157,10 +157,10 @@ defmodule Moba.Game.Schema.Hero do
       pve_tier: pve_tier,
       league_step: 0,
       league_tier: 0,
-      gold: Moba.initial_gold(user)
+      gold: Moba.initial_gold(player)
     })
     |> changeset(attrs)
-    |> put_assoc(:user, user)
+    |> put_assoc(:player, player)
     |> put_assoc(:avatar, avatar)
     |> put_assoc(:skills, skills)
     |> put_assoc(:items, items)

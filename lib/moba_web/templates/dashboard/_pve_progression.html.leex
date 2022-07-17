@@ -1,28 +1,25 @@
 <div class="card dark-bg mb-3" id="pve-progression">
     <div class="card-body pb-0">
         <div class="row mt-3 mb-3 d-flex justify-content-center">
-            <%= if next = next_pve_tier(@current_user) do %>
+            <%= if next = next_pve_tier(@current_player) do %>
                 <div class="col pve-tier-container text-center">
-                    <img src="/images/pve/<%= @current_user.pve_tier %>.png" class="pve-rank"/>
-                    <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[@current_user.pve_tier] %></h4>
+                    <img src="/images/pve/<%= @current_player.pve_tier %>.png" class="pve-rank"/>
+                    <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[@current_player.pve_tier] %></h4>
                 </div>
                 <div class="col-8">
-                    <h4 class="text-center mb-0 mt-0"><%= @current_season_progression.quest.description %></h4>
+                    <h4 class="text-center mb-0 mt-0"><%= current_quest_description(@current_player) %></h4>
                     <div class="progress mt-3" style="height:50px;">
-                        <div style="width:<%= progression_percentage(@current_season_progression) %>%;" class="progress-bar pve-bar"></div>
+                        <div style="width:<%= current_quest_progression_percentage(@current_player) %>%;" class="progress-bar pve-bar"></div>
                         <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
-                            <%= @current_season_progression.current_value %>/<%= @current_season_progression.quest.final_value %> Avatars
+                            <%= current_quest_progression_label(@current_player) %>
                         </h5>
                     </div>
                     <div class="mt-4 text-center">
-                        <%= unless @current_user.season_tier == Moba.max_season_tier() do %>
+                        <%= unless @current_player.pvp_tier == Moba.max_pvp_tier() do %>
                             <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#pve-tier-rewards">
                                 <i class="fa fa-crown mr-1"></i>Progression Rewards
                             </button>
                         <% end %>
-                        <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#daily-quests">
-                            <i class="fa fa-clock-o mr-1"></i>Daily Quests
-                        </button>
                     </div>
                 </div>
                 <div class="col pve-tier-container text-center">
@@ -31,8 +28,8 @@
                 </div>
             <% else %>
                 <div class="col text-center">
-                    <img src="/images/pve/<%= @current_user.pve_tier %>.png" class="user-rank"/>
-                    <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pve_tiers[@current_user.pve_tier] %></h4>
+                    <img src="/images/pve/<%= @current_player.pve_tier %>.png" class="user-rank"/>
+                    <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pve_tiers[@current_player.pve_tier] %></h4>
                 </div>
             <% end %>
         </div>

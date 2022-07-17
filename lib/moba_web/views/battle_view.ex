@@ -5,8 +5,8 @@ defmodule MobaWeb.BattleView do
   defdelegate difficulty_color(diff), to: TrainingView
   defdelegate difficulty_label(diff), to: TrainingView
 
-  def active_attacker?(%{attacker: attacker} = battle, last_turn, %{id: user_id}) do
-    is_current? = attacker.user_id == user_id
+  def active_attacker?(%{attacker: attacker} = battle, last_turn, %{id: player_id}) do
+    is_current? = attacker.player_id == player_id
 
     cond do
       is_current? && is_nil(last_turn) && battle.attacker_id == battle.initiator_id -> true
@@ -17,8 +17,8 @@ defmodule MobaWeb.BattleView do
 
   def active_attacker?(_, _, _), do: false
 
-  def active_defender?(%{defender: defender} = battle, last_turn, %{id: user_id}) do
-    is_current? = defender.user_id == user_id
+  def active_defender?(%{defender: defender} = battle, last_turn, %{id: player_id}) do
+    is_current? = defender.player_id == player_id
 
     cond do
       is_current? && is_nil(last_turn) && battle.defender_id == battle.initiator_id -> true

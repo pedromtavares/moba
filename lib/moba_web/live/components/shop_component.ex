@@ -20,7 +20,7 @@ defmodule MobaWeb.Shop do
        items: Moba.cached_items(),
        current_hero: hero,
        tutorial_step: step,
-       current_user: hero.user
+       current_player: hero.player
      )}
   end
 

@@ -2,14 +2,14 @@ defmodule Moba.EngineTest do
   use Moba.DataCase, async: true
 
   setup do
-    attrs = %{season_points: 50, pve_tier: 1}
+    attrs = %{pvp_points: 50, pve_tier: 1}
 
     base_hero = create_base_hero(attrs)
-    weak_hero = create_base_hero(attrs, create_user(attrs), weak_avatar())
+    weak_hero = create_base_hero(attrs, create_player!(attrs), weak_avatar())
 
-    strong_hero = create_base_hero(attrs, create_user(attrs), strong_avatar())
+    strong_hero = create_base_hero(attrs, create_player!(attrs), strong_avatar())
 
-    alternate_hero = create_base_hero(attrs, create_user(attrs), strong_avatar())
+    alternate_hero = create_base_hero(attrs, create_player!(attrs), strong_avatar())
 
     %{
       weak_hero: weak_hero,
@@ -209,7 +209,7 @@ defmodule Moba.EngineTest do
 
   describe "pvp duel" do
     test "full cycle", %{strong_hero: attacker, weak_hero: defender} do
-      duel = Game.create_pvp_duel!(attacker.user, defender.user)
+      duel = Game.create_pvp_duel!(attacker.player, defender.player)
       Game.next_duel_phase!(duel, attacker)
       duel = Game.get_duel!(duel.id)
       Game.next_duel_phase!(duel, defender)
@@ -218,7 +218,7 @@ defmodule Moba.EngineTest do
       hero = Game.get_hero!(attacker.id)
       defender = Game.get_hero!(defender.id)
 
-      assert hero.user.season_points == attacker.user.season_points
+      assert hero.player.pvp_points == attacker.player.pvp_points
 
       duel = Game.get_duel!(duel.id)
       Game.next_duel_phase!(duel, defender)
@@ -227,20 +227,17 @@ defmodule Moba.EngineTest do
 
       last_battle = Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
 
-      %{user: user} = Game.get_hero!(attacker.id)
-      %{user: opponent} = Game.get_hero!(defender.id)
+      %{player: player} = Game.get_hero!(attacker.id)
+      %{player: opponent} = Game.get_hero!(defender.id)
       duel = Game.get_duel!(duel.id)
 
       assert duel.rewards == last_battle.rewards
-      assert duel.winner_id == attacker.user_id
-      assert user.duel_count == attacker.user.duel_count + 1
-      assert opponent.duel_count == defender.user.duel_count + 1
-      assert user.duel_wins == attacker.user.duel_wins + 1
-      assert user.duel_score == %{"#{opponent.id}" => 1}
+      assert duel.winner_player_id == attacker.player_id
+      assert player.duel_score == %{"#{opponent.id}" => 1}
       assert opponent.duel_score == %{}
 
-      assert user.season_points == attacker.user.season_points + 10
-      assert opponent.season_points == defender.user.season_points - 10
+      assert player.pvp_points == attacker.player.pvp_points + 10
+      assert opponent.pvp_points == defender.player.pvp_points - 10
     end
   end
 

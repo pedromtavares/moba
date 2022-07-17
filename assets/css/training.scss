@@ -162,29 +162,66 @@
     filter: grayscale(100%);
   }
   .current-tier{
-    width: 15%;
+    width: 100px;
   }
   .next-tier{
     width: 10%;
     opacity: 0.5;
   }
   .ranking{
-    img{
+    .avatar{
       width: 60px;
       border: 1px solid;
       border-image-source: radial-gradient(white, rgb(47, 60, 74));
       border-image-slice: 1;
+    }
+
+    .extended-body{
+      max-height: 91.5vh !important;
+    }
+
+    .card-body{
+      padding: 0 !important;
+      max-height: 87vh;
+      overflow: auto;
+
+      thead th {
+        position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #414d59;
+        border-top: 0;
+        padding: 0.7rem;
+      }
+
+      tfoot th{
+        position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        background: #3a454f;
+        border-top: 0;
+        padding: 0.75rem;
+        vertical-align: middle;
+      }
     }
   }
 
   .hero-card{
     .card-body{
       padding: 0;
+      height: 425px;
 
       img{
         max-width: 100%;
-        max-height: 500px;
+        max-height: 100%;
       }
+
+    }
+
+    .card-footer{
+      background: #323b44;
     }
 
     .skills-container{

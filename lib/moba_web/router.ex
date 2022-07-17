@@ -29,16 +29,16 @@ defmodule MobaWeb.Router do
       error_handler: Pow.Phoenix.PlugErrorHandler
   end
 
+  pipeline :player_protected do
+    plug MobaWeb.PlayerAuth
+  end
+
   pipeline :admin_protected do
     plug MobaWeb.AdminAuth
   end
 
-  pipeline :user_helper do
-    plug MobaWeb.AuthHelper
-  end
-
   scope "/" do
-    pipe_through [:browser, :user_helper, :pow_layout]
+    pipe_through [:browser, :pow_layout]
 
     pow_routes()
     pow_extension_routes()
@@ -49,16 +49,16 @@ defmodule MobaWeb.Router do
     get "/", MobaWeb.GameController, :index
   end
 
-  scope "/" do
-    pipe_through [:browser, :user_helper, :root_layout]
+  scope "/", MobaWeb do
+    pipe_through [:browser, :root_layout]
 
-    live "/battles/:id", MobaWeb.BattleLive
+    live "/battles/:id", BattleLive
   end
 
   scope "/", MobaWeb do
-    pipe_through [:browser, :root_layout, :protected, :user_helper]
+    pipe_through [:browser, :root_layout, :player_protected]
 
-    live_session :default, on_mount: MobaWeb.UserLiveAuth do
+    live_session :default, on_mount: MobaWeb.PlayerLiveAuth do
       live "/invoke", CreateLive
 
       live "/training", TrainingLive
@@ -71,6 +71,7 @@ defmodule MobaWeb.Router do
       live "/arena/:id", DuelLive
 
       live "/user/:id", UserLive
+      live "/player/:player_id", UserLive, :show, as: :player
 
       live "/hero/:id", HeroLive
 
@@ -89,7 +90,7 @@ defmodule MobaWeb.Router do
     resources "/items", Admin.ItemController
     resources "/avatars", Admin.AvatarController
     resources "/users", Admin.UserController
-    resources "/matches", Admin.MatchController
+    resources "/seasons", Admin.SeasonController
     resources "/skins", Admin.SkinController
     resources "/quests", Admin.QuestController
 

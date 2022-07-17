@@ -7,8 +7,8 @@ defmodule MobaWeb.CreateLive do
     end
   end
 
-  def mount(_params, %{"user_id" => user_id}, socket) do
-    with socket = socket_user_init(user_id, socket) do
+  def mount(_params, %{"player_id" => player_id}, socket) do
+    with socket = socket_player_init(player_id, socket) do
       {:ok, socket}
     end
   end
@@ -83,12 +83,12 @@ defmodule MobaWeb.CreateLive do
   def handle_event(
         "create",
         _,
-        %{assigns: %{current_user: user, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
+        %{assigns: %{current_player: player, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
           socket
       ) do
     with skills = Enum.map(selected_skills, & &1.id) |> Game.list_chosen_skills(),
-         hero_name = hero_name(user, avatar, name, socket) do
-      Moba.create_current_pve_hero!(%{name: hero_name}, user, avatar, skills)
+         hero_name = hero_name(player, avatar, name, socket) do
+      Moba.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
 
       {:noreply, socket |> redirect(to: "/training")}
     end
@@ -121,11 +121,11 @@ defmodule MobaWeb.CreateLive do
     end
   end
 
-  defp hero_name(user, avatar, name, socket) do
+  defp hero_name(player, avatar, name, socket) do
     cond do
-      user.is_guest -> avatar.name
+      is_nil(player.user_id) -> avatar.name
       !is_nil(name) && is_nil(validation_error(name, socket)) -> name
-      true -> user.username
+      true -> player.user.username
     end
   end
 
@@ -145,11 +145,12 @@ defmodule MobaWeb.CreateLive do
     })
   end
 
-  defp set_name(%{assigns: %{current_user: %{is_guest: true}}} = socket, avatar) when not is_nil(avatar) do
+  defp set_name(%{assigns: %{current_player: %{user_id: user_id}}} = socket, avatar)
+       when is_nil(user_id) and not is_nil(avatar) do
     assign(socket, name: avatar.name)
   end
 
-  defp set_name(%{assigns: %{current_user: %{username: username}}} = socket, _) do
+  defp set_name(%{assigns: %{current_player: %{user: %{username: username}}}} = socket, _) do
     assign(socket, name: username)
   end
 
@@ -168,7 +169,7 @@ defmodule MobaWeb.CreateLive do
         all_avatars: avatars,
         avatars: avatars,
         cache_key: cache_key,
-        current_user: nil,
+        current_player: nil,
         selected_avatar: cached.selected_avatar,
         selected_skills: cached.selected_skills,
         selected_build_index: cached.selected_build_index,
@@ -178,19 +179,19 @@ defmodule MobaWeb.CreateLive do
     end
   end
 
-  defp socket_user_init(user_id, %{assigns: %{current_user: user}} = socket) do
+  defp socket_player_init(player_id, %{assigns: %{current_player: player}} = socket) do
     with socket = socket_init(socket),
-         unlocked_codes = Accounts.unlocked_codes_for(user),
-         cached = get_cache(user.id),
+         unlocked_codes = unlocked_codes_for(player),
+         cached = get_cache(player_id),
          avatars = Game.list_creation_avatars(unlocked_codes),
-         collection_codes = Enum.map(user.hero_collection, & &1["code"]),
+         collection_codes = Enum.map(player.hero_collection, & &1["code"]),
          blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes)),
          skills = Game.list_creation_skills(1, unlocked_codes) do
       assign(socket,
         all_avatars: avatars,
         avatars: avatars,
         blank_collection: blank_collection,
-        cache_key: user.id,
+        cache_key: player.id,
         selected_avatar: cached.selected_avatar,
         selected_skills: cached.selected_skills,
         selected_build_index: cached.selected_build_index,
@@ -200,7 +201,13 @@ defmodule MobaWeb.CreateLive do
     end
   end
 
-  defp validation_error(name, %{assigns: %{current_user: user}}) do
+  def unlocked_codes_for(%{user: user}) when not is_nil(user) do
+    Accounts.unlocked_codes_for(user)
+  end
+
+  def unlocked_codes_for(_), do: []
+
+  defp validation_error(name, %{assigns: %{current_player: %{user: user}}}) do
     length = String.length(name)
 
     if length >= 3 and length <= 15 do

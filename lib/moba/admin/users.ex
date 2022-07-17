@@ -6,7 +6,7 @@ defmodule Moba.Admin.Users do
   alias Moba.{Repo, Accounts, Game}
   alias Accounts.Schema.User
   alias Accounts.Query.UserQuery
-  alias Game.Query.HeroQuery
+  alias Game.Query.{HeroQuery, PlayerQuery}
 
   import Ecto.Query, warn: false
   import Torch.Helpers, only: [sort: 1, paginate: 4]
@@ -70,9 +70,9 @@ defmodule Moba.Admin.Users do
   end
 
   def get_stats do
-    online_today = UserQuery.online_users(User, 24) |> UserQuery.non_guests() |> Repo.aggregate(:count)
-    new_users = UserQuery.new_users(User, 24) |> UserQuery.non_guests() |> Repo.aggregate(:count)
-    new_guests = UserQuery.new_users(User, 24) |> UserQuery.guests() |> Repo.aggregate(:count)
+    online_today = UserQuery.online_users(User, 24) |> Repo.aggregate(:count)
+    new_users = UserQuery.new_users(User, 24) |> Repo.aggregate(:count)
+    new_guests = PlayerQuery.guests() |> PlayerQuery.recently_created(24) |> Repo.aggregate(:count)
     new_heroes = HeroQuery.created_recently() |> HeroQuery.unarchived() |> Repo.aggregate(:count)
 
     %{
@@ -94,11 +94,7 @@ defmodule Moba.Admin.Users do
     defconfig do
       text(:username)
       text(:email)
-      boolean(:is_bot)
-      boolean(:is_guest)
       boolean(:is_admin)
-      number(:level)
-      number(:experience)
       date(:last_online_at)
       date(:inserted_at)
     end

@@ -1,14 +1,14 @@
-defmodule MobaWeb.Admin.MatchLiveView do
+defmodule MobaWeb.Admin.SeasonLiveView do
   use MobaWeb, :live_view
 
-  alias Moba.{Game, Admin}
+  alias Moba.Admin
 
   def mount(_, _, socket) do
     if connected?(socket), do: MobaWeb.subscribe("admin")
 
     duels = Admin.list_recent_duels()
 
-    {:ok, assign(socket, match: Game.current_match(), duels: duels) |> set_vars()}
+    {:ok, assign(socket, duels: duels) |> set_vars()}
   end
 
   def handle_info({"server", _}, socket) do
@@ -16,13 +16,15 @@ defmodule MobaWeb.Admin.MatchLiveView do
   end
 
   def render(assigns) do
-    MobaWeb.Admin.MatchView.render("show.html", assigns)
+    MobaWeb.Admin.SeasonView.render("show.html", assigns)
   end
 
   defp set_vars(socket) do
-    data = Admin.get_server_data(socket.assigns.match)
+    data = Admin.get_server_data()
     user_stats = Admin.get_user_stats()
-    sorted_guests = data.guests |> Enum.filter(& &1.current_pve_hero) |> Enum.sort_by(& &1.current_pve_hero.league_tier, :desc)
+
+    sorted_guests =
+      data.guests |> Enum.filter(& &1.current_pve_hero) |> Enum.sort_by(& &1.current_pve_hero.league_tier, :desc)
 
     assign(socket,
       players: data.players,

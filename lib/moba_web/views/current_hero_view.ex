@@ -6,7 +6,7 @@ defmodule MobaWeb.CurrentHeroView do
   end
 
   def edit_orders_label(_) do
-    "Click to edit the skill and item orders that will be used when other players attack you in Matchmaking."
+    "Click to edit the skill and item orders that will be used when defending against other players in the Arena."
   end
 
   def sorted_items(%{items: items}), do: Game.sort_items(items)

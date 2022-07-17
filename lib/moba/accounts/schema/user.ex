@@ -21,34 +21,55 @@ defmodule Moba.Accounts.Schema.User do
     field :is_admin, :boolean, default: false
     field :is_bot, :boolean, default: false
     field :is_guest, :boolean, default: false
+    #
     field :tutorial_step, :integer
     field :last_online_at, :utc_datetime
+    #
     field :status, :string
+    #
     field :ranking, :integer
+    #
     field :duel_score, :map, default: %{}
+    #
     field :duel_wins, :integer, default: 0
+    #
     field :duel_count, :integer, default: 0
+    #
     field :medal_count, :integer, default: 0
     field :shard_count, :integer, default: 0
+    #
     field :hero_collection, {:array, :map}
+    #
     field :season_tier, :integer, default: 0
+    #
     field :season_points, :integer, default: 0
+    # TODO
     field :bot_codes, {:array, :string}
+    # TODO
     field :bot_tier, :integer
+    #
     field :shard_limit, :integer, default: 100
+    #
     field :pve_tier, :integer, default: 0
     field :unread_messages_count, :integer, default: 0
+    #
     field :match_history, :map, default: %{}
+    #
     field :last_challenge_at, :utc_datetime
 
+    #
     embeds_one :preferences, Accounts.Schema.Preferences, on_replace: :update
 
+    #
     has_many :heroes, Game.Schema.Hero
     has_many :unlocks, Accounts.Schema.Unlock
     has_many :duels, Game.Schema.Duel
 
+    #
     belongs_to :current_pve_hero, Game.Schema.Hero
+    #
     belongs_to :current_pvp_hero, Game.Schema.Hero
+    #
     belongs_to :title_quest, Game.Schema.Quest
 
     timestamps()

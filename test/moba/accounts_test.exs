@@ -6,57 +6,11 @@ defmodule Moba.AccountsTest do
   end
 
   describe "user updates" do
-    test "#update_tutorial_step", %{user: user} do
-      user = Accounts.update_tutorial_step!(user, 5)
-      assert user.tutorial_step == 5
-    end
-
     test "#set_user_online_now", %{user: user} do
       {1, nil} = Accounts.set_online_now(user)
       user = Accounts.get_user!(user.id)
 
       assert user.last_online_at
-    end
-
-    test "#set_current_pve_hero!", %{user: user} do
-      hero = create_base_hero()
-
-      user = Accounts.set_current_pve_hero!(user, hero.id)
-
-      assert user.current_pve_hero_id == hero.id
-    end
-  end
-
-  describe "#add_user_experience" do
-    test "levels up when reaching max xp" do
-      user = create_user()
-      user = Accounts.add_experience(user, Moba.user_level_xp() + 100)
-
-      assert user.level == 2
-      assert user.experience == 100
-    end
-  end
-
-  describe "#user_duel_updates!" do
-    test "sets score correctly", %{user: winner} do
-      loser = create_user()
-      user = Accounts.user_duel_updates!(winner, "pvp", %{loser_id: loser.id})
-
-      assert user.duel_score["#{loser.id}"] == 1
-    end
-
-    test "sets wins/losses/points correctly", %{user: winner} do
-      user = Accounts.user_duel_updates!(winner, "pvp", %{duel_winner: winner, pvp_points: 10})
-
-      assert user.duel_wins == winner.duel_wins + 1
-      assert user.duel_count == winner.duel_count + 1
-    end
-
-    test "does not set score for non-pvp duels", %{user: winner} do
-      loser = create_user()
-      user = Accounts.user_duel_updates!(winner, "normal_matchmaking", %{loser_id: loser.id})
-
-      assert user.duel_score == %{}
     end
   end
 

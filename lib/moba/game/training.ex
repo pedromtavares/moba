@@ -2,11 +2,12 @@ defmodule Moba.Game.Training do
   @moduledoc """
   Module focused on cross-domain orchestration and logic related to hero training (single-player)
   """
-  alias Moba.{Accounts, Game, Repo}
-  alias Game.{Avatars, Heroes, Skills, Targets}
+  alias Moba.{Game, Repo}
+  alias Game.{Avatars, Heroes, Players, Quests, Skills, Targets}
 
-  def archive_hero!(%{user: user} = hero) do
-    if user.current_pve_hero_id == hero.id, do: Accounts.set_current_pve_hero!(user, nil)
+  def archive_hero!(%{player: player} = hero) do
+    if player.current_pve_hero_id == hero.id, do: Players.set_current_pve_hero!(player, nil)
+    unless hero.finished_at, do: Players.add_total_farm!(player)
     update_hero!(hero, %{archived_at: DateTime.utc_now()})
   end
 
@@ -17,16 +18,16 @@ defmodule Moba.Game.Training do
   @doc """
   Orchestrates the creation of a Hero, which involves creating it and generating its first Training targets
   """
-  def create_hero!(attrs, user, avatar, skills) do
+  def create_hero!(attrs, player, avatar, skills) do
     attrs =
-      if user && user.pve_tier >= 4 do
-        Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count(user.pve_tier))
+      if player && player.pve_tier >= 4 do
+        Map.put(attrs, :refresh_targets_count, Moba.refresh_targets_count(player.pve_tier))
       else
         attrs
       end
 
     attrs
-    |> Heroes.create!(user, avatar, skills)
+    |> Heroes.create!(player, avatar, skills)
     |> generate_targets!()
   end
 
@@ -47,11 +48,10 @@ defmodule Moba.Game.Training do
   end
 
   def finish_pve!(%{finished_at: nil} = hero) do
-    hero =
-      hero
-      |> update_hero!(%{finished_at: Timex.now()})
-      |> Game.track_pve_quests()
+    hero = update_hero!(hero, %{finished_at: Timex.now()})
 
+    Quests.track_pve_progression!(hero)
+    Players.add_total_farm!(hero)
     Moba.update_pve_ranking()
     Moba.run_async(fn -> update_hero_collection!(hero) end)
 
@@ -73,8 +73,8 @@ defmodule Moba.Game.Training do
   end
 
   def generate_targets!(hero) do
-    hero = Repo.preload(hero, :user)
-    codes = (hero.user && Accounts.unlocked_codes_for(hero.user)) || []
+    hero = Repo.preload(hero, player: [:user])
+    codes = (hero.player && hero.player.user && Moba.unlocked_codes_for(hero.player.user)) || []
     Targets.generate!(hero, codes)
   end
 
@@ -112,14 +112,6 @@ defmodule Moba.Game.Training do
 
   def refresh_targets!(hero), do: hero
 
-  def shard_buyback!(%{user: user} = hero) do
-    if Accounts.shard_buyback!(user) do
-      update_hero!(hero, %{pve_state: "alive"})
-    else
-      hero
-    end
-  end
-
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")
     hero_id
@@ -138,9 +130,9 @@ defmodule Moba.Game.Training do
   end
 
   def update_hero_collection!(hero) do
-    hero = Repo.preload(hero, :user)
-    collection = Heroes.collection_for(hero.user_id)
-    if length(collection) > 0, do: Accounts.update_collection!(hero.user, collection)
+    hero = Repo.preload(hero, :player)
+    collection = Heroes.collection_for(hero.player_id)
+    if length(collection) > 0, do: Players.update_collection!(hero.player, collection)
 
     hero
   end

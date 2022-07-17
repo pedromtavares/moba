@@ -4,7 +4,7 @@ defmodule Moba.Ranker do
   """
   use GenServer
 
-  alias Moba.{Accounts, Game}
+  alias Moba.Game
 
   @limit 2000
   @tick 1000
@@ -37,7 +37,7 @@ defmodule Moba.Ranker do
   end
 
   defp check_timer(timer) when timer >= @limit do
-    Accounts.update_ranking!()
+    Game.update_pvp_ranking!()
     0
   end
 

@@ -11,7 +11,7 @@ defmodule MobaWeb.BattleLiveTest do
 
     conn =
       Phoenix.ConnTest.build_conn()
-      |> Pow.Plug.assign_current_user(attacker.user, otp_app: :moba)
+      |> init_test_session(player_id: attacker.player_id)
 
     %{conn: conn, battle: battle, attacker: attacker, defender: defender}
   end

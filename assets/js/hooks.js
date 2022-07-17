@@ -26,6 +26,17 @@ Hooks.Scroll = {
   }
 }
 
+Hooks.HalfScroll = {
+  mounted(){
+    let el = this.el;
+    let container = el.getAttribute("phx-container");
+    let $container = $(`${container}`);
+    let rowpos = $(el).position();
+    
+    $container.scrollTop(rowpos.top - 300);
+  }
+}
+
 Hooks.ScrollToTop = {
   mounted(){
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -35,7 +46,7 @@ Hooks.ScrollToTop = {
 Hooks.AnimateScroll = {
   mounted(){
     let el = this.el;
-    let target = $(el).attr("phx-target-element");
+    let target = el.getAttribute("phx-target-element");
     el.addEventListener("click", e => {
       $('html, body').animate({
           scrollTop: $(`${target}`).offset().top
@@ -206,7 +217,7 @@ Hooks.DuelChallenger = {
     }).then((value) => {
       switch(value){
         case "close":
-          this.pushEventTo("#current-user", "close", {});
+          this.pushEventTo("#current-player", "close", {});
           break;
       }
     })
@@ -239,10 +250,10 @@ Hooks.DuelChallenged = {
     }).then((value) => {
       switch(value){
         case "accept":
-          this.pushEventTo("#current-user", "accept", {});
+          this.pushEventTo("#current-player", "accept", {});
           break;
         case "reject":
-          this.pushEventTo("#current-user", "reject", {})
+          this.pushEventTo("#current-player", "reject", {})
           break;
       }
     });

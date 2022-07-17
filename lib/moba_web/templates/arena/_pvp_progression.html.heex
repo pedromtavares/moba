@@ -1,20 +1,20 @@
 <div class="card dark-bg mb-3" id="pvp-progression">
     <div class="card-body pb-0">
         <div class="row mt-3 mb-3 d-flex justify-content-center">
-            <%= if next = next_pvp_tier(@current_user) do %>
+            <%= if next = next_pvp_tier(@current_player) do %>
                 <div class="col pvp-tier-container text-center">
-                    <img src={"/images/pvp/#{@current_user.season_tier}.png"} class="pvp-rank"/>
-                    <h4 class={"my-0 text-uppercase text-white f-rpg shadow-medal-#{@current_user.season_tier}"}><%= Moba.pvp_tiers[@current_user.season_tier] %></h4>
+                    <img src={"/images/pvp/#{@current_player.pvp_tier}.png"} class="pvp-rank"/>
+                    <h4 class={"my-0 text-uppercase text-white f-rpg shadow-medal-#{@current_player.pvp_tier}"}><%= Moba.pvp_tiers[@current_player.pvp_tier] %></h4>
                 </div>
                 <div class="col-8">
                     <h4 class="text-center mb-0 mt-0">Earn Season Points by playing on Matchmaking or by Dueling other players</h4>
                     <div class="progress mt-3" style="height:50px;">
-                        <div style={"width:#{next_pvp_tier_percentage(@current_user)}%;"} class="progress-bar pvp-bar"></div>
-                        <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px" data-toggle="tooltip" title={"#{@current_user.season_points}/#{Accounts.season_points_for(next)} Season Points"}>
-                            <%=Accounts.season_points_for(next) - @current_user.season_points%> Season Points to next rank
+                        <div style={"width:#{next_pvp_tier_percentage(@current_player)}%;"} class="progress-bar pvp-bar"></div>
+                        <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px" data-toggle="tooltip" title={"#{@current_player.pvp_points}/#{Game.pvp_points_for(next)} Season Points"}>
+                            <%= Game.pvp_points_for(next) - @current_player.pvp_points %> Season Points to next rank
                         </h5>
                     </div>
-                    <%= if @current_user.season_points >= 400 do %>
+                    <%= if @current_player.pvp_points >= 400 do %>
                         <div class="mt-4 text-center">
                             <button type="button" class="btn btn-sm btn-light no-action" data-toggle="tooltip" title={ season_rankings_string()} data-tippy-placement="bottom">
                                 <i class="fa fa-list-ul mr-1"></i>Endgame Season Rankings
@@ -28,8 +28,8 @@
                 </div>
             <% else %>
                 <div class="col text-center">
-                    <img src={"/images/pvp/#{@current_user.season_tier}.png"} class="pvp-rank"/>
-                    <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pvp_tiers[@current_user.season_tier] %></h4>
+                    <img src={"/images/pvp/#{@current_player.pvp_tier}.png"} class="pvp-rank"/>
+                    <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pvp_tiers[@current_player.pvp_tier] %></h4>
                 </div>
             <% end %>
         </div>

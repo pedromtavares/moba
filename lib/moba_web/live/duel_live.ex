@@ -3,8 +3,8 @@ defmodule MobaWeb.DuelLive do
 
   alias MobaWeb.DuelView
 
-  def mount(%{"id" => duel_id}, %{"user_id" => user_id}, socket) do
-    with %{assigns: %{channel: channel, duel: duel}} = socket = socket_init(duel_id, user_id, socket) do
+  def mount(%{"id" => duel_id}, %{"player_id" => player_id}, socket) do
+    with %{assigns: %{channel: channel, duel: duel}} = socket = socket_init(duel_id, player_id, socket) do
       if connected?(socket), do: MobaWeb.subscribe(channel)
       if duel.type == "pvp", do: check_phase()
 
@@ -12,7 +12,11 @@ defmodule MobaWeb.DuelLive do
     end
   end
 
-  def handle_event("create-message", params, %{assigns: %{current_user: user, channel: channel}} = socket) do
+  def handle_event(
+        "create-message",
+        params,
+        %{assigns: %{current_player: %{user: user} = player, channel: channel}} = socket
+      ) do
     with body = params["message"]["body"],
          length = String.length(body),
          proper_size? = length > 1 && length <= 200 do
@@ -20,7 +24,7 @@ defmodule MobaWeb.DuelLive do
         Accounts.create_message!(%{
           body: body,
           author: user.username,
-          tier: user.season_tier,
+          tier: player.pvp_tier,
           channel: channel,
           topic: "general",
           is_admin: user.is_admin,
@@ -94,12 +98,12 @@ defmodule MobaWeb.DuelLive do
     Process.send_after(self(), :check_phase, 500)
   end
 
-  defp socket_init(duel_id, user_id, socket) do
+  defp socket_init(duel_id, player_id, socket) do
     with channel = "duel-#{duel_id}",
          changeset = Accounts.change_message(),
          current_time = Timex.now(),
          duel = Game.get_duel!(duel_id),
-         heroes = Game.list_pickable_heroes(user_id, duel.inserted_at),
+         heroes = Game.list_pickable_heroes(player_id, duel.inserted_at),
          first_battle = Engine.first_duel_battle(duel),
          last_battle = Engine.last_duel_battle(duel),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse() do

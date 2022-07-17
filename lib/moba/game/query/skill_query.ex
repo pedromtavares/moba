@@ -17,7 +17,7 @@ defmodule Moba.Game.Query.SkillQuery do
   end
 
   def canon(query \\ Skill) do
-    from s in query, where: is_nil(s.match_id)
+    from s in query, where: is_nil(s.resource_uuid)
   end
 
   def enabled(query \\ Skill) do

@@ -7,7 +7,7 @@ defmodule MobaWeb.TrainingLive do
     with %{assigns: %{current_hero: hero}} = socket = socket_init(socket) do
       if hero && connected?(socket) do
         Game.subscribe_to_hero(hero.id)
-        TutorialComponent.subscribe(hero.user_id)
+        TutorialComponent.subscribe(hero.player_id)
       end
 
       {:ok, socket}
@@ -49,25 +49,25 @@ defmodule MobaWeb.TrainingLive do
   end
 
   def handle_event("shard-buyback", _, %{assigns: %{current_hero: hero}} = socket) do
-    with hero = Game.shard_buyback!(hero) do
+    with hero = Moba.shard_buyback!(hero) do
       Game.broadcast_to_hero(hero.id)
       {:noreply, assign(socket, current_hero: hero)}
     end
   end
 
-  def handle_event("restart", _, %{assigns: %{current_hero: hero, current_user: user}} = socket) do
+  def handle_event("restart", _, %{assigns: %{current_hero: hero, current_player: player}} = socket) do
     with _ <- Game.archive_hero!(hero),
          skills = Enum.map(hero.skills, &Game.get_skill_by_code!(&1.code, true, 1)) do
-      Moba.create_current_pve_hero!(%{name: hero.name}, user, hero.avatar, skills)
+      Moba.create_current_pve_hero!(%{name: hero.name}, player, hero.avatar, skills)
 
       {:noreply, socket |> redirect(to: "/training")}
     end
   end
 
-  def handle_event("show-farm-tabs", params, %{assigns: %{current_user: user}} = socket) do
+  def handle_event("show-farm-tabs", params, %{assigns: %{current_player: player}} = socket) do
     with show_farm_tabs = not is_nil(Map.get(params, "value")),
-         user = Accounts.update_preferences!(user, %{show_farm_tabs: show_farm_tabs}) do
-      {:noreply, assign(socket, current_user: user)}
+         player = Game.update_preferences!(player, %{show_farm_tabs: show_farm_tabs}) do
+      {:noreply, assign(socket, current_player: player)}
     end
   end
 
@@ -187,7 +187,7 @@ defmodule MobaWeb.TrainingLive do
   end
 
   defp training_assigns(%{assigns: %{current_hero: hero}} = socket) when not is_nil(hero) do
-    Cachex.del(:game_cache, hero.user_id)
+    Cachex.del(:game_cache, hero.player_id)
 
     with current_time = Timex.now(),
          farm_rewards = farm_rewards_for(hero, "meditating"),
@@ -206,7 +206,7 @@ defmodule MobaWeb.TrainingLive do
         selected_turns: hero.pve_current_turns,
         sidebar_code: "training",
         targets: targets,
-        tutorial_step: hero.user.tutorial_step
+        tutorial_step: hero.player.tutorial_step
       )
     end
   end

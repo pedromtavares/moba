@@ -6,7 +6,7 @@ defmodule MobaWeb.CurrentHeroLive do
   def mount(_, session, socket) do
     with %{assigns: %{current_hero: hero}} = socket = socket_init(session, socket) do
       if connected?(socket) do
-        TutorialComponent.subscribe(hero.user_id)
+        TutorialComponent.subscribe(hero.player_id)
 
         hero.id
         |> Game.subscribe_to_hero()
@@ -103,10 +103,11 @@ defmodule MobaWeb.CurrentHeroLive do
   end
 
   defp socket_init(%{"hero" => hero} = session, socket) do
-    with step = session["tutorial_step"] || hero.user.tutorial_step,
+    with step = session["tutorial_step"] || hero.player.tutorial_step,
          show_shop = Enum.member?([3, 7, 8, 9], step) do
       assign(socket,
         current_hero: hero,
+        current_player: hero.player,
         editing: false,
         show_build: false,
         show_shop: show_shop,

@@ -19,7 +19,8 @@ defmodule MobaWeb.ArenaView do
   def elite?(%{type: "elite_matchmaking"}), do: true
   def elite?(_), do: false
 
-  def first_battle_for(%{id: duel_id, user_first_pick_id: hero_id}, battles), do: duel_battle(duel_id, hero_id, battles)
+  def first_battle_for(%{id: duel_id, player_first_pick_id: hero_id}, battles),
+    do: duel_battle(duel_id, hero_id, battles)
 
   def last_battle_for(%{id: duel_id, opponent_second_pick_id: hero_id}, battles),
     do: duel_battle(duel_id, hero_id, battles)
@@ -39,32 +40,32 @@ defmodule MobaWeb.ArenaView do
   def duel_label(%{type: "pvp"}), do: "Duel"
   def duel_label(_), do: "Normal MM"
 
-  def duel_result(duel, user_id \\ nil) do
-    user_id = user_id || duel.user_id
+  def duel_result(duel, player_id \\ nil) do
+    player_id = player_id || duel.player_id
 
     cond do
       duel.phase != "finished" -> content_tag(:h5, "In Progress")
-      is_nil(duel.winner) -> content_tag(:h5, "Tie", class: "text-white")
-      duel.winner_id == user_id -> content_tag(:h5, "Victory", class: "text-success")
+      is_nil(duel.winner_player) -> content_tag(:h5, "Tie", class: "text-white")
+      duel.winner_player_id == player_id -> content_tag(:h5, "Victory", class: "text-success")
       true -> content_tag(:h5, "Defeat", class: "text-muted")
     end
   end
 
-  def next_pvp_tier_percentage(%{season_tier: current_tier, season_points: season_points}) do
-    current = Accounts.season_points_for(current_tier)
-    max = Accounts.season_points_for(current_tier + 1)
-    (season_points - current) * 100 / (max - current)
+  def next_pvp_tier_percentage(%{pvp_tier: current_tier, pvp_points: pvp_points}) do
+    current = Game.pvp_points_for(current_tier)
+    max = Game.pvp_points_for(current_tier + 1)
+    (pvp_points - current) * 100 / (max - current)
   end
 
-  def next_pvp_tier(%{season_tier: current_tier}) do
+  def next_pvp_tier(%{pvp_tier: current_tier}) do
     cond do
-      current_tier >= Moba.max_season_tier() -> nil
+      current_tier >= Moba.max_pvp_tier() -> nil
       true -> current_tier + 1
     end
   end
 
-  def opponent_for(duel, %{id: id}) when duel.user_id == id, do: duel.opponent
-  def opponent_for(duel, _), do: duel.user
+  def opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
+  def opponent_for(duel, _), do: duel.player
 
   def rewards_badge(rewards) when rewards == 0, do: ""
 
@@ -80,7 +81,7 @@ defmodule MobaWeb.ArenaView do
     Phoenix.View.render_to_string(MobaWeb.ArenaView, "_season_rankings.html", [])
   end
 
-  def silenced?(%{current_user: %{status: "silenced"}}), do: true
+  def silenced?(%{current_player: %{status: "silenced"}}), do: true
   def silenced?(_), do: false
 
   def pvp?(%{type: "pvp"}), do: true

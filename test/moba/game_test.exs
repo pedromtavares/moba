@@ -1,12 +1,45 @@
 defmodule Moba.GameTest do
   use Moba.DataCase, async: true
 
+  describe "players" do
+    setup do
+      %{player: create_player!()}
+    end
+
+    test "#player_duel_updates! sets score correctly", %{player: winner} do
+      loser = create_player!()
+      player = Game.player_duel_updates!(winner, "pvp", %{loser_id: loser.id})
+
+      assert player.duel_score["#{loser.id}"] == 1
+    end
+
+    test "#player_duel_updates! does not set score for non-pvp duels", %{player: winner} do
+      loser = create_player!()
+      player = Game.player_duel_updates!(winner, "normal_matchmaking", %{loser_id: loser.id})
+
+      assert player.duel_score == %{}
+    end
+
+    test "#update_tutorial_step", %{player: player} do
+      player = Game.update_tutorial_step!(player, 5)
+      assert player.tutorial_step == 5
+    end
+
+    test "#set_current_pve_hero!", %{player: player} do
+      hero = create_base_hero()
+
+      player = Game.set_current_pve_hero!(player, hero.id)
+
+      assert player.current_pve_hero_id == hero.id
+    end
+  end
+
   describe "heroes" do
     test "#create_hero!" do
       avatar = base_avatar()
       skills = base_skills()
 
-      hero = Game.create_hero!(%{name: "Foo"}, create_user(), avatar, skills)
+      hero = Game.create_hero!(%{name: "Foo"}, create_player!(), avatar, skills)
       hero = Game.get_hero!(hero.id)
       targets = Game.list_targets(hero)
 
@@ -14,7 +47,7 @@ defmodule Moba.GameTest do
       assert length(hero.skills) == 4
       assert length(targets) > 0
 
-      veteran_hero = Game.create_hero!(%{name: "Foo"}, create_user(%{pve_tier: 1}), avatar, skills)
+      veteran_hero = Game.create_hero!(%{name: "Foo"}, create_player!(%{pve_tier: 1}), avatar, skills)
       assert veteran_hero.gold == 2000
     end
 
@@ -132,30 +165,23 @@ defmodule Moba.GameTest do
     end
 
     test "#finish_pve!" do
-      user = create_user()
-      hero = create_base_hero(%{league_tier: 5}, user)
+      player = create_player!()
+      hero = create_base_hero(%{league_tier: 5}, player)
       finished = Game.finish_pve!(hero)
 
       assert finished.finished_at
 
-      quest = Game.Quests.get_by_code_and_level!("season", 1)
-      progression = Game.Quests.find_progression_by!(user.id, quest.id)
+      %{pve_progression: progression} = player = Game.get_player!(player.id)
+      assert length(progression.season_codes) == 1
+      refute progression.history["1"]
 
-      assert progression.current_value == 1
-      refute progression.completed_at
+      create_base_hero(%{league_tier: 5}, player, alternate_avatar()) |> Game.finish_pve!()
 
-      user = Accounts.get_user!(user.id)
-
-      create_base_hero(%{league_tier: 5}, user, alternate_avatar()) |> Game.finish_pve!()
-      progression = Game.Quests.find_progression_by!(user.id, quest.id)
-
-      assert progression.current_value == 2
-      assert progression.completed_at
-
-      updated = Accounts.get_user!(user.id)
+      %{pve_progression: progression} = updated = Game.get_player!(player.id)
+      assert length(progression.season_codes) == 2
+      assert progression.history["1"]
 
       assert updated.pve_tier == 1
-      assert updated.shard_count == user.shard_count + quest.shard_prize
     end
 
     test "#maybe_generate_boss" do
@@ -300,40 +326,40 @@ defmodule Moba.GameTest do
   end
 
   describe "targets" do
-    test "#generate_targets! user tier 0" do
-      hero = create_base_hero(%{}, create_user(%{pve_tier: 0})) |> Game.generate_targets!()
+    test "#generate_targets! player tier 0" do
+      hero = create_base_hero(%{}, create_player!(%{pve_tier: 0})) |> Game.generate_targets!()
       assert length(hero.targets) == 6
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 0
     end
 
-    test "#generate_targets! user tier 1" do
-      hero = create_base_hero(%{}, create_user(%{pve_tier: 1})) |> Game.generate_targets!()
+    test "#generate_targets! player tier 1" do
+      hero = create_base_hero(%{}, create_player!(%{pve_tier: 1})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 0
     end
 
-    test "#generate_targets! user tier 2" do
-      hero = create_base_hero(%{}, create_user(%{pve_tier: 2})) |> Game.generate_targets!()
+    test "#generate_targets! player tier 2" do
+      hero = create_base_hero(%{}, create_player!(%{pve_tier: 2})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 6
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 3
     end
 
-    test "#generate_targets! user tier 3" do
-      hero = create_base_hero(%{}, create_user(%{pve_tier: 3})) |> Game.generate_targets!()
+    test "#generate_targets! player tier 3" do
+      hero = create_base_hero(%{}, create_player!(%{pve_tier: 3})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 3
       assert hero.targets |> Enum.filter(&(&1.difficulty == "strong")) |> length() == 6
     end
 
-    test "#generate_targets! user tier 4" do
-      hero = create_base_hero(%{}, create_user(%{pve_tier: 4})) |> Game.generate_targets!()
+    test "#generate_targets! player tier 4" do
+      hero = create_base_hero(%{}, create_player!(%{pve_tier: 4})) |> Game.generate_targets!()
       assert length(hero.targets) == 9
       assert hero.targets |> Enum.filter(&(&1.difficulty == "weak")) |> length() == 0
       assert hero.targets |> Enum.filter(&(&1.difficulty == "moderate")) |> length() == 0
@@ -477,32 +503,32 @@ defmodule Moba.GameTest do
 
   describe "duels" do
     test "#next_duel_phase!" do
-      user = create_user()
-      opponent = create_user()
+      player = create_player!()
+      opponent = create_player!()
       skills = base_skills()
 
-      user_hero = Game.create_hero!(%{name: "User"}, user, strong_avatar(), skills)
+      player_hero = Game.create_hero!(%{name: "Player"}, player, strong_avatar(), skills)
       opp_hero = Game.create_hero!(%{name: "Opponent"}, opponent, weak_avatar(), skills)
 
-      duel = Game.create_pvp_duel!(user, opponent)
+      duel = Game.create_pvp_duel!(player, opponent)
 
-      assert duel.phase == "user_first_pick"
+      assert duel.phase == "player_first_pick"
 
-      Game.next_duel_phase!(duel, user_hero)
+      Game.next_duel_phase!(duel, player_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_first_pick"
-      assert duel.user_first_pick_id == user_hero.id
+      assert duel.player_first_pick_id == player_hero.id
 
       Game.next_duel_phase!(duel, opp_hero)
       duel = Game.get_duel!(duel.id)
 
-      assert duel.phase == "user_battle"
+      assert duel.phase == "player_battle"
       assert duel.opponent_first_pick_id == opp_hero.id
 
       battle = Engine.first_duel_battle(duel)
 
-      assert battle.attacker_id == user_hero.id
+      assert battle.attacker_id == player_hero.id
       assert battle.defender_id == opp_hero.id
 
       Engine.auto_finish_battle!(battle)
@@ -513,9 +539,9 @@ defmodule Moba.GameTest do
       Game.next_duel_phase!(duel, opp_hero)
       duel = Game.get_duel!(duel.id)
 
-      assert duel.phase == "user_second_pick"
+      assert duel.phase == "player_second_pick"
 
-      Game.next_duel_phase!(duel, user_hero)
+      Game.next_duel_phase!(duel, player_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_battle"
@@ -523,7 +549,7 @@ defmodule Moba.GameTest do
       battle = Engine.last_duel_battle(duel)
 
       assert battle.attacker_id == opp_hero.id
-      assert battle.defender_id == user_hero.id
+      assert battle.defender_id == player_hero.id
 
       Engine.auto_finish_battle!(battle)
       duel = Game.get_duel!(duel.id)
@@ -533,71 +559,73 @@ defmodule Moba.GameTest do
   end
 
   describe "quests" do
-    test "#track_pve master quests" do
-      user = create_user()
-      skills = base_skills()
-
-      user_hero =
-        %{name: "User", league_tier: 5, finished_at: Timex.now()}
-        |> Game.create_hero!(user, strong_avatar(), skills)
-
-      Game.track_pve_quests(user_hero)
-
-      assert_progression("season", user_hero, 1)
-      assert_progression("season_master", user_hero, 1, 5)
-      assert_progression("daily_master", user_hero, 1)
+    setup do
+      %{player: create_player!()}
     end
 
-    test "#track_pve grandmaster quests" do
-      user = create_user()
-      skills = base_skills()
+    test "#track_pve_progression completes", %{player: player} do
+      create_base_hero(%{league_tier: 4, finished_at: Timex.now()}, player)
+      |> Game.Quests.track_pve_progression!()
 
-      user_hero =
-        %{name: "User", league_tier: 6, finished_at: Timex.now()}
-        |> Game.create_hero!(user, strong_avatar(), skills)
+      player = Game.get_player!(player.id)
+      player_hero = create_base_hero(%{league_tier: 4, finished_at: Timex.now()}, player, alternate_avatar())
+      Game.Quests.track_pve_progression!(player_hero)
 
-      Game.track_pve_quests(user_hero)
+      %{pve_progression: progression} = updated = Game.get_player!(player.id)
 
-      assert_progression("season", user_hero, 1)
-      assert_progression("daily_master", user_hero, 1)
-      assert_progression("season_master", user_hero, 1, 5)
-      assert_progression("season_grandmaster", user_hero, 1, 6)
-      assert_progression("daily_grandmaster", user_hero, 1)
+      assert length(progression.season_codes) == 2
+      assert progression.history["1"] > player_hero.finished_at
+      assert updated.status == "available"
+      assert updated.pve_tier == 1
+      assert updated.user.shard_count == player.user.shard_count + Game.get_quest(1).prize
     end
 
-    test "#track_pve perfect quests" do
-      user = create_user()
-      skills = base_skills()
+    test "#track_pve_progression! master", %{player: player} do
+      player_hero =
+        %{name: "Player", league_tier: 5, finished_at: Timex.now()}
+        |> Game.create_hero!(player, strong_avatar(), base_skills())
 
-      user_hero =
+      Game.Quests.track_pve_progression!(player_hero)
+
+      %{pve_progression: progression} = Game.get_player!(player.id)
+
+      assert length(progression.season_codes) == 1
+      assert length(progression.master_codes) == 1
+    end
+
+    test "#track_pve_progression! grandmaster", %{player: player} do
+      player_hero =
+        %{name: "Player", league_tier: 6, finished_at: Timex.now()}
+        |> Game.create_hero!(player, strong_avatar(), base_skills())
+
+      Game.Quests.track_pve_progression!(player_hero)
+
+      %{pve_progression: progression} = Game.get_player!(player.id)
+
+      assert length(progression.season_codes) == 1
+      assert length(progression.master_codes) == 1
+      assert length(progression.grandmaster_codes) == 1
+    end
+
+    test "#track_pve_progression! invoker", %{player: player} do
+      player_hero =
         %{
-          name: "User",
+          name: "Player",
           league_tier: 6,
           finished_at: Timex.now(),
-          total_gold_farm: div(Moba.maximum_total_farm(), 2),
-          total_xp_farm: div(Moba.maximum_total_farm(), 2)
+          total_gold_farm: div(Moba.max_total_farm(), 2),
+          total_xp_farm: div(Moba.max_total_farm(), 2)
         }
-        |> Game.create_hero!(user, strong_avatar(), skills)
+        |> Game.create_hero!(player, strong_avatar(), base_skills())
 
-      Game.track_pve_quests(user_hero)
+      Game.Quests.track_pve_progression!(player_hero)
 
-      assert_progression("season", user_hero, 1)
-      assert_progression("daily_master", user_hero, 1)
-      assert_progression("season_master", user_hero, 1, 5)
-      assert_progression("season_grandmaster", user_hero, 1, 6)
-      assert_progression("daily_grandmaster", user_hero, 1)
-      assert_progression("daily_perfect", user_hero, 1)
-      assert_progression("season_perfect", user_hero, 1, 7)
-    end
-  end
+      %{pve_progression: progression} = Game.get_player!(player.id)
 
-  defp assert_progression(code, %{user_id: user_id, avatar: %{code: avatar_code}}, current_value, quest_level \\ 1) do
-    quest = Game.Quests.get_by_code_and_level!(code, quest_level)
-    progression = Game.Quests.find_progression_by!(user_id, quest.id)
-    assert progression.current_value == current_value
-
-    if current_value > 0 do
-      assert progression.history_codes == [avatar_code]
+      assert length(progression.season_codes) == 1
+      assert length(progression.master_codes) == 1
+      assert length(progression.grandmaster_codes) == 1
+      assert length(progression.invoker_codes) == 1
     end
   end
 end

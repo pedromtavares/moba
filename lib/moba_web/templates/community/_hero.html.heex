@@ -4,7 +4,7 @@
             <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @hero.pve_ranking %></span>
                 <div data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
-                    <img src={"/images/pve/#{@hero.user.pve_tier}.png"} class="league-logo">
+                    <img src={"/images/pve/#{@hero.player.pve_tier}.png"} class="league-logo">
                     <%= @hero.name %>
                 </div>
                 <div class="btn-group">

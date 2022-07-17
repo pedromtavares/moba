@@ -9,16 +9,16 @@ defmodule MobaWeb.CommunityLive do
     end
   end
 
-  def handle_event("show-users", _, %{assigns: %{user_ranking: users}} = socket) do
-    users = if users, do: users, else: Accounts.ranking(20)
-    {:noreply, assign(socket, active_tab: "users", user_ranking: users)}
+  def handle_event("show-users", _, %{assigns: %{player_ranking: users}} = socket) do
+    users = if users, do: users, else: Game.player_ranking(20)
+    {:noreply, assign(socket, active_tab: "users", player_ranking: users)}
   end
 
   def handle_event("show-pve", _, socket) do
     {:noreply, assign(socket, active_tab: "pve")}
   end
 
-  def handle_event("create-message", params, %{assigns: %{current_user: user}} = socket) do
+  def handle_event("create-message", params, %{assigns: %{current_player: %{user: user} = player}} = socket) do
     with body = params["message"]["body"],
          length = String.length(body),
          proper_size? = length > 1 && length <= 500 do
@@ -26,7 +26,7 @@ defmodule MobaWeb.CommunityLive do
         Accounts.create_message!(%{
           body: body,
           author: user.username,
-          tier: user.season_tier,
+          tier: player.pvp_tier,
           channel: "community",
           topic: "general",
           is_admin: user.is_admin,
@@ -81,11 +81,11 @@ defmodule MobaWeb.CommunityLive do
     MobaWeb.CommunityView.render("index.html", assigns)
   end
 
-  defp socket_init(socket) do
+  defp socket_init(%{assigns: %{current_player: %{user: user}}} = socket) do
     with active_tab = "pve",
          changeset = Accounts.change_message(),
          channel = "community",
-         pve_ranking = Game.pve_ranking(21),
+         pve_ranking = Game.community_pve_ranking(),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse(),
          updates = Accounts.latest_messages(channel, "updates", 20) do
       assign(socket,
@@ -96,7 +96,8 @@ defmodule MobaWeb.CommunityLive do
         messages: messages,
         sidebar_code: channel,
         updates: updates,
-        user_ranking: nil
+        player_ranking: nil,
+        current_user: user
       )
     end
   end

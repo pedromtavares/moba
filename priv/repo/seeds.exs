@@ -10,16 +10,13 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Moba.{Repo, Game, Accounts, Admin}
-alias Game.Schema.{Item, Skill, Avatar, Quest}
+alias Moba.{Repo, Game, Accounts}
+alias Game.Schema.{Item, Skill, Avatar}
 alias Accounts.Schema.User
 
 defmodule SeedHelper do
   def create_bot(bot_tier, avatar_codes) do
-    name = Faker.Superhero.name()
-    email = Faker.Internet.email()
-
-    season_points =
+    pvp_points =
       case bot_tier do
         4 -> 200..499
         5 -> 500..999
@@ -28,20 +25,11 @@ defmodule SeedHelper do
       end
       |> Enum.random()
 
-    season_tier = Accounts.season_tier_for(season_points)
+    pvp_tier = Game.pvp_tier_for(pvp_points)
+    name = Faker.Superhero.name()
+    bot_options = %{name: name, tier: bot_tier, codes: avatar_codes}
 
-    case Admin.create_user(%{
-           username: name,
-           email: email,
-           is_bot: true,
-           bot_tier: bot_tier,
-           season_points: season_points,
-           season_tier: season_tier,
-           bot_codes: avatar_codes
-         }) do
-      {:ok, user} -> user
-      {:error, _} -> create_bot(bot_tier, avatar_codes)
-    end
+    Game.create_player!(%{bot_options: bot_options, pvp_tier: pvp_tier, pvp_points: pvp_points})
   end
 
   def create_pvp_bots do
@@ -102,7 +90,7 @@ defmodule SeedHelper do
   end
 
   def create_avatar(attrs) do
-    Repo.insert!(Avatar.create_changeset(%Avatar{}, attrs_with_image(attrs), attrs[:ultimate], nil))
+    Repo.insert!(Avatar.create_changeset(%Avatar{}, attrs_with_image(attrs), attrs[:ultimate]))
   end
 
   def attrs_with_image(attrs) do
@@ -114,7 +102,7 @@ defmodule SeedHelper do
   end
 end
 
-%User{is_admin: true, tutorial_step: 0, shard_count: 100, level: 20}
+%User{is_admin: true, tutorial_step: 0, shard_count: 10000, level: 20}
 |> User.changeset(%{
   email: "admin@browsermoba.com",
   username: "Admin",
@@ -1255,34 +1243,15 @@ Game.Query.SkillQuery.base_canon()
 
   Enum.each(range, fn level ->
     skill
-    |> Repo.preload(:match)
     |> Map.put(:id, nil)
     |> Map.put(:level, level)
     |> Repo.insert!()
   end)
 end)
 
-Repo.update_all(Item, set: [current: true])
-Repo.update_all(Skill, set: [current: true])
-Repo.update_all(Avatar, set: [current: true])
-
+Moba.regenerate_resources!()
 Moba.regenerate_pvp_bots!()
-
-Repo.insert(%Quest{code: "season", level: 1, shard_prize: 100, initial_value: 0, final_value: 2})
-Repo.insert(%Quest{code: "season", level: 2, shard_prize: 150, initial_value: 0, final_value: 5})
-Repo.insert(%Quest{code: "season", level: 3, shard_prize: 200, initial_value: 0, final_value: 10})
-Repo.insert(%Quest{code: "season", level: 4, shard_prize: 250, initial_value: 0, final_value: 15})
-Repo.insert(%Quest{code: "season_master", level: 5, shard_prize: 250, initial_value: 0, final_value: 15})
-Repo.insert(%Quest{code: "season_grandmaster", level: 6, shard_prize: 250, initial_value: 0, final_value: 15})
-Repo.insert(%Quest{code: "season_perfect", level: 7, shard_prize: 250, initial_value: 0, final_value: 15})
-
-Repo.insert(%Quest{code: "daily_master", level: 1, shard_prize: 100, initial_value: 0, final_value: 1, daily: true})
-
-Repo.insert(%Quest{code: "daily_grandmaster", level: 1, shard_prize: 100, initial_value: 0, final_value: 1, daily: true})
-
-Repo.insert(%Quest{code: "daily_perfect", level: 1, shard_prize: 100, initial_value: 0, final_value: 1, daily: true})
-
-Moba.start!()
+Moba.server_tick!()
 
 (Enum.to_list(0..10) ++ Enum.to_list(17..22))
 |> Moba.regenerate_pve_bots!()

@@ -21,7 +21,7 @@ defmodule Moba.Game.Query.AvatarQuery do
   end
 
   def canon(query \\ Avatar) do
-    from avatar in query, where: is_nil(avatar.match_id)
+    from avatar in query, where: is_nil(avatar.resource_uuid)
   end
 
   def current(query \\ Avatar) do

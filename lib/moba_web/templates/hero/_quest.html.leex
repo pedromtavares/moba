@@ -1,0 +1,35 @@
+<div class="col-xl-6 margin-auto">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="text-center m-0">You have ranked up to <%= @completed_quest.title %>!</h3>
+        </div>
+        <div class="card-body">
+            <table class="table table-dark mb-0 border text-center">
+                <tr>
+                    <td><strong><%= @completed_quest.description %></strong></td>
+                </tr>
+            </table>
+            <div class="text-center mt-2">
+                <img src="/images/pve/<%= @current_player.pve_tier %>.png" style="max-height: 70px"/><br/>
+                <button type="button" class="btn btn-light mt-2" data-toggle="modal" data-target="#pve-tier-rewards">
+                    <i class="fa fa-crown mr-1"></i>Rewards
+                </button>
+            </div>      
+        </div>
+        <div class="card-footer p-0">
+            <%= if @current_player.pve_tier == 1 do %>
+                <a href="/arena" class="btn btn-danger btn-block btn-lg">
+                    <i class="fa fa-swords fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Proceed to the Arena</strong>
+                </a>
+            <% else %>
+                <a href="/base" class="btn btn-success btn-block btn-lg">
+                    <i class="fa fa-home fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Proceed to Base</strong>
+                </a>
+            <% end %>
+        </div>
+    </div>
+</div>
+
+<%= MobaWeb.DashboardView.render "_pve_tier_rewards.html", Map.merge(assigns, %{pve_tier: @current_player.pve_tier}) %>

@@ -15,6 +15,5 @@
     </div>
 </div>
 
-<%= render "_pve_tier_rewards.html", Map.put(assigns, :pve_tier, @current_user.pve_tier + 1) %>
-<%= render "_daily_quests.html", assigns %>
+<%= render "_pve_tier_rewards.html", Map.put(assigns, :pve_tier, @current_player.pve_tier + 1) %>
 <%= live_component(MobaWeb.TutorialComponent, step: @tutorial_step) %>

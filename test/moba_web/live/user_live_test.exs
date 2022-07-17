@@ -5,11 +5,11 @@ defmodule MobaWeb.UserLiveTest do
   test "connected mount", %{conn: conn} do
     hero = create_base_hero()
 
-    conn = Pow.Plug.assign_current_user(conn, hero.user, otp_app: :moba)
+    conn = Pow.Plug.assign_current_user(conn, hero.player.user, otp_app: :moba)
 
-    username = hero.user.username
+    username = hero.player.user.username
 
-    {:ok, _view, html} = live(conn, "/user/#{hero.user_id}")
+    {:ok, _view, html} = live(conn, "/user/#{hero.player.user_id}")
     assert html =~ username
   end
 end

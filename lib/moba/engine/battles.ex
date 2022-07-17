@@ -53,9 +53,9 @@ defmodule Moba.Engine.Battles do
     |> Repo.preload([:winner, attacker: :avatar, defender: :avatar])
   end
 
-  def first_duel_battle(%{user_first_pick_id: pick_id}) when is_nil(pick_id), do: nil
+  def first_duel_battle(%{player_first_pick_id: pick_id}) when is_nil(pick_id), do: nil
 
-  def first_duel_battle(%{user_first_pick_id: pick_id, id: id}) do
+  def first_duel_battle(%{player_first_pick_id: pick_id, id: id}) do
     from(b in for_duel(id), where: b.attacker_id == ^pick_id, order_by: [desc: :id], limit: 1)
     |> load()
     |> Repo.all()
@@ -91,7 +91,7 @@ defmodule Moba.Engine.Battles do
     |> preload([
       :initiator,
       :winner,
-      duel: [:user, :opponent],
+      duel: [player: :user, opponent_player: :user],
       turns: ^ordered_turns_query(),
       attacker: ^HeroQuery.load(),
       defender: ^HeroQuery.load()

@@ -70,7 +70,7 @@
         </div>
     </div>
 <% end %>
-<%= if @current_user do %>
+<%= if @current_player do %>
     <%= if Game.master_league?(@snapshot) || @snapshot.league_step == 0 || @battle.attacker.league_step == 0 do %>
         <div class="row battle-border-top pt-1 mt-2">
             <div class="col">

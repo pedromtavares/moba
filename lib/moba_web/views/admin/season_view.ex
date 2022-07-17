@@ -1,4 +1,4 @@
-defmodule MobaWeb.Admin.MatchView do
+defmodule MobaWeb.Admin.SeasonView do
   use MobaWeb, :view
 
   import Torch.TableView

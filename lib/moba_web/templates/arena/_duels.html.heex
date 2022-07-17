@@ -7,31 +7,31 @@
         <% else %>
             <div class="d-flex justify-content-center my-2">
                 <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="set-status" phx-click="set-status" checked={@current_user.status == "available"}>
+                    <input type="checkbox" class="custom-control-input" id="set-status" phx-click="set-status" checked={@current_player.status == "available"}>
                     <label class="custom-control-label" for="set-status">I am available for PvP Duels</label>
                 </div>
             </div>
             <%= if length(@duel_opponents) > 0 do %>
                 <table class="table-dark table mt-3">
-                    <%= for user <- @duel_opponents do %>
-                        <tr id={"user-#{user.id}"}>
+                    <%= for player <- @duel_opponents do %>
+                        <tr id={"player-#{player.id}"}>
                             <td class="text-right">
-                                <img src={"/images/pvp/#{user.season_tier}.png"} style="max-height:  50px"/>
+                                <img src={"/images/pvp/#{player.pvp_tier}.png"} style="max-height:  50px"/>
                             </td>
                             <td>
-                                <h5><%= live_redirect user.username, to: Routes.live_path(@socket, MobaWeb.UserLive, user) %></h5>
+                                <h5><%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id) %></h5>
                             </td>
                             <td>
-                                <%= user.season_points %> Season Points
+                                <%= player.pvp_points %> Season Points
                             </td>
                             <td>
-                                Last active <%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+                                Last active <%= player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
                             </td>
                             <td>
-                                <%= if can_be_challenged?(@current_user, @current_time) && can_be_challenged?(user, @current_time) do %>
-                                    <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id={user.id}><i class="fa fa-bullseye mr-1" id={"can-duel-#{user.id}"}></i>Duel</button>
+                                <%= if can_be_challenged?(@current_player, @current_time) && can_be_challenged?(player, @current_time) do %>
+                                    <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id={player.id}><i class="fa fa-bullseye mr-1" id={"can-duel-#{player.id}"}></i>Duel</button>
                                 <% else %>
-                                    <button type="button" class="btn btn-danger btn-block disabled no-action" data-toggle="tooltip" title="You currently cannot challenge this player, please wait a few seconds." id={"cannot-duel-#{user.id}"}><i class="fa fa-bullseye mr-1"></i>Duel</button>
+                                    <button type="button" class="btn btn-danger btn-block disabled no-action" data-toggle="tooltip" title="You currently cannot challenge this player, please wait a few seconds." id={"cannot-duel-#{player.id}"}><i class="fa fa-bullseye mr-1"></i>Duel</button>
                                 <% end %>
                             </td>
                         </tr>
@@ -43,7 +43,7 @@
                 <div class="history mt-3">
                     <table class="table-dark table mb-0">
                         <%= for duel <- @duels do %>
-                            <%= render "_duel_row.html", duel: duel, opponent: opponent_for(duel, @current_user), battles: @duel_battles, user_id: @current_user.id, socket: @socket %>
+                            <%= render "_duel_row.html", duel: duel, opponent: opponent_for(duel, @current_player), battles: @duel_battles, player_id: @current_player.id, socket: @socket %>
                         <% end %>
                     </table>
                 </div>

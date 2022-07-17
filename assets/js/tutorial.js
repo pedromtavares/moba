@@ -38,20 +38,23 @@ const Tutorial = {
   tourSteps: function (tour, step, hookInstance) {
     switch (step) {
       case 1:
-        tour.addStep({
-          id: 'first-tutorial-first-step',
-          text: "Welcome to Training! Now that you've created your hero, it's time to put it to the test. Battle this target to start your first battle.",
-          attachTo: {
-            element: '.targets .battle-button',
-            on: 'right'
-          },
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 25] } }]
-          },
-          advanceOn: {
-            selector: "button", event: "click"
-          }
-        });
+        $(".meditation-tab").hide() &&
+          $(".mine-tab").hide() && 
+          $(".targets")[0] && 
+          tour.addStep({
+            id: 'first-tutorial-first-step',
+            text: "Welcome to Training! Now that you've created your hero, it's time to put it to the test. Battle this target to start your first battle.",
+            attachTo: {
+              element: '.targets .battle-button',
+              on: 'right'
+            },
+            popperOptions: {
+              modifiers: [{ name: 'offset', options: { offset: [0, 25] } }]
+            },
+            advanceOn: {
+              selector: "button", event: "click"
+            }
+          });
         break;
       case 2:
         tour.addStep({
@@ -144,7 +147,7 @@ const Tutorial = {
       case 8:
         tour.addStep({
           id: 'eigth-tutorial-first-step',
-          text: "<p class='text-center'>Click on your 3 Normal items and press Transmute.</p>",
+          text: "<p class='text-center'>Click on your 3 Normal items and then click on Transmute.</p>",
           attachTo: {
             element: '.inventory-item',
             on: 'left'

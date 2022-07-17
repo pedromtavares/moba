@@ -1,5 +1,5 @@
-<div class="hero-review content-with-hero-bar" id="hero-review">
-    <%= if finished_hero = just_finished_training?(@current_user, @hero) do %>
+<div class="hero-review <%= if @hero.player_id == @current_player.id, do: "content-with-hero-bar" %>" id="hero-review">
+    <%= if finished_hero = just_finished_training?(@current_player, @hero) do %>
         <%= render "_finished_hero.html", Map.put(assigns, :finished_hero, finished_hero) %>
     <% end %>
     <div class="row mt-3">
@@ -7,17 +7,19 @@
             <div class="row">
                 <div class="col">
                     <div class="hero-card card">
-                        <div class="card-header pt-0 pb-1">
+                        <div class="card-header pt-1 pb-2">
                             <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                                 <span class="font-italic font-15">Level <%= @hero.level %></span></span>
-                                <%=live_redirect class: "text-white font-20", to: Routes.live_path(@socket, MobaWeb.UserLive, @hero.user_id) do %><%= @hero.name %><%end %>
+                                <%= if @hero.player.user_id do %>
+                                    <%=live_redirect class: "text-white font-20 f-rpg", to: Routes.player_path(@socket, :show, @hero.player_id) do %><%= @hero.name %><%end %>
+                                <% end %>
                                 <span class="font-italic font-15"><%= @hero.avatar.name %></span>
                             </h4>
                         </div>
                         <div class="card-body text-center">
                             <img src="<%= GH.background_url(@hero) %>"/>
                         </div>
-                        <div class="transparent card-footer p-0 text-center">
+                        <div class="card-footer p-0 text-center">
                             <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
                                 <div class="col">
                                     <%= GH.hero_stats(@hero, true) %>
@@ -33,7 +35,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <%= if @hero.user_id == @current_user.id do %>
+                            <%= if @hero.player.user_id && @hero.player_id == @current_player.id do %>
                                 <div class="row">
                                     <%= if @skin_selection do %>
                                         <div class="col">
@@ -61,13 +63,7 @@
             <div class="row">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header text-center font-17 text-white">
-                            <i class="fa fa-poll mr-1"></i>Performance
-                            <%= unless @hero.finished_at do %>
-                                <small class="text-muted font-italic"> - In Progress (<%= @hero.pve_total_turns %> turns left)</small>
-                            <% end %>
-                        </h5>
-                        <div class="card-body p-2">
+                        <div class="card-body pt-3 pb-2">
                             <div class="performance">
                                 <div class="row">
                                     <div class="col d-flex align-items-center">
@@ -84,99 +80,121 @@
                                     </div>
                                 </div>
                                 <h3 class="text-center mt-2 mb-2 text-league-<%=@hero.league_tier%>"><%= Moba.leagues[@hero.league_tier] %></h3>
-                                <div class="row text-center">
+                                
+                                <div class="row text-center mt-3">
                                     <div class="col">
-                                        <h3 class="mb-0 text-info">
-                                            <i class="fa fa-spa"></i>
-                                            <%= @hero.total_xp_farm %>
-                                        </h3>
-                                        <h4 class="text-info">Total XP Farm</h4>
+                                        <h4 class="text-warning" data-toggle="tooltip" title="<%= @hero.total_xp_farm + @hero.total_gold_farm %>"><i class="fa fa-crown"></i> Total Farm: <%= GH.farming_amount_label @hero.total_xp_farm + @hero.total_gold_farm %></h4>
                                     </div>
+                                    
                                     <div class="col">
-                                        <h3 class="mb-0 text-warning">
-                                            <i class="fa fa-coins"></i>
-                                            <%= @hero.total_gold_farm %>
-                                        </h3>
-                                        <h4 class="text-warning">Total Gold Farm</h4>
+                                        <%= if @hero.finished_at do %>
+                                            <h4 class="text-center text-success"> <i class="fa fa-clock-o"></i> Trained in <%= GH.finished_time(@hero) %> min</h3>
+                                        <% else %>
+                                            <h4 class="text-center text-white">In Progress (<%= @hero.pve_total_turns %> turns left)</h4>
+                                        <% end %>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <%= if @hero.finished_at do %>
-                            <div class="card-footer text-center font-italic text-muted">
-                                Trained <%= @hero.finished_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-                            </div>
-                        <% end %>
+                        
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6 col-xl-6">
-            <%= unless @hero.user.is_guest do %>
-                <div class="row">
-                    <div class="col">
-                        <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.live_path(@socket, MobaWeb.UserLive, @hero.user_id) do %><i class="fa fa-user"></i> View User Profile<% end %>
-                    </div>
+            <div class="row">
+                <div class="col">
+                    <%= if @hero.player.user_id do %>
+                        <%= live_redirect class: "btn btn-block btn-light mb-1 btn-lg", to: Routes.player_path(@socket, :show, @hero.player_id) do %><i class="fa fa-user"></i> View Player Profile<% end %>
+                    <% end %>
                 </div>
-            <% end %>
-            
+            </div>            
             <div class="row">
                 <div class="col">
                     <div class="card ranking">
-                <h5 class="card-header text-center font-17 text-white"><i class="fa fa-trophy mr-1"></i>Hero Ranking</h5>
-                <div class="card-body p-0">
-                    <table class="table table-dark text-center m-0 table-sm">
-                        <tr>
-                            <th>Rank</th>
-                            <th>Hero</th>
-                            <th>Total Farm</th>
-                            <th>Time</th>
-                        </tr>
-                        <%= for hero <- @ranking do %>
-                            <tr id="ranking-<%= hero.id %>">
-                                <td>
-                                    <h1 class="<%= if hero.id == @hero.id, do: "text-danger f-rpg", else: "f-rpg" %>">
-                                        <%= if hero.pve_ranking do %>
-                                            #<%= hero.pve_ranking %>
-                                        <% else %>
-                                            ?
-                                        <% end %>
-                                    </h1>
-                                </td>
-                                <td>
-                                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLive, hero) do %>
-                                        <%= GH.hero_avatar(hero) %>
-                                        <br/>
-                                        <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>
+                        <div class="card-body p-0 <%= if is_nil(@hero.player.user_id) , do: "extended-body"%>" id="ranking-card">
+                            <table class="table table-dark text-center m-0 table-sm">
+                                <thead>
+                                    <tr>
+                                        <th>Rank</th>
+                                        <th>Hero</th>
+                                        <th>Total Farm</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <%= for hero <- @ranking do %>
+                                        <tr id="ranking-<%= hero.id %>" <%= if hero.id == @hero.id do %>phx-hook="HalfScroll"<% end %> phx-container="#ranking-card"> 
+                                            <td>
+                                                <h1 class="<%= if hero.id == @hero.id, do: "text-danger f-rpg", else: "f-rpg" %>">
+                                                    <%= if hero.pve_ranking do %>
+                                                        #<%= hero.pve_ranking %>
+                                                    <% else %>
+                                                        ?
+                                                    <% end %>
+                                                </h1>
+                                            </td>
+                                            <td>
+                                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.HeroLive, hero) do %>
+                                                    <%= GH.hero_avatar(hero) %>
+                                                    <br/>
+                                                    <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>
+                                                <% end %>
+                                            </td>
+                                            <td>
+                                                <h3 class="text-white" data-toggle="tooltip" title="<%= hero.total_xp_farm + hero.total_gold_farm %>"><img src="/images/league/<%= hero.league_tier%>.png" style="max-width: 30px;"/> <%= GH.farming_amount_label hero.total_xp_farm + hero.total_gold_farm %></h3>
+                                            </td>
+                                            <td>
+                                                <h3 class="text-success">
+                                                    <i class="fa fa-clock-o"></i>
+                                                    <%= if hero.finished_at do %>
+                                                        <%= GH.finished_time(hero) %> min
+                                                    <% else %>
+                                                        ??
+                                                    <% end %>
+                                                </h3>
+                                            </td>
+                                        </tr>
                                     <% end %>
-                                </td>
-                                <td>
-                                    <h3 class="text-warning" data-toggle="tooltip" title="<%= hero.total_xp_farm + hero.total_gold_farm %>"><i class="fa fa-crown"></i> <%= GH.farming_amount_label hero.total_xp_farm + hero.total_gold_farm %></h3>
-                                </td>
-                                <td>
-                                    <h3 class="text-success">
-                                        <i class="fa fa-clock-o"></i>
-                                        <%= if hero.finished_at do %>
-                                            <%= GH.finished_time(hero) %> min
-                                        <% else %>
-                                            ??
-                                        <% end %>
-                                    </h3>
-                                </td>
-                            </tr>
-                        <% end %>
-                    </table>
-                </div>
-                <div class="transparent card-footer p-0">
-                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.CommunityLive), class: "btn btn-block btn-light btn-sm" do %>
-                        <i class="fa fa-table mr-1"></i>See Top Heroes
-                    <% end %>
-                </div>
-            </div>
+                                </tbody>
+                                <%= if not in_ranking?(@ranking, @hero) do %>
+                                    <tfoot>
+                                        <tr>
+                                            <th>
+                                                <%= if @hero.pve_ranking do %>
+                                                    <h1 class="text-danger f-rpg">#<%= @hero.pve_ranking %></h1>
+                                                <% else %>
+                                                    <h4 class="text-danger font-italic">Unranked</h4>
+                                                <% end %>
+                                            </th>
+                                            <th>
+                                                <%= GH.hero_avatar(@hero) %>
+                                                <br/>
+                                                <h5 class="text-primary mb-0 mt-1"><%= @hero.name %></h5>
+                                            </th>
+                                            <th>
+                                                <h3 class="text-white" data-toggle="tooltip" title="<%= @hero.total_xp_farm + @hero.total_gold_farm %>"><img src="/images/league/<%= @hero.league_tier%>.png" style="max-width: 30px;"/> <%= GH.farming_amount_label @hero.total_xp_farm + @hero.total_gold_farm %></h3>
+                                            </th>
+                                            <th>
+                                                <h3 class="text-success">
+                                                    <i class="fa fa-clock-o"></i>
+                                                    <%= if @hero.finished_at do %>
+                                                        <%= GH.finished_time(@hero) %> min
+                                                    <% else %>
+                                                        ??
+                                                    <% end %>
+                                                </h3>
+                                            </th>
+                                        </tr>           
+                                    </tfoot>
+                                <% end %>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<%= if @hero.user_id == @current_user.id, do: live_render(@socket, MobaWeb.CurrentHeroLive, session: %{"hero" => @hero}, id: "hero-bar") %>
+<%= if @hero.player_id == @current_player.id, do: live_render(@socket, MobaWeb.CurrentHeroLive, session: %{"hero" => @hero}, id: "hero-bar") %>

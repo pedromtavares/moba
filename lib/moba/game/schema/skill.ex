@@ -5,9 +5,6 @@ defmodule Moba.Game.Schema.Skill do
   Active Skills usually cost MP to be activated and have a cooldown in order to be activated again.
   Passive Skills usually cost no MP and activate by themselves, usually providing bonuses every turn.
 
-  This is a match-locked resource, meaning once a match starts, its stats cannot be changed,
-  and any changes made on the admin panel will only be applied on the next match.
-
   Skills can be unlocked with shards, and may have a user level_requirement
   """
 
@@ -15,7 +12,7 @@ defmodule Moba.Game.Schema.Skill do
   use Arc.Ecto.Schema
   import Ecto.Changeset
 
-  @derive {Jason.Encoder, except: [:__meta__, :match]}
+  @derive {Jason.Encoder, except: [:__meta__]}
 
   schema "skills" do
     field :image, Moba.Image.Type
@@ -26,6 +23,7 @@ defmodule Moba.Game.Schema.Skill do
     field :code, :string
     field :enabled, :boolean
     field :current, :boolean
+    field :resource_uuid, :string
     field :mp_cost, :integer
     field :name, :string
     field :passive, :boolean, default: false
@@ -60,7 +58,7 @@ defmodule Moba.Game.Schema.Skill do
     field :defender_buff, :boolean, virtual: true
     field :attacker_debuff, :boolean, virtual: true
 
-    belongs_to :match, Moba.Game.Schema.Match
+    # belongs_to :match, Moba.Game.Schema.Match
 
     timestamps()
   end
@@ -76,7 +74,6 @@ defmodule Moba.Game.Schema.Skill do
       :cooldown,
       :ultimate,
       :passive,
-      :match_id,
       :atk_multiplier,
       :other_atk_multiplier,
       :atk_regen_multiplier,
@@ -98,7 +95,8 @@ defmodule Moba.Game.Schema.Skill do
       :enabled,
       :level_requirement,
       :damage_type,
-      :current
+      :current,
+      :resource_uuid
     ])
     |> cast_attachments(attrs, [:image])
   end

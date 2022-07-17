@@ -3,10 +3,10 @@ defmodule MobaWeb.ArenaLive do
 
   alias MobaWeb.{ArenaView, Presence, TutorialComponent}
 
-  def mount(_, _session, %{assigns: %{current_user: user}} = socket) do
+  def mount(_, _session, %{assigns: %{current_player: player}} = socket) do
     with socket = socket_init(socket) do
       if connected?(socket) do
-        TutorialComponent.subscribe(user.id)
+        TutorialComponent.subscribe(player.id)
         MobaWeb.subscribe("online")
       end
 
@@ -14,40 +14,40 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
-  def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_user: user}} = socket) do
-    opponent = Accounts.get_user!(opponent_id)
+  def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_player: player}} = socket) do
+    opponent = Game.get_player!(opponent_id)
 
-    if can_duel?(user) && can_duel?(opponent) do
-      Game.duel_challenge(user, opponent)
+    if can_duel?(player) && can_duel?(opponent) do
+      Game.duel_challenge(player, opponent)
       {:noreply, socket}
     else
-      {:noreply, assign(socket, duel_opponents: opponents_from_presence(user))}
+      {:noreply, assign(socket, duel_opponents: opponents_from_presence(player))}
     end
   end
 
-  def handle_event("matchmaking", %{"type" => type}, %{assigns: %{current_user: user}} = socket) do
-    duel = if type == "elite", do: Moba.elite_matchmaking!(user), else: Moba.normal_matchmaking!(user)
+  def handle_event("matchmaking", %{"type" => type}, %{assigns: %{current_player: player}} = socket) do
+    duel = if type == "elite", do: Game.elite_matchmaking!(player), else: Game.normal_matchmaking!(player)
 
     if duel do
       {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLive, duel.id))}
     else
       {:noreply,
        assign(socket,
-         normal_count: Accounts.normal_matchmaking_count(user),
-         elite_count: Accounts.elite_matchmaking_count(user)
+         normal_count: Game.normal_matchmaking_count(player),
+         elite_count: Game.elite_matchmaking_count(player)
        )}
     end
   end
 
-  def handle_event("set-status", params, %{assigns: %{current_user: user}} = socket) do
-    {user, duel_opponents} =
+  def handle_event("set-status", params, %{assigns: %{current_player: player}} = socket) do
+    {player, duel_opponents} =
       if is_nil(Map.get(params, "value")) do
-        {Accounts.set_unavailable!(user), []}
+        {Game.set_player_unavailable!(player), []}
       else
-        {Accounts.set_available!(user), opponents_from_presence(user)}
+        {Game.set_player_available!(player), opponents_from_presence(player)}
       end
 
-    {:noreply, assign(socket, current_user: user, duel_opponents: duel_opponents)}
+    {:noreply, assign(socket, current_player: player, duel_opponents: duel_opponents)}
   end
 
   def handle_event("tutorial1", _, socket) do
@@ -62,8 +62,8 @@ defmodule MobaWeb.ArenaLive do
     {:noreply, assign(socket, tutorial_step: step)}
   end
 
-  def handle_info(%{event: "presence_diff"}, %{assigns: %{current_user: user}} = socket) do
-    duel_opponents = if user.status == "available", do: opponents_from_presence(user), else: []
+  def handle_info(%{event: "presence_diff"}, %{assigns: %{current_player: player}} = socket) do
+    duel_opponents = if player.status == "available", do: opponents_from_presence(player), else: []
 
     {:noreply, assign(socket, duel_opponents: duel_opponents)}
   end
@@ -72,40 +72,40 @@ defmodule MobaWeb.ArenaLive do
     ArenaView.render("index.html", assigns)
   end
 
-  defp can_duel?(user) do
-    user.status == "available" && ArenaView.can_be_challenged?(user, Timex.now())
+  defp can_duel?(player) do
+    player.status == "available" && ArenaView.can_be_challenged?(player, Timex.now())
   end
 
-  defp maybe_redirect(%{assigns: %{current_user: %{is_guest: true}}} = socket) do
-    redirect(socket, to: "/registration/edit")
+  defp maybe_redirect(%{assigns: %{current_player: %{user_id: user_id}}} = socket) when is_nil(user_id) do
+    redirect(socket, to: "/registration/new")
   end
 
-  defp maybe_redirect(%{assigns: %{current_user: %{hero_collection: collection}}} = socket)
+  defp maybe_redirect(%{assigns: %{current_player: %{hero_collection: collection}}} = socket)
        when length(collection) < 2 do
     redirect(socket, to: "/base")
   end
 
   defp maybe_redirect(socket), do: socket
 
-  defp opponents_from_presence(user) do
+  defp opponents_from_presence(player) do
     online_ids =
       Presence.list("online")
       |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)
-      |> Enum.map(& &1.user_id)
+      |> Enum.map(& &1.player_id)
 
-    Accounts.duel_opponents(user, online_ids)
+    Game.duel_opponents(player, online_ids)
   end
 
-  defp socket_init(%{assigns: %{current_user: user}} = socket) do
+  defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
          sidebar_code = "arena",
-         normal_count = Accounts.normal_matchmaking_count(user),
-         elite_count = Accounts.elite_matchmaking_count(user),
-         matchmaking = Game.list_matchmaking(user),
+         normal_count = Game.normal_matchmaking_count(player),
+         elite_count = Game.elite_matchmaking_count(player),
+         matchmaking = Game.list_matchmaking(player),
          battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
          pending_match = Enum.find(matchmaking, &(&1.phase != "finished")),
-         closest_bot_time = normal_count == 0 && elite_count == 0 && Accounts.closest_bot_time(user),
-         duels = Game.list_pvp_duels(user),
+         closest_bot_time = normal_count == 0 && elite_count == 0 && Game.closest_bot_time(player),
+         duels = Game.list_pvp_duels(player),
          duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
          pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
       assign(socket,
@@ -121,7 +121,7 @@ defmodule MobaWeb.ArenaLive do
         pending_duel: pending_duel,
         pending_match: pending_match,
         sidebar_code: sidebar_code,
-        tutorial_step: user.tutorial_step
+        tutorial_step: player.tutorial_step
       )
       |> maybe_redirect()
     end

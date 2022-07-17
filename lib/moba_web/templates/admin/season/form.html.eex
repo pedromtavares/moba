@@ -8,9 +8,9 @@
     <% end %>
   
     <div class="torch-form-group">
-      <%= label f, :next_changelog %>
-      <%= textarea f, :next_changelog %>
-      <%= error_tag f, :next_changelog %>
+      <%= label f, :changelog %>
+      <%= textarea f, :changelog %>
+      <%= error_tag f, :changelog %>
     </div>
   
     <div class="torch-submit-form">

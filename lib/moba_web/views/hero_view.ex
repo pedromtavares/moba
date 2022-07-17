@@ -3,29 +3,20 @@ defmodule MobaWeb.HeroView do
 
   def just_finished_training?(_, %{finished_at: nil}), do: nil
 
-  def just_finished_training?(user, %{finished_at: finished_at} = hero) do
+  def just_finished_training?(player, %{finished_at: finished_at} = hero) do
     ago = Timex.now() |> Timex.shift(days: -1)
     diff = Timex.diff(finished_at, ago)
 
-    if user.current_pve_hero_id && diff > 0 do
-      current_hero = Game.get_hero!(user.current_pve_hero_id)
+    if player.current_pve_hero_id && diff > 0 do
+      current_hero = Game.get_hero!(player.current_pve_hero_id)
       current_hero.finished_at && hero.id == current_hero.id && hero
     end
   end
 
-  def display_quest_tabs?(%{
-        completed_progressions: all,
-        completed_daily_progressions: daily,
-        completed_season_progression: season
-      }) do
-    length(all) > 1 && all != daily && all != season
-  end
-
-  def quest_title_for(progressions) when length(progressions) > 1, do: "Quests"
-  def quest_title_for(_), do: "Quest"
-
-  def history_avatars(%{history_codes: history_codes}, avatars) do
-    Enum.filter(avatars, &(&1.code in history_codes))
+  def in_ranking?(ranking, %{id: id}) do
+    ranking
+    |> Enum.map(& &1.id)
+    |> Enum.member?(id)
   end
 
   def tier_class(tier, hero_tier) do

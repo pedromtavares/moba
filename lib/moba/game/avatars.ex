@@ -23,13 +23,12 @@ defmodule Moba.Game.Avatars do
 
   def boss!, do: Repo.get_by!(Avatar, code: "boss")
 
-  def create_avatar!(%Avatar{} = avatar, attrs, match) do
+  def create_avatar!(%Avatar{} = avatar, attrs) do
     ultimate_code = Map.get(avatar, :ultimate_code) || attrs["ultimate_code"]
-    current = match != nil
-    ultimate = ultimate_code && Game.get_skill_by_code!(ultimate_code, current)
+    ultimate = ultimate_code && Game.get_skill_by_code!(ultimate_code, avatar.current)
 
     avatar
-    |> Avatar.create_changeset(attrs, ultimate, match)
+    |> Avatar.create_changeset(attrs, ultimate)
     |> Repo.insert!()
   end
 

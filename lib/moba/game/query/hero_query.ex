@@ -10,6 +10,7 @@ defmodule Moba.Game.Query.HeroQuery do
   import Ecto.Query
 
   @platinum_league_tier Moba.platinum_league_tier()
+  @master_league_tier Moba.master_league_tier()
   @current_ranking_date Moba.current_ranking_date()
   @base_hero_count Moba.base_hero_count()
 
@@ -19,7 +20,7 @@ defmodule Moba.Game.Query.HeroQuery do
       :items,
       :avatar,
       :skin,
-      :user,
+      player: :user,
       skills: ^SkillQuery.ordered()
     ])
   end
@@ -49,14 +50,14 @@ defmodule Moba.Game.Query.HeroQuery do
     |> limit_by(1)
   end
 
-  def latest(user_id, limit \\ @base_hero_count) do
-    base = load() |> with_user(user_id) |> unarchived()
+  def latest(player_id, limit \\ @base_hero_count) do
+    base = load() |> with_player(player_id) |> unarchived()
 
     from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])
   end
 
-  def pickable(user_id, duel_inserted_at) do
-    base = with_user(Hero, user_id) |> unarchived() |> finished() |> order_by_pvp()
+  def pickable(player_id, duel_inserted_at) do
+    base = with_player(Hero, player_id) |> unarchived() |> finished() |> order_by_pvp()
 
     from(hero in base,
       limit: 50,
@@ -93,11 +94,11 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def pve_bots(query \\ bots()) do
-    from hero in query, where: is_nil(hero.user_id)
+    from hero in query, where: is_nil(hero.player_id)
   end
 
   def pvp_bots(query \\ bots()) do
-    from hero in query, where: not is_nil(hero.user_id)
+    from hero in query, where: not is_nil(hero.player_id)
   end
 
   def by_difficulty(query, difficulty) do
@@ -115,6 +116,11 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query,
       where: hero.total_xp_farm >= ^first,
       where: hero.total_xp_farm <= ^last
+  end
+
+  def with_player(query, player_id) do
+    from hero in query,
+      where: hero.player_id == ^player_id
   end
 
   def with_user(query, user_id) do
@@ -180,7 +186,12 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def in_current_ranking_date(query \\ Hero) do
-    from hero in query, where: hero.inserted_at > ^@current_ranking_date
+    last_week = Timex.now() |> Timex.shift(days: -7)
+
+    from hero in query,
+      where:
+        (hero.league_tier >= ^@master_league_tier and hero.inserted_at > ^@current_ranking_date) or
+          hero.inserted_at > ^last_week
   end
 
   def pve_ranked(query \\ Hero) do
@@ -194,18 +205,14 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.id not in ^ids
   end
 
-  def exclude_match(%{id: id} = _match) do
-    from hero in Hero, where: hero.match_id != ^id
-  end
-
   def created_recently(query \\ non_bots(), hours_ago \\ 24) do
     ago = Timex.now() |> Timex.shift(hours: -hours_ago)
 
     from(hero in query,
-      join: user in assoc(hero, :user),
+      join: player in assoc(hero, :player),
       where: hero.inserted_at > ^ago,
-      where: user.is_guest == false,
-      where: user.is_bot == false
+      where: not is_nil(player.user_id),
+      where: is_nil(player.bot_options)
     )
   end
 

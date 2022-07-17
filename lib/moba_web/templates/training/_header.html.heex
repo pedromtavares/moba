@@ -31,7 +31,7 @@
                     <%= if expert_hero?(@current_hero) do %>
                         <div>
                             <div class="custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="show-farm-tabs" phx-click="show-farm-tabs" checked={@current_user.preferences.show_farm_tabs}>
+                                <input type="checkbox" class="custom-control-input" id="show-farm-tabs" phx-click="show-farm-tabs" checked={@current_player.preferences.show_farm_tabs}>
                                 <label class="custom-control-label" for="show-farm-tabs">Show farm tabs</label>
                             </div>
                         </div>

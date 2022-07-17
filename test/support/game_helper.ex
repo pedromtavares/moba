@@ -2,12 +2,18 @@ defmodule Test.GameHelper do
   alias Moba.Game
   import Test.AccountsHelper
 
-  def create_base_hero(attrs \\ %{}, user \\ create_user(), avatar \\ base_avatar()) do
+  def create_player!(attrs \\ %{}, user \\ create_user(), bot_name \\ nil) do
+    bot_options = if bot_name, do: %{name: bot_name}, else: nil
+    attrs = Map.merge(attrs, %{user_id: user.id, bot_options: bot_options})
+    Game.create_player!(attrs)
+  end
+
+  def create_base_hero(attrs \\ %{}, player \\ create_player!(), avatar \\ base_avatar()) do
     base = %{name: "Test"}
 
     Moba.create_current_pve_hero!(
       Map.merge(base, attrs),
-      user,
+      player,
       avatar,
       base_skills()
     )

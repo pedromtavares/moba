@@ -47,7 +47,7 @@ defmodule Moba.Admin.Skills do
   def list_with_same_code(nil), do: []
 
   def list_with_same_code(code) do
-    from(s in Skill, where: s.code == ^code, where: is_nil(s.match_id), order_by: [asc: s.level])
+    from(s in Skill, where: s.code == ^code, where: is_nil(s.resource_uuid), order_by: [asc: s.level])
     |> Repo.all()
   end
 
@@ -65,7 +65,7 @@ defmodule Moba.Admin.Skills do
         from s in Skill,
           where: s.code == ^skill.code,
           where: s.id != ^skill.id,
-          where: is_nil(s.match_id)
+          where: is_nil(s.resource_uuid)
 
       changes = %{
         description: attrs["description"],

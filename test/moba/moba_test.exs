@@ -34,16 +34,16 @@ defmodule Moba.MobaTest do
 
   describe "cross-domain functions" do
     test "#create_current_pve_hero!" do
-      user = create_user()
+      player = create_player!()
       avatar = base_avatar()
       skills = base_skills()
 
-      hero = Moba.create_current_pve_hero!(%{name: "Foo"}, user, avatar, skills)
+      hero = Moba.create_current_pve_hero!(%{name: "Foo"}, player, avatar, skills)
       hero = Game.get_hero!(hero.id)
-      user = Accounts.get_user!(user.id)
+      player = Game.get_player!(player.id)
 
       assert hero
-      assert user.current_pve_hero_id == hero.id
+      assert player.current_pve_hero_id == hero.id
     end
   end
 end
