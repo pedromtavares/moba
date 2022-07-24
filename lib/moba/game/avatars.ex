@@ -21,6 +21,28 @@ defmodule Moba.Game.Avatars do
 
   # -------------------------------- PUBLIC API
 
+  def avatar_minimum_stats do
+    %{
+      total_hp: 200,
+      total_mp: 10,
+      atk: 12,
+      power: 0,
+      armor: 0,
+      speed: 0
+    }
+  end
+
+  def avatar_stat_units do
+    %{
+      total_hp: 5,
+      total_mp: 4,
+      atk: 1,
+      power: 1.4,
+      armor: 1,
+      speed: 5
+    }
+  end
+
   def boss!, do: Repo.get_by!(Avatar, code: "boss")
 
   def create_avatar!(%Avatar{} = avatar, attrs) do
@@ -63,8 +85,8 @@ defmodule Moba.Game.Avatars do
   end
 
   defp with_extra_stats(%Avatar{} = avatar) do
-    minimum = Moba.avatar_minimum_stats()
-    units = Moba.avatar_stat_units()
+    minimum = avatar_minimum_stats()
+    units = avatar_stat_units()
 
     Map.merge(avatar, %{
       display_defense:

@@ -1,8 +1,8 @@
 defmodule Moba.Game.Training do
   @moduledoc """
-  Module focused on cross-domain orchestration and logic related to hero training (single-player)
+  Module focused on cross-resource orchestration and logic related to hero training (single-player)
   """
-  alias Moba.{Game, Repo}
+  alias Moba.{Game, Repo, Utils}
   alias Game.{Avatars, Heroes, Players, Quests, Skills, Targets}
 
   def archive_hero!(%{player: player} = hero) do
@@ -13,6 +13,12 @@ defmodule Moba.Game.Training do
 
   def broadcast_to_hero(hero_id) do
     MobaWeb.broadcast("hero-#{hero_id}", "hero", %{id: hero_id})
+  end
+
+  def create_current_pve_hero!(attrs, player, avatar, skills) do
+    hero = create_hero!(attrs, player, avatar, skills)
+    Players.set_current_pve_hero!(player, hero.id)
+    hero
   end
 
   @doc """
@@ -53,7 +59,7 @@ defmodule Moba.Game.Training do
     Quests.track_pve_progression!(hero)
     Players.add_total_farm!(hero)
     Moba.update_pve_ranking()
-    Moba.run_async(fn -> update_hero_collection!(hero) end)
+    Utils.run_async(fn -> update_hero_collection!(hero) end)
 
     hero
   end
@@ -135,10 +141,5 @@ defmodule Moba.Game.Training do
     if length(collection) > 0, do: Players.update_collection!(hero.player, collection)
 
     hero
-  end
-
-  def update_pve_ranking! do
-    Heroes.update_pve_ranking!()
-    MobaWeb.broadcast("hero-ranking", "ranking", %{})
   end
 end

@@ -28,28 +28,8 @@
         </li>
 
         <li>
-          <div class="torch-show-label">Level:</div>
-          <div class="torch-show-data"><%= @user.level %></div>
-        </li>
-
-        <li>
-          <div class="torch-show-label">Experience:</div>
-          <div class="torch-show-data"><%= @user.experience %></div>
-        </li>
-
-        <li>
-          <div class="torch-show-label">Tutorial Step:</div>
-          <div class="torch-show-data"><%= @user.tutorial_step %></div>
-        </li>
-
-        <li>
           <div class="torch-show-label">Shards:</div>
           <div class="torch-show-data"><%= @user.shard_count %></div>
-        </li>
-
-        <li>
-          <div class="torch-show-label">Ranking:</div>
-          <div class="torch-show-data"><%= @user.ranking %></div>
         </li>
 
     </ul>

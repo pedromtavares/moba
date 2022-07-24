@@ -3,8 +3,8 @@ defmodule Moba.Engine.Core.Processor do
   Orchestrates the core mechanics, processing a Turn from start to finish.
   """
 
-  alias Moba.Engine.Core
-  alias Core.{Effect, Helper, Spell}
+  alias Moba.Engine
+  alias Engine.Core.{Effect, Helper, Spell}
   # require Logger
 
   @doc """
@@ -35,7 +35,7 @@ defmodule Moba.Engine.Core.Processor do
   def cast_skill(turn, %{code: "basic_attack"}), do: basic_attack(turn)
 
   def cast_skill(turn, skill, apply_base_effects \\ true) do
-    damage_type = skill.damage_type || Moba.damage_types().magic
+    damage_type = skill.damage_type || Engine.damage_types().magic
     # Logger.info("Skill cast: #{skill.code}, type: #{damage_type}")
 
     turn =
@@ -360,7 +360,7 @@ defmodule Moba.Engine.Core.Processor do
     basic_attack = Moba.basic_attack()
 
     %{turn | resource: basic_attack, skill: basic_attack}
-    |> Effect.damage_type(Moba.damage_types().normal)
+    |> Effect.damage_type(Engine.damage_types().normal)
     |> Effect.atk_damage()
     |> Effect.turn_mp_regen()
     |> Effect.remove_last_skill()

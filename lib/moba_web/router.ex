@@ -92,7 +92,6 @@ defmodule MobaWeb.Router do
     resources "/users", Admin.UserController
     resources "/seasons", Admin.SeasonController
     resources "/skins", Admin.SkinController
-    resources "/quests", Admin.QuestController
 
     live_dashboard "/dashboard", metrics: MobaWeb.Telemetry, ecto_repos: [Moba.Repo]
 

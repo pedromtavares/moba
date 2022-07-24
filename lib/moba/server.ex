@@ -4,6 +4,8 @@ defmodule Moba.Server do
   """
   use GenServer
 
+  alias Moba.{Cleaner, Conductor}
+
   # 30 secs
   @check_timeout 1000 * 30
 
@@ -31,7 +33,8 @@ defmodule Moba.Server do
     season = Moba.current_season()
 
     if time_diff_in_seconds(season.last_server_update_at) >= @tick_diff_in_seconds do
-      Moba.server_tick!(season)
+      Conductor.season_tick!()
+      Cleaner.cleanup_old_records()
     end
 
     state

@@ -51,24 +51,24 @@ defmodule MobaWeb.TavernLive do
     end
   end
 
-  def handle_event("unlock-avatar", %{"code" => code}, %{assigns: %{current_user: user}} = socket) do
+  def handle_event("unlock-avatar", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     with resource = Game.get_avatar_by_code!(code),
-         user = Accounts.create_unlock!(user, resource) do
-      {:noreply, assign(socket, current_user: user)}
+         player = create_unlock!(player, resource) do
+      {:noreply, assign(socket, current_player: player)}
     end
   end
 
-  def handle_event("unlock-skill", %{"code" => code}, %{assigns: %{current_user: user}} = socket) do
+  def handle_event("unlock-skill", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     with resource = Game.get_current_skill!(code, 1),
-         user = Accounts.create_unlock!(user, resource) do
-      {:noreply, assign(socket, current_user: user)}
+         player = create_unlock!(player, resource) do
+      {:noreply, assign(socket, current_player: player)}
     end
   end
 
-  def handle_event("unlock-skin", %{"code" => code}, %{assigns: %{current_user: user}} = socket) do
+  def handle_event("unlock-skin", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     with resource = Game.get_skin_by_code!(code),
-         user = Accounts.create_unlock!(user, resource) do
-      {:noreply, assign(socket, current_user: user)}
+         player = create_unlock!(player, resource) do
+      {:noreply, assign(socket, current_player: player)}
     end
   end
 
@@ -76,14 +76,20 @@ defmodule MobaWeb.TavernLive do
     MobaWeb.TavernView.render("index.html", assigns)
   end
 
-  defp index_assigns(params, %{assigns: %{current_player: %{user: user}}} = socket) do
+  defp create_unlock!(%{user: user} = player, resource) do
+    user = Accounts.create_unlock!(user, resource)
+    Map.put(player, :user, user)
+  end
+
+  defp index_assigns(params, %{assigns: %{current_player: current_player}} = socket) do
     with avatar_code = Map.get(params, "avatar"),
          active_tab = if(avatar_code, do: "skins", else: "avatars"),
          avatars = Game.list_unlockable_avatars(),
          all_avatars = Game.list_avatars() |> Enum.sort_by(& &1.level_requirement, :desc),
-         user = Accounts.get_user_with_unlocks!(user.id),
+         user = Accounts.get_user_with_unlocks!(current_player.user_id),
          skills = Game.list_unlockable_skills(),
          current_avatar = Enum.find(all_avatars, &(&1.code == avatar_code)) || List.first(all_avatars),
+         current_player = Map.put(current_player, :user, user),
          current_skins = Game.list_avatar_skins(current_avatar.code),
          current_skin = List.first(current_skins) do
       assign(socket,
@@ -93,9 +99,9 @@ defmodule MobaWeb.TavernLive do
         avatar_code: avatar_code,
         current_avatar: current_avatar,
         current_index: 0,
+        current_player: current_player,
         current_skins: current_skins,
         current_skin: current_skin,
-        current_user: user,
         sidebar_code: "tavern",
         skills: skills
       )

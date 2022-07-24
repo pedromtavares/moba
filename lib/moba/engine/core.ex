@@ -3,7 +3,7 @@ defmodule Moba.Engine.Core do
   Mid-level domain of all core battle mechanics.
   """
 
-  alias Moba.{Engine, Game, Repo}
+  alias Moba.{Engine, Game, Repo, Utils}
   alias Engine.Core.{Duel, Helper, League, Logger, Processor, Pve, Turns}
 
   @doc """
@@ -55,8 +55,8 @@ defmodule Moba.Engine.Core do
     turn &&
       %{
         turn
-        | skill: turn.skill && Moba.struct_from_map(turn.skill, as: %Game.Schema.Skill{}),
-          item: turn.item && Moba.struct_from_map(turn.item, as: %Game.Schema.Item{})
+        | skill: turn.skill && Utils.struct_from_map(turn.skill, as: %Game.Schema.Skill{}),
+          item: turn.item && Utils.struct_from_map(turn.item, as: %Game.Schema.Item{})
       }
   end
 

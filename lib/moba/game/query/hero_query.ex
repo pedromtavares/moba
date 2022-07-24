@@ -123,11 +123,6 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.player_id == ^player_id
   end
 
-  def with_user(query, user_id) do
-    from hero in query,
-      where: hero.user_id == ^user_id
-  end
-
   def with_league_tier(query, league_tier) do
     from hero in query,
       where: hero.league_tier == ^league_tier

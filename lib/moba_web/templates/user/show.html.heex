@@ -53,12 +53,12 @@
                         </div>
                         <%= unless length(@duels) == 0 do %>
                             <div class="pt-1">
-                                <%= if @current_player.user && @player.id != @current_player.id do %>
+                                <%= if @current_player.user && @player.user && @player.id != @current_player.id do %>
                                     <div class="score border-top">
                                         <div class="row no-gutters">
                                             <div class="col">
                                                 <h4 class="text-right">
-                                                    <%= username(@player) %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_player.duel_score["#{@player.id}"] || 0 %></span>
+                                                    <%= username(@current_player) %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_player.duel_score["#{@player.id}"] || 0 %></span>
                                                 </h4>
                                             </div>
                                             <div class="col-1 d-flex align-items-center justify-content-center">

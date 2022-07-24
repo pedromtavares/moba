@@ -3,6 +3,8 @@ defmodule Moba.Engine.Core.Helper do
   Core convenience functions and calculations for Battlers
   """
 
+  alias Moba.Engine
+
   @doc """
   Makes sure a Battler has MP (case the spell requires one) and that
   the specified resource is not on cooldown (if it has one)
@@ -64,7 +66,7 @@ defmodule Moba.Engine.Core.Helper do
     total_power(battler) + battler.turn_power_normal + battler.battle_power_normal
   end
 
-  def normal_damage?(battler), do: battler.damage_type == Moba.damage_types().normal
+  def normal_damage?(battler), do: battler.damage_type == Engine.damage_types().normal
 
   def magic_damage?(battler), do: not normal_damage?(battler)
 

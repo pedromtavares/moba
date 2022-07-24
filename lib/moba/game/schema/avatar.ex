@@ -42,7 +42,6 @@ defmodule Moba.Game.Schema.Avatar do
     field :mp_per_level, :integer
 
     belongs_to :ultimate, Game.Schema.Skill
-    # belongs_to :match, Game.Schema.Match
 
     timestamps()
   end

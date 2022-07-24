@@ -2,7 +2,7 @@ defmodule Moba.Engine.Core.Pve do
   @moduledoc """
   Encapsulates all logic for Training battles
   """
-  alias Moba.{Game, Engine}
+  alias Moba.{Game, Engine, Utils}
   alias Engine.Schema.Battle
 
   def create_battle!(%{attacker: %{pve_current_turns: turns}}) when turns < 1 do
@@ -51,7 +51,7 @@ defmodule Moba.Engine.Core.Pve do
   end
 
   defp generate_targets({battle, attacker}) do
-    Moba.run_async(fn -> Game.generate_targets!(attacker) end)
+    Utils.run_async(fn -> Game.generate_targets!(attacker) end)
 
     battle
   end

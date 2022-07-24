@@ -6,6 +6,7 @@ defmodule Moba.Engine do
   alias Moba.{Game, Engine}
   alias Engine.{Battles, Core}
 
+  def damage_types, do: %{normal: "normal", magic: "magic", pure: "pure"}
   def battle_types, do: %{pve: "pve", league: "league", duel: "duel"}
 
   # BATTLE MANAGEMENT

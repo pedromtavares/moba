@@ -92,7 +92,7 @@ defmodule Moba.Game.Heroes do
     bot = create!(attrs, player, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
 
     if level > 0 do
-      xp = Moba.xp_until_hero_level(level)
+      xp = xp_until_hero_level(level)
 
       bot
       |> add_experience!(xp)
@@ -144,7 +144,7 @@ defmodule Moba.Game.Heroes do
   Used for easy testing in development, unavailable in production
   """
   def level_cheat(hero) do
-    xp = Moba.xp_to_next_hero_level(hero.level + 1)
+    xp = xp_to_next_hero_level(hero.level + 1)
 
     updated =
       hero
@@ -253,6 +253,9 @@ defmodule Moba.Game.Heroes do
     end)
   end
 
+  def xp_to_next_hero_level(level) when level < 1, do: 0
+  def xp_to_next_hero_level(level), do: Moba.base_xp() + (level - 2) * Moba.xp_increment()
+
   # --------------------------------
 
   defp add_experience!(hero, nil), do: hero
@@ -307,7 +310,7 @@ defmodule Moba.Game.Heroes do
   defp check_if_leveled(%{data: data, changes: changes} = changeset) do
     level = changes[:level] || data.level
     xp = changes[:experience] || 0
-    diff = Moba.xp_to_next_hero_level(level + 1) - xp
+    diff = xp_to_next_hero_level(level + 1) - xp
 
     if diff <= 0 do
       changeset
@@ -330,6 +333,9 @@ defmodule Moba.Game.Heroes do
   end
 
   defp total_farm(hero), do: hero.total_gold_farm + hero.total_xp_farm
+
+  defp xp_until_hero_level(level) when level < 2, do: 0
+  defp xp_until_hero_level(level), do: xp_to_next_hero_level(level) + xp_until_hero_level(level - 1)
 
   defp zero_limit(total) when total < 0, do: 0
   defp zero_limit(total), do: total

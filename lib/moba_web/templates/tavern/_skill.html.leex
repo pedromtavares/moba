@@ -1,6 +1,6 @@
 <div class="col-12 col-md-6 col-lg-4 col-xl-3" id="skill-<%= @skill.id %>">
     <div class="card ribbon-box">
-        <%= if unlocked?(@skill, @user) do %>
+        <%= if unlocked?(@skill, @player) do %>
             <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
         <% end %>
         <div class="card-body text-center">
@@ -11,6 +11,6 @@
                 <small class="font-italic text-muted">(mouse over image for info)</small>
             </h3>
         </div>
-        <%= unless unlocked?(@skill, @user), do: render("_actions.html", resource: @skill, user: @user, action: "unlock-skill") %>
+        <%= unless unlocked?(@skill, @player), do: render("_actions.html", resource: @skill, player: @player, action: "unlock-skill") %>
     </div>
 </div>

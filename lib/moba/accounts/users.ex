@@ -30,7 +30,7 @@ defmodule Moba.Accounts.Users do
   end
 
   def set_online_now(user) do
-    UserQuery.by_user(User, user)
+    UserQuery.with_id(User, user.id)
     |> Repo.update_all(set: [last_online_at: DateTime.utc_now()])
   end
 end

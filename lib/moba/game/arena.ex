@@ -1,6 +1,6 @@
 defmodule Moba.Game.Arena do
   @moduledoc """
-  Module focused on cross-domain orchestration and logic related to PvP (Duels & Matchmaking)
+  Module focused on cross-resource orchestration and logic related to PvP (Duels & Matchmaking)
   """
   alias Moba.Game
   alias Game.{Duels, Players}

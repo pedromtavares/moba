@@ -4,6 +4,6 @@ defmodule Mix.Tasks.PvpBots do
   @shortdoc "Generates new PVP bots"
   def run(_) do
     Mix.Task.run("app.start")
-    Moba.regenerate_pvp_bots!()
+    Moba.Conductor.regenerate_pvp_bots!()
   end
 end

@@ -139,7 +139,7 @@ defmodule MobaWeb.TrainingView do
 
   defp with_display_stats(hero, heroes) do
     minimum = minimum_stats(heroes)
-    units = Moba.avatar_stat_units()
+    units = Game.avatar_stat_units()
 
     Map.merge(hero, %{
       display_defense:

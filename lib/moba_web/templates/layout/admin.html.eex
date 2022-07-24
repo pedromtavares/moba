@@ -53,11 +53,6 @@
                                             <br/>
                                             <span class="d-none d-md-inline">Users</span>
                                         </a>
-                                        <a href="/admin/quests" class="nav-link">
-                                            <i class="fa fa-trophy"></i>
-                                            <br/>
-                                            <span class="d-none d-md-inline">Quests</span>
-                                        </a>
                                         <a href="/admin/dashboard" class="nav-link">
                                             <i class="fab fa-phoenix-framework"></i>
                                             <br/>

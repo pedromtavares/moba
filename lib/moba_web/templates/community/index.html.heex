@@ -90,10 +90,10 @@
                     <%= render "_hero.html", hero: hero, socket: @socket %>
                 <% end %>
             </div>
-            <%= if @player_ranking do %>
+            <%= if @pvp_ranking do %>
                 <table class={"table table-dark mb-0 ranking border-left border-right border-bottom #{unless @active_tab == "users", do: "d-none"}"}>
                     <tbody id="hall-of-users">
-                        <%= for {player, index} <- Enum.with_index(@player_ranking, 1) do %>
+                        <%= for {player, index} <- Enum.with_index(@pvp_ranking, 1) do %>
                             <tr id={"player-#{player.id}"}>
                                 <td>
                                     <img src={"/images/pvp/#{player.pvp_tier}.png"} style="max-height: 90px"/>

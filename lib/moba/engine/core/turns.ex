@@ -1,5 +1,5 @@
 defmodule Moba.Engine.Core.Turns do
-  alias Moba.{Game, Engine, Repo}
+  alias Moba.{Game, Engine, Repo, Utils}
   alias Engine.Schema.{Battler, Turn}
   alias Engine.Core
 
@@ -128,7 +128,7 @@ defmodule Moba.Engine.Core.Turns do
   defp load_items(list), do: Enum.map(list, &load_item(&1))
 
   defp load_resource(nil, _), do: nil
-  defp load_resource(map, struct), do: Moba.struct_from_map(map, as: struct)
+  defp load_resource(map, struct), do: Utils.struct_from_map(map, as: struct)
 
   defp prepare_battlers(battle, last_turn) do
     if last_turn do

@@ -152,7 +152,7 @@ defmodule MobaWeb.BattleView do
     end
   end
 
-  def xp_to_next_level(hero), do: Moba.xp_to_next_hero_level(hero.level + 1)
+  defdelegate xp_to_next_level(hero), to: MobaWeb.CurrentHeroView
 
   def final_points(current_points, rewarded_points) when rewarded_points <= 0 do
     current_points
@@ -338,12 +338,12 @@ defmodule MobaWeb.BattleView do
 
   def turn_skill_description(turn) do
     turn.skill
-    |> Moba.struct_from_map(as: %Game.Schema.Skill{})
+    |> struct_from_map(as: %Game.Schema.Skill{})
     |> GH.skill_description()
   end
 
   def turn_item_description(turn) do
-    item = Moba.struct_from_map(turn.item, as: %Game.Schema.Item{})
+    item = struct_from_map(turn.item, as: %Game.Schema.Item{})
 
     %{item | name: "#{turn.attacker.name} activated #{item.name}"}
     |> GH.item_description()
@@ -393,7 +393,7 @@ defmodule MobaWeb.BattleView do
 
   def battler_skill_list(battler) do
     (battler.active_skills ++ battler.passive_skills)
-    |> Enum.map(fn skill -> Moba.struct_from_map(skill, as: %Game.Schema.Skill{}) end)
+    |> Enum.map(fn skill -> struct_from_map(skill, as: %Game.Schema.Skill{}) end)
     |> Enum.uniq_by(& &1.code)
     |> Enum.sort_by(fn skill -> skill.ultimate end)
     |> Enum.map(fn skill ->
@@ -407,7 +407,7 @@ defmodule MobaWeb.BattleView do
 
   def battler_item_list(battler) do
     (battler.active_items ++ battler.passive_items)
-    |> Enum.map(fn item -> Moba.struct_from_map(item, as: %Game.Schema.Item{}) end)
+    |> Enum.map(fn item -> struct_from_map(item, as: %Game.Schema.Item{}) end)
     |> Enum.uniq_by(& &1.code)
     |> Game.sort_items()
     |> Enum.map(fn item ->
@@ -461,12 +461,12 @@ defmodule MobaWeb.BattleView do
     skills =
       (turn.attacker.active_skills ++
          turn.attacker.passive_skills ++ turn.defender.active_skills ++ turn.defender.passive_skills)
-      |> Enum.map(fn skill -> Moba.struct_from_map(skill, as: %Game.Schema.Skill{}) end)
+      |> Enum.map(fn skill -> struct_from_map(skill, as: %Game.Schema.Skill{}) end)
 
     items =
       (turn.attacker.active_items ++
          turn.attacker.passive_items ++ turn.defender.active_items ++ turn.defender.passive_items)
-      |> Enum.map(fn item -> Moba.struct_from_map(item, as: %Game.Schema.Item{}) end)
+      |> Enum.map(fn item -> struct_from_map(item, as: %Game.Schema.Item{}) end)
 
     (skills ++ items)
     |> Enum.find(fn resource -> resource.code == code end)

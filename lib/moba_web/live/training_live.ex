@@ -58,7 +58,7 @@ defmodule MobaWeb.TrainingLive do
   def handle_event("restart", _, %{assigns: %{current_hero: hero, current_player: player}} = socket) do
     with _ <- Game.archive_hero!(hero),
          skills = Enum.map(hero.skills, &Game.get_skill_by_code!(&1.code, true, 1)) do
-      Moba.create_current_pve_hero!(%{name: hero.name}, player, hero.avatar, skills)
+      Game.create_current_pve_hero!(%{name: hero.name}, player, hero.avatar, skills)
 
       {:noreply, socket |> redirect(to: "/training")}
     end

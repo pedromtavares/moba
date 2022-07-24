@@ -12,7 +12,8 @@ defmodule Moba.Conductor do
   Runs the automated bot battles and touches a datetime field
   so Moba.Server knows when to run this again, currently every 10 mins.
   """
-  def season_tick!(season \\ Moba.current_season()) do
+  def season_tick! do
+    season = Moba.current_season()
     auto_matchmaking_bots(season)
     auto_matchmaking_users()
     Game.update_pvp_ranking!()
@@ -46,7 +47,8 @@ defmodule Moba.Conductor do
     Game.update_season!(Moba.current_season(), %{resource_uuid: resource_uuid})
   end
 
-  def regenerate_pve_bots!(level_range) do
+  def regenerate_pve_bots!(level_range \\ 0..35) do
+    IO.puts("Generating new PVE bots...")
     timestamp = Timex.now()
 
     AvatarQuery.base_canon()

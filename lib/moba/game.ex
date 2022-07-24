@@ -3,9 +3,7 @@ defmodule Moba.Game do
   Top-level domain of all gameplay logic, with cross-domain orchestration handled by Arena and Training
   """
 
-  alias Moba.Game
-
-  alias Game.{
+  alias Moba.Game.{
     Arena,
     Avatars,
     Builds,
@@ -23,6 +21,8 @@ defmodule Moba.Game do
   }
 
   # AVATARS
+
+  defdelegate avatar_stat_units, to: Avatars
 
   defdelegate get_avatar!(avatar_id), to: Avatars
 
@@ -78,6 +78,8 @@ defmodule Moba.Game do
 
   defdelegate create_bot!(avatar, level, difficulty, tier, player), to: Heroes
 
+  defdelegate create_current_pve_hero!(attrs, player, avatar, skills), to: Training
+
   defdelegate create_hero!(attrs, player, avatar, skills), to: Training
 
   defdelegate finish_pve!(hero), to: Training
@@ -132,7 +134,9 @@ defmodule Moba.Game do
 
   defdelegate update_hero_collection!(hero), to: Training
 
-  defdelegate update_pve_ranking!, to: Training
+  defdelegate update_pve_ranking!, to: Heroes
+
+  defdelegate xp_to_next_hero_level(level), to: Heroes
 
   # ITEMS
 
@@ -200,9 +204,9 @@ defmodule Moba.Game do
 
   defdelegate player_duel_updates!(player, duel_type, updates), to: Arena
 
-  defdelegate player_ranking(limit), to: Players
-
   defdelegate pvp_points_for(tier), to: Players
+
+  defdelegate pvp_ranking(limit), to: Players
 
   defdelegate pvp_tier_for(pvp_points), to: Players
 
@@ -224,9 +228,9 @@ defmodule Moba.Game do
 
   # QUESTS
 
-  defdelegate last_completed_quest(hero), to: Quests
-
   defdelegate get_quest(tier), to: Quests
+
+  defdelegate last_completed_quest(hero), to: Quests
 
   # SEASONS
 

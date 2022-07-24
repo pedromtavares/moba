@@ -10,7 +10,7 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
-alias Moba.{Repo, Game, Accounts}
+alias Moba.{Accounts, Conductor, Game, Repo}
 alias Game.Schema.{Item, Skill, Avatar}
 alias Accounts.Schema.User
 
@@ -102,7 +102,7 @@ defmodule SeedHelper do
   end
 end
 
-%User{is_admin: true, tutorial_step: 0, shard_count: 10000, level: 20}
+%User{is_admin: true, shard_count: 10000}
 |> User.changeset(%{
   email: "admin@browsermoba.com",
   username: "Admin",
@@ -1249,9 +1249,9 @@ Game.Query.SkillQuery.base_canon()
   end)
 end)
 
-Moba.regenerate_resources!()
-Moba.regenerate_pvp_bots!()
-Moba.server_tick!()
+Conductor.regenerate_resources!()
+Conductor.regenerate_pvp_bots!()
+Conductor.season_tick!()
 
 (Enum.to_list(0..10) ++ Enum.to_list(17..22))
-|> Moba.regenerate_pve_bots!()
+|> Conductor.regenerate_pve_bots!()

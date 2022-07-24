@@ -2,7 +2,7 @@
     <div class="row mt-2">
         <div class="col">
             <div class="card dark-bg mb-3 text-center p-2">
-                <h1 class="text-warning"><i class="fab fa-ethereum mr-2"></i><%= @current_user.shard_count %></h1>
+                <h1 class="text-warning"><i class="fab fa-ethereum mr-2"></i><%= @current_player.user.shard_count %></h1>
                 <p class="text-muted">
                     Unlock new avatars, skills and skins to play with by using your Shards. You can acquire Shards by finishing daily quests in the Base or by matchmaking in the Arena.
                 </p>
@@ -36,13 +36,13 @@
 
     <div class="row <%= unless @active_tab == "avatars", do: "d-none" %> mt-2">
         <%= for avatar <- @avatars do %>
-            <%= render "_avatar.html", avatar: avatar, avatars: @all_avatars, user: @current_user %>
+            <%= render "_avatar.html", avatar: avatar, avatars: @all_avatars, player: @current_player %>
         <% end %>
     </div>
 
     <div class="row <%= unless @active_tab == "skills", do: "d-none" %> mt-2">
         <%= for skill <- @skills do %>
-            <%= render "_skill.html", skill: skill, user: @current_user %>
+            <%= render "_skill.html", skill: skill, player: @current_player %>
         <% end %>
     </div>
 
@@ -68,17 +68,17 @@
                                     <% end %>
                                 </div>
                                 <div class="col-6">
-                                    <%=if unlocked?(@current_skin, @current_user) do %>
+                                    <%=if unlocked?(@current_skin, @current_player) do %>
                                         <a href="javascript:;" class="btn btn-outline-secondary no-action btn-rounded" data-toggle="tooltip" title="You already own this Skin and can select it when joining the Arena with this hero."><i class="fa fa-unlock mr-1"></i>Unlocked</a>
                                     <% else %>
-                                        <%= if can_unlock?(@current_skin, @current_user) do %>
+                                        <%= if can_unlock?(@current_skin, @current_player) do %>
                                             <a href="javascript:;" class="btn btn-outline-warning btn-lg" phx-click="unlock-skin" phx-value-code="<%= @current_skin.code %>" phx-hook="Loading" id="unlock-<%= @current_skin.code %>">
                                                 <span class="loading-text">
                                                     <i class="fab fa-ethereum mr-1"></i>Unlock for <%= price_to_unlock(@current_skin) %> Shards
                                                 </span>
                                             </a>
                                         <% else %>
-                                            <a href="javascript:;" class="btn btn-secondary no-action"><i class="fa fa-lock mr-1"></i><%=unlock_error_message(@current_skin, @current_user)%></a>
+                                            <a href="javascript:;" class="btn btn-secondary no-action"><i class="fa fa-lock mr-1"></i><%=unlock_error_message(@current_skin, @current_player)%></a>
                                         <% end %>
                                     <% end %>
                                 </div>

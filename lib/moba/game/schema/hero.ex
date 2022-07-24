@@ -1,10 +1,10 @@
 defmodule Moba.Game.Schema.Hero do
   @moduledoc """
-  The most important Schema. A Hero can be created every match, and uses its Avatar
-  for all of the base stats: Health, Energy, Attack, Power, Armor and Speed.
+  A Hero uses its Avatarfor all of the base stats: 
+  Health, Energy, Attack, Power, Armor and Speed.
 
-  A Hero starts at level 1 and levels up by gaining XP when beating
-  opponents while Training.
+  It starts at level 1 and levels up by gaining XP when battling
+  opponents or passively farming via Meditation/Mining in Training.
 
   When a hero levels up it gains stats based on its Avatar, and
   on an even level (2, 4, 6, etc) it gains a skill level which
@@ -13,7 +13,7 @@ defmodule Moba.Game.Schema.Hero do
 
   use Ecto.Schema
   import Ecto.Changeset
-  alias Moba.{Game, Accounts}
+  alias Moba.Game
   require Integer
 
   schema "heroes" do
@@ -76,9 +76,7 @@ defmodule Moba.Game.Schema.Hero do
 
     has_many :targets, Game.Schema.Target, foreign_key: :attacker_id
 
-    # belongs_to :match, Game.Schema.Match
     belongs_to :avatar, Game.Schema.Avatar
-    belongs_to :user, Accounts.Schema.User
     belongs_to :boss, Game.Schema.Hero
     belongs_to :skin, Game.Schema.Skin
     belongs_to :player, Game.Schema.Player

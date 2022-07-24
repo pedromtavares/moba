@@ -36,28 +36,6 @@
             <%= filter_boolean_input(:user, :is_admin, @conn.params) %>
           </div>
 
-          <div class="field">
-            <label>Is bot</label>
-            <%= filter_boolean_input(:user, :is_bot, @conn.params) %>
-          </div>
-
-          <div class="field">
-            <label>Is guest</label>
-            <%= filter_boolean_input(:user, :is_guest, @conn.params) %>
-          </div>
-
-          <div class="field">
-            <label>Level</label>
-            <%= number_filter_select(:user, :level, @conn.params) %>
-            <%= filter_number_input(:user, :level, @conn.params) %>
-          </div>
-
-          <div class="field">
-            <label>Experience</label>
-            <%= number_filter_select(:user, :experience, @conn.params) %>
-            <%= filter_number_input(:user, :experience, @conn.params) %>
-          </div>
-
         <button type="submit" class="torch-button">Search</button>
         <%= link "Clear Filters", to: Routes.user_path(@conn, :index) %>
       <% end %>
@@ -76,11 +54,7 @@
 
               <th><%= table_link(@conn, "Last Online", :last_online_at) %></th>
 
-              <th><%= table_link(@conn, "Level", :level) %></th>
-
-              <th><%= table_link(@conn, "Experience", :experience) %></th>
-
-              <th>Has Current Hero</th>
+              <th><%= table_link(@conn, "Shards", :shard_count) %></th>
 
             <th><span>Actions</span></th>
           </tr>
@@ -89,20 +63,13 @@
           <%= for user <- @users do %>
             <tr>
 
-                <td <%=if user.is_admin, do: "style=color:red"%>><%= if user.is_guest, do: "Guest", else: user.username %> <%=if user.is_bot, do: "(BOT)"%></td>
+                <td <%= if user.is_admin, do: "style='color:red'"%>><%= user.username%></td>
 
-                <td><%= if user.is_guest, do: "Guest", else: user.email %></td>
+                <td><%= user.email %></td>
 
                 <td><%= user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %></td>
 
-                <td><%= user.level %></td>
-
-                <td><%= user.experience %></td>
-                <td>
-                  <%= if hero = hero_for(user) do%>
-                    <img src="<%=GH.image_url(hero.avatar)%>" style="width: 30px;"/>
-                  <% end %>
-                </td>
+                <td><%= user.shard_count %></td>
 
                 <td class="torch-actions">
                   <span><%= link "Show", to: Routes.user_path(@conn, :show, user) %></span>

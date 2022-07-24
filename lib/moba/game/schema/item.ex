@@ -61,8 +61,6 @@ defmodule Moba.Game.Schema.Item do
     field :defender_buff, :boolean, virtual: true
     field :attacker_debuff, :boolean, virtual: true
 
-    # belongs_to :match, Moba.Game.Schema.Match
-
     timestamps()
   end
 

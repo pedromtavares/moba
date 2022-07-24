@@ -35,6 +35,19 @@ defmodule Moba.GameTest do
   end
 
   describe "heroes" do
+    test "#create_current_pve_hero!" do
+      player = create_player!()
+      avatar = base_avatar()
+      skills = base_skills()
+
+      hero = Game.create_current_pve_hero!(%{name: "Foo"}, player, avatar, skills)
+      hero = Game.get_hero!(hero.id)
+      player = Game.get_player!(player.id)
+
+      assert hero
+      assert player.current_pve_hero_id == hero.id
+    end
+    
     test "#create_hero!" do
       avatar = base_avatar()
       skills = base_skills()

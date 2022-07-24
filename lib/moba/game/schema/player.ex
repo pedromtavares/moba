@@ -1,6 +1,13 @@
 defmodule Moba.Game.Schema.Player do
   @moduledoc """
-  Represents the Player
+  Represents the Player, the link between a User and a Season. A player can be one of 3 options:
+  - A real user: has a user_id
+  - A guest: does not have a user_id
+  - A bot: has the bot_options map set
+
+  This is the main schema used throughout the app as it manages the heroes of a given player.
+  Heroes and all other progression tracked in this schema are tied to a Season record, so when
+  a new season starts, it will be a "fresh" start for everyone.
   """
   use Ecto.Schema
   import Ecto.Changeset

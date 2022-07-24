@@ -10,4 +10,6 @@ defmodule MobaWeb.Admin.SeasonView do
   end
 
   def gold_farm_percentage(hero), do: 100 - xp_farm_percentage(hero)
+
+  defdelegate username(player), to: MobaWeb.UserView
 end

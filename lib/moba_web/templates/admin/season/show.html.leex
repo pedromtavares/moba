@@ -59,33 +59,33 @@
                     </td>
                     <td>
                        <img src="/images/pvp/<%= duel.player.pvp_tier %>.png" style="max-height:  40px"/><br/>
-                       <%= duel.player.user.username %>
+                       <%= username(duel.player) %>
                     </td>
                     <td style="width: 1%">
                         vs
                     </td>
                     <td>
                         <img src="/images/pvp/<%= duel.opponent_player.pvp_tier %>.png" style="max-height:  40px"/><br/>
-                        <%= duel.opponent_player.user.username %>
+                        <%= username(duel.opponent_player)%>
                     </td>
                     <td>
                         <%= if duel.phase == "finished" do %>
                             <%= if duel.winner_player do %>
-                                <span class="text-success">Winner: <%= duel.winner_player.user.username %></span>
+                                <span class="text-success">Winner: <%= username(duel.winner_player) %></span>
                             <% else %>
                                 <span class="text-muted">Tie</span>
                             <% end %>
                             <br/>
                             <%= if duel.rewards.attacker_pvp_points > 0 do %>
-                                <span class="badge badge-pill badge-light-success"><%= duel.player.user.username %>: +<%= duel.rewards.attacker_pvp_points %></span>
+                                <span class="badge badge-pill badge-light-success"><%= username(duel.player) %>: +<%= duel.rewards.attacker_pvp_points %></span>
                             <% else %>
-                                <span class="badge badge-pill badge-light-dark"><%= duel.player.user.username %>: <%= duel.rewards.attacker_pvp_points %></span>
+                                <span class="badge badge-pill badge-light-dark"><%= username(duel.player)%>: <%= duel.rewards.attacker_pvp_points %></span>
                             <% end %>
                             <%= if duel.rewards.defender_pvp_points != 0 do %>
                                 <%= if duel.rewards.defender_pvp_points > 0 do %>
-                                    <span class="badge badge-pill badge-light-success"><%=duel.opponent_player.user.username%>: +<%=duel.rewards.defender_pvp_points %></span>
+                                    <span class="badge badge-pill badge-light-success"><%= username(duel.opponent_player) %>: +<%=duel.rewards.defender_pvp_points %></span>
                                 <% else %>
-                                    <span class="badge badge-pill badge-light-dark"><%=duel.opponent_player.user.username%>: <%= duel.rewards.defender_pvp_points %></span>
+                                    <span class="badge badge-pill badge-light-dark"><%= username(duel.opponent_player) %>: <%= duel.rewards.defender_pvp_points %></span>
                                 <% end %>
                             <% end %>                                
                         <% else %>

@@ -9,7 +9,7 @@ defmodule MobaWeb.HeroLive do
 
   def handle_params(%{"id" => id}, _uri, socket) do
     with hero = Game.get_hero!(id),
-         ranking = Game.pve_ranking(200) do
+         ranking = Moba.pve_ranking() do
       if connected?(socket) do
         Game.subscribe_to_hero(id)
         MobaWeb.subscribe("hero-ranking")
@@ -42,7 +42,7 @@ defmodule MobaWeb.HeroLive do
 
   def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
     with hero = Game.get_hero!(id),
-         ranking = Game.pve_ranking(200) do
+         ranking = Moba.pve_ranking() do
       {:noreply, assign(socket, ranking: ranking, hero: hero)}
     end
   end

@@ -88,7 +88,7 @@ defmodule MobaWeb.CreateLive do
       ) do
     with skills = Enum.map(selected_skills, & &1.id) |> Game.list_chosen_skills(),
          hero_name = hero_name(player, avatar, name, socket) do
-      Moba.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
+      Game.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
 
       {:noreply, socket |> redirect(to: "/training")}
     end

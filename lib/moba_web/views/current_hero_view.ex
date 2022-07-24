@@ -19,7 +19,7 @@ defmodule MobaWeb.CurrentHeroView do
 
   def xp_percentage(hero), do: hero.experience * 100 / xp_to_next_level(hero)
 
-  def xp_to_next_level(hero), do: Moba.xp_to_next_hero_level(hero.level + 1)
+  def xp_to_next_level(hero), do: Game.xp_to_next_hero_level(hero.level + 1)
 
   def next_skill_description(skill) do
     next = Game.get_current_skill!(skill.code, skill.level + 1)

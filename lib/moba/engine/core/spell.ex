@@ -605,7 +605,7 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Item{code: code}} = turn, _options) when code in ["dagon", "dagon5"] do
     turn
     |> Effect.base_amount_damage()
-    |> Effect.damage_type(Moba.damage_types().magic)
+    |> Effect.damage_type(Engine.damage_types().magic)
   end
 
   defp effects_for(%{resource: %Item{code: "heavens_halberd"}} = turn, _options) do

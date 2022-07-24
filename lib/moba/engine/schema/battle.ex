@@ -8,7 +8,6 @@ defmodule Moba.Engine.Schema.Battle do
   alias Game.Schema.{Hero, Duel}
 
   schema "battles" do
-    # belongs_to :match, Match
     belongs_to :attacker, Hero
     belongs_to :defender, Hero
     belongs_to :winner, Hero

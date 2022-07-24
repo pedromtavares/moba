@@ -12,7 +12,7 @@ defmodule Moba.Game.Skills do
 
   @doc """
   A Basic Attack is a 'virtual' Skill that all Heroes can use in a battle
-  at any time. It requires no MP and has no cooldown, but only deals your ATK
+  at any time. It requires no MP and has no cooldown, but only deals your Aattack
   as damage.
   """
   def basic_attack do
@@ -20,7 +20,7 @@ defmodule Moba.Game.Skills do
       name: "Basic Attack",
       code: "basic_attack",
       atk_multiplier: 1,
-      description: "Hit with a Basic Attack for 100% ATK",
+      description: "Basic hit that deals 100% of your Attack",
       damage_type: "normal",
       mp_cost: 0,
       cooldown: 0

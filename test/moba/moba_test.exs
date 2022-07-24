@@ -33,17 +33,34 @@ defmodule Moba.MobaTest do
   end
 
   describe "cross-domain functions" do
-    test "#create_current_pve_hero!" do
-      player = create_player!()
-      avatar = base_avatar()
-      skills = base_skills()
+    test "#shard_buyback! with valid hero" do
+      user = create_user(%{shard_count: 100})
+      player = create_player!(%{}, user)
+      hero = create_base_hero(%{league_tier: 2, pve_tier: 4, pve_state: "dead"}, player) |> Moba.shard_buyback!()
+      updated_user = Accounts.get_user!(user.id)
 
-      hero = Moba.create_current_pve_hero!(%{name: "Foo"}, player, avatar, skills)
-      hero = Game.get_hero!(hero.id)
-      player = Game.get_player!(player.id)
+      assert hero.pve_state == "alive"
+      assert updated_user.shard_count == 95
+    end
 
-      assert hero
-      assert player.current_pve_hero_id == hero.id
+    test "#shard_buyback! with invalid hero" do
+      user = create_user(%{shard_count: 100})
+      player = create_player!(%{}, user)
+      hero = create_base_hero(%{league_tier: 4, pve_tier: 2, pve_state: "dead"}, player) |> Moba.shard_buyback!()
+      updated_user = Accounts.get_user!(user.id)
+
+      assert hero.pve_state == "dead"
+      assert updated_user.shard_count == 100
+    end
+
+    test "#reward_shards!" do
+      player = create_player!() |> Repo.preload(:user)
+
+      Moba.reward_shards!(player, 200)
+
+      user = Accounts.get_user!(player.user_id)
+
+      assert user.shard_count == 200
     end
   end
 end

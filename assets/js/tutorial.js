@@ -161,7 +161,7 @@ const Tutorial = {
       case 9:
         tour.addStep({
           id: 'ninth-tutorial-first-step',
-          text: "<p class='text-center'>Great! You now have your first <span class='text-primary'>Rare item</span>. If you got the Boots, remember to use them when inside a battle.</p><p class='text-center'>Also, make sure to come back here and buy a <span class='text-dark'>Normal item</span> when you have <span class='text-warning'>400 gold</span>  , you can always transmute it into a stronger item later!</p>",
+          text: "<p class='text-center'>Great! You now have your first <span class='text-primary'>Rare item</span>. If you got the Boots, remember to use them during a battle.</p><p class='text-center'>Also, make sure to come back here and buy a <span class='text-dark'>Normal item</span> when you have <span class='text-warning'>400 gold</span>  , you can always transmute it into a stronger item later!</p>",
           attachTo: {
             element: '.inventory-item img',
             on: 'left'

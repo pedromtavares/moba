@@ -45,7 +45,7 @@ defmodule MobaWeb.UserLive do
   defp featured_hero(player), do: player.current_pve_hero
 
   defp ranking_for(%{bot_options: options}) when not is_nil(options), do: Game.bot_ranking()
-  defp ranking_for(_), do: Game.player_ranking(50)
+  defp ranking_for(_), do: Moba.pvp_ranking()
 
   defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do
     with user = Accounts.get_user!(user_id),
