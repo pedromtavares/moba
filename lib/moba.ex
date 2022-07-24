@@ -243,10 +243,7 @@ defmodule Moba do
 
   defp cached_ranking(key, fetch_fn) do
     case Cachex.get(:game_cache, key) do
-      {:ok, nil} ->
-        ranking = fetch_fn.()
-        Cachex.put(:game_cache, key, ranking)
-        ranking
+      {:ok, nil} -> fetch_fn.()
       {:ok, ranking} -> ranking
     end
   end

@@ -117,13 +117,13 @@ defmodule Moba.Game.Duels do
   def auto_next_phase!(%{phase: phase, player_id: player_id} = duel)
       when phase in ["player_first_pick", "player_second_pick"] do
     hero = available_random_hero(player_id, duel.player_first_pick_id)
-    Game.next_duel_phase!(get_duel!(duel.id), hero)
+    if hero, do: Game.next_duel_phase!(get_duel!(duel.id), hero)
   end
 
   def auto_next_phase!(%{phase: phase, opponent_player_id: opponent_id} = duel)
       when phase in ["opponent_first_pick", "opponent_second_pick"] do
     hero = available_random_hero(opponent_id, duel.opponent_first_pick_id)
-    Game.next_duel_phase!(get_duel!(duel.id), hero)
+    if hero, do: Game.next_duel_phase!(get_duel!(duel.id), hero)
   end
 
   def auto_next_phase!(duel), do: duel

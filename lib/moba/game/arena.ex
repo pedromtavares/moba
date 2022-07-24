@@ -13,7 +13,7 @@ defmodule Moba.Game.Arena do
     updated
   end
 
-  def bot_matchmaking!(player), do: create_matchmaking!(player, Players.bot_opponent(player), false)
+  def bot_matchmaking!(player), do: create_matchmaking!(player, Players.bot_opponent(player), true)
 
   def create_pvp_duel!(player, opponent) do
     duel = Duels.create!(player, opponent, "pvp", false)
