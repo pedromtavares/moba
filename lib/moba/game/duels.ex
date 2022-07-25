@@ -149,9 +149,6 @@ defmodule Moba.Game.Duels do
 
   defp maybe_auto_next_phase(%{auto: true} = duel), do: auto_next_phase!(duel)
 
-  defp maybe_auto_next_phase(%{player: %{bot_options: options}} = duel) when not is_nil(options),
-    do: auto_next_phase!(duel)
-
   defp maybe_auto_next_phase(%{phase: phase, type: type} = duel)
        when phase in ["opponent_first_pick", "opponent_second_pick"] and type != "pvp" do
     auto_next_phase!(duel)

@@ -88,7 +88,8 @@ defmodule Moba.Cleaner do
         join: player in assoc(h, :player),
         where: is_nil(player.user_id),
         where: player.inserted_at < ^last_week,
-        where: is_nil(h.archived_at)
+        where: is_nil(h.archived_at),
+        where: is_nil(h.bot_difficulty)
 
     Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
 
