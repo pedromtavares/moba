@@ -113,7 +113,7 @@ defmodule Moba.Game.Quests do
     quest_codes = Map.get(progression, quest.field)
     progression_map = Map.from_struct(progression)
 
-    if length(quest_codes) == quest.goal do
+    if length(quest_codes) >= quest.goal do
       history = Map.put(history, next_tier, Timex.now() |> Timex.shift(seconds: +1))
       progression = Map.put(progression_map, :history, history)
       status = if next_tier == 1 && user_id, do: "available", else: current_status
