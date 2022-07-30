@@ -1,5 +1,5 @@
 defmodule Moba.Utils do
-	def struct_from_map(a_map, as: a_struct) do
+  def struct_from_map(a_map, as: a_struct) do
     # Find the keys within the map
     keys =
       Map.keys(a_struct)

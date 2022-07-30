@@ -22,12 +22,12 @@
                                 <%= live_redirect to: Routes.player_path(@conn, :show, @current_player.id), class: "nav-link" do %>
                                     <i class="fa fa-helmet-battle"></i>
                                 <% end %>
-                            <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLive), class: "nav-link" do %>
-                                <i class="fa fa-globe"></i>
-                            <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLive), class: "nav-link" do %>
-                                <i class="fa fa-dungeon"></i>
+                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLive), class: "nav-link" do %>
+                                    <i class="fa fa-globe"></i>
+                                <% end %>
+                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLive), class: "nav-link" do %>
+                                    <i class="fa fa-dungeon"></i>
+                                <% end %>
                             <% end %>
                         </div>
                     </div>

@@ -96,6 +96,8 @@ defmodule Moba.Admin.Seasons do
     |> PlayerQuery.recently_created()
     |> Repo.all()
     |> Repo.preload(current_pve_hero: [:avatar, :items, skills: SkillQuery.ordered()])
+    |> Enum.filter(& &1.current_pve_hero)
+    |> Enum.sort_by(& &1.current_pve_hero.league_tier, :desc)
   end
 
   defp skill_winrates(heroes) do

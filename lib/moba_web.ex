@@ -111,7 +111,7 @@ defmodule MobaWeb do
       alias MobaWeb.Router.Helpers, as: Routes
       alias MobaWeb.GameHelpers, as: GH
       alias Moba.{Game, Accounts, Engine}
-      
+
       import Moba.Utils
     end
   end

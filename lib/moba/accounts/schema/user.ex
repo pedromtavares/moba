@@ -32,7 +32,7 @@ defmodule Moba.Accounts.Schema.User do
     |> cast(attrs, [
       :username,
       :password,
-      :email,
+      :email
     ])
     |> pow_user_id_field_changeset(attrs)
     |> pow_password_changeset(attrs)

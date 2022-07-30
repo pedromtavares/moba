@@ -13,17 +13,21 @@ defmodule Moba do
     %{resource_uuid: uuid} = Game.current_season()
 
     case Cachex.get(:game_cache, "items-#{uuid}") do
-      {:ok, nil} -> 
+      {:ok, nil} ->
         items = Game.shop_list()
         Cachex.put(:game_cache, "items-#{uuid}", items)
         items
-      {:ok, items} -> items
+
+      {:ok, items} ->
+        items
     end
   end
 
   def can_shard_buyback?(%{player: %{user: %{shard_count: count}}} = hero) do
     Game.can_shard_buyback?(hero) && count >= shard_buyback_price(count) && count
   end
+
+  def can_shard_buyback?(_), do: false
 
   defdelegate current_season, to: Game
 

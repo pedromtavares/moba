@@ -27,25 +27,30 @@ defmodule Moba.Repo.Migrations.PostSeasonsCleanup do
       remove :preferences
       remove :current_pve_hero_id
       remove :current_pvp_hero_id
-      remove :title_quest_id      
+      remove :title_quest_id
     end
 
     alter table(:battles) do
       remove :match_id
     end
+
     alter table(:skills) do
       remove :match_id
     end
+
     alter table(:items) do
       remove :match_id
     end
+
     alter table(:avatars) do
       remove :match_id
     end
+
     alter table(:heroes) do
       remove :match_id
       remove :user_id
     end
+
     alter table(:duels) do
       remove :user_id
       remove :opponent_id

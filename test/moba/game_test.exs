@@ -47,7 +47,7 @@ defmodule Moba.GameTest do
       assert hero
       assert player.current_pve_hero_id == hero.id
     end
-    
+
     test "#create_hero!" do
       avatar = base_avatar()
       skills = base_skills()
