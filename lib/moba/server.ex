@@ -15,7 +15,7 @@ defmodule Moba.Server do
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   def init(state) do
-    schedule_check()
+    server_check(state)
     {:ok, state}
   end
 
@@ -28,7 +28,7 @@ defmodule Moba.Server do
   defp schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
 
   defp server_check(state) do
-    schedule_check()
+    unless dev?(), do: schedule_check()
 
     season = Moba.current_season()
 
@@ -42,4 +42,6 @@ defmodule Moba.Server do
 
   defp time_diff_in_seconds(nil), do: 0
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
+
+  defp dev?, do: Application.get_env(:moba, :env) == :dev
 end
