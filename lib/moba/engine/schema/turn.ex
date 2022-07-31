@@ -19,8 +19,8 @@ defmodule Moba.Engine.Schema.Turn do
     field :resource, :map, virtual: true
     field :final_effects, {:array, :map}, virtual: true, default: []
 
-    field :skill, :map#, virtual: true
-    field :item, :map#, virtual: true
+    field :skill, :map, virtual: true
+    field :item, :map, virtual: true
 
     embeds_one :attacker, Engine.Schema.Battler
     embeds_one :defender, Engine.Schema.Battler

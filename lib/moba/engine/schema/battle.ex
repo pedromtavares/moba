@@ -17,7 +17,6 @@ defmodule Moba.Engine.Schema.Battle do
     field :type, :string
     field :difficulty, :string
     field :finished, :boolean
-    field :unread_id, :integer
 
     embeds_one :rewards, Engine.Schema.Rewards, on_replace: :update
     embeds_one :attacker_snapshot, Engine.Schema.HeroSnapshot, on_replace: :update
@@ -33,7 +32,7 @@ defmodule Moba.Engine.Schema.Battle do
     initiator_id = initiator && initiator.id
 
     battle
-    |> cast(attrs, [:difficulty, :finished, :unread_id, :duel_id])
+    |> cast(attrs, [:difficulty, :finished, :duel_id])
     |> cast_embed(:rewards)
     |> cast_embed(:attacker_snapshot)
     |> cast_embed(:defender_snapshot)
