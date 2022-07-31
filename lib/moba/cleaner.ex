@@ -129,10 +129,7 @@ defmodule Moba.Cleaner do
         acc ++ Enum.map(duels, & &1.id)
       end)
 
-    query =
-      from d in Duel,
-        where: d.type == "normal_matchmaking" or d.type == "elite_matchmaking",
-        where: d.id not in ^ids
+    query = from d in Duel, where: d.id not in ^ids
 
     Repo.all(query) |> delete_records()
   end
