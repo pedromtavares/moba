@@ -68,10 +68,14 @@ defmodule Moba.Engine.Schema.Battler do
 
     field :spell_count, :integer, default: 0
 
-    field :double_skill, :map
-    field :delayed_skill, :map
-    field :permanent_skill, :map
-    field :last_skill, :map
+    field :double_skill, :map, virtual: true
+    field :double_skill_code, :string
+    field :delayed_skill, :map, virtual: true
+    field :delayed_skill_code, :string
+    field :permanent_skill, :map, virtual: true
+    field :permanent_skill_code, :string
+    field :last_skill, :map, virtual: true
+    field :last_skill_code, :string
 
     field :buffs, {:array, :map}, default: []
     field :debuffs, {:array, :map}, default: []
@@ -93,12 +97,12 @@ defmodule Moba.Engine.Schema.Battler do
     field :extra, :boolean, default: false
     field :bonus, :string
 
-    field :active_skills, {:array, :map}, default: []
-    field :passive_skills, {:array, :map}, default: []
-    field :active_items, {:array, :map}, default: []
-    field :passive_items, {:array, :map}, default: []
-    field :skill_order, {:array, :map}, default: []
-    field :item_order, {:array, :map}, default: []
+    field :active_skills, {:array, :map}, default: [], virtual: true
+    field :passive_skills, {:array, :map}, default: [], virtual: true
+    field :active_items, {:array, :map}, default: [], virtual: true
+    field :passive_items, {:array, :map}, default: [], virtual: true
+    field :skill_order, {:array, :map}, default: [], virtual: true
+    field :item_order, {:array, :map}, default: [], virtual: true
 
     field :effects, {:array, :map}, default: []
     field :cooldowns, :map, default: %{}

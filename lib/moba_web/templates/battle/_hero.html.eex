@@ -30,11 +30,11 @@
         <div class="row">
             <div class="col-12 mt-1">
                 <div class="skills-container d-flex justify-content-between <%=if length(@hero.items) == 0, do: "float-none margin-auto" %>">
-                    <%=@last_hero && battler_skill_list(@last_hero) || GH.hero_skill_list(@hero)%>
+                    <%= GH.hero_skill_list(@hero)%>
                 </div>
                 <%= if length(@hero.items) > 0 do %>
                     <div class="items-container row no-gutters">
-                        <%=@last_hero && battler_item_list(@last_hero) || GH.hero_item_list(@hero)%>
+                        <%= GH.hero_item_list(@hero) %>
                     </div>
                 <% end %>
 

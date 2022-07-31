@@ -4,14 +4,6 @@ defmodule MobaWeb.UserView do
 
   defdelegate avatar_class(hero), to: DashboardView
 
-  def avatar_title(hero) do
-    if hero["ranking"] do
-      "##{hero["ranking"]}"
-    else
-      "Unranked"
-    end
-  end
-
   def in_ranking?(ranking, %{id: id}) do
     ranking
     |> Enum.map(& &1.id)

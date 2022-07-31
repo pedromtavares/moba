@@ -30,6 +30,8 @@ defmodule Moba.Game do
 
   defdelegate create_avatar!(avatar, attrs), to: Avatars
 
+  defdelegate list_all_current_avatars, to: Avatars
+
   defdelegate list_avatars, to: Avatars
 
   defdelegate list_creation_avatars(codes \\ []), to: Avatars
@@ -253,6 +255,8 @@ defmodule Moba.Game do
   defdelegate get_skill_by_code!(code, current, level \\ 1), to: Skills
 
   defdelegate level_up_skill!(hero, skill), to: Skills
+
+  defdelegate list_all_current_skills, to: Skills
 
   defdelegate list_chosen_skills(skill_ids), to: Skills
 

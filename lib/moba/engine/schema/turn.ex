@@ -12,13 +12,15 @@ defmodule Moba.Engine.Schema.Turn do
     belongs_to :battle, Engine.Schema.Battle
 
     field :number, :integer
+    field :skill_code, :string
+    field :item_code, :string
 
     field :orders, :map, virtual: true
     field :resource, :map, virtual: true
     field :final_effects, {:array, :map}, virtual: true, default: []
 
-    field :skill, :map
-    field :item, :map
+    field :skill, :map#, virtual: true
+    field :item, :map#, virtual: true
 
     embeds_one :attacker, Engine.Schema.Battler
     embeds_one :defender, Engine.Schema.Battler

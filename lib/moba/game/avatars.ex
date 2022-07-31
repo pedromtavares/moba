@@ -59,6 +59,8 @@ defmodule Moba.Game.Avatars do
   def get_avatar!(id), do: Repo.get!(Avatar, id) |> Repo.preload(:ultimate) |> with_extra_stats()
   def get_avatar_by_code!(code), do: unlocked_list([code]) |> List.first()
 
+  def list_all_current_avatars, do: AvatarQuery.all_current() |> Repo.all()
+
   def list_avatars, do: AvatarQuery.base_canon() |> Repo.all() |> with_extra_stats()
 
   def list_creation_avatars(codes) do

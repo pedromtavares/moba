@@ -31,6 +31,9 @@ defmodule Moba do
 
   defdelegate current_season, to: Game
 
+  def load_resource(nil), do: nil
+  def load_resource(code), do: Enum.find(cached_resources(), & &1.code == code)
+
   def player_for(%{id: user_id}) do
     with existing <- Game.get_player_from_user!(user_id) do
       existing
@@ -92,6 +95,20 @@ defmodule Moba do
     case Cachex.get(:game_cache, key) do
       {:ok, nil} -> fetch_fn.()
       {:ok, ranking} -> ranking
+    end
+  end
+
+  defp cached_resources do
+    %{resource_uuid: uuid} = Game.current_season()
+
+    case Cachex.get(:game_cache, "resources-#{uuid}") do
+      {:ok, nil} ->
+        resources = Game.shop_list() ++ Game.list_all_current_avatars() ++ Game.list_all_current_skills()
+        Cachex.put(:game_cache, "resources-#{uuid}", resources)
+        resources
+
+      {:ok, resources} ->
+        resources
     end
   end
 

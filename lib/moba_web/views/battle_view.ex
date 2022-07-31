@@ -349,8 +349,8 @@ defmodule MobaWeb.BattleView do
     |> GH.item_description()
   end
 
-  def effect_tooltip(turn, code) do
-    resource = get_resource(turn, code) || %{name: humanize(code), description: ""}
+  def effect_tooltip(code) do
+    resource = get_resource(code)
 
     "
     <h3>#{resource.name}</h3>
@@ -359,10 +359,10 @@ defmodule MobaWeb.BattleView do
     "
   end
 
-  def effect_image(turn, code) do
-    resource = get_resource(turn, code) || %{code: code}
-
-    GH.image_url(resource)
+  def effect_image(code) do
+    code
+    |> get_resource()
+    |> GH.image_url()
   end
 
   def hero_mp_costs(hero) do
@@ -390,37 +390,6 @@ defmodule MobaWeb.BattleView do
   def link_for(%{id: id, bot_difficulty: diff}, _) when is_nil(diff), do: "/hero/#{id}"
   def link_for(_, %{type: "pvp"}), do: "/arena"
   def link_for(_, _), do: "/training"
-
-  def battler_skill_list(battler) do
-    (battler.active_skills ++ battler.passive_skills)
-    |> Enum.map(fn skill -> struct_from_map(skill, as: %Game.Schema.Skill{}) end)
-    |> Enum.uniq_by(& &1.code)
-    |> Enum.sort_by(fn skill -> skill.ultimate end)
-    |> Enum.map(fn skill ->
-      img_tag(GH.image_url(skill),
-        data: [toggle: "tooltip"],
-        title: GH.skill_description(skill),
-        class: "skill-img img-border-sm #{if skill.passive, do: "passive"} tooltip-mobile"
-      )
-    end)
-  end
-
-  def battler_item_list(battler) do
-    (battler.active_items ++ battler.passive_items)
-    |> Enum.map(fn item -> struct_from_map(item, as: %Game.Schema.Item{}) end)
-    |> Enum.uniq_by(& &1.code)
-    |> Game.sort_items()
-    |> Enum.map(fn item ->
-      image =
-        img_tag(GH.image_url(item),
-          data: [toggle: "tooltip"],
-          title: GH.item_description(item),
-          class: "item-img img-border-xs tooltip-mobile"
-        )
-
-      content_tag(:div, image, class: "item-container col-4")
-    end)
-  end
 
   def total_hp_for(hero, nil), do: hero.total_hp + hero.item_hp
   def total_hp_for(_, last_hero), do: last_hero.total_hp
@@ -457,18 +426,5 @@ defmodule MobaWeb.BattleView do
     end
   end
 
-  defp get_resource(turn, code) do
-    skills =
-      (turn.attacker.active_skills ++
-         turn.attacker.passive_skills ++ turn.defender.active_skills ++ turn.defender.passive_skills)
-      |> Enum.map(fn skill -> struct_from_map(skill, as: %Game.Schema.Skill{}) end)
-
-    items =
-      (turn.attacker.active_items ++
-         turn.attacker.passive_items ++ turn.defender.active_items ++ turn.defender.passive_items)
-      |> Enum.map(fn item -> struct_from_map(item, as: %Game.Schema.Item{}) end)
-
-    (skills ++ items)
-    |> Enum.find(fn resource -> resource.code == code end)
-  end
+  defp get_resource(code), do: Moba.load_resource(code) || Moba.basic_attack()
 end

@@ -16,7 +16,7 @@ MOBA is an opportunity to get your feet wet with Phoenix LiveView (or even Elixi
  * PostgreSQL 12
  * Elixir 1.13.3
  * Erlang 23.3
- * node.js 14.16.1
+ * node.js 17.0.1
 
 ### Setup
   * Install dependencies with `mix deps.get`

@@ -2,7 +2,7 @@
     <div class="col">
         <div class="notification mt-0 mb-2 darker">
             <div>
-              <img class="img-border-xs" src="<%= effect_image(@turn, @resource) %>" data-toggle="tooltip" title="<%= effect_tooltip(@turn, @resource) %>"/>
+              <img class="img-border-xs" src="<%= effect_image(@resource) %>" data-toggle="tooltip" title="<%= effect_tooltip(@resource) %>"/>
               <%= GH.formatted_effect(@effect) %>
             </div>
         </div>

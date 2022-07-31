@@ -3,7 +3,7 @@ defmodule Moba.Engine.Core do
   Mid-level domain of all core battle mechanics.
   """
 
-  alias Moba.{Engine, Game, Repo, Utils}
+  alias Moba.{Engine, Game, Repo}
   alias Engine.Core.{Duel, Helper, League, Logger, Processor, Pve, Turns}
 
   @doc """
@@ -55,8 +55,8 @@ defmodule Moba.Engine.Core do
     turn &&
       %{
         turn
-        | skill: turn.skill && Utils.struct_from_map(turn.skill, as: %Game.Schema.Skill{}),
-          item: turn.item && Utils.struct_from_map(turn.item, as: %Game.Schema.Item{})
+        | skill: Moba.load_resource(turn.skill_code),
+          item: Moba.load_resource(turn.item_code)
       }
   end
 
@@ -83,6 +83,7 @@ defmodule Moba.Engine.Core do
   defp create_turn!(battle, orders) do
     build_turn(battle, orders)
     |> Processor.process_turn()
+    |> Turns.serialize()
     |> Repo.insert!()
     |> battle_finished?()
   end

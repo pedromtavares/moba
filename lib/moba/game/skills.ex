@@ -97,6 +97,11 @@ defmodule Moba.Game.Skills do
     end
   end
 
+  def list_all_current_skills do
+    current = SkillQuery.base_current() |> Repo.all()
+    current ++ [basic_attack()] ++ boss!()
+  end
+
   def list_chosen_skills(ids) do
     SkillQuery.base_current()
     |> SkillQuery.normals()

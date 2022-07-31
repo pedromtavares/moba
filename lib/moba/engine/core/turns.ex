@@ -1,5 +1,5 @@
 defmodule Moba.Engine.Core.Turns do
-  alias Moba.{Game, Engine, Repo, Utils}
+  alias Moba.{Engine, Repo}
   alias Engine.Schema.{Battler, Turn}
   alias Engine.Core
 
@@ -17,6 +17,16 @@ defmodule Moba.Engine.Core.Turns do
     }
   end
 
+  def serialize(%{skill: skill, item: item, attacker: attacker, defender: defender} = turn) do
+    %{
+      turn | 
+        skill_code: skill && skill.code, 
+        item_code: item && item.code,
+        attacker: serialize_battler(attacker),
+        defender: serialize_battler(defender)
+    }
+  end
+
   # Heroes in initial pve_tiers are constantly buffed for league battles
   defp buffed_total(%{pve_tier: pve_tier, league_tier: league_tier, bot_difficulty: diff}, %{type: "league"}, total)
        when is_nil(diff),
@@ -31,32 +41,36 @@ defmodule Moba.Engine.Core.Turns do
   end
 
   # flushes necessary stats for an attacker on a new turn (was a defender last turn)
-  defp flush_attacker(attacker) do
+  defp flush_attacker(battle, %{defender: battler}) do
+    hero = hero_from_battler(battle, battler)
+
     %{
-      attacker
+      battler
       | invulnerable: false,
         immortal: false,
         physically_invulnerable: false,
         inneffectable: false,
-        turn_armor: attacker.turn_armor + attacker.next_armor,
-        turn_power: attacker.turn_power + attacker.next_power,
-        turn_power_normal: attacker.turn_power_normal + attacker.next_power_normal,
-        turn_power_magic: attacker.turn_power_magic + attacker.next_power_magic,
+        turn_armor: battler.turn_armor + battler.next_armor,
+        turn_power: battler.turn_power + battler.next_power,
+        turn_power_normal: battler.turn_power_normal + battler.next_power_normal,
+        turn_power_magic: battler.turn_power_magic + battler.next_power_magic,
         next_armor: 0,
         next_power: 0,
         next_power_normal: 0,
         next_power_magic: 0,
-        double_skill: load_skill(attacker.double_skill),
-        delayed_skill: load_skill(attacker.delayed_skill),
-        permanent_skill: load_skill(attacker.permanent_skill)
+        double_skill: load_resource(battler.double_skill_code),
+        delayed_skill: load_resource(battler.delayed_skill_code),
+        permanent_skill: load_resource(battler.permanent_skill_code)
     }
-    |> flush()
+    |> flush(hero)
   end
 
   # flushes necessary stats for a defender on a new turn (was an attacker last turn)
-  defp flush_defender(defender) do
+  defp flush_defender(battle, %{attacker: battler}) do
+    hero = hero_from_battler(battle, battler)
+
     %{
-      defender
+      battler
       | turn_armor: 0,
         turn_power: 0,
         turn_power_normal: 0,
@@ -69,10 +83,10 @@ defmodule Moba.Engine.Core.Turns do
         disarmed: false,
         immortal: false
     }
-    |> flush()
+    |> flush(hero)
   end
 
-  defp flush(battler) do
+  defp flush(battler, %{items: items, skills: skills} = hero) do
     %{
       battler
       | damage: 0,
@@ -83,19 +97,29 @@ defmodule Moba.Engine.Core.Turns do
         total_reduction: 0,
         null_armor: false,
         effects: [],
-        active_skills: load_skills(battler.active_skills),
-        passive_skills: load_skills(battler.passive_skills),
-        active_items: load_items(battler.active_items),
-        passive_items: load_items(battler.passive_items),
-        skill_order: load_skills(battler.skill_order),
-        item_order: load_items(battler.item_order),
-        last_skill: load_skill(battler.last_skill),
+        active_skills: hero_active_skills(hero),
+        passive_skills: hero_passive_skills(hero),
+        active_items: hero_active_items(hero),
+        passive_items: hero_passive_items(hero),
+        skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
+        item_order: codes_to_resources(hero.item_order, items),
+        last_skill: load_resource(battler.last_skill_code),
         buffs: load_buffs(battler.buffs),
         debuffs: load_buffs(battler.debuffs),
         defender_buffs: load_buffs(battler.defender_buffs),
         attacker_debuffs: load_buffs(battler.attacker_debuffs)
     }
   end
+
+  defp hero_from_battler(battle, %{hero_id: hero_id}) do
+    hero = if battle.attacker_id == hero_id, do: battle.attacker, else: battle.defender
+    preload_hero(hero)
+  end
+
+  defp hero_active_items(%{items: items}), do: Enum.filter(items, & &1.active)
+  defp hero_active_skills(%{skills: skills}), do: Enum.filter(skills, & !&1.passive)
+  defp hero_passive_items(%{items: items}), do: Enum.filter(items, & &1.passive)
+  defp hero_passive_skills(%{skills: skills}), do: Enum.filter(skills, & &1.passive)
 
   def keys_to_atoms(string_key_map) when is_map(string_key_map) do
     for {key, val} <- string_key_map, into: %{}, do: {String.to_atom(key), keys_to_atoms(val)}
@@ -105,42 +129,32 @@ defmodule Moba.Engine.Core.Turns do
 
   defp load_buffs(buffs) do
     Enum.map(buffs, fn buff ->
-      if Map.get(buff, :resource) do
-        buff
+      buff = if Map.get(buff, "duration") do
+        keys_to_atoms(buff)
       else
-        resource = Map.get(buff, "resource")
-        loaded_resource = if Map.get(resource, "rarity"), do: load_item(resource), else: load_skill(resource)
-
         buff
-        |> keys_to_atoms()
-        |> Map.put(:resource, loaded_resource)
       end
+      # legacy data compliance, buffs will no longer have a pre-existing resource
+      if buff.resource, do: buff, else: Map.put(buff, :resource, load_resource(buff.resource_code))
     end)
     |> Enum.reject(&(&1.duration <= 0))
   end
 
-  defp load_skill(map), do: load_resource(map, %Game.Schema.Skill{})
-
-  defp load_skills(list), do: Enum.map(list, &load_skill(&1))
-
-  defp load_item(map), do: load_resource(map, %Game.Schema.Item{})
-
-  defp load_items(list), do: Enum.map(list, &load_item(&1))
-
-  defp load_resource(nil, _), do: nil
-  defp load_resource(map, struct), do: Utils.struct_from_map(map, as: struct)
+  defp load_resource(code), do: Moba.load_resource(code)
 
   defp prepare_battlers(battle, last_turn) do
     if last_turn do
-      {flush_attacker(last_turn.defender), flush_defender(last_turn.attacker)}
+      {flush_attacker(battle, last_turn), flush_defender(battle, last_turn)}
     else
       {prepare_battler(battle.initiator, battle), prepare_battler(Core.opponent(battle, battle.initiator_id), battle)}
     end
   end
 
+  defp preload_hero(hero), do: Repo.preload(hero, [:avatar, :items, :skills])
+
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
   defp prepare_battler(hero, battle) do
-    %{skills: skills, items: items, avatar: avatar} = hero = Repo.preload(hero, [:avatar, :items, :skills])
+    %{skills: skills, items: items, avatar: avatar} = hero = preload_hero(hero)
 
     %Battler{
       hero_id: hero.id,
@@ -161,12 +175,42 @@ defmodule Moba.Engine.Core.Turns do
       base_atk: buffed_total(hero, battle, hero.atk + hero.item_atk),
       base_power: buffed_total(hero, battle, hero.power + hero.item_power),
       base_armor: buffed_total(hero, battle, hero.armor + hero.item_armor),
-      active_skills: skills |> Enum.filter(&(!&1.passive)),
-      passive_skills: skills |> Enum.filter(& &1.passive),
-      active_items: items |> Enum.filter(& &1.active),
-      passive_items: items |> Enum.filter(& &1.passive),
+      active_skills: hero_active_skills(hero),
+      passive_skills: hero_passive_skills(hero),
+      active_items: hero_active_items(hero),
+      passive_items: hero_passive_items(hero),
       skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
       item_order: codes_to_resources(hero.item_order, items)
     }
   end
+
+  defp serialize_battler(battler) do
+    %{
+      battler |
+        double_skill_code: serialized_resource(battler, :double_skill),
+        delayed_skill_code: serialized_resource(battler, :delayed_skill),
+        permanent_skill_code: serialized_resource(battler, :permanent_skill),
+        last_skill_code: serialized_resource(battler, :last_skill),
+        buffs: serialized_buffs(battler, :buffs),
+        debuffs: serialized_buffs(battler, :debuffs),
+        defender_buffs: serialized_buffs(battler, :defender_buffs),
+        attacker_debuffs: serialized_buffs(battler, :attacker_debuffs)
+    }
+  end
+
+  defp serialized_buffs(battler, key) do
+    buffs = Map.get(battler, key)
+    Enum.map(buffs, fn buff ->
+      if buff.resource do
+        %{buff | resource_code: buff.resource.code, resource: nil}
+      else
+        buff
+      end
+    end)
+  end
+
+  defp serialized_resource(battler, key) do
+    resource = Map.get(battler, key)
+    resource && resource.code || nil
+  end  
 end

@@ -14,7 +14,7 @@
         <small class="text-dark font-italic">
             Online <%= @player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
             <br/>
-            Registered <%= @player.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+            Registered <%= @player.user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
         </small>
     </td>
     <%= for hero <- @player.latest_heroes do %>

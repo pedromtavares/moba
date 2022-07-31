@@ -53,7 +53,6 @@ defmodule Moba.Game.Heroes do
         hero_id: hero.id,
         tier: hero.league_tier,
         avatar: hero.avatar,
-        ranking: hero.pve_ranking,
         total_farm: total_farm(hero)
       }
     end)

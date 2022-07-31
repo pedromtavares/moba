@@ -103,20 +103,29 @@ defmodule Moba.Cleaner do
 
     Repo.all(query) |> delete_records()
 
-    # deletes older (per-player) matchmaking duels
+    # deletes older (per-player) duels
     players = Repo.all(from p in Player, where: p.pvp_points > 0)
 
     ids =
       Enum.reduce(players, [], fn player, acc ->
-        duels =
+        matchmaking =
           Repo.all(
             from d in Duel,
-              where: d.player_id == ^player.id,
+              where: d.player_id == ^player.id or d.opponent_player_id == ^player.id,
               where: d.type == "normal_matchmaking" or d.type == "elite_matchmaking",
               order_by: [desc: :inserted_at],
               limit: 9
           )
+        pvp = 
+          Repo.all(
+            from d in Duel,
+              where: d.player_id == ^player.id or d.opponent_player_id == ^player.id,
+              where: d.type == "pvp",
+              order_by: [desc: :inserted_at],
+              limit: 6
+          )
 
+        duels = matchmaking || pvp
         acc ++ Enum.map(duels, & &1.id)
       end)
 

@@ -270,7 +270,7 @@ defmodule Moba.EngineTest do
       last_turn = List.last(battle.turns)
       previous_turn = previous_turn_for(last_turn, battle.turns)
 
-      assert previous_turn.skill.code == skill.code
+      assert previous_turn.skill_code == skill.code
       assert previous_turn.attacker.cooldowns == %{"decay" => 1}
     end
 
@@ -286,7 +286,7 @@ defmodule Moba.EngineTest do
       previous_turn = previous_turn_for(last_turn, battle.turns)
       assert last_turn.number == 4
 
-      assert previous_turn.skill.code == "basic_attack"
+      assert previous_turn.skill_code == "basic_attack"
       assert previous_turn.attacker.cooldowns == %{"decay" => 0}
 
       battle =
@@ -299,7 +299,7 @@ defmodule Moba.EngineTest do
 
       assert last_turn.number == 8
 
-      assert previous_turn.skill.code == "decay"
+      assert previous_turn.skill_code == "decay"
       assert previous_turn.attacker.cooldowns == %{"decay" => 1}
     end
 
@@ -316,7 +316,7 @@ defmodule Moba.EngineTest do
       last_turn = List.last(battle.turns)
       previous_turn = previous_turn_for(last_turn, battle.turns)
 
-      assert previous_turn.item.code == item.code
+      assert previous_turn.item_code == item.code
       assert previous_turn.attacker.cooldowns == %{"tranquil_boots" => 2}
     end
 
@@ -341,7 +341,7 @@ defmodule Moba.EngineTest do
         |> Engine.last_turn()
 
       assert last_turn.number == 2
-      assert last_turn.skill.code
+      assert last_turn.skill_code
     end
 
     test "#can_use_resource?", %{strong_hero: attacker, alternate_hero: defender} do

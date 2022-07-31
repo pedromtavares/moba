@@ -122,7 +122,7 @@ defmodule Moba.Conductor do
   end
 
   defp auto_matchmaking_users do
-    Enum.each(1..2, fn _n ->
+    Enum.each(1..5, fn _n ->
       player = PlayerQuery.auto_matchmaking() |> Repo.all() |> Repo.preload(:user) |> List.first()
 
       if player do

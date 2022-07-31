@@ -5,5 +5,5 @@ defmodule Moba.Engine.Core.Buff do
 
   @derive Jason.Encoder
 
-  defstruct resource: %{}, duration: 0, power: 0, armor: 0, atk: 0
+  defstruct resource: %{}, duration: 0, power: 0, armor: 0, atk: 0, resource_code: nil
 end

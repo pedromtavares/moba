@@ -8,16 +8,16 @@ defmodule Moba.Game.Query.AvatarQuery do
 
   import Ecto.Query, only: [from: 2]
 
+  def all_current do
+    current() |> enabled()
+  end
+
   def base_current do
-    current() |> enabled() |> no_level_requirement()
+    all_current() |> no_level_requirement()
   end
 
   def base_canon do
     canon() |> enabled() |> by_name()
-  end
-
-  def all_current do
-    current() |> enabled()
   end
 
   def canon(query \\ Avatar) do

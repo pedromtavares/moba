@@ -9,7 +9,7 @@ defmodule Moba.Engine.Battles do
 
   import Ecto.Query
 
-  def get_battle!(id), do: Repo.get!(load(), id)
+  def get_battle!(id), do: Repo.get!(load(), id) |> load_resources()
 
   def update_battle!(battle, attrs) do
     battle
@@ -96,6 +96,16 @@ defmodule Moba.Engine.Battles do
       attacker: ^HeroQuery.load(),
       defender: ^HeroQuery.load()
     ])
+  end
+
+  defp load_resources(%{turns: turns} = battle) do
+    turns = Enum.map(turns, fn turn ->
+      %{turn | 
+        skill: Moba.load_resource(turn.skill_code),
+        item: Moba.load_resource(turn.item_code)
+      }
+    end)
+    Map.put(battle, :turns, turns)
   end
 
   defp snapshot_for(hero, battle_hero) do
