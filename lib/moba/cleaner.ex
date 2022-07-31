@@ -129,7 +129,7 @@ defmodule Moba.Cleaner do
         acc ++ Enum.map(duels, & &1.id)
       end)
 
-    query = from d in Duel, where: d.id not in ^ids
+    query = from d in Duel, where: d.id not in ^ids, where: d.inserted_at <= ^yesterday
 
     Repo.all(query) |> delete_records()
   end
