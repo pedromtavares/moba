@@ -125,7 +125,7 @@ defmodule Moba.Cleaner do
               limit: 6
           )
 
-        duels = matchmaking || pvp
+        duels = matchmaking ++ pvp
         acc ++ Enum.map(duels, & &1.id)
       end)
 
