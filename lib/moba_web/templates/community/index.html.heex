@@ -12,7 +12,6 @@
                     <ul class="list-unstyled timeline-sm">
                         <%= for update <- @updates do %>
                             <li class="timeline-sm-item">
-                                <span class="timeline-sm-date"><%= Timex.format(update.inserted_at, "%B %d", :strftime) |> elem(1) %></span>
                                 <%= if @current_player.user.is_admin do %>
                                     <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={update.id} class="text-left text-danger float-right small ml-3">Delete</a>
                                 <% end %> 
@@ -52,7 +51,6 @@
                                 </p>
                                 <p class="inbox-item-text"><%= formatted_body(message) %></p>
                                 <p class="inbox-item-date">
-                                    <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>
                                     <%= if @current_player.user.is_admin do %>
                                         <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3">Delete</a>
                                     <% end %>        

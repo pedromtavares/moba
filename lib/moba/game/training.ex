@@ -58,8 +58,7 @@ defmodule Moba.Game.Training do
 
     Quests.track_pve_progression!(hero)
     Players.add_total_farm!(hero)
-    Moba.update_pve_ranking()
-    Utils.run_async(fn -> update_hero_collection!(hero) end)
+    Moba.rank_finished_heroes()
 
     hero
   end
@@ -109,6 +108,12 @@ defmodule Moba.Game.Training do
   end
 
   def maybe_generate_boss(hero), do: hero
+
+  def rank_finished_heroes! do
+    heroes = Heroes.unranked_finished_heroes()
+    Heroes.update_pve_ranking!()
+    Enum.map(heroes, &(update_hero_collection!(&1)))
+  end
 
   def refresh_targets!(%{refresh_targets_count: count} = hero) when count > 0 do
     generate_targets!(hero)

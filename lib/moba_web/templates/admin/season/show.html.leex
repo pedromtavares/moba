@@ -1,27 +1,27 @@
 <div class="row mt-3">
     <div class="col-xl-3 col-md-6">
-        <div class="widget-simple text-center card-box">
+        <div class="widget-simple text-center card-box" phx-click="filter">
             <h3 class="text-success counter mt-0"><%= @user_stats.new_guests %></h3>
             <p class="text-muted mb-0">New Guests</p>
         </div>
     </div>
 
     <div class="col-xl-3 col-md-6">
-        <div class="widget-simple text-center card-box">
+        <div class="widget-simple text-center card-box" phx-click="filter">
             <h3 class="text-primary counter mt-0"><%= @user_stats.new_users %> <%= if @user_stats.new_guests > 0 do %> (<%= div(@user_stats.new_users * 100, @user_stats.new_guests) %>%)<% end %></h3>
             <p class="text-muted mb-0">New Users (% converted)</p>
         </div>
     </div>
 
     <div class="col-xl-3 col-md-6">
-        <div class="widget-simple text-center card-box">
+        <div class="widget-simple text-center card-box" phx-click="filter">
             <h3 class="text-pink mt-0 counter"><%= @user_stats.online_today %> <%= if @user_stats.online_today > 0 do %> (<%= div(@user_stats.new_users * 100, @user_stats.online_today) %>%)<% end %></h3>
-            <p class="text-muted mb-0">Online Today (% new)</p>
+            <p class="text-muted mb-0">Online <%= if @filter == :daily, do: "Today", else: "This Week" %> (% new)</p>
         </div>
     </div>
 
     <div class="col-xl-3 col-md-6">
-        <div class="widget-simple text-center card-box">
+        <div class="widget-simple text-center card-box" phx-click="filter">
             <h3 class="text-danger counter mt-0"><%= @user_stats.new_heroes %> <%= if @user_stats.online_today > 0 do %> (<%= Float.round(@user_stats.new_heroes / @user_stats.online_today, 1) %>x)<% end %></h3>
             <p class="text-muted mb-0">New Heroes (x online)</p>
         </div>

@@ -94,6 +94,7 @@ defmodule MobaWeb.ArenaLive do
       |> Enum.map(& &1.player_id)
 
     Game.duel_opponents(player, online_ids)
+    |> Enum.sort_by(& &1.user.last_online_at, {:asc, Date})
   end
 
   defp socket_init(%{assigns: %{current_player: player}} = socket) do

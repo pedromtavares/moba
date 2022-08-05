@@ -222,4 +222,13 @@ defmodule Moba.Game.Query.HeroQuery do
   def order_by_pvp(query) do
     from hero in query, order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]]
   end
+
+  def finished_recently(query \\ non_bots(), hours_ago \\ 1) do
+    ago = Timex.now() |> Timex.shift(hours: -hours_ago)
+    from hero in query, where: hero.finished_at > ^ago
+  end
+
+  def unranked(query \\ Hero) do
+    from hero in query, where: is_nil(hero.pve_ranking)
+  end
 end

@@ -104,34 +104,34 @@ defmodule Moba.Cleaner do
     Repo.all(query) |> delete_records()
 
     # deletes older (per-player) duels
-    players = Repo.all(from p in Player, where: p.pvp_points > 0)
+    # players = Repo.all(from p in Player, where: p.pvp_points > 0)
 
-    ids =
-      Enum.reduce(players, [], fn player, acc ->
-        matchmaking =
-          Repo.all(
-            from d in Duel,
-              where: d.player_id == ^player.id or d.opponent_player_id == ^player.id,
-              where: d.type == "normal_matchmaking" or d.type == "elite_matchmaking",
-              order_by: [desc: :inserted_at],
-              limit: 9
-          )
-        pvp = 
-          Repo.all(
-            from d in Duel,
-              where: d.player_id == ^player.id or d.opponent_player_id == ^player.id,
-              where: d.type == "pvp",
-              order_by: [desc: :inserted_at],
-              limit: 6
-          )
+    # ids =
+    #   Enum.reduce(players, [], fn player, acc ->
+    #     matchmaking =
+    #       Repo.all(
+    #         from d in Duel,
+    #           where: d.player_id == ^player.id or d.opponent_player_id == ^player.id,
+    #           where: d.type == "normal_matchmaking" or d.type == "elite_matchmaking",
+    #           order_by: [desc: :inserted_at],
+    #           limit: 9
+    #       )
+    #     pvp = 
+    #       Repo.all(
+    #         from d in Duel,
+    #           where: d.player_id == ^player.id or d.opponent_player_id == ^player.id,
+    #           where: d.type == "pvp",
+    #           order_by: [desc: :inserted_at],
+    #           limit: 6
+    #       )
 
-        duels = matchmaking ++ pvp
-        acc ++ Enum.map(duels, & &1.id)
-      end)
+    #     duels = matchmaking ++ pvp
+    #     acc ++ Enum.map(duels, & &1.id)
+    #   end)
 
-    query = from d in Duel, where: d.id not in ^ids, where: d.inserted_at <= ^yesterday
+    # query = from d in Duel, where: d.id not in ^ids, where: d.inserted_at <= ^yesterday
 
-    Repo.all(query) |> delete_records()
+    # Repo.all(query) |> delete_records()
   end
 
   defp delete_records(results) when length(results) > 0 do

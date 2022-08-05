@@ -252,6 +252,10 @@ defmodule Moba.Game.Heroes do
     end)
   end
 
+  def unranked_finished_heroes do
+    HeroQuery.finished_recently() |> HeroQuery.unranked() |> Repo.all()
+  end
+
   def xp_to_next_hero_level(level) when level < 1, do: 0
   def xp_to_next_hero_level(level), do: Moba.base_xp() + (level - 2) * Moba.xp_increment()
 

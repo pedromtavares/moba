@@ -16,7 +16,7 @@ defmodule Moba.Ranker do
   end
 
   def handle_cast(:pve, state) do
-    Game.update_pve_ranking!()
+    Game.rank_finished_heroes!()
     Cachex.put(:game_cache, "pve_ranking", Game.pve_ranking(Moba.pve_ranking_limit()))
     MobaWeb.broadcast("hero-ranking", "ranking", %{})
     {:noreply, state}

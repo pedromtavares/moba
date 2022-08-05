@@ -70,10 +70,17 @@ defmodule Moba.Admin.Users do
   end
 
   def get_stats do
-    online_today = UserQuery.online_recently(User, 24) |> Repo.aggregate(:count)
-    new_users = UserQuery.inserted_recently(User, 24) |> Repo.aggregate(:count)
-    new_guests = PlayerQuery.guests() |> PlayerQuery.recently_created(24) |> Repo.aggregate(:count)
-    new_heroes = HeroQuery.created_recently() |> HeroQuery.unarchived() |> Repo.aggregate(:count)
+    %{
+      daily: stats_map(24),
+      weekly: stats_map(168)
+    }
+  end
+
+  defp stats_map(hours) do
+    online_today = UserQuery.online_recently(User, hours) |> Repo.aggregate(:count)
+    new_users = UserQuery.inserted_recently(User, hours) |> Repo.aggregate(:count)
+    new_guests = PlayerQuery.guests() |> PlayerQuery.recently_created(hours) |> Repo.aggregate(:count)
+    new_heroes =  HeroQuery.unarchived() |> HeroQuery.created_recently(hours) |> Repo.aggregate(:count)
 
     %{
       new_guests: new_guests,

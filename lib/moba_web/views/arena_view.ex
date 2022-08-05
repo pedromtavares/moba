@@ -87,6 +87,8 @@ defmodule MobaWeb.ArenaView do
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false
 
+  defdelegate username(player), to: MobaWeb.UserView
+
   defp duel_battle(duel_id, hero_id, battles) do
     Enum.find(battles, &(&1.attacker_id == hero_id && &1.duel_id == duel_id))
   end

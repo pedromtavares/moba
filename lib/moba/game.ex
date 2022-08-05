@@ -120,6 +120,8 @@ defmodule Moba.Game do
 
   defdelegate community_pve_ranking, to: Heroes
 
+  defdelegate rank_finished_heroes!, to: Training
+
   defdelegate refresh_targets!(hero), to: Training
 
   defdelegate set_skin!(hero, skin), to: Heroes
@@ -135,8 +137,6 @@ defmodule Moba.Game do
   defdelegate update_hero!(hero, attrs, items \\ nil, skills \\ nil), to: Training
 
   defdelegate update_hero_collection!(hero), to: Training
-
-  defdelegate update_pve_ranking!, to: Heroes
 
   defdelegate xp_to_next_hero_level(level), to: Heroes
 

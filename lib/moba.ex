@@ -80,8 +80,8 @@ defmodule Moba do
   @doc """
   Game pve_ranking is defined by which hero has the highest total_farm (gold + xp)
   """
-  def update_pve_ranking do
-    if test?(), do: Game.update_pve_ranking!(), else: GenServer.cast(Ranker, :pve)
+  def rank_finished_heroes do
+    if test?(), do: Game.rank_finished_heroes!(), else: GenServer.cast(Ranker, :pve)
   end
 
   @doc """

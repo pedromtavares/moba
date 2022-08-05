@@ -107,11 +107,11 @@ defmodule Moba.GameTest do
       refute build_base_hero(%{league_tier: 6}) |> Game.master_league?()
     end
 
-    test "#update_pve_ranking" do
+    test "#rank_finished_heroes!" do
       hero1 = create_base_hero(%{total_gold_farm: 100, pve_current_turns: 0, finished_at: Timex.now()})
       hero2 = create_base_hero(%{total_gold_farm: 200, pve_current_turns: 0, finished_at: Timex.now()})
 
-      Game.update_pve_ranking!()
+      Game.rank_finished_heroes!()
 
       hero1 = Game.get_hero!(hero1.id)
       hero2 = Game.get_hero!(hero2.id)
