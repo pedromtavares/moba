@@ -7,16 +7,16 @@
             <h3 class="mb-2">
                 <%= if @battle.duel.rewards.attacker_pvp_points != 0 do %>
                     <%= if @battle.rewards.attacker_pvp_points > 0 do %>
-                        <span class="badge badge-pill badge-light-success"><%=@battle.duel.player.user.username%>: +<%=@battle.duel.rewards.attacker_pvp_points%> Season Points</span>
+                        <span class="badge badge-pill badge-light-success"><%= username(@battle.duel.player) %>: +<%=@battle.duel.rewards.attacker_pvp_points%> Season Points</span>
                     <% else %>
-                        <span class="badge badge-pill badge-light-dark"><%=@battle.duel.player.user.username%>: <%=@battle.duel.rewards.attacker_pvp_points%> Season Points</span>
+                        <span class="badge badge-pill badge-light-dark"><%= username(@battle.duel.player) %>: <%=@battle.duel.rewards.attacker_pvp_points%> Season Points</span>
                     <% end %>
                 <% end %>
                 <%= if @battle.duel.rewards.defender_pvp_points != 0 do %>
                     <%= if @battle.duel.rewards.defender_pvp_points > 0 do %>
-                        <span class="badge badge-pill badge-light-success"><%=@battle.duel.opponent_player.user.username%>: +<%=@battle.duel.rewards.defender_pvp_points%> Season Points</span>
+                        <span class="badge badge-pill badge-light-success"><%= username(@battle.duel.opponent_player) %>: +<%=@battle.duel.rewards.defender_pvp_points%> Season Points</span>
                     <% else %>
-                        <span class="badge badge-pill badge-light-dark"><%=@battle.duel.opponent_player.user.username%>: <%=@battle.duel.rewards.defender_pvp_points%> Season Points</span>
+                        <span class="badge badge-pill badge-light-dark"><%= username(@battle.duel.opponent_player) %>: <%=@battle.duel.rewards.defender_pvp_points%> Season Points</span>
                     <% end %>
                 <% end %>
             </h3>
