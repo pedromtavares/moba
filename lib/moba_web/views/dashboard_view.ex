@@ -2,7 +2,7 @@ defmodule MobaWeb.DashboardView do
   use MobaWeb, :view
 
   def avatar_class(hero) do
-    if hero["ranking"] && hero["total_farm"] == Moba.max_total_farm() do
+    if hero["total_farm"] == Moba.max_total_farm() do
       "avatar max-farm"
     else
       "avatar"
@@ -10,11 +10,7 @@ defmodule MobaWeb.DashboardView do
   end
 
   def avatar_title(hero) do
-    if hero["ranking"] do
-      "##{hero["ranking"]} - #{hero["avatar"]["name"]}"
-    else
-      hero["avatar"]["name"]
-    end
+    hero["avatar"]["name"]
   end
 
   def can_enter_arena?(%{all_heroes: heroes}) do
