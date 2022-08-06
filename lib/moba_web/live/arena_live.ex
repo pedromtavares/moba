@@ -62,10 +62,18 @@ defmodule MobaWeb.ArenaLive do
     {:noreply, assign(socket, tutorial_step: step)}
   end
 
-  def handle_info(%{event: "presence_diff"}, %{assigns: %{current_player: player}} = socket) do
-    duel_opponents = if player.status == "available", do: opponents_from_presence(player), else: []
+  def handle_info(
+        %{event: "presence_diff"},
+        %{assigns: %{current_player: player, last_presence_update: last_update}} = socket
+      ) do
+    ago = Timex.shift(Timex.now(), seconds: -10)
+    diff = Timex.diff(ago, last_update)
 
-    {:noreply, assign(socket, duel_opponents: duel_opponents)}
+    if diff > 0 do
+      {:noreply, assign(socket, duel_opponents: opponents_from_presence(player), last_presence_update: Timex.now())}
+    else
+      {:noreply, socket}
+    end
   end
 
   def render(assigns) do
@@ -87,7 +95,7 @@ defmodule MobaWeb.ArenaLive do
 
   defp maybe_redirect(socket), do: socket
 
-  defp opponents_from_presence(player) do
+  defp opponents_from_presence(%{status: "available"} = player) do
     online_ids =
       Presence.list("online")
       |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)
@@ -96,6 +104,8 @@ defmodule MobaWeb.ArenaLive do
     Game.duel_opponents(player, online_ids)
     |> Enum.sort_by(& &1.user.last_online_at, {:asc, Date})
   end
+
+  defp opponents_from_presence(_), do: []
 
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
@@ -108,6 +118,8 @@ defmodule MobaWeb.ArenaLive do
          closest_bot_time = normal_count == 0 && elite_count == 0 && Game.closest_bot_time(player),
          duels = Game.list_pvp_duels(player),
          duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
+         duel_opponents = opponents_from_presence(player),
+         last_presence_update = Timex.now(),
          pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
       assign(socket,
         battles: battles,
@@ -115,12 +127,13 @@ defmodule MobaWeb.ArenaLive do
         current_time: current_time,
         duels: duels,
         duel_battles: duel_battles,
-        duel_opponents: [],
+        duel_opponents: duel_opponents,
         elite_count: elite_count,
         matchmaking: matchmaking,
         normal_count: normal_count,
         pending_duel: pending_duel,
         pending_match: pending_match,
+        last_presence_update: last_presence_update,
         sidebar_code: sidebar_code,
         tutorial_step: player.tutorial_step
       )

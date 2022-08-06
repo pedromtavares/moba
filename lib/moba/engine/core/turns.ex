@@ -19,8 +19,8 @@ defmodule Moba.Engine.Core.Turns do
 
   def serialize(%{skill: skill, item: item, attacker: attacker, defender: defender} = turn) do
     %{
-      turn | 
-        skill_code: skill && skill.code, 
+      turn
+      | skill_code: skill && skill.code,
         item_code: item && item.code,
         attacker: serialize_battler(attacker),
         defender: serialize_battler(defender)
@@ -57,10 +57,7 @@ defmodule Moba.Engine.Core.Turns do
         next_armor: 0,
         next_power: 0,
         next_power_normal: 0,
-        next_power_magic: 0,
-        double_skill: load_resource(battler.double_skill_code),
-        delayed_skill: load_resource(battler.delayed_skill_code),
-        permanent_skill: load_resource(battler.permanent_skill_code)
+        next_power_magic: 0
     }
     |> flush(hero)
   end
@@ -104,6 +101,9 @@ defmodule Moba.Engine.Core.Turns do
         skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
         item_order: codes_to_resources(hero.item_order, items),
         last_skill: load_resource(battler.last_skill_code),
+        double_skill: load_resource(battler.double_skill_code),
+        delayed_skill: load_resource(battler.delayed_skill_code),
+        permanent_skill: load_resource(battler.permanent_skill_code),
         buffs: load_buffs(battler.buffs),
         debuffs: load_buffs(battler.debuffs),
         defender_buffs: load_buffs(battler.defender_buffs),
@@ -117,7 +117,7 @@ defmodule Moba.Engine.Core.Turns do
   end
 
   defp hero_active_items(%{items: items}), do: Enum.filter(items, & &1.active)
-  defp hero_active_skills(%{skills: skills}), do: Enum.filter(skills, & !&1.passive)
+  defp hero_active_skills(%{skills: skills}), do: Enum.filter(skills, &(!&1.passive))
   defp hero_passive_items(%{items: items}), do: Enum.filter(items, & &1.passive)
   defp hero_passive_skills(%{skills: skills}), do: Enum.filter(skills, & &1.passive)
 
@@ -129,11 +129,13 @@ defmodule Moba.Engine.Core.Turns do
 
   defp load_buffs(buffs) do
     Enum.map(buffs, fn buff ->
-      buff = if Map.get(buff, "duration") do
-        keys_to_atoms(buff)
-      else
-        buff
-      end
+      buff =
+        if Map.get(buff, "duration") do
+          keys_to_atoms(buff)
+        else
+          buff
+        end
+
       # legacy data compliance, buffs will no longer have a pre-existing resource
       if buff.resource, do: buff, else: Map.put(buff, :resource, load_resource(buff.resource_code))
     end)
@@ -186,8 +188,8 @@ defmodule Moba.Engine.Core.Turns do
 
   defp serialize_battler(battler) do
     %{
-      battler |
-        double_skill_code: serialized_resource(battler, :double_skill),
+      battler
+      | double_skill_code: serialized_resource(battler, :double_skill),
         delayed_skill_code: serialized_resource(battler, :delayed_skill),
         permanent_skill_code: serialized_resource(battler, :permanent_skill),
         last_skill_code: serialized_resource(battler, :last_skill),
@@ -200,6 +202,7 @@ defmodule Moba.Engine.Core.Turns do
 
   defp serialized_buffs(battler, key) do
     buffs = Map.get(battler, key)
+
     Enum.map(buffs, fn buff ->
       if buff.resource do
         %{buff | resource_code: buff.resource.code, resource: nil}
@@ -211,6 +214,6 @@ defmodule Moba.Engine.Core.Turns do
 
   defp serialized_resource(battler, key) do
     resource = Map.get(battler, key)
-    resource && resource.code || nil
-  end  
+    (resource && resource.code) || nil
+  end
 end

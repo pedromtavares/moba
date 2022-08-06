@@ -80,7 +80,7 @@ defmodule Moba.Admin.Users do
     online_today = UserQuery.online_recently(User, hours) |> Repo.aggregate(:count)
     new_users = UserQuery.inserted_recently(User, hours) |> Repo.aggregate(:count)
     new_guests = PlayerQuery.guests() |> PlayerQuery.recently_created(hours) |> Repo.aggregate(:count)
-    new_heroes =  HeroQuery.unarchived() |> HeroQuery.created_recently(hours) |> Repo.aggregate(:count)
+    new_heroes = HeroQuery.unarchived() |> HeroQuery.created_recently(hours) |> Repo.aggregate(:count)
 
     %{
       new_guests: new_guests,

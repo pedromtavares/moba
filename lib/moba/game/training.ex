@@ -2,7 +2,7 @@ defmodule Moba.Game.Training do
   @moduledoc """
   Module focused on cross-resource orchestration and logic related to hero training (single-player)
   """
-  alias Moba.{Game, Repo, Utils}
+  alias Moba.{Game, Repo}
   alias Game.{Avatars, Heroes, Players, Quests, Skills, Targets}
 
   def archive_hero!(%{player: player} = hero) do
@@ -112,7 +112,7 @@ defmodule Moba.Game.Training do
   def rank_finished_heroes! do
     heroes = Heroes.unranked_finished_heroes()
     Heroes.update_pve_ranking!()
-    Enum.map(heroes, &(update_hero_collection!(&1)))
+    Enum.map(heroes, &update_hero_collection!(&1))
   end
 
   def refresh_targets!(%{refresh_targets_count: count} = hero) when count > 0 do

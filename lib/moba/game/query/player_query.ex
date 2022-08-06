@@ -135,8 +135,8 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   defp available_opponents(query \\ Player) do
-    from player in query, 
-      where: player.pvp_points > 0, 
+    from player in query,
+      where: player.pvp_points > 0,
       where: not is_nil(player.user_id) or not is_nil(player.bot_options)
   end
 end

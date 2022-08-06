@@ -25,8 +25,9 @@ defmodule MobaWeb.DuelView do
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false
 
-  def show_rematch?(%{duel: %{type: "pvp"} = duel, current_user: user, current_player: player}) do
-    finished?(duel) && both_online?(duel, user) && (player.id == duel.player_id || player.id == duel.opponent_player_id)
+  def show_rematch?(%{duel: %{type: "pvp"} = duel, current_player: player}) do
+    finished?(duel) && both_online?(duel, player) &&
+      (player.id == duel.player_id || player.id == duel.opponent_player_id)
   end
 
   def show_rematch?(_), do: false
@@ -55,13 +56,13 @@ defmodule MobaWeb.DuelView do
 
   defdelegate username(player), to: MobaWeb.UserView
 
-  defp both_online?(%{player: %{user_id: user_id}, opponent_player: %{user_id: opponent_id}}, current_user) do
+  defp both_online?(%{player: %{id: player_id}, opponent_player: %{id: opponent_id}}, current_player) do
     online_ids =
       Presence.list("online")
       |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)
-      |> Enum.map(& &1.user_id)
-      |> Kernel.++([current_user.id])
+      |> Enum.map(& &1.player_id)
+      |> Kernel.++([current_player.id])
 
-    Enum.member?(online_ids, user_id) && Enum.member?(online_ids, opponent_id)
+    Enum.member?(online_ids, player_id) && Enum.member?(online_ids, opponent_id)
   end
 end

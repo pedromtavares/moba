@@ -99,12 +99,11 @@ defmodule Moba.Engine.Battles do
   end
 
   defp load_resources(%{turns: turns} = battle) do
-    turns = Enum.map(turns, fn turn ->
-      %{turn | 
-        skill: Moba.load_resource(turn.skill_code),
-        item: Moba.load_resource(turn.item_code)
-      }
-    end)
+    turns =
+      Enum.map(turns, fn turn ->
+        %{turn | skill: Moba.load_resource(turn.skill_code), item: Moba.load_resource(turn.item_code)}
+      end)
+
     Map.put(battle, :turns, turns)
   end
 
