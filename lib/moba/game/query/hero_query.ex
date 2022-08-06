@@ -220,7 +220,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def order_by_pvp(query) do
-    from hero in query, order_by: [desc: [hero.pvp_picks, hero.total_gold_farm + hero.total_xp_farm]]
+    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm, hero.pvp_picks]]
   end
 
   def finished_recently(query \\ non_bots(), hours_ago \\ 1) do
