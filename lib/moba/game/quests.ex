@@ -72,8 +72,8 @@ defmodule Moba.Game.Quests do
 
   def get_quest(tier), do: @all[tier]
 
-  def last_completed_quest(%{player: %{pve_progression: %{history: history}}} = hero) do
-    with {tier, _} <- Enum.find(history, fn {_, time} -> Timex.parse!(time, "{ISO:Extended:Z}") >= hero.finished_at end) do
+  def last_completed_quest(%{player: %{pve_progression: %{history: history}, pve_tier: current_tier}} = hero) do
+    with {tier, _} <- find_quest_history(history, current_tier, hero) do
       get_quest(String.to_integer(tier))
     else
       _ -> nil
@@ -99,6 +99,15 @@ defmodule Moba.Game.Quests do
   def track_pve_progression!(hero), do: hero
 
   # --------------------------------------------------------
+
+  defp find_quest_history(history, current_tier, hero) do
+    Enum.find(history, fn {tier, time} ->
+      parsed_time = Timex.parse!(time, "{ISO:Extended:Z}")
+      parsed_tier = String.to_integer(tier)
+      diff = Timex.diff(parsed_time, hero.finished_at)
+      parsed_tier == current_tier && diff >= 0
+    end)
+  end
 
   defp track(progression, field, avatar_code, true) do
     updated_codes = Map.get(progression, field) ++ [avatar_code]
