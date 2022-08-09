@@ -15,7 +15,7 @@
         <div class="card-footer transparent p-1">
             <div class="row">
                 <div class="col justify-content-between d-flex">
-                    <%= if length(@all_heroes) > 2 do %>
+                    <%= if @current_player.pve_tier >= 4 && length(@all_heroes) > 2 do %>
                         <button type="button" class="btn btn-danger" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id={@hero.id}>
                             <i class="fa fa-trash-alt mr-1"></i>Delete
                         </button>

@@ -7,7 +7,7 @@ defmodule Moba.Game.Training do
 
   def archive_hero!(%{player: player} = hero) do
     if player.current_pve_hero_id == hero.id, do: Players.set_current_pve_hero!(player, nil)
-    unless hero.finished_at, do: Players.add_total_farm!(player)
+    unless hero.finished_at, do: Players.add_total_farm!(hero)
     update_hero!(hero, %{archived_at: DateTime.utc_now()})
   end
 

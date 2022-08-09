@@ -6,7 +6,7 @@
                 <h5 class="text-uppercase text-white mb-0 mt-2"><%= Moba.leagues[@current_hero.league_tier] %></h5>
             </div>
             <div class="col-8">
-                <h4 class="text-center mb-0 mt-0">Reach the <span class={"text-league-#{max_available_league(@current_hero)}"}><%= Moba.leagues[max_available_league(@current_hero)] %></span> by spending your turns on Ganking, Meditating or Mining.</h4>
+                <h4 class="text-center mb-0 mt-0">Reach the <span class={"text-league-#{max_available_league(@current_hero)}"}><%= Moba.leagues[max_available_league(@current_hero)] %></span> by spending your turns on Battling, Meditating or Mining.</h4>
                 <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" title={"Total turns left: #{@current_hero.pve_current_turns + @current_hero.pve_total_turns}"}>
                     <div style={"width:#{turn_percentage(@current_hero)}%"} class={"progress-bar league-bar-#{@current_hero.league_tier}"}></div>
                     <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
