@@ -1,4 +1,4 @@
-defmodule MobaWeb.UserLive do
+defmodule MobaWeb.PlayerLive do
   use MobaWeb, :live_view
 
   def mount(_, _session, socket) do
@@ -26,6 +26,12 @@ defmodule MobaWeb.UserLive do
     end
   end
 
+  def handle_event("create-match", _, %{assigns: %{current_player: player, player: opponent}} = socket) do
+    with match = Game.create_match!(player, opponent) do
+      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match))}
+    end
+  end
+
   def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}}} = socket) do
     with player = Game.get_player!(id),
          ranking = ranking_for(player) do
@@ -34,7 +40,7 @@ defmodule MobaWeb.UserLive do
   end
 
   def render(assigns) do
-    MobaWeb.UserView.render("show.html", assigns)
+    MobaWeb.PlayerView.render("show.html", assigns)
   end
 
   defp featured_hero(%{hero_collection: collection}) when length(collection) > 0 do

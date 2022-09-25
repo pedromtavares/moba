@@ -1,0 +1,41 @@
+<div class="row">
+	<div class="col">
+		<div class="card">
+			<h1 class="text-center"><%= username(@match.player) %></h1>
+			<div class="row no-gutters">
+				<%= for hero <- @match.player_picks do %>
+					<%= render "_picked_hero.html", hero: hero %>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="row">
+	<div class="col">
+		<div class="card">
+			<h1 class="text-center"><%= username(@match.opponent) %></h1>
+			<div class="row no-gutters">
+				<%= for hero <- @match.opponent_picks do %>
+					<%= render "_picked_hero.html", hero: hero %>
+				<% end %>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
+	<div class="col">
+		<div class="card">
+			<button class="btn btn-danger btn-block btn-lg" phx-click="start">Start</button>
+		</div>
+	</div>
+</div>
+
+
+<div class="row">
+	<div class="col">
+		<%= for {battle, index} <- Enum.with_index(@battles, 1) do %>
+			<%= render "_battle_review.html", battle: battle, index: index, socket: @socket %>
+		<% end %>
+	</div>
+</div>

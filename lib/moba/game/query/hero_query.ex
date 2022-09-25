@@ -196,8 +196,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def exclude_ids(query, ids) do
-    from hero in query,
-      where: hero.id not in ^ids
+    from hero in query, where: hero.id not in ^ids
   end
 
   def created_recently(query \\ non_bots(), hours_ago \\ 24) do
@@ -215,12 +214,16 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query, where: hero.avatar_id in ^avatar_ids
   end
 
+  def with_ids(query, hero_ids) do
+    from hero in query, where: hero.id in ^hero_ids
+  end
+
   def created_before(query, time) do
     from hero in query, where: hero.inserted_at < ^time
   end
 
   def order_by_pvp(query) do
-    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm, hero.pvp_picks]]
+    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm]]
   end
 
   def finished_recently(query \\ non_bots(), hours_ago \\ 1) do

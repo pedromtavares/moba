@@ -426,7 +426,5 @@ defmodule MobaWeb.BattleView do
     end
   end
 
-  defdelegate username(player), to: MobaWeb.UserView
-
   defp get_resource(code), do: Moba.load_resource(code) || Moba.basic_attack()
 end

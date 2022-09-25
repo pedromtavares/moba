@@ -1,4 +1,4 @@
-defmodule MobaWeb.UserLiveTest do
+defmodule MobaWeb.PlayerLiveTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
@@ -9,7 +9,7 @@ defmodule MobaWeb.UserLiveTest do
 
     username = hero.player.user.username
 
-    {:ok, _view, html} = live(conn, "/user/#{hero.player.user_id}")
+    {:ok, _view, html} = live(conn, "/player/#{hero.player_id}")
     assert html =~ username
   end
 end

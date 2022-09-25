@@ -1,4 +1,4 @@
-defmodule MobaWeb.UserView do
+defmodule MobaWeb.PlayerView do
   use MobaWeb, :view
   alias MobaWeb.{ArenaView, DashboardView}
 
@@ -33,8 +33,4 @@ defmodule MobaWeb.UserView do
   def rewards_badge(rewards) do
     content_tag("span", "#{rewards} Season Points", class: "badge badge-pill badge-light-dark")
   end
-
-  def username(%{bot_options: %{name: name}}), do: name
-  def username(%{user: %{username: username}}), do: username
-  def username(_), do: "Guest"
 end

@@ -69,6 +69,9 @@
                                                     <span class="badge badge-pill badge-light-danger font-15"><%= @player.duel_score["#{@current_player.id}"] || 0 %></span> <%= username(@player) %>
                                                 </h4>
                                             </div>
+                                            <div class="col">
+                                                <button class="btn btn-xs btn-danger mt-1" phx-click="create-match">Match</button>
+                                            </div>
                                         </div>
                                     </div>
                                 <% end %>

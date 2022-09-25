@@ -9,6 +9,16 @@ defmodule Moba.Game.Heroes do
 
   # -------------------------------- PUBLIC API
 
+  def available_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5) do
+    HeroQuery.unarchived()
+    |> HeroQuery.with_player(player_id)
+    |> HeroQuery.exclude_ids(excluded_hero_ids)
+    |> HeroQuery.order_by_pvp()
+    |> HeroQuery.limit_by(limit)
+    |> HeroQuery.random()
+    |> Repo.all()
+  end
+
   def buyback!(%{pve_state: "dead"} = hero) do
     price = buyback_price(hero)
 
@@ -138,6 +148,9 @@ defmodule Moba.Game.Heroes do
   def get_hero!(nil), do: nil
 
   def get_hero!(id), do: HeroQuery.load() |> Repo.get!(id)
+
+  def get_heroes([]), do: []
+  def get_heroes(hero_ids), do: HeroQuery.with_ids(HeroQuery.load(), hero_ids) |> Repo.all()
 
   @doc """
   Used for easy testing in development, unavailable in production

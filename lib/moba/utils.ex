@@ -1,4 +1,12 @@
 defmodule Moba.Utils do
+  def run_async(fun) do
+    if test?() do
+      fun.()
+    else
+      Task.start(fun)
+    end
+  end
+
   def struct_from_map(a_map, as: a_struct) do
     # Find the keys within the map
     keys =
@@ -16,13 +24,9 @@ defmodule Moba.Utils do
     a_struct
   end
 
-  def run_async(fun) do
-    if test?() do
-      fun.()
-    else
-      Task.start(fun)
-    end
-  end
+  def username(%{bot_options: %{name: name}}), do: name
+  def username(%{user: %{username: username}}), do: username
+  def username(_), do: "Guest"
 
   defp test?, do: Application.get_env(:moba, :env) == :test
 end

@@ -11,6 +11,7 @@ defmodule Moba.Game do
     Items,
     Heroes,
     Leagues,
+    Matches,
     Players,
     Quests,
     Seasons,
@@ -70,6 +71,8 @@ defmodule Moba.Game do
 
   defdelegate archive_hero!(hero), to: Training
 
+  defdelegate available_pvp_heroes(player_id, excluded_hero_ids), to: Heroes
+
   defdelegate broadcast_to_hero(hero_id), to: Training
 
   defdelegate buyback!(hero), to: Heroes
@@ -93,6 +96,8 @@ defmodule Moba.Game do
   defdelegate generate_boss!(hero), to: Training
 
   defdelegate get_hero!(hero_id), to: Heroes
+
+  defdelegate get_heroes(hero_ids), to: Heroes
 
   defdelegate latest_finished_heroes(player_id), to: Heroes
 
@@ -177,6 +182,14 @@ defmodule Moba.Game do
   defdelegate league_tier_for(level), to: Leagues
 
   defdelegate max_league_step_for(league), to: Leagues
+
+  # MATCHES
+
+  defdelegate create_match!(player, opponent), to: Arena
+
+  defdelegate get_match!(id), to: Matches
+
+  defdelegate start_match!(match), to: Arena
 
   # PLAYERS
 

@@ -4,7 +4,7 @@ defmodule Moba.Engine.Core do
   """
 
   alias Moba.{Engine, Game, Repo}
-  alias Engine.Core.{Duel, Helper, League, Logger, Processor, Pve, Turns}
+  alias Engine.Core.{Duel, Helper, Match, League, Logger, Processor, Pve, Turns}
 
   @doc """
   Automatically continues a battle until it finishes
@@ -17,11 +17,11 @@ defmodule Moba.Engine.Core do
   @doc """
   Creates a battle and jumps to a state where the attacker can start (case they are not the initiator)
   """
-  def begin_battle!(battle) do
+  def begin_battle!(battle, opts) do
     battle
     |> determine_initiator()
     |> Repo.insert!()
-    |> maybe_skip_next_turn()
+    |> maybe_skip_next_turn(opts)
     |> maybe_finalize_battle()
   end
 
@@ -34,6 +34,8 @@ defmodule Moba.Engine.Core do
   def create_league_battle!(attacker, defender), do: League.create_battle!(attacker, defender)
 
   def create_duel_battle!(attrs), do: Duel.create_battle!(attrs)
+
+  def create_match_battle!(attrs), do: Match.create_battle!(attrs)
 
   @doc """
   Continues an existing battle by creating a new turn from where it left off
@@ -76,7 +78,7 @@ defmodule Moba.Engine.Core do
 
   defp battle_finished?(%{battle: battle} = turn) do
     %{battle | turns: battle.turns ++ [turn]}
-    |> maybe_skip_next_turn()
+    |> maybe_skip_next_turn(%{})
   end
 
   # Creates and processes a turn, finishing a battle if someone dies or it reaches the max turns count
@@ -134,13 +136,19 @@ defmodule Moba.Engine.Core do
   defp maybe_finalize_battle(%{finished: true, type: "duel"} = battle), do: Duel.finalize_battle(battle)
   defp maybe_finalize_battle(battle), do: battle
 
+  # All match battles are automated
+  defp maybe_skip_next_turn(%{match_id: match_id} = battle, opts) when not is_nil(match_id) do
+    battle = Repo.preload(battle, :turns)
+    create_turn!(battle, Map.merge(opts, %{auto: true}))
+  end
+
   # Skips to the next turn if the current action is to be performed by an automated opponent
-  defp maybe_skip_next_turn(%{duel: %{auto: true}} = battle) do
+  defp maybe_skip_next_turn(%{duel: %{auto: true}} = battle, _) do
     battle = Repo.preload(battle, :turns)
     create_turn!(battle, %{auto: true})
   end
 
-  defp maybe_skip_next_turn(battle) do
+  defp maybe_skip_next_turn(battle, _) do
     battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
     last_turn = List.last(battle.turns)
     attacker_disabled? = last_turn && Helper.disabled?(last_turn.defender)

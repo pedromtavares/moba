@@ -54,8 +54,6 @@ defmodule MobaWeb.DuelView do
 
   def opponent_instructions(_), do: ""
 
-  defdelegate username(player), to: MobaWeb.UserView
-
   defp both_online?(%{player: %{id: player_id}, opponent_player: %{id: opponent_id}}, current_player) do
     online_ids =
       Presence.list("online")

@@ -7,7 +7,7 @@ defmodule Moba.Engine do
   alias Engine.{Battles, Core}
 
   def damage_types, do: %{normal: "normal", magic: "magic", pure: "pure"}
-  def battle_types, do: %{pve: "pve", league: "league", duel: "duel"}
+  def battle_types, do: %{pve: "pve", league: "league", duel: "duel", match: "match"}
 
   # BATTLE MANAGEMENT
 
@@ -23,9 +23,13 @@ defmodule Moba.Engine do
 
   defdelegate latest_battle(hero_id), to: Battles
 
+  defdelegate latest_match_battle(match_id), to: Battles
+
   defdelegate list_battles(hero, type), to: Battles
 
   defdelegate list_duel_battles(duel_ids), to: Battles
+
+  defdelegate list_match_battles(match_id), to: Battles
 
   defdelegate ordered_turns_query, to: Battles
 
@@ -37,7 +41,7 @@ defmodule Moba.Engine do
 
   defdelegate auto_finish_battle!(battle, orders \\ %{auto: true}), to: Core
 
-  defdelegate begin_battle!(battle), to: Core
+  defdelegate begin_battle!(battle, opts \\ %{}), to: Core
 
   defdelegate build_turn(battle, orders \\ %{}), to: Core
 
@@ -52,6 +56,8 @@ defmodule Moba.Engine do
   end
 
   defdelegate create_duel_battle!(attrs), to: Core
+
+  defdelegate create_match_battle!(attrs), to: Core
 
   defdelegate effect_descriptions(turn), to: Core
 

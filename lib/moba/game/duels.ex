@@ -129,16 +129,11 @@ defmodule Moba.Game.Duels do
   def auto_next_phase!(duel), do: duel
 
   defp available_random_hero(player_id, pick_id) do
-    available_hero(player_id, pick_id) |> Repo.all() |> Enum.shuffle() |> List.first()
+    available_heroes(player_id, pick_id) |> Enum.shuffle() |> List.first()
   end
 
-  defp available_hero(player_id, nil) do
-    HeroQuery.unarchived() |> HeroQuery.with_player(player_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(5)
-  end
-
-  defp available_hero(player_id, hero_id) do
-    available_hero(player_id, nil) |> HeroQuery.exclude_ids([hero_id])
-  end
+  defp available_heroes(player_id, nil), do: Game.available_pvp_heroes(player_id, [])
+  defp available_heroes(player_id, hero_id), do: Game.available_pvp_heroes(player_id, [hero_id])
 
   defp base_query(%{id: player_id}) do
     from duel in simple_load(),
