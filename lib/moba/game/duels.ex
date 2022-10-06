@@ -133,7 +133,7 @@ defmodule Moba.Game.Duels do
   end
 
   defp available_hero(player_id, nil) do
-    HeroQuery.unarchived() |> HeroQuery.with_player(player_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(5)
+    HeroQuery.unarchived() |> HeroQuery.finished() |> HeroQuery.with_player(player_id) |> HeroQuery.order_by_pvp() |> HeroQuery.limit_by(5)
   end
 
   defp available_hero(player_id, hero_id) do
