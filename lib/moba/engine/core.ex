@@ -50,18 +50,6 @@ defmodule Moba.Engine.Core do
 
   def effect_descriptions(turn), do: Logger.descriptions_for(turn)
 
-  def last_turn(battle) do
-    battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
-    turn = List.last(battle.turns)
-
-    turn &&
-      %{
-        turn
-        | skill: Moba.load_resource(turn.skill_code),
-          item: Moba.load_resource(turn.item_code)
-      }
-  end
-
   def opponent(%{attacker_id: attacker_id} = battle, hero_id) when attacker_id == hero_id, do: battle.defender
   def opponent(battle, _), do: battle.attacker
 

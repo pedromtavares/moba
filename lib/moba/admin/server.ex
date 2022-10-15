@@ -20,8 +20,6 @@ defmodule Moba.Admin.Server do
     {:ok, current_state()}
   end
 
-  def schedule_update, do: Process.send_after(self(), :server_update, @timeout)
-
   def handle_info(:server_update, _state) do
     state = current_state()
     MobaWeb.broadcast("admin", "server", %{})
@@ -44,4 +42,6 @@ defmodule Moba.Admin.Server do
       duels: Admin.list_recent_duels()
     }
   end
+
+  defp schedule_update, do: Process.send_after(self(), :server_update, @timeout)
 end

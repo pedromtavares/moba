@@ -1,5 +1,5 @@
 <div class="row">
-	<div class="col">
+	<div class="col-4">
 		<div class="card">
 			<h1 class="text-center"><%= username(@match.player) %></h1>
 			<div class="row no-gutters">
@@ -9,9 +9,31 @@
 			</div>
 		</div>
 	</div>
-</div>
-<div class="row">
-	<div class="col">
+	<div class="col-4">
+		<div class="row">
+			<div class="col">
+				<div class="card">
+					<%= if @match.winner && @tick >= length(@battles) do %>
+						<h2 class="text-center">
+							Winner: <%= username(@match.winner) %>
+							<button class="btn btn-danger btn-sm" phx-click="reset">Reset</button>
+						</h2>
+					<% end %>
+					<%= if @tick == 0 do %>
+						<button class="btn btn-danger btn-block btn-lg" phx-click="start">Start</button>
+					<% end %>
+				</div>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<%= for {battle, index} <- Enum.with_index(@battles, 1) |> Enum.take(@tick) do %>
+					<%= render "_battle_review.html", battle: battle, index: index, socket: @socket, match: @match %>
+				<% end %>
+			</div>
+		</div>
+	</div>
+	<div class="col-4">
 		<div class="card">
 			<h1 class="text-center"><%= username(@match.opponent) %></h1>
 			<div class="row no-gutters">
@@ -23,19 +45,7 @@
 	</div>
 </div>
 
-<div class="row">
-	<div class="col">
-		<div class="card">
-			<button class="btn btn-danger btn-block btn-lg" phx-click="start">Start</button>
-		</div>
-	</div>
-</div>
 
 
-<div class="row">
-	<div class="col">
-		<%= for {battle, index} <- Enum.with_index(@battles, 1) do %>
-			<%= render "_battle_review.html", battle: battle, index: index, socket: @socket %>
-		<% end %>
-	</div>
-</div>
+
+

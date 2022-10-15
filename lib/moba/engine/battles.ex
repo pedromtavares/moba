@@ -48,19 +48,19 @@ defmodule Moba.Engine.Battles do
   end
 
   def latest_match_battle(match_id) do
-    from(b in Battle, where: b.match_id == ^match_id, order_by: [desc: :id], limit: 1)
+    from(b in load(), where: b.match_id == ^match_id, order_by: [desc: :id], limit: 1)
     |> Repo.all()
     |> List.first()
   end
 
   def list_duel_battles(duel_ids) do
-    from(b in Battle, where: b.duel_id in ^duel_ids)
+    from(b in load(), where: b.duel_id in ^duel_ids)
     |> Repo.all()
     |> Repo.preload([:winner, attacker: :avatar, defender: :avatar])
   end
 
   def list_match_battles(match_id) do
-    from(b in Battle, where: b.match_id == ^match_id, order_by: [asc: :id])
+    from(b in load(), where: b.match_id == ^match_id, order_by: [asc: :id])
     |> Repo.all()
     |> Repo.preload([:winner, attacker: :avatar, defender: :avatar])
   end

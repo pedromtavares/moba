@@ -6,12 +6,13 @@ defmodule Moba.Engine.Core.Match do
   alias Moba.Engine
   alias Engine.Schema.Battle
 
-  def create_battle!(attrs) do
-    attacker_initial_hp = Map.get(attrs[:attacker], :initial_hp)
+  def create_battle!(%{attacker: attacker} = attrs) do
+    attacker_initial_hp = Map.get(attacker, :initial_hp)
+    attacker_initial_mp = Map.get(attacker, :initial_mp)
 
     if valid?(attrs) do
       battle_for(attrs)
-      |> Engine.begin_battle!(%{attacker_initial_hp: attacker_initial_hp})
+      |> Engine.begin_battle!(%{attacker_initial_hp: attacker_initial_hp, attacker_initial_mp: attacker_initial_mp})
     else
       {:error, "Invalid target"}
     end

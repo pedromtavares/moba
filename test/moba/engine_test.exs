@@ -338,7 +338,8 @@ defmodule Moba.EngineTest do
       last_turn =
         create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
         |> Engine.continue_battle!(%{skill: nil, item: nil})
-        |> Engine.last_turn()
+        |> Map.get(:turns)
+        |> List.last()
 
       assert last_turn.number == 2
       assert last_turn.skill_code

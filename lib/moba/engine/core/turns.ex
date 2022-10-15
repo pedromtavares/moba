@@ -157,14 +157,8 @@ defmodule Moba.Engine.Core.Turns do
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
   defp prepare_battler(hero, battle, orders) do
     %{skills: skills, items: items, avatar: avatar} = hero = preload_hero(hero)
-    attacker_initial_hp = Map.get(orders, :attacker_initial_hp)
-
-    initial_hp =
-      if hero.id == battle.attacker_id && attacker_initial_hp do
-        attacker_initial_hp
-      else
-        nil
-      end
+    initial_hp = prepare_stat(hero, battle, orders, :attacker_initial_hp)
+    initial_mp = prepare_stat(hero, battle, orders, :attacker_initial_mp)
 
     %Battler{
       hero_id: hero.id,
@@ -176,7 +170,7 @@ defmodule Moba.Engine.Core.Turns do
       total_hp: buffed_total(hero, battle, hero.total_hp + hero.item_hp),
       total_mp: buffed_total(hero, battle, hero.total_mp + hero.item_mp),
       current_hp: initial_hp || buffed_total(hero, battle, hero.total_hp + hero.item_hp),
-      current_mp: buffed_total(hero, battle, hero.total_mp + hero.item_mp),
+      current_mp: initial_mp || buffed_total(hero, battle, hero.total_mp + hero.item_mp),
       last_hp: buffed_total(hero, battle, hero.total_hp + hero.item_hp),
       speed: buffed_total(hero, battle, hero.speed + hero.item_speed),
       atk: buffed_total(hero, battle, hero.atk + hero.item_atk),
@@ -192,6 +186,16 @@ defmodule Moba.Engine.Core.Turns do
       skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
       item_order: codes_to_resources(hero.item_order, items)
     }
+  end
+
+  defp prepare_stat(hero, battle, orders, stat) do
+    hero_stat = Map.get(orders, stat)
+
+    if hero.id == battle.attacker_id && hero_stat do
+      hero_stat
+    else
+      nil
+    end
   end
 
   defp serialize_battler(battler) do

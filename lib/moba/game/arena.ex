@@ -15,6 +15,25 @@ defmodule Moba.Game.Arena do
 
   def bot_matchmaking!(player), do: create_matchmaking!(player, Players.bot_opponent(player), true)
 
+  def continue_match!(%{winner_id: winner_id} = match) when not is_nil(winner_id), do: match
+
+  def continue_match!(match) do
+    latest_battle = Engine.latest_match_battle(match.id)
+    last_turn = if latest_battle, do: List.last(latest_battle.turns), else: nil
+    {attacker, defender} = Matches.get_latest_battlers(match, last_turn)
+    battle = Engine.create_match_battle!(%{attacker: attacker, defender: defender, match: match})
+    winner = Matches.finished?(match, battle)
+
+    match =
+      if winner do
+        Matches.update!(match, %{winner_id: winner.id})
+      else
+        match
+      end
+
+    continue_match!(match)
+  end
+
   def create_match!(%{id: player_id}, %{id: opponent_id}) do
     player_picks = Heroes.available_pvp_heroes(player_id) |> Enum.map(& &1.id)
     opponent_picks = Heroes.available_pvp_heroes(opponent_id) |> Enum.map(& &1.id)
@@ -72,20 +91,6 @@ defmodule Moba.Game.Arena do
     updated = Players.duel_updates!(player, duel_type, updates)
     Moba.update_pvp_ranking()
     updated
-  end
-
-  def start_match!(match) do
-    latest_battle = Engine.latest_match_battle(match.id)
-    winner = Matches.finished?(match, latest_battle)
-
-    if winner do
-      Matches.update!(match, %{winner_id: winner.id})
-    else
-      last_turn = if latest_battle, do: Engine.last_turn(latest_battle), else: nil
-      {attacker, defender} = Matches.get_latest_battlers(match, last_turn)
-      Engine.create_match_battle!(%{attacker: attacker, defender: defender, match: match})
-      MobaWeb.broadcast("match-#{match.id}", "latest", %{})
-    end
   end
 
   def update_pvp_ranking! do

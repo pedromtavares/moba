@@ -185,11 +185,11 @@ defmodule Moba.Game do
 
   # MATCHES
 
+  defdelegate continue_match!(match), to: Arena
+
   defdelegate create_match!(player, opponent), to: Arena
 
   defdelegate get_match!(id), to: Matches
-
-  defdelegate start_match!(match), to: Arena
 
   # PLAYERS
 

@@ -60,6 +60,4 @@ defmodule Moba.Engine do
   defdelegate create_match_battle!(attrs), to: Core
 
   defdelegate effect_descriptions(turn), to: Core
-
-  defdelegate last_turn(battle), to: Core
 end

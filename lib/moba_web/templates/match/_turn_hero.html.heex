@@ -1,18 +1,18 @@
+<% turn_hero = if @turn.attacker.hero_id == @hero.id, do: @turn.attacker, else: @turn.defender %>
 <div class="row mt-1">
-    <div class="col-4">
-        <div class="row">
-            <div class="col">
-                <img src={GH.image_url(@hero.avatar)} class="avatar"/>
-            </div>
-        </div>
-    </div>
     <div class="col">
-        <div class="row mt-2 mb-1">
+        <img src={GH.image_url(@hero.avatar)} class="avatar"/>
+        <h4><%= @hero.name %></h4>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <div class="row mb-1">
             <div class="col">
                 <div class="progress progress-fixed">
-                    <%= if @turn_hero.current_hp > 0 do %>
-                        <div style={"width:#{@turn_hero.current_hp * 100 / @turn_hero.total_hp}%"} class="progress-bar bg-danger">
-                            <span>&nbsp;<%= @turn_hero.current_hp %>&nbsp;</span>
+                    <%= if turn_hero.current_hp > 0 do %>
+                        <div style={"width:#{turn_hero.current_hp * 100 / turn_hero.total_hp}%"} class="progress-bar bg-danger">
+                            <span>&nbsp;<%= turn_hero.current_hp %>&nbsp;</span>
                         </div>
                     <% else %>
                         <div style="width:100%" class="progress-bar bg-dark">
@@ -25,9 +25,9 @@
         <div class="row">
             <div class="col">
                 <div class="progress progress-fixed">
-                    <%= if @turn_hero.current_hp > 0 do %>
-                        <div style={"width:#{@turn_hero.current_mp * 100 / @turn_hero.total_mp}%"} class="progress-bar bg-primary">
-                            <span>&nbsp;<%= @turn_hero.current_mp %>&nbsp;</span>
+                    <%= if turn_hero.current_hp > 0 do %>
+                        <div style={"width:#{turn_hero.current_mp * 100 / turn_hero.total_mp}%"} class="progress-bar bg-primary">
+                            <span>&nbsp;<%= turn_hero.current_mp %>&nbsp;</span>
                         </div>
                     <% else %>
                         <div style="width:100%" class="progress-bar bg-dark">
