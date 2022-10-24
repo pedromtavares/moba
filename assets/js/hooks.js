@@ -66,6 +66,20 @@ Hooks.ScrollToTarget = {
   }
 }
 
+Hooks.ToggleDisplay = {
+  mounted(){
+    let el = this.el;
+    let target = $(el).attr("phx-target-element");
+    const targetElement = $(target);
+    el.addEventListener("mouseover", e => {
+      targetElement.addClass("d-block")
+    });
+    el.addEventListener("mouseout", e => {
+      targetElement.removeClass("d-block")
+    });
+  }
+}
+
 Hooks.Loading = {
   mounted(){
     let el = this.el;

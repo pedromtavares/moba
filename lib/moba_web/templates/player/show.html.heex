@@ -3,11 +3,6 @@
         <div class="col-md-6 col-xl-4">
                 <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
                 <div class="card collection mb-0">
-                    <%= if is_nil(@player.bot_options) do %>
-                        <h5 class="text-center text-white font-20 mt-3 f-rpg text-uppercase">
-                            <img src={"/images/pve/#{@player.pve_tier}.png"} class="pve-rank"/> <%= Moba.pve_tiers[@player.pve_tier] %>
-                        </h5>
-                    <% end %>
                     <div class="card-body pb-1 d-flex">
                         <div class="row">
                             <%= for hero <- @player.hero_collection do %>
@@ -48,8 +43,8 @@
                             </h5>
                         <% end %>
                         <div class="card-body p-2 text-center">
-                            <img src={"/images/pvp/#{@player.pvp_tier}.png"} class="pvp-rank" data-toggle="tooltip" title={Moba.pvp_tiers[@player.pvp_tier]}/>
-                            <h2 class="text-white f-rpg"><span class={"shadow-medal-#{@player.pvp_tier}"}><%= username(@player) %></span></h2>
+                            <img src={"/images/pve/#{@player.pve_tier}.png"} class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}data-toggle="tooltip" title={Moba.pve_tiers[@player.pve_tier]}/>
+                            <h2 class="text-white f-rpg"><span class={"name-shadow-#{shadow_rank(@player)}"}><%= username(@player) %></span></h2>
                         </div>
                         <%= unless length(@duels) == 0 do %>
                             <div class="pt-1">
@@ -88,7 +83,6 @@
                                             </td>
 
                                             <td class="text-left">
-                                                <img src={"/images/pvp/#{opponent_for(duel, @player).pvp_tier}.png"} class="pvp-rank"/>
                                                 <span class="opponent"><%= live_redirect opponent_for(duel, @player) |> username(), to: Routes.player_path(@socket, :show, opponent_for(duel, @player).id) %></span>
                                             </td>
 
@@ -132,25 +126,25 @@
                             <tr>
                                 <th><%= unless is_nil(@player.bot_options), do: "A.I. " %>Rank</th>
                                 <th>Player</th>
-                                <th>Season Points</th>
+                                <th>Daily Win Rate</th>
                             </tr>
                         </thead>
                         <tbody>
                             <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
-                                <tr id={"player-#{player.id}"} phx-hook={if player.id == @player.id, do: "HalfScroll"} phx-container="#ranking-card">
+                                <tr id={"player-#{player.id}"} phx-hook={if player.id == @player.id, do: "HalfScroll"} phx-container="#ranking-card" class={if player.id == @player.id, do: "selected-player"}>
                                     <td>
-                                        <h1 class={if player.id == @player.id, do: "text-info f-rpg", else: "f-rpg"} >
+                                        <h1 class="f-rpg" >
                                             #<%= player.ranking || index %>
                                         </h1>
                                     </td>
                                     <td>
                                         <%= live_redirect to: Routes.player_path(@socket, :show, player.id) do %>
-                                            <img src={"/images/pvp/#{player.pvp_tier}.png"} class="pvp-rank" />
-                                            <h5 class={"text-white font-weight-bold mb-0 mt-1 #{if player.id == @player.id, do: "text-info"}"}><%= username(player) %></h5>
+                                            <img src={"/images/pve/#{player.pve_tier}.png"} class={"pvp-rank rank-shadow-#{shadow_rank(player)}"} />
+                                            <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}><%= username(player) %></h5>
                                         <% end %>
                                     </td>
                                     <td>
-                                        <h3 class="text-success"><%= player.pvp_points %></h3>
+                                        <h3 class={performance_class(player)} title={"#{player.daily_wins} wins / #{player.daily_matches} matches"} data-toggle="tooltip"><%= if player.daily_matches > 0, do: round(player.daily_wins / player.daily_matches * 100), else: 0 %>%</h3>
                                     </td>
                                 </tr>
                             <% end %>

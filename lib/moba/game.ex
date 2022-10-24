@@ -185,9 +185,13 @@ defmodule Moba.Game do
 
   # MATCHES
 
+  defdelegate can_clear_auto_matches?(player), to: Matches
+
+  defdelegate clear_auto_matches!(player), to: Arena
+
   defdelegate continue_match!(match), to: Arena
 
-  defdelegate create_match!(player, opponent), to: Arena
+  defdelegate create_match!(player, opponent, type \\ Matches.types()[:manual]), to: Arena
 
   defdelegate get_match!(id), to: Matches
 
@@ -195,11 +199,7 @@ defmodule Moba.Game do
 
   defdelegate auto_matchmaking!(player), to: Arena
 
-  defdelegate bot_matchmaking!(player), to: Arena
-
   defdelegate bot_ranking, to: Players
-
-  defdelegate closest_bot_time(player), to: Players
 
   defdelegate create_player!(attrs), to: Players
 
@@ -223,8 +223,6 @@ defmodule Moba.Game do
 
   defdelegate pvp_ranking(limit), to: Players
 
-  defdelegate pvp_tier_for(pvp_points), to: Players
-
   defdelegate set_player_available!(player), to: Players
 
   defdelegate set_player_unavailable!(player), to: Players
@@ -237,7 +235,7 @@ defmodule Moba.Game do
 
   defdelegate update_preferences!(player, preferences), to: Players
 
-  defdelegate update_pvp_ranking!, to: Arena
+  defdelegate update_pvp_ranking!(update_tiers? \\ false), to: Arena
 
   defdelegate update_tutorial_step!(player, step), to: Players
 

@@ -58,6 +58,10 @@
   .ranking{
     margin-bottom: 0;
 
+    .selected-player{
+      background: rgba(0,0,0,0.2)
+    }
+
     .card-body{
       padding: 0 !important;
       max-height: 93vh;

@@ -115,7 +115,6 @@ defmodule MobaWeb.ArenaLive do
          matchmaking = Game.list_matchmaking(player),
          battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
          pending_match = Enum.find(matchmaking, &(&1.phase != "finished")),
-         closest_bot_time = normal_count == 0 && elite_count == 0 && Game.closest_bot_time(player),
          duels = Game.list_pvp_duels(player),
          duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
          duel_opponents = opponents_from_presence(player),
@@ -123,7 +122,7 @@ defmodule MobaWeb.ArenaLive do
          pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
       assign(socket,
         battles: battles,
-        closest_bot_time: closest_bot_time,
+        closest_bot_time: current_time,
         current_time: current_time,
         duels: duels,
         duel_battles: duel_battles,

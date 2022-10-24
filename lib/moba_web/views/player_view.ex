@@ -13,6 +13,10 @@ defmodule MobaWeb.PlayerView do
   def opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
   def opponent_for(duel, _), do: duel.player
 
+  def performance_class(%{daily_matches: matches}) when matches < 15, do: "text-orange"
+  def performance_class(%{daily_matches: matches}) when matches < 30, do: "text-warning"
+  def performance_class(_), do: "text-success"
+
   def registered_label(player) do
     time = if player.user, do: player.user.inserted_at, else: player.inserted_at
     formatted = time |> Timex.format("{relative}", :relative) |> elem(1)
@@ -33,4 +37,7 @@ defmodule MobaWeb.PlayerView do
   def rewards_badge(rewards) do
     content_tag("span", "#{rewards} Season Points", class: "badge badge-pill badge-light-dark")
   end
+
+  def shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
+  def shadow_rank(%{pvp_tier: tier}), do: tier
 end

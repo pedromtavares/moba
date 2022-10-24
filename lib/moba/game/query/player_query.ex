@@ -9,8 +9,6 @@ defmodule Moba.Game.Query.PlayerQuery do
 
   import Ecto.Query
 
-  @maximum_points_difference Moba.maximum_points_difference()
-
   def load(queryable \\ Player) do
     queryable
     |> preload([
@@ -47,6 +45,10 @@ defmodule Moba.Game.Query.PlayerQuery do
     from player in query, where: player.id not in ^ids
   end
 
+  def exclude_rankings(query, rankings) do
+    from player in query, where: player.ranking not in ^rankings
+  end
+
   def limit_by(query, limit) do
     from _ in query, limit: ^limit
   end
@@ -62,21 +64,6 @@ defmodule Moba.Game.Query.PlayerQuery do
     )
   end
 
-  def eligible_for_ranking(limit) do
-    base = non_bots() |> non_guests() |> limit_by(limit)
-
-    from(player in base,
-      order_by: [desc: [player.pvp_points, player.pve_tier, player.total_farm]]
-    )
-  end
-
-  def by_ranking(query, min, max) do
-    from player in query,
-      where: player.ranking >= ^min,
-      where: player.ranking <= ^max,
-      order_by: [asc: player.ranking]
-  end
-
   def by_pvp_points(query \\ Player) do
     from(player in query, order_by: [desc: player.pvp_points])
   end
@@ -85,38 +72,37 @@ defmodule Moba.Game.Query.PlayerQuery do
     bots() |> by_pvp_points()
   end
 
-  def bot_opponents(pvp_tier) do
-    from bot in bots(),
-      where: bot.pvp_tier <= ^pvp_tier + 1,
-      order_by: [desc: bot.pvp_points]
+  def old_ranking(limit) do
+    base = non_bots() |> non_guests() |> limit_by(limit)
+
+    from(player in base,
+      order_by: [desc: [player.pvp_points, player.pve_tier, player.total_farm]]
+    )
   end
 
-  def normal_opponents(pvp_tier, player_points) do
-    from player in available_opponents(),
-      where: player.pvp_tier <= ^pvp_tier,
-      where: player.pvp_points > ^player_points - @maximum_points_difference,
-      order_by: [desc: player.pvp_points]
+  def with_pvp_tier(tier) do
+    from player in pvp_available(), where: player.pvp_tier == ^tier
   end
 
-  def elite_opponents(pvp_tier, player_points) do
-    from player in available_opponents(),
-      where: player.pvp_tier >= ^pvp_tier,
-      where: player.pvp_points < ^player_points + @maximum_points_difference,
-      order_by: [asc: player.pvp_points]
+  def by_daily_wins(query \\ Player) do
+    from player in query, order_by: [desc: player.daily_wins, desc: player.pvp_points]
+  end
+
+  def matchmaking_opponents(id, pvp_tier) do
+    from(player in pvp_available(), where: player.pvp_tier == ^pvp_tier)
+    |> exclude_ids([id])
+    |> random()
   end
 
   def auto_matchmaking do
-    base = non_bots() |> available_opponents() |> random() |> limit_by(1)
-    ago = Timex.now() |> Timex.shift(days: -1)
+    ago = Timex.now() |> Timex.shift(hours: -48)
 
-    from player in base, join: user in assoc(player, :user), where: user.last_online_at < ^ago
-  end
-
-  def matchmaking_bot(timestamp) do
-    base = bots() |> random() |> limit_by(1)
-
-    from bot in base,
-      where: is_nil(bot.last_challenge_at) or bot.last_challenge_at < ^timestamp
+    from player in pvp_available(),
+      join: user in assoc(player, :user),
+      where:
+        is_nil(player.preferences["auto_matchmaking"]) or
+          player.preferences["auto_matchmaking"] == ^true or
+          user.last_online_at < ^ago
   end
 
   def currently_active(query \\ Player, hours_ago \\ 24) do
@@ -134,9 +120,9 @@ defmodule Moba.Game.Query.PlayerQuery do
     from(player in query, where: player.inserted_at > ^ago, order_by: [desc: player.inserted_at])
   end
 
-  defp available_opponents(query \\ Player) do
-    from player in query,
-      where: player.pvp_points > 0,
-      where: not is_nil(player.user_id) or not is_nil(player.bot_options)
+  def pvp_available(query \\ Player) do
+    base = query |> non_bots() |> non_guests()
+
+    from player in base, where: player.pvp_points > 0
   end
 end

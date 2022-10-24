@@ -25,11 +25,10 @@ defmodule SeedHelper do
       end
       |> Enum.random()
 
-    pvp_tier = Game.pvp_tier_for(pvp_points)
     name = Faker.Superhero.name()
     bot_options = %{name: name, tier: bot_tier, codes: avatar_codes}
 
-    Game.create_player!(%{bot_options: bot_options, pvp_tier: pvp_tier, pvp_points: pvp_points})
+    Game.create_player!(%{bot_options: bot_options, pvp_tier: 0, pvp_points: pvp_points})
   end
 
   def create_pvp_bots do

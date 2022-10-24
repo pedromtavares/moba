@@ -9,15 +9,23 @@ defmodule Moba.Conductor do
   require Logger
 
   @doc """
-  Runs the automated bot battles and touches a datetime field
-  so Moba.Server knows when to run this again, currently every 10 mins.
+  Runs the auto matchmaking and touches a datetime field
+  so Moba.Server knows when to run this again, currently every 30 mins.
   """
   def season_tick! do
-    season = Moba.current_season()
-    auto_matchmaking_bots(season)
-    auto_matchmaking_users()
-    Game.update_pvp_ranking!()
-    Game.update_season!(season, %{last_server_update_at: DateTime.utc_now()})
+    auto_matchmaking()
+    Moba.update_pvp_ranking()
+
+    Moba.current_season()
+    |> Game.update_season!(%{last_server_update_at: DateTime.utc_now()})
+  end
+
+  def pvp_tick! do
+    Game.update_pvp_ranking!(true)
+    Repo.update_all(PlayerQuery.pvp_available(), set: [daily_matches: 0, daily_wins: 0])
+
+    Moba.current_season()
+    |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
   end
 
   # Generates new resources based on canon so edits in the admin panel don't affect the current resources
@@ -105,32 +113,16 @@ defmodule Moba.Conductor do
     |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
   end
 
-  defp auto_matchmaking_bots(%{last_server_update_at: time}) do
-    Enum.each(1..2, fn _n ->
-      bot = PlayerQuery.matchmaking_bot(time) |> Repo.all() |> List.first()
+  defp auto_matchmaking do
+    PlayerQuery.auto_matchmaking()
+    |> Repo.all()
+    |> Repo.preload(:user)
+    |> Enum.map(fn player ->
+      match = Game.auto_matchmaking!(player)
 
-      if bot do
-        duel = Game.bot_matchmaking!(bot)
-
-        if duel do
-          Logger.info("Created BOT duel ##{duel.id} for #{bot.bot_options.name}")
-          later = Timex.shift(time, minutes: 190)
-          Game.update_player!(bot, %{last_challenge_at: later})
-        end
-      end
-    end)
-  end
-
-  defp auto_matchmaking_users do
-    Enum.each(1..5, fn _n ->
-      player = PlayerQuery.auto_matchmaking() |> Repo.all() |> Repo.preload(:user) |> List.first()
-
-      if player do
-        duel = Game.auto_matchmaking!(player)
-
-        if duel do
-          Logger.info("Created duel ##{duel.id} for #{player.user.username}")
-        end
+      if match do
+        Game.get_match!(match.id) |> Game.continue_match!()
+        Logger.info("Created match ##{match.id} for #{player.user.username}")
       end
     end)
   end

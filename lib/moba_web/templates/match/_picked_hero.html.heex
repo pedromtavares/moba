@@ -1,4 +1,4 @@
-<div class="col-md-12" id={"visible-hero-#{@hero.id}"}>
+<div class="col-md-12 mt-1" id={"hero-#{@hero.id}"} phx-target-element={"#hero-footer-#{@hero.id}"}  phx-hook="ToggleDisplay">
     <div class="card hero-card mb-0" style={"background-image: url(#{GH.background_url(@hero)})"}>
         <div class="card-header pt-0 pb-1">
             <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
@@ -10,9 +10,9 @@
                 <span class="font-15 font-italic" data-toggle="tooltip" title={GH.hero_stats_string(@hero, true)}>Level <%= @hero.level %> <%= @hero.avatar.name %></span>
             </h4>
         </div>
-        <div class="card-body p-0 d-flex align-items-center justify-content-center">
+        <div class="card-body p-0 d-flex align-items-center justify-content-center" >
         </div>
-        <div class="card-footer transparent p-1">
+        <div class="card-footer transparent p-1" id={"hero-footer-#{@hero.id}"}>
             <div class="row">
                 <div class="col-12">
                     <div class="skills-container d-flex justify-content-between">

@@ -18,18 +18,19 @@ defmodule MobaWeb.MatchLive do
   def handle_event("start", _, %{assigns: %{match: match}} = socket) do
     Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.continue_match!(match) end)
     schedule_tick()
-    
+
     {:noreply, assign(socket, tick: 0)}
   end
 
   def handle_event("reset", _, %{assigns: %{match: match}} = socket) do
-    Moba.Game.Matches.update!(match, %{winner_id: nil})
+    Moba.Game.Matches.update!(match, %{winner_id: nil, phase: nil})
     query = from(b in Moba.Engine.Schema.Battle, where: b.match_id == ^match.id)
     Moba.Repo.delete_all(query)
     {:noreply, socket_init(match.id, 0, socket)}
   end
 
-  def handle_info(:tick, %{assigns: %{tick: tick, match: %{id: match_id, winner_id: winner_id}}} = socket) when is_nil(winner_id) do
+  def handle_info(:tick, %{assigns: %{tick: tick, match: %{id: match_id, winner_id: winner_id}}} = socket)
+      when is_nil(winner_id) do
     schedule_tick()
     {:noreply, socket_init(match_id, tick + 1, socket)}
   end

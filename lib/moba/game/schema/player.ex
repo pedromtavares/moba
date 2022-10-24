@@ -25,6 +25,10 @@ defmodule Moba.Game.Schema.Player do
     field :match_history, :map, default: %{}
     field :last_challenge_at, :utc_datetime
     field :total_farm, :integer, default: 0
+    field :total_wins, :integer, default: 0
+    field :total_matches, :integer, default: 0
+    field :daily_wins, :integer, default: 0
+    field :daily_matches, :integer, default: 0
 
     has_many :heroes, Game.Schema.Hero
     has_many :duels, Game.Schema.Duel
@@ -55,7 +59,11 @@ defmodule Moba.Game.Schema.Player do
       :last_challenge_at,
       :total_farm,
       :current_pve_hero_id,
-      :user_id
+      :user_id,
+      :daily_wins,
+      :daily_matches,
+      :total_wins,
+      :total_matches
     ])
     |> cast_embed(:preferences)
     |> cast_embed(:bot_options)
