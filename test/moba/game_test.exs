@@ -6,20 +6,6 @@ defmodule Moba.GameTest do
       %{player: create_player!()}
     end
 
-    test "#player_duel_updates! sets score correctly", %{player: winner} do
-      loser = create_player!()
-      player = Game.player_duel_updates!(winner, "pvp", %{loser_id: loser.id})
-
-      assert player.duel_score["#{loser.id}"] == 1
-    end
-
-    test "#player_duel_updates! does not set score for non-pvp duels", %{player: winner} do
-      loser = create_player!()
-      player = Game.player_duel_updates!(winner, "normal_matchmaking", %{loser_id: loser.id})
-
-      assert player.duel_score == %{}
-    end
-
     test "#update_tutorial_step", %{player: player} do
       player = Game.update_tutorial_step!(player, 5)
       assert player.tutorial_step == 5
@@ -515,7 +501,7 @@ defmodule Moba.GameTest do
   end
 
   describe "duels" do
-    test "#next_duel_phase!" do
+    test "#continue_duel!" do
       player = create_player!()
       opponent = create_player!()
       skills = base_skills()
@@ -523,17 +509,17 @@ defmodule Moba.GameTest do
       player_hero = Game.create_hero!(%{name: "Player"}, player, strong_avatar(), skills)
       opp_hero = Game.create_hero!(%{name: "Opponent"}, opponent, weak_avatar(), skills)
 
-      duel = Game.create_pvp_duel!(player, opponent)
+      duel = Game.create_duel!(player, opponent)
 
       assert duel.phase == "player_first_pick"
 
-      Game.next_duel_phase!(duel, player_hero)
+      Game.continue_duel!(duel, player_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_first_pick"
       assert duel.player_first_pick_id == player_hero.id
 
-      Game.next_duel_phase!(duel, opp_hero)
+      Game.continue_duel!(duel, opp_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "player_battle"
@@ -545,16 +531,15 @@ defmodule Moba.GameTest do
       assert battle.defender_id == opp_hero.id
 
       Engine.auto_finish_battle!(battle)
-      duel = Game.get_duel!(duel.id)
+      duel = Game.get_duel!(duel.id) |> Game.continue_duel!(nil)
 
       assert duel.phase == "opponent_second_pick"
 
-      Game.next_duel_phase!(duel, opp_hero)
-      duel = Game.get_duel!(duel.id)
+      duel = Game.continue_duel!(duel, opp_hero)
 
       assert duel.phase == "player_second_pick"
 
-      Game.next_duel_phase!(duel, player_hero)
+      Game.get_duel!(duel.id) |> Game.continue_duel!(player_hero)
       duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_battle"
@@ -565,9 +550,13 @@ defmodule Moba.GameTest do
       assert battle.defender_id == player_hero.id
 
       Engine.auto_finish_battle!(battle)
-      duel = Game.get_duel!(duel.id)
+      duel = Game.get_duel!(duel.id) |> Game.continue_duel!(nil)
 
       assert duel.phase == "finished"
+
+      player = Game.get_player!(player.id)
+
+      assert player.duel_score["#{opponent.id}"] == 1
     end
   end
 

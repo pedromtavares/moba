@@ -9,12 +9,6 @@ defmodule Moba.Game.Arena do
 
   def auto_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "auto")
 
-  def auto_next_duel_phase!(duel) do
-    updated = Duels.auto_next_phase!(duel)
-    MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
-    updated
-  end
-
   def clear_auto_matches!(player) do
     if Matches.can_clear_auto_matches?(player) do
       Matches.clear_auto!(player)
@@ -28,6 +22,19 @@ defmodule Moba.Game.Arena do
         total_matches: total_matches
       })
     end
+  end
+
+  def continue_duel!(%{phase: "opponent_battle"} = duel, _) do
+    score = score_duel!(duel)
+    Players.set_player_available!(duel.player) && Players.set_player_available!(duel.opponent_player)
+    Duels.finish!(duel, score)
+  end
+
+  def continue_duel!(duel, hero) do
+    updated = if hero == :auto, do: Duels.auto_next_phase!(duel), else: Duels.next_phase!(duel, hero)
+    hero && hero != :auto && Game.update_hero!(hero, %{pvp_last_picked: Timex.now(), pvp_picks: hero.pvp_picks + 1})
+    MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
+    updated
   end
 
   def continue_match!(%{winner_id: winner_id, type: type} = match) when not is_nil(winner_id) do
@@ -63,8 +70,8 @@ defmodule Moba.Game.Arena do
     })
   end
 
-  def create_pvp_duel!(player, opponent) do
-    duel = Duels.create!(player, opponent, "pvp", false)
+  def create_duel!(player, opponent) do
+    duel = Duels.create!(player, opponent)
 
     Players.set_player_unavailable!(player) && Players.set_player_unavailable!(opponent)
 
@@ -81,55 +88,51 @@ defmodule Moba.Game.Arena do
     MobaWeb.broadcast("player-#{opponent_id}", "challenge", attrs)
   end
 
-  def elite_matchmaking!(player), do: create_matchmaking!(player, Players.matchmaking_opponent(player), false)
-
-  def finish_duel!(%{type: "pvp"} = duel, winner, rewards) do
-    Players.set_player_available!(duel.player) && Players.set_player_available!(duel.opponent_player)
-    Duels.finish!(duel, winner, rewards)
-  end
-
-  def finish_duel!(duel, winner, rewards) do
-    unless duel.auto, do: Moba.reward_shards!(duel.player, shard_reward_for(duel))
-    Duels.finish!(duel, winner, rewards)
-  end
-
-  def next_duel_phase!(duel, hero) do
-    updated = Duels.next_phase!(duel, hero)
-    hero && Game.update_hero!(hero, %{pvp_last_picked: Timex.now(), pvp_picks: hero.pvp_picks + 1})
-    MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
-    updated
-  end
-
-  def normal_matchmaking!(player), do: create_matchmaking!(player, Players.matchmaking_opponent(player), false)
-
-  def player_duel_updates!(nil, _, _), do: nil
-
-  def player_duel_updates!(player, duel_type, updates) do
-    updated = Players.duel_updates!(player, duel_type, updates)
-    Moba.update_pvp_ranking()
-    updated
-  end
-
   def update_pvp_ranking!(update_tiers?) do
     if update_tiers?, do: Players.update_ranking_tiers!(), else: Players.update_ranking!()
     MobaWeb.broadcast("player-ranking", "ranking", %{})
   end
 
-  defp create_matchmaking!(_, nil, _), do: nil
+  defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent} = duel) do
+    %{winner_id: first_winner_id} = Engine.first_duel_battle(duel)
+    %{winner_id: last_winner_id} = Engine.last_duel_battle(duel)
 
-  defp create_matchmaking!(player, opponent, auto) do
-    type = if opponent.pvp_tier <= player.pvp_tier, do: "normal_matchmaking", else: "elite_matchmaking"
-    duel = Duels.create!(player, opponent, type, auto)
+    player_win = first_winner_id == duel.player_first_pick_id && last_winner_id == duel.player_second_pick_id
 
-    duel
+    opponent_win = first_winner_id == duel.opponent_first_pick_id && last_winner_id == duel.opponent_second_pick_id
+
+    winner =
+      cond do
+        player_win -> player
+        opponent_win -> opponent
+        true -> nil
+      end
+
+    {player_points, opponent_points} = Duels.pvp_points(player, opponent, winner)
+    player_updates = if player_win, do: %{loser_id: opponent.id}, else: %{}
+    opponent_updates = if opponent_win, do: %{loser_id: player.id}, else: %{}
+
+    Players.duel_update!(player, Map.merge(player_updates, %{pvp_points: player_points}))
+    Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: opponent_points}))
+
+    Moba.update_pvp_ranking()
+
+    %{winner: winner, attacker_pvp_points: player_points, defender_pvp_points: opponent_points}
   end
 
-  # TODO: Update season points for player
-  defp score_match!(%{phase: phase, player: player} = match) when phase != "scored" do
-    winner = if match.winner_id == player.id, do: match.player, else: match.opponent
-    _loser = if match.winner_id == player.id, do: match.opponent, else: match.player
+  defp score_duel!(_), do: %{}
 
-    match_attrs = %{total_matches: player.total_matches + 1, daily_matches: player.daily_matches + 1}
+  defp score_match!(%{phase: phase, player: player, opponent: opponent} = match) when phase != "scored" do
+    winner = if match.winner_id == player.id, do: player, else: opponent
+    _loser = if match.winner_id == player.id, do: opponent, else: player
+
+    {player_points, _} = Duels.pvp_points(player, opponent, winner)
+
+    match_attrs = %{
+      total_matches: player.total_matches + 1,
+      daily_matches: player.daily_matches + 1,
+      pvp_points: player.pvp_points + player_points
+    }
 
     winner_attrs =
       if winner.id == player.id do
@@ -144,7 +147,4 @@ defmodule Moba.Game.Arena do
   end
 
   defp score_match!(match), do: match
-
-  defp shard_reward_for(%{type: "elite_matchmaking"}), do: Moba.elite_matchmaking_shards()
-  defp shard_reward_for(_), do: Moba.normal_matchmaking_shards()
 end

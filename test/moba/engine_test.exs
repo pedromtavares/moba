@@ -209,11 +209,14 @@ defmodule Moba.EngineTest do
 
   describe "pvp duel" do
     test "full cycle", %{strong_hero: attacker, weak_hero: defender} do
-      duel = Game.create_pvp_duel!(attacker.player, defender.player)
-      Game.next_duel_phase!(duel, attacker)
+      duel = Game.create_duel!(attacker.player, defender.player)
+      Game.continue_duel!(duel, attacker)
       duel = Game.get_duel!(duel.id)
-      Game.next_duel_phase!(duel, defender)
+      Game.continue_duel!(duel, defender)
       Engine.first_duel_battle(duel) |> Engine.auto_finish_battle!()
+
+      duel = Game.get_duel!(duel.id)
+      Game.continue_duel!(duel, nil)
 
       hero = Game.get_hero!(attacker.id)
       defender = Game.get_hero!(defender.id)
@@ -221,23 +224,27 @@ defmodule Moba.EngineTest do
       assert hero.player.pvp_points == attacker.player.pvp_points
 
       duel = Game.get_duel!(duel.id)
-      Game.next_duel_phase!(duel, defender)
+      Game.continue_duel!(duel, defender)
       duel = Game.get_duel!(duel.id)
-      Game.next_duel_phase!(duel, attacker)
+      Game.continue_duel!(duel, attacker)
 
-      last_battle = Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
+      Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
+
+      duel = Game.get_duel!(duel.id)
+      Game.continue_duel!(duel, nil)
 
       %{player: player} = Game.get_hero!(attacker.id)
       %{player: opponent} = Game.get_hero!(defender.id)
       duel = Game.get_duel!(duel.id)
 
-      assert duel.rewards == last_battle.rewards
+      assert duel.rewards.attacker_pvp_points == 55
+      assert duel.rewards.defender_pvp_points == 45
       assert duel.winner_player_id == attacker.player_id
       assert player.duel_score == %{"#{opponent.id}" => 1}
       assert opponent.duel_score == %{}
 
-      assert player.pvp_points == attacker.player.pvp_points + 10
-      assert opponent.pvp_points == defender.player.pvp_points - 10
+      assert player.pvp_points == attacker.player.pvp_points + 5
+      assert opponent.pvp_points == defender.player.pvp_points - 5
     end
   end
 

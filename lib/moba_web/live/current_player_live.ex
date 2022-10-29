@@ -28,7 +28,7 @@ defmodule MobaWeb.CurrentPlayerLive do
         {challenge.other, current_player}
       end
 
-    Game.create_pvp_duel!(player, opponent)
+    Game.create_duel!(player, opponent)
 
     {:noreply, assign(socket, challenge: nil, page_title: @default_title)}
   end

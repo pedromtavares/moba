@@ -34,29 +34,17 @@ defmodule Moba.Game.Players do
   Increments duel counts and sets the duel_score map that is displayed on the player's profile
   Each player holds the score count of every other player they have dueled against
   """
-  def duel_updates!(player, duel_type, updates) do
-    pvp_points = updates[:pvp_points] || player.pvp_points
-    base_updates = %{pvp_points: pvp_points}
+  def duel_update!(player, updates) do
+    loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
+    current_score = player.duel_score[loser_id] || 0
+    duel_score = loser_id && Map.put(player.duel_score, loser_id, current_score + 1)
 
-    score_updates =
-      if duel_type == "pvp" do
-        loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
-        current_score = player.duel_score[loser_id] || 0
-        duel_score = loser_id && Map.put(player.duel_score, loser_id, current_score + 1)
+    updates = %{
+      duel_score: duel_score || player.duel_score,
+      pvp_points: updates[:pvp_points] || player.pvp_points
+    }
 
-        %{
-          duel_score: duel_score || player.duel_score
-        }
-      else
-        %{}
-      end
-
-    update_player!(player, Map.merge(base_updates, score_updates))
-  end
-
-  def elite_matchmaking_count(_player) do
-    # remove
-    1
+    update_player!(player, updates)
   end
 
   def get_player!(id), do: PlayerQuery.load() |> Repo.get!(id)
@@ -65,11 +53,6 @@ defmodule Moba.Game.Players do
 
   def matchmaking_opponent(%{pvp_tier: tier, id: id}) do
     PlayerQuery.matchmaking_opponents(id, tier) |> PlayerQuery.limit_by(1) |> Repo.all() |> List.first()
-  end
-
-  def normal_matchmaking_count(_player) do
-    # remove
-    1
   end
 
   def pvp_points_for(tier) do
@@ -160,6 +143,7 @@ defmodule Moba.Game.Players do
     deranked_shadows = Enum.slice(shadows, 14..19)
     same_shadows = Enum.slice(shadows, 4..13)
     ranked_rest = Enum.slice(rest, 0..5)
+    the_immortal = List.first(immortals)
 
     new_shadows =
       deranked_immortals
@@ -171,7 +155,7 @@ defmodule Moba.Game.Players do
       |> Kernel.--(ranked_rest)
       |> Kernel.++(deranked_shadows)
 
-    update_player!(List.first(immortals), %{ranking: 1})
+    the_immortal && update_player!(the_immortal, %{ranking: 1})
 
     new_immortals
     |> Enum.with_index(2)

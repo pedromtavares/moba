@@ -4,9 +4,11 @@ defmodule MobaWeb.DuelLive do
   alias MobaWeb.DuelView
 
   def mount(%{"id" => duel_id}, %{"player_id" => player_id}, socket) do
-    with %{assigns: %{channel: channel, duel: duel}} = socket = socket_init(duel_id, player_id, socket) do
-      if connected?(socket), do: MobaWeb.subscribe(channel)
-      if duel.type == "pvp", do: check_phase()
+    with %{assigns: %{channel: channel}} = socket = socket_init(duel_id, player_id, socket) do
+      if connected?(socket) do
+        MobaWeb.subscribe(channel)
+        check_phase()
+      end
 
       {:ok, socket}
     end
@@ -40,7 +42,7 @@ defmodule MobaWeb.DuelLive do
 
   def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel, heroes: heroes}} = socket) do
     with hero = Enum.find(heroes, &(&1.id == String.to_integer(hero_id))) do
-      Game.next_duel_phase!(duel, hero)
+      Game.continue_duel!(duel, hero)
 
       {:noreply, socket}
     end
@@ -75,12 +77,12 @@ defmodule MobaWeb.DuelLive do
     {:noreply, assign(socket, messages: messages ++ [message])}
   end
 
-  def handle_info(:check_phase, %{assigns: %{duel: %{type: "pvp", phase: phase} = duel}} = socket)
+  def handle_info(:check_phase, %{assigns: %{duel: %{phase: phase} = duel}} = socket)
       when phase not in ["user_battle", "opponent_battle", "finished"] do
     Process.send_after(self(), :check_phase, 1000)
 
     if DuelView.pick_timer(duel, Timex.now()) <= 0 do
-      Game.auto_next_duel_phase!(duel)
+      Game.continue_duel!(duel, :auto)
     end
 
     {:noreply, assign(socket, current_time: Timex.now())}

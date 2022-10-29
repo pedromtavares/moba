@@ -49,23 +49,17 @@ defmodule Moba.Game do
 
   # DUELS
 
-  defdelegate auto_next_duel_phase!(duel), to: Arena
+  defdelegate continue_duel!(duel, hero \\ nil), to: Arena
 
-  defdelegate create_pvp_duel!(player, opponent), to: Arena
+  defdelegate create_duel!(player, opponent), to: Arena
 
   defdelegate duel_challenge(player, opponent), to: Arena
-
-  defdelegate finish_duel!(player, winner, rewards), to: Arena
 
   defdelegate get_duel!(id), to: Duels
 
   defdelegate list_finished_duels(player), to: Duels
 
-  defdelegate list_matchmaking(player), to: Duels
-
-  defdelegate list_pvp_duels(player), to: Duels
-
-  defdelegate next_duel_phase!(duel, hero \\ nil), to: Arena
+  defdelegate list_duels(player), to: Duels
 
   # HEROES
 
@@ -205,19 +199,9 @@ defmodule Moba.Game do
 
   defdelegate duel_opponents(player, online_ids), to: Players
 
-  defdelegate elite_matchmaking!(player), to: Arena
-
-  defdelegate elite_matchmaking_count(player), to: Players
-
   defdelegate get_player!(id), to: Players
 
   defdelegate get_player_from_user!(user_id), to: Players
-
-  defdelegate normal_matchmaking!(player), to: Arena
-
-  defdelegate normal_matchmaking_count(player), to: Players
-
-  defdelegate player_duel_updates!(player, duel_type, updates), to: Arena
 
   defdelegate pvp_points_for(tier), to: Players
 
