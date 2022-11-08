@@ -31,7 +31,7 @@ defmodule Moba.Game.Players do
   end
 
   @doc """
-  Increments duel counts and sets the duel_score map that is displayed on the player's profile
+  Sets pvp_points and the duel_score map that is displayed on the player's profile
   Each player holds the score count of every other player they have dueled against
   """
   def duel_update!(player, updates) do

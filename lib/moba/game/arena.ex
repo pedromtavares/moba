@@ -5,7 +5,7 @@ defmodule Moba.Game.Arena do
   alias Moba.{Engine, Game}
   alias Game.{Duels, Heroes, Matches, Players}
 
-  @daily_match_limit 30
+  @daily_match_limit Moba.daily_match_limit()
 
   def auto_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "auto")
 
@@ -55,21 +55,6 @@ defmodule Moba.Game.Arena do
     |> continue_match!()
   end
 
-  def create_match!(%{daily_matches: player_matches}, _, _) when player_matches >= @daily_match_limit, do: nil
-
-  def create_match!(%{id: player_id}, %{id: opponent_id}, type) do
-    player_picks = Heroes.available_pvp_heroes(player_id) |> Enum.map(& &1.id)
-    opponent_picks = Heroes.available_pvp_heroes(opponent_id) |> Enum.map(& &1.id)
-
-    Matches.create!(%{
-      player_id: player_id,
-      opponent_id: opponent_id,
-      player_picks: player_picks,
-      opponent_picks: opponent_picks,
-      type: type
-    })
-  end
-
   def create_duel!(player, opponent) do
     duel = Duels.create!(player, opponent)
 
@@ -93,6 +78,21 @@ defmodule Moba.Game.Arena do
     MobaWeb.broadcast("player-ranking", "ranking", %{})
   end
 
+  defp create_match!(%{daily_matches: player_matches}, _, _) when player_matches >= @daily_match_limit, do: nil
+
+  defp create_match!(%{id: player_id}, %{id: opponent_id}, type) do
+    player_picks = Heroes.available_pvp_heroes(player_id) |> Enum.map(& &1.id)
+    opponent_picks = Heroes.available_pvp_heroes(opponent_id) |> Enum.map(& &1.id)
+
+    Matches.create!(%{
+      player_id: player_id,
+      opponent_id: opponent_id,
+      player_picks: player_picks,
+      opponent_picks: opponent_picks,
+      type: type
+    })
+  end
+
   defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent} = duel) do
     %{winner_id: first_winner_id} = Engine.first_duel_battle(duel)
     %{winner_id: last_winner_id} = Engine.last_duel_battle(duel)
@@ -108,16 +108,16 @@ defmodule Moba.Game.Arena do
         true -> nil
       end
 
-    {player_points, opponent_points} = Duels.pvp_points(player, opponent, winner)
+    duel_points = Duels.pvp_points(player, opponent, winner)
     player_updates = if player_win, do: %{loser_id: opponent.id}, else: %{}
     opponent_updates = if opponent_win, do: %{loser_id: player.id}, else: %{}
 
-    Players.duel_update!(player, Map.merge(player_updates, %{pvp_points: player_points}))
-    Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: opponent_points}))
+    Players.duel_update!(player, Map.merge(player_updates, %{pvp_points: duel_points.total_player_points}))
+    Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: duel_points.total_opponent_points}))
 
     Moba.update_pvp_ranking()
 
-    %{winner: winner, attacker_pvp_points: player_points, defender_pvp_points: opponent_points}
+    %{winner: winner, attacker_pvp_points: duel_points.player_points, defender_pvp_points: duel_points.opponent_points}
   end
 
   defp score_duel!(_), do: %{}
@@ -126,12 +126,12 @@ defmodule Moba.Game.Arena do
     winner = if match.winner_id == player.id, do: player, else: opponent
     _loser = if match.winner_id == player.id, do: opponent, else: player
 
-    {player_points, _} = Duels.pvp_points(player, opponent, winner)
+    pvp_points = Duels.pvp_points(player, opponent, winner)
 
     match_attrs = %{
       total_matches: player.total_matches + 1,
       daily_matches: player.daily_matches + 1,
-      pvp_points: player.pvp_points + player_points
+      pvp_points: pvp_points.total_player_points
     }
 
     winner_attrs =
@@ -143,7 +143,7 @@ defmodule Moba.Game.Arena do
 
     Players.update_player!(match.player, Map.merge(match_attrs, winner_attrs))
 
-    Matches.update!(match, %{phase: "scored"})
+    Matches.update!(match, %{phase: "scored", rewards: %{attacker_pvp_points: pvp_points.player_points}})
   end
 
   defp score_match!(match), do: match

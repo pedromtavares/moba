@@ -6,51 +6,41 @@
                     <i class="fa fa-hourglass mr-1"></i>You have a pending match, click to continue
                 <% end %>
             <% else %>
-                <%= if @normal_count > 0 do %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a moderate or weaker opponent" phx-click="matchmaking" phx-value-type="normal" class="btn p-2 btn-block btn-lg btn-primary col-md-4 margin-auto matchmaking-button dark-button shadow-fx">
-                        <i class="fa fa-gauge-simple mr-1 fa-2x"></i>
-                        <br/>
-                        Matchmaking
-                        <br/>
-                        <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.normal_matchmaking_shards() %> Shards</span>
-                        <span class="badge badge-light-primary"><i class="fa fa-user"></i> <%= @normal_count %> opponent<%=if @normal_count > 1, do: "s"%> available</span>
-                    </a>
-                <% else %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a moderate or weaker opponent" class="btn p-2 btn-block btn-lg btn-outline-dark col-xl-4 margin-auto no-action matchmaking-button">
-                        <i class="fa fa-gauge-simple mr-1 fa-2x"></i>
-                        <br/>
-                        Matchmaking
-                        <br/>
-                        <small class="font-italic">No opponents available</small>
-                    </a>
-                <% end %>
-                <%= if @normal_count == 0 && @elite_count == 0 do %>
-                    <i class="fa fa-hourglass mt-4 fa-2x text-danger" data-toggle="tooltip" title={bot_timer(@closest_bot_time)}></i>
-                <% end %>
-                <%= if @elite_count > 0 do %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a stronger opponent" phx-click="matchmaking" phx-value-type="elite" class="btn p-2 btn-block btn-lg btn-warning col-md-4 margin-auto matchmaking-button dark-button shadow-fx">
-                        <i class="fa fa-gauge-max mr-1 fa-2x"></i>
-                        <br/>
-                        Elite Matchmaking
-                        <br/>
-                        <span class="badge badge-light-warning"><i class="fab fa-ethereum"></i> +<%= Moba.elite_matchmaking_shards() %> Shards</span>
-                        <span class="badge badge-light-warning"><i class="fa fa-user"></i> <%= @elite_count %> opponent<%=if @elite_count > 1, do: "s"%> available</span>
-                    </a>
-                <% else %>
-                    <a href="javascript:;" data-toggle="tooltip" title="Match against a stronger opponent" class="btn p-2 btn-block btn-lg btn-outline-dark col-xl-4 margin-auto no-action matchmaking-button dark-button">
-                        <i class="fa fa-gauge-max mr-1 fa-2x"></i>
-                        <br/>
-                        Elite Matchmaking
-                        <br/>
-                        <small class="font-italic">No opponents available</small>
-                    </a>
-                <% end %>
+                <a href="javascript:;" phx-click="matchmaking" class="btn p-2 btn-block btn-lg btn-primary col-md-4 margin-auto matchmaking-button dark-button shadow-fx">
+                    <i class="fa fa-gauge-simple mr-1 fa-2x"></i>
+                    <br/>
+                    Matchmaking
+                    <br/>
+                    <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards</span>
+                </a>
             <% end %>
         </div>
         <div class="history">
             <table class="table-dark table mb-0">
-                <%= for duel <- @matchmaking do %>
-                    <%= render "_duel_row.html", duel: duel, battles: @battles, opponent: opponent_for(duel, @current_player), player_id: @current_player.id, socket: @socket %>
+                <%= for match <- @matches do %>
+                    <tr>
+                        <td class="d-flex justify-content-center">
+                            <img src={"/images/pve/#{match.opponent.pve_tier}.png"} class="mr-2" style="max-height:  40px"/>
+                            <div style="width: 50%">
+                                <h4>
+                                    <%= live_redirect username(match.opponent), to: Routes.player_path(@socket, :show, match.opponent.id), class: "text-primary" %>       
+                                </h4>
+                            </div>
+                        </td>
+
+                        <td width="15%" class="text-center">
+                            <%= match_result(match) %>
+                            <%= if match.rewards.attacker_pvp_points != 0 do %>
+                                <%= rewards_badge(match.rewards.attacker_pvp_points) %>
+                            <% end %>
+                        </td>
+                        <td>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.MatchLive, match), class: "btn btn-light" do %>
+                                <i class="fa fa-eye"></i>
+                            <% end %>
+                        </td>
+                    </tr>
+
                 <% end %>
             </table>
         </div>

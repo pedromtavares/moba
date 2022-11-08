@@ -1,6 +1,7 @@
-<div class={if @player.user_id, do: "user-profile", else: "user-profile bot-profile"}>
+<div class="user-profile">
     <div class="row mt-2">
         <div class="col-md-6 col-xl-4">
+            <div class="collection-container">
                 <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
                 <div class="card collection mb-0">
                     <div class="card-body pb-1 d-flex">
@@ -25,101 +26,86 @@
                             <% end %>
                         </div>
                     </div>
+                </div>
             </div>
         </div>
         <div class="col-md-6 col-xl-4">
-            <div class="row">
-                <div class="col">
-                    <div class="card">
-                        <%= if @player.id == @current_player.id do %>
-                            <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">  
-                                <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
-                                    <i class="fa fa-edit mr-1"></i>Edit Profile
-                                <% end %>
-                                <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
-                                    <i class="fa fa-sign-out-alt"></i>
-                                    <span class="d-none d-md-inline">Log out</span>
-                                <% end %>
-                            </h5>
+            <div class="card" phx-hook="EqualHeight" phx-target=".collection-container" id="user-profile">
+                <%= if @player.id == @current_player.id do %>
+                    <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">  
+                        <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
+                            <i class="fa fa-edit mr-1"></i>Edit Profile
                         <% end %>
-                        <div class="card-body p-2 text-center">
-                            <img src={"/images/pve/#{@player.pve_tier}.png"} class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}data-toggle="tooltip" title={Moba.pve_tiers[@player.pve_tier]}/>
-                            <h2 class="text-white f-rpg"><span class={"name-shadow-#{shadow_rank(@player)}"}><%= username(@player) %></span></h2>
-                        </div>
-                        <%= unless length(@duels) == 0 do %>
-                            <div class="pt-1">
-                                <%= if @current_player.user && @player.user && @player.id != @current_player.id do %>
-                                    <div class="score border-top">
-                                        <div class="row no-gutters">
-                                            <div class="col">
-                                                <h4 class="text-right">
-                                                    <%= username(@current_player) %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_player.duel_score["#{@player.id}"] || 0 %></span>
-                                                </h4>
-                                            </div>
-                                            <div class="col-1 d-flex align-items-center justify-content-center">
-                                                <i class="fa fa-times"></i>
-                                            </div>
-                                            <div class="col">
-                                                <h4 class="text-left">
-                                                    <span class="badge badge-pill badge-light-danger font-15"><%= @player.duel_score["#{@current_player.id}"] || 0 %></span> <%= username(@player) %>
-                                                </h4>
-                                            </div>
-                                            <div class="col">
-                                                <button class="btn btn-xs btn-danger mt-1" phx-click="create-match">Match</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <% end %>
-                            </div>
-                            
-                            <div class="transparent p-0 duels">
-                                <table class="table table-dark text-center table-sm m-0">
-                                    <%= for duel <- @duels do %>
-                                        <tr>
-                                            <td>
-                                                <small class={ArenaView.duel_badge_class(duel)} style="font-size: 0.6rem">
-                                                    <%= ArenaView.duel_label(duel) %>
-                                                </small>
-                                            </td>
-
-                                            <td class="text-left">
-                                                <span class="opponent"><%= live_redirect opponent_for(duel, @player) |> username(), to: Routes.player_path(@socket, :show, opponent_for(duel, @player).id) %></span>
-                                            </td>
-
-                                            <td class="text-center">
-                                                <%= ArenaView.duel_result(duel, @player.id) %>
-                                                <%= if duel.player_id == @player.id do %>
-                                                    <%= rewards_badge(duel.rewards.attacker_pvp_points) %>
-                                                <% else %>
-                                                    <%= rewards_badge(duel.rewards.defender_pvp_points) %>
-                                                <% end %>
-                                            </td>
-                                            
-                                            <td>
-                                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, duel), class: "btn btn-light btn-sm" do %>
-                                                    <i class="fa fa-eye"></i>
-                                                <% end %>
-                                            </td>
-                                        </tr>
+                        <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
+                            <i class="fa fa-sign-out-alt"></i>
+                            <span class="d-none d-md-inline">Log out</span>
+                        <% end %>
+                    </h5>
+                <% end %>
+                <div class="card-body p-2 text-center">
+                    <img src={"/images/pve/#{@player.pve_tier}.png"} class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}data-toggle="tooltip" title={Moba.pve_tiers[@player.pve_tier]}/>
+                    <h2 class="text-white f-rpg"><span class={"name-shadow-#{shadow_rank(@player)}"}><%= username(@player) %></span></h2>
+                </div>
+                <hr/>
+                <div class="row no-gutters py-1">
+                    <div class="col text-center">
+                        <strong title="Season Points" data-toggle="tooltip">
+                            <i class="fa fa-arrows-to-dot text-white"></i> <%= @player.pvp_points %> SP
+                        </strong>
+                    </div>
+                    <div class="col text-center">
+                        <strong title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"} data-toggle="tooltip">
+                            <i class="fa fa-swords text-white"></i> <%= total_win_rate(@player)%>
+                        </strong>
+                    </div>
+                    <div class="col text-center">
+                        <strong title="Current Immortal Streak: 0<br/>Best Immortal Streak: 1" data-toggle="tooltip">
+                            <i class="fa fa-trophy text-white"></i> 1
+                        </strong>
+                    </div>
+                </div>
+                <%= if length(@duels) > 0 do %>
+                    <hr/>
+                    <div class="row">
+                        <div class="col d-flex justify-content-center">
+                            <div class="pt-2 pb-2">
+                                <div class="btn-group">
+                                    <%= if @filter == "matches" do %>
+                                        <button type="button" class="btn btn-sm btn-secondary no-action">
+                                            <span class="loading-text">Matches</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-light" phx-click="show-duels" phx-hook="Loading" id="duels-btn">
+                                            <span class="loading-text">Duels</span>
+                                        </button>
+                                    <% else %>
+                                        <button type="button" class="btn btn-sm btn-light" phx-click="show-matches" phx-hook="Loading" id="matches-btn">
+                                            <span class="loading-text">Matches</span>
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-secondary no-action">
+                                            <span class="loading-text">Duels</span>
+                                        </button>
                                     <% end %>
-                                </table>
-                            </div>
-                        <% end %>
-                        <div class="card-footer p-1">
-                            <div class="row">
-                                <div class="col text-center">
-                                    <span class="font-italic text-dark">
-                                        <%= registered_label(@player) %>
-                                    </span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+                <% end %>
+                <%= if @filter == "matches", do: render "_matches.html", assigns %>
+                <%= if @filter == "duels", do: render "_duels.html", assigns %>
+
+                <div class="card-footer p-1">
+                    <div class="row">
+                        <div class="col text-center">
+                            <span class="font-italic text-dark">
+                                <%= registered_label(@player) %>
+                            </span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="col-md-6 col-xl-4">
-            <div class="card ranking">
+            <div class="card ranking" phx-hook="EqualHeight" phx-target=".collection-container" id="user-ranking">
                 <div class="card-body" id="ranking-card">
                     <table class="table table-dark text-center m-0 table-sm">
                         <thead>
@@ -138,13 +124,13 @@
                                         </h1>
                                     </td>
                                     <td>
-                                        <%= live_redirect to: Routes.player_path(@socket, :show, player.id) do %>
+                                        <%= live_redirect to: Routes.player_path(@socket, :show, player.id), title: "#{player.pvp_points} Season Points", data: [toggle: "tooltip"] do %>
                                             <img src={"/images/pve/#{player.pve_tier}.png"} class={"pvp-rank rank-shadow-#{shadow_rank(player)}"} />
                                             <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}><%= username(player) %></h5>
                                         <% end %>
                                     </td>
                                     <td>
-                                        <h3 class={performance_class(player)} title={"#{player.daily_wins} wins / #{player.daily_matches} matches"} data-toggle="tooltip"><%= if player.daily_matches > 0, do: round(player.daily_wins / player.daily_matches * 100), else: 0 %>%</h3>
+                                        <h3 class={performance_class(player)} title={"#{player.daily_wins} wins / #{player.daily_matches} matches"} data-toggle="tooltip"><%= daily_win_rate(player)%></h3>
                                     </td>
                                 </tr>
                             <% end %>

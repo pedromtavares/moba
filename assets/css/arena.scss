@@ -46,6 +46,23 @@
     margin-bottom: 10px;
   }
 
+  #pvp-progression{
+    .info-box{
+      text-align: center;
+      line-height: 0.8;
+      border: 1px solid;
+      padding: 1rem;
+      margin: -2px;
+
+      small{
+        font-size: 0.9rem;
+      }
+    }
+    .btn{
+      background: 0;
+    }
+  }
+
 	.matchmaking{
 
     .avatar{
@@ -57,7 +74,7 @@
     }
 
     .history{
-    	max-height: 220px;
+    	max-height: 45vh;
     	overflow: auto;
 
       h4{
@@ -73,12 +90,23 @@
   }
 
   .duels {
+    overflow: auto;
+
     .avatar{
       max-height: 25px;
     }
 
     h5{
       margin: 0;
+    }
+
+    .history{
+      max-height: 60vh;
+      overflow: auto;
+
+      h4{
+        margin: 0;
+      }
     }
   }
 }

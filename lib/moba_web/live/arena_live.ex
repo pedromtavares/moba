@@ -26,16 +26,12 @@ defmodule MobaWeb.ArenaLive do
   end
 
   def handle_event("matchmaking", _, %{assigns: %{current_player: player}} = socket) do
-    duel = Game.auto_matchmaking!(player)
+    match = Game.auto_matchmaking!(player)
 
-    if duel do
-      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLive, duel.id))}
+    if match do
+      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match.id))}
     else
-      {:noreply,
-       assign(socket,
-         normal_count: 1,
-         elite_count: 1
-       )}
+      {:noreply, socket}
     end
   end
 
@@ -110,26 +106,18 @@ defmodule MobaWeb.ArenaLive do
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
          sidebar_code = "arena",
-         normal_count = 1,
-         elite_count = 1,
-         matchmaking = [],
-         battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
-         pending_match = nil,
+         matches = Game.list_matches(player),
+         pending_match = Enum.find(matches, &(&1.phase != "scored")),
          duels = Game.list_duels(player),
-         duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
          duel_opponents = opponents_from_presence(player),
          last_presence_update = Timex.now(),
          pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
       assign(socket,
-        battles: battles,
         closest_bot_time: current_time,
         current_time: current_time,
         duels: duels,
-        duel_battles: duel_battles,
         duel_opponents: duel_opponents,
-        elite_count: elite_count,
-        matchmaking: matchmaking,
-        normal_count: normal_count,
+        matches: matches,
         pending_duel: pending_duel,
         pending_match: pending_match,
         last_presence_update: last_presence_update,

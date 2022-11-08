@@ -1,5 +1,6 @@
 defmodule MobaWeb.ArenaView do
   use MobaWeb, :view
+  alias MobaWeb.PlayerView
 
   def bot_timer(time) do
     time =
@@ -28,6 +29,10 @@ defmodule MobaWeb.ArenaView do
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
 
+  def daily_matches_percentage(%{daily_matches: daily_matches}) do
+    daily_matches * 100 / Moba.daily_match_limit()
+  end
+
   def duel_badge_class(%{type: type}) do
     case type do
       "pvp" -> "badge badge-light-danger"
@@ -47,6 +52,14 @@ defmodule MobaWeb.ArenaView do
       duel.phase != "finished" -> content_tag(:h5, "In Progress")
       is_nil(duel.winner_player) -> content_tag(:h5, "Tie", class: "text-white")
       duel.winner_player_id == player_id -> content_tag(:h5, "Victory", class: "text-success")
+      true -> content_tag(:h5, "Defeat", class: "text-muted")
+    end
+  end
+
+  def match_result(match) do
+    cond do
+      match.phase != "scored" -> content_tag(:h5, "In Progress")
+      match.winner_id == match.player_id -> content_tag(:h5, "Victory", class: "text-success")
       true -> content_tag(:h5, "Defeat", class: "text-muted")
     end
   end

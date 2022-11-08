@@ -4,6 +4,12 @@ defmodule MobaWeb.PlayerView do
 
   defdelegate avatar_class(hero), to: DashboardView
 
+  def daily_win_rate(%{daily_matches: matches, daily_wins: wins}) when matches > 0 do
+    "#{round(wins / matches * 100)}%"
+  end
+
+  def daily_win_rate(_), do: "0%"
+
   def in_ranking?(ranking, %{id: id}) do
     ranking
     |> Enum.map(& &1.id)
@@ -40,4 +46,10 @@ defmodule MobaWeb.PlayerView do
 
   def shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
   def shadow_rank(%{pvp_tier: tier}), do: tier
+
+  def total_win_rate(%{total_matches: matches, total_wins: wins}) when matches > 0 do
+    "#{round(wins / matches * 100)}%"
+  end
+
+  def total_win_rate(_), do: "0%"
 end

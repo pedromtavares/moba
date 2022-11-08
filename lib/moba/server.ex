@@ -47,7 +47,7 @@ defmodule Moba.Server do
     state
   end
 
-  defp time_diff_in_seconds(nil), do: 999_999_999
+  defp time_diff_in_seconds(nil), do: 0
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
   defp dev?, do: Application.get_env(:moba, :env) == :dev

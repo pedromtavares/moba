@@ -20,6 +20,19 @@ Hooks.CompleteTutorial = {
   }
 }
 
+Hooks.EqualHeight = {
+  mounted(){
+    const target = this.el.getAttribute("phx-target")
+    const height = $(target).height()
+    this.el.style.height = `${height}px`
+  },
+  updated(){
+    const target = this.el.getAttribute("phx-target")
+    const height = $(target).height()
+    this.el.style.height = `${height}px`
+  }
+}
+
 Hooks.Scroll = {
   mounted(){
     this.el.scrollIntoView();

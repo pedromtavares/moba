@@ -185,9 +185,9 @@ defmodule Moba.Game do
 
   defdelegate continue_match!(match), to: Arena
 
-  defdelegate create_match!(player, opponent, type \\ Matches.types()[:manual]), to: Arena
-
   defdelegate get_match!(id), to: Matches
+
+  defdelegate list_matches(player), to: Matches
 
   # PLAYERS
 

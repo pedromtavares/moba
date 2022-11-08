@@ -65,15 +65,7 @@ defmodule Moba.Game.Matches do
 
   def get_match!(id), do: load() |> Repo.get!(id) |> load_picks()
 
-  def list_query(player_id, type \\ @types[:manual]) do
-    season = Moba.current_season()
-
-    from(match in load(),
-      where: match.player_id == ^player_id,
-      where: match.type == ^type,
-      where: match.inserted_at > ^season.last_pvp_update_at
-    )
-  end
+  def list_matches(%{id: player_id}), do: list_query(player_id) |> Repo.all()
 
   def load(queryable \\ Match) do
     preload(queryable, player: :user, opponent: :user, winner: :user)
@@ -99,6 +91,17 @@ defmodule Moba.Game.Matches do
     end
   end
 
+  defp list_query(player_id, type \\ nil) do
+    season = Moba.current_season()
+
+    from(match in load(),
+      where: match.player_id == ^player_id,
+      where: match.inserted_at > ^season.last_pvp_update_at,
+      order_by: [desc: :id]
+    )
+    |> type_query(type)
+  end
+
   defp load_picks(%{player_picks: player_picks, opponent_picks: opponent_picks} = match) do
     heroes = Game.get_heroes(player_picks ++ opponent_picks)
     player_picks = Enum.map(player_picks, &load_picks_hero(heroes, &1))
@@ -108,4 +111,10 @@ defmodule Moba.Game.Matches do
   end
 
   defp load_picks_hero(heroes, hero_id), do: Enum.find(heroes, &(&1.id == hero_id))
+
+  defp type_query(query, nil), do: query
+
+  defp type_query(query, type) do
+    from(match in query, where: match.type == ^type)
+  end
 end

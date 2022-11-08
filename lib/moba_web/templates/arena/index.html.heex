@@ -10,14 +10,17 @@
                 <div class="col">
                     <%= render "_matchmaking.html", assigns %>
                 </div>
-            </div>
-            <%= unless silenced?(assigns) do %>
-                <div class="row">
+                <div class="col">
+                    <%= render "_matchmaking.html", assigns %>
+                </div>
+
+                <%= unless silenced?(assigns) do %>
                     <div class="col">
                         <%= render "_duels.html", assigns %>
                     </div>
-                </div>
-            <% end %>
+                <% end %>
+            </div>
+            
         </div>
     </div>
 </div>

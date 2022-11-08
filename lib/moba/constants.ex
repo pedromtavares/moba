@@ -78,13 +78,13 @@ defmodule Moba.Constants do
       # PVP
       @max_pvp_tier 18
       @match_timeout_in_hours 24
-      @normal_matchmaking_shards 5
-      @elite_matchmaking_shards 15
+      @normal_matchmaking_shards 20
       @minimum_duel_points 2
       @maximum_points_difference 200
       @duel_timer_in_seconds 60
       @turn_timer_in_seconds 30
       @pvp_ranking_limit 50
+      @daily_match_limit 30
 
       def base_hero_count, do: @base_hero_count
       def items_base_price, do: @items_base_price
@@ -145,8 +145,7 @@ defmodule Moba.Constants do
 
       def max_pvp_tier, do: @max_pvp_tier
       def match_timeout_in_hours, do: @match_timeout_in_hours
-      def normal_matchmaking_shards, do: @normal_matchmaking_shards
-      def elite_matchmaking_shards, do: @elite_matchmaking_shards
+      def matchmaking_shards, do: @normal_matchmaking_shards
       def maximum_points_difference, do: @maximum_points_difference
       def minimum_duel_points(points) when points < @minimum_duel_points, do: @minimum_duel_points
       def minimum_duel_points(points), do: points
@@ -161,6 +160,7 @@ defmodule Moba.Constants do
       def duel_timer_in_seconds, do: @duel_timer_in_seconds
       def turn_timer_in_seconds, do: @turn_timer_in_seconds
       def pvp_ranking_limit, do: @pvp_ranking_limit
+      def daily_match_limit, do: @daily_match_limit
     end
   end
 end

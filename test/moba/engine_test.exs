@@ -237,8 +237,8 @@ defmodule Moba.EngineTest do
       %{player: opponent} = Game.get_hero!(defender.id)
       duel = Game.get_duel!(duel.id)
 
-      assert duel.rewards.attacker_pvp_points == 55
-      assert duel.rewards.defender_pvp_points == 45
+      assert duel.rewards.attacker_pvp_points == 5
+      assert duel.rewards.defender_pvp_points == -5
       assert duel.winner_player_id == attacker.player_id
       assert player.duel_score == %{"#{opponent.id}" => 1}
       assert opponent.duel_score == %{}

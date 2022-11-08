@@ -128,7 +128,12 @@ defmodule Moba.Game.Duels do
           {tie_points, tie_points * -1}
       end
 
-    {points_limits(player.pvp_points + player_points), points_limits(opponent.pvp_points + opponent_points)}
+    %{
+      total_player_points: points_limits(player.pvp_points + player_points),
+      player_points: player_points,
+      total_opponent_points: points_limits(opponent.pvp_points + opponent_points),
+      opponent_points: opponent_points
+    }
   end
 
   defp available_random_hero(player_id, pick_id) do
@@ -138,10 +143,10 @@ defmodule Moba.Game.Duels do
   defp available_heroes(player_id, nil), do: Game.available_pvp_heroes(player_id, [])
   defp available_heroes(player_id, hero_id), do: Game.available_pvp_heroes(player_id, [hero_id])
 
-  defp base_query(%{id: player_id}) do
+  defp base_query(%{id: player_id}, limit \\ 15) do
     from duel in load_less(),
       where: duel.player_id == ^player_id or duel.opponent_player_id == ^player_id,
-      limit: 15,
+      limit: ^limit,
       order_by: [desc: duel.inserted_at]
   end
 

@@ -49,14 +49,10 @@
     }
   }
 
-  .bot-ranking{
-    .card-body{
-      max-height: 720px !important;
-    }
-  }
-
   .ranking{
     margin-bottom: 0;
+    max-height: 110vh;
+    overflow: auto;
 
     .selected-player{
       background: rgba(0,0,0,0.2)
@@ -64,8 +60,6 @@
 
     .card-body{
       padding: 0 !important;
-      max-height: 93vh;
-      overflow: auto;
 
       thead th {
         position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
@@ -95,8 +89,8 @@
   }
 
 
-  .duels{
-    height: 64vh;
+  .duels, .matches{
+    height: 55vh;
     overflow: auto;
 
     h5{
@@ -124,12 +118,5 @@
       top: 70%;
       left: 40%;
     }
-  }
-}
-
-.bot-profile{
-
-  .duels{
-    max-height: 39.5vh;
   }
 }
