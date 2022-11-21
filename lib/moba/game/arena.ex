@@ -9,21 +9,6 @@ defmodule Moba.Game.Arena do
 
   def auto_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "auto")
 
-  def clear_auto_matches!(player) do
-    if Matches.can_clear_auto_matches?(player) do
-      Matches.clear_auto!(player)
-      total_wins = player.total_wins - player.daily_wins
-      total_matches = player.total_matches - player.daily_matches
-
-      Players.update_player!(player, %{
-        daily_matches: 0,
-        daily_wins: 0,
-        total_wins: total_wins,
-        total_matches: total_matches
-      })
-    end
-  end
-
   def continue_duel!(%{phase: "opponent_battle"} = duel, _) do
     score = score_duel!(duel)
     Players.set_player_available!(duel.player) && Players.set_player_available!(duel.opponent_player)
@@ -71,6 +56,23 @@ defmodule Moba.Game.Arena do
 
     MobaWeb.broadcast("player-#{player_id}", "challenge", attrs)
     MobaWeb.broadcast("player-#{opponent_id}", "challenge", attrs)
+  end
+
+  def manual_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "manual")
+
+  def maybe_clear_auto_matches(player) do
+    if Matches.can_clear_auto_matches?(player) do
+      cleared_count = Matches.clear_auto!(player)
+
+      Players.update_player!(player, %{
+        daily_matches: player.daily_matches - cleared_count,
+        daily_wins: player.daily_wins - cleared_count,
+        total_wins: player.total_wins - cleared_count,
+        total_matches: player.total_matches - cleared_count
+      })
+    else
+      player
+    end
   end
 
   def update_pvp_ranking!(update_tiers?) do

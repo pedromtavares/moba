@@ -46,6 +46,12 @@
     margin-bottom: 10px;
   }
 
+  .matchmaking-button{
+    .badge{
+      font-size: 0.7rem;
+    }
+  }
+
   #pvp-progression{
     .info-box{
       text-align: center;
@@ -64,6 +70,7 @@
   }
 
 	.matchmaking{
+    overflow: hidden;
 
     .avatar{
       max-height: 25px;
@@ -74,7 +81,7 @@
     }
 
     .history{
-    	max-height: 45vh;
+    	max-height: 60vh;
     	overflow: auto;
 
       h4{
@@ -82,15 +89,46 @@
       }
     }
 
-    .matchmaking-button{
-    	.badge{
-    		font-size: 0.7rem;
-    	}
+    
+  }
+
+  .ranking{
+    padding: 0;
+    max-height: 65vh;
+
+    .card-body{
+      padding: 0;
+      overflow: auto;
+
+      thead th {
+        position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #414d59;
+        border-top: 0;
+        padding: 0.7rem;
+      }
+
+      tfoot th{
+        position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        background: #3a454f;
+        border-top: 0;
+        padding: 0.75rem;
+        vertical-align: middle;
+      }
+    }
+
+    .pvp-rank{
+      max-height: 50px;
     }
   }
 
   .duels {
-    overflow: auto;
+    overflow: hidden;
 
     .avatar{
       max-height: 25px;

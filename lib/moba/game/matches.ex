@@ -8,14 +8,17 @@ defmodule Moba.Game.Matches do
 
   def can_clear_auto_matches?(player) do
     query = list_query(player.id, "auto")
-    count = Repo.aggregate(query, :count)
-
-    player.daily_matches == count
+    Repo.aggregate(query, :count) > 0
   end
 
   def clear_auto!(player) do
-    list_query(player.id, "auto")
-    |> Repo.delete_all()
+    {count, _} =
+      list_query(player.id, "auto")
+      |> exclude(:order_by)
+      |> exclude(:preload)
+      |> Repo.delete_all()
+
+    count
   end
 
   def create!(attrs), do: Match.changeset(%Match{}, attrs) |> Repo.insert!()

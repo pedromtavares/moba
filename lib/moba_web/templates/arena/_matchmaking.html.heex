@@ -1,19 +1,10 @@
-<div class="card matchmaking" id="matchmaking-container">
+<div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".ranking">
     <div class="card-body p-0">
-        <div class="row d-flex justify-content-around my-3">
-            <%= if @pending_match do %>
-                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
-                    <i class="fa fa-hourglass mr-1"></i>You have a pending match, click to continue
-                <% end %>
-            <% else %>
-                <a href="javascript:;" phx-click="matchmaking" class="btn p-2 btn-block btn-lg btn-primary col-md-4 margin-auto matchmaking-button dark-button shadow-fx">
-                    <i class="fa fa-gauge-simple mr-1 fa-2x"></i>
-                    <br/>
-                    Matchmaking
-                    <br/>
-                    <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards</span>
-                </a>
-            <% end %>
+        <div class="d-flex justify-content-center my-2">
+            <div class="custom-control custom-switch">
+                <input type="checkbox" class="custom-control-input" id="toggle-auto-matchmaking" phx-click="show-farm-tabs" checked={@current_player.preferences.auto_matchmaking}>
+                <label class="custom-control-label" for="toggle-auto-matchmaking">Auto Matchmaking</label>
+            </div>
         </div>
         <div class="history">
             <table class="table-dark table mb-0">

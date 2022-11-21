@@ -8,10 +8,17 @@ defmodule MobaWeb.ArenaLive do
       if connected?(socket) do
         TutorialComponent.subscribe(player.id)
         MobaWeb.subscribe("online")
+        MobaWeb.subscribe("player-ranking")
       end
 
       {:ok, socket}
     end
+  end
+
+  def handle_event("clear-auto-matches", _, %{assigns: %{current_player: player}} = socket) do
+    player = Game.maybe_clear_auto_matches(player)
+
+    {:noreply, assign(socket, current_player: player)}
   end
 
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_player: player}} = socket) do
@@ -26,12 +33,12 @@ defmodule MobaWeb.ArenaLive do
   end
 
   def handle_event("matchmaking", _, %{assigns: %{current_player: player}} = socket) do
-    match = Game.auto_matchmaking!(player)
+    match = Game.manual_matchmaking!(player)
 
     if match do
       {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match.id))}
     else
-      {:noreply, socket}
+      {:noreply, assign(socket, current_player: Game.get_player!(player.id))}
     end
   end
 
@@ -69,6 +76,13 @@ defmodule MobaWeb.ArenaLive do
       {:noreply, assign(socket, duel_opponents: opponents_from_presence(player), last_presence_update: Timex.now())}
     else
       {:noreply, socket}
+    end
+  end
+
+  def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}}} = socket) do
+    with player = Game.get_player!(id),
+         ranking = tiered_ranking(player) do
+      {:noreply, assign(socket, ranking: ranking, current_player: player)}
     end
   end
 
@@ -111,7 +125,8 @@ defmodule MobaWeb.ArenaLive do
          duels = Game.list_duels(player),
          duel_opponents = opponents_from_presence(player),
          last_presence_update = Timex.now(),
-         pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
+         pending_duel = Enum.find(duels, &(&1.phase != "finished")),
+         ranking = tiered_ranking(player) do
       assign(socket,
         closest_bot_time: current_time,
         current_time: current_time,
@@ -121,10 +136,16 @@ defmodule MobaWeb.ArenaLive do
         pending_duel: pending_duel,
         pending_match: pending_match,
         last_presence_update: last_presence_update,
+        ranking: ranking,
         sidebar_code: sidebar_code,
         tutorial_step: player.tutorial_step
       )
       |> maybe_redirect()
     end
+  end
+
+  defp tiered_ranking(%{pvp_tier: tier}) do
+    Moba.pvp_ranking()
+    |> Enum.filter(fn player -> player.pvp_tier == tier end)
   end
 end

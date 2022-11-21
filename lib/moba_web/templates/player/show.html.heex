@@ -110,7 +110,7 @@
                     <table class="table table-dark text-center m-0 table-sm">
                         <thead>
                             <tr>
-                                <th><%= unless is_nil(@player.bot_options), do: "A.I. " %>Rank</th>
+                                <th>Rank</th>
                                 <th>Player</th>
                                 <th>Daily Win Rate</th>
                             </tr>
@@ -146,11 +146,11 @@
                                         <% end %>
                                     </th>
                                     <th>
-                                        <img src={"/images/pvp/#{@player.pvp_tier}.png"} class="pvp-rank" />
+                                        <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
                                         <h5 class="font-weight-bold mb-0 mt-1 text-info"><%= username(@player) %></h5>
                                     </th>
                                     <th>
-                                        <h3 class="text-success"><%= @player.pvp_points %></h3>
+                                        <h3 class={performance_class(@player)} title={"#{@player.daily_wins} wins / #{@player.daily_matches} matches"} data-toggle="tooltip"><%= daily_win_rate(@player)%></h3>
                                     </th>
                                 </tr>           
                             </tfoot>

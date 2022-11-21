@@ -1,16 +1,16 @@
 <div class="card dark-bg mb-3" id="pvp-progression">
     <div class="card-body pb-0">
         <div class="row mt-3 mb-3 d-flex justify-content-center">
-            <div class="col-8">
-                <h4 class="text-center mb-0 mt-0 f-rpg">Immortal</h4>
-                <div class="progress mt-3" style="height:50px;">
+            <div class="col">
+                <h4 class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}><%= tier_label(@current_player) %></h4>
+                <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" data-tippy-placement="bottom" title={reset_timer()}>
                     <div style={"width:#{daily_matches_percentage(@current_player)}%;"} class="progress-bar pvp-bar"></div>
                     <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
                         <%= @current_player.daily_matches %> / <%= Moba.daily_match_limit() %> Daily Matches
                     </h5>
                 </div>
                 <div class="mt-4 d-flex justify-content-between align-items-center">
-                    <div>
+                    <div class="col">
                         <a class="btn btn-light">
                             <i class="fa fa-info mr-1 fa-2x"></i><br/>Arena Info
                         </a>
@@ -18,24 +18,44 @@
                             <a href="javascript:;" data-toggle="tooltip" title="Remove all daily matches from auto matchmaking." phx-click="clear-auto-matches" class="btn btn-light"><i class="fa fa-remove fa-2x mr-1"></i><br/>Clear Auto Matches</a>
                         <% end %>
                     </div>
-                    <div>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="toggle-auto-matchmaking" phx-click="show-farm-tabs" checked={@current_player.preferences.auto_matchmaking}>
-                            <label class="custom-control-label" for="toggle-auto-matchmaking">Auto Matchmaking</label>
+                    <div class="col">
+                        <div class="row d-flex justify-content-around">
+                            <%= if @pending_match do %>
+                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
+                                    <i class="fa fa-hourglass mr-1"></i>You have a pending match, click to continue
+                                <% end %>
+                            <% else %>
+                                <%= if @current_player.daily_matches < Moba.daily_match_limit() do %>
+                                    <a href="javascript:;" phx-click="matchmaking" class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx">
+                                        <i class="fa fa-swords mr-1 fa-2x"></i>
+                                        <br/>
+                                        Enter the Arena
+                                        <br/>
+                                        <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards</span>
+                                    </a>
+                                <% else %>
+                                    <a href="javascript:;" class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button">
+                                        <i class="fa fa-clock-o mr-1 fa-2x"></i>
+                                        <br/>
+                                        <%= reset_timer() %>
+                                    </a>
+                                <% end %>
+                            <% end %>
                         </div>
+                        
                     </div>
-                    <div class="d-flex justify-content-center">
-                        <h3 class="info-box text-success" data-toggle="tooltip" title="Season Points">
+                    <div class="col d-flex justify-content-center">
+                        <h3 class="info-box text-warning">
                             <span class="f-rpg"><%= @current_player.pvp_points %></span>
                             <br/>
-                            <small class="text-muted">SP</small>
+                            <small class="text-muted">Season Points</small>
                         </h3>
                         <h3 class="info-box text-primary" data-toggle="tooltip" title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}>
                             <span class="f-rpg"><%= PlayerView.total_win_rate(@current_player) %></span>
                             <br/>
                             <small class="text-muted">Total Win Rate</small>
                         </h3>
-                        <h3 class="info-box text-warning">
+                        <h3 class="info-box text-success">
                             <span class="f-rpg"><%= PlayerView.daily_win_rate(@current_player) %></span>
                             <br/>
                             <small class="text-muted">Daily Win Rate</small>

@@ -179,9 +179,9 @@ defmodule Moba.Game do
 
   # MATCHES
 
-  defdelegate can_clear_auto_matches?(player), to: Matches
+  defdelegate auto_matchmaking!(player), to: Arena
 
-  defdelegate clear_auto_matches!(player), to: Arena
+  defdelegate can_clear_auto_matches?(player), to: Matches
 
   defdelegate continue_match!(match), to: Arena
 
@@ -189,9 +189,11 @@ defmodule Moba.Game do
 
   defdelegate list_matches(player), to: Matches
 
-  # PLAYERS
+  defdelegate manual_matchmaking!(player), to: Arena
 
-  defdelegate auto_matchmaking!(player), to: Arena
+  defdelegate maybe_clear_auto_matches(player), to: Arena
+
+  # PLAYERS
 
   defdelegate bot_ranking, to: Players
 
