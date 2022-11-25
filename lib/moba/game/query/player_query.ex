@@ -80,6 +80,14 @@ defmodule Moba.Game.Query.PlayerQuery do
     )
   end
 
+  def season_ranking(limit) do
+    base = non_bots() |> non_guests() |> limit_by(limit)
+
+    from(player in base,
+      order_by: [desc: [player.best_immortal_streak, player.pvp_points, player.total_wins]]
+    )
+  end
+
   def with_pvp_tier(tier) do
     from player in pvp_available(), where: player.pvp_tier == ^tier
   end

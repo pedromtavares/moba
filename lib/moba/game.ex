@@ -223,6 +223,8 @@ defmodule Moba.Game do
 
   defdelegate update_pvp_ranking!(update_tiers? \\ false), to: Arena
 
+  defdelegate update_season_ranking!, to: Players
+
   defdelegate update_tutorial_step!(player, step), to: Players
 
   # QUESTS

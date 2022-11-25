@@ -155,7 +155,7 @@ defmodule Moba.Game.Players do
       |> Kernel.--(ranked_rest)
       |> Kernel.++(deranked_shadows)
 
-    the_immortal && update_player!(the_immortal, %{ranking: 1})
+    the_immortal && update_immortal!(the_immortal)
 
     new_immortals
     |> Enum.with_index(2)
@@ -166,7 +166,7 @@ defmodule Moba.Game.Players do
     new_shadows
     |> Enum.with_index(6)
     |> Enum.each(fn {player, index} ->
-      update_player!(player, %{ranking: index, pvp_tier: 1})
+      update_player!(player, %{ranking: index, pvp_tier: 1, current_immortal_streak: 0})
     end)
 
     new_rest
@@ -177,11 +177,28 @@ defmodule Moba.Game.Players do
     end)
   end
 
+  def update_season_ranking! do
+    Repo.update_all(Player, set: [season_ranking: nil])
+
+    PlayerQuery.season_ranking(1000)
+    |> Repo.all()
+    |> Enum.with_index(1)
+    |> Enum.each(fn {player, index} ->
+      update_player!(player, %{season_ranking: index})
+    end)
+  end
+
   defp rank_tiered_players!(players, start_index) do
     players
     |> Enum.with_index(start_index)
     |> Enum.each(fn {player, index} ->
       update_player!(player, %{ranking: index})
     end)
+  end
+
+  defp update_immortal!(%{current_immortal_streak: cstreak, best_immortal_streak: bstreak} = player) do
+    current = cstreak + 1
+    best = if current > bstreak, do: current, else: bstreak
+    update_player!(player, %{ranking: 1, best_immortal_streak: best, current_immortal_streak: current})
   end
 end
