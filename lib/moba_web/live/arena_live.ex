@@ -145,7 +145,7 @@ defmodule MobaWeb.ArenaLive do
   end
 
   defp tiered_ranking(%{pvp_tier: tier}) do
-    Moba.pvp_ranking()
+    Moba.daily_ranking()
     |> Enum.filter(fn player -> player.pvp_tier == tier end)
   end
 end

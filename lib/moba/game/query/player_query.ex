@@ -57,7 +57,7 @@ defmodule Moba.Game.Query.PlayerQuery do
     from _ in query, order_by: fragment("RANDOM()")
   end
 
-  def ranking(limit) do
+  def daily_ranked(limit) do
     from(player in limit_by(Player, limit),
       where: not is_nil(player.ranking),
       order_by: [asc: player.ranking]
@@ -77,6 +77,13 @@ defmodule Moba.Game.Query.PlayerQuery do
 
     from(player in base,
       order_by: [desc: [player.pvp_points, player.pve_tier, player.total_farm]]
+    )
+  end
+
+  def season_ranked(limit) do
+    from(player in limit_by(Player, limit),
+      where: not is_nil(player.season_ranking),
+      order_by: [asc: player.season_ranking]
     )
   end
 

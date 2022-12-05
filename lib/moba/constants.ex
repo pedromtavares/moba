@@ -83,7 +83,8 @@ defmodule Moba.Constants do
       @maximum_points_difference 200
       @duel_timer_in_seconds 60
       @turn_timer_in_seconds 30
-      @pvp_ranking_limit 50
+      @daily_ranking_limit 50
+      @season_ranking_limit 50
       @daily_match_limit 30
 
       def base_hero_count, do: @base_hero_count
@@ -159,7 +160,8 @@ defmodule Moba.Constants do
       def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points()
       def duel_timer_in_seconds, do: @duel_timer_in_seconds
       def turn_timer_in_seconds, do: @turn_timer_in_seconds
-      def pvp_ranking_limit, do: @pvp_ranking_limit
+      def daily_ranking_limit, do: @daily_ranking_limit
+      def season_ranking_limit, do: @season_ranking_limit
       def daily_match_limit, do: @daily_match_limit
     end
   end

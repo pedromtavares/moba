@@ -10,7 +10,7 @@ defmodule MobaWeb.CommunityLive do
   end
 
   def handle_event("show-users", _, %{assigns: %{pvp_ranking: users}} = socket) do
-    users = if users, do: users, else: Moba.pvp_ranking()
+    users = if users, do: users, else: Moba.daily_ranking()
     {:noreply, assign(socket, active_tab: "users", pvp_ranking: users)}
   end
 

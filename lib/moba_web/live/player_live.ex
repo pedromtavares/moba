@@ -38,9 +38,16 @@ defmodule MobaWeb.PlayerLive do
     end
   end
 
-  def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}}} = socket) do
+  def handle_event("switch-ranking", _, %{assigns: %{ranking_display: display}} = socket) do
+    with other_display = other_ranking_display(display),
+         ranking = ranking_for(other_display) do
+      {:noreply, assign(socket, ranking: ranking, ranking_display: other_display)}
+    end
+  end
+
+  def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}, ranking_display: display}} = socket) do
     with player = Game.get_player!(id),
-         ranking = ranking_for(player) do
+         ranking = ranking_for(display) do
       {:noreply, assign(socket, ranking: ranking, player: player)}
     end
   end
@@ -56,8 +63,11 @@ defmodule MobaWeb.PlayerLive do
 
   defp featured_hero(player), do: player.current_pve_hero
 
-  defp ranking_for(%{bot_options: options}) when not is_nil(options), do: Game.bot_ranking()
-  defp ranking_for(_), do: Moba.pvp_ranking()
+  defp other_ranking_display("daily"), do: "season"
+  defp other_ranking_display(_), do: "daily"
+
+  defp ranking_for("daily"), do: Moba.daily_ranking()
+  defp ranking_for(_), do: Moba.season_ranking()
 
   defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do
     with user = Accounts.get_user!(user_id),
@@ -67,7 +77,8 @@ defmodule MobaWeb.PlayerLive do
          featured = featured_hero(player),
          duels = Game.list_finished_duels(player),
          matches = Game.list_matches(player),
-         ranking = ranking_for(player),
+         ranking_display = "daily",
+         ranking = ranking_for(ranking_display),
          sidebar_code = if(player.id == current_player.id, do: "user", else: nil),
          filter = "matches" do
       assign(socket,
@@ -78,6 +89,7 @@ defmodule MobaWeb.PlayerLive do
         matches: matches,
         player: player,
         ranking: ranking,
+        ranking_display: ranking_display,
         sidebar_code: sidebar_code,
         user: user
       )

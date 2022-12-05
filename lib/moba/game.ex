@@ -199,6 +199,8 @@ defmodule Moba.Game do
 
   defdelegate create_player!(attrs), to: Players
 
+  defdelegate daily_ranking(limit), to: Players
+
   defdelegate duel_opponents(player, online_ids), to: Players
 
   defdelegate get_player!(id), to: Players
@@ -207,7 +209,7 @@ defmodule Moba.Game do
 
   defdelegate pvp_points_for(tier), to: Players
 
-  defdelegate pvp_ranking(limit), to: Players
+  defdelegate season_ranking(limit), to: Players
 
   defdelegate set_player_available!(player), to: Players
 

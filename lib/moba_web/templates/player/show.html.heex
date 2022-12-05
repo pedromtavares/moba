@@ -59,8 +59,8 @@
                         </strong>
                     </div>
                     <div class="col text-center">
-                        <strong title="Current Immortal Streak: 0<br/>Best Immortal Streak: 1" data-toggle="tooltip">
-                            <i class="fa fa-trophy text-white"></i> 1
+                        <strong title={"Current Immortal Streak: #{@player.current_immortal_streak}<br/>Best Immortal Streak: #{@player.best_immortal_streak}"} data-toggle="tooltip">
+                            <i class="fa fa-trophy text-white"></i> <%= @player.best_immortal_streak %>
                         </strong>
                     </div>
                 </div>
@@ -110,9 +110,20 @@
                     <table class="table table-dark text-center m-0 table-sm">
                         <thead>
                             <tr>
-                                <th>Rank</th>
+                                <th>
+                                    <a href="javascript:;" phx-click="switch-ranking" data-toggle="tooltip" title={"Switch to #{if @ranking_display == "daily", do: "Season", else: "Daily"} Rank"} phx-hook="Loading" class="text-white" id="loading-ranking">
+                                        <span class="loading-text">
+                                            <i class="fa fa-arrows-cross mr-1 text-primary"></i>
+                                            <%= if @ranking_display == "daily", do: "Daily", else: "Season"%> Rank
+                                        </span>
+                                    </a>
+                                </th>
                                 <th>Player</th>
-                                <th>Daily Win Rate</th>
+                                <%= if @ranking_display == "daily" do %>
+                                    <th>Daily Win Rate</th>
+                                <% else %>
+                                    <th data-toggle="tooltip" title="Score is defined by: Best Immortal Streak (Season Points)">Season Score</th>
+                                <% end %>
                             </tr>
                         </thead>
                         <tbody>
@@ -120,7 +131,11 @@
                                 <tr id={"player-#{player.id}"} phx-hook={if player.id == @player.id, do: "HalfScroll"} phx-container="#ranking-card" class={if player.id == @player.id, do: "selected-player"}>
                                     <td>
                                         <h1 class="f-rpg" >
-                                            #<%= player.ranking || index %>
+                                            <%= if @ranking_display == "daily" do %>
+                                                #<%= player.ranking || index %>
+                                            <% else %>
+                                                #<%= player.season_ranking %>
+                                            <% end %>
                                         </h1>
                                     </td>
                                     <td>
@@ -130,7 +145,11 @@
                                         <% end %>
                                     </td>
                                     <td>
-                                        <h3 class={performance_class(player)} title={"#{player.daily_wins} wins / #{player.daily_matches} matches"} data-toggle="tooltip"><%= daily_win_rate(player)%></h3>
+                                        <%= if @ranking_display == "daily" do %>
+                                            <h3 class={performance_class(player)} title={"#{player.daily_wins} wins / #{player.daily_matches} matches"} data-toggle="tooltip" id={"daily-player-#{player.id}"}><%= daily_win_rate(player)%></h3>
+                                        <% else %>
+                                            <h3 class="text-success"  id={"season-player-#{player.id}"}><%= player.best_immortal_streak %> <span class="text-small">(<%= player.pvp_points %>)</span></h3>
+                                        <% end %>
                                     </td>
                                 </tr>
                             <% end %>

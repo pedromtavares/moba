@@ -82,7 +82,9 @@ defmodule Moba.Game.Players do
   @doc """
   Lists Players by their ranking
   """
-  def pvp_ranking(limit), do: PlayerQuery.ranking(limit) |> Repo.all() |> Repo.preload(:user)
+  def daily_ranking(limit), do: PlayerQuery.daily_ranked(limit) |> Repo.all() |> Repo.preload(:user)
+
+  def season_ranking(limit), do: PlayerQuery.season_ranked(limit) |> Repo.all() |> Repo.preload(:user)
 
   def set_player_available!(player), do: update_player!(player, %{status: "available"})
 
