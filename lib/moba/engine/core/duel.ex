@@ -16,8 +16,8 @@ defmodule Moba.Engine.Core.Duel do
   end
 
   def finalize_battle(battle) do
-    battle
-    |> generate_snapshots()
+    Game.continue_duel!(battle.duel, nil)
+    generate_snapshots(battle)
   end
 
   defp battle_for(%{attacker: attacker, defender: defender, duel_id: duel_id}) do

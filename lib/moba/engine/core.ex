@@ -148,23 +148,7 @@ defmodule Moba.Engine.Core do
     end
   end
 
-  defp skip_bot_turn?(
-         %{
-           type: "duel",
-           attacker: attacker,
-           defender: defender,
-           initiator: initiator,
-           duel: %{type: duel_type, player: %{id: player_id, bot_options: nil}}
-         },
-         last_turn
-       )
-       when duel_type != "pvp" do
-    bot_initiator = is_nil(last_turn) && initiator.player_id != player_id
-    bot_attacker = last_turn && last_turn.defender.hero_id == attacker.id && attacker.player_id != player_id
-    bot_defender = last_turn && last_turn.defender.hero_id == defender.id && defender.player_id != player_id
-
-    bot_initiator || bot_attacker || bot_defender
-  end
+  defp skip_bot_turn?(%{type: "duel"}, _), do: false
 
   defp skip_bot_turn?(%{attacker: attacker, defender: defender, initiator: initiator}, last_turn) do
     bot_initiator = is_nil(last_turn) && initiator.bot_difficulty

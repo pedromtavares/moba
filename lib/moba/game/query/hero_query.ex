@@ -29,6 +29,15 @@ defmodule Moba.Game.Query.HeroQuery do
     preload(queryable, [:avatar])
   end
 
+  def trained(player_id, ids, limit) do
+    base = with_player(load(), player_id) |> unarchived() |> finished() |> order_by_pvp() |> exclude_ids(ids)
+
+    from(hero in base,
+      limit: ^limit,
+      where: hero.league_tier >= @platinum_league_tier
+    )
+  end
+
   def pve_targets(difficulty, farm_range, exclude_list, codes, limit) do
     Hero
     |> by_difficulty(difficulty)
@@ -54,16 +63,6 @@ defmodule Moba.Game.Query.HeroQuery do
     base = load() |> with_player(player_id) |> unarchived()
 
     from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])
-  end
-
-  def pickable(player_id, duel_inserted_at) do
-    base = with_player(Hero, player_id) |> unarchived() |> finished() |> order_by_pvp()
-
-    from(hero in base,
-      limit: 50,
-      where: hero.league_tier >= @platinum_league_tier,
-      where: is_nil(hero.pvp_last_picked) or hero.pvp_last_picked < ^duel_inserted_at
-    )
   end
 
   def finished(query) do
@@ -98,6 +97,7 @@ defmodule Moba.Game.Query.HeroQuery do
     |> by_level(15..26)
     |> random()
     |> unarchived()
+    |> load()
   end
 
   def by_difficulty(query, difficulty) do
@@ -195,7 +195,8 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def exclude_ids(query, ids) do
-    from hero in query, where: hero.id not in ^ids
+    ids = Enum.filter(ids, & &1)
+    if length(ids) > 0, do: from(hero in query, where: hero.id not in ^ids), else: query
   end
 
   def created_recently(query \\ non_bots(), hours_ago \\ 24) do

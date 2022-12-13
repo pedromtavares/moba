@@ -15,7 +15,7 @@
                             <i class="fa fa-info mr-1 fa-2x"></i><br/>Arena Info
                         </a>
                         <%= if Game.can_clear_auto_matches?(@current_player) do %>
-                            <a href="javascript:;" data-toggle="tooltip" title="Remove all daily matches from auto matchmaking." phx-click="clear-auto-matches" class="btn btn-light"><i class="fa fa-remove fa-2x mr-1"></i><br/>Clear Auto Matches</a>
+                            <a href="javascript:;" data-toggle="tooltip" title="Removes all daily matches from auto matchmaking." phx-click="clear-auto-matches" class="btn btn-light"><i class="fa fa-remove fa-2x mr-1"></i><br/>Clear Auto Matches</a>
                         <% end %>
                     </div>
                     <div class="col">

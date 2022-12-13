@@ -22,24 +22,17 @@ defmodule MobaWeb.DuelView do
   def phase_class(%{phase: phase}, current_phase) when phase == current_phase, do: "nav-link no-action active"
   def phase_class(_, _), do: "nav-link no-action"
 
-  def pvp?(%{type: "pvp"}), do: true
-  def pvp?(_), do: false
-
-  def show_rematch?(%{duel: %{type: "pvp"} = duel, current_player: player}) do
+  def show_rematch?(%{duel: duel, current_player: player}) do
     finished?(duel) && both_online?(duel, player) &&
       (player.id == duel.player_id || player.id == duel.opponent_player_id)
   end
 
   def show_rematch?(_), do: false
 
-  def show_timer?(%{type: "pvp", phase: phase}) when phase not in ["player_battle", "opponent_battle", "finished"],
+  def show_timer?(%{phase: phase}) when phase not in ["player_battle", "opponent_battle", "finished"],
     do: true
 
   def show_timer?(_), do: false
-
-  def title(%{type: "normal_matchmaking"}), do: "Normal Matchmaking"
-  def title(%{type: "elite_matchmaking"}), do: "Elite Matchmaking"
-  def title(_), do: ""
 
   def user_instructions(%{phase: phase, player: player}) when phase in ["player_first_pick", "player_second_pick"] do
     "#{player.user.username}, it's your turn to pick"

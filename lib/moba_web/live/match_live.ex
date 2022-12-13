@@ -84,7 +84,7 @@ defmodule MobaWeb.MatchLive do
          player = socket.assigns.current_player,
          match = Game.get_match!(match_id),
          battles = Engine.list_match_battles(match_id),
-         trained_heroes = Game.available_pvp_heroes(player.id, [], 20) do
+         trained_heroes = Game.trained_pvp_heroes(player.id, [], 20) do
       assign(socket,
         channel: channel,
         match: match,

@@ -85,7 +85,7 @@ defmodule MobaWeb.CommunityLive do
     with active_tab = "pve",
          changeset = Accounts.change_message(),
          channel = "community",
-         pve_ranking = Game.community_pve_ranking(),
+         pve_ranking = Game.pve_ranking_for_community(),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse(),
          updates = Accounts.latest_messages(channel, "updates", 20) do
       assign(socket,

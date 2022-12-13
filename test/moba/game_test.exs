@@ -531,7 +531,7 @@ defmodule Moba.GameTest do
       assert battle.defender_id == opp_hero.id
 
       Engine.auto_finish_battle!(battle)
-      duel = Game.get_duel!(duel.id) |> Game.continue_duel!(nil)
+      duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "opponent_second_pick"
 
@@ -550,7 +550,7 @@ defmodule Moba.GameTest do
       assert battle.defender_id == player_hero.id
 
       Engine.auto_finish_battle!(battle)
-      duel = Game.get_duel!(duel.id) |> Game.continue_duel!(nil)
+      duel = Game.get_duel!(duel.id)
 
       assert duel.phase == "finished"
 

@@ -5,15 +5,15 @@ defmodule Moba.Game.Duels do
 
   import Ecto.Query
 
-  def auto_next_phase!(%{phase: phase, player_id: player_id} = duel)
+  def auto_next_phase!(%{phase: phase, player: player} = duel)
       when phase in ["player_first_pick", "player_second_pick"] do
-    hero = available_random_hero(player_id, duel.player_first_pick_id)
+    hero = available_hero(player, duel.player_first_pick_id)
     if hero, do: Game.continue_duel!(get_duel!(duel.id), hero)
   end
 
-  def auto_next_phase!(%{phase: phase, opponent_player_id: opponent_id} = duel)
+  def auto_next_phase!(%{phase: phase, opponent_player: opponent} = duel)
       when phase in ["opponent_first_pick", "opponent_second_pick"] do
-    hero = available_random_hero(opponent_id, duel.opponent_first_pick_id)
+    hero = available_hero(opponent, duel.opponent_first_pick_id)
     if hero, do: Game.continue_duel!(get_duel!(duel.id), hero)
   end
 
@@ -118,10 +118,10 @@ defmodule Moba.Game.Duels do
 
     {player_points, opponent_points} =
       cond do
-        player.id == winner.id ->
+        winner && player.id == winner.id ->
           {victory_points, victory_points * -1}
 
-        opponent.id == winner.id ->
+        winner && opponent.id == winner.id ->
           {defeat_points * -1, defeat_points}
 
         true ->
@@ -136,12 +136,12 @@ defmodule Moba.Game.Duels do
     }
   end
 
-  defp available_random_hero(player_id, pick_id) do
-    available_heroes(player_id, pick_id) |> Enum.shuffle() |> List.first()
+  defp available_hero(player, pick_id) do
+    available_heroes(player, pick_id) |> List.first()
   end
 
-  defp available_heroes(player_id, nil), do: Game.available_pvp_heroes(player_id, [], 5)
-  defp available_heroes(player_id, hero_id), do: Game.available_pvp_heroes(player_id, [hero_id], 5)
+  defp available_heroes(player, nil), do: Game.available_pvp_heroes(player, [])
+  defp available_heroes(player, hero_id), do: Game.available_pvp_heroes(player, [hero_id])
 
   defp base_query(%{id: player_id}, limit \\ 15) do
     from duel in load_less(),

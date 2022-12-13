@@ -5,8 +5,8 @@ defmodule MobaWeb.BattleView do
   defdelegate difficulty_color(diff), to: TrainingView
   defdelegate difficulty_label(diff), to: TrainingView
 
-  def active_attacker?(%{attacker: attacker} = battle, last_turn, %{id: player_id}) do
-    is_current? = attacker.player_id == player_id
+  def active_attacker?(battle, last_turn, %{id: player_id}) do
+    is_current? = current_attacker?(battle, player_id)
 
     cond do
       is_current? && is_nil(last_turn) && battle.attacker_id == battle.initiator_id -> true
@@ -17,8 +17,8 @@ defmodule MobaWeb.BattleView do
 
   def active_attacker?(_, _, _), do: false
 
-  def active_defender?(%{defender: defender} = battle, last_turn, %{id: player_id}) do
-    is_current? = defender.player_id == player_id
+  def active_defender?(battle, last_turn, %{id: player_id}) do
+    is_current? = current_defender?(battle, player_id)
 
     cond do
       is_current? && is_nil(last_turn) && battle.defender_id == battle.initiator_id -> true
@@ -406,7 +406,7 @@ defmodule MobaWeb.BattleView do
   def total_armor_for(hero, nil), do: hero.armor + hero.item_armor
   def total_armor_for(_, last_hero), do: last_hero.base_armor
 
-  def show_timer?(%{battle: %{duel: %{type: "pvp"}} = battle, last_turn: last_turn, hero: hero}) do
+  def show_timer?(%{battle: %{duel_id: duel_id} = battle, last_turn: last_turn, hero: hero}) when not is_nil(duel_id) do
     if last_turn do
       last_turn.attacker.hero_id != hero.id
     else
@@ -424,6 +424,24 @@ defmodule MobaWeb.BattleView do
     else
       0
     end
+  end
+
+  defp current_attacker?(%{type: "duel", duel: duel, attacker: attacker}, player_id) do
+    (attacker.id == duel.player_first_pick_id && duel.player_id == player_id) || 
+    (attacker.id == duel.opponent_second_pick_id && duel.opponent_player_id == player_id)
+  end
+
+  defp current_attacker?(battle, player_id) do
+    battle.attacker.player_id == player_id
+  end
+
+  defp current_defender?(%{type: "duel", duel: duel, defender: defender}, player_id) do
+    (defender.id == duel.player_second_pick_id && duel.player_id == player_id) || 
+    (defender.id == duel.opponent_first_pick_id && duel.opponent_player_id == player_id)
+  end
+
+  defp current_defender?(battle, player_id) do
+    battle.defender.player_id == player_id
   end
 
   defp get_resource(code), do: Moba.load_resource(code) || Moba.basic_attack()

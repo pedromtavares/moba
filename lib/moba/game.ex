@@ -65,7 +65,7 @@ defmodule Moba.Game do
 
   defdelegate archive_hero!(hero), to: Training
 
-  defdelegate available_pvp_heroes(player_id, excluded_hero_ids, limit), to: Heroes
+  defdelegate available_pvp_heroes(player, excluded_hero_ids), to: Heroes
 
   defdelegate broadcast_to_hero(hero_id), to: Training
 
@@ -103,8 +103,6 @@ defmodule Moba.Game do
 
   defdelegate list_all_unfinished_heroes(player_id), to: Heroes
 
-  defdelegate list_pickable_heroes(player_id, duel_inserted_at), to: Heroes
-
   defdelegate master_league?(hero), to: Training
 
   defdelegate max_league?(hero), to: Training
@@ -117,7 +115,7 @@ defmodule Moba.Game do
 
   defdelegate pve_ranking(limit \\ 20), to: Heroes
 
-  defdelegate community_pve_ranking, to: Heroes
+  defdelegate pve_ranking_for_community, to: Heroes
 
   defdelegate rank_finished_heroes!, to: Training
 
@@ -130,6 +128,8 @@ defmodule Moba.Game do
   defdelegate start_farming!(hero, state, turns), to: Heroes
 
   defdelegate subscribe_to_hero(hero_id), to: Training
+
+  defdelegate trained_pvp_heroes(player_id, excluded_hero_ids, limit), to: Heroes
 
   defdelegate update_attacker!(hero, updates), to: Training
 

@@ -105,7 +105,7 @@ defmodule Moba.Game.Arena do
   defp match_picks(nil, _), do: []
 
   defp match_picks(player_id, generated_picks) do
-    pick_ids = Heroes.available_pvp_heroes(player_id) |> Enum.map(& &1.id)
+    pick_ids = Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
     diff = 5 - length(pick_ids)
 
     if diff > 0 do

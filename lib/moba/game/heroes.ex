@@ -9,15 +9,8 @@ defmodule Moba.Game.Heroes do
 
   # -------------------------------- PUBLIC API
 
-  def available_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5) do
-    HeroQuery.unarchived()
-    |> HeroQuery.with_player(player_id)
-    |> HeroQuery.exclude_ids(excluded_hero_ids)
-    |> HeroQuery.order_by_pvp()
-    |> HeroQuery.limit_by(limit)
-    |> HeroQuery.random()
-    |> HeroQuery.load()
-    |> Repo.all()
+  def available_pvp_heroes(player, excluded_hero_ids \\ []) do
+    trained_pvp_heroes(player.id, excluded_hero_ids, 21) ++ pvp_bots(player.pvp_tier, [], 3)
   end
 
   def buyback!(%{pve_state: "dead"} = hero) do
@@ -193,12 +186,6 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def list_pickable_heroes(player_id, duel_inserted_at) do
-    HeroQuery.pickable(player_id, duel_inserted_at)
-    |> HeroQuery.load()
-    |> Repo.all()
-  end
-
   @doc """
   Retrieves top PVE ranked Heroes
   """
@@ -209,7 +196,7 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def community_pve_ranking do
+  def pve_ranking_for_community do
     HeroQuery.pve_ranked()
     |> HeroQuery.limit_by(21)
     |> HeroQuery.load()
@@ -218,7 +205,7 @@ defmodule Moba.Game.Heroes do
 
   def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
 
-  def pvp_bots(pvp_tier, exclude_ids \\ []) do
+  def pvp_bots(pvp_tier, exclude_ids \\ [], limit \\ 5) do
     {difficulty, league_tier} =
       case pvp_tier do
         0 -> {"strong", 4}
@@ -228,7 +215,7 @@ defmodule Moba.Game.Heroes do
 
     HeroQuery.pvp_bots(difficulty, league_tier)
     |> HeroQuery.exclude_ids(exclude_ids)
-    |> HeroQuery.limit_by(5)
+    |> HeroQuery.limit_by(limit)
     |> Repo.all()
   end
 
@@ -239,6 +226,10 @@ defmodule Moba.Game.Heroes do
 
   def start_farming!(hero, state, turns) do
     update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+  end
+
+  def trained_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5) do
+    HeroQuery.trained(player_id, excluded_hero_ids, limit) |> Repo.all()
   end
 
   def update!(nil, _), do: nil

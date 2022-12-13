@@ -215,9 +215,6 @@ defmodule Moba.EngineTest do
       Game.continue_duel!(duel, defender)
       Engine.first_duel_battle(duel) |> Engine.auto_finish_battle!()
 
-      duel = Game.get_duel!(duel.id)
-      Game.continue_duel!(duel, nil)
-
       hero = Game.get_hero!(attacker.id)
       defender = Game.get_hero!(defender.id)
 
@@ -229,9 +226,6 @@ defmodule Moba.EngineTest do
       Game.continue_duel!(duel, attacker)
 
       Engine.last_duel_battle(duel) |> Engine.auto_finish_battle!()
-
-      duel = Game.get_duel!(duel.id)
-      Game.continue_duel!(duel, nil)
 
       %{player: player} = Game.get_hero!(attacker.id)
       %{player: opponent} = Game.get_hero!(defender.id)

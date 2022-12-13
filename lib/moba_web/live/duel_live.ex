@@ -3,8 +3,8 @@ defmodule MobaWeb.DuelLive do
 
   alias MobaWeb.DuelView
 
-  def mount(%{"id" => duel_id}, %{"player_id" => player_id}, socket) do
-    with %{assigns: %{channel: channel}} = socket = socket_init(duel_id, player_id, socket) do
+  def mount(%{"id" => duel_id}, _, socket) do
+    with %{assigns: %{channel: channel}} = socket = socket_init(duel_id, socket) do
       if connected?(socket) do
         MobaWeb.subscribe(channel)
         check_phase()
@@ -43,15 +43,16 @@ defmodule MobaWeb.DuelLive do
   def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel, heroes: heroes}} = socket) do
     with hero = Enum.find(heroes, &(&1.id == String.to_integer(hero_id))) do
       Game.continue_duel!(duel, hero)
+      heroes = heroes -- [hero]
 
-      {:noreply, socket}
+      {:noreply, assign(socket, heroes: heroes)}
     end
   end
 
-  def handle_event("rematch", _, %{assigns: %{duel: duel, current_user: current_user}} = socket) do
-    with other = if(current_user.id == duel.user_id, do: duel.opponent, else: duel.user),
-         can_challenge? = current_user.status == "available" && other.status == "available" do
-      if can_challenge?, do: Game.duel_challenge(current_user, other)
+  def handle_event("rematch", _, %{assigns: %{duel: duel, current_player: player}} = socket) do
+    with other = if(player.id == duel.player_id, do: duel.opponent_player, else: duel.player),
+         can_challenge? = player.status == "available" && other.status == "available" do
+      if can_challenge?, do: Game.duel_challenge(player, other)
 
       {:noreply, socket}
     end
@@ -79,7 +80,7 @@ defmodule MobaWeb.DuelLive do
 
   def handle_info(:check_phase, %{assigns: %{duel: %{phase: phase} = duel}} = socket)
       when phase not in ["user_battle", "opponent_battle", "finished"] do
-    Process.send_after(self(), :check_phase, 1000)
+    Process.send_after(self(), :check_phase, 1000 + Enum.random(1..200))
 
     if DuelView.pick_timer(duel, Timex.now()) <= 0 do
       Game.continue_duel!(duel, :auto)
@@ -100,12 +101,13 @@ defmodule MobaWeb.DuelLive do
     Process.send_after(self(), :check_phase, 500)
   end
 
-  defp socket_init(duel_id, player_id, socket) do
+  defp socket_init(duel_id, socket) do
     with channel = "duel-#{duel_id}",
          changeset = Accounts.change_message(),
          current_time = Timex.now(),
          duel = Game.get_duel!(duel_id),
-         heroes = Game.list_pickable_heroes(player_id, duel.inserted_at),
+         player = socket.assigns.current_player,
+         heroes = Game.available_pvp_heroes(player, [duel.player_first_pick_id, duel.opponent_first_pick_id]),
          first_battle = Engine.first_duel_battle(duel),
          last_battle = Engine.last_duel_battle(duel),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse() do
