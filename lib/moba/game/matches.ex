@@ -105,12 +105,15 @@ defmodule Moba.Game.Matches do
     |> type_query(type)
   end
 
-  defp load_picks(%{player_picks: player_picks, opponent_picks: opponent_picks} = match) do
-    heroes = Game.get_heroes(player_picks ++ opponent_picks)
+  defp load_picks(
+         %{player_picks: player_picks, opponent_picks: opponent_picks, generated_picks: generated_picks} = match
+       ) do
+    heroes = Game.get_heroes(player_picks ++ opponent_picks ++ generated_picks)
     player_picks = Enum.map(player_picks, &load_picks_hero(heroes, &1))
     opponent_picks = Enum.map(opponent_picks, &load_picks_hero(heroes, &1))
+    generated_picks = Enum.map(generated_picks, &load_picks_hero(heroes, &1))
 
-    %{match | player_picks: player_picks, opponent_picks: opponent_picks}
+    %{match | player_picks: player_picks, opponent_picks: opponent_picks, generated_picks: generated_picks}
   end
 
   defp load_picks_hero(heroes, hero_id), do: Enum.find(heroes, &(&1.id == hero_id))

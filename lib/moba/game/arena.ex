@@ -22,6 +22,11 @@ defmodule Moba.Game.Arena do
     updated
   end
 
+  def continue_match!(match, player_picks) do
+    Matches.update!(match, %{player_picks: player_picks})
+    Matches.get_match!(match.id) |> continue_match!()
+  end
+
   def continue_match!(%{winner_id: winner_id, type: type} = match) when not is_nil(winner_id) do
     match = score_match!(match)
     if type != "auto", do: Moba.update_pvp_ranking()
@@ -82,17 +87,33 @@ defmodule Moba.Game.Arena do
 
   defp create_match!(%{daily_matches: player_matches}, _, _) when player_matches >= @daily_match_limit, do: nil
 
-  defp create_match!(%{id: player_id}, %{id: opponent_id}, type) do
-    player_picks = Heroes.available_pvp_heroes(player_id) |> Enum.map(& &1.id)
-    opponent_picks = Heroes.available_pvp_heroes(opponent_id) |> Enum.map(& &1.id)
+  defp create_match!(%{id: player_id, pvp_tier: pvp_tier}, %{id: opponent_id}, type) do
+    player_generated_picks = Heroes.pvp_bots(pvp_tier) |> Enum.map(& &1.id)
+    opponent_generated_picks = Heroes.pvp_bots(pvp_tier, player_generated_picks) |> Enum.map(& &1.id)
+    player_pick_id = if type == "manual", do: nil, else: player_id
 
     Matches.create!(%{
       player_id: player_id,
       opponent_id: opponent_id,
-      player_picks: player_picks,
-      opponent_picks: opponent_picks,
+      player_picks: match_picks(player_pick_id, player_generated_picks),
+      opponent_picks: match_picks(opponent_id, opponent_generated_picks),
+      generated_picks: player_generated_picks,
       type: type
     })
+  end
+
+  defp match_picks(nil, _), do: []
+
+  defp match_picks(player_id, generated_picks) do
+    pick_ids = Heroes.available_pvp_heroes(player_id) |> Enum.map(& &1.id)
+    diff = 5 - length(pick_ids)
+
+    if diff > 0 do
+      generated_ids = Enum.shuffle(generated_picks) |> Enum.take(diff)
+      pick_ids ++ generated_ids
+    else
+      pick_ids
+    end
   end
 
   defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent} = duel) do

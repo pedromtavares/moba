@@ -140,8 +140,8 @@ defmodule Moba.Game.Duels do
     available_heroes(player_id, pick_id) |> Enum.shuffle() |> List.first()
   end
 
-  defp available_heroes(player_id, nil), do: Game.available_pvp_heroes(player_id, [])
-  defp available_heroes(player_id, hero_id), do: Game.available_pvp_heroes(player_id, [hero_id])
+  defp available_heroes(player_id, nil), do: Game.available_pvp_heroes(player_id, [], 5)
+  defp available_heroes(player_id, hero_id), do: Game.available_pvp_heroes(player_id, [hero_id], 5)
 
   defp base_query(%{id: player_id}, limit \\ 15) do
     from duel in load_less(),

@@ -1,12 +1,23 @@
 .matches {
-	.hero-card{
-		min-height: 150px;
+  .hero-card{
+    min-height: 150px;
+  }
 
+	.picked-hero{
 		.card-footer{
 			display: none;
 		}
 	}
+
 	.avatar{
 		max-width: 65px;
 	}
+
+  .picked-hero-card{
+    border: 1px solid white !important;
+  }
+
+  .tab-content{
+    overflow: auto;
+  }
 }

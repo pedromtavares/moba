@@ -16,6 +16,7 @@ defmodule Moba.Game.Heroes do
     |> HeroQuery.order_by_pvp()
     |> HeroQuery.limit_by(limit)
     |> HeroQuery.random()
+    |> HeroQuery.load()
     |> Repo.all()
   end
 
@@ -82,23 +83,21 @@ defmodule Moba.Game.Heroes do
   Level 0 bots exist to serve as weak targets for newly created player Heroes,
   and thus have their stats greatly reduced
   """
-  def create_bot!(avatar, level, difficulty, league_tier, player \\ nil) do
-    name = if player, do: player.bot_options.name, else: avatar.name
-    finished_at = if player, do: Timex.now() |> Timex.shift(hours: 1), else: nil
+  def create_bot!(avatar, level, difficulty, league_tier) do
+    name = if Enum.member?(["pvp_master", "pvp_grandmaster"], difficulty), do: Faker.Superhero.name(), else: avatar.name
 
     attrs = %{
       bot_difficulty: difficulty,
       name: name,
       gold: 100_000,
       league_tier: league_tier,
-      total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
-      finished_at: finished_at
+      total_gold_farm: bot_total_gold_farm(league_tier, difficulty)
     }
 
     build_attrs = Map.put(attrs, :level, level)
     build = Game.generate_bot_build(build_attrs, avatar)
     attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
-    bot = create!(attrs, player, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
+    bot = create!(attrs, nil, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
 
     if level > 0 do
       xp = xp_until_hero_level(level)
@@ -219,6 +218,20 @@ defmodule Moba.Game.Heroes do
 
   def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
 
+  def pvp_bots(pvp_tier, exclude_ids \\ []) do
+    {difficulty, league_tier} =
+      case pvp_tier do
+        0 -> {"strong", 4}
+        1 -> {"pvp_master", 5}
+        2 -> {"pvp_grandmaster", 6}
+      end
+
+    HeroQuery.pvp_bots(difficulty, league_tier)
+    |> HeroQuery.exclude_ids(exclude_ids)
+    |> HeroQuery.limit_by(5)
+    |> Repo.all()
+  end
+
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
   def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
 
@@ -309,10 +322,10 @@ defmodule Moba.Game.Heroes do
         "moderate" -> 2..4
         # 1600..3200
         "strong" -> (4 + extra_farm)..(6 + extra_farm)
-        # 19_200..24_000
-        "pvp_master" -> 0..12
-        # 26_400..30_000
-        "pvp_grandmaster" -> 6..15
+        # 24_000
+        "pvp_master" -> 12..12
+        # 30_000
+        "pvp_grandmaster" -> 15..15
       end
 
     base + 400 * Enum.random(range)

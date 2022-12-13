@@ -26,7 +26,7 @@ defmodule MobaWeb.DuelLive do
         Accounts.create_message!(%{
           body: body,
           author: user.username,
-          tier: player.pvp_tier,
+          tier: player.pve_tier,
           channel: channel,
           topic: "general",
           is_admin: user.is_admin,

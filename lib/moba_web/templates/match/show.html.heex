@@ -5,8 +5,18 @@
 				<h2 class="text-center f-rpg"><%= username(@match.player) %></h2>
 			</div>
 			<div class="row mt-2">
-				<%= for hero <- @match.player_picks do %>
-					<%= render "_picked_hero.html", hero: hero %>
+				<%= if length(@picked_heroes) >= 5 && !@match.phase do %>
+					<div class="col">
+						<button type="button" class="btn text-center btn-lg btn-block btn-secondary dark-button mt-1" phx-click="start" phx-hook="Loading" id="start-match-button">
+							<span class="loading-text">
+								<i class="fa fa-play mr-1"></i>
+								Lock Picks and Start Match
+							</span>
+						</button>
+					</div>
+				<% end %>
+				<%= for hero <- @picked_heroes do %>
+					<%= render "_picked_hero.html", hero: hero, player_id: @match.player_id %>
 				<% end %>
 			</div>
 		</div>
@@ -19,17 +29,51 @@
 								Winner:
 								<%= if @match.winner && @tick >= length(@battles) do %> 
 									<%= username(@match.winner) %>
-									<button class="btn btn-danger btn-sm" phx-click="reset">Reset</button>
 								<% else %>
 									?
 								<% end %>
 							</h2>
 						<% else %>
-							<button class="btn btn-danger btn-block btn-lg" phx-click="start">Start</button>
+							<h2 class="text-center text-white">Pick 5 Heroes</h2>
 						<% end %>
 					</div>
 				</div>
 			</div>
+			<%= unless @match.phase do %>
+				<div class="row mt-1">
+					<div class="col">
+						<div class="card mb-0 mt-2" phx-hook="EqualHeight" phx-target="#opponent-heroes-container" id="picks-card">
+							<ul class="nav nav-pills navtab-bg mt-2 justify-content-center">
+			                  	<li class="nav-item">
+			                      	<a href="#trained-heroes" phx-click="hero-tab" phx-value-tab="trained" data-toggle="tab" class={"nav-link px-2 py-1 #{if @hero_tab == "trained", do: "active"}"}>
+			                          	<span class="d-inline-block"><i class="fa fa-sword mr-1"></i>Trained Heroes</span>
+			                      	</a>
+			                    </li>
+			                    <li class="nav-item">
+                      				<a href="#available-heroes" phx-click="hero-tab" phx-value-tab="available" data-toggle="tab" class={"nav-link px-2 py-1 #{if @hero_tab == "available", do: "active"}"}>
+			                          	<span class="d-inline-block"><i class="fa fa-dice mr-1"></i>Available Heroes</span>
+			                      	</a>
+			                  	</li>
+			                </ul>
+			                <div class="tab-content pt-0 mt-2">
+			                	<div class={"tab-pane fade #{if @hero_tab == "trained", do: "active show"}"} id="trained-heroes">
+									<hr class="mb-2"/>
+									<%= for hero <- @trained_heroes do %>
+										<%= render "_hero.html", hero: hero, picked_ids: Enum.map(@picked_heroes, &(&1.id))  %>
+									<% end %>
+								</div>
+								<div class={"tab-pane fade #{if @hero_tab == "available", do: "active show"}"} id="available-heroes">
+									<hr class="mb-2"/>
+									<%= for hero <- @generated_heroes do %>
+										<%= render "_hero.html", hero: hero, picked_ids: Enum.map(@picked_heroes, &(&1.id))  %>
+									<% end %>
+								</div>
+							</div>
+
+						</div>
+					</div>
+				</div>
+			<% end %>
 			<div class="row mt-1">
 				<%= for {battle, index} <- Enum.with_index(@battles, 1) |> Enum.take(@tick) do %>
 					<%= render "_battle_review.html", battle: battle, index: index, socket: @socket, match: @match %>
@@ -40,16 +84,13 @@
 			<div class="card mb-0">
 				<h2 class="text-center f-rpg"><%= username(@match.opponent) %></h2>
 			</div>
-			<div class="row mt-2">
+			<div class="row mt-2" id="opponent-heroes-container">
 				<%= for hero <- @match.opponent_picks do %>
-					<%= render "_picked_hero.html", hero: hero %>
+					<%= render "_picked_hero.html", hero: hero, player_id: @match.opponent_id %>
 				<% end %>
 			</div>
 		</div>
 	</div>
 </div>
 
-
-
-
-
+<%= live_component(MobaWeb.TutorialComponent, step: @tutorial_step) %>

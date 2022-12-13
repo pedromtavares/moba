@@ -58,14 +58,14 @@
                         <%= duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
                     </td>
                     <td>
-                       <img src="/images/pvp/<%= duel.player.pvp_tier %>.png" style="max-height:  40px"/><br/>
+                       <img src="/images/pve/<%= duel.player.pve_tier %>.png" style="max-height:  40px"/><br/>
                        <%= username(duel.player) %>
                     </td>
                     <td style="width: 1%">
                         vs
                     </td>
                     <td>
-                        <img src="/images/pvp/<%= duel.opponent_player.pvp_tier %>.png" style="max-height:  40px"/><br/>
+                        <img src="/images/pve/<%= duel.opponent_player.pve_tier %>.png" style="max-height:  40px"/><br/>
                         <%= username(duel.opponent_player)%>
                     </td>
                     <td>

@@ -12,11 +12,11 @@
                                 <h3><%= title(@duel) %></h3>
                             <% end %>
                             <h2 class="mb-0">
-                                <img src={"/images/pvp/#{@duel.player.pvp_tier}.png"} style="max-height:  50px"/>
+                                <img src={"/images/pve/#{@duel.player.pve_tier}.png"} style="max-height:  50px"/>
                                 <%= live_redirect username(@duel.player), to: Routes.player_path(@socket, :show, @duel.player) %>
                                  vs 
                                 <%= live_redirect username(@duel.opponent_player), to: Routes.player_path(@socket, :show, @duel.opponent_player) %>
-                                <img src={"/images/pvp/#{@duel.opponent_player.pvp_tier}.png"} style="max-height:  50px"/>
+                                <img src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"} style="max-height:  50px"/>
                             </h2>
                             <%= if casual?(@duel) do %>
                                 <span class="font-15 badge badge-pill badge-light-success" data-toggle="tooltip" title="This duel is worth no Season Points because the points difference of players is too high">Casual</span>
@@ -80,7 +80,7 @@
                         <%= for message <- @messages do %>
                             <div class="inbox-item">              
                                 <div class="inbox-item-img">
-                                    <img src={"/images/pvp/#{message.tier}.png"}/>
+                                    <img src={"/images/pve/#{message.tier}.png"}/>
                                 </div>
                                 <p class="inbox-item-text">
                                     <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id), class: "text-dark mr-1" %>

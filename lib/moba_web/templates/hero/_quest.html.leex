@@ -17,7 +17,7 @@
             </div>      
         </div>
         <div class="card-footer p-0">
-            <%= if @current_player.pve_tier == 1 do %>
+            <%= if is_nil(@current_player.user_id) do %>
                 <a href="/arena" class="btn btn-danger btn-block btn-lg">
                     <i class="fa fa-swords fa-2x mr-1 mt-2"></i>
                     <strong class="font-20 d-block">Proceed to the Arena</strong>

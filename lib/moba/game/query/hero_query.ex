@@ -84,21 +84,20 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def non_bots(query \\ Hero) do
-    from hero in query,
-      where: is_nil(hero.bot_difficulty)
+    from hero in query, where: is_nil(hero.bot_difficulty)
   end
 
   def bots(query \\ Hero) do
-    from hero in query,
-      where: not is_nil(hero.bot_difficulty)
+    from hero in query, where: not is_nil(hero.bot_difficulty)
   end
 
-  def pve_bots(query \\ bots()) do
-    from hero in query, where: is_nil(hero.player_id)
-  end
-
-  def pvp_bots(query \\ bots()) do
-    from hero in query, where: not is_nil(hero.player_id)
+  def pvp_bots(difficulty, league_tier) do
+    bots()
+    |> by_difficulty(difficulty)
+    |> with_league_tier(league_tier)
+    |> by_level(15..26)
+    |> random()
+    |> unarchived()
   end
 
   def by_difficulty(query, difficulty) do

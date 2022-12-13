@@ -65,7 +65,7 @@ defmodule Moba.Game do
 
   defdelegate archive_hero!(hero), to: Training
 
-  defdelegate available_pvp_heroes(player_id, excluded_hero_ids), to: Heroes
+  defdelegate available_pvp_heroes(player_id, excluded_hero_ids, limit), to: Heroes
 
   defdelegate broadcast_to_hero(hero_id), to: Training
 
@@ -75,7 +75,7 @@ defmodule Moba.Game do
 
   defdelegate can_shard_buyback?(hero), to: Heroes
 
-  defdelegate create_bot!(avatar, level, difficulty, tier, player), to: Heroes
+  defdelegate create_bot!(avatar, level, difficulty, tier), to: Heroes
 
   defdelegate create_current_pve_hero!(attrs, player, avatar, skills), to: Training
 
@@ -182,6 +182,8 @@ defmodule Moba.Game do
   defdelegate auto_matchmaking!(player), to: Arena
 
   defdelegate can_clear_auto_matches?(player), to: Matches
+
+  defdelegate continue_match!(match, player_picks), to: Arena
 
   defdelegate continue_match!(match), to: Arena
 

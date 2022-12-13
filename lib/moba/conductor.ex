@@ -23,6 +23,7 @@ defmodule Moba.Conductor do
   def pvp_tick! do
     Game.update_pvp_ranking!(true)
     Repo.update_all(PlayerQuery.pvp_available(), set: [daily_matches: 0, daily_wins: 0])
+    Game.update_season_ranking!()
 
     Moba.current_season()
     |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
@@ -55,14 +56,23 @@ defmodule Moba.Conductor do
     Game.update_season!(Moba.current_season(), %{resource_uuid: resource_uuid})
   end
 
-  def regenerate_pve_bots!(level_range \\ 0..35) do
-    IO.puts("Generating new PVE bots...")
+  def regenerate_bots!(level_range \\ 0..35) do
+    IO.puts("Generating new bots...")
     timestamp = Timex.now()
 
     AvatarQuery.base_canon()
     |> Repo.all()
     |> Enum.each(fn avatar ->
       Logger.info("Generating #{avatar.name}s...")
+
+      Logger.info("Generating pvp bots...")
+
+      Enum.each(1..10, fn _n ->
+        create_bot_hero!(avatar, 24, "pvp_master", 5)
+        create_bot_hero!(avatar, 26, "pvp_grandmaster", 6)
+      end)
+
+      Logger.info("Generating pve bots...")
 
       Enum.each(level_range, fn level ->
         create_bot_hero!(avatar, level, "weak")
@@ -76,33 +86,9 @@ defmodule Moba.Conductor do
       end)
     end)
 
-    archive_previous_bots!(HeroQuery.pve_bots(), timestamp)
+    archive_previous_bots!(HeroQuery.bots(), timestamp)
 
     Repo.delete_all(Game.Schema.Target)
-  end
-
-  def regenerate_pvp_bots! do
-    timestamp = Timex.now()
-
-    all_avatars = AvatarQuery.base_canon() |> Repo.all()
-
-    bot_heroes =
-      PlayerQuery.eligible_arena_bots()
-      |> Repo.all()
-      |> Enum.map(fn %{bot_options: options} = player ->
-        Logger.info("New PVP heroes for #{options.name}: #{options.codes |> Enum.join(", ")}")
-
-        options.codes
-        |> Enum.map(fn code -> Enum.find(all_avatars, &(&1.code == code)) end)
-        |> Enum.filter(& &1)
-        |> Enum.map(&create_pvp_bot_hero!(player, &1))
-      end)
-
-    archive_previous_bots!(HeroQuery.pvp_bots(), timestamp)
-
-    bot_heroes
-    |> List.flatten()
-    |> Enum.map(&Game.update_hero_collection!(&1))
   end
 
   # Archives all current bots so they can be removed later by Cleaner
@@ -127,23 +113,10 @@ defmodule Moba.Conductor do
     end)
   end
 
-  defp create_bot_hero!(avatar, level, difficulty, league_tier \\ nil, player \\ nil) do
+  defp create_bot_hero!(avatar, level, difficulty, league_tier \\ nil) do
     tier = league_tier || Game.league_tier_for(level)
 
-    Game.create_bot!(avatar, level, difficulty, tier, player)
-  end
-
-  defp create_pvp_bot_hero!(%{bot_options: %{tier: tier}} = player, avatar) do
-    level = Game.league_level_range_for(tier) |> Enum.random()
-
-    difficulty =
-      cond do
-        tier == Moba.master_league_tier() -> "pvp_master"
-        tier == Moba.max_league_tier() -> "pvp_grandmaster"
-        true -> "strong"
-      end
-
-    create_bot_hero!(avatar, level, difficulty, tier, player)
+    Game.create_bot!(avatar, level, difficulty, tier)
   end
 
   # by nilifing :id here we can make a perfect clone of a record

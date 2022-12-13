@@ -16,13 +16,10 @@
                     <%= for player <- @duel_opponents do %>
                         <tr id={"player-#{player.id}"}>
                             <td class="text-right">
-                                <img src={"/images/pvp/#{player.pvp_tier}.png"} style="max-height:  50px"/>
+                                <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height:  50px"/>
                             </td>
                             <td>
-                                <h5><%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id) %></h5>
-                            </td>
-                            <td>
-                                <%= player.pvp_points %> Season Points
+                                <h5><%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id) %><br/><small><%= player.pvp_points %> SP</small></h5>
                             </td>
                             <td>
                                 Last active <%= player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>

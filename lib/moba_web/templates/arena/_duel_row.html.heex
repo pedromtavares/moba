@@ -1,9 +1,9 @@
 <tr>
     <td class="d-flex justify-content-center">
         <img src={"/images/pve/#{@opponent.pve_tier}.png"} class="mr-2" style="max-height:  40px"/>
-        <div style="width: 50%">
-            <h4>
-                <%= live_redirect username(@opponent), to: Routes.player_path(@socket, :show, @opponent.id), class: "text-primary" %>
+        <div style="width: 70%">
+            <h4 class="mt-2">
+                <%= live_redirect username(@opponent), to: Routes.player_path(@socket, :show, @opponent.id), class: "text-white" %>
             </h4>
         </div>
     </td>

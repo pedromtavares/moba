@@ -53,12 +53,10 @@ defmodule MobaWeb.ArenaLive do
     {:noreply, assign(socket, current_player: player, duel_opponents: duel_opponents)}
   end
 
-  def handle_event("tutorial1", _, socket) do
-    {:noreply, socket |> TutorialComponent.next_step(31)}
-  end
-
   def handle_event("finish-tutorial", _, socket) do
-    {:noreply, TutorialComponent.finish_arena(socket)}
+    socket = TutorialComponent.next_step(socket, 31)
+
+    handle_event("matchmaking", nil, socket)
   end
 
   def handle_info({:tutorial, %{step: step}}, socket) do
@@ -98,11 +96,6 @@ defmodule MobaWeb.ArenaLive do
     redirect(socket, to: "/registration/new")
   end
 
-  defp maybe_redirect(%{assigns: %{current_player: %{hero_collection: collection}}} = socket)
-       when length(collection) < 2 do
-    redirect(socket, to: "/base")
-  end
-
   defp maybe_redirect(socket), do: socket
 
   defp opponents_from_presence(%{status: "available"} = player) do
@@ -120,8 +113,9 @@ defmodule MobaWeb.ArenaLive do
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
          sidebar_code = "arena",
-         matches = Game.list_matches(player),
-         pending_match = Enum.find(matches, &(&1.phase != "scored")),
+         all_matches = Game.list_matches(player),
+         matches = all_matches |> Enum.filter(&(&1.phase == "scored")),
+         pending_match = Enum.find(all_matches, &(&1.phase != "scored")),
          duels = Game.list_duels(player),
          duel_opponents = opponents_from_presence(player),
          last_presence_update = Timex.now(),

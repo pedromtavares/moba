@@ -19,7 +19,7 @@
                         <td>
                             <%= live_redirect to: Routes.player_path(@socket, :show, player.id), title: "#{player.pvp_points} Season Points", data: [toggle: "tooltip"] do %>
                                 <img src={"/images/pve/#{player.pve_tier}.png"} class={"pvp-rank rank-shadow-#{PlayerView.shadow_rank(player)}"} />
-                                <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{PlayerView.shadow_rank(player)}"}><%= username(player) %></h5>
+                                <h4 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{PlayerView.shadow_rank(player)}"}><%= username(player) %></h4>
                             <% end %>
                         </td>
                         <td>

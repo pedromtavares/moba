@@ -1,9 +1,9 @@
 <div class="card dark-bg mb-3" id="pvp-progression">
     <div class="card-body pb-0">
-        <div class="row mt-3 mb-3 d-flex justify-content-center">
+        <div class="row mb-3 d-flex justify-content-center">
             <div class="col">
-                <h4 class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}><%= tier_label(@current_player) %></h4>
-                <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" data-tippy-placement="bottom" title={reset_timer()}>
+                <h4 id="current-pvp-tier" class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}><%= tier_label(@current_player) %></h4>
+                <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" data-tippy-placement="bottom" title={reset_timer()} id="daily-progression">
                     <div style={"width:#{daily_matches_percentage(@current_player)}%;"} class="progress-bar pvp-bar"></div>
                     <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
                         <%= @current_player.daily_matches %> / <%= Moba.daily_match_limit() %> Daily Matches
@@ -11,7 +11,7 @@
                 </div>
                 <div class="mt-4 d-flex justify-content-between align-items-center">
                     <div class="col">
-                        <a class="btn btn-light">
+                        <a class="btn btn-light" id="arena-info-button">
                             <i class="fa fa-info mr-1 fa-2x"></i><br/>Arena Info
                         </a>
                         <%= if Game.can_clear_auto_matches?(@current_player) do %>
@@ -21,7 +21,7 @@
                     <div class="col">
                         <div class="row d-flex justify-content-around">
                             <%= if @pending_match do %>
-                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
+                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.MatchLive, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
                                     <i class="fa fa-hourglass mr-1"></i>You have a pending match, click to continue
                                 <% end %>
                             <% else %>

@@ -93,10 +93,6 @@ defmodule MobaWeb.ArenaView do
     content_tag("span", "#{rewards} Season Points", class: "badge badge-pill badge-light-dark")
   end
 
-  def season_rankings_string do
-    Phoenix.View.render_to_string(MobaWeb.ArenaView, "_season_rankings.html", [])
-  end
-
   def silenced?(%{current_player: %{status: "silenced"}}), do: true
   def silenced?(_), do: false
 
