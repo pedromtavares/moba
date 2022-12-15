@@ -1186,7 +1186,9 @@ Game.Query.SkillQuery.base_canon()
 end)
 
 Conductor.regenerate_resources!()
+Conductor.pvp_tick!()
 Conductor.season_tick!()
+
 
 (Enum.to_list(0..10) ++ Enum.to_list(17..22))
 |> Conductor.regenerate_bots!()
