@@ -6,7 +6,7 @@ defmodule Moba.Engine.Core.Turns do
   def build_turn(battle, orders) do
     last_turn = List.last(battle.turns)
 
-    {attacker, defender} = prepare_battlers(battle, last_turn)
+    {attacker, defender} = prepare_battlers(battle, last_turn, orders)
 
     %Turn{
       number: ((last_turn && last_turn.number) || 0) + 1,
@@ -136,27 +136,29 @@ defmodule Moba.Engine.Core.Turns do
           buff
         end
 
-      # legacy data compliance, buffs will no longer have a pre-existing resource
-      if buff.resource, do: buff, else: Map.put(buff, :resource, load_resource(buff.resource_code))
+      Map.put(buff, :resource, load_resource(buff.resource_code))
     end)
     |> Enum.reject(&(&1.duration <= 0))
   end
 
   defp load_resource(code), do: Moba.load_resource(code)
 
-  defp prepare_battlers(battle, last_turn) do
+  defp prepare_battlers(battle, last_turn, orders) do
     if last_turn do
       {flush_attacker(battle, last_turn), flush_defender(battle, last_turn)}
     else
-      {prepare_battler(battle.initiator, battle), prepare_battler(Core.opponent(battle, battle.initiator_id), battle)}
+      {prepare_battler(battle.initiator, battle, orders),
+       prepare_battler(Core.opponent(battle, battle.initiator_id), battle, orders)}
     end
   end
 
   defp preload_hero(hero), do: Repo.preload(hero, [:avatar, :items, :skills])
 
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
-  defp prepare_battler(hero, battle) do
+  defp prepare_battler(hero, battle, orders) do
     %{skills: skills, items: items, avatar: avatar} = hero = preload_hero(hero)
+    initial_hp = prepare_stat(hero, battle, orders, :attacker_initial_hp)
+    initial_mp = prepare_stat(hero, battle, orders, :attacker_initial_mp)
 
     %Battler{
       hero_id: hero.id,
@@ -167,8 +169,8 @@ defmodule Moba.Engine.Core.Turns do
       level: hero.level,
       total_hp: buffed_total(hero, battle, hero.total_hp + hero.item_hp),
       total_mp: buffed_total(hero, battle, hero.total_mp + hero.item_mp),
-      current_hp: buffed_total(hero, battle, hero.total_hp + hero.item_hp),
-      current_mp: buffed_total(hero, battle, hero.total_mp + hero.item_mp),
+      current_hp: initial_hp || buffed_total(hero, battle, hero.total_hp + hero.item_hp),
+      current_mp: initial_mp || buffed_total(hero, battle, hero.total_mp + hero.item_mp),
       last_hp: buffed_total(hero, battle, hero.total_hp + hero.item_hp),
       speed: buffed_total(hero, battle, hero.speed + hero.item_speed),
       atk: buffed_total(hero, battle, hero.atk + hero.item_atk),
@@ -184,6 +186,16 @@ defmodule Moba.Engine.Core.Turns do
       skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
       item_order: codes_to_resources(hero.item_order, items)
     }
+  end
+
+  defp prepare_stat(hero, battle, orders, stat) do
+    hero_stat = Map.get(orders, stat)
+
+    if hero.id == battle.attacker_id && hero_stat do
+      hero_stat
+    else
+      nil
+    end
   end
 
   defp serialize_battler(battler) do

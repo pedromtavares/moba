@@ -9,6 +9,10 @@ defmodule MobaWeb.LayoutView do
     assigns[:current_player] && is_nil(assigns[:hide_sidebar]) && length(assigns[:current_player].hero_collection) > 0
   end
 
+  def sidebar_class(codes, assigns) when is_list(codes) do
+    if Enum.member?(codes, assigns[:sidebar_code]), do: "active", else: ""
+  end
+
   def sidebar_class(code, assigns) do
     if assigns[:sidebar_code] == code, do: "active", else: ""
   end

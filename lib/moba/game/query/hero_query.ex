@@ -29,6 +29,15 @@ defmodule Moba.Game.Query.HeroQuery do
     preload(queryable, [:avatar])
   end
 
+  def trained(player_id, ids, limit) do
+    base = with_player(load(), player_id) |> unarchived() |> finished() |> order_by_pvp() |> exclude_ids(ids)
+
+    from(hero in base,
+      limit: ^limit,
+      where: hero.league_tier >= @platinum_league_tier
+    )
+  end
+
   def pve_targets(difficulty, farm_range, exclude_list, codes, limit) do
     Hero
     |> by_difficulty(difficulty)
@@ -56,16 +65,6 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])
   end
 
-  def pickable(player_id, duel_inserted_at) do
-    base = with_player(Hero, player_id) |> unarchived() |> finished() |> order_by_pvp()
-
-    from(hero in base,
-      limit: 50,
-      where: hero.league_tier >= @platinum_league_tier,
-      where: is_nil(hero.pvp_last_picked) or hero.pvp_last_picked < ^duel_inserted_at
-    )
-  end
-
   def finished(query) do
     from(hero in query, where: not is_nil(hero.finished_at))
   end
@@ -84,21 +83,21 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def non_bots(query \\ Hero) do
-    from hero in query,
-      where: is_nil(hero.bot_difficulty)
+    from hero in query, where: is_nil(hero.bot_difficulty)
   end
 
   def bots(query \\ Hero) do
-    from hero in query,
-      where: not is_nil(hero.bot_difficulty)
+    from hero in query, where: not is_nil(hero.bot_difficulty)
   end
 
-  def pve_bots(query \\ bots()) do
-    from hero in query, where: is_nil(hero.player_id)
-  end
-
-  def pvp_bots(query \\ bots()) do
-    from hero in query, where: not is_nil(hero.player_id)
+  def pvp_bots(difficulty, league_tier) do
+    bots()
+    |> by_difficulty(difficulty)
+    |> with_league_tier(league_tier)
+    |> by_level(15..26)
+    |> random()
+    |> unarchived()
+    |> load()
   end
 
   def by_difficulty(query, difficulty) do
@@ -196,8 +195,8 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def exclude_ids(query, ids) do
-    from hero in query,
-      where: hero.id not in ^ids
+    ids = Enum.filter(ids, & &1)
+    if length(ids) > 0, do: from(hero in query, where: hero.id not in ^ids), else: query
   end
 
   def created_recently(query \\ non_bots(), hours_ago \\ 24) do
@@ -215,12 +214,16 @@ defmodule Moba.Game.Query.HeroQuery do
     from hero in query, where: hero.avatar_id in ^avatar_ids
   end
 
+  def with_ids(query, hero_ids) do
+    from hero in query, where: hero.id in ^hero_ids
+  end
+
   def created_before(query, time) do
     from hero in query, where: hero.inserted_at < ^time
   end
 
   def order_by_pvp(query) do
-    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm, hero.pvp_picks]]
+    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm]]
   end
 
   def finished_recently(query \\ non_bots(), hours_ago \\ 1) do

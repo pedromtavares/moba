@@ -70,8 +70,10 @@ defmodule MobaWeb.Router do
       live "/arena", ArenaLive
       live "/arena/:id", DuelLive
 
-      live "/user/:id", UserLive
-      live "/player/:player_id", UserLive, :show, as: :player
+      live "/matches/:id", MatchLive
+
+      live "/user/:id", PlayerLive
+      live "/player/:player_id", PlayerLive, :show, as: :player
 
       live "/hero/:id", HeroLive
 

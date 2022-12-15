@@ -1,0 +1,46 @@
+<%= if @current_player.user && @player.user && @player.id != @current_player.id do %>
+    <div class="border-top pt-1">
+        <div class="row no-gutters">
+            <div class="col">
+                <h4 class="text-right">
+                    <%= username(@current_player) %> <span class="badge badge-pill badge-light-danger font-15"><%= @current_player.duel_score["#{@player.id}"] || 0 %></span>
+                </h4>
+            </div>
+            <div class="col-1 d-flex align-items-center justify-content-center">
+                <i class="fa fa-times"></i>
+            </div>
+            <div class="col">
+                <h4 class="text-left">
+                    <span class="badge badge-pill badge-light-danger font-15"><%= @player.duel_score["#{@current_player.id}"] || 0 %></span> <%= username(@player) %>
+                </h4>
+            </div>
+        </div>
+    </div>
+<% end %>
+
+<div class="transparent p-0 duels">
+    <table class="table table-dark text-center table-sm m-0">
+        <%= for duel <- @duels do %>
+            <tr>
+                <td class="text-center">
+                    <span class="opponent"><%= live_redirect opponent_for(duel, @player) |> username(), to: Routes.player_path(@socket, :show, opponent_for(duel, @player).id) %></span>
+                </td>
+
+                <td class="text-center">
+                    <%= ArenaView.duel_result(duel, @player.id) %>
+                    <%= if duel.player_id == @player.id do %>
+                        <%= rewards_badge(duel.rewards.attacker_pvp_points) %>
+                    <% else %>
+                        <%= rewards_badge(duel.rewards.defender_pvp_points) %>
+                    <% end %>
+                </td>
+                
+                <td>
+                    <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, duel), class: "btn btn-light btn-sm" do %>
+                        <i class="fa fa-eye"></i>
+                    <% end %>
+                </td>
+            </tr>
+        <% end %>
+    </table>
+</div>

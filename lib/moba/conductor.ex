@@ -9,15 +9,24 @@ defmodule Moba.Conductor do
   require Logger
 
   @doc """
-  Runs the automated bot battles and touches a datetime field
-  so Moba.Server knows when to run this again, currently every 10 mins.
+  Runs the auto matchmaking and touches a datetime field
+  so Moba.Server knows when to run this again, currently every 30 mins.
   """
   def season_tick! do
-    season = Moba.current_season()
-    auto_matchmaking_bots(season)
-    auto_matchmaking_users()
-    Game.update_pvp_ranking!()
-    Game.update_season!(season, %{last_server_update_at: DateTime.utc_now()})
+    auto_matchmaking()
+    Moba.update_pvp_ranking()
+
+    Moba.current_season()
+    |> Game.update_season!(%{last_server_update_at: DateTime.utc_now()})
+  end
+
+  def pvp_tick! do
+    Game.update_pvp_ranking!(true)
+    Repo.update_all(PlayerQuery.pvp_available(), set: [daily_matches: 0, daily_wins: 0])
+    Game.update_season_ranking!()
+
+    Moba.current_season()
+    |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
   end
 
   # Generates new resources based on canon so edits in the admin panel don't affect the current resources
@@ -47,14 +56,23 @@ defmodule Moba.Conductor do
     Game.update_season!(Moba.current_season(), %{resource_uuid: resource_uuid})
   end
 
-  def regenerate_pve_bots!(level_range \\ 0..35) do
-    IO.puts("Generating new PVE bots...")
+  def regenerate_bots!(level_range \\ 0..35) do
+    IO.puts("Generating new bots...")
     timestamp = Timex.now()
 
     AvatarQuery.base_canon()
     |> Repo.all()
     |> Enum.each(fn avatar ->
       Logger.info("Generating #{avatar.name}s...")
+
+      Logger.info("Generating pvp bots...")
+
+      Enum.each(1..10, fn _n ->
+        create_bot_hero!(avatar, 24, "pvp_master", 5)
+        create_bot_hero!(avatar, 26, "pvp_grandmaster", 6)
+      end)
+
+      Logger.info("Generating pve bots...")
 
       Enum.each(level_range, fn level ->
         create_bot_hero!(avatar, level, "weak")
@@ -68,33 +86,9 @@ defmodule Moba.Conductor do
       end)
     end)
 
-    archive_previous_bots!(HeroQuery.pve_bots(), timestamp)
+    archive_previous_bots!(HeroQuery.bots(), timestamp)
 
     Repo.delete_all(Game.Schema.Target)
-  end
-
-  def regenerate_pvp_bots! do
-    timestamp = Timex.now()
-
-    all_avatars = AvatarQuery.base_canon() |> Repo.all()
-
-    bot_heroes =
-      PlayerQuery.eligible_arena_bots()
-      |> Repo.all()
-      |> Enum.map(fn %{bot_options: options} = player ->
-        Logger.info("New PVP heroes for #{options.name}: #{options.codes |> Enum.join(", ")}")
-
-        options.codes
-        |> Enum.map(fn code -> Enum.find(all_avatars, &(&1.code == code)) end)
-        |> Enum.filter(& &1)
-        |> Enum.map(&create_pvp_bot_hero!(player, &1))
-      end)
-
-    archive_previous_bots!(HeroQuery.pvp_bots(), timestamp)
-
-    bot_heroes
-    |> List.flatten()
-    |> Enum.map(&Game.update_hero_collection!(&1))
   end
 
   # Archives all current bots so they can be removed later by Cleaner
@@ -105,53 +99,24 @@ defmodule Moba.Conductor do
     |> Repo.update_all(set: [archived_at: DateTime.utc_now()])
   end
 
-  defp auto_matchmaking_bots(%{last_server_update_at: time}) do
-    Enum.each(1..2, fn _n ->
-      bot = PlayerQuery.matchmaking_bot(time) |> Repo.all() |> List.first()
+  defp auto_matchmaking do
+    PlayerQuery.auto_matchmaking()
+    |> Repo.all()
+    |> Repo.preload(:user)
+    |> Enum.map(fn player ->
+      match = Game.auto_matchmaking!(player)
 
-      if bot do
-        duel = Game.bot_matchmaking!(bot)
-
-        if duel do
-          Logger.info("Created BOT duel ##{duel.id} for #{bot.bot_options.name}")
-          later = Timex.shift(time, minutes: 190)
-          Game.update_player!(bot, %{last_challenge_at: later})
-        end
+      if match do
+        Game.get_match!(match.id) |> Game.continue_match!()
+        Logger.info("Created match ##{match.id} for #{player.user.username}")
       end
     end)
   end
 
-  defp auto_matchmaking_users do
-    Enum.each(1..5, fn _n ->
-      player = PlayerQuery.auto_matchmaking() |> Repo.all() |> Repo.preload(:user) |> List.first()
-
-      if player do
-        duel = Game.auto_matchmaking!(player)
-
-        if duel do
-          Logger.info("Created duel ##{duel.id} for #{player.user.username}")
-        end
-      end
-    end)
-  end
-
-  defp create_bot_hero!(avatar, level, difficulty, league_tier \\ nil, player \\ nil) do
+  defp create_bot_hero!(avatar, level, difficulty, league_tier \\ nil) do
     tier = league_tier || Game.league_tier_for(level)
 
-    Game.create_bot!(avatar, level, difficulty, tier, player)
-  end
-
-  defp create_pvp_bot_hero!(%{bot_options: %{tier: tier}} = player, avatar) do
-    level = Game.league_level_range_for(tier) |> Enum.random()
-
-    difficulty =
-      cond do
-        tier == Moba.master_league_tier() -> "pvp_master"
-        tier == Moba.max_league_tier() -> "pvp_grandmaster"
-        true -> "strong"
-      end
-
-    create_bot_hero!(avatar, level, difficulty, tier, player)
+    Game.create_bot!(avatar, level, difficulty, tier)
   end
 
   # by nilifing :id here we can make a perfect clone of a record

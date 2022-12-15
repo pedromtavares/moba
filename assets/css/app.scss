@@ -13,6 +13,7 @@
 @import "./tavern.scss";
 @import "./duel.scss";
 @import "./community.scss";
+@import "./matches.scss";
 @import "./shared.scss";
 
 @import "../node_modules/shepherd.js/dist/css/shepherd.css";
@@ -568,80 +569,40 @@ b, strong {
   text-shadow: 0 0 7px #f7b84b , 0 0 10px #f7b84b;
 }
 
-.shadow-medal-0{
-  text-shadow: 0 0 7px rgb(160, 87, 20), 0 0 10px rgb(160, 87, 20);
+.rank-shadow-3{
+  filter: drop-shadow(0px 0px 6px red);
 }
 
-.shadow-medal-1{
-  text-shadow: 0 0 7px rgb(200, 120, 40), 0 0 10px rgb(200, 120, 40);
+.rank-shadow-2{
+  filter: drop-shadow(0px 0px 3px #ffffff);
 }
 
-.shadow-medal-2{
-  text-shadow: 0 0 7px rgb(250, 150, 65), 0 0 10px rgb(250, 150, 65);
+.rank-shadow-1{
+  filter: drop-shadow(0px 0px 8px #000000);
 }
 
-.shadow-medal-3{
-  text-shadow: 0 0 7px rgb(180, 180, 180), 0 0 10px rgb(180, 180, 180);
+.big-rank-shadow-3{
+  filter: drop-shadow(0px 0px 12px red);
 }
 
-.shadow-medal-4{
-  text-shadow: 0 0 7px rgb(220, 220, 220), 0 0 10px rgb(220, 220, 220);
+.big-rank-shadow-2{
+  filter: drop-shadow(0px 0px 6px #ffffff);
 }
 
-.shadow-medal-5{
-  text-shadow: 0 0 7px rgb(255, 255, 255), 0 0 10px rgb(255, 255, 255);
+.big-rank-shadow-1{
+  filter: drop-shadow(0px 0px 16px #000000);
 }
 
-.shadow-medal-6{
-  text-shadow: 0 0 7px rgb(151, 97, 21), 0 0 10px rgb(151, 97, 21);
+.name-shadow-3{
+  text-shadow: 0 0 7px red, 0 0 10px red;
 }
 
-.shadow-medal-7{
-  text-shadow: 0 0 7px rgb(200, 150, 30), 0 0 10px rgb(200, 150, 30);
+.name-shadow-2{
+  text-shadow: 0 0 1px #FFFFFF, 0 0 10px #FFFFFF;
 }
 
-.shadow-medal-8{
-  text-shadow: 0 0 7px rgb(240, 212, 50), 0 0 10px rgb(240, 212, 50);
-}
-
-.shadow-medal-9{
-  text-shadow: 0 0 7px rgb(41, 166, 226), 0 0 10px rgb(41, 166, 226);
-}
-
-.shadow-medal-10{
-  text-shadow: 0 0 7px rgb(82, 189, 233), 0 0 10px rgb(82, 189, 233);
-}
-
-.shadow-medal-11{
-  text-shadow: 0 0 7px rgb(123, 213, 242), 0 0 10px rgb(123, 213, 242);
-}
-
-.shadow-medal-12{
-  text-shadow: 0 0 7px rgb(0, 53, 160), 0 0 10px rgb(0, 53, 160);
-}
-
-.shadow-medal-13{
-  text-shadow: 0 0 7px rgb(34, 94, 174), 0 0 10px rgb(34, 94, 174);
-}
-
-.shadow-medal-14{
-  text-shadow: 0 0 7px rgb(83, 169, 244), 0 0 10px rgb(83, 169, 244);
-}
-
-.shadow-medal-15{
-  text-shadow: 0 0 7px rgb(152, 79, 85), 0 0 10px rgb(152, 79, 85);
-}
-
-.shadow-medal-16{
-  text-shadow: 0 0 7px rgb(255, 115, 127), 0 0 10px rgb(255, 115, 127);
-}
-
-.shadow-medal-17{
-  text-shadow: 0 0 7px rgb(255, 130, 140), 0 0 10px rgb(255, 130, 140);
-}
-
-.shadow-medal-18{
-  text-shadow: 0 0 7px rgb(250, 111, 233), 0 0 10px rgb(250, 111, 233);
+.name-shadow-1{
+  text-shadow: 0 0 7px #000000, 0 0 10px #000000;
 }
 
 .hero-card{

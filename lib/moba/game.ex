@@ -11,6 +11,7 @@ defmodule Moba.Game do
     Items,
     Heroes,
     Leagues,
+    Matches,
     Players,
     Quests,
     Seasons,
@@ -48,27 +49,23 @@ defmodule Moba.Game do
 
   # DUELS
 
-  defdelegate auto_next_duel_phase!(duel), to: Arena
+  defdelegate continue_duel!(duel, hero \\ nil), to: Arena
 
-  defdelegate create_pvp_duel!(player, opponent), to: Arena
+  defdelegate create_duel!(player, opponent), to: Arena
 
   defdelegate duel_challenge(player, opponent), to: Arena
-
-  defdelegate finish_duel!(player, winner, rewards), to: Arena
 
   defdelegate get_duel!(id), to: Duels
 
   defdelegate list_finished_duels(player), to: Duels
 
-  defdelegate list_matchmaking(player), to: Duels
-
-  defdelegate list_pvp_duels(player), to: Duels
-
-  defdelegate next_duel_phase!(duel, hero \\ nil), to: Arena
+  defdelegate list_duels(player), to: Duels
 
   # HEROES
 
   defdelegate archive_hero!(hero), to: Training
+
+  defdelegate available_pvp_heroes(player, excluded_hero_ids), to: Heroes
 
   defdelegate broadcast_to_hero(hero_id), to: Training
 
@@ -78,7 +75,7 @@ defmodule Moba.Game do
 
   defdelegate can_shard_buyback?(hero), to: Heroes
 
-  defdelegate create_bot!(avatar, level, difficulty, tier, player), to: Heroes
+  defdelegate create_bot!(avatar, level, difficulty, tier), to: Heroes
 
   defdelegate create_current_pve_hero!(attrs, player, avatar, skills), to: Training
 
@@ -94,6 +91,8 @@ defmodule Moba.Game do
 
   defdelegate get_hero!(hero_id), to: Heroes
 
+  defdelegate get_heroes(hero_ids), to: Heroes
+
   defdelegate latest_finished_heroes(player_id), to: Heroes
 
   defdelegate latest_unfinished_heroes(player_id), to: Heroes
@@ -103,8 +102,6 @@ defmodule Moba.Game do
   defdelegate list_all_finished_heroes(player_id), to: Heroes
 
   defdelegate list_all_unfinished_heroes(player_id), to: Heroes
-
-  defdelegate list_pickable_heroes(player_id, duel_inserted_at), to: Heroes
 
   defdelegate master_league?(hero), to: Training
 
@@ -118,7 +115,7 @@ defmodule Moba.Game do
 
   defdelegate pve_ranking(limit \\ 20), to: Heroes
 
-  defdelegate community_pve_ranking, to: Heroes
+  defdelegate pve_ranking_for_community, to: Heroes
 
   defdelegate rank_finished_heroes!, to: Training
 
@@ -131,6 +128,8 @@ defmodule Moba.Game do
   defdelegate start_farming!(hero, state, turns), to: Heroes
 
   defdelegate subscribe_to_hero(hero_id), to: Training
+
+  defdelegate trained_pvp_heroes(player_id, excluded_hero_ids, limit), to: Heroes
 
   defdelegate update_attacker!(hero, updates), to: Training
 
@@ -178,39 +177,41 @@ defmodule Moba.Game do
 
   defdelegate max_league_step_for(league), to: Leagues
 
-  # PLAYERS
+  # MATCHES
 
   defdelegate auto_matchmaking!(player), to: Arena
 
-  defdelegate bot_matchmaking!(player), to: Arena
+  defdelegate can_clear_auto_matches?(player), to: Matches
+
+  defdelegate continue_match!(match, player_picks), to: Arena
+
+  defdelegate continue_match!(match), to: Arena
+
+  defdelegate get_match!(id), to: Matches
+
+  defdelegate list_matches(player), to: Matches
+
+  defdelegate manual_matchmaking!(player), to: Arena
+
+  defdelegate maybe_clear_auto_matches(player), to: Arena
+
+  # PLAYERS
 
   defdelegate bot_ranking, to: Players
 
-  defdelegate closest_bot_time(player), to: Players
-
   defdelegate create_player!(attrs), to: Players
 
+  defdelegate daily_ranking(limit), to: Players
+
   defdelegate duel_opponents(player, online_ids), to: Players
-
-  defdelegate elite_matchmaking!(player), to: Arena
-
-  defdelegate elite_matchmaking_count(player), to: Players
 
   defdelegate get_player!(id), to: Players
 
   defdelegate get_player_from_user!(user_id), to: Players
 
-  defdelegate normal_matchmaking!(player), to: Arena
-
-  defdelegate normal_matchmaking_count(player), to: Players
-
-  defdelegate player_duel_updates!(player, duel_type, updates), to: Arena
-
   defdelegate pvp_points_for(tier), to: Players
 
-  defdelegate pvp_ranking(limit), to: Players
-
-  defdelegate pvp_tier_for(pvp_points), to: Players
+  defdelegate season_ranking(limit), to: Players
 
   defdelegate set_player_available!(player), to: Players
 
@@ -224,7 +225,9 @@ defmodule Moba.Game do
 
   defdelegate update_preferences!(player, preferences), to: Players
 
-  defdelegate update_pvp_ranking!, to: Arena
+  defdelegate update_pvp_ranking!(update_tiers? \\ false), to: Arena
+
+  defdelegate update_season_ranking!, to: Players
 
   defdelegate update_tutorial_step!(player, step), to: Players
 

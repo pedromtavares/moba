@@ -1,14 +1,6 @@
 defmodule MobaWeb.ArenaView do
   use MobaWeb, :view
-
-  def bot_timer(time) do
-    time =
-      Timex.parse!(time, "{ISO:Extended:Z}")
-      |> Timex.format("{relative}", :relative)
-      |> elem(1)
-
-    "Your next opponent will be available #{time}"
-  end
+  alias MobaWeb.PlayerView
 
   def can_be_challenged?(%{last_challenge_at: nil}, _), do: true
 
@@ -27,6 +19,10 @@ defmodule MobaWeb.ArenaView do
 
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
+
+  def daily_matches_percentage(%{daily_matches: daily_matches}) do
+    daily_matches * 100 / Moba.daily_match_limit()
+  end
 
   def duel_badge_class(%{type: type}) do
     case type do
@@ -51,6 +47,14 @@ defmodule MobaWeb.ArenaView do
     end
   end
 
+  def match_result(match) do
+    cond do
+      match.phase != "scored" -> content_tag(:h5, "In Progress")
+      match.winner_id == match.player_id -> content_tag(:h5, "Victory", class: "text-success")
+      true -> content_tag(:h5, "Defeat", class: "text-muted")
+    end
+  end
+
   def next_pvp_tier_percentage(%{pvp_tier: current_tier, pvp_points: pvp_points}) do
     current = Game.pvp_points_for(current_tier)
     max = Game.pvp_points_for(current_tier + 1)
@@ -67,6 +71,18 @@ defmodule MobaWeb.ArenaView do
   def opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
   def opponent_for(duel, _), do: duel.player
 
+  def reset_timer do
+    last_pvp_time = Moba.current_season().last_pvp_update_at
+
+    time =
+      last_pvp_time
+      |> Timex.shift(days: 1)
+      |> Timex.format("{relative}", :relative)
+      |> elem(1)
+
+    "Arena will reset #{time}"
+  end
+
   def rewards_badge(rewards) when rewards == 0, do: ""
 
   def rewards_badge(rewards) when rewards > 0 do
@@ -77,17 +93,15 @@ defmodule MobaWeb.ArenaView do
     content_tag("span", "#{rewards} Season Points", class: "badge badge-pill badge-light-dark")
   end
 
-  def season_rankings_string do
-    Phoenix.View.render_to_string(MobaWeb.ArenaView, "_season_rankings.html", [])
-  end
-
   def silenced?(%{current_player: %{status: "silenced"}}), do: true
   def silenced?(_), do: false
 
+  def tier_label(%{pvp_tier: 2}), do: "Immortal"
+  def tier_label(%{pvp_tier: 1}), do: "Shadow"
+  def tier_label(_), do: "Pleb"
+
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false
-
-  defdelegate username(player), to: MobaWeb.UserView
 
   defp duel_battle(duel_id, hero_id, battles) do
     Enum.find(battles, &(&1.attacker_id == hero_id && &1.duel_id == duel_id))

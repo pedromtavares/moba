@@ -20,6 +20,19 @@ Hooks.CompleteTutorial = {
   }
 }
 
+Hooks.EqualHeight = {
+  mounted(){
+    const target = this.el.getAttribute("phx-target")
+    const height = $(target).height()
+    this.el.style.height = `${height}px`
+  },
+  updated(){
+    const target = this.el.getAttribute("phx-target")
+    const height = $(target).height()
+    this.el.style.height = `${height}px`
+  }
+}
+
 Hooks.Scroll = {
   mounted(){
     this.el.scrollIntoView();
@@ -63,6 +76,20 @@ Hooks.ScrollToTarget = {
     if (targetElement){
       targetElement[0].scrollIntoView();
     }
+  }
+}
+
+Hooks.ToggleDisplay = {
+  mounted(){
+    let el = this.el;
+    let target = $(el).attr("phx-target-element");
+    const targetElement = $(target);
+    el.addEventListener("mouseover", e => {
+      targetElement.addClass("d-block")
+    });
+    el.addEventListener("mouseout", e => {
+      targetElement.removeClass("d-block")
+    });
   }
 }
 

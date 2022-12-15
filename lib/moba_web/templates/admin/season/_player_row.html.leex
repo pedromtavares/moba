@@ -2,9 +2,6 @@
     <td class="text-center">
         <%= live_redirect to: Routes.player_path(@socket, :show, @player), class: "text-white" do %>
             <img src="/images/pve/<%= @player.pve_tier %>.png" style="max-height:  50px"/>
-            <%= if @player.pvp_points > 0 do %>
-                <img src="/images/pvp/<%= @player.pvp_tier %>.png" style="max-height:  50px"/>
-            <% end %>
             <br/>
             <span class="text-white"><%= @player.user.username %></span>
             <span class="badge badge-pill badge-light-success"><%= @player.hero_count%></span>
@@ -12,6 +9,8 @@
         <% end %>
         <br/>
         <small class="text-dark font-italic">
+            D#<%= @player.ranking %> (<%= @player.pvp_tier %>) - S#<%= @player.season_ranking %> - BI <%= @player.best_immortal_streak %> - CI <%= @player.current_immortal_streak %>
+            <br/>
             Online <%= @player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
             <br/>
             Registered <%= @player.user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>

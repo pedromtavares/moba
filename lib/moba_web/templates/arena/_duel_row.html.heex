@@ -1,19 +1,14 @@
 <tr>
     <td class="d-flex justify-content-center">
-        <img src={"/images/pvp/#{@opponent.pvp_tier}.png"} class="mr-2" style="max-height:  40px"/>
-        <div style="width: 50%">
-            <h4>
-                <%= live_redirect username(@opponent), to: Routes.player_path(@socket, :show, @opponent.id), class: if elite?(@duel), do: "text-warning", else: "text-primary" %>       
+        <img src={"/images/pve/#{@opponent.pve_tier}.png"} class="mr-2" style="max-height:  40px"/>
+        <div style="width: 70%">
+            <h4 class="mt-2">
+                <%= live_redirect username(@opponent), to: Routes.player_path(@socket, :show, @opponent.id), class: "text-white" %>
             </h4>
-            <%= unless pvp?(@duel) do %>
-                <small class={if elite?(@duel), do: "badge badge-pill badge-light-warning", else: "badge badge-pill badge-light-primary"} style="font-size: 0.6rem">
-                    <%= duel_label(@duel) %>
-                </small>
-            <% end %>
         </div>
     </td>
 
-    <td width="15%" class="text-center">
+    <td width="33%" class="text-center">
         <%= duel_result(@duel, @player_id) %>
         <%= if finished?(@duel) && @duel.rewards.attacker_pvp_points != 0 do %>
             <%= if @duel.player_id == @player_id do %>
@@ -23,19 +18,10 @@
             <% end %>
         <% end %>
     </td>
-
-    <td>
-        <%= render "_duel_battle.html", battle: first_battle_for(@duel, @battles) %>
-    </td>
-
-    <td>
-        <%= render "_duel_battle.html", battle: last_battle_for(@duel, @battles) %>
-    </td>
     
-    <td>
+    <td class="text-center">
         <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @duel), class: "btn btn-light" do %>
-            <i class="fa fa-eye mr-1"></i>
-            View
+            <i class="fa fa-eye"></i>
         <% end %>
     </td>
 </tr>

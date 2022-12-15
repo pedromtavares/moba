@@ -46,7 +46,9 @@ defmodule Moba do
 
   def pve_ranking, do: cached_ranking("pve_ranking", fn -> Game.pve_ranking(@pve_ranking_limit) end)
 
-  def pvp_ranking, do: cached_ranking("pvp_ranking", fn -> Game.pvp_ranking(@pvp_ranking_limit) end)
+  def daily_ranking, do: cached_ranking("daily_ranking", fn -> Game.daily_ranking(@daily_ranking_limit) end)
+
+  def season_ranking, do: cached_ranking("season_ranking", fn -> Game.season_ranking(@season_ranking_limit) end)
 
   def reward_shards!(%{user: %{shard_count: current_count} = user}, shard_reward) do
     Accounts.update_user!(user, %{shard_count: current_count + shard_reward})

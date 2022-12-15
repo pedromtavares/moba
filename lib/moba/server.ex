@@ -9,13 +9,16 @@ defmodule Moba.Server do
   # 30 secs
   @check_timeout 1000 * 30
 
-  # 10mins
-  @tick_diff_in_seconds 60 * 10
+  # 30mins
+  @tick_diff_in_seconds 60 * 30
+
+  # 24h
+  @pvp_update_diff_in_seconds 24 * 60 * 30
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   def init(state) do
-    server_check(state)
+    # server_check(state)
     {:ok, state}
   end
 
@@ -35,6 +38,10 @@ defmodule Moba.Server do
     if time_diff_in_seconds(season.last_server_update_at) >= @tick_diff_in_seconds do
       Conductor.season_tick!()
       Cleaner.cleanup_old_records()
+    end
+
+    if time_diff_in_seconds(season.last_pvp_update_at) >= @pvp_update_diff_in_seconds do
+      Conductor.pvp_tick!()
     end
 
     state

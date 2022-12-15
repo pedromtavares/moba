@@ -8,27 +8,11 @@ defmodule Moba.Game.Players do
   alias Game.Schema.Player
   alias Game.Query.PlayerQuery
 
-  @max_pvp_tier Moba.max_pvp_tier()
-
   def add_total_farm!(%{player: player} = hero) do
     update_player!(player, %{total_farm: player.total_farm + hero.total_gold_farm + hero.total_xp_farm})
   end
 
-  def bot_opponent(player) do
-    exclusions = match_exclusions(player) ++ [player.id]
-
-    PlayerQuery.bot_opponents(player.pvp_tier)
-    |> PlayerQuery.exclude_ids(exclusions)
-    |> PlayerQuery.limit_by(1)
-    |> Repo.all()
-    |> List.first()
-  end
-
   def bot_ranking, do: PlayerQuery.bots() |> PlayerQuery.by_pvp_points() |> Repo.all()
-
-  def closest_bot_time(%{match_history: history}) do
-    Map.values(history) |> Enum.sort() |> List.first()
-  end
 
   def create_player!(attrs \\ %{}) do
     %Player{}
@@ -47,58 +31,28 @@ defmodule Moba.Game.Players do
   end
 
   @doc """
-  Increments duel counts and sets the duel_score map that is displayed on the player's profile
+  Sets pvp_points and the duel_score map that is displayed on the player's profile
   Each player holds the score count of every other player they have dueled against
   """
-  def duel_updates!(player, duel_type, updates) do
-    pvp_points = updates[:pvp_points] || player.pvp_points
-    pvp_tier = pvp_tier_for(pvp_points)
-    base_updates = %{pvp_points: pvp_points, pvp_tier: pvp_tier}
+  def duel_update!(player, updates) do
+    loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
+    current_score = player.duel_score[loser_id] || 0
+    duel_score = loser_id && Map.put(player.duel_score, loser_id, current_score + 1)
 
-    score_updates =
-      if duel_type == "pvp" do
-        loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
-        current_score = player.duel_score[loser_id] || 0
-        duel_score = loser_id && Map.put(player.duel_score, loser_id, current_score + 1)
+    updates = %{
+      duel_score: duel_score || player.duel_score,
+      pvp_points: updates[:pvp_points] || player.pvp_points
+    }
 
-        %{
-          duel_score: duel_score || player.duel_score
-        }
-      else
-        %{}
-      end
-
-    update_player!(player, Map.merge(base_updates, score_updates))
-  end
-
-  def elite_matchmaking_count(player) do
-    elite_matchmaking_query(player) |> Repo.aggregate(:count)
-  end
-
-  def elite_matchmaking_opponent(player) do
-    elite_matchmaking_query(player) |> PlayerQuery.limit_by(1) |> Repo.all() |> List.first()
+    update_player!(player, updates)
   end
 
   def get_player!(id), do: PlayerQuery.load() |> Repo.get!(id)
 
   def get_player_from_user!(user_id), do: Repo.get_by(PlayerQuery.load(), user_id: user_id)
 
-  def manage_match_history(%{match_history: history} = player, opponent) do
-    timeout = Timex.shift(Timex.now(), hours: Moba.match_timeout_in_hours())
-    history = Map.put(history, Integer.to_string(opponent.id), timeout)
-    update_player!(player, %{match_history: history})
-  end
-
-  def matchmaking_opponent(player) do
-    elite_matchmaking_opponent(player) || normal_matchmaking_opponent(player)
-  end
-
-  def normal_matchmaking_count(player) do
-    normal_matchmaking_query(player) |> Repo.aggregate(:count)
-  end
-
-  def normal_matchmaking_opponent(player) do
-    normal_matchmaking_query(player) |> PlayerQuery.limit_by(1) |> Repo.all() |> List.first()
+  def matchmaking_opponent(%{pvp_tier: tier, id: id}) do
+    PlayerQuery.matchmaking_opponents(id, tier) |> PlayerQuery.limit_by(1) |> Repo.all() |> List.first()
   end
 
   def pvp_points_for(tier) do
@@ -128,13 +82,9 @@ defmodule Moba.Game.Players do
   @doc """
   Lists Players by their ranking
   """
-  def pvp_ranking(limit), do: PlayerQuery.ranking(limit) |> Repo.all() |> Repo.preload(:user)
+  def daily_ranking(limit), do: PlayerQuery.daily_ranked(limit) |> Repo.all() |> Repo.preload(:user)
 
-  def pvp_tier_for(points) when points < 1000 do
-    Enum.find(0..18, fn tier -> pvp_points_for(tier + 1) > points end)
-  end
-
-  def pvp_tier_for(_), do: 18
+  def season_ranking(limit), do: PlayerQuery.season_ranked(limit) |> Repo.all() |> Repo.preload(:user)
 
   def set_player_available!(player), do: update_player!(player, %{status: "available"})
 
@@ -159,47 +109,101 @@ defmodule Moba.Game.Players do
 
   def update_tutorial_step!(player, step), do: update_player!(player, %{tutorial_step: step})
 
-  @doc """
-  Updates all Players' ranking
-  """
-  def update_ranking! do
+  def old_update_ranking! do
     Repo.update_all(Player, set: [ranking: nil])
 
-    PlayerQuery.eligible_for_ranking(1000)
+    PlayerQuery.old_ranking(1000)
     |> Repo.all()
     |> Enum.with_index(1)
+    |> Enum.each(fn {player, index} ->
+      update_player!(player, %{ranking: index, pvp_tier: pvp_tier_for(index)})
+    end)
+
+    Moba.current_season()
+    |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
+  end
+
+  defp pvp_tier_for(n) when n in 1..5, do: 2
+  defp pvp_tier_for(n) when n in 6..25, do: 1
+  defp pvp_tier_for(_), do: 0
+
+  def update_ranking! do
+    immortals =
+      PlayerQuery.with_pvp_tier(2) |> PlayerQuery.by_daily_wins() |> PlayerQuery.exclude_rankings([1]) |> Repo.all()
+
+    shadows = PlayerQuery.with_pvp_tier(1) |> PlayerQuery.by_daily_wins() |> Repo.all()
+    rest = PlayerQuery.with_pvp_tier(0) |> PlayerQuery.by_daily_wins() |> PlayerQuery.limit_by(975) |> Repo.all()
+
+    rank_tiered_players!(immortals, 2)
+    rank_tiered_players!(shadows, 6)
+    rank_tiered_players!(rest, 26)
+  end
+
+  def update_ranking_tiers! do
+    immortals = PlayerQuery.with_pvp_tier(2) |> PlayerQuery.by_daily_wins() |> Repo.all()
+    shadows = PlayerQuery.with_pvp_tier(1) |> PlayerQuery.by_daily_wins() |> Repo.all()
+    rest = PlayerQuery.with_pvp_tier(0) |> PlayerQuery.by_daily_wins() |> PlayerQuery.limit_by(975) |> Repo.all()
+    deranked_immortals = Enum.slice(immortals, 1..4)
+    new_immortals = Enum.slice(shadows, 0..3)
+    deranked_shadows = Enum.slice(shadows, 14..19)
+    same_shadows = Enum.slice(shadows, 4..13)
+    ranked_rest = Enum.slice(rest, 0..5)
+    the_immortal = List.first(immortals)
+
+    new_shadows =
+      deranked_immortals
+      |> Kernel.++(same_shadows)
+      |> Kernel.++(ranked_rest)
+
+    new_rest =
+      rest
+      |> Kernel.--(ranked_rest)
+      |> Kernel.++(deranked_shadows)
+
+    the_immortal && update_immortal!(the_immortal)
+
+    new_immortals
+    |> Enum.with_index(2)
+    |> Enum.each(fn {player, index} ->
+      update_player!(player, %{ranking: index, pvp_tier: 2})
+    end)
+
+    new_shadows
+    |> Enum.with_index(6)
+    |> Enum.each(fn {player, index} ->
+      update_player!(player, %{ranking: index, pvp_tier: 1, current_immortal_streak: 0})
+    end)
+
+    new_rest
+    |> Enum.sort_by(&{&1.daily_wins, &1.pvp_points}, :desc)
+    |> Enum.with_index(26)
+    |> Enum.each(fn {player, index} ->
+      update_player!(player, %{ranking: index, pvp_tier: 0})
+    end)
+  end
+
+  def update_season_ranking! do
+    Repo.update_all(Player, set: [season_ranking: nil])
+
+    PlayerQuery.season_ranking(1000)
+    |> Repo.all()
+    |> Enum.with_index(1)
+    |> Enum.each(fn {player, index} ->
+      update_player!(player, %{season_ranking: index})
+    end)
+  end
+
+  defp rank_tiered_players!(players, start_index) do
+    players
+    |> Enum.with_index(start_index)
     |> Enum.each(fn {player, index} ->
       update_player!(player, %{ranking: index})
     end)
   end
 
-  # --------------------------------
-
-  defp elite_matchmaking_query(%{pvp_tier: player_tier, pvp_points: player_points} = player) do
-    exclusions = match_exclusions(player) ++ [player.id]
-    tier = maximum_tier(player_tier + 1)
-
-    PlayerQuery.elite_opponents(tier, player_points) |> PlayerQuery.exclude_ids(exclusions)
-  end
-
-  defp match_exclusions(%{match_history: history}) do
-    Enum.reduce(history, [], fn {id, time}, acc ->
-      parsed = Timex.parse!(time, "{ISO:Extended:Z}")
-
-      if Timex.before?(parsed, Timex.now()) do
-        acc
-      else
-        acc ++ [id]
-      end
-    end)
-  end
-
-  defp maximum_tier(tier) when tier > @max_pvp_tier, do: @max_pvp_tier
-  defp maximum_tier(tier), do: tier
-
-  defp normal_matchmaking_query(%{pvp_tier: player_tier, pvp_points: player_points} = player) do
-    exclusions = match_exclusions(player) ++ [player.id]
-
-    PlayerQuery.normal_opponents(player_tier, player_points) |> PlayerQuery.exclude_ids(exclusions)
+  defp update_immortal!(%{current_immortal_streak: cstreak, best_immortal_streak: bstreak} = player) do
+    current = cstreak + 1
+    best = if current > bstreak, do: current, else: bstreak
+    update_player!(player, %{ranking: 1, best_immortal_streak: best, current_immortal_streak: current})
   end
 end

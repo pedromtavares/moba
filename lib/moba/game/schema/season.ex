@@ -12,6 +12,7 @@ defmodule Moba.Game.Schema.Season do
     field :title, :string
     field :active, :boolean, default: false
     field :last_server_update_at, :utc_datetime
+    field :last_pvp_update_at, :utc_datetime
     field :changelog, :string
     field :resource_uuid, :string
 
@@ -22,6 +23,6 @@ defmodule Moba.Game.Schema.Season do
 
   def changeset(season, attrs) do
     season
-    |> cast(attrs, [:title, :active, :last_server_update_at, :changelog, :resource_uuid])
+    |> cast(attrs, [:title, :active, :last_server_update_at, :last_pvp_update_at, :changelog, :resource_uuid])
   end
 end

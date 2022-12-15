@@ -15,68 +15,6 @@ alias Game.Schema.{Item, Skill, Avatar}
 alias Accounts.Schema.User
 
 defmodule SeedHelper do
-  def create_bot(bot_tier, avatar_codes) do
-    pvp_points =
-      case bot_tier do
-        4 -> 200..499
-        5 -> 500..999
-        6 -> 1000..3999
-        _ -> 0..199
-      end
-      |> Enum.random()
-
-    pvp_tier = Game.pvp_tier_for(pvp_points)
-    name = Faker.Superhero.name()
-    bot_options = %{name: name, tier: bot_tier, codes: avatar_codes}
-
-    Game.create_player!(%{bot_options: bot_options, pvp_tier: pvp_tier, pvp_points: pvp_points})
-  end
-
-  def create_pvp_bots do
-    codes = Game.list_avatars() |> Enum.map(& &1.code)
-
-    # creates 10 plat and 10 diamond bots, each with 2 avatar codes
-    Enum.each(3..4, fn bot_tier ->
-      Enum.reduce(1..10, codes, fn _, acc ->
-        used = Enum.shuffle(acc) |> Enum.take(2)
-        create_bot(bot_tier, used)
-        acc -- used
-      end)
-    end)
-
-    # creates 40 master bots, each with 3 avatar codes
-    Enum.reduce(1..40, codes, fn _, acc ->
-      used = Enum.shuffle(acc) |> Enum.take(3)
-      total = length(used)
-
-      if total < 3 do
-        new_acc = acc ++ Enum.shuffle(codes)
-        used = used ++ Enum.take(new_acc, 3 - total)
-        create_bot(5, used)
-        new_acc -- used
-      else
-        create_bot(5, used)
-        acc -- used
-      end
-    end)
-
-    # creates 40 grandmaster bots, each with 4 avatar codes
-    Enum.reduce(1..40, codes, fn _, acc ->
-      used = Enum.shuffle(acc) |> Enum.take(4)
-      total = length(used)
-
-      if total < 4 do
-        new_acc = acc ++ Enum.shuffle(codes)
-        used = used ++ Enum.take(new_acc, 4 - total)
-        create_bot(6, used)
-        new_acc -- used
-      else
-        create_bot(6, used)
-        acc -- used
-      end
-    end)
-  end
-
   def image_for(code) do
     %Plug.Upload{filename: "#{code}.png", path: "priv/resources/#{code}.png", content_type: "image/png"}
   end
@@ -1228,8 +1166,6 @@ SeedHelper.create_avatar(
   )
 )
 
-SeedHelper.create_pvp_bots()
-
 # generates all further skill levels with same values as level 1
 Game.Query.SkillQuery.base_canon()
 |> Repo.all()
@@ -1250,8 +1186,9 @@ Game.Query.SkillQuery.base_canon()
 end)
 
 Conductor.regenerate_resources!()
-Conductor.regenerate_pvp_bots!()
+Conductor.pvp_tick!()
 Conductor.season_tick!()
 
+
 (Enum.to_list(0..10) ++ Enum.to_list(17..22))
-|> Conductor.regenerate_pve_bots!()
+|> Conductor.regenerate_bots!()

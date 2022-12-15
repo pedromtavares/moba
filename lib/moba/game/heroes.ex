@@ -9,6 +9,10 @@ defmodule Moba.Game.Heroes do
 
   # -------------------------------- PUBLIC API
 
+  def available_pvp_heroes(player, excluded_hero_ids \\ []) do
+    trained_pvp_heroes(player.id, excluded_hero_ids, 21) ++ pvp_bots(player.pvp_tier, [], 3)
+  end
+
   def buyback!(%{pve_state: "dead"} = hero) do
     price = buyback_price(hero)
 
@@ -72,23 +76,21 @@ defmodule Moba.Game.Heroes do
   Level 0 bots exist to serve as weak targets for newly created player Heroes,
   and thus have their stats greatly reduced
   """
-  def create_bot!(avatar, level, difficulty, league_tier, player \\ nil) do
-    name = if player, do: player.bot_options.name, else: avatar.name
-    finished_at = if player, do: Timex.now() |> Timex.shift(hours: 1), else: nil
+  def create_bot!(avatar, level, difficulty, league_tier) do
+    name = if Enum.member?(["pvp_master", "pvp_grandmaster"], difficulty), do: Faker.Superhero.name(), else: avatar.name
 
     attrs = %{
       bot_difficulty: difficulty,
       name: name,
       gold: 100_000,
       league_tier: league_tier,
-      total_gold_farm: bot_total_gold_farm(league_tier, difficulty),
-      finished_at: finished_at
+      total_gold_farm: bot_total_gold_farm(league_tier, difficulty)
     }
 
     build_attrs = Map.put(attrs, :level, level)
     build = Game.generate_bot_build(build_attrs, avatar)
     attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
-    bot = create!(attrs, player, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
+    bot = create!(attrs, nil, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
 
     if level > 0 do
       xp = xp_until_hero_level(level)
@@ -139,6 +141,9 @@ defmodule Moba.Game.Heroes do
 
   def get_hero!(id), do: HeroQuery.load() |> Repo.get!(id)
 
+  def get_heroes([]), do: []
+  def get_heroes(hero_ids), do: HeroQuery.with_ids(HeroQuery.load(), hero_ids) |> Repo.all()
+
   @doc """
   Used for easy testing in development, unavailable in production
   """
@@ -181,12 +186,6 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def list_pickable_heroes(player_id, duel_inserted_at) do
-    HeroQuery.pickable(player_id, duel_inserted_at)
-    |> HeroQuery.load()
-    |> Repo.all()
-  end
-
   @doc """
   Retrieves top PVE ranked Heroes
   """
@@ -197,7 +196,7 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def community_pve_ranking do
+  def pve_ranking_for_community do
     HeroQuery.pve_ranked()
     |> HeroQuery.limit_by(21)
     |> HeroQuery.load()
@@ -206,6 +205,20 @@ defmodule Moba.Game.Heroes do
 
   def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
 
+  def pvp_bots(pvp_tier, exclude_ids \\ [], limit \\ 5) do
+    {difficulty, league_tier} =
+      case pvp_tier do
+        0 -> {"strong", 4}
+        1 -> {"pvp_master", 5}
+        2 -> {"pvp_grandmaster", 6}
+      end
+
+    HeroQuery.pvp_bots(difficulty, league_tier)
+    |> HeroQuery.exclude_ids(exclude_ids)
+    |> HeroQuery.limit_by(limit)
+    |> Repo.all()
+  end
+
   def set_skin!(hero, %{id: nil}), do: update!(hero, %{skin_id: nil}) |> Map.put(:skin, nil)
   def set_skin!(hero, skin), do: update!(hero, %{skin_id: skin.id}) |> Map.put(:skin, skin)
 
@@ -213,6 +226,10 @@ defmodule Moba.Game.Heroes do
 
   def start_farming!(hero, state, turns) do
     update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+  end
+
+  def trained_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5) do
+    HeroQuery.trained(player_id, excluded_hero_ids, limit) |> Repo.all()
   end
 
   def update!(nil, _), do: nil
@@ -296,10 +313,10 @@ defmodule Moba.Game.Heroes do
         "moderate" -> 2..4
         # 1600..3200
         "strong" -> (4 + extra_farm)..(6 + extra_farm)
-        # 19_200..24_000
-        "pvp_master" -> 0..12
-        # 26_400..30_000
-        "pvp_grandmaster" -> 6..15
+        # 24_000
+        "pvp_master" -> 12..12
+        # 30_000
+        "pvp_grandmaster" -> 15..15
       end
 
     base + 400 * Enum.random(range)

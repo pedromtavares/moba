@@ -41,10 +41,10 @@
                         <%= for message <- @messages do %>
                             <div class="inbox-item">              
                                 <div class="inbox-item-img">
-                                    <img src={"/images/pvp/#{message.tier}.png"}/>
+                                    <img src={"/images/pve/#{message.tier}.png"}/>
                                 </div>
                                 <p class="inbox-item-author">
-                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.UserLive, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
+                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
                                     <%= if message.is_admin do %>
                                         <small class="text-danger">(admin)</small>
                                     <% end %>
@@ -94,7 +94,7 @@
                         <%= for {player, index} <- Enum.with_index(@pvp_ranking, 1) do %>
                             <tr id={"player-#{player.id}"}>
                                 <td>
-                                    <img src={"/images/pvp/#{player.pvp_tier}.png"} style="max-height: 90px"/>
+                                    <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height: 90px"/>
                                     <h1 class="mb-0">
                                         #<%= index %>
                                     </h1>

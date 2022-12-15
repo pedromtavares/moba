@@ -25,7 +25,7 @@ defmodule MobaWeb.BattleLive do
     with battle = Engine.get_battle!(battle_id),
          skill = skill_id != "" && Game.get_skill!(skill_id),
          item = item_id != "" && Game.get_item!(item_id),
-         last_turn = Engine.last_turn(battle),
+         last_turn = List.last(battle.turns),
          valid_attacker? = is_nil(last_turn) || last_turn.defender.hero_id == String.to_integer(hero_id) do
       if valid_attacker? do
         %{assigns: %{battle: battle}} = socket = next_turn(socket, battle, %{skill: skill, item: item}, last_turn)
@@ -42,7 +42,7 @@ defmodule MobaWeb.BattleLive do
 
   def handle_event("check-timer", _, %{assigns: %{battle: %{id: id}}} = socket) do
     with battle = Engine.get_battle!(id),
-         last_turn = Engine.last_turn(battle),
+         last_turn = List.last(battle.turns),
          timer = turn_timer(last_turn, battle) do
       if timer < 0 do
         {:noreply, next_turn(socket, battle, %{auto: true}, last_turn)}
@@ -75,7 +75,7 @@ defmodule MobaWeb.BattleLive do
 
   defp battle_assigns(params, socket) do
     with battle = Engine.get_battle!(params["id"]),
-         last_turn = Engine.last_turn(battle),
+         last_turn = List.last(battle.turns),
          turn = Engine.build_turn(battle) do
       assign(socket,
         action_turn_number: nil,
@@ -118,7 +118,7 @@ defmodule MobaWeb.BattleLive do
   end
 
   defp turn_assigns(socket, battle, turn, turn_number) do
-    with last_turn = Engine.last_turn(battle) do
+    with last_turn = List.last(battle.turns) do
       assign(socket,
         action_turn_number: turn_number,
         battle: battle,

@@ -20,7 +20,6 @@ defmodule MobaWeb.PowControllerCallbacks do
 
       if player.pve_tier > 0 do
         Moba.reward_shards!(player, Game.get_quest(1).prize)
-        Game.set_player_available!(player)
       end
     end
 

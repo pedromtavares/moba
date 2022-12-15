@@ -5,7 +5,7 @@ defmodule Moba.Engine.Schema.Battle do
   use Ecto.Schema
   import Ecto.Changeset
   alias Moba.{Engine, Game}
-  alias Game.Schema.{Hero, Duel}
+  alias Game.Schema.{Duel, Hero, Match}
 
   schema "battles" do
     belongs_to :attacker, Hero
@@ -13,6 +13,7 @@ defmodule Moba.Engine.Schema.Battle do
     belongs_to :winner, Hero
     belongs_to :initiator, Hero
     belongs_to :duel, Duel
+    belongs_to :match, Match
 
     field :type, :string
     field :difficulty, :string

@@ -8,10 +8,17 @@ defmodule MobaWeb.ArenaLive do
       if connected?(socket) do
         TutorialComponent.subscribe(player.id)
         MobaWeb.subscribe("online")
+        MobaWeb.subscribe("player-ranking")
       end
 
       {:ok, socket}
     end
+  end
+
+  def handle_event("clear-auto-matches", _, %{assigns: %{current_player: player}} = socket) do
+    player = Game.maybe_clear_auto_matches(player)
+
+    {:noreply, assign(socket, current_player: player)}
   end
 
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_player: player}} = socket) do
@@ -25,17 +32,13 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
-  def handle_event("matchmaking", %{"type" => type}, %{assigns: %{current_player: player}} = socket) do
-    duel = if type == "elite", do: Game.elite_matchmaking!(player), else: Game.normal_matchmaking!(player)
+  def handle_event("matchmaking", _, %{assigns: %{current_player: player}} = socket) do
+    match = Game.manual_matchmaking!(player)
 
-    if duel do
-      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLive, duel.id))}
+    if match do
+      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match.id))}
     else
-      {:noreply,
-       assign(socket,
-         normal_count: Game.normal_matchmaking_count(player),
-         elite_count: Game.elite_matchmaking_count(player)
-       )}
+      {:noreply, assign(socket, current_player: Game.get_player!(player.id))}
     end
   end
 
@@ -50,12 +53,10 @@ defmodule MobaWeb.ArenaLive do
     {:noreply, assign(socket, current_player: player, duel_opponents: duel_opponents)}
   end
 
-  def handle_event("tutorial1", _, socket) do
-    {:noreply, socket |> TutorialComponent.next_step(31)}
-  end
-
   def handle_event("finish-tutorial", _, socket) do
-    {:noreply, TutorialComponent.finish_arena(socket)}
+    socket = TutorialComponent.next_step(socket, 31)
+
+    handle_event("matchmaking", nil, socket)
   end
 
   def handle_info({:tutorial, %{step: step}}, socket) do
@@ -76,6 +77,13 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
+  def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}}} = socket) do
+    with player = Game.get_player!(id),
+         ranking = tiered_ranking(player) do
+      {:noreply, assign(socket, ranking: ranking, current_player: player)}
+    end
+  end
+
   def render(assigns) do
     ArenaView.render("index.html", assigns)
   end
@@ -84,13 +92,12 @@ defmodule MobaWeb.ArenaLive do
     player.status == "available" && ArenaView.can_be_challenged?(player, Timex.now())
   end
 
-  defp maybe_redirect(%{assigns: %{current_player: %{user_id: user_id}}} = socket) when is_nil(user_id) do
-    redirect(socket, to: "/registration/new")
+  defp check_tutorial(socket) do
+    TutorialComponent.next_step(socket, 30)
   end
 
-  defp maybe_redirect(%{assigns: %{current_player: %{hero_collection: collection}}} = socket)
-       when length(collection) < 2 do
-    redirect(socket, to: "/base")
+  defp maybe_redirect(%{assigns: %{current_player: %{user_id: user_id}}} = socket) when is_nil(user_id) do
+    redirect(socket, to: "/registration/new")
   end
 
   defp maybe_redirect(socket), do: socket
@@ -110,34 +117,34 @@ defmodule MobaWeb.ArenaLive do
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
          sidebar_code = "arena",
-         normal_count = Game.normal_matchmaking_count(player),
-         elite_count = Game.elite_matchmaking_count(player),
-         matchmaking = Game.list_matchmaking(player),
-         battles = matchmaking |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
-         pending_match = Enum.find(matchmaking, &(&1.phase != "finished")),
-         closest_bot_time = normal_count == 0 && elite_count == 0 && Game.closest_bot_time(player),
-         duels = Game.list_pvp_duels(player),
-         duel_battles = duels |> Enum.map(& &1.id) |> Engine.list_duel_battles(),
+         all_matches = Game.list_matches(player),
+         matches = all_matches |> Enum.filter(&(&1.phase == "scored")),
+         pending_match = Enum.find(all_matches, &(&1.phase != "scored")),
+         duels = Game.list_duels(player),
          duel_opponents = opponents_from_presence(player),
          last_presence_update = Timex.now(),
-         pending_duel = Enum.find(duels, &(&1.phase != "finished")) do
+         pending_duel = Enum.find(duels, &(&1.phase != "finished")),
+         ranking = tiered_ranking(player) do
       assign(socket,
-        battles: battles,
-        closest_bot_time: closest_bot_time,
+        closest_bot_time: current_time,
         current_time: current_time,
         duels: duels,
-        duel_battles: duel_battles,
         duel_opponents: duel_opponents,
-        elite_count: elite_count,
-        matchmaking: matchmaking,
-        normal_count: normal_count,
+        matches: matches,
         pending_duel: pending_duel,
         pending_match: pending_match,
         last_presence_update: last_presence_update,
+        ranking: ranking,
         sidebar_code: sidebar_code,
         tutorial_step: player.tutorial_step
       )
       |> maybe_redirect()
+      |> check_tutorial()
     end
+  end
+
+  defp tiered_ranking(%{pvp_tier: tier}) do
+    Moba.daily_ranking()
+    |> Enum.filter(fn player -> player.pvp_tier == tier end)
   end
 end

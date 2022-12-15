@@ -10,7 +10,7 @@ defmodule MobaWeb.CommunityLive do
   end
 
   def handle_event("show-users", _, %{assigns: %{pvp_ranking: users}} = socket) do
-    users = if users, do: users, else: Moba.pvp_ranking()
+    users = if users, do: users, else: Moba.daily_ranking()
     {:noreply, assign(socket, active_tab: "users", pvp_ranking: users)}
   end
 
@@ -26,7 +26,7 @@ defmodule MobaWeb.CommunityLive do
         Accounts.create_message!(%{
           body: body,
           author: user.username,
-          tier: player.pvp_tier,
+          tier: player.pve_tier,
           channel: "community",
           topic: "general",
           is_admin: user.is_admin,
@@ -85,7 +85,7 @@ defmodule MobaWeb.CommunityLive do
     with active_tab = "pve",
          changeset = Accounts.change_message(),
          channel = "community",
-         pve_ranking = Game.community_pve_ranking(),
+         pve_ranking = Game.pve_ranking_for_community(),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse(),
          updates = Accounts.latest_messages(channel, "updates", 20) do
       assign(socket,

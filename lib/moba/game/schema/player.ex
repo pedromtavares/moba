@@ -17,6 +17,7 @@ defmodule Moba.Game.Schema.Player do
     field :status, :string
     field :tutorial_step, :integer
     field :ranking, :integer
+    field :season_ranking, :integer
     field :duel_score, :map, default: %{}
     field :hero_collection, {:array, :map}
     field :pvp_tier, :integer, default: 0
@@ -25,6 +26,12 @@ defmodule Moba.Game.Schema.Player do
     field :match_history, :map, default: %{}
     field :last_challenge_at, :utc_datetime
     field :total_farm, :integer, default: 0
+    field :total_wins, :integer, default: 0
+    field :total_matches, :integer, default: 0
+    field :daily_wins, :integer, default: 0
+    field :daily_matches, :integer, default: 0
+    field :current_immortal_streak, :integer, default: 0
+    field :best_immortal_streak, :integer, default: 0
 
     has_many :heroes, Game.Schema.Hero
     has_many :duels, Game.Schema.Duel
@@ -46,6 +53,7 @@ defmodule Moba.Game.Schema.Player do
       :status,
       :tutorial_step,
       :ranking,
+      :season_ranking,
       :duel_score,
       :hero_collection,
       :pvp_tier,
@@ -55,7 +63,13 @@ defmodule Moba.Game.Schema.Player do
       :last_challenge_at,
       :total_farm,
       :current_pve_hero_id,
-      :user_id
+      :user_id,
+      :daily_wins,
+      :daily_matches,
+      :total_wins,
+      :total_matches,
+      :current_immortal_streak,
+      :best_immortal_streak
     ])
     |> cast_embed(:preferences)
     |> cast_embed(:bot_options)

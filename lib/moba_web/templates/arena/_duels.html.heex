@@ -1,4 +1,4 @@
-<div class="card duels">
+<div class="card duels" phx-hook="EqualHeight" phx-target=".ranking" id="pvp_duels">
     <div class="card-body p-0">
         <%= if @pending_duel do %>
             <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_duel), class: "btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3" do %>
@@ -12,17 +12,14 @@
                 </div>
             </div>
             <%= if length(@duel_opponents) > 0 do %>
-                <table class="table-dark table mt-3">
+                <table class="table-dark table">
                     <%= for player <- @duel_opponents do %>
                         <tr id={"player-#{player.id}"}>
                             <td class="text-right">
-                                <img src={"/images/pvp/#{player.pvp_tier}.png"} style="max-height:  50px"/>
+                                <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height:  50px"/>
                             </td>
                             <td>
-                                <h5><%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id) %></h5>
-                            </td>
-                            <td>
-                                <%= player.pvp_points %> Season Points
+                                <h5><%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id) %><br/><small><%= player.pvp_points %> SP</small></h5>
                             </td>
                             <td>
                                 Last active <%= player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
@@ -40,10 +37,10 @@
             <% end %>
 
             <%= if length(@duels) > 0 do %>
-                <div class="history mt-3">
+                <div class="history">
                     <table class="table-dark table mb-0">
                         <%= for duel <- @duels do %>
-                            <%= render "_duel_row.html", duel: duel, opponent: opponent_for(duel, @current_player), battles: @duel_battles, player_id: @current_player.id, socket: @socket %>
+                            <%= render "_duel_row.html", duel: duel, opponent: opponent_for(duel, @current_player), player_id: @current_player.id, socket: @socket %>
                         <% end %>
                     </table>
                 </div>
