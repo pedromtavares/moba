@@ -15,6 +15,7 @@ defmodule Moba.Conductor do
   def season_tick! do
     auto_matchmaking()
     Moba.update_pvp_ranking()
+    Game.update_season_ranking!()
 
     Moba.current_season()
     |> Game.update_season!(%{last_server_update_at: DateTime.utc_now()})

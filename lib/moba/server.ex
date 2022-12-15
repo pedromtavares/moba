@@ -10,10 +10,10 @@ defmodule Moba.Server do
   @check_timeout 1000 * 30
 
   # 30mins
-  @tick_diff_in_seconds 30 * 60 * 1000
+  @tick_diff_in_seconds 60 * 30
 
   # 24h
-  @pvp_update_diff_in_seconds 24 * 60 * 60 * 1000
+  @pvp_update_diff_in_seconds 24 * 60 * 60
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
