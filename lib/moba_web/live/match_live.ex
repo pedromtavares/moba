@@ -15,7 +15,7 @@ defmodule MobaWeb.MatchLive do
     end
   end
 
-  def handle_event("hero-tab", %{"tab" => tab}, socket) do
+  def handle_event("hero-tab", %{"type" => tab}, socket) do
     {:noreply, assign(socket, hero_tab: tab)}
   end
 

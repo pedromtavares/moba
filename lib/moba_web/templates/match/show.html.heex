@@ -44,19 +44,19 @@
 					<div class="col">
 						<div class="card mb-0 mt-2" phx-hook="EqualHeight" phx-target="#opponent-heroes-container" id="picks-card">
 							<ul class="nav nav-pills navtab-bg mt-2 justify-content-center">
-			                  	<li class="nav-item">
-			                      	<a href="#trained-heroes" phx-click="hero-tab" phx-value-tab="trained" data-toggle="tab" class={"nav-link px-2 py-1 #{if @hero_tab == "trained", do: "active"}"}>
-			                          	<span class="d-inline-block"><i class="fa fa-sword mr-1"></i>Trained Heroes</span>
-			                      	</a>
-			                    </li>
-			                    <li class="nav-item">
-                      				<a href="#available-heroes" phx-click="hero-tab" phx-value-tab="available" data-toggle="tab" class={"nav-link px-2 py-1 #{if @hero_tab == "available", do: "active"}"}>
-			                          	<span class="d-inline-block"><i class="fa fa-dice mr-1"></i>Available Heroes</span>
-			                      	</a>
-			                  	</li>
-			                </ul>
-			                <div class="tab-content pt-0 mt-2">
-			                	<div class={"tab-pane fade #{if @hero_tab == "trained", do: "active show"}"} id="trained-heroes">
+              	<li class="nav-item">
+                  	<a href="#trained-heroes" phx-click="hero-tab" phx-value-type="trained" data-toggle="tab" class={"nav-link px-2 py-1 #{if @hero_tab == "trained", do: "active"}"} phx-hook="Loading" id="trained-heroes-button">
+                      	<span class="d-inline-block loading-text"><i class="fa fa-sword mr-1"></i>Trained Heroes</span>
+                  	</a>
+                </li>
+                <li class="nav-item">
+            				<a href="#available-heroes" phx-click="hero-tab" phx-value-type="available" data-toggle="tab" class={"nav-link px-2 py-1 #{if @hero_tab == "available", do: "active"}"} phx-hook="Loading" id="available-heroes-button">
+                      	<span class="d-inline-block loading-text"><i class="fa fa-dice mr-1"></i>Available Heroes</span>
+                  	</a>
+              	</li>
+            	</ul>
+			        <div class="tab-content pt-0 mt-2">
+			          <div class={"tab-pane fade #{if @hero_tab == "trained", do: "active show"}"} id="trained-heroes">
 									<hr class="mb-2"/>
 									<%= for hero <- @trained_heroes do %>
 										<%= render "_hero.html", hero: hero, picked_ids: Enum.map(@picked_heroes, &(&1.id))  %>

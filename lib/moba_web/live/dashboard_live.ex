@@ -92,16 +92,8 @@ defmodule MobaWeb.DashboardLive do
     MobaWeb.DashboardView.render("index.html", assigns)
   end
 
-  defp check_tutorial(%{assigns: %{current_player: player}} = socket) do
-    %{assigns: %{tutorial_step: step}} = socket = TutorialComponent.next_step(socket, 20)
-
-    if step == 29 && player.pve_tier > 0 do
-      socket
-      |> TutorialComponent.next_step(30)
-      |> push_redirect(to: Routes.live_path(socket, MobaWeb.ArenaLive))
-    else
-      socket
-    end
+  defp check_tutorial(socket) do
+    TutorialComponent.next_step(socket, 20)
   end
 
   defp heroes_assigns(%{assigns: %{current_player: player}} = socket) do

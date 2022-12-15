@@ -92,6 +92,10 @@ defmodule MobaWeb.ArenaLive do
     player.status == "available" && ArenaView.can_be_challenged?(player, Timex.now())
   end
 
+  defp check_tutorial(socket) do
+    TutorialComponent.next_step(socket, 30)
+  end
+
   defp maybe_redirect(%{assigns: %{current_player: %{user_id: user_id}}} = socket) when is_nil(user_id) do
     redirect(socket, to: "/registration/new")
   end
@@ -135,6 +139,7 @@ defmodule MobaWeb.ArenaLive do
         tutorial_step: player.tutorial_step
       )
       |> maybe_redirect()
+      |> check_tutorial()
     end
   end
 

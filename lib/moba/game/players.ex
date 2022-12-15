@@ -118,6 +118,9 @@ defmodule Moba.Game.Players do
     |> Enum.each(fn {player, index} ->
       update_player!(player, %{ranking: index, pvp_tier: pvp_tier_for(index)})
     end)
+
+    Moba.current_season()
+    |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
   end
 
   defp pvp_tier_for(n) when n in 1..5, do: 2

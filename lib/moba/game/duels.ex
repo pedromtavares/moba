@@ -147,6 +147,7 @@ defmodule Moba.Game.Duels do
     from duel in load_less(),
       where: duel.player_id == ^player_id or duel.opponent_player_id == ^player_id,
       limit: ^limit,
+      where: is_nil(duel.type) or duel.type == "pvp",
       order_by: [desc: duel.inserted_at]
   end
 

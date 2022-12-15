@@ -243,7 +243,7 @@ const Tutorial = {
           buttons: [
             {
               text: 'Finish Tutorial',
-              action: function () { hookInstance.pushEvent("tutorial1", {}); this.complete() }
+              action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
           popperOptions: {
@@ -305,10 +305,10 @@ const Tutorial = {
         });
         $(".arena")[0] && tour.addStep({
           id: 'thirtieth-four-tutorial-first-step',
-          text: "<p class='text-center'>You can check out more info about the Arena, including how live PvP Duels work, by clicking this button. Now, let's get to the action.</p>",
+          text: "<p class='text-center'>You can learn more about how the Arena and other parts of the game work by checking out the Game Manual. Now, let's get to the action!</p>",
           attachTo: {
-            element: '#arena-info-button',
-            on: 'bottom'
+            element: '#game-manual',
+            on: 'right'
           },
           buttons: [
             {
@@ -324,7 +324,7 @@ const Tutorial = {
       case 31:
         $("#picks-card")[0] && tour.addStep({
           id: 'thirty-first-tutorial-first-step',
-          text: "<p class='text-center'>The first part of an Arena match is the picking phase. Here you can build a team of 5 by selecting either from your trained heroes or from a pool of randomized heroes.<br/><br/>You can reorder your selection by Unpicking an already picked hero and picking it again. <br/><br/>When you’re done picking, a button will show up to finally start the match, where your picks will automatically fight the opponents picks until the last hero standing. Good luck!</p>",
+          text: "<p class='text-center'>The first part of an Arena match is the picking phase. Here you can build a team of 5 by selecting either from your trained heroes or from a pool of randomized heroes.<br/><br/>You can reorder your selection by Unpicking an already picked hero and picking it again. <br/><br/>When you’re done picking, a button will show up to finally start the match, where your picks will automatically fight the opponent's picks until the last hero standing. Good luck!</p>",
           attachTo: {
             element: '#picks-card',
             on: 'left'

@@ -28,7 +28,7 @@
                     <i class="fa-duotone fa-globe"></i>
                 <% end %>
             <% end %>
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.LibraryLive), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Info</h3>", class: sidebar_class("library", assigns)  do %>
+            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.LibraryLive), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Game Manual</h3>", class: sidebar_class("library", assigns), id: "game-manual"  do %>
                 <i class="fa-duotone fa-book-sparkles"></i>
             <% end %>
             <%= if @current_player.user && @current_player.user.is_admin do %>

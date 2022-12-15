@@ -25,15 +25,19 @@
             </div>
         </div>
         <%= if Enum.member?(@picked_ids, @hero.id) do %>
-            <button type="button" class="btn btn-secondary dark-button text-white btn-block pick-button" phx-click="unpick-hero" phx-value-id={@hero.id} id={"unpick-hero-#{@hero.id}"}>
-                <img src={"#{GH.image_url(@hero.avatar)}"} class="avatar mr-2" style="max-width: 40px;white-space: nowrap;"/>
-                Unpick <%= @hero.avatar.name %>
+            <button type="button" class="btn btn-secondary dark-button text-white btn-block pick-button" phx-click="unpick-hero" phx-value-id={@hero.id} id={"unpick-hero-#{@hero.id}"} phx-hook="Loading">
+                <span class="loading-text">
+                    <img src={"#{GH.image_url(@hero.avatar)}"} class="avatar mr-2" style="max-width: 40px;white-space: nowrap;"/>
+                    <span class="text-danger">Unpick <%= @hero.avatar.name %></span>
+                </span>
             </button>
         <% else %>
             <%= if length(@picked_ids) < 5 do %>
-                <button type="button" class="btn btn-secondary dark-button text-white btn-block pick-button" phx-click="pick-hero" phx-value-id={@hero.id} id={"pick-hero-#{@hero.id}"}>
-                    <img src={"#{GH.image_url(@hero.avatar)}"} class="avatar mr-2" style="max-width: 40px;white-space: nowrap;"/>
-                    Pick <%= @hero.avatar.name %>
+                <button type="button" class="btn btn-secondary dark-button text-white btn-block pick-button" phx-click="pick-hero" phx-value-id={@hero.id} id={"pick-hero-#{@hero.id}"} phx-hook="Loading">
+                    <span class="loading-text">
+                        <img src={"#{GH.image_url(@hero.avatar)}"} class="avatar mr-2" style="max-width: 40px;white-space: nowrap;"/>
+                        Pick <%= @hero.avatar.name %>
+                    </span>
                 </button>
             <% end %>
         <% end %>

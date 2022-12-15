@@ -427,8 +427,8 @@ defmodule MobaWeb.BattleView do
   end
 
   defp current_attacker?(%{type: "duel", duel: duel, attacker: attacker}, player_id) do
-    (attacker.id == duel.player_first_pick_id && duel.player_id == player_id) || 
-    (attacker.id == duel.opponent_second_pick_id && duel.opponent_player_id == player_id)
+    (attacker.id == duel.player_first_pick_id && duel.player_id == player_id) ||
+      (attacker.id == duel.opponent_second_pick_id && duel.opponent_player_id == player_id)
   end
 
   defp current_attacker?(battle, player_id) do
@@ -436,8 +436,8 @@ defmodule MobaWeb.BattleView do
   end
 
   defp current_defender?(%{type: "duel", duel: duel, defender: defender}, player_id) do
-    (defender.id == duel.player_second_pick_id && duel.player_id == player_id) || 
-    (defender.id == duel.opponent_first_pick_id && duel.opponent_player_id == player_id)
+    (defender.id == duel.player_second_pick_id && duel.player_id == player_id) ||
+      (defender.id == duel.opponent_first_pick_id && duel.opponent_player_id == player_id)
   end
 
   defp current_defender?(battle, player_id) do
