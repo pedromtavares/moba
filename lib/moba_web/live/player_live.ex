@@ -76,7 +76,7 @@ defmodule MobaWeb.PlayerLive do
          blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes)),
          featured = featured_hero(player),
          duels = Game.list_finished_duels(player),
-         matches = Game.list_matches(player) |> Enum.filter(& &1.phase == "scored"),
+         matches = Game.list_matches(player) |> Enum.filter(&(&1.phase == "scored")),
          ranking_display = "daily",
          ranking = ranking_for(ranking_display),
          sidebar_code = if(player.id == current_player.id, do: "user", else: nil),

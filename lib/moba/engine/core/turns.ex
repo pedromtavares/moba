@@ -29,8 +29,14 @@ defmodule Moba.Engine.Core.Turns do
 
   # Heroes in initial pve_tiers are constantly buffed for league battles
   defp buffed_total(%{pve_tier: pve_tier, league_tier: league_tier, bot_difficulty: diff}, %{type: "league"}, total)
-       when is_nil(diff),
-       do: total + round(Moba.league_buff_multiplier(pve_tier, league_tier) * total)
+       when is_nil(diff) do
+    total + round(Moba.league_buff_multiplier(pve_tier, league_tier) * total)
+  end
+
+  # Players with an immortal streak will have their heroes nerfed for match battles, aka "Arrogance" debuff
+  defp buffed_total(%{player: %{current_immortal_streak: streak}}, %{type: "match"}, total) when streak > 0 do
+    total - round(Moba.immortal_streak_multiplier() * streak * total)
+  end
 
   defp buffed_total(_, _, total), do: total
 

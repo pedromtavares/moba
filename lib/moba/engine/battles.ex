@@ -104,6 +104,7 @@ defmodule Moba.Engine.Battles do
       :initiator,
       :winner,
       duel: [player: :user, opponent_player: :user],
+      match: [:player],
       turns: ^ordered_turns_query(),
       attacker: ^HeroQuery.load(),
       defender: ^HeroQuery.load()
