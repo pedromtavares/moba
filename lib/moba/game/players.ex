@@ -51,8 +51,12 @@ defmodule Moba.Game.Players do
 
   def get_player_from_user!(user_id), do: Repo.get_by(PlayerQuery.load(), user_id: user_id)
 
+  def matchmaking_opponent(%{pvp_tier: 0, id: id, pvp_points: points}) do
+    PlayerQuery.pleb_opponents(id, points) |> Repo.all() |> List.first()
+  end
+
   def matchmaking_opponent(%{pvp_tier: tier, id: id}) do
-    PlayerQuery.matchmaking_opponents(id, tier) |> PlayerQuery.limit_by(1) |> Repo.all() |> List.first()
+    PlayerQuery.matchmaking_opponents(id, tier) |> Repo.all() |> List.first()
   end
 
   def pvp_points_for(tier) do
@@ -108,24 +112,6 @@ defmodule Moba.Game.Players do
   end
 
   def update_tutorial_step!(player, step), do: update_player!(player, %{tutorial_step: step})
-
-  def old_update_ranking! do
-    Repo.update_all(Player, set: [ranking: nil])
-
-    PlayerQuery.old_ranking(1000)
-    |> Repo.all()
-    |> Enum.with_index(1)
-    |> Enum.each(fn {player, index} ->
-      update_player!(player, %{ranking: index, pvp_tier: pvp_tier_for(index)})
-    end)
-
-    Moba.current_season()
-    |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
-  end
-
-  defp pvp_tier_for(n) when n in 1..5, do: 2
-  defp pvp_tier_for(n) when n in 6..25, do: 1
-  defp pvp_tier_for(_), do: 0
 
   def update_ranking! do
     immortals =

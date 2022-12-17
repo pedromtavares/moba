@@ -103,10 +103,25 @@ defmodule Moba.Game.Query.PlayerQuery do
     from player in query, order_by: [desc: player.daily_wins, desc: player.pvp_points]
   end
 
-  def matchmaking_opponents(id, pvp_tier) do
+  def matchmaking_opponents(id, pvp_tier, limit \\ 1) do
     from(player in pvp_available(), where: player.pvp_tier == ^pvp_tier)
     |> exclude_ids([id])
     |> random()
+    |> limit_by(limit)
+  end
+
+  def pleb_opponents(id, pvp_points, limit \\ 5) do
+    bottom = (pvp_points - 40)
+    top = (pvp_points + 40)
+
+    from(player in pvp_available(), 
+      where: player.pvp_tier == 0, 
+      where: player.pvp_points >= ^bottom,
+      where: player.pvp_points <= ^top,
+    )
+    |> exclude_ids([id])
+    |> random()
+    |> limit_by(limit)
   end
 
   def auto_matchmaking do
