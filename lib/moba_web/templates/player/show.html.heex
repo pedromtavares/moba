@@ -128,7 +128,7 @@
                         </thead>
                         <tbody>
                             <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
-                                <tr id={"player-#{player.id}"} phx-hook={if player.id == @player.id, do: "HalfScroll"} phx-container="#ranking-card" class={if player.id == @player.id, do: "selected-player"}>
+                                <tr id={"player-#{player.id}"} phx-hook={if player.id == @player.id, do: "HalfScroll"} phx-container="#user-ranking" class={if player.id == @player.id, do: "selected-player"}>
                                     <td>
                                         <h1 class="f-rpg" >
                                             <%= if @ranking_display == "daily" do %>
