@@ -117,7 +117,7 @@ defmodule Moba.Game.Query.PlayerQuery do
     from(player in pvp_available(), 
       where: player.pvp_tier == 0, 
       where: player.pvp_points >= ^bottom,
-      where: player.pvp_points <= ^top,
+      where: player.pvp_points <= ^top
     )
     |> exclude_ids([id])
     |> random()
