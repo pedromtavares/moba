@@ -63,7 +63,11 @@ defmodule Moba.Game.Arena do
     MobaWeb.broadcast("player-#{opponent_id}", "challenge", attrs)
   end
 
-  def manual_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "manual")
+  def manual_matchmaking!(player) do 
+    match = create_match!(player, Players.matchmaking_opponent(player), "manual")
+    if match, do: Moba.reward_shards!(player, Moba.matchmaking_shards())
+    match
+  end
 
   def maybe_clear_auto_matches(player) do
     if Matches.can_clear_auto_matches?(player) do
