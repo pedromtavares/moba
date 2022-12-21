@@ -21,6 +21,13 @@ defmodule MobaWeb.ArenaLive do
     {:noreply, assign(socket, current_player: player)}
   end
 
+  def handle_event("toggle-auto-matchmaking", params, %{assigns: %{current_player: player}} = socket) do
+    with auto_matchmaking = not is_nil(Map.get(params, "value")),
+         player = Game.update_preferences!(player, %{auto_matchmaking: auto_matchmaking}) do
+      {:noreply, assign(socket, current_player: player)}
+    end
+  end
+
   def handle_event("challenge", %{"id" => opponent_id}, %{assigns: %{current_player: player}} = socket) do
     opponent = Game.get_player!(opponent_id)
 

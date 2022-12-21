@@ -1,8 +1,8 @@
 <div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".ranking">
     <div class="card-body p-0">
         <div class="d-flex justify-content-center my-2">
-            <div class="custom-control custom-switch">
-                <input type="checkbox" class="custom-control-input" id="toggle-auto-matchmaking" phx-click="show-farm-tabs" checked={@current_player.preferences.auto_matchmaking}>
+            <div class="custom-control custom-switch" data-toggle="tooltip" title="Allow the game to automatically play a match for you every 30 minutes. You can clear these matches by clicking 'Clear Auto Matches' above.">
+                <input type="checkbox" class="custom-control-input" id="toggle-auto-matchmaking" phx-click="toggle-auto-matchmaking" checked={@current_player.preferences.auto_matchmaking}>
                 <label class="custom-control-label" for="toggle-auto-matchmaking">Auto Matchmaking</label>
             </div>
         </div>
