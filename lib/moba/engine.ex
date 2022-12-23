@@ -3,7 +3,7 @@ defmodule Moba.Engine do
   Top-level domain of all logic related to the battle engine
   """
 
-  alias Moba.{Game, Engine}
+  alias Moba.Engine
   alias Engine.{Battles, Core}
 
   def damage_types, do: %{normal: "normal", magic: "magic", pure: "pure"}
@@ -49,15 +49,13 @@ defmodule Moba.Engine do
 
   defdelegate continue_battle!(battle, orders), to: Core
 
-  defdelegate create_pve_battle!(target), to: Core
-
-  def create_league_battle!(attacker) do
-    Core.create_league_battle!(attacker, Game.league_defender_for(attacker))
-  end
-
   defdelegate create_duel_battle!(attrs), to: Core
 
+  defdelegate create_league_battle!(attrs), to: Core
+
   defdelegate create_match_battle!(attrs), to: Core
+
+  defdelegate create_pve_battle!(target), to: Core
 
   defdelegate effect_descriptions(turn), to: Core
 end

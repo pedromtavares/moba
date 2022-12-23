@@ -45,12 +45,12 @@ defmodule Moba.EngineTest do
   describe "pve" do
     test "not enough battles", %{base_hero: attacker, alternate_hero: defender} do
       updated = %{attacker | pve_current_turns: 0}
-      assert {:error, _} = Engine.create_pve_battle!(%{attacker: updated, defender: defender, difficulty: "weak"})
+      assert {:error, _} = Game.start_pve_battle!(%{attacker: updated, defender: defender, difficulty: "weak"})
     end
 
     test "battle win for attacker, level up", %{strong_hero: attacker, weak_hero: defender} do
       battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
+        Game.start_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
         |> Engine.auto_finish_battle!()
 
       assert battle.winner.id == attacker.id
@@ -77,7 +77,7 @@ defmodule Moba.EngineTest do
 
     test "battle loss for attacker, no xp", %{weak_hero: attacker, strong_hero: defender} do
       battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
+        Game.start_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
         |> Engine.auto_finish_battle!()
 
       assert battle.winner.id == defender.id
@@ -93,22 +93,22 @@ defmodule Moba.EngineTest do
       assert defender.experience == 0
     end
 
-    test "battle loss for veteran attacker, gets gank back", %{weak_hero: attacker, strong_hero: defender} do
-      attacker = %{attacker | pve_tier: 3}
-
+    test "battle loss for attacker, gets gank back", %{weak_hero: attacker, strong_hero: defender} do
       battle =
-        Engine.create_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
+        Game.start_pve_battle!(%{attacker: attacker, defender: defender, difficulty: "strong"})
         |> Engine.auto_finish_battle!()
 
+      reloaded_attacker = Game.get_hero!(attacker.id)
+
       assert battle.winner.id == defender.id
-      assert battle.attacker.pve_current_turns == attacker.pve_current_turns
+      assert reloaded_attacker.pve_current_turns == attacker.pve_current_turns
     end
   end
 
   describe "league" do
     test "default case", %{strong_hero: attacker} do
       battle =
-        Engine.create_league_battle!(%{attacker | league_step: 1})
+        Game.start_league_battle!(attacker)
         |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -117,13 +117,9 @@ defmodule Moba.EngineTest do
       assert hero.league_attempts == attacker.league_attempts + 1
     end
 
-    test "when invalid", %{base_hero: attacker} do
-      assert {:error, _} = Engine.create_league_battle!(attacker)
-    end
-
     test "attacker wins", %{strong_hero: attacker} do
       battle =
-        Engine.create_league_battle!(%{attacker | league_step: 1})
+        Game.start_league_battle!(attacker)
         |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -134,7 +130,7 @@ defmodule Moba.EngineTest do
 
     test "defender wins", %{weak_hero: attacker} do
       battle =
-        Engine.create_league_battle!(%{attacker | league_step: 1})
+        Game.start_league_battle!(attacker)
         |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -145,7 +141,7 @@ defmodule Moba.EngineTest do
 
     test "attacker wins and ranks up", %{strong_hero: attacker} do
       battle =
-        Engine.create_league_battle!(%{attacker | league_step: 2})
+        Game.start_league_battle!(%{attacker | league_step: 2})
         |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -164,7 +160,7 @@ defmodule Moba.EngineTest do
       with_boss = Game.generate_boss!(hero)
 
       battle =
-        Engine.create_league_battle!(%{with_boss | league_step: 1, league_tier: master_league_tier})
+        Game.start_league_battle!(%{with_boss | league_step: 1, league_tier: master_league_tier})
         |> Engine.auto_finish_battle!()
 
       assert battle.winner_id == with_boss.id
@@ -184,7 +180,7 @@ defmodule Moba.EngineTest do
       boss = Game.get_hero!(with_boss.boss_id)
 
       battle =
-        Engine.create_league_battle!(with_boss)
+        Game.start_league_battle!(with_boss)
         |> Engine.auto_finish_battle!()
 
       assert battle.winner_id == boss.id
@@ -195,7 +191,7 @@ defmodule Moba.EngineTest do
       assert with_boss.boss_id
 
       battle =
-        Engine.create_league_battle!(with_boss)
+        Game.start_league_battle!(with_boss)
         |> Engine.auto_finish_battle!()
 
       assert battle.winner_id == boss.id
