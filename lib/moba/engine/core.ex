@@ -3,7 +3,7 @@ defmodule Moba.Engine.Core do
   Mid-level domain of all core battle mechanics.
   """
 
-  alias Moba.{Engine, Game, Repo}
+  alias Moba.{Engine, Repo}
   alias Engine.Core.{Duel, Helper, Match, League, Logger, Processor, Pve, Turns}
 
   @doc """
@@ -29,13 +29,13 @@ defmodule Moba.Engine.Core do
 
   def can_use_resource?(%{attacker: attacker}, resource), do: Helper.can_use?(attacker, resource, :active)
 
-  def create_pve_battle!(target), do: Pve.create_battle!(target)
-
-  def create_league_battle!(attacker, defender), do: League.create_battle!(attacker, defender)
-
   def create_duel_battle!(attrs), do: Duel.create_battle!(attrs)
 
+  def create_league_battle!(attrs), do: League.create_battle!(attrs)
+
   def create_match_battle!(attrs), do: Match.create_battle!(attrs)
+
+  def create_pve_battle!(target), do: Pve.create_battle!(target)
 
   @doc """
   Continues an existing battle by creating a new turn from where it left off
@@ -102,20 +102,9 @@ defmodule Moba.Engine.Core do
     %{battle | turns: battle.turns ++ [turn]}
   end
 
-  defp finalize_boss(%{type: "league", attacker: %{boss_id: boss_id} = hero, defender: boss, winner: winner} = battle)
-       when winner == boss and not is_nil(boss_id) do
-    last_turn = List.last(battle.turns)
-    boss_battler = if last_turn.attacker.hero_id == boss_id, do: last_turn.attacker, else: last_turn.defender
-    attacker = Game.finalize_boss!(boss, boss_battler.current_hp, hero)
-    %{battle | attacker: attacker}
-  end
-
-  defp finalize_boss(battle), do: battle
-
   defp finish_battle(turn) do
     turn
     |> determine_winner()
-    |> finalize_boss()
     |> Engine.update_battle!(%{finished: true})
   end
 

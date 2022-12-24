@@ -85,6 +85,10 @@ defmodule Moba.Game do
 
   defdelegate finalize_boss!(boss, boss_current_hp, hero), to: Training
 
+  defdelegate finalize_league_attacker!(attacker, winner), to: Training
+
+  defdelegate finalize_pve_attacker!(attacker, defender, winner, rewards), to: Training
+
   defdelegate finish_farming!(hero), to: Training
 
   defdelegate generate_boss!(hero), to: Training
@@ -109,10 +113,6 @@ defmodule Moba.Game do
 
   defdelegate maybe_finish_pve(hero), to: Training
 
-  defdelegate maybe_generate_boss(hero), to: Training
-
-  defdelegate prepare_league_challenge!(hero), to: Heroes
-
   defdelegate pve_ranking(limit \\ 20), to: Heroes
 
   defdelegate pve_ranking_for_community, to: Heroes
@@ -126,6 +126,8 @@ defmodule Moba.Game do
   defdelegate shard_buyback!(hero), to: Heroes
 
   defdelegate start_farming!(hero, state, turns), to: Heroes
+
+  defdelegate start_league_battle!(hero), to: Training
 
   defdelegate subscribe_to_hero(hero_id), to: Training
 
@@ -168,8 +170,6 @@ defmodule Moba.Game do
   defdelegate transmute_item!(hero, recipe, item), to: Items
 
   # LEAGUES
-
-  defdelegate league_defender_for(attacker), to: Leagues
 
   defdelegate league_level_range_for(tier), to: Leagues
 
@@ -292,4 +292,6 @@ defmodule Moba.Game do
   defdelegate get_target!(target_id), to: Targets
 
   defdelegate list_targets(hero), to: Targets
+
+  defdelegate start_pve_battle!(target), to: Training
 end

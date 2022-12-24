@@ -2,8 +2,8 @@ defmodule Moba.Game.Training do
   @moduledoc """
   Module focused on cross-resource orchestration and logic related to hero training (single-player)
   """
-  alias Moba.{Game, Repo}
-  alias Game.{Avatars, Heroes, Players, Quests, Skills, Targets}
+  alias Moba.{Engine, Game, Repo, Utils}
+  alias Game.{Avatars, Heroes, Leagues, Players, Quests, Skills, Targets}
 
   def archive_hero!(%{player: player} = hero) do
     if player.current_pve_hero_id == hero.id, do: Players.set_current_pve_hero!(player, nil)
@@ -46,6 +46,104 @@ defmodule Moba.Game.Training do
   end
 
   def finalize_boss!(_, _, hero), do: update_hero!(hero, %{boss_id: nil, pve_state: "dead"})
+
+  def finalize_league_attacker!(attacker, winner) do
+    %{
+      league_step: step,
+      league_successes: successes,
+      league_tier: league_tier,
+      pve_total_turns: pve_total_turns,
+      pve_current_turns: pve_current_turns
+    } = attacker
+
+    win = winner && attacker.id == winner.id
+
+    {total_turns, current_turns} =
+      if pve_total_turns >= Moba.turns_per_tier() do
+        current = pve_current_turns + Moba.turns_per_tier()
+        total = pve_total_turns - Moba.turns_per_tier()
+        {total, current}
+      else
+        {0, 0}
+      end
+
+    league_bonus =
+      if attacker.league_tier == Moba.master_league_tier() do
+        Moba.boss_win_bonus()
+      else
+        Moba.league_win_bonus()
+      end
+
+    updates =
+      cond do
+        win && step >= Leagues.max_league_step_for(league_tier) ->
+          next_league_tier = league_tier + 1
+
+          %{
+            league_step: 0,
+            league_tier: next_league_tier,
+            league_successes: successes + 1,
+            gold: attacker.gold + league_bonus,
+            total_xp: league_bonus,
+            boss_id: nil,
+            pve_current_turns: current_turns,
+            pve_total_turns: total_turns,
+            total_gold_farm: attacker.total_gold_farm + league_bonus
+          }
+
+        win ->
+          %{
+            league_step: step + 1
+          }
+
+        league_tier == Moba.master_league_tier() ->
+          %{
+            league_step: 1
+          }
+
+        true ->
+          %{
+            league_step: 0,
+            pve_current_turns: current_turns,
+            pve_total_turns: total_turns,
+            pve_state: "dead"
+          }
+      end
+
+    attacker = update_attacker!(attacker, updates)
+
+    if winner && attacker.id == winner.id && attacker.league_step > 0 do
+      start_league_battle!(attacker)
+    end
+
+    attacker
+    |> maybe_generate_boss()
+    |> maybe_finish_pve()
+  end
+
+  def finalize_pve_attacker!(attacker, defender, winner, %{total_xp: total_xp, total_gold: total_gold}) do
+    reward_updates = %{
+      total_xp: total_xp,
+      gold: attacker.gold + total_gold,
+      total_gold_farm: attacker.total_gold_farm + total_gold
+    }
+
+    score_updates =
+      if winner && winner.id == defender.id do
+        state = if attacker.pve_tier < 1, do: "alive", else: "dead"
+
+        %{losses: attacker.losses + 1, pve_state: state, pve_current_turns: attacker.pve_current_turns + 1}
+      else
+        wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
+
+        %{wins: wins}
+      end
+
+    attacker
+    |> update_attacker!(Map.merge(reward_updates, score_updates))
+    |> maybe_generate_boss()
+    |> maybe_finish_pve()
+  end
 
   def finish_farming!(hero) do
     hero
@@ -122,6 +220,28 @@ defmodule Moba.Game.Training do
   end
 
   def refresh_targets!(hero), do: hero
+
+  def start_pve_battle!(%{attacker: %{pve_current_turns: turns}}) when turns < 1 do
+    {:error, "Not enough available turns"}
+  end
+
+  def start_pve_battle!(%{attacker: attacker} = target) do
+    Utils.run_async(fn -> generate_targets!(attacker) end)
+    updated = update_hero!(attacker, %{pve_current_turns: attacker.pve_current_turns - 1})
+    Engine.create_pve_battle!(%{target | attacker: updated})
+  end
+
+  def start_league_battle!(hero) do
+    attacker =
+      if hero.league_step == 0 do
+        update_hero!(hero, %{league_step: 1, league_attempts: hero.league_attempts + 1})
+      else
+        hero
+      end
+
+    defender = Leagues.league_defender_for(attacker)
+    Engine.create_league_battle!(%{attacker: attacker, defender: defender})
+  end
 
   def subscribe_to_hero(hero_id) do
     MobaWeb.subscribe("hero-#{hero_id}")

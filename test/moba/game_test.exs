@@ -191,15 +191,15 @@ defmodule Moba.GameTest do
           league_tier: Moba.master_league_tier()
         })
 
-      assert Game.maybe_generate_boss(hero).boss_id
+      assert Game.Training.maybe_generate_boss(hero).boss_id
 
       hero = create_base_hero(%{pve_current_turns: 0, league_tier: Moba.master_league_tier()}) |> Game.generate_boss!()
 
-      assert Game.maybe_generate_boss(hero) == hero
+      assert Game.Training.maybe_generate_boss(hero) == hero
 
       hero = create_base_hero(%{pve_current_turns: 5, pve_state: "dead", league_tier: Moba.master_league_tier()})
 
-      refute Game.maybe_generate_boss(hero).boss_id
+      refute Game.Training.maybe_generate_boss(hero).boss_id
     end
 
     test "#generate_boss!" do
@@ -312,9 +312,9 @@ defmodule Moba.GameTest do
       diamond_league_hero = create_base_hero(%{league_tier: 4, league_step: 5})
       master_league_hero = create_base_hero(%{league_tier: 5, league_step: 5}) |> Game.generate_boss!()
 
-      first_league_defender = Game.league_defender_for(first_league_hero)
-      diamond_league_defender = Game.league_defender_for(diamond_league_hero)
-      master_league_defender = Game.league_defender_for(master_league_hero)
+      first_league_defender = Game.Leagues.league_defender_for(first_league_hero)
+      diamond_league_defender = Game.Leagues.league_defender_for(diamond_league_hero)
+      master_league_defender = Game.Leagues.league_defender_for(master_league_hero)
 
       assert first_league_defender.level >= 4
       assert first_league_defender.bot_difficulty == "moderate"

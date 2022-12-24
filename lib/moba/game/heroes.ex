@@ -203,8 +203,6 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def prepare_league_challenge!(hero), do: update!(hero, %{league_step: 1})
-
   def pvp_bots(pvp_tier, exclude_ids \\ [], limit \\ 5) do
     {difficulty, league_tier} =
       case pvp_tier do

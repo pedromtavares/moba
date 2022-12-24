@@ -22,7 +22,7 @@ defmodule MobaWeb.TrainingLive do
 
   def handle_event("battle", %{"id" => id}, socket) do
     with socket = TutorialComponent.next_step(socket, 2),
-         battle = Game.get_target!(id) |> Engine.create_pve_battle!() do
+         battle = Game.get_target!(id) |> Game.start_pve_battle!() do
       {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.BattleLive, battle.id))}
     end
   end
@@ -36,7 +36,7 @@ defmodule MobaWeb.TrainingLive do
 
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
     with socket = TutorialComponent.next_step(socket, 10),
-         battle = Game.prepare_league_challenge!(hero) |> Engine.create_league_battle!() do
+         battle = Game.start_league_battle!(hero) do
       {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.BattleLive, battle.id))}
     end
   end

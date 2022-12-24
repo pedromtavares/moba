@@ -32,7 +32,7 @@
             </ul>
         </div>
         <div class="progress progress-fixed victory-xp-bar">
-            <div style="width:<%= hero_xp_percentage(@battle) %>%" class="progress-bar bg-white">
+            <div style="width:<%= hero_xp_percentage(@battle) %>%; min-width: 0% !important" class="progress-bar bg-white">
             </div>
             <%= if @battle.rewards.total_xp > 0 do %>
                 <div style="width:<%= battle_xp_percentage(@battle) %>%" class="progress-bar">
