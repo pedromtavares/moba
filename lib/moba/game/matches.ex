@@ -118,6 +118,7 @@ defmodule Moba.Game.Matches do
 
     %{match | player_picks: player_picks, opponent_picks: opponent_picks, generated_picks: generated_picks}
   end
+  defp load_picks(_), do: nil
 
   defp load_picks_hero(heroes, hero_id), do: Enum.find(heroes, &(&1.id == hero_id))
 
