@@ -11,6 +11,8 @@ defmodule Moba.Engine do
 
   # BATTLE MANAGEMENT
 
+  defdelegate delete_match_battles!(match), to: Battles
+
   defdelegate first_duel_battle(duel), to: Battles
 
   defdelegate generate_attacker_snapshot!(tuple), to: Battles

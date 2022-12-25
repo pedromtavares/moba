@@ -9,6 +9,11 @@ defmodule Moba.Engine.Battles do
 
   import Ecto.Query
 
+  def delete_match_battles!(match) do
+    from(b in Battle, where: b.match_id == ^match.id)
+    |> Repo.delete_all()
+  end
+
   def get_battle!(id), do: Repo.get!(load(), id) |> load_resources()
 
   def update_battle!(battle, attrs) do

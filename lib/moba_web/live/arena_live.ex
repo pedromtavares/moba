@@ -86,9 +86,10 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
-  def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}}} = socket) do
+  def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}, ranking_tab: ranking_tab}} = socket) do
     with player = Game.get_player!(id),
-         ranking = tiered_ranking(player) do
+         pvp_tier = pvp_tier_for(ranking_tab),
+         ranking = tiered_ranking(%{pvp_tier: pvp_tier}) do
       {:noreply, assign(socket, ranking: ranking, current_player: player) |> list_matches()}
     end
   end

@@ -69,6 +69,13 @@ defmodule Moba.Game.Arena do
     match
   end
 
+  def reset_match!(%{id: id} = match) do
+    Engine.delete_match_battles!(match)
+
+    Matches.get_match!(id)
+    |> Matches.update!(%{winner_id: nil, phase: nil, player_picks: []})
+  end
+
   def update_pvp_ranking!(update_tiers?) do
     if update_tiers?, do: Players.update_ranking_tiers!(), else: Players.update_ranking!()
     MobaWeb.broadcast("player-ranking", "ranking", %{})

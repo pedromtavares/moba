@@ -1,14 +1,13 @@
 defmodule MobaWeb.MatchLive do
   use MobaWeb, :live_view
-  # remove
-  import Ecto.Query
 
   alias MobaWeb.{MatchView, TutorialComponent}
 
   @tick_timeout 500
+  @max_tick 15
 
   def mount(%{"id" => match_id}, _, socket) do
-    with %{assigns: %{channel: channel}} = socket = socket_init(match_id, 100, socket) do
+    with %{assigns: %{channel: channel}} = socket = socket_init(match_id, @max_tick, socket) do
       if connected?(socket), do: MobaWeb.subscribe(channel)
 
       {:ok, socket}
@@ -19,8 +18,11 @@ defmodule MobaWeb.MatchLive do
     {:noreply, assign(socket, hero_tab: tab)}
   end
 
-  def handle_event("repeat", _, %{assigns: %{latest_match: match}} = socket) when not is_nil(match) do
-    {:noreply, assign(socket, picked_heroes: match.player_picks)}
+  def handle_event("repeat", _, %{assigns: %{latest_match: match, trained_heroes: trained}} = socket)
+      when not is_nil(match) do
+    trained_ids = Enum.map(trained, & &1.id)
+    picked_heroes = Enum.filter(match.player_picks, &Enum.member?(trained_ids, &1.id))
+    {:noreply, assign(socket, picked_heroes: picked_heroes)}
   end
 
   def handle_event("repeat", _, socket), do: {:noreply, socket}
@@ -43,13 +45,6 @@ defmodule MobaWeb.MatchLive do
     {:noreply, assign(socket, tick: 0)}
   end
 
-  def handle_event("reset", _, %{assigns: %{match: match}} = socket) do
-    Moba.Game.Matches.update!(match, %{winner_id: nil, phase: nil})
-    query = from(b in Moba.Engine.Schema.Battle, where: b.match_id == ^match.id)
-    Moba.Repo.delete_all(query)
-    {:noreply, socket_init(match.id, 0, socket)}
-  end
-
   def handle_event("finish-tutorial", _, socket) do
     {:noreply, TutorialComponent.finish_arena(socket)}
   end
@@ -59,7 +54,7 @@ defmodule MobaWeb.MatchLive do
   end
 
   def handle_info(:tick, %{assigns: %{tick: tick, match: %{id: match_id, winner_id: winner_id}}} = socket)
-      when is_nil(winner_id) do
+      when is_nil(winner_id) and tick < @max_tick do
     schedule_tick()
     {:noreply, socket_init(match_id, tick + 1, socket)}
   end
@@ -71,6 +66,11 @@ defmodule MobaWeb.MatchLive do
 
   def handle_info(:tick, socket) do
     {:noreply, socket}
+  end
+
+  def handle_info({:DOWN, _ref, _, _, _reason}, %{assigns: %{match: match}} = socket) do
+    match = Game.reset_match!(match)
+    {:noreply, socket_init(match.id, @max_tick, socket)}
   end
 
   def handle_info({ref, match}, socket) do

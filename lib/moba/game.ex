@@ -193,6 +193,8 @@ defmodule Moba.Game do
 
   defdelegate manual_matchmaking!(player), to: Arena
 
+  defdelegate reset_match!(match), to: Arena
+
   # PLAYERS
 
   defdelegate bot_ranking, to: Players
