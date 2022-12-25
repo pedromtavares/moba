@@ -4,6 +4,8 @@ defmodule MobaWeb.Admin.SeasonView do
   import Torch.TableView
   import Torch.FilterView
 
+  alias MobaWeb.PlayerView
+
   def xp_farm_percentage(%{total_xp_farm: xp_farm, total_gold_farm: gold_farm}) do
     total = xp_farm + gold_farm
     if total > 0, do: div(xp_farm * 100, total), else: 100
