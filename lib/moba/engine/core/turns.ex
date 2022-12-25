@@ -35,7 +35,7 @@ defmodule Moba.Engine.Core.Turns do
 
   # Players with an immortal streak will have their heroes nerfed for match battles, aka "Arrogance" debuff
   defp buffed_total(%{player: %{current_immortal_streak: streak}}, %{type: "match"}, total) when streak > 0 do
-    total - Float.round(Moba.immortal_streak_multiplier() * streak * total)
+    total - round(Moba.immortal_streak_multiplier() * streak * total)
   end
 
   defp buffed_total(_, _, total), do: total
