@@ -15,12 +15,6 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
-  def handle_event("clear-auto-matches", _, %{assigns: %{current_player: player}} = socket) do
-    player = Game.maybe_clear_auto_matches(player)
-
-    {:noreply, assign(socket, current_player: player)}
-  end
-
   def handle_event("toggle-auto-matchmaking", params, %{assigns: %{current_player: player}} = socket) do
     with auto_matchmaking = not is_nil(Map.get(params, "value")),
          player = Game.update_preferences!(player, %{auto_matchmaking: auto_matchmaking}) do
@@ -39,8 +33,8 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
-  def handle_event("matchmaking", _, %{assigns: %{current_player: player}} = socket) do
-    match = Game.manual_matchmaking!(player)
+  def handle_event("matchmaking", _, %{assigns: %{current_player: player, pending_match: pending}} = socket) do
+    match = if pending, do: pending, else: Game.manual_matchmaking!(player)
 
     if match do
       {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match.id))}
@@ -87,7 +81,7 @@ defmodule MobaWeb.ArenaLive do
   def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}}} = socket) do
     with player = Game.get_player!(id),
          ranking = tiered_ranking(player) do
-      {:noreply, assign(socket, ranking: ranking, current_player: player)}
+      {:noreply, assign(socket, ranking: ranking, current_player: player) |> list_matches()}
     end
   end
 
@@ -101,6 +95,21 @@ defmodule MobaWeb.ArenaLive do
 
   defp check_tutorial(socket) do
     TutorialComponent.next_step(socket, 30)
+  end
+
+  defp list_matches(%{assigns: %{current_player: player}} = socket) do
+    with all_matches = Game.list_matches(player),
+         matches = all_matches |> Enum.filter(&(&1.phase == "scored")),
+         pending_match = Enum.find(all_matches, &(&1.phase != "scored")),
+         manual_matches = Enum.filter(all_matches, &(&1.type == "manual")),
+         auto_matches = Enum.filter(all_matches, &(&1.type == "auto")) do
+      assign(socket,
+        auto_matches: auto_matches,
+        manual_matches: manual_matches,
+        matches: matches,
+        pending_match: pending_match
+      )
+    end
   end
 
   defp maybe_redirect(%{assigns: %{current_player: %{user_id: user_id}}} = socket) when is_nil(user_id) do
@@ -124,27 +133,22 @@ defmodule MobaWeb.ArenaLive do
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
          sidebar_code = "arena",
-         all_matches = Game.list_matches(player),
-         matches = all_matches |> Enum.filter(&(&1.phase == "scored")),
-         pending_match = Enum.find(all_matches, &(&1.phase != "scored")),
          duels = Game.list_duels(player),
          duel_opponents = opponents_from_presence(player),
          last_presence_update = Timex.now(),
          pending_duel = Enum.find(duels, &(&1.phase != "finished")),
          ranking = tiered_ranking(player) do
       assign(socket,
-        closest_bot_time: current_time,
         current_time: current_time,
         duels: duels,
         duel_opponents: duel_opponents,
-        matches: matches,
         pending_duel: pending_duel,
-        pending_match: pending_match,
         last_presence_update: last_presence_update,
         ranking: ranking,
         sidebar_code: sidebar_code,
         tutorial_step: player.tutorial_step
       )
+      |> list_matches()
       |> maybe_redirect()
       |> check_tutorial()
     end

@@ -69,24 +69,31 @@ defmodule Moba.Game.Arena do
     match
   end
 
-  def maybe_clear_auto_matches(player) do
-    if Matches.can_clear_auto_matches?(player) do
-      cleared_count = Matches.clear_auto!(player)
-
-      Players.update_player!(player, %{
-        daily_matches: player.daily_matches - cleared_count,
-        daily_wins: player.daily_wins - cleared_count,
-        total_wins: player.total_wins - cleared_count,
-        total_matches: player.total_matches - cleared_count
-      })
-    else
-      player
-    end
-  end
-
   def update_pvp_ranking!(update_tiers?) do
     if update_tiers?, do: Players.update_ranking_tiers!(), else: Players.update_ranking!()
     MobaWeb.broadcast("player-ranking", "ranking", %{})
+  end
+
+  defp create_match!(%{daily_matches: count} = player, opponent, "manual") when count >= @daily_match_limit do
+    manual_matches = Matches.list_manual(player)
+
+    if length(manual_matches) >= @daily_match_limit do
+      nil
+    else
+      deleted = Matches.delete_oldest_auto(player)
+      base_attrs = %{daily_matches: player.daily_matches - 1, total_matches: player.total_matches - 1}
+
+      attrs =
+        if deleted.winner_id == player.id do
+          Map.merge(base_attrs, %{daily_wins: player.daily_wins - 1, total_wins: player.total_wins - 1})
+        else
+          base_attrs
+        end
+
+      player
+      |> Players.update_player!(attrs)
+      |> create_match!(opponent, "manual")
+    end
   end
 
   defp create_match!(%{daily_matches: player_matches}, _, _) when player_matches >= @daily_match_limit, do: nil

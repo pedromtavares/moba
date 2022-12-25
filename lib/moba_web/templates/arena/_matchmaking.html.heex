@@ -1,7 +1,7 @@
-<div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".ranking">
+<div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".arena .ranking">
     <div class="card-body p-0">
         <div class="d-flex justify-content-center my-2">
-            <div class="custom-control custom-switch" data-toggle="tooltip" title="Allow the game to automatically play a match for you every 30 minutes. You can clear these matches by clicking 'Clear Auto Matches' above.">
+            <div class="custom-control custom-switch" data-toggle="tooltip" title="Allow the game to automatically play a match for you every 30 minutes.">
                 <input type="checkbox" class="custom-control-input" id="toggle-auto-matchmaking" phx-click="toggle-auto-matchmaking" checked={@current_player.preferences.auto_matchmaking}>
                 <label class="custom-control-label" for="toggle-auto-matchmaking">Auto Matchmaking</label>
             </div>
@@ -10,6 +10,9 @@
             <table class="table-dark table mb-0">
                 <%= for match <- @matches do %>
                     <tr>
+                        <td>
+                            <h3 class="f-rpg m-0"><%= match_type(match) %></h3>
+                        </td>
                         <td class="d-flex justify-content-center">
                             <img src={"/images/pve/#{match.opponent.pve_tier}.png"} class="mr-2" style="max-height:  40px"/>
                             <div style="width: 70%">

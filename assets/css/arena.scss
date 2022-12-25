@@ -37,8 +37,14 @@
     line-height: 6.5rem;
   }
 
-  .pvp-bar{
+  .manual-bar{
     background: rgba(59,175,218, 0.8) !important;
+    min-width: 0%;
+  }
+
+  .auto-bar{
+    background: rgba(59,175,218, 0.2) !important;
+    min-width: 0%;
   }
 
   .pvp-rank{
@@ -81,7 +87,7 @@
     }
 
     .history{
-    	max-height: 60vh;
+    	max-height: 53vh;
     	overflow: auto;
 
       h4{
@@ -139,7 +145,7 @@
     }
 
     .history{
-      max-height: 60vh;
+      max-height: 53vh;
       overflow: auto;
 
       h4{

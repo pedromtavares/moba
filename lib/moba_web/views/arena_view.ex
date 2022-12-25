@@ -2,6 +2,10 @@ defmodule MobaWeb.ArenaView do
   use MobaWeb, :view
   alias MobaWeb.PlayerView
 
+  def auto_matches_percentage(auto_matches) do
+    length(auto_matches) * 100 / Moba.daily_match_limit()
+  end
+
   def can_be_challenged?(%{last_challenge_at: nil}, _), do: true
 
   def can_be_challenged?(%{last_challenge_at: time}, current_time) do
@@ -19,10 +23,6 @@ defmodule MobaWeb.ArenaView do
 
   def finished?(%{phase: "finished"}), do: true
   def finished?(_), do: false
-
-  def daily_matches_percentage(%{daily_matches: daily_matches}) do
-    daily_matches * 100 / Moba.daily_match_limit()
-  end
 
   def duel_badge_class(%{type: type}) do
     case type do
@@ -47,6 +47,10 @@ defmodule MobaWeb.ArenaView do
     end
   end
 
+  def manual_matches_percentage(manual_matches) do
+    length(manual_matches) * 100 / Moba.daily_match_limit()
+  end
+
   def match_result(match) do
     cond do
       match.phase != "scored" -> content_tag(:h5, "In Progress")
@@ -54,6 +58,9 @@ defmodule MobaWeb.ArenaView do
       true -> content_tag(:h5, "Defeat", class: "text-muted")
     end
   end
+
+  def match_type(%{type: "auto"}), do: content_tag(:span, "A", data: [toggle: "tooltip"], title: "Auto Match")
+  def match_type(%{type: "manual"}), do: content_tag(:span, "M", data: [toggle: "tooltip"], title: "Manual Match")
 
   def next_pvp_tier_percentage(%{pvp_tier: current_tier, pvp_points: pvp_points}) do
     current = Game.pvp_points_for(current_tier)
@@ -80,7 +87,7 @@ defmodule MobaWeb.ArenaView do
       |> Timex.format("{relative}", :relative)
       |> elem(1)
 
-    "Arena will reset #{time}"
+    "A new fight begins #{time}"
   end
 
   def rewards_badge(rewards) when rewards == 0, do: ""
@@ -96,9 +103,28 @@ defmodule MobaWeb.ArenaView do
   def silenced?(%{current_player: %{status: "silenced"}}), do: true
   def silenced?(_), do: false
 
+  def tier_buff(%{player: %{current_immortal_streak: streak}} = assigns) when streak > 0 do
+    nerf = round(streak * Moba.immortal_streak_multiplier() * 100)
+    assigns = Map.put(assigns, :nerf, nerf)
+
+    ~H"""
+      <span class='badge badge-light-danger mt-2' data-toggle="tooltip" title="The title of being The Immortal comes with a weakness."><i class='fa-solid fa-diamond mr-1'></i>- <%= @nerf %>% Hero Stats</span>
+    """
+  end
+
+  def tier_buff(assigns),
+    do: ~H"""
+      <span></span>
+    """
+
   def tier_label(%{pvp_tier: 2}), do: "Immortal"
   def tier_label(%{pvp_tier: 1}), do: "Shadow"
   def tier_label(_), do: "Pleb"
+
+  def tier_title(%{pvp_tier: 2, ranking: 1}), do: "You are The Immortal, defend your title."
+  def tier_title(%{pvp_tier: 2}), do: "You are an Immortal, fighting among the best for the title."
+  def tier_title(%{pvp_tier: 1}), do: "You are a Shadow, rise above the rest to become an Immortal."
+  def tier_title(_), do: "You are a Pleb, fight to become a Shadow."
 
   def pvp?(%{type: "pvp"}), do: true
   def pvp?(_), do: false

@@ -19,6 +19,12 @@ defmodule MobaWeb.MatchLive do
     {:noreply, assign(socket, hero_tab: tab)}
   end
 
+  def handle_event("repeat", _, %{assigns: %{latest_match: match}} = socket) when not is_nil(match) do
+    {:noreply, assign(socket, picked_heroes: match.player_picks)}
+  end
+
+  def handle_event("repeat", _, socket), do: {:noreply, socket}
+
   def handle_event("pick-hero", %{"id" => id}, %{assigns: %{picked_heroes: heroes}} = socket) do
     hero = Game.get_hero!(id)
     {:noreply, assign(socket, picked_heroes: heroes ++ [hero])}
@@ -83,6 +89,7 @@ defmodule MobaWeb.MatchLive do
     with channel = "match-#{match_id}",
          player = socket.assigns.current_player,
          match = Game.get_match!(match_id),
+         latest_match = Game.latest_manual_match(player),
          battles = Engine.list_match_battles(match_id),
          trained_heroes = Game.trained_pvp_heroes(player.id, [], 20) do
       assign(socket,
@@ -94,7 +101,8 @@ defmodule MobaWeb.MatchLive do
         picked_heroes: match.player_picks,
         generated_heroes: match.generated_picks,
         tutorial_step: player.tutorial_step,
-        hero_tab: "trained"
+        hero_tab: "trained",
+        latest_match: latest_match
       )
     end
   end

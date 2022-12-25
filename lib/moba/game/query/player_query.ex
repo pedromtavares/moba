@@ -153,6 +153,6 @@ defmodule Moba.Game.Query.PlayerQuery do
   def pvp_available(query \\ Player) do
     base = query |> non_bots() |> non_guests()
 
-    from player in base, where: player.pvp_points > 0
+    from player in base, where: player.total_matches > 0
   end
 end

@@ -32,7 +32,12 @@
 									</span>
 								</button>
 							<% else %>
-								<h2 class="text-center text-white">Pick 5 Heroes</h2>
+								<h2 class="text-center text-white">
+									Pick 5 Heroes 
+									<%= if @latest_match do %>
+										<i class="fa-solid fa-repeat text-right ml-4 action-cursor" data-toggle="tooltip" title="Repeat picks from latest match" phx-click="repeat"></i>
+									<% end %>
+								</h2>
 							<% end %>
 						<% end %>
 					</div>

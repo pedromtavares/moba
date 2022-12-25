@@ -6,22 +6,16 @@ defmodule Moba.Game.Matches do
 
   @types %{manual: "manual", auto: "auto"}
 
-  def can_clear_auto_matches?(player) do
-    query = list_query(player.id, "auto")
-    Repo.aggregate(query, :count) > 0
-  end
-
-  def clear_auto!(player) do
-    {count, _} =
-      list_query(player.id, "auto")
-      |> exclude(:order_by)
-      |> exclude(:preload)
-      |> Repo.delete_all()
-
-    count
-  end
-
   def create!(attrs), do: Match.changeset(%Match{}, attrs) |> Repo.insert!()
+
+  # prioritizes deleting losses first
+  def delete_oldest_auto(%{id: player_id}) do
+    query = list_query(player_id, "auto") |> exclude(:order_by) |> exclude(:preload)
+
+    from(m in query, order_by: [desc: fragment("? = ?", m.winner_id, m.opponent_id), asc: :id], limit: 1)
+    |> Repo.one()
+    |> Repo.delete!()
+  end
 
   def finish!(%{winner_id: winner_id} = match, _) when not is_nil(winner_id), do: match
   def finish!(match, nil), do: match
@@ -68,7 +62,16 @@ defmodule Moba.Game.Matches do
 
   def get_match!(id), do: load() |> Repo.get!(id) |> load_picks()
 
+  def latest_manual_match(%{id: player_id}) do
+    from(m in list_query(player_id, "manual"), limit: 1, where: fragment("? != '[]'", m.player_picks))
+    |> Repo.all()
+    |> List.first()
+    |> load_picks()
+  end
+
   def list_matches(%{id: player_id}), do: list_query(player_id) |> Repo.all()
+
+  def list_manual(%{id: player_id}), do: list_query(player_id, "manual") |> Repo.all()
 
   def load(queryable \\ Match) do
     preload(queryable, player: :user, opponent: :user, winner: :user)

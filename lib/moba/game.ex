@@ -181,19 +181,17 @@ defmodule Moba.Game do
 
   defdelegate auto_matchmaking!(player), to: Arena
 
-  defdelegate can_clear_auto_matches?(player), to: Matches
-
   defdelegate continue_match!(match, player_picks), to: Arena
 
   defdelegate continue_match!(match), to: Arena
 
   defdelegate get_match!(id), to: Matches
 
+  defdelegate latest_manual_match(player), to: Matches
+
   defdelegate list_matches(player), to: Matches
 
   defdelegate manual_matchmaking!(player), to: Arena
-
-  defdelegate maybe_clear_auto_matches(player), to: Arena
 
   # PLAYERS
 

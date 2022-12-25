@@ -2,41 +2,36 @@
     <div class="card-body pb-0">
         <div class="row mb-3 d-flex justify-content-center">
             <div class="col">
-                <h4 id="current-pvp-tier" class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}><%= tier_label(@current_player) %></h4>
-                <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" data-tippy-placement="bottom" title={reset_timer()} id="daily-progression">
-                    <div style={"width:#{daily_matches_percentage(@current_player)}%;"} class="progress-bar pvp-bar"></div>
+                <div class="progress mt-1" style="height:50px;" id="daily-progression">
+                    <div style={"width:#{manual_matches_percentage(@manual_matches)}%;"} class="progress-bar manual-bar" data-toggle="tooltip" data-tippy-placement="bottom" title={"Manual matches played: #{length(@manual_matches)}"} ></div>
+                    <div style={"width:#{auto_matches_percentage(@auto_matches)}%;"} class="progress-bar auto-bar" data-toggle="tooltip" data-tippy-placement="bottom" title={"Auto matches played: #{length(@auto_matches)}"}></div>
                     <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
                         <%= @current_player.daily_matches %> / <%= Moba.daily_match_limit() %> Daily Matches
                     </h5>
                 </div>
                 <div class="mt-4 d-flex justify-content-between align-items-center">
-                    <div class="col">
-                        <%= if Game.can_clear_auto_matches?(@current_player) do %>
-                            <a href="javascript:;" data-toggle="tooltip" title="Removes all daily matches from auto matchmaking." phx-click="clear-auto-matches" class="btn btn-light"><i class="fa fa-remove fa-2x mr-1"></i><br/>Clear Auto Matches</a>
-                        <% end %>
+                    <div class="col text-center">
+                        <h4 id="current-pvp-tier" class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}><%= tier_title(@current_player) %></h4>
+                        <.tier_buff player={@current_player}/>
                     </div>
                     <div class="col">
                         <div class="row d-flex justify-content-around">
-                            <%= if @pending_match do %>
-                                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.MatchLive, @pending_match), class: "btn btn-block btn-lg btn-outline-primary col-xl-4 margin-auto" do %>
-                                    <i class="fa fa-hourglass mr-1"></i>You have a pending match, click to continue
-                                <% end %>
-                            <% else %>
-                                <%= if @current_player.daily_matches < Moba.daily_match_limit() do %>
-                                    <a href="javascript:;" phx-click="matchmaking" class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx">
+                            <%= if length(@manual_matches) < Moba.daily_match_limit() do %>
+                                <a href="javascript:;" phx-click="matchmaking" class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx" phx-hook="Loading" loading="Entering..." id="enter-arena-button">
+                                    <span class="loading-text">
                                         <i class="fa fa-swords mr-1 fa-2x"></i>
                                         <br/>
                                         Enter the Arena
-                                        <br/>
-                                        <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards</span>
-                                    </a>
-                                <% else %>
-                                    <a href="javascript:;" class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button">
-                                        <i class="fa fa-clock-o mr-1 fa-2x"></i>
-                                        <br/>
-                                        <%= reset_timer() %>
-                                    </a>
-                                <% end %>
+                                    </span>
+                                    <br/>
+                                    <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards</span>
+                                </a>
+                            <% else %>
+                                <a href="javascript:;" class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button">
+                                    <i class="fa fa-clock-o mr-1 fa-2x"></i>
+                                    <br/>
+                                    <%= reset_timer() %>
+                                </a>
                             <% end %>
                         </div>
                         
