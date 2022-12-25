@@ -202,7 +202,7 @@
                                       <h4 class="faq-question text-primary">What is the Season Ranking?</h4>
                                       <p class="faq-answer mb-4">
                                         On the Ranking section of the Profile page you can click on the <i class="fa fa-arrows-cross mr-1 text-primary"></i> icon to switch the Daily Ranking to the Season Ranking, which displays the best players of the Season, who are defined by the highest Best Immortal Streak. When you become The Immortal, your Immortal Streak increases by 1 and you must keep the title in order to further increase your Streak. The players who are able to maintain the highest streak will be immortalized as the best players of the Season.
-                                        <br/>An important note: If you have an active Immortal Streak, your heroes will receive an "Arrogance" debuff that lowers their stats in Matchmaking battles by <%= round(Moba.immortal_streak_multiplier * 100)%>% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak.
+                                        <br/>An important note: If you have an active Immortal Streak, your heroes will receive an "Arrogance" debuff that lowers their stats in Matchmaking battles by <%= Float.round(Moba.immortal_streak_multiplier * 100, 1)%>% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak.
                                       </p>
                                   </div>
 

@@ -104,7 +104,7 @@ defmodule MobaWeb.ArenaView do
   def silenced?(_), do: false
 
   def tier_buff(%{player: %{current_immortal_streak: streak}} = assigns) when streak > 0 do
-    nerf = round(streak * Moba.immortal_streak_multiplier() * 100)
+    nerf = Float.round(streak * Moba.immortal_streak_multiplier() * 100, 1)
     assigns = Map.put(assigns, :nerf, nerf)
 
     ~H"""
