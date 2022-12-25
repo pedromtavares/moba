@@ -15,6 +15,14 @@ defmodule MobaWeb.ArenaLive do
     end
   end
 
+  def handle_event("tiered-ranking", params, socket) do
+    with ranking_tab = Map.get(params, "type"),
+         pvp_tier = pvp_tier_for(ranking_tab),
+         ranking = tiered_ranking(%{pvp_tier: pvp_tier}) do
+      {:noreply, assign(socket, ranking: ranking, ranking_tab: ranking_tab)}
+    end
+  end
+
   def handle_event("toggle-auto-matchmaking", params, %{assigns: %{current_player: player}} = socket) do
     with auto_matchmaking = not is_nil(Map.get(params, "value")),
          player = Game.update_preferences!(player, %{auto_matchmaking: auto_matchmaking}) do
@@ -130,6 +138,14 @@ defmodule MobaWeb.ArenaLive do
 
   defp opponents_from_presence(_), do: []
 
+  defp pvp_tier_for("immortals"), do: 2
+  defp pvp_tier_for("shadows"), do: 1
+  defp pvp_tier_for(_), do: 0
+
+  defp ranking_tab_for(%{pvp_tier: 2}), do: "immortals"
+  defp ranking_tab_for(%{pvp_tier: 1}), do: "shadows"
+  defp ranking_tab_for(_), do: "plebs"
+
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with current_time = Timex.now(),
          sidebar_code = "arena",
@@ -137,7 +153,8 @@ defmodule MobaWeb.ArenaLive do
          duel_opponents = opponents_from_presence(player),
          last_presence_update = Timex.now(),
          pending_duel = Enum.find(duels, &(&1.phase != "finished")),
-         ranking = tiered_ranking(player) do
+         ranking = tiered_ranking(player),
+         ranking_tab = ranking_tab_for(player) do
       assign(socket,
         current_time: current_time,
         duels: duels,
@@ -145,6 +162,7 @@ defmodule MobaWeb.ArenaLive do
         pending_duel: pending_duel,
         last_presence_update: last_presence_update,
         ranking: ranking,
+        ranking_tab: ranking_tab,
         sidebar_code: sidebar_code,
         tutorial_step: player.tutorial_step
       )
