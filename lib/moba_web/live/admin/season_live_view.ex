@@ -32,6 +32,7 @@ defmodule MobaWeb.Admin.SeasonLiveView do
       guests: data.guests,
       filter: filter,
       user_stats: data.user_stats[filter],
+      match_stats: data.match_stats,
       duels: data.duels,
       last_updated: Timex.now()
     )

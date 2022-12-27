@@ -62,17 +62,6 @@ defmodule Moba.Admin.Seasons do
     Season.changeset(season, %{})
   end
 
-  def recent_winrates(season_time) do
-    HeroQuery.pvp_picked_recently(season_time)
-    |> Repo.all()
-    |> Repo.preload(:skills)
-    |> skill_winrates()
-    |> Map.new(fn {_key, {skill, list}} ->
-      count = Enum.count(list)
-      {skill, {Enum.sum(list) / count, count}}
-    end)
-  end
-
   def current_active_players do
     PlayerQuery.non_bots()
     |> PlayerQuery.non_guests()
@@ -98,30 +87,6 @@ defmodule Moba.Admin.Seasons do
     |> Repo.preload(current_pve_hero: [:avatar, :items, skills: SkillQuery.ordered()])
     |> Enum.filter(& &1.current_pve_hero)
     |> Enum.sort_by(& &1.current_pve_hero.league_tier, :desc)
-  end
-
-  defp skill_winrates(heroes) do
-    heroes
-    |> Enum.reduce([], fn hero, acc ->
-      # Game.pvp_win_rate(hero)
-      winrate = 0
-
-      if winrate == 0 do
-        acc
-      else
-        rates =
-          hero.skills
-          |> Enum.map(fn skill ->
-            {skill.code, skill, winrate}
-          end)
-
-        acc ++ rates
-      end
-    end)
-    |> Enum.reduce(%{}, fn {code, skill, rate}, acc ->
-      {_, list} = Map.get(acc, code) || {skill, []}
-      Map.put(acc, code, {skill, [rate | list]})
-    end)
   end
 
   defp do_paginate(filter, params) do

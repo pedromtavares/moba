@@ -73,15 +73,6 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in query, where: is_nil(hero.finished_at))
   end
 
-  def pvp_picked_recently(match_time) do
-    ago = match_time |> Timex.shift(days: -3)
-
-    from(hero in Hero,
-      where: not is_nil(hero.pvp_last_picked),
-      where: hero.pvp_last_picked > ^ago
-    )
-  end
-
   def non_bots(query \\ Hero) do
     from hero in query, where: is_nil(hero.bot_difficulty)
   end
@@ -127,31 +118,11 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.league_tier == ^league_tier
   end
 
-  def with_league_tiers(query, league_tiers) do
-    from hero in query,
-      where: hero.league_tier in ^league_tiers
-  end
-
   def by_codes(query, codes) do
     from hero in query,
       join: avatar in Avatar,
       on: hero.avatar_id == avatar.id,
       where: is_nil(avatar.level_requirement) or avatar.code in ^codes
-  end
-
-  def by_pve_ranking(query, min, max) do
-    from hero in query,
-      where: hero.pve_ranking >= ^min,
-      where: hero.pve_ranking <= ^max,
-      order_by: [asc: hero.pve_ranking]
-  end
-
-  def by_total_gold_farm(query, min, max) do
-    from hero in query,
-      where: hero.total_gold_farm >= ^min,
-      where: hero.total_gold_farm <= ^max,
-      where: not is_nil(hero.pve_ranking),
-      order_by: [desc: hero.total_gold_farm]
   end
 
   def limit_by(query, limit, offset \\ 0) do

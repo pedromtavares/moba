@@ -4,7 +4,7 @@ defmodule Moba.Admin do
   """
 
   alias Moba.Admin
-  alias Admin.{Skills, Items, Avatars, Seasons, Users, Server, Skins, Duels}
+  alias Admin.{Skills, Items, Avatars, Seasons, Users, Server, Skins, Duels, Matches}
 
   # SKILLS
 
@@ -88,10 +88,6 @@ defmodule Moba.Admin do
 
   def change_season(season), do: Seasons.change(season)
 
-  def get_server_data(), do: Server.get_data()
-
-  defdelegate recent_winrates(season_time), to: Seasons
-
   defdelegate current_active_players, to: Seasons
 
   defdelegate current_guests, to: Seasons
@@ -115,4 +111,12 @@ defmodule Moba.Admin do
   # DUELS
 
   def list_recent_duels, do: Duels.list_recent()
+
+  # MATCHES
+
+  defdelegate match_stats(pve_tier \\ nil), to: Matches
+
+  # SERVER
+
+  def get_server_data, do: Server.get_data()
 end

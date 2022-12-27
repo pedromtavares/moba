@@ -12,4 +12,26 @@ defmodule MobaWeb.Admin.SeasonView do
   end
 
   def gold_farm_percentage(hero), do: 100 - xp_farm_percentage(hero)
+
+  def bottom_performing(stats, key) do
+    data = stats[key]
+    average = stats[:winrate]
+
+    Enum.map(data, fn {record, winrate} ->
+      {record, {winrate, winrate - average}}
+    end)
+    |> Enum.sort_by(fn {record, {winrate, diff}} -> diff end)
+    |> Enum.take(10)
+  end
+
+  def top_performing(stats, key) do
+    data = stats[key]
+    average = stats[:winrate]
+
+    Enum.map(data, fn {record, winrate} ->
+      {record, {winrate, winrate - average}}
+    end)
+    |> Enum.sort_by(fn {record, {winrate, diff}} -> diff * -1 end)
+    |> Enum.take(10)
+  end
 end
