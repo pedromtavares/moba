@@ -1,21 +1,21 @@
 <div class="card ranking">
     <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-around">
-            <li class="nav-item">
-                <a href="javascript:;" phx-click="tiered-ranking" phx-value-type="immortals" data-toggle="tab" class={"nav-link px-2 py-1 #{if @ranking_tab == "immortals", do: "active"} rank-shadow-2"} phx-hook="Loading" id="immortal-ranking-button">
-                    <span class="d-inline-block loading-text">Immortals</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:;" phx-click="tiered-ranking" phx-value-type="shadows" data-toggle="tab" class={"nav-link px-2 py-1 #{if @ranking_tab == "shadows", do: "active"} rank-shadow-1"} phx-hook="Loading" id="shadow-ranking-button">
-                    <span class="d-inline-block loading-text">Shadows</span>
-                </a>
-            </li>
-            <li class="nav-item">
-                <a href="javascript:;" phx-click="tiered-ranking" phx-value-type="plebs" data-toggle="tab" class={"nav-link px-2 py-1 #{if @ranking_tab == "plebs", do: "active"} rank-shadow-0 border"} phx-hook="Loading" id="pleb-ranking-button">
-                    <span class="d-inline-block loading-text">Plebs</span>
-                </a>
-            </li>
-        </ul>
+        <li class="nav-item">
+            <a href="javascript:;" phx-click="tiered-ranking" phx-value-type="immortals" data-toggle="tab" class={"nav-link px-2 py-1 #{if @ranking_tab == "immortals", do: "active"} rank-shadow-2"} phx-hook="Loading" id="immortal-ranking-button">
+                <span class="d-inline-block loading-text">Immortals</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="javascript:;" phx-click="tiered-ranking" phx-value-type="shadows" data-toggle="tab" class={"nav-link px-2 py-1 #{if @ranking_tab == "shadows", do: "active"} rank-shadow-1"} phx-hook="Loading" id="shadow-ranking-button">
+                <span class="d-inline-block loading-text">Shadows</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="javascript:;" phx-click="tiered-ranking" phx-value-type="plebs" data-toggle="tab" class={"nav-link px-2 py-1 #{if @ranking_tab == "plebs", do: "active"} rank-shadow-0 border"} phx-hook="Loading" id="pleb-ranking-button">
+                <span class="d-inline-block loading-text">Plebs</span>
+            </a>
+        </li>
+    </ul>
     <div class="card-body">
         
         <table class="table table-dark text-center m-0 table-sm">

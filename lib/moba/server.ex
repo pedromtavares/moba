@@ -31,17 +31,18 @@ defmodule Moba.Server do
   defp schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
 
   defp server_check(state) do
-    unless dev?(), do: schedule_check()
+    unless dev?() do
+      schedule_check()
+      season = Moba.current_season()
 
-    season = Moba.current_season()
+      if time_diff_in_seconds(season.last_server_update_at) >= @tick_diff_in_seconds do
+        Conductor.season_tick!()
+        Cleaner.cleanup_old_records()
+      end
 
-    if time_diff_in_seconds(season.last_server_update_at) >= @tick_diff_in_seconds do
-      Conductor.season_tick!()
-      Cleaner.cleanup_old_records()
-    end
-
-    if time_diff_in_seconds(season.last_pvp_update_at) >= @pvp_update_diff_in_seconds do
-      Conductor.pvp_tick!()
+      if time_diff_in_seconds(season.last_pvp_update_at) >= @pvp_update_diff_in_seconds do
+        Conductor.pvp_tick!()
+      end
     end
 
     state

@@ -39,7 +39,8 @@ defmodule Moba.Admin.Server do
       players: Admin.current_active_players(),
       guests: Admin.current_guests(),
       user_stats: Admin.get_user_stats(),
-      duels: Admin.list_recent_duels()
+      duels: Admin.list_recent_duels(),
+      match_stats: Admin.match_stats()
     }
   end
 
