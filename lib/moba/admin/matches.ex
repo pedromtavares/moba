@@ -27,15 +27,20 @@ defmodule Moba.Admin.Matches do
       end
 
     matches = Repo.all(from(m in query, where: m.phase == "scored"))
-    won_matches = Enum.filter(matches, &(&1.winner_id == &1.player_id))
-    total_winrate = Float.round(length(won_matches) / length(matches) * 100, 2)
-    scores = hero_scores(matches)
 
-    %{
-      skills: skill_winrates(scores),
-      avatars: avatar_winrates(scores),
-      winrate: total_winrate
-    }
+    if length(matches) > 0 do
+      won_matches = Enum.filter(matches, &(&1.winner_id == &1.player_id))
+      total_winrate = Float.round(length(won_matches) / length(matches) * 100, 2)
+      scores = hero_scores(matches)
+
+      %{
+        skills: skill_winrates(scores),
+        avatars: avatar_winrates(scores),
+        winrate: total_winrate
+      }
+    else
+      %{}
+    end
   end
 
   defp hero_scores(matches) do
