@@ -9,11 +9,26 @@ defmodule Moba.Admin.Matches do
 
   import Ecto.Query
 
-  def match_stats(pve_tier) do
-    query = if pve_tier, do: Match, else: Match
+  def match_stats do
+    %{
+      "pvp" => filtered_stats(nil),
+      "immortals" => filtered_stats(2),
+      "shadows" => filtered_stats(1),
+      "plebs" => filtered_stats(0)
+    }
+  end
+
+  defp filtered_stats(pvp_tier) do
+    query =
+      if pvp_tier do
+        from(m in Match, join: p in assoc(m, :player), where: p.pvp_tier == ^pvp_tier)
+      else
+        Match
+      end
+
     matches = Repo.all(from(m in query, where: m.phase == "scored"))
     won_matches = Enum.filter(matches, &(&1.winner_id == &1.player_id))
-    total_winrate = round(length(won_matches) / length(matches) * 100)
+    total_winrate = Float.round(length(won_matches) / length(matches) * 100, 2)
     scores = hero_scores(matches)
 
     %{
@@ -23,7 +38,7 @@ defmodule Moba.Admin.Matches do
     }
   end
 
-  def hero_scores(matches) do
+  defp hero_scores(matches) do
     heroes =
       matches
       |> Enum.reduce([], fn match, acc ->
@@ -48,8 +63,9 @@ defmodule Moba.Admin.Matches do
     end)
   end
 
-  def skill_winrates(scores) do
-    skills = SkillQuery.base_canon() |> SkillQuery.normals() |> SkillQuery.enabled() |> SkillQuery.with_level(5) |> Repo.all()
+  defp skill_winrates(scores) do
+    skills =
+      SkillQuery.base_canon() |> SkillQuery.normals() |> SkillQuery.enabled() |> SkillQuery.with_level(5) |> Repo.all()
 
     Enum.reduce(skills, %{}, fn skill, acc ->
       {wins, losses} =
@@ -63,13 +79,14 @@ defmodule Moba.Admin.Matches do
           end
         end)
 
-      winrate = round(wins / (wins + losses) * 100)
+      total = if wins + losses == 0, do: 1, else: wins + losses
+      winrate = Float.round(wins / total * 100, 2)
 
-      Map.put(acc, skill, winrate)
+      Map.put(acc, skill, {winrate, wins + losses})
     end)
   end
 
-  def avatar_winrates(scores) do
+  defp avatar_winrates(scores) do
     avatars = Game.list_avatars()
 
     Enum.reduce(avatars, %{}, fn %{code: code} = avatar, acc ->
@@ -79,9 +96,10 @@ defmodule Moba.Admin.Matches do
           {_, _, _}, inner_acc -> inner_acc
         end)
 
-      winrate = round(wins / (wins + losses) * 100)
+      total = if wins + losses == 0, do: 1, else: wins + losses
+      winrate = Float.round(wins / total * 100, 2)
 
-      Map.put(acc, avatar, winrate)
+      Map.put(acc, avatar, {winrate, wins + losses})
     end)
   end
 end

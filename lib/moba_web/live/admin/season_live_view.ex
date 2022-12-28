@@ -18,6 +18,12 @@ defmodule MobaWeb.Admin.SeasonLiveView do
     {:noreply, assign(socket, filter: new_filter) |> base_assigns()}
   end
 
+  def handle_event("stats-filter", params, socket) do
+    with filter = Map.get(params, "type") do
+      {:noreply, assign(socket, stats_filter: filter) |> base_assigns()}
+    end
+  end
+
   def render(assigns) do
     MobaWeb.Admin.SeasonView.render("show.html", assigns)
   end
@@ -26,13 +32,15 @@ defmodule MobaWeb.Admin.SeasonLiveView do
     data = Admin.get_server_data()
 
     filter = socket.assigns[:filter] || :weekly
+    stats_filter = socket.assigns[:stats_filter] || "pvp"
 
     assign(socket,
       players: data.players,
       guests: data.guests,
       filter: filter,
       user_stats: data.user_stats[filter],
-      match_stats: data.match_stats,
+      stats_filter: stats_filter,
+      match_stats: data.match_stats[stats_filter],
       duels: data.duels,
       last_updated: Timex.now()
     )

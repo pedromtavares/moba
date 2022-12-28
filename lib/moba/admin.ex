@@ -114,7 +114,7 @@ defmodule Moba.Admin do
 
   # MATCHES
 
-  defdelegate match_stats(pve_tier \\ nil), to: Matches
+  defdelegate match_stats, to: Matches
 
   # SERVER
 
