@@ -27,6 +27,38 @@ defmodule Moba.Engine.Core.Helper do
       (is_nil(cooldown) || cooldown + 1 <= 0)
   end
 
+  def should_use?(battler, resource, type, nil), do: can_use?(battler, resource, type)
+
+  # avoids having the AI using skills after shivas and guardian angel
+  def should_use?(battler, resource, type, defender) do
+    can = can_use?(battler, resource, type)
+
+    skipped = [
+      "laguna_blade",
+      "gods_strength",
+      "guardian_angel",
+      "decay",
+      "death_pulse",
+      "mana_shield",
+      "boss_slam",
+      "bad_juju",
+      "borrowed_time",
+      "culling_blade",
+      "doom",
+      "elder_dragon_form",
+      "rearm",
+      "spell_steal",
+      "shadow_word",
+      "dream_coil"
+    ]
+
+    if defender.next_armor >= 100 && !Enum.member?(skipped, resource) do
+      can && Enum.random(0..1) == 0
+    else
+      can
+    end
+  end
+
   def alive?(battler), do: battler.current_hp > 0
 
   def dead?(battler), do: not alive?(battler)

@@ -340,8 +340,8 @@ defmodule Moba.Engine.Core.Processor do
 
   # Uses a skill from the pre-defined skill_order, this happens when defending
   # in the Arena or when the opponent is an A.I. player.
-  defp use_skill(%{attacker: attacker, orders: %{auto: true}} = turn) do
-    skill = get_resource_from_order(attacker.skill_order, attacker)
+  defp use_skill(%{attacker: attacker, defender: defender, orders: %{auto: true}} = turn) do
+    skill = get_resource_from_order(attacker.skill_order, attacker, defender)
     (skill && cast_skill(turn, skill)) || basic_attack(turn)
   end
 
@@ -446,10 +446,10 @@ defmodule Moba.Engine.Core.Processor do
     |> Spell.apply_interruption(%{})
   end
 
-  defp get_resource_from_order(order, battler) do
+  defp get_resource_from_order(order, battler, defender \\ nil) do
     order
     |> Enum.filter(fn resource ->
-      resource && Helper.can_use?(battler, resource, :active)
+      resource && Helper.should_use?(battler, resource, :active, defender)
     end)
     |> Enum.take(1)
     |> List.first()
