@@ -151,10 +151,15 @@ defmodule Moba.Constants do
       def maximum_points_difference, do: @maximum_points_difference
       def minimum_duel_points(points) when points < @minimum_duel_points, do: @minimum_duel_points
       def minimum_duel_points(points), do: points
-      def victory_duel_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference, do: 0
-      def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
-      def victory_duel_points(diff) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
-      def victory_duel_points(diff), do: ceil(diff * 0.15)
+
+      def victory_duel_points(diff, skip_victory_limit \\ false)
+
+      def victory_duel_points(diff, false) when diff < -@maximum_points_difference or diff > @maximum_points_difference,
+        do: 0
+
+      def victory_duel_points(diff, _) when diff > -40 and diff < 40, do: 5
+      def victory_duel_points(diff, _) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
+      def victory_duel_points(diff, _), do: ceil(diff * 0.15)
       def defeat_duel_points(diff), do: victory_duel_points(-diff)
       def tie_duel_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference, do: 0
       def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points())

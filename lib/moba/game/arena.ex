@@ -167,7 +167,7 @@ defmodule Moba.Game.Arena do
     winner = if match.winner_id == player.id, do: player, else: opponent
     _loser = if match.winner_id == player.id, do: opponent, else: player
 
-    pvp_points = Duels.pvp_points(player, opponent, winner)
+    pvp_points = Duels.pvp_points(player, opponent, winner, true)
 
     match_attrs = %{
       total_matches: player.total_matches + 1,
