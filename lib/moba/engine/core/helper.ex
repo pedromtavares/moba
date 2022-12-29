@@ -52,7 +52,7 @@ defmodule Moba.Engine.Core.Helper do
       "dream_coil"
     ]
 
-    if defender.next_armor >= 100 && !Enum.member?(skipped, resource) do
+    if defender.next_armor >= 100 && !Enum.member?(skipped, resource.code) do
       can && Enum.random(0..1) == 0
     else
       can
