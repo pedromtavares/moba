@@ -88,8 +88,19 @@ defmodule MobaWeb.BattleLive do
         turn: turn,
         turn_timer: turn_timer(last_turn, battle)
       )
+      |> check_stuck()
     end
   end
+
+  defp check_stuck(%{assigns: %{last_turn: last_turn, battle: battle}} = socket) when not is_nil(last_turn) do
+    if battle.defender.bot_difficulty && last_turn.defender.hero_id == battle.defender_id do
+      next_turn(socket, battle, %{auto: true}, last_turn)
+    else
+      socket
+    end
+  end
+
+  defp check_stuck(socket), do: socket
 
   defp check_tutorial(socket, %{attacker_snapshot: %{league_step: 0}, type: "league"} = battle) do
     if battle.winner_id == battle.attacker_id do
