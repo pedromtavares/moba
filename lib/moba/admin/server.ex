@@ -5,7 +5,7 @@ defmodule Moba.Admin.Server do
 
   use GenServer
 
-  alias Moba.Admin
+  alias Moba.{Admin, Utils}
 
   @timeout 1000 * String.to_integer(Application.get_env(:moba, :admin_refresh_seconds))
 
@@ -17,21 +17,28 @@ defmodule Moba.Admin.Server do
 
   def init(_) do
     schedule_update()
-    {:ok, current_state()}
+    state = current_state()
+    Cachex.put(:game_cache, "match_stats", state)
+    {:ok, state}
   end
 
-  def handle_info(:server_update, _state) do
-    state = current_state()
-    MobaWeb.broadcast("admin", "server", %{})
+  def handle_info(:server_update, state) do
+    update_match_cache()
     schedule_update()
     {:noreply, state}
   end
 
   @doc """
-  Returns current match state or fetches from cache in the case of past matches
+  Returns current match state or fetches from cache
   """
   def handle_call(:data, _from, state) do
-    {:reply, state, state}
+    new_state =
+      case Cachex.get(:game_cache, "match_stats") do
+        {:ok, nil} -> state
+        {:ok, stats} -> stats
+      end
+
+    {:reply, new_state, new_state}
   end
 
   defp current_state do
@@ -45,4 +52,12 @@ defmodule Moba.Admin.Server do
   end
 
   defp schedule_update, do: Process.send_after(self(), :server_update, @timeout)
+
+  defp update_match_cache do
+    Utils.run_async(fn ->
+      state = current_state()
+      Cachex.put(:game_cache, "match_stats", state)
+      MobaWeb.broadcast("admin", "server", %{})
+    end)
+  end
 end

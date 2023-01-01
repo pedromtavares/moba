@@ -30,6 +30,18 @@ defmodule MobaWeb.DashboardView do
     end
   end
 
+  def current_quest_avatars(%{pve_tier: tier, pve_progression: progression}) do
+    codes =
+      case tier do
+        4 -> progression.master_codes
+        5 -> progression.grandmaster_codes
+        6 -> progression.invoker_codes
+        _ -> progression.season_codes
+      end
+
+    Enum.map(codes, &Moba.load_resource(&1)) |> Enum.map(& &1.name) |> Enum.join(", ")
+  end
+
   def current_quest_description(%{pve_tier: tier}) do
     Game.get_quest(tier + 1).description
   end

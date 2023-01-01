@@ -3,13 +3,13 @@
         <div class="row mt-3 mb-3 d-flex justify-content-center">
             <%= if next = next_pve_tier(@current_player) do %>
                 <div class="col pve-tier-container text-center">
-                    <img src="/images/pve/<%= @current_player.pve_tier %>.png" class="pve-rank"/>
+                    <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="pve-rank"/>
                     <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[@current_player.pve_tier] %></h4>
                 </div>
                 <div class="col-8">
                     <h4 class="text-center mb-0 mt-0"><%= current_quest_description(@current_player) %></h4>
-                    <div class="progress mt-3" style="height:50px;">
-                        <div style="width:<%= current_quest_progression_percentage(@current_player) %>%;" class="progress-bar pve-bar"></div>
+                    <div class="progress mt-3" style="height:50px;" data-toggle="tooltip" title={current_quest_avatars(@current_player)}>
+                        <div style={"width:#{current_quest_progression_percentage(@current_player)}%;"} class="progress-bar pve-bar"></div>
                         <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
                             <%= current_quest_progression_label(@current_player) %>
                         </h5>
@@ -23,12 +23,12 @@
                     </div>
                 </div>
                 <div class="col pve-tier-container text-center">
-                    <img src="/images/pve/<%= next %>.png" class="pve-rank"/>
+                    <img src={"/images/pve/#{next}.png"} class="pve-rank"/>
                     <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[next] %></h4>
                 </div>
             <% else %>
                 <div class="col text-center">
-                    <img src="/images/pve/<%= @current_player.pve_tier %>.png" class="user-rank"/>
+                    <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="user-rank"/>
                     <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pve_tiers[@current_player.pve_tier] %></h4>
                 </div>
             <% end %>
