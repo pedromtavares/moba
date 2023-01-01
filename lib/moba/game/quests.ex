@@ -70,6 +70,7 @@ defmodule Moba.Game.Quests do
     }
   }
 
+  def get_quest(tier) when tier > 7, do: @all[7]
   def get_quest(tier), do: @all[tier]
 
   def last_completed_quest(%{player: %{pve_progression: %{history: history}, pve_tier: current_tier}} = hero) do

@@ -27,8 +27,8 @@
                     <h4 class="text-uppercase text-white my-0 f-rpg"><%= Moba.pve_tiers[next] %></h4>
                 </div>
             <% else %>
-                <div class="col text-center">
-                    <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="user-rank"/>
+                <div class="col text-center mb-2">
+                    <img src={"/images/pve/#{@current_player.pve_tier}.png"} style="width: 150px" class="user-rank"/>
                     <h4 class="my-0 text-uppercase text-white f-rpg"><%= Moba.pve_tiers[@current_player.pve_tier] %></h4>
                 </div>
             <% end %>
