@@ -1,0 +1,79 @@
+<div class="arena arena-edit mt-2">
+    <div class="row">
+        <div class="col">
+            <div class="card main-card" id="teams-container" style={if @hero, do: "height: 75vh", else: "height: 90vh"}>
+                <form phx-submit="new-team">
+                    <div class="d-flex">
+                        <input type="text" maxlength="20" name="name" class="form-control w-50" required="true" placeholder="Team name" />
+                        <button class="btn btn-primary w-50" id="create-team-button"><span class="loading-text"><i class="fa fa-plus"></i> Create Team</span></button>     
+                    </div>
+                </form>
+                <div class="overflow">
+                    <table class="table table-dark text-center m-0 mt-2 table-sm">
+                        <%= for team <- @teams do %>
+                            <tr class={"action-cursor #{if @selected_team.id == team.id, do: "selected-team"}"} phx-click="select-team" phx-value-id={team.id} phx-hook="Loading" id={"team-row-#{team.id}"}>
+                                <td class="py-3" style="width: 30%">
+                                    <h5 class="m-0"><span class="loading-text"><%= team.name %></span></h5>
+                                </td>
+                                <td style="width: 1%">
+                                    <%= if team.defensive do %>
+                                        <i class="fa fa-shield-halved"></i>
+                                    <% end %>
+                                </td>
+                                <td>
+                                    <%= for pick <- team.picks do %>
+                                        <%= GH.hero_avatar(pick) %>
+                                    <% end %> 
+                                </td>
+                                <td style="width: 1%" data-toggle="tooltip" title="Number of times it was picked in Manual matches">
+                                    <%= team.used_count %>
+                                </td>
+                            </tr>
+                        <% end %>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card main-card" id="current-team-container" phx-hook="EqualHeight" phx-target="#teams-container">
+                <%= if @selected_team do %>
+                    <div class="d-flex justify-content-around">
+                        <button class="btn btn-danger btn-sm my-1" data-confirm="Are you sure?" phx-click="remove-team" phx-hook="Loading" loading="Removing..." id="remove-selected-team"><span class="loading-text"><i class="fa fa-trash"></i> Remove</span></button>
+                        <h3 class="text-center"><%= @selected_team.name %></h3>
+                        <div class="custom-control custom-switch mt-2" data-toggle="tooltip" title="Toggle to use this team automatically only when defending against opponents.">
+                            <input type="checkbox" class="custom-control-input" id="toggle-defensive" phx-click="toggle-defensive" checked={@selected_team.defensive}>
+                            <label class="custom-control-label" for="toggle-defensive">Defensive</label>
+                        </div>
+                    </div>
+                    <hr/>
+                    <div class="overflow">
+                        <div class="row">
+                            <%= for pick <- @selected_team.picks do %>
+                                <%= render "_team_hero.html", hero: pick, selected_team: @selected_team  %>
+                            <% end %>
+                        </div>
+                    </div>
+                <% end %>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card main-card" id="heroes-container" phx-hook="EqualHeight" phx-target="#teams-container">
+                <div class="d-flex justify-content-around">
+                    <h3 class="text-center">Your Trained Heroes</h3>
+                    <a href="javascript:;" class="h5" phx-click="sort" data-toggle="tooltip" title={"Click to sort by #{if @sort == :recent, do: "Rank", else: "Recent"}"} id="hero-sort"><i class="fa fa-circle-sort mt-1"></i> Sorted by <%= if @sort == :recent, do: "Recent", else: "Rank" %></a>
+                </div>
+                <hr/>
+                <div class="overflow">
+                    <div class="row">
+                        <%= for hero <- @trained_heroes do %>
+                            <%= render "_trained_hero.html", hero: hero, selected_team: @selected_team  %>
+                        <% end %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%= if @hero, do: live_render(@socket, MobaWeb.CurrentHeroLive, session: %{"hero" => @hero}, id: "hero-bar") %>

@@ -1,0 +1,34 @@
+<div class="col-md-12 mt-1" id={"team-hero-#{@hero.id}"}>
+    <div class={"card hero-card mb-0 border"} style={"background-image: url(#{GH.background_url(@hero)})"}>
+        <div class="card-header pt-0 pb-1">
+            <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
+                <span class="font-italic font-20 f-rpg"><%= if @hero.pve_ranking do %>#<%= @hero.pve_ranking %><% end %></span>
+                <div>
+                    <%= GH.hero_league(@hero) %>
+                    <%= @hero.name %>
+                </div>
+                <span class="font-15 font-italic" data-toggle="tooltip" title={GH.hero_stats_string(@hero, true)}>Level <%= @hero.level %> <%= @hero.avatar.name %></span>
+            </h4>
+        </div>
+        <div class="card-body p-0 d-flex align-items-center justify-content-center" >
+        </div>
+        <div class="card-footer transparent p-1" id={"hero-footer-#{@hero.id}"}>
+            <div class="row">
+                <div class="col-12">
+                    <div class="skills-container d-flex justify-content-between">
+                        <%= GH.hero_skill_list(@hero) %>
+                    </div>
+                    <div class="items-container row no-gutters float-right">
+                        <%= GH.hero_item_list(@hero) %>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between" style="background: #323b44 !important">
+            <button class="btn btn-sm btn-block btn-secondary m-0 mr-1" phx-click="move-up" phx-value-id={@hero.id} phx-hook="Loading" loading="Moving..." id={"move-up-#{@hero.id}"}><span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span></button>
+            <button class="btn btn-sm btn-block btn-secondary m-0 mx-1" phx-click="move-down" phx-value-id={@hero.id} phx-hook="Loading" loading="Moving..." id={"move-down-#{@hero.id}"}><span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span></button>
+            <button class="btn btn-sm btn-block btn-warning m-0 mr-1" phx-click="edit-hero" phx-value-id={@hero.id} phx-hook="Loading" id={"edit-hero-#{@hero.id}"}><span class="loading-text"><i class="fa fa-edit"></i> Edit</span></button>
+            <button class="btn btn-sm btn-block btn-danger m-0 ml-1" phx-click="remove-hero" phx-value-id={@hero.id} phx-hook="Loading" loading="Removing..." id={"remove-hero-#{@hero.id}"}><span class="loading-text"><i class="fa fa-times"></i> Remove</span></button>
+        </div>
+    </div>
+</div>

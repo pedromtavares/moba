@@ -1,4 +1,28 @@
 .matches {
+  @keyframes shadow {
+    0% {
+      box-shadow: inset 0px 0px 20px black;
+    }
+    50% {
+      box-shadow: inset 0px 0px 35px black;
+    }
+    100% {
+      box-shadow: inset 0px 0px 20px black;
+    }
+  }
+
+  .shadow-fx{
+    animation: 2s shadow infinite;
+  }
+
+  .shadow-fx:hover{
+    color: white !important;
+  }
+  
+  .btn-primary {
+    color: #3bafda;
+    background: rgba(59,175,218, 0.2) !important;
+  }
   .hero-card{
     min-height: 150px;
   }
@@ -10,8 +34,8 @@
 	}
 
 	.avatar{
-		max-width: 65px;
-	}
+    max-width: 65px;
+  }
 
   .picked-hero-card{
     border: 1px solid white !important;
@@ -19,5 +43,16 @@
 
   .tab-content{
     overflow: auto;
+  }
+
+  .team{
+    .avatar{
+      max-width: initial !important;
+      width: 100%
+    }
+    .avatar-container{
+      width: 20%;
+    }
+
   }
 }

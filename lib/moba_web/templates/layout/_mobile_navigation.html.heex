@@ -15,7 +15,7 @@
                             <% end %>
                             <%= if assigns[:current_player] do %>
                                 <%= if length(@current_player.hero_collection) > 0 do %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLive), class: "nav-link" do %>
+                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLive.Index), class: "nav-link" do %>
                                         <i class="fa fa-swords"></i>
                                     <% end %>
                                 <% end %>

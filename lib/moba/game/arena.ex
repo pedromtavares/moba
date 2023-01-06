@@ -3,7 +3,7 @@ defmodule Moba.Game.Arena do
   Module focused on cross-resource orchestration and logic related to PvP (Duels & Matchmaking)
   """
   alias Moba.{Engine, Game}
-  alias Game.{Duels, Heroes, Matches, Players}
+  alias Game.{Duels, Heroes, Matches, Players, Teams}
 
   @daily_match_limit Moba.daily_match_limit()
 
@@ -113,17 +113,25 @@ defmodule Moba.Game.Arena do
     Matches.create!(%{
       player_id: player_id,
       opponent_id: opponent_id,
-      player_picks: match_picks(player_pick_id, player_generated_picks),
-      opponent_picks: match_picks(opponent_id, opponent_generated_picks),
+      player_picks: match_picks(player_pick_id, player_generated_picks, false),
+      opponent_picks: match_picks(opponent_id, opponent_generated_picks, true),
       generated_picks: player_generated_picks,
       type: type
     })
   end
 
-  defp match_picks(nil, _), do: []
+  defp match_picks(nil, _, _), do: []
 
-  defp match_picks(player_id, generated_picks) do
-    pick_ids = Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
+  defp match_picks(player_id, generated_picks, defensive) do
+    team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
+
+    pick_ids =
+      if team do
+        team.pick_ids
+      else
+        Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
+      end
+
     diff = 5 - length(pick_ids)
 
     if diff > 0 do

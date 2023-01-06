@@ -18,6 +18,7 @@ defmodule Moba.Game do
     Skills,
     Skins,
     Targets,
+    Teams,
     Training
   }
 
@@ -294,4 +295,14 @@ defmodule Moba.Game do
   defdelegate list_targets(hero), to: Targets
 
   defdelegate start_pve_battle!(target), to: Training
+
+  # TEAMS
+
+  defdelegate create_team!(attrs), to: Teams
+
+  defdelegate delete_team!(team), to: Teams
+
+  defdelegate list_teams(player), to: Teams
+
+  defdelegate update_team!(team, attrs), to: Teams
 end

@@ -5,7 +5,7 @@
                 <i class="fa-duotone fa-sword"></i>
             <% end %>
             <%= if @current_player.user_id do %>
-                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLive), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
+                <%= live_redirect to: Routes.live_path(@socket, MobaWeb.ArenaLive.Index), data: [toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false], title: "<h3 class='ml-2 mr-2'>Arena</h3>", class: sidebar_class("arena", assigns)  do %>
                     <i class="fa-duotone fa-swords"></i>
                 <% end %>
             <% else %>

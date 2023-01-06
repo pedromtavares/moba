@@ -35,6 +35,7 @@ defmodule Moba.Game.Schema.Player do
 
     has_many :heroes, Game.Schema.Hero
     has_many :duels, Game.Schema.Duel
+    has_many :teams, Game.Schema.Team
 
     belongs_to :current_pve_hero, Game.Schema.Hero
     belongs_to :season, Game.Schema.Season

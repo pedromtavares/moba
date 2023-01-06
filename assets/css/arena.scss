@@ -20,18 +20,18 @@
     color: white !important;
   }
 
-	.btn-success {
-    color: #1abc9c;
-    background: rgba(26,188,156, 0.2) !important;
-  }
+	// .btn-success {
+  //   color: #1abc9c;
+  //   background: rgba(26,188,156, 0.2) !important;
+  // }
   .btn-primary {
     color: #3bafda;
     background: rgba(59,175,218, 0.2) !important;
   }
-  .btn-warning {
-    color: #f7b84b;
-    background: rgba(247, 184, 75, 0.2) !important;
-  }
+  // .btn-warning {
+  //   color: #f7b84b;
+  //   background: rgba(247, 184, 75, 0.2) !important;
+  // }
 
 	.pvp-tier-container{
     line-height: 6.5rem;
@@ -152,5 +152,31 @@
         margin: 0;
       }
     }
+  }
+}
+
+.arena-edit{
+  .avatar{
+    width: 50px;
+  }
+
+  .img-border{
+    border: 1px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+  }
+
+  .main-card .overflow{
+    overflow: auto;
+  }
+
+  .main-card .hero-card{
+    min-height: 200px;
+  }
+
+  .selected-team{
+    border-left: 1px solid white;
+    border-right: 1px solid white;
+    background: rgba(59,175,218, 0.2) !important;
   }
 }

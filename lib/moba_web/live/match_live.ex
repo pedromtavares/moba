@@ -37,6 +37,12 @@ defmodule MobaWeb.MatchLive do
     {:noreply, assign(socket, picked_heroes: heroes -- [hero])}
   end
 
+  def handle_event("pick-team", %{"id" => id}, %{assigns: %{teams: teams}} = socket) do
+    team = Enum.find(teams, &(&1.id == String.to_integer(id)))
+    Game.update_team!(team, %{used_count: team.used_count + 1})
+    {:noreply, assign(socket, picked_heroes: team.picks)}
+  end
+
   def handle_event("start", _, %{assigns: %{match: match, picked_heroes: picked_heroes}} = socket) do
     ids = Enum.map(picked_heroes, & &1.id)
     Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.continue_match!(match, ids) end)
@@ -91,6 +97,8 @@ defmodule MobaWeb.MatchLive do
          match = Game.get_match!(match_id),
          latest_match = Game.latest_manual_match(player),
          battles = Engine.list_match_battles(match_id),
+         teams = Game.list_teams(player),
+         hero_tab = if(length(teams) > 0, do: "teams", else: "trained"),
          trained_heroes = Game.trained_pvp_heroes(player.id, [], 20) do
       assign(socket,
         channel: channel,
@@ -101,8 +109,9 @@ defmodule MobaWeb.MatchLive do
         picked_heroes: match.player_picks,
         generated_heroes: match.generated_picks,
         tutorial_step: player.tutorial_step,
-        hero_tab: "trained",
-        latest_match: latest_match
+        hero_tab: hero_tab,
+        latest_match: latest_match,
+        teams: teams
       )
     end
   end
