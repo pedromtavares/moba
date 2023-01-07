@@ -24,9 +24,9 @@
         <div class="card-footer transparent p-1">
             <div class="row">
                 <div class="col justify-content-center d-flex">
-                    <div class="btn-group hero-stats">
-                        <button class="btn btn-icon btn-outline-dark text-danger" data-toggle="tooltip" title="Total Arena Win Rate"> <i class="fa fa-swords mr-1"></i> <%= PlayerView.total_win_rate(@player) %></button>
+                    <div class="btn-group hero-stats">  
                         <button class="btn btn-icon btn-outline-dark text-info" data-toggle="tooltip" title="Season Points"> <i class="fa fa-arrows-to-dot"></i> <%= @player.pvp_points %></button>
+                        <button class="btn btn-icon btn-outline-dark text-danger" data-toggle="tooltip" title="Total Arena Win Rate"> <i class="fa fa-swords mr-1"></i> <%= PlayerView.total_win_rate(@player) %></button>
                         <button class="btn btn-icon btn-outline-dark text-warning" data-toggle="tooltip" title="Best Immortal Streak"> <i class="fa fa-trophy"></i> <%= @player.best_immortal_streak %></button>
                     </div>
 
