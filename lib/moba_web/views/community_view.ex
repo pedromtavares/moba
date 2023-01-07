@@ -1,6 +1,8 @@
 defmodule MobaWeb.CommunityView do
   use MobaWeb, :view
 
+  alias MobaWeb.PlayerView
+
   def formatted_body(%{body: body}) do
     body
     |> text_to_html()

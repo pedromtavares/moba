@@ -29,7 +29,7 @@ defmodule Moba.Game.Arena do
 
   def continue_match!(%{winner_id: winner_id, type: type} = match) when not is_nil(winner_id) do
     match = score_match!(match)
-    if type != "auto", do: Moba.update_pvp_ranking()
+    if type != "auto", do: Moba.update_pvp_rankings()
 
     match
   end
@@ -76,9 +76,8 @@ defmodule Moba.Game.Arena do
     |> Matches.update!(%{winner_id: nil, phase: nil, player_picks: []})
   end
 
-  def update_pvp_ranking!(update_tiers?) do
+  def update_daily_ranking!(update_tiers?) do
     if update_tiers?, do: Players.update_ranking_tiers!(), else: Players.update_ranking!()
-    MobaWeb.broadcast("player-ranking", "ranking", %{})
   end
 
   defp create_match!(%{daily_matches: count} = player, opponent, "manual") when count >= @daily_match_limit do
@@ -164,7 +163,7 @@ defmodule Moba.Game.Arena do
     Players.duel_update!(player, Map.merge(player_updates, %{pvp_points: duel_points.total_player_points}))
     Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: duel_points.total_opponent_points}))
 
-    Moba.update_pvp_ranking()
+    Moba.update_pvp_rankings()
 
     %{winner: winner, attacker_pvp_points: duel_points.player_points, defender_pvp_points: duel_points.opponent_points}
   end

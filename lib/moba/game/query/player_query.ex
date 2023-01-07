@@ -7,6 +7,8 @@ defmodule Moba.Game.Query.PlayerQuery do
   alias Game.Schema.Player
   alias Game.Query.HeroQuery
 
+  @current_ranking_date Moba.current_ranking_date()
+
   import Ecto.Query
 
   def load(queryable \\ Player) do
@@ -62,6 +64,7 @@ defmodule Moba.Game.Query.PlayerQuery do
       where: not is_nil(player.ranking),
       order_by: [asc: player.ranking]
     )
+    |> preload(:user)
   end
 
   def by_pvp_points(query \\ Player) do
@@ -85,13 +88,19 @@ defmodule Moba.Game.Query.PlayerQuery do
       where: not is_nil(player.season_ranking),
       order_by: [asc: player.season_ranking]
     )
+    |> preload(:user)
   end
 
   def season_ranking(limit) do
     base = non_bots() |> non_guests() |> limit_by(limit)
 
     from(player in base,
-      order_by: [desc: [player.best_immortal_streak, player.pvp_points, player.total_wins]]
+      join: user in assoc(player, :user),
+      where: user.last_online_at > ^@current_ranking_date,
+      order_by: [
+        desc: fragment("(1000 * ?) + (500 * ?) + ?", player.best_immortal_streak, player.pve_tier, player.pvp_points),
+        desc: player.total_wins
+      ]
     )
   end
 

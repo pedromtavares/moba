@@ -116,8 +116,6 @@ defmodule Moba.Game do
 
   defdelegate pve_ranking(limit \\ 20), to: Heroes
 
-  defdelegate pve_ranking_for_community, to: Heroes
-
   defdelegate rank_finished_heroes!, to: Training
 
   defdelegate refresh_targets!(hero), to: Training
@@ -226,7 +224,7 @@ defmodule Moba.Game do
 
   defdelegate update_preferences!(player, preferences), to: Players
 
-  defdelegate update_pvp_ranking!(update_tiers? \\ false), to: Arena
+  defdelegate update_daily_ranking!(update_tiers? \\ false), to: Arena
 
   defdelegate update_season_ranking!, to: Players
 

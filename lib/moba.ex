@@ -89,8 +89,8 @@ defmodule Moba do
   @doc """
   Game pvp_ranking is defined by which player has the highest pvp_points
   """
-  def update_pvp_ranking do
-    if test?(), do: Game.update_pvp_ranking!(), else: GenServer.cast(Ranker, :pvp)
+  def update_pvp_rankings do
+    if test?(), do: Game.update_daily_ranking!() && Game.update_season_ranking!(), else: GenServer.cast(Ranker, :pvp)
   end
 
   defp cached_ranking(key, fetch_fn) do

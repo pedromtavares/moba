@@ -23,7 +23,7 @@ defmodule MobaWeb.PowControllerCallbacks do
       end
     end
 
-    Moba.update_pvp_ranking()
+    Moba.update_pvp_rankings()
 
     {:ok, user, conn}
   end

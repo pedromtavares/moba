@@ -26,7 +26,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def load_avatar(queryable \\ Hero) do
-    preload(queryable, [:avatar])
+    preload(queryable, [:avatar, :skin])
   end
 
   def trained(player_id, ids, limit) do
@@ -204,5 +204,9 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def unranked(query \\ Hero) do
     from hero in query, where: is_nil(hero.pve_ranking)
+  end
+
+  def top_ranked_for_player(player_id) do
+    from hero in load_avatar(), where: hero.player_id == ^player_id, order_by: [asc: hero.pve_ranking], limit: 1
   end
 end

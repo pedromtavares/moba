@@ -6,7 +6,7 @@ defmodule Moba.Game.Players do
 
   alias Moba.{Repo, Game}
   alias Game.Schema.Player
-  alias Game.Query.PlayerQuery
+  alias Game.Query.{HeroQuery, PlayerQuery}
 
   def add_total_farm!(%{player: player} = hero) do
     update_player!(player, %{total_farm: player.total_farm + hero.total_gold_farm + hero.total_xp_farm})
@@ -86,9 +86,16 @@ defmodule Moba.Game.Players do
   @doc """
   Lists Players by their ranking
   """
-  def daily_ranking(limit), do: PlayerQuery.daily_ranked(limit) |> Repo.all() |> Repo.preload(:user)
+  def daily_ranking(limit), do: PlayerQuery.daily_ranked(limit) |> Repo.all()
 
-  def season_ranking(limit), do: PlayerQuery.season_ranked(limit) |> Repo.all() |> Repo.preload(:user)
+  def season_ranking(limit) do
+    players = PlayerQuery.season_ranked(limit) |> Repo.all()
+
+    Enum.map(players, fn player ->
+      top_ranked = HeroQuery.top_ranked_for_player(player.id) |> Repo.all() |> List.first()
+      Map.put(player, :top_hero, top_ranked)
+    end)
+  end
 
   def set_player_available!(player), do: update_player!(player, %{status: "available"})
 

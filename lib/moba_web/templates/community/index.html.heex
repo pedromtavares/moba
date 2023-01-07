@@ -7,34 +7,6 @@
     <div class="row mt-2">
         <div class="col-lg-6">
             <div class="card mb-0">
-                <h5 class="card-header font-17 text-white"><i class="fa fa-globe mr-1"></i> Updates <span class="text-muted font-italic font-15 ml-2">Stay up to date with the latest development updates in BrowserMOBA</span></h5>
-                <div class="card-body updates">
-                    <ul class="list-unstyled timeline-sm">
-                        <%= for update <- @updates do %>
-                            <li class="timeline-sm-item">
-                                <%= if @current_player.user.is_admin do %>
-                                    <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={update.id} class="text-left text-danger float-right small ml-3">Delete</a>
-                                <% end %> 
-                                <h5 class="mt-0 mb-1"><%= update.title %></h5>
-                                <p class="text-muted mt-2"><%= formatted_body(update) %></p>
-                            </li>
-                        <% end %>
-                    </ul>
-                    <%= if @current_player.user.is_admin do %>
-                        <hr/>
-                        <.form let={form} for={@changeset} phx-submit="create-update" class="form-horizontal">
-                            <%= text_input form, :title, class: "form-control" %>
-                            <br/>
-                            <%= textarea form, :body, class: "form-control", rows: 10 %>
-                            <br/>
-                            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-                        </.form>
-                    <% end %>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card mb-0">
                 <h5 class="card-header font-17 text-white"><i class="fa fa-comments mr-1"></i> Message Board<span class="text-muted font-italic font-15 ml-2">Bug reports or any feedback for the devs is deeply appreciated!</span></h5>
                 <div class="card-body">
                     <div class="inbox-widget messages">
@@ -67,67 +39,77 @@
                 </div>
             </div>
         </div>
+        <div class="col-lg-6">
+            <div class="card mb-0">
+                <h5 class="card-header font-17 text-white"><i class="fa fa-globe mr-1"></i> Updates <span class="text-muted font-italic font-15 ml-2">Stay up to date with the latest development updates in BrowserMOBA</span></h5>
+                <div class="card-body updates">
+                    <ul class="list-unstyled timeline-sm">
+                        <%= for update <- @updates do %>
+                            <li class="timeline-sm-item">
+                                <%= if @current_player.user.is_admin do %>
+                                    <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={update.id} class="text-left text-danger float-right small ml-3">Delete</a>
+                                <% end %> 
+                                <h5 class="mt-0 mb-1"><%= update.title %></h5>
+                                <p class="text-muted mt-2"><%= formatted_body(update) %></p>
+                            </li>
+                        <% end %>
+                    </ul>
+                    <%= if @current_player.user.is_admin do %>
+                        <hr/>
+                        <.form let={form} for={@changeset} phx-submit="create-update" class="form-horizontal">
+                            <%= text_input form, :title, class: "form-control" %>
+                            <br/>
+                            <%= textarea form, :body, class: "form-control", rows: 10 %>
+                            <br/>
+                            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+                        </.form>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+        
     </div>
     <div class="row mt-3">
         <div class="col text-center">
             <ul class="nav nav-tabs nav-bordered nav-justified">
                 <li class="nav-item">
+                    <a href="javascript:;" class={"h5 mt-0 nav-link #{if @active_tab == "pvp", do: "active"}"} phx-click="show-pvp" phx-hook="Loading" id="show-pvp-link">
+                        <span class="loading-text"><i class="fa fa-swords fa-2x text-danger"></i><br/>Season Ranking</span>
+                    </a>
+                </li>
+                <li class="nav-item">
                     <a href="javascript:;" class={"h5 mt-0 nav-link #{if @active_tab == "pve", do: "active"}"} phx-click="show-pve" phx-hook="Loading" id="show-pve-link">
-                        <span class="loading-text"><i class="fa fa-sword fa-2x text-success"></i><br/>Hero Ranking</span>
+                        <span class="loading-text"><i class="fa fa-star fa-2x text-warning"></i><br/>Hero Hall of Fame</span>
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <a href="javascript:;" class={"h5 mt-0 nav-link #{if @active_tab == "users", do: "active"}"} phx-click="show-users" phx-hook="Loading" id="show-users-link">
-                        <span class="loading-text"><i class="fa fa-swords fa-2x text-primary"></i><br/>Season Ranking</span>
-                    </a>
-                </li>
+                
             </ul>
-            <div class={"row mt-2 #{unless @active_tab == "pve", do: "d-none"}"}>
-                <%= for hero <- @pve_ranking do %>
-                    <%= render "_hero.html", hero: hero, socket: @socket %>
-                <% end %>
+            <div class={"mt-1 mb-1 #{unless @active_tab == "pvp", do: "d-none"}"}>
+                <div class="row">
+                    <div class="col">
+                        <h3>Best players of the current Season</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <%= for player <- @pvp_ranking do %>
+                        <%= render "_player.html", player: player, socket: @socket %>
+                    <% end %>
+                </div>
             </div>
-            <%= if @pvp_ranking do %>
-                <table class={"table table-dark mb-0 ranking border-left border-right border-bottom #{unless @active_tab == "users", do: "d-none"}"}>
-                    <tbody id="hall-of-users">
-                        <%= for {player, index} <- Enum.with_index(@pvp_ranking, 1) do %>
-                            <tr id={"player-#{player.id}"}>
-                                <td>
-                                    <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height: 90px"/>
-                                    <h1 class="mb-0">
-                                        #<%= index %>
-                                    </h1>
-                                </td>
-                                <td>
-                                    <h2>
-                                        <%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id), class: "text-reset" %>
-                                        <br/>
-                                        <small class="text-dark"><em>Registered <%= player.user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %></em></small>
-                                    </h2>
-                                    <span class="font-15 badge badge-pill badge-light-success py-1 px-2 text-reset m-1">
-                                        <i class="fa fa-globe mr-1"></i><%= player.pvp_points %> Season Points
-                                    </span>
-                                </td>
-                                <td>
-                                    <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height: 50px"/>
-                                    <h3 class="mb-0">
-                                        <%= Moba.pve_tiers[player.pve_tier] %>
-                                    </h3>
-                                </td>
-                                <td width="90%">
-                                    <%= for hero <- player.hero_collection do %>
-                                        <div style="width: 70px;" class='avatar-container mx-1' data-toggle="tooltip" title={hero["avatar"]["name"]}>
-                                            <img src={GH.image_url(hero["avatar"])} class="avatar" style="max-width: 100%";/>
-                                            <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo" style="margin-top: -20px">
-                                        </div>
-                                <% end %>
-                                </td>
-                            </tr>
-                      <% end %>
-                    </tbody>
-                </table>
-            <% end %>
+            <div class={"mt-1 mb-1 #{unless @active_tab == "pve", do: "d-none"}"}>
+                <div class="row">
+                    <div class="col">
+                        <h3 class="text-center">Best heroes of the current Season</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <%= for hero <- @pve_ranking do %>
+                        <%= render "_hero.html", hero: hero, socket: @socket %>
+                    <% end %>
+                </div>
+            </div>
+            
         </div>
     </div>
 </div>

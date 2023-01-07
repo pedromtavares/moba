@@ -44,6 +44,10 @@ defmodule MobaWeb.PlayerView do
     content_tag("span", "#{rewards} Season Points", class: "badge badge-pill badge-light-dark")
   end
 
+  def season_score(player) do
+    1000 * player.best_immortal_streak + 500 * player.pve_tier + player.pvp_points
+  end
+
   def shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
   def shadow_rank(%{pvp_tier: tier}), do: tier
 

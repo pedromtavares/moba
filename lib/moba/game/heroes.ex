@@ -192,13 +192,6 @@ defmodule Moba.Game.Heroes do
   def pve_ranking(limit) do
     HeroQuery.pve_ranked()
     |> HeroQuery.limit_by(limit)
-    |> HeroQuery.load_avatar()
-    |> Repo.all()
-  end
-
-  def pve_ranking_for_community do
-    HeroQuery.pve_ranked()
-    |> HeroQuery.limit_by(21)
     |> HeroQuery.load()
     |> Repo.all()
   end

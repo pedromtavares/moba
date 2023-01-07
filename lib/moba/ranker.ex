@@ -6,7 +6,7 @@ defmodule Moba.Ranker do
 
   alias Moba.Game
 
-  @limit 2000
+  @limit 5000
   @tick 1000
 
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
@@ -39,7 +39,10 @@ defmodule Moba.Ranker do
   end
 
   defp check_timer(timer) when timer >= @limit do
-    Game.update_pvp_ranking!()
+    Game.update_daily_ranking!()
+    Cachex.put(:game_cache, "daily_ranking", Game.daily_ranking(Moba.daily_ranking_limit()))
+    Cachex.put(:game_cache, "season_ranking", Game.season_ranking(Moba.season_ranking_limit()))
+    MobaWeb.broadcast("player-ranking", "ranking", %{})
     0
   end
 

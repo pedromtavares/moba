@@ -14,7 +14,7 @@ defmodule Moba.Conductor do
   """
   def season_tick! do
     auto_matchmaking()
-    Moba.update_pvp_ranking()
+    Moba.update_pvp_rankings()
     Game.update_season_ranking!()
 
     Moba.current_season()
@@ -22,7 +22,7 @@ defmodule Moba.Conductor do
   end
 
   def pvp_tick! do
-    Game.update_pvp_ranking!(true)
+    Game.update_daily_ranking!(true)
     Repo.update_all(PlayerQuery.non_bots(), set: [daily_matches: 0, daily_wins: 0])
     Game.update_season_ranking!()
 
