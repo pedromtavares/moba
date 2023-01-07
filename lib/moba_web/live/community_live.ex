@@ -5,6 +5,8 @@ defmodule MobaWeb.CommunityLive do
     with %{assigns: %{channel: channel}} = socket = socket_init(socket) do
       if connected?(socket), do: MobaWeb.subscribe(channel)
 
+      Process.send_after(self(), :load_rankings, 100)
+
       {:ok, socket}
     end
   end
@@ -76,6 +78,14 @@ defmodule MobaWeb.CommunityLive do
     {:noreply, assign(socket, updates: [message] ++ updates)}
   end
 
+  def handle_info(:load_rankings, socket) do
+    {:noreply,
+     assign(socket,
+       pvp_ranking: Moba.season_ranking() |> Enum.take(21),
+       pve_ranking: Moba.pve_ranking() |> Enum.take(21)
+     )}
+  end
+
   def render(assigns) do
     MobaWeb.CommunityView.render("index.html", assigns)
   end
@@ -84,19 +94,17 @@ defmodule MobaWeb.CommunityLive do
     with active_tab = "pvp",
          changeset = Accounts.change_message(),
          channel = "community",
-         pve_ranking = Moba.pve_ranking() |> Enum.take(21),
-         pvp_ranking = Moba.season_ranking() |> Enum.take(21),
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse(),
          updates = Accounts.latest_messages(channel, "updates", 20) do
       assign(socket,
         active_tab: active_tab,
         changeset: changeset,
         channel: channel,
-        pve_ranking: pve_ranking,
+        pve_ranking: [],
         messages: messages,
         sidebar_code: channel,
         updates: updates,
-        pvp_ranking: pvp_ranking,
+        pvp_ranking: [],
         current_user: user
       )
     end

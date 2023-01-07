@@ -63,6 +63,11 @@
                             <i class="fa fa-trophy text-white"></i> <%= @player.best_immortal_streak %>
                         </strong>
                     </div>
+                    <div class="col text-center">
+                        <strong title={"Season Rank"} data-toggle="tooltip">
+                            <i class="fa-solid fa-hashtag text-white"></i> <%= @player.season_ranking %>
+                        </strong>
+                    </div>
                 </div>
                 <%= if length(@duels) > 0 do %>
                     <hr/>

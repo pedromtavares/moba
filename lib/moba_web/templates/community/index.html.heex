@@ -88,13 +88,17 @@
             <div class={"mt-1 mb-1 #{unless @active_tab == "pvp", do: "d-none"}"}>
                 <div class="row">
                     <div class="col">
-                        <h3>Best players of the current Season</h3>
+                        <%= if length(@pve_ranking) > 0 do %>
+                            <h3>Best players of the current Season</h3>
+                        <% else %>
+                            <h3><i class="fa fa-loading fa-spin fa-2x"></i> Loading... </h3>
+                        <% end %>
                     </div>
                 </div>
                 <div class="row">
                     <%= for player <- @pvp_ranking do %>
                         <%= render "_player.html", player: player, socket: @socket %>
-                    <% end %>
+                    <% end %>                        
                 </div>
             </div>
             <div class={"mt-1 mb-1 #{unless @active_tab == "pve", do: "d-none"}"}>

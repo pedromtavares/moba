@@ -207,6 +207,9 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def top_ranked_for_player(player_id) do
-    from hero in load_avatar(), where: hero.player_id == ^player_id, order_by: [asc: hero.pve_ranking], limit: 1
+    from hero in load_avatar(),
+      where: hero.player_id == ^player_id,
+      order_by: [asc: hero.pve_ranking, desc: [hero.total_gold_farm + hero.total_xp_farm]],
+      limit: 1
   end
 end
