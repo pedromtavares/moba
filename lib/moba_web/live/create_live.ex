@@ -208,6 +208,7 @@ defmodule MobaWeb.CreateLive do
   def unlocked_codes_for(_), do: []
 
   defp validation_error(name, %{assigns: %{current_player: %{user: user}}}) do
+    name = String.trim(name)
     length = String.length(name)
 
     if length >= 3 and length <= 15 do

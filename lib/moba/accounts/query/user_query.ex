@@ -7,8 +7,12 @@ defmodule Moba.Accounts.Query.UserQuery do
 
   import Ecto.Query
 
-  def with_id(query \\ User, user_id) do
+  def with_id(query, user_id) do
     from(u in query, where: u.id == ^user_id)
+  end
+
+  def with_username(query, username) do
+    from u in query, where: fragment("lower(?) = ?", u.username, ^String.downcase(username))
   end
 
   def inserted_recently(query \\ User, since_hours_ago \\ 24) do

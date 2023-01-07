@@ -15,7 +15,7 @@ defmodule Moba.Accounts.Users do
 
   def get_user_with_unlocks!(id), do: get_user!(id) |> Repo.preload(:unlocks)
 
-  def get_user_by_username(username), do: Repo.get_by(User, username: username)
+  def get_user_by_username(username), do: UserQuery.with_username(User, username) |> Repo.all() |> List.first()
 
   def create_user(attrs \\ %{}) do
     %User{}

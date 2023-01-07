@@ -81,8 +81,8 @@ defmodule MobaWeb.CommunityLive do
   def handle_info(:load_rankings, socket) do
     {:noreply,
      assign(socket,
-       pvp_ranking: Moba.season_ranking() |> Enum.take(21),
-       pve_ranking: Moba.pve_ranking() |> Enum.take(21)
+       pvp_ranking: Moba.season_ranking() |> Enum.take(30),
+       pve_ranking: Moba.pve_ranking() |> Enum.take(30)
      )}
   end
 
