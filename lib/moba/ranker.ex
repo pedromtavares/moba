@@ -40,6 +40,7 @@ defmodule Moba.Ranker do
 
   defp check_timer(timer) when timer >= @limit do
     Game.update_daily_ranking!()
+    Game.update_season_ranking!()
     Cachex.put(:game_cache, "daily_ranking", Game.daily_ranking(Moba.daily_ranking_limit()))
     Cachex.put(:game_cache, "season_ranking", Game.season_ranking(Moba.season_ranking_limit()))
     MobaWeb.broadcast("player-ranking", "ranking", %{})
