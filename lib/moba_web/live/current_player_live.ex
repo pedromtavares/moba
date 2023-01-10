@@ -13,9 +13,7 @@ defmodule MobaWeb.CurrentPlayerLive do
       Presence.track_player(self(), current_player)
     end
 
-    notifications = Accounts.notification_count(current_player.user)
-
-    {:ok, assign(socket, challenge: nil, notifications: notifications)}
+    {:ok, assign(socket, challenge: nil)}
   end
 
   def handle_event("close", _, socket) do
