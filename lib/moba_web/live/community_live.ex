@@ -70,8 +70,8 @@ defmodule MobaWeb.CommunityLive do
     end
   end
 
-  def handle_info({"general", message}, %{assigns: %{messages: messages}} = socket) do
-    {:noreply, assign(socket, messages: messages ++ [message])}
+  def handle_info({"general", message}, %{assigns: %{messages: messages, current_player: player}} = socket) do
+    {:noreply, assign(socket, messages: messages ++ [message]) |> tick_user(player.user)}
   end
 
   def handle_info({"updates", message}, %{assigns: %{updates: updates}} = socket) do
@@ -105,8 +105,15 @@ defmodule MobaWeb.CommunityLive do
         sidebar_code: channel,
         updates: updates,
         pvp_ranking: [],
-        current_user: user
+        current_user: user,
+        notifications: 0
       )
+      |> tick_user(user)
     end
+  end
+
+  defp tick_user(socket, user) do
+    user = Accounts.update_user!(user, %{community_seen_at: DateTime.utc_now()})
+    assign(socket, user: user)
   end
 end

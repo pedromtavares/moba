@@ -33,7 +33,7 @@ defmodule MobaWeb.PlayerLive do
   end
 
   def handle_event("show-matches", _, %{assigns: %{player: player}} = socket) do
-    with matches = Game.list_matches(player) do
+    with matches = Game.list_matches(player) |> Enum.filter(&(&1.phase == "scored")) do
       {:noreply, assign(socket, matches: matches, filter: "matches")}
     end
   end

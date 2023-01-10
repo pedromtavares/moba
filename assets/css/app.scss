@@ -55,6 +55,7 @@
     margin-bottom: 0.5rem;
     margin-right: auto;
     margin-left: auto;
+    max-height: 75px;
     @media (min-height: 830px) {
       margin-bottom: 0.7rem;
       margin-top: 0.7rem;
@@ -87,6 +88,11 @@
   i:hover{
     border-radius: 1rem;
     transition: all 0.3s;
+  }
+
+  .badge{
+    font-size: 100%;
+    margin-left: -20px;
   }
 
   

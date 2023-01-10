@@ -4,10 +4,11 @@ defmodule MobaWeb.PowControllerCallbacks do
   """
 
   use Pow.Extension.Phoenix.ControllerCallbacks.Base
-  alias Moba.Game
+  alias Moba.{Accounts, Game}
 
   def before_respond(Pow.Phoenix.RegistrationController, :create, {:ok, user, conn}, _config) do
     player_id = Plug.Conn.get_session(conn, :player_id)
+    user = Accounts.update_user!(user, %{community_seen_at: DateTime.utc_now()})
 
     if player_id do
       player =

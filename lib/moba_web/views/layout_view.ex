@@ -5,6 +5,10 @@ defmodule MobaWeb.LayoutView do
 
   def non_guest?(assigns), do: assigns[:current_player] && assigns[:current_player].user_id
 
+  def show_notifications?(assigns) do
+    assigns[:notifications] && assigns[:notifications] > 0
+  end
+
   def show_sidebar?(assigns) do
     assigns[:current_player] && is_nil(assigns[:hide_sidebar]) && length(assigns[:current_player].hero_collection) > 0
   end

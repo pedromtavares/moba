@@ -30,4 +30,10 @@ defmodule Moba.Accounts.Messages do
   end
 
   def delete_message(%Message{} = message), do: Repo.delete(message)
+
+  def notification_count(nil), do: 0
+
+  def notification_count(%{community_seen_at: time}) do
+    from(m in Message, where: m.inserted_at > ^time) |> Repo.aggregate(:count)
+  end
 end

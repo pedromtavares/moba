@@ -36,6 +36,8 @@ defmodule Moba.Accounts do
 
   defdelegate latest_messages(channel, topic, limit), to: Messages
 
+  defdelegate notification_count(player), to: Messages
+
   # UNLOCKS
 
   defdelegate create_unlock!(user, resource), to: Unlocks

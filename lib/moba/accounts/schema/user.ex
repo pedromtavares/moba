@@ -17,6 +17,7 @@ defmodule Moba.Accounts.Schema.User do
 
     field :username, :string
     field :last_online_at, :utc_datetime
+    field :community_seen_at, :utc_datetime
     field :shard_count, :integer, default: 0
     field :is_admin, :boolean, default: false
 
@@ -45,7 +46,8 @@ defmodule Moba.Accounts.Schema.User do
     |> cast(attrs, [
       :username,
       :email,
-      :shard_count
+      :shard_count,
+      :community_seen_at
     ])
     |> validations_and_constraints()
   end
