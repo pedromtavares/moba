@@ -14,7 +14,7 @@ defmodule Test.AccountsHelper do
     }
 
     case Accounts.create_user(creds) do
-      {:ok, user} -> user |> Accounts.update_user!(attrs)
+      {:ok, user} -> user |> Accounts.update_user!(Map.merge(attrs, %{community_seen_at: DateTime.utc_now()}))
       {:error, _} -> create_user(attrs)
     end
   end
