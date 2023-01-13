@@ -118,6 +118,8 @@ defmodule Moba.Game.Arena do
       type: type
     })
   end
+  
+  defp create_match!(_, _, _), do: nil
 
   defp match_picks(nil, _, _), do: []
 
