@@ -23,3 +23,7 @@ config :pow, Pow.Ecto.Schema.Password, iterations: 1
 
 config :arc,
   storage: Arc.Storage.Local
+
+# test bot
+config :nostrum,
+  token: "MTA2NDAyMDk5Nzc0Njk5NTIwMA.Gap6cO.kuq5KZQsshOyrFTf1AG2UQENydJ6inpaoWfC9o"

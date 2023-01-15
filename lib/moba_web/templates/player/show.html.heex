@@ -36,6 +36,9 @@
                         <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
                             <i class="fa fa-edit mr-1"></i>Edit Profile
                         <% end %>
+                        <%= link to: "/auth/discord", class: "text-white" do %>
+                            <i class="fab fa-discord"></i> Connect Discord
+                        <% end %>
                         <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
                             <i class="fa fa-sign-out-alt"></i>
                             <span class="d-none d-md-inline">Log out</span>
@@ -44,7 +47,14 @@
                 <% end %>
                 <div class="card-body p-2 text-center">
                     <img src={"/images/pve/#{@player.pve_tier}.png"} class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}data-toggle="tooltip" title={"#{Moba.pve_tiers[@player.pve_tier]} (#{@player.pve_tier})"}/>
-                    <h2 class="text-white f-rpg"><span class={"name-shadow-#{shadow_rank(@player)}"}><%= username(@player) %></span></h2>
+                    <h2 class="text-white f-rpg">
+                        <span class={"name-shadow-#{shadow_rank(@player)}"}>
+                            <%= if @player.user.discord.id do %>
+                                <img src={@player.user.discord.avatar} class="discord-avatar" data-toggle="tooltip" title={"Discord: #{@player.user.discord.nickname}"}/>
+                            <% end %>
+                            <%= username(@player) %>    
+                        </span>
+                    </h2>
                 </div>
                 <hr/>
                 <div class="row no-gutters py-1">
@@ -146,7 +156,12 @@
                                     <td>
                                         <%= live_redirect to: Routes.player_path(@socket, :show, player.id), title: "#{player.pvp_points} Season Points", data: [toggle: "tooltip"] do %>
                                             <img src={"/images/pve/#{player.pve_tier}.png"} class={"pvp-rank rank-shadow-#{shadow_rank(player)}"} />
-                                            <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}><%= username(player) %></h5>
+                                            <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}>
+                                                <%= if player.user.discord.id do %>
+                                                    <img src={player.user.discord.avatar} class="mini-discord-avatar"/>
+                                                <% end %>
+                                                <%= username(player) %>   
+                                            </h5>
                                         <% end %>
                                     </td>
                                     <td>
@@ -171,7 +186,12 @@
                                     </th>
                                     <th>
                                         <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
-                                        <h5 class="font-weight-bold mb-0 mt-1 text-info"><%= username(@player) %></h5>
+                                        <h5 class="font-weight-bold mb-0 mt-1 text-info">
+                                            <%= if @player.user.discord.id do %>
+                                                <img src={@player.user.discord.avatar} class="mini-discord-avatar"/>
+                                            <% end %>
+                                            <%= username(@player) %>    
+                                        </h5>
                                     </th>
                                     <th>
                                         <h3 class={performance_class(@player)} title={"#{@player.daily_wins} wins / #{@player.daily_matches} matches"} data-toggle="tooltip"><%= daily_win_rate(@player)%></h3>

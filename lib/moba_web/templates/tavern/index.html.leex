@@ -34,7 +34,14 @@
         </div>
     </div>
 
+    <%= if @featured_avatar do %>
+        <div class="row d-flex justify-content-center mt-2">
+            
+        </div>
+    <% end %>
+
     <div class="row <%= unless @active_tab == "avatars", do: "d-none" %> mt-2">
+        <%= if @featured_avatar, do: render "_featured_avatar.html", avatar: @featured_avatar, avatars: @all_avatars, player: @current_player %>
         <%= for avatar <- @avatars do %>
             <%= render "_avatar.html", avatar: avatar, avatars: @all_avatars, player: @current_player %>
         <% end %>

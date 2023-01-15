@@ -16,14 +16,13 @@ defmodule Moba.Admin.Server do
   end
 
   def init(_) do
+    update_cache()
     schedule_update()
-    state = current_state()
-    Cachex.put(:game_cache, "match_stats", state)
-    {:ok, state}
+    {:ok, %{}}
   end
 
   def handle_info(:server_update, state) do
-    update_match_cache()
+    update_cache()
     schedule_update()
     {:noreply, state}
   end
@@ -53,7 +52,7 @@ defmodule Moba.Admin.Server do
 
   defp schedule_update, do: Process.send_after(self(), :server_update, @timeout)
 
-  defp update_match_cache do
+  defp update_cache do
     Utils.run_async(fn ->
       state = current_state()
       Cachex.put(:game_cache, "match_stats", state)

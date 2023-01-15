@@ -1,6 +1,8 @@
 defmodule MobaWeb.TavernLive do
   use MobaWeb, :live_view
 
+  alias MobaWeb.TavernView
+
   def mount(_, _session, socket) do
     {:ok, socket}
   end
@@ -73,12 +75,16 @@ defmodule MobaWeb.TavernLive do
   end
 
   def render(assigns) do
-    MobaWeb.TavernView.render("index.html", assigns)
+    TavernView.render("index.html", assigns)
   end
 
   defp create_unlock!(%{user: user} = player, resource) do
-    user = Accounts.create_unlock!(user, resource)
+    user = Accounts.buy_unlock!(user, resource)
     Map.put(player, :user, user)
+  end
+
+  defp featured_avatar_for(player, avatars) do
+    not TavernView.unlocked?(%{code: "tinker"}, player) && Enum.find(avatars, &(&1.code == "tinker"))
   end
 
   defp index_assigns(params, %{assigns: %{current_player: current_player}} = socket) do
@@ -91,17 +97,19 @@ defmodule MobaWeb.TavernLive do
          current_avatar = Enum.find(all_avatars, &(&1.code == avatar_code)) || List.first(all_avatars),
          current_player = Map.put(current_player, :user, user),
          current_skins = Game.list_avatar_skins(current_avatar.code),
-         current_skin = List.first(current_skins) do
+         current_skin = List.first(current_skins),
+         featured_avatar = featured_avatar_for(current_player, avatars) do
       assign(socket,
         active_tab: active_tab,
         all_avatars: all_avatars,
-        avatars: avatars,
+        avatars: avatars -- [featured_avatar],
         avatar_code: avatar_code,
         current_avatar: current_avatar,
         current_index: 0,
         current_player: current_player,
         current_skins: current_skins,
         current_skin: current_skin,
+        featured_avatar: featured_avatar,
         sidebar_code: "tavern",
         skills: skills
       )

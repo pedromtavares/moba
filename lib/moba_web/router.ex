@@ -58,6 +58,10 @@ defmodule MobaWeb.Router do
   scope "/", MobaWeb do
     pipe_through [:browser, :root_layout, :player_protected]
 
+    get "/auth", AuthController, :start
+    get "/auth/:provider", AuthController, :request
+    get "/auth/:provider/callback", AuthController, :callback
+
     live_session :default, on_mount: MobaWeb.PlayerLiveAuth do
       live "/invoke", CreateLive
 

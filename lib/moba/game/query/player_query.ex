@@ -121,7 +121,7 @@ defmodule Moba.Game.Query.PlayerQuery do
 
   def pleb_opponents(id, pvp_points, limit \\ 5) do
     bottom = pvp_points - 100
-    top = pvp_points + 50
+    top = pvp_points + 200
 
     from(player in pvp_available(),
       where: player.pvp_tier == 0,

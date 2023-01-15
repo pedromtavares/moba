@@ -25,6 +25,8 @@ defmodule Moba.Accounts.Schema.User do
     has_many :unlocks, Accounts.Schema.Unlock
     has_many :players, Game.Schema.Player
 
+    embeds_one :discord, Accounts.Schema.Discord, on_replace: :update
+
     timestamps()
   end
 
@@ -49,6 +51,7 @@ defmodule Moba.Accounts.Schema.User do
       :shard_count,
       :community_seen_at
     ])
+    |> cast_embed(:discord)
     |> validations_and_constraints()
   end
 

@@ -22,6 +22,18 @@ config :moba, MobaWeb.Endpoint,
     signing_salt: "0rCmKQt21BmJfTqBwGVEaIm/AY2dnbry"
   ]
 
+config :ueberauth, Ueberauth,
+  providers: [
+    discord: {Ueberauth.Strategy.Discord, [default_scope: "identify email guilds.join"]}
+  ]
+
+config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
+  client_id: System.get_env("DISCORD_CLIENT_ID"),
+  client_secret: System.get_env("DISCORD_CLIENT_SECRET")
+
+config :nostrum,
+  token: System.get_env("DISCORD_BOT_TOKEN")
+
 config :torch,
   otp_app: :moba,
   template_format: "eex"

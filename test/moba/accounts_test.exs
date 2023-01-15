@@ -25,23 +25,23 @@ defmodule Moba.AccountsTest do
   end
 
   describe "unlocks" do
-    test "#create_unlock! works" do
+    test "#buy_unlock! works" do
       skill = base_skill()
-      user = create_user(%{shard_count: 100}) |> Accounts.create_unlock!(skill)
+      user = create_user(%{shard_count: 100}) |> Accounts.buy_unlock!(skill)
       assert user.shard_count == 0
       assert user.unlocks |> List.first() |> Map.get(:resource_code) == skill.code
     end
 
-    test "#create_unlock! not enough shards", %{user: user} do
+    test "#buy_unlock! not enough shards", %{user: user} do
       skill = base_skill()
-      user = Accounts.create_unlock!(user, skill)
+      user = Accounts.buy_unlock!(user, skill)
       assert user.shard_count == 0
       assert length(user.unlocks) == 0
     end
 
     test "#unlocked_codes_for" do
       skill = base_skill()
-      user = create_user(%{shard_count: 100}) |> Accounts.create_unlock!(skill)
+      user = create_user(%{shard_count: 100}) |> Accounts.buy_unlock!(skill)
 
       assert Accounts.unlocked_codes_for(user) == [skill.code]
     end

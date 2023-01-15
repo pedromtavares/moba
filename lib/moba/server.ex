@@ -4,7 +4,7 @@ defmodule Moba.Server do
   """
   use GenServer
 
-  alias Moba.{Cleaner, Conductor}
+  alias Moba.{Cleaner, Conductor, Utils}
 
   # 30 secs
   @check_timeout 1000 * 30
@@ -19,6 +19,7 @@ defmodule Moba.Server do
 
   def init(state) do
     server_check(state)
+    warm_caches()
     {:ok, state}
   end
 
@@ -52,4 +53,14 @@ defmodule Moba.Server do
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
   defp dev?, do: Application.get_env(:moba, :env) == :dev
+
+  defp warm_caches do
+    Utils.run_async(fn ->
+      Moba.cached_items()
+      Moba.load_resource("tinker")
+      Moba.pve_ranking()
+      Moba.daily_ranking()
+      Moba.season_ranking()
+    end)
+  end
 end

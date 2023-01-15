@@ -40,7 +40,9 @@ defmodule Moba.Accounts do
 
   # UNLOCKS
 
-  defdelegate create_unlock!(user, resource), to: Unlocks
+  defdelegate buy_unlock!(user, resource), to: Unlocks
+
+  defdelegate create_unlock!(user, resource_code), to: Unlocks
 
   defdelegate unlocked_codes_for(user), to: Unlocks
 
