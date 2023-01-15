@@ -18,8 +18,8 @@ defmodule Moba.Server do
   def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
 
   def init(state) do
-    server_check(state)
-    warm_caches()
+    schedule_check()
+    Process.send_after(self(), :warm_caches, 1000)
     {:ok, state}
   end
 
@@ -27,6 +27,20 @@ defmodule Moba.Server do
     with state = server_check(state) do
       {:noreply, state}
     end
+  end
+
+  def handle_info(:warm_caches, state) do
+    unless test?() do
+      Utils.run_async(fn ->
+        Moba.cached_items()
+        Moba.load_resource("tinker")
+        Moba.pve_ranking()
+        Moba.daily_ranking()
+        Moba.season_ranking()
+      end)
+    end
+
+    {:noreply, state}
   end
 
   defp schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
@@ -54,13 +68,5 @@ defmodule Moba.Server do
 
   defp dev?, do: Application.get_env(:moba, :env) == :dev
 
-  defp warm_caches do
-    Utils.run_async(fn ->
-      Moba.cached_items()
-      Moba.load_resource("tinker")
-      Moba.pve_ranking()
-      Moba.daily_ranking()
-      Moba.season_ranking()
-    end)
-  end
+  defp test?, do: Application.get_env(:moba, :env) == :test
 end
