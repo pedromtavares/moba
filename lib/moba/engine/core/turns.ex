@@ -106,10 +106,10 @@ defmodule Moba.Engine.Core.Turns do
         passive_items: hero_passive_items(hero),
         skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
         item_order: codes_to_resources(hero.item_order, items),
-        last_skill: load_resource(battler.last_skill_code),
-        double_skill: load_resource(battler.double_skill_code),
-        delayed_skill: load_resource(battler.delayed_skill_code),
-        permanent_skill: load_resource(battler.permanent_skill_code),
+        last_skill: load_resource(battler.last_skill_code, skills),
+        double_skill: load_resource(battler.double_skill_code, skills),
+        delayed_skill: load_resource(battler.delayed_skill_code, skills),
+        permanent_skill: load_resource(battler.permanent_skill_code, skills),
         buffs: load_buffs(battler.buffs),
         debuffs: load_buffs(battler.debuffs),
         defender_buffs: load_buffs(battler.defender_buffs),
@@ -142,12 +142,17 @@ defmodule Moba.Engine.Core.Turns do
           buff
         end
 
-      Map.put(buff, :resource, load_resource(buff.resource_code))
+      level = Map.get(buff, :level, nil)
+      Map.put(buff, :resource, load_resource(buff.resource_code, level))
     end)
     |> Enum.reject(&(&1.duration <= 0))
   end
 
-  defp load_resource(code), do: Moba.load_resource(code)
+  defp load_resource(code, resources) when is_list(resources) do
+    Enum.find(resources, &(&1.code == code))
+  end
+
+  defp load_resource(code, level), do: Moba.load_resource(code, level)
 
   defp prepare_battlers(battle, last_turn, orders) do
     if last_turn do
@@ -223,7 +228,8 @@ defmodule Moba.Engine.Core.Turns do
 
     Enum.map(buffs, fn buff ->
       if buff.resource do
-        %{buff | resource_code: buff.resource.code, resource: nil}
+        level = Map.get(buff.resource, :level, nil)
+        %{buff | resource_code: buff.resource.code, resource: nil, level: level}
       else
         buff
       end
