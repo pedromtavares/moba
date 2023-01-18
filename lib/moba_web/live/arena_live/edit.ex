@@ -52,7 +52,7 @@ defmodule MobaWeb.ArenaLive.Edit do
     %{current_player: current_player, selected_team: selected_team} = socket.assigns
     hero = Game.get_hero!(id)
 
-    if hero.player_id == current_player.id do
+    if hero.player_id == current_player.id && length(selected_team.pick_ids) < 5 do
       team = Game.update_team!(selected_team, %{pick_ids: selected_team.pick_ids ++ [hero.id]})
       {:noreply, assign(socket, selected_team: team) |> update_teams()}
     else
