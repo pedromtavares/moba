@@ -40,7 +40,7 @@ defmodule MobaWeb.MatchLive do
   def handle_event("pick-team", %{"id" => id}, %{assigns: %{teams: teams}} = socket) do
     team = Enum.find(teams, &(&1.id == String.to_integer(id)))
     Game.update_team!(team, %{used_count: team.used_count + 1})
-    {:noreply, assign(socket, picked_heroes: team.picks)}
+    {:noreply, assign(socket, picked_heroes: Enum.take(team.picks, 5))}
   end
 
   def handle_event("start", _, %{assigns: %{match: match, picked_heroes: picked_heroes}} = socket) do
