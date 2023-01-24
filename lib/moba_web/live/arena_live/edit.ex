@@ -9,6 +9,13 @@ defmodule MobaWeb.ArenaLive.Edit do
     end
   end
 
+  def handle_event("hero-list", params, socket) do
+    with heroes_tab = Map.get(params, "type"),
+         heroes = heroes_for(socket, heroes_tab) do
+      {:noreply, assign(socket, heroes: heroes, heroes_tab: heroes_tab)}
+    end
+  end
+
   def handle_event("toggle-defensive", params, %{assigns: %{selected_team: team}} = socket) do
     with defensive = not is_nil(Map.get(params, "value")),
          team = Game.update_team!(team, %{defensive: defensive}) do
@@ -49,10 +56,10 @@ defmodule MobaWeb.ArenaLive.Edit do
   end
 
   def handle_event("add-hero", %{"id" => id}, socket) do
-    %{current_player: current_player, selected_team: selected_team} = socket.assigns
+    %{selected_team: selected_team} = socket.assigns
     hero = Game.get_hero!(id)
 
-    if hero.player_id == current_player.id && length(selected_team.pick_ids) < 5 do
+    if Game.available_hero?(hero) && length(selected_team.pick_ids) < 5 do
       team = Game.update_team!(selected_team, %{pick_ids: selected_team.pick_ids ++ [hero.id]})
       {:noreply, assign(socket, selected_team: team) |> update_teams()}
     else
@@ -100,6 +107,12 @@ defmodule MobaWeb.ArenaLive.Edit do
     ArenaView.render("edit.html", assigns)
   end
 
+  defp heroes_for(%{assigns: %{current_player: player}}, "trained") do
+    Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking)
+  end
+
+  defp heroes_for(_, _), do: Moba.pve_ranking_available()
+
   defp move(hero_id, slide, socket) do
     %{selected_team: selected_team} = socket.assigns
     index = Enum.find_index(selected_team.pick_ids, &(&1 == hero_id))
@@ -112,13 +125,15 @@ defmodule MobaWeb.ArenaLive.Edit do
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with sidebar_code = "arena",
          match = Game.latest_manual_match(player),
-         trained_heroes = Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking),
+         heroes_tab = "trained",
+         heroes = heroes_for(socket, heroes_tab),
          teams = Game.list_teams(player) do
       assign(socket,
         sidebar_code: sidebar_code,
         hero: nil,
+        heroes_tab: heroes_tab,
         match: match,
-        trained_heroes: trained_heroes,
+        heroes: heroes,
         teams: teams,
         sort: :rank,
         selected_team: List.first(teams)

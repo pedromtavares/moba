@@ -4,13 +4,13 @@
 	    <div class="card-body p-2">
 	    	<%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLive, @battle) do %>		        
 		    	<div class="row">
-		            <div class="col center pr-4">
-		                <%= render "_turn_hero.html", battle: @battle, turn: last_turn, hero: player_pick(@battle, @match) %>
-		            </div>
+		           <div class="col center pr-4">
+		              <%= render "_turn_hero.html", battle: @battle, turn: last_turn, hero: player_pick(@battle, @match), player: @match.player %>
+		           </div>
 			        <hr class="mt-2 mb-1" />
-		            <div class="col center pr-4">
-		                <%= render "_turn_hero.html", battle: @battle, turn: last_turn, hero: opponent_pick(@battle, @match) %>
-		            </div>
+		          <div class="col center pr-4">
+		              <%= render "_turn_hero.html", battle: @battle, turn: last_turn, hero: opponent_pick(@battle, @match), player: @match.opponent %>
+		          </div>
 			    </div>
 		    <% end %>
 	    </div>

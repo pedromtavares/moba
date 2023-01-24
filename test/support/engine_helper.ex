@@ -2,13 +2,19 @@ defmodule Test.EngineHelper do
   alias Moba.{Engine, Game, Repo}
 
   def build_basic_battle(attacker, defender) do
-    %Engine.Schema.Battle{attacker: attacker, defender: defender}
+    %Engine.Schema.Battle{
+      attacker: attacker,
+      defender: defender,
+      defender_player: defender.player,
+      attacker_player: attacker.player
+    }
   end
 
   def create_basic_battle(attacker, defender) do
     build_basic_battle(attacker, defender)
     |> Engine.begin_battle!()
     |> Repo.preload(:winner)
+    |> Repo.preload(:winner_player)
   end
 
   def equip_random_items(hero, items) do

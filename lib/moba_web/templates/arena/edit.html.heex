@@ -60,14 +60,27 @@
         <div class="col">
             <div class="card main-card" id="heroes-container" phx-hook="EqualHeight" phx-target="#teams-container">
                 <div class="d-flex justify-content-around">
-                    <h3 class="text-center">Your Trained Heroes</h3>
-                    <a href="javascript:;" class="h5" phx-click="sort" data-toggle="tooltip" title={"Click to sort by #{if @sort == :recent, do: "Rank", else: "Recent"}"} id="hero-sort"><i class="fa fa-circle-sort mt-1"></i> Sorted by <%= if @sort == :recent, do: "Recent", else: "Rank" %></a>
+                    <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-around">
+                        <li class="nav-item">
+                            <a href="javascript:;" phx-click="hero-list" phx-value-type="trained" data-toggle="tab" class={"nav-link px-2 py-1 #{if @heroes_tab == "trained", do: "active"}"} phx-hook="Loading" id="trained-heroes-button">
+                                <span class="d-inline-block loading-text">Trained Heroes</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="javascript:;" phx-click="hero-list" phx-value-type="available" data-toggle="tab" class={"nav-link px-2 py-1 #{if @heroes_tab == "available", do: "active"}"} phx-hook="Loading" id="available-heroes-button">
+                                <span class="d-inline-block loading-text">Available Heroes</span>
+                            </a>
+                        </li>
+                    </ul>
+                    <%= if @heroes_tab == "trained" do %>
+                        <a href="javascript:;" class="h5 mt-2" phx-click="sort" data-toggle="tooltip" title={"Click to sort by #{if @sort == :recent, do: "Rank", else: "Recent"}"} id="hero-sort"><i class="fa fa-circle-sort mt-1"></i> Sorted by <%= if @sort == :recent, do: "Recent", else: "Rank" %></a>
+                    <% end %>
                 </div>
                 <hr/>
                 <div class="overflow">
                     <div class="row">
-                        <%= for hero <- @trained_heroes do %>
-                            <%= render "_trained_hero.html", hero: hero, selected_team: @selected_team  %>
+                        <%= for hero <- @heroes do %>
+                            <%= render "_hero.html", hero: hero, selected_team: @selected_team  %>
                         <% end %>
                     </div>
                 </div>

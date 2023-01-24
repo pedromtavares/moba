@@ -11,6 +11,7 @@ defmodule Moba.Engine.Schema.Battler do
   @primary_key false
   embedded_schema do
     field :hero_id, :integer
+    field :player_id, :integer
     field :name, :string
     field :code, :string
     field :image, Moba.Image.Type

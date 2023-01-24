@@ -9,6 +9,8 @@ defmodule Moba.Engine.Core.Pve do
     %Battle{
       attacker: attacker,
       defender: defender,
+      attacker_player: attacker.player,
+      defender_player: nil,
       difficulty: difficulty,
       type: Engine.battle_types().pve
     }

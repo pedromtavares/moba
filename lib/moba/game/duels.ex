@@ -88,7 +88,15 @@ defmodule Moba.Game.Duels do
           update!(duel, %{opponent_first_pick_id: hero_id, phase: "player_battle", phase_changed_at: Timex.now()})
 
         defender = Game.get_hero!(hero_id)
-        Engine.create_duel_battle!(%{attacker: duel.player_first_pick, defender: defender, duel_id: duel.id})
+
+        Engine.create_duel_battle!(%{
+          attacker: duel.player_first_pick,
+          attacker_player: duel.player,
+          defender: defender,
+          defender_player: duel.opponent_player,
+          duel_id: duel.id
+        })
+
         updated
 
       "player_battle" ->
@@ -102,7 +110,15 @@ defmodule Moba.Game.Duels do
           update!(duel, %{player_second_pick_id: hero_id, phase: "opponent_battle", phase_changed_at: Timex.now()})
 
         defender = Game.get_hero!(hero_id)
-        Engine.create_duel_battle!(%{attacker: duel.opponent_second_pick, defender: defender, duel_id: duel.id})
+
+        Engine.create_duel_battle!(%{
+          attacker: duel.opponent_second_pick,
+          attacker_player: duel.opponent_player,
+          defender: defender,
+          defender_player: duel.player,
+          duel_id: duel.id
+        })
+
         updated
 
       _ ->

@@ -238,6 +238,44 @@ defmodule Moba.EngineTest do
     end
   end
 
+  describe "same hero battle" do
+    test "attacker wins", %{strong_hero: strong, weak_hero: weak} do
+      match = Game.Matches.create!(%{type: "manual", player_id: strong.player_id, opponent_id: weak.player_id})
+      attacker = Map.put(weak, :initial_hp, 100_000) |> Map.put(:total_hp, 100_000)
+
+      battle =
+        Engine.create_match_battle!(%{
+          attacker: attacker,
+          attacker_player: strong.player,
+          defender: weak,
+          defender_player: weak.player,
+          match: match
+        })
+
+      battle = Engine.auto_finish_battle!(battle)
+
+      assert battle.winner_player_id == strong.player_id
+    end
+
+    test "defender wins", %{strong_hero: strong, weak_hero: weak} do
+      match = Game.Matches.create!(%{type: "manual", player_id: strong.player_id, opponent_id: weak.player_id})
+      attacker = Map.put(weak, :initial_hp, 1)
+
+      battle =
+        Engine.create_match_battle!(%{
+          attacker: attacker,
+          attacker_player: strong.player,
+          defender: weak,
+          defender_player: weak.player,
+          match: match
+        })
+
+      battle = Engine.auto_finish_battle!(battle)
+
+      assert battle.winner_player_id == weak.player_id
+    end
+  end
+
   describe "core" do
     test "#begin_battle!", %{strong_hero: attacker, alternate_hero: defender} do
       battle = build_basic_battle(attacker, %{defender | bot_difficulty: "test"}) |> Engine.begin_battle!()

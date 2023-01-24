@@ -37,8 +37,18 @@ defmodule Moba.Game.Arena do
   def continue_match!(match) do
     latest_battle = Engine.latest_match_battle(match.id)
     last_turn = if latest_battle, do: List.last(latest_battle.turns), else: nil
-    {attacker, defender} = Matches.get_latest_battlers(match, last_turn)
-    battle = Engine.create_match_battle!(%{attacker: attacker, defender: defender, match: match})
+
+    {attacker, attacker_player, defender, defender_player} =
+      Matches.get_latest_battlers(match, latest_battle, last_turn)
+
+    battle =
+      Engine.create_match_battle!(%{
+        attacker: attacker,
+        attacker_player: attacker_player,
+        defender: defender,
+        defender_player: defender_player,
+        match: match
+      })
 
     match
     |> Matches.finish!(battle)
@@ -105,25 +115,26 @@ defmodule Moba.Game.Arena do
   defp create_match!(%{daily_matches: player_matches}, _, _) when player_matches >= @daily_match_limit, do: nil
 
   defp create_match!(%{id: player_id, pvp_tier: pvp_tier}, %{id: opponent_id}, type) do
-    player_generated_picks = Heroes.pvp_bots(pvp_tier) |> Enum.map(& &1.id)
-    opponent_generated_picks = Heroes.pvp_bots(pvp_tier, player_generated_picks) |> Enum.map(& &1.id)
+    bot_ids = Enum.map(Heroes.pvp_bots(), & &1.id)
     player_pick_id = if type == "manual", do: nil, else: player_id
 
     Matches.create!(%{
       player_id: player_id,
       opponent_id: opponent_id,
-      player_picks: match_picks(player_pick_id, player_generated_picks, false),
-      opponent_picks: match_picks(opponent_id, opponent_generated_picks, true),
-      generated_picks: player_generated_picks,
+      player_picks: match_picks(player_pick_id, pvp_tier, bot_ids, false),
+      opponent_picks: match_picks(opponent_id, pvp_tier, bot_ids, true),
+      generated_picks: bot_ids,
       type: type
     })
   end
-  
+
   defp create_match!(_, _, _), do: nil
 
-  defp match_picks(nil, _, _), do: []
+  defp match_picks(nil, _, _, _), do: []
 
-  defp match_picks(player_id, generated_picks, defensive) do
+  # TODO: Test pleb picks
+
+  defp match_picks(player_id, 0, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
 
     pick_ids =
@@ -136,8 +147,31 @@ defmodule Moba.Game.Arena do
     diff = 5 - length(pick_ids)
 
     if diff > 0 do
-      generated_ids = Enum.shuffle(generated_picks) |> Enum.take(diff)
+      generated_ids = Enum.shuffle(bot_ids) |> Enum.take(diff)
       pick_ids ++ generated_ids
+    else
+      pick_ids
+    end
+  end
+
+  defp match_picks(player_id, _, _, defensive) do
+    team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
+
+    pick_ids =
+      if team do
+        team.pick_ids
+      else
+        Heroes.trained_pvp_heroes(player_id)
+        |> Enum.filter(&(&1.league_tier == Moba.max_league_tier()))
+        |> Enum.map(& &1.id)
+      end
+
+    diff = 5 - length(pick_ids)
+
+    if diff > 0 do
+      top_available = Moba.pve_ranking_available() |> Enum.reject(&Enum.member?(pick_ids, &1.id))
+      available_ids = Enum.shuffle(top_available) |> Enum.take(diff) |> Enum.map(& &1.id)
+      pick_ids ++ available_ids
     else
       pick_ids
     end

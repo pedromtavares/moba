@@ -10,26 +10,25 @@ defmodule Moba.Engine.Core.Match do
     attacker_initial_hp = Map.get(attacker, :initial_hp)
     attacker_initial_mp = Map.get(attacker, :initial_mp)
 
-    if valid?(attrs) do
-      battle_for(attrs)
-      |> Engine.begin_battle!(%{attacker_initial_hp: attacker_initial_hp, attacker_initial_mp: attacker_initial_mp})
-    else
-      {:error, "Invalid target"}
-    end
+    Engine.begin_battle!(battle_for(attrs), %{
+      attacker_initial_hp: attacker_initial_hp,
+      attacker_initial_mp: attacker_initial_mp
+    })
   end
-
-  def valid?(%{attacker: %{id: attacker_id}, defender: %{id: defender_id}}) when attacker_id == defender_id, do: false
-  def valid?(_), do: true
 
   def finalize_battle(battle) do
     battle
     |> generate_snapshots()
   end
 
-  defp battle_for(%{attacker: attacker, defender: defender, match: match}) do
+  defp battle_for(battle) do
+    %{attacker: attacker, attacker_player: aplayer, defender: defender, defender_player: dplayer, match: match} = battle
+
     %Battle{
       attacker: attacker,
       defender: defender,
+      attacker_player: aplayer,
+      defender_player: dplayer,
       match_id: match.id,
       type: Engine.battle_types().match,
       match: match

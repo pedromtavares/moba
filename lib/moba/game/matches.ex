@@ -30,26 +30,30 @@ defmodule Moba.Game.Matches do
     end
   end
 
-  def get_latest_battlers(%{player_picks: player_picks, opponent_picks: opponent_picks}, nil) do
-    {List.first(player_picks), List.first(opponent_picks)}
+  def get_latest_battlers(match, _, nil) do
+    %{player: player, player_picks: player_picks, opponent: opponent, opponent_picks: opponent_picks} = match
+    {List.first(player_picks), player, List.first(opponent_picks), opponent}
   end
 
-  def get_latest_battlers(%{player_picks: player_picks, opponent_picks: opponent_picks}, last_turn) do
+  def get_latest_battlers(match, battle, last_turn) do
+    %{player: player, player_picks: player_picks, opponent: opponent, opponent_picks: opponent_picks} = match
+    %{winner_player: winner_player} = battle
+
     winner = if last_turn.attacker.current_hp > 0, do: last_turn.attacker, else: last_turn.defender
     loser = if winner == last_turn.attacker, do: last_turn.defender, else: last_turn.attacker
 
-    winner_is_player_pick = Enum.find(player_picks, &(&1.id == winner.hero_id))
+    winner_is_player_pick = winner_player.id == player.id && Enum.find(player_picks, &(&1.id == winner.hero_id))
 
-    {attacker_pick, defender_pick} =
+    {attacker_pick, attacker_player, defender_pick, defender_player} =
       if winner_is_player_pick do
         opponent_loser_index = Enum.find_index(opponent_picks, &(&1.id == loser.hero_id)) || 0
 
-        {winner_is_player_pick, Enum.at(opponent_picks, opponent_loser_index + 1)}
+        {winner_is_player_pick, player, Enum.at(opponent_picks, opponent_loser_index + 1), opponent}
       else
         winner_is_opponent_pick = Enum.find(opponent_picks, &(&1.id == winner.hero_id))
         player_loser_index = Enum.find_index(player_picks, &(&1.id == loser.hero_id)) || 0
 
-        {winner_is_opponent_pick, Enum.at(player_picks, player_loser_index + 1)}
+        {winner_is_opponent_pick, opponent, Enum.at(player_picks, player_loser_index + 1), player}
       end
 
     attacker_pick =
@@ -57,7 +61,7 @@ defmodule Moba.Game.Matches do
       |> Map.put(:initial_hp, winner.current_hp + winner.total_hp * 0.2)
       |> Map.put(:initial_mp, winner.current_mp + winner.total_mp * 0.2)
 
-    {attacker_pick, defender_pick}
+    {attacker_pick, attacker_player, defender_pick, defender_player}
   end
 
   def get_match!(id), do: load() |> Repo.get!(id) |> load_picks()
@@ -86,13 +90,15 @@ defmodule Moba.Game.Matches do
   defp hero_loser?(%{id: pid}, %{attacker_id: aid, defender_id: did}) when pid != aid and pid != did, do: false
   defp hero_loser?(_, _), do: true
 
-  defp last_winner(%{player_picks: player_picks, opponent_picks: opponent_picks} = match, latest_battle) do
+  defp last_winner(match, latest_battle) do
+    %{player_picks: player_picks, player: player, opponent: opponent, opponent_picks: opponent_picks} = match
+    %{winner_player: winner_player} = latest_battle
     last_player_pick = List.last(player_picks)
     last_opponent_pick = List.last(opponent_picks)
 
     cond do
-      hero_loser?(last_player_pick, latest_battle) -> match.opponent
-      hero_loser?(last_opponent_pick, latest_battle) -> match.player
+      hero_loser?(last_player_pick, latest_battle) && winner_player.id == opponent.id -> match.opponent
+      hero_loser?(last_opponent_pick, latest_battle) && winner_player.id == player.id -> match.player
       true -> false
     end
   end

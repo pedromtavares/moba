@@ -62,19 +62,6 @@ defmodule MobaWeb.ArenaView do
   def match_type(%{type: "auto"}), do: content_tag(:span, "A", data: [toggle: "tooltip"], title: "Auto Match")
   def match_type(%{type: "manual"}), do: content_tag(:span, "M", data: [toggle: "tooltip"], title: "Manual Match")
 
-  def next_pvp_tier_percentage(%{pvp_tier: current_tier, pvp_points: pvp_points}) do
-    current = Game.pvp_points_for(current_tier)
-    max = Game.pvp_points_for(current_tier + 1)
-    (pvp_points - current) * 100 / (max - current)
-  end
-
-  def next_pvp_tier(%{pvp_tier: current_tier}) do
-    cond do
-      current_tier >= Moba.max_pvp_tier() -> nil
-      true -> current_tier + 1
-    end
-  end
-
   def opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
   def opponent_for(duel, _), do: duel.player
 

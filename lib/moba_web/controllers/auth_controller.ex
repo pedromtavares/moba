@@ -23,27 +23,23 @@ defmodule MobaWeb.AuthController do
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
     user = conn.assigns.current_player.user
 
-    Accounts.update_user!(user, %{discord: basic_info(auth)})
+    Accounts.update_user!(user, %{
+      discord: %{id: auth.uid, nickname: auth.info.nickname, avatar: auth.info.image, token: auth.credentials.token}
+    })
+
     Accounts.create_unlock!(user, "tinker")
     origin = get_session(conn, :origin)
 
-    resp =
-      Nostrum.Api.add_guild_member(
-        @discord_guild_id,
-        String.to_integer(auth.uid),
-        access_token: auth.credentials.token,
-        nick: user.username
-      )
-
-    IO.inspect(resp)
+    Nostrum.Api.add_guild_member(
+      @discord_guild_id,
+      String.to_integer(auth.uid),
+      access_token: auth.credentials.token,
+      nick: user.username
+    )
 
     conn
     |> put_session(:origin, nil)
     |> redirect(to: origin || origin_for(conn, nil))
-  end
-
-  defp basic_info(auth) do
-    %{id: auth.uid, nickname: auth.info.nickname, avatar: auth.info.image, token: auth.credentials.token}
   end
 
   defp origin_for(conn, param) do

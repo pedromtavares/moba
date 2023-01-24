@@ -9,8 +9,23 @@ defmodule Moba.Game.Heroes do
 
   # -------------------------------- PUBLIC API
 
+  def available_hero?(hero) do
+    ago = Timex.shift(Timex.now(), days: -Moba.available_hero_days()) |> Timex.to_datetime()
+
+    DateTime.compare(hero.finished_at, ago) == :lt
+  end
+
   def available_pvp_heroes(player, excluded_hero_ids \\ []) do
-    trained_pvp_heroes(player.id, excluded_hero_ids, 21) ++ pvp_bots(player.pvp_tier, [], 3)
+    trained_pvp_heroes(player.id, excluded_hero_ids, 21) ++ pvp_bots(3)
+  end
+
+  def available_top_heroes do
+    HeroQuery.load()
+    |> HeroQuery.pve_ranked()
+    |> HeroQuery.finished_before()
+    |> HeroQuery.with_max_league_tier()
+    |> HeroQuery.limit_by(100)
+    |> Repo.all()
   end
 
   def buyback!(%{pve_state: "dead"} = hero) do
@@ -196,16 +211,8 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def pvp_bots(pvp_tier, exclude_ids \\ [], limit \\ 5) do
-    {difficulty, league_tier} =
-      case pvp_tier do
-        0 -> {"strong", 4}
-        1 -> {"pvp_master", 5}
-        2 -> {"pvp_grandmaster", 6}
-      end
-
-    HeroQuery.pvp_bots(difficulty, league_tier)
-    |> HeroQuery.exclude_ids(exclude_ids)
+  def pvp_bots(limit \\ 5) do
+    HeroQuery.pvp_bots("pvp_grandmaster", Moba.max_league_tier())
     |> HeroQuery.limit_by(limit)
     |> Repo.all()
   end

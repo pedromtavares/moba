@@ -81,22 +81,28 @@ defmodule Moba.Engine.Core do
   # Uses the attacker's speed to calculate if they will initiate the battle. 1 speed = 1% chance
   defp determine_initiator(%{attacker: attacker, defender: defender} = battle) do
     roll = if attacker.pve_tier > 0, do: attacker.speed + attacker.item_speed, else: 100
-    initiator = if roll >= Enum.random(1..100), do: attacker, else: defender
 
-    %{battle | initiator: initiator}
+    {initiator, initiator_player} =
+      if roll >= Enum.random(1..100) do
+        {attacker, battle.attacker_player}
+      else
+        {defender, battle.defender_player}
+      end
+
+    %{battle | initiator: initiator, initiator_player: initiator_player}
   end
 
   defp determine_winner(%{battle: battle, attacker: attacker, defender: defender} = turn) do
     battle =
       cond do
         Helper.dead?(attacker) ->
-          %{battle | winner: opponent(battle, attacker.hero_id)}
+          %{battle | winner: opponent(battle, attacker.hero_id), winner_player: player_for(defender.player_id, battle)}
 
         Helper.dead?(defender) ->
-          %{battle | winner: opponent(battle, defender.hero_id)}
+          %{battle | winner: opponent(battle, defender.hero_id), winner_player: player_for(attacker.player_id, battle)}
 
         true ->
-          %{battle | winner: battle.defender}
+          %{battle | winner: battle.defender, winner_player: battle.defender_player}
       end
 
     %{battle | turns: battle.turns ++ [turn]}
@@ -136,6 +142,9 @@ defmodule Moba.Engine.Core do
       battle
     end
   end
+
+  defp player_for(player_id, %{attacker_player_id: apid} = battle) when player_id == apid, do: battle.attacker_player
+  defp player_for(_, battle), do: battle.defender_player
 
   defp skip_bot_turn?(%{type: "duel"}, _), do: false
 

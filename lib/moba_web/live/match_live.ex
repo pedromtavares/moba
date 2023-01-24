@@ -89,6 +89,14 @@ defmodule MobaWeb.MatchLive do
     MatchView.render("show.html", assigns)
   end
 
+  defp available_heroes(match, %{pvp_tier: 0}, _) do
+    match.generated_picks
+  end
+
+  defp available_heroes(_, _, trained_heroes) do
+    Moba.pve_ranking_available() |> Enum.reject(&Enum.member?(trained_heroes, &1)) |> Enum.take(10)
+  end
+
   defp schedule_tick, do: Process.send_after(self(), :tick, @tick_timeout)
 
   defp socket_init(match_id, tick, socket) do
@@ -99,7 +107,8 @@ defmodule MobaWeb.MatchLive do
          battles = Engine.list_match_battles(match_id),
          teams = Game.list_teams(player),
          hero_tab = if(length(teams) > 0, do: "teams", else: "trained"),
-         trained_heroes = Game.trained_pvp_heroes(player.id, [], 20) do
+         trained_heroes = Game.trained_pvp_heroes(player.id, [], 20),
+         generated_heroes = available_heroes(match, player, trained_heroes) do
       assign(socket,
         channel: channel,
         match: match,
@@ -107,7 +116,7 @@ defmodule MobaWeb.MatchLive do
         tick: tick,
         trained_heroes: trained_heroes,
         picked_heroes: match.player_picks,
-        generated_heroes: match.generated_picks,
+        generated_heroes: generated_heroes,
         tutorial_step: player.tutorial_step,
         hero_tab: hero_tab,
         latest_match: latest_match,

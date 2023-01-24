@@ -30,7 +30,7 @@
                         <div class='btn btn-lg btn-outline-<%= if @battle.initiator_id == @battle.attacker_id, do: "danger", else: "primary" %> width-lg' phx-hook="Scroll" id="battle-initiated">Battle initiated by <%= @battle.initiator.name %></div>
                     </div>
                     <%= for turn <- @battle.turns do %>
-                        <%= render "_turn.html", turn: turn, is_attacker: turn.attacker.hero_id == @battle.attacker_id, debug: @debug %>
+                        <%= render "_turn.html", turn: turn, is_attacker: turn.attacker.player_id == @battle.attacker_player_id, debug: @debug %>
                     <% end %>
                     <div class="clearfix"></div>
                     <%= if @battle.finished do %>
@@ -80,7 +80,7 @@
 <div id="battle-bar">
     <div class="container-fluid">
         <div class="row">
-            <%= render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.attacker, turn_hero: if @turn.attacker.hero_id == @battle.attacker_id, do: @turn.attacker, else: @turn.defender %>
+            <%= render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.attacker, turn_hero: if @turn.attacker.player_id == @battle.attacker_player_id, do: @turn.attacker, else: @turn.defender %>
             <div class="col-12 col-xl-8 battle-border-left battle-border-right">
                 <%= if @battle.finished do %>
                     <%= render_rewards(@battle, assigns) %>
@@ -88,7 +88,7 @@
                     <%= render "_active_battle.html", assigns %>
                 <% end %>
             </div>
-            <%= render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.defender, turn_hero: if @turn.attacker.hero_id == @battle.attacker_id, do: @turn.defender, else: @turn.attacker %>
+            <%= render "_turn_hero.html", battle: @battle, turn: @turn, hero: @battle.defender, turn_hero: if @turn.attacker.player_id == @battle.attacker_player_id, do: @turn.defender, else: @turn.attacker %>
         </div>
     </div>
 </div>
