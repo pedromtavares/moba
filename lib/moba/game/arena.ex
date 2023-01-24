@@ -132,14 +132,12 @@ defmodule Moba.Game.Arena do
 
   defp match_picks(nil, _, _, _), do: []
 
-  # TODO: Test pleb picks
-
   defp match_picks(player_id, 0, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
 
     pick_ids =
       if team do
-        team.pick_ids
+        Enum.take(team.pick_ids, 5)
       else
         Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
       end
@@ -159,7 +157,7 @@ defmodule Moba.Game.Arena do
 
     pick_ids =
       if team do
-        team.pick_ids
+        Enum.take(team.pick_ids, 5)
       else
         Heroes.trained_pvp_heroes(player_id)
         |> Enum.filter(&(&1.league_tier == Moba.max_league_tier()))
