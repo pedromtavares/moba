@@ -44,7 +44,7 @@ defmodule MobaWeb.MatchLive do
   end
 
   def handle_event("start", _, %{assigns: %{match: match, picked_heroes: picked_heroes}} = socket) do
-    ids = Enum.map(picked_heroes, & &1.id)
+    ids = picked_heroes |> Enum.take(5) |> Enum.map(& &1.id)
     Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.continue_match!(match, ids) end)
     schedule_tick()
 
