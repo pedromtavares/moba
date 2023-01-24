@@ -14,6 +14,8 @@ defmodule Moba.Engine.Core.League do
     %Battle{
       attacker: attacker,
       defender: defender,
+      attacker_player: attacker.player,
+      defender_player: nil,
       type: Engine.battle_types().league
     }
     |> Engine.begin_battle!()

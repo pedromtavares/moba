@@ -20,11 +20,19 @@ defmodule Moba.Engine.Core.Duel do
     generate_snapshots(battle)
   end
 
-  defp battle_for(%{attacker: attacker, defender: defender, duel_id: duel_id}) do
+  defp battle_for(%{
+         attacker: attacker,
+         attacker_player: aplayer,
+         defender: defender,
+         defender_player: dplayer,
+         duel_id: duel_id
+       }) do
     %Battle{
       attacker: attacker,
       defender: defender,
       duel_id: duel_id,
+      attacker_player: aplayer,
+      defender_player: dplayer,
       type: Engine.battle_types().duel,
       duel: Game.get_duel!(duel_id)
     }

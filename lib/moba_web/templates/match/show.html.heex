@@ -89,8 +89,8 @@
 				</div>
 			<% end %>
 			<div class="row mt-1">
-				<%= for {battle, index} <- Enum.with_index(@battles, 1) |> Enum.take(@tick) do %>
-					<%= render "_battle_review.html", battle: battle, index: index, socket: @socket, match: @match %>
+				<%= for battle <- Enum.take(@battles, @tick) do %>
+					<%= render "_battle_review.html", battle: battle, socket: @socket, match: @match %>
 				<% end %>
 			</div>
 		</div>

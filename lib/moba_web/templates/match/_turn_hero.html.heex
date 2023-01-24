@@ -1,4 +1,4 @@
-<% turn_hero = if @turn.attacker.hero_id == @hero.id, do: @turn.attacker, else: @turn.defender %>
+<% turn_hero = if @turn.attacker.player_id == @player.id, do: @turn.attacker, else: @turn.defender %>
 <div class="row mt-1">
     <div class="col-4">
         <img src={GH.image_url(@hero.avatar)} class="avatar"/>

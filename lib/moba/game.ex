@@ -66,7 +66,11 @@ defmodule Moba.Game do
 
   defdelegate archive_hero!(hero), to: Training
 
+  defdelegate available_hero?(hero), to: Heroes
+
   defdelegate available_pvp_heroes(player, excluded_hero_ids), to: Heroes
+
+  defdelegate available_top_heroes, to: Heroes
 
   defdelegate broadcast_to_hero(hero_id), to: Training
 
@@ -207,8 +211,6 @@ defmodule Moba.Game do
   defdelegate get_player!(id), to: Players
 
   defdelegate get_player_from_user!(user_id), to: Players
-
-  defdelegate pvp_points_for(tier), to: Players
 
   defdelegate season_ranking(limit), to: Players
 

@@ -118,6 +118,11 @@ defmodule Moba.Game.Query.HeroQuery do
       where: hero.league_tier == ^league_tier
   end
 
+  def with_max_league_tier(query) do
+    from hero in query,
+      where: hero.league_tier == ^Moba.max_league_tier()
+  end
+
   def by_codes(query, codes) do
     from hero in query,
       join: avatar in Avatar,
@@ -195,6 +200,11 @@ defmodule Moba.Game.Query.HeroQuery do
 
   def order_by_pvp(query) do
     from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm]]
+  end
+
+  def finished_before(query \\ non_bots(), days_ago \\ Moba.available_hero_days()) do
+    ago = Timex.now() |> Timex.shift(days: -days_ago)
+    from hero in query, where: hero.finished_at <= ^ago
   end
 
   def finished_recently(query \\ non_bots(), hours_ago \\ 1) do

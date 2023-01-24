@@ -5,13 +5,19 @@ defmodule Moba.Engine.Schema.Battle do
   use Ecto.Schema
   import Ecto.Changeset
   alias Moba.{Engine, Game}
-  alias Game.Schema.{Duel, Hero, Match}
+  alias Game.Schema.{Duel, Hero, Match, Player}
 
   schema "battles" do
     belongs_to :attacker, Hero
     belongs_to :defender, Hero
     belongs_to :winner, Hero
     belongs_to :initiator, Hero
+
+    belongs_to :attacker_player, Player
+    belongs_to :defender_player, Player
+    belongs_to :winner_player, Player
+    belongs_to :initiator_player, Player
+
     belongs_to :duel, Duel
     belongs_to :match, Match
 
@@ -28,8 +34,9 @@ defmodule Moba.Engine.Schema.Battle do
     timestamps()
   end
 
-  def changeset(%{winner: winner, initiator: initiator} = battle, attrs) do
+  def changeset(%{winner: winner, initiator: initiator, winner_player: winner_player} = battle, attrs) do
     winner_id = winner && winner.id
+    winner_player_id = winner_player && winner_player.id
     initiator_id = initiator && initiator.id
 
     battle
@@ -37,6 +44,6 @@ defmodule Moba.Engine.Schema.Battle do
     |> cast_embed(:rewards)
     |> cast_embed(:attacker_snapshot)
     |> cast_embed(:defender_snapshot)
-    |> change(%{winner_id: winner_id, initiator_id: initiator_id})
+    |> change(%{winner_id: winner_id, initiator_id: initiator_id, winner_player_id: winner_player_id})
   end
 end

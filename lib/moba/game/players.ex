@@ -59,30 +59,6 @@ defmodule Moba.Game.Players do
     PlayerQuery.matchmaking_opponents(id, tier) |> Repo.all() |> List.first()
   end
 
-  def pvp_points_for(tier) do
-    case tier do
-      1 -> 30
-      2 -> 60
-      3 -> 100
-      4 -> 130
-      5 -> 160
-      6 -> 200
-      7 -> 230
-      8 -> 260
-      9 -> 300
-      10 -> 330
-      11 -> 360
-      12 -> 400
-      13 -> 430
-      14 -> 460
-      15 -> 500
-      16 -> 600
-      17 -> 750
-      18 -> 1000
-      _ -> 0
-    end
-  end
-
   @doc """
   Lists Players by their ranking
   """

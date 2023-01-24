@@ -1,7 +1,6 @@
 defmodule Moba.Engine.Core.Turns do
   alias Moba.{Engine, Repo}
   alias Engine.Schema.{Battler, Turn}
-  alias Engine.Core
 
   def build_turn(battle, orders) do
     last_turn = List.last(battle.turns)
@@ -117,6 +116,11 @@ defmodule Moba.Engine.Core.Turns do
     }
   end
 
+  defp hero_from_battler(battle, %{player_id: player_id}) when not is_nil(player_id) do
+    hero = if battle.attacker_player_id == player_id, do: battle.attacker, else: battle.defender
+    preload_hero(hero)
+  end
+
   defp hero_from_battler(battle, %{hero_id: hero_id}) do
     hero = if battle.attacker_id == hero_id, do: battle.attacker, else: battle.defender
     preload_hero(hero)
@@ -158,21 +162,31 @@ defmodule Moba.Engine.Core.Turns do
     if last_turn do
       {flush_attacker(battle, last_turn), flush_defender(battle, last_turn)}
     else
-      {prepare_battler(battle.initiator, battle, orders),
-       prepare_battler(Core.opponent(battle, battle.initiator_id), battle, orders)}
+      {attacker, attacker_player} = {battle.initiator, battle.initiator_player}
+
+      {defender, defender_player} =
+        if battle.initiator_player_id == battle.attacker_player_id do
+          {battle.defender, battle.defender_player}
+        else
+          {battle.attacker, battle.attacker_player}
+        end
+
+      {prepare_battler(attacker, attacker_player, battle, orders),
+       prepare_battler(defender, defender_player, battle, orders)}
     end
   end
 
   defp preload_hero(hero), do: Repo.preload(hero, [:avatar, :items, :skills])
 
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
-  defp prepare_battler(hero, battle, orders) do
+  defp prepare_battler(hero, player, battle, orders) do
     %{skills: skills, items: items, avatar: avatar} = hero = preload_hero(hero)
-    initial_hp = prepare_stat(hero, battle, orders, :attacker_initial_hp)
-    initial_mp = prepare_stat(hero, battle, orders, :attacker_initial_mp)
+    initial_hp = prepare_stat(player, battle, orders, :attacker_initial_hp)
+    initial_mp = prepare_stat(player, battle, orders, :attacker_initial_mp)
 
     %Battler{
       hero_id: hero.id,
+      player_id: player && player.id,
       name: hero.name,
       code: avatar.code,
       image: avatar.image,
@@ -199,10 +213,11 @@ defmodule Moba.Engine.Core.Turns do
     }
   end
 
-  defp prepare_stat(hero, battle, orders, stat) do
+  defp prepare_stat(player, battle, orders, stat) do
     hero_stat = Map.get(orders, stat)
+    player_id = player && Map.get(player, :id, nil)
 
-    if hero.id == battle.attacker_id && hero_stat do
+    if player_id && player_id == battle.attacker_player_id && hero_stat do
       hero_stat
     else
       nil

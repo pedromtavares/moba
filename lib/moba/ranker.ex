@@ -43,6 +43,7 @@ defmodule Moba.Ranker do
     Game.update_season_ranking!()
     Cachex.put(:game_cache, "daily_ranking", Game.daily_ranking(Moba.daily_ranking_limit()))
     Cachex.put(:game_cache, "season_ranking", Game.season_ranking(Moba.season_ranking_limit()))
+    Cachex.put(:game_cache, "pve_ranking_available", Game.available_top_heroes())
     MobaWeb.broadcast("player-ranking", "ranking", %{})
     0
   end

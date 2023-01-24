@@ -27,7 +27,9 @@
         <div class="d-flex justify-content-between" style="background: #323b44 !important">
             <button class="btn btn-sm btn-block btn-secondary m-0 mr-1" phx-click="move-up" phx-value-id={@hero.id} phx-hook="Loading" loading="Moving..." id={"move-up-#{@hero.id}"}><span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span></button>
             <button class="btn btn-sm btn-block btn-secondary m-0 mx-1" phx-click="move-down" phx-value-id={@hero.id} phx-hook="Loading" loading="Moving..." id={"move-down-#{@hero.id}"}><span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span></button>
-            <button class="btn btn-sm btn-block btn-warning m-0 mr-1" phx-click="edit-hero" phx-value-id={@hero.id} phx-hook="Loading" id={"edit-hero-#{@hero.id}"}><span class="loading-text"><i class="fa fa-edit"></i> Edit</span></button>
+            <%= if @selected_team.player_id == @hero.player_id do %>
+                <button class="btn btn-sm btn-block btn-warning m-0 mr-1" phx-click="edit-hero" phx-value-id={@hero.id} phx-hook="Loading" id={"edit-hero-#{@hero.id}"}><span class="loading-text"><i class="fa fa-edit"></i> Edit</span></button>
+            <% end %>
             <button class="btn btn-sm btn-block btn-danger m-0 ml-1" phx-click="remove-hero" phx-value-id={@hero.id} phx-hook="Loading" loading="Removing..." id={"remove-hero-#{@hero.id}"}><span class="loading-text"><i class="fa fa-times"></i> Remove</span></button>
         </div>
     </div>

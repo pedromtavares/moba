@@ -108,6 +108,10 @@ defmodule Moba.Engine.Battles do
     |> preload([
       :initiator,
       :winner,
+      :winner_player,
+      :attacker_player,
+      :defender_player,
+      :initiator_player,
       duel: [player: :user, opponent_player: :user],
       match: [:player],
       turns: ^ordered_turns_query(),
