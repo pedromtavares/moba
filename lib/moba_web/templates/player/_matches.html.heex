@@ -14,7 +14,7 @@
                         </td>
                         
                         <td  class="text-center" width="33%">
-                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.MatchLive, match), class: "btn btn-light btn-sm" do %>
+                            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.MatchLive, match), class: "btn btn-light btn-sm", data: [toggle: "tooltip"], title: String.capitalize(match.type) do %>
                                 <i class="fa fa-eye"></i>
                             <% end %>
                         </td>

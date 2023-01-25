@@ -133,17 +133,6 @@ defmodule Moba.Game.Query.PlayerQuery do
     |> limit_by(limit)
   end
 
-  def auto_matchmaking do
-    ago = Timex.now() |> Timex.shift(hours: -48)
-
-    from player in pvp_available(),
-      join: user in assoc(player, :user),
-      where:
-        is_nil(player.preferences["auto_matchmaking"]) or
-          player.preferences["auto_matchmaking"] == ^true or
-          user.last_online_at < ^ago
-  end
-
   def currently_active(query \\ Player, hours_ago \\ 24) do
     ago = Timex.now() |> Timex.shift(hours: -hours_ago)
 
