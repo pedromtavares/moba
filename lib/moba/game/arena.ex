@@ -162,13 +162,14 @@ defmodule Moba.Game.Arena do
         trained = Heroes.trained_pvp_heroes(player_id)
         first = List.first(trained)
         others = trained -- [first]
+        first_id = if first, do: first.id, else: nil
 
         grandmasters =
           others
           |> Enum.filter(&(&1.league_tier == Moba.max_league_tier()))
           |> Enum.map(& &1.id)
 
-        grandmasters ++ [first.id]
+        if first_id, do: grandmasters ++ [first_id], else: grandmasters
       end
 
     diff = 5 - length(pick_ids)
