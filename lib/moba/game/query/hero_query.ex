@@ -199,7 +199,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def order_by_pvp(query) do
-    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm, hero.pve_ranking]]
+    from hero in query, order_by: [desc: [hero.total_gold_farm + hero.total_xp_farm], asc: hero.pve_ranking]
   end
 
   def finished_before(query \\ non_bots(), days_ago \\ Moba.available_hero_days()) do
