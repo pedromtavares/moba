@@ -19,7 +19,6 @@ defmodule Moba.Server do
 
   def init(state) do
     schedule_check()
-    Process.send_after(self(), :warm_caches, 1000)
     {:ok, state}
   end
 
@@ -53,6 +52,7 @@ defmodule Moba.Server do
       if time_diff_in_seconds(season.last_server_update_at) >= @tick_diff_in_seconds do
         Conductor.season_tick!()
         Cleaner.cleanup_old_records()
+        Process.send_after(self(), :warm_caches, 1000)
       end
 
       if time_diff_in_seconds(season.last_pvp_update_at) >= @pvp_update_diff_in_seconds do
