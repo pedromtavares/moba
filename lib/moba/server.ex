@@ -19,6 +19,7 @@ defmodule Moba.Server do
 
   def init(state) do
     schedule_check()
+    Process.send_after(self(), :warm_caches, 1000)
     {:ok, state}
   end
 
