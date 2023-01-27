@@ -6,7 +6,7 @@
 			</div>
 			<div class="row mt-2">
 				<%= for hero <- @picked_heroes do %>
-					<%= render "_picked_hero.html", hero: hero, player_id: @match.player_id, editable: true %>
+					<%= render "_picked_hero.html", hero: hero, player_id: @match.player_id, editable: is_nil(@match.winner) %>
 				<% end %>
 			</div>
 		</div>
