@@ -14,7 +14,10 @@ defmodule MobaWeb.DashboardView do
   end
 
   def can_delete?(hero) do
-    hero.league_tier < Moba.max_league_tier() || is_nil(hero.finished_at) || not Game.available_hero?(hero)
+    is_nil(hero.pve_ranking) ||
+      hero.league_tier < Moba.max_league_tier() ||
+      is_nil(hero.finished_at) ||
+      not Game.available_hero?(hero)
   end
 
   def farming_per_turn(pve_tier) do
