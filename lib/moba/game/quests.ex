@@ -120,14 +120,19 @@ defmodule Moba.Game.Quests do
   defp maybe_complete(%{history: history} = progression, %{pve_tier: tier, status: current_status, user_id: user_id}) do
     next_tier = tier + 1
     quest = Map.get(@all, next_tier)
-    quest_codes = Map.get(progression, quest.field)
     progression_map = Map.from_struct(progression)
 
-    if length(quest_codes) >= quest.goal do
-      history = Map.put(history, next_tier, Timex.now() |> Timex.shift(seconds: +1))
-      progression = Map.put(progression_map, :history, history)
-      status = if next_tier == 1 && user_id, do: "available", else: current_status
-      %{pve_progression: progression, pve_tier: next_tier, status: status, shard_prize: quest.prize}
+    if quest do
+      quest_codes = Map.get(progression, quest.field)
+
+      if length(quest_codes) >= quest.goal do
+        history = Map.put(history, next_tier, Timex.now() |> Timex.shift(seconds: +1))
+        progression = Map.put(progression_map, :history, history)
+        status = if next_tier == 1 && user_id, do: "available", else: current_status
+        %{pve_progression: progression, pve_tier: next_tier, status: status, shard_prize: quest.prize}
+      else
+        %{pve_progression: progression_map}
+      end
     else
       %{pve_progression: progression_map}
     end
