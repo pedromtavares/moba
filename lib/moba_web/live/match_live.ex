@@ -43,6 +43,16 @@ defmodule MobaWeb.MatchLive do
     {:noreply, assign(socket, picked_heroes: Enum.take(team.picks, 5))}
   end
 
+  def handle_event("move-up", %{"id" => id}, socket) do
+    hero_id = String.to_integer(id)
+    {:noreply, move(hero_id, -1, socket)}
+  end
+
+  def handle_event("move-down", %{"id" => id}, socket) do
+    hero_id = String.to_integer(id)
+    {:noreply, move(hero_id, +1, socket)}
+  end
+
   def handle_event("start", _, %{assigns: %{match: match, picked_heroes: picked_heroes}} = socket) do
     ids = picked_heroes |> Enum.take(5) |> Enum.map(& &1.id)
     Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.continue_match!(match, ids) end)
@@ -95,6 +105,14 @@ defmodule MobaWeb.MatchLive do
 
   defp available_heroes(_, _, trained_heroes) do
     Moba.pve_ranking_available() |> Enum.reject(&Enum.member?(trained_heroes, &1)) |> Enum.take(10)
+  end
+
+  defp move(hero_id, slide, socket) do
+    %{picked_heroes: picked_heroes} = socket.assigns
+    index = Enum.find_index(picked_heroes, &(&1.id == hero_id))
+    moved_picks = Enum.slide(picked_heroes, index, index + slide)
+
+    assign(socket, picked_heroes: moved_picks)
   end
 
   defp schedule_tick, do: Process.send_after(self(), :tick, @tick_timeout)

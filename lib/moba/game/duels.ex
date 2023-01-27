@@ -126,10 +126,10 @@ defmodule Moba.Game.Duels do
     end
   end
 
-  def pvp_points(player, opponent, winner, skip_victory_limit \\ false) do
+  def pvp_points(player, opponent, winner, skip_max_limit \\ false) do
     diff = opponent.pvp_points - player.pvp_points
-    victory_points = Moba.victory_duel_points(diff, skip_victory_limit)
-    defeat_points = Moba.defeat_duel_points(diff)
+    victory_points = Moba.victory_duel_points(diff, skip_max_limit)
+    defeat_points = Moba.defeat_duel_points(diff, skip_max_limit)
     tie_points = Moba.tie_duel_points(diff)
 
     {player_points, opponent_points} =

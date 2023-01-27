@@ -37,7 +37,7 @@ defmodule Moba do
   def load_resource(code, level), do: Enum.find(cached_resources(), &(&1.code == code && &1.level == level))
 
   def player_for(%{id: user_id}) do
-    with existing <- Game.get_player_from_user!(user_id) do
+    with existing when existing != nil <- Game.get_player_from_user!(user_id) do
       existing
     else
       _ ->
