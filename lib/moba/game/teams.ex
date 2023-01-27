@@ -41,6 +41,7 @@ defmodule Moba.Game.Teams do
         Enum.map(team.pick_ids, fn pick_id ->
           Enum.find(heroes, &(&1.id == pick_id))
         end)
+        |> Enum.filter(& &1)
 
       Map.put(team, :picks, picks)
     end)
@@ -53,6 +54,7 @@ defmodule Moba.Game.Teams do
       Enum.map(team.pick_ids, fn pick_id ->
         Enum.find(heroes, &(&1.id == pick_id))
       end)
+      |> Enum.filter(& &1)
 
     Map.put(team, :picks, picks)
   end

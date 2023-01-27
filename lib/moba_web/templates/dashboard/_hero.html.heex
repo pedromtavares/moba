@@ -15,9 +15,11 @@
         <div class="card-footer transparent p-1">
             <div class="row">
                 <div class="col justify-content-between d-flex">
-                    <button type="button" class="btn btn-danger" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id={@hero.id}>
-                        <i class="fa fa-trash-alt mr-1"></i>Delete
-                    </button>
+                    <%= if can_delete?(@hero) do %>
+                        <button type="button" class="btn btn-danger" data-confirm="Are you sure you want to DELETE your hero?" phx-click="archive" phx-value-id={@hero.id}>
+                            <i class="fa fa-trash-alt mr-1"></i>Delete
+                        </button>
+                    <% end %>
                     <%= if @hero.finished_at do %>
                         <%= live_redirect class: "btn btn-primary", to: Routes.live_path(@socket, MobaWeb.HeroLive, @hero) do %>
                             <i class="fa fa-address-card mr-1"></i>

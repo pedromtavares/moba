@@ -13,8 +13,8 @@ defmodule MobaWeb.DashboardView do
     hero["avatar"]["name"]
   end
 
-  def can_enter_arena?(%{all_heroes: heroes}) do
-    Enum.reject(heroes, &is_nil(&1.finished_at)) |> length() >= 2
+  def can_delete?(hero) do
+    hero.league_tier < Moba.max_league_tier() || is_nil(hero.finished_at) || not Game.available_hero?(hero)
   end
 
   def farming_per_turn(pve_tier) do
