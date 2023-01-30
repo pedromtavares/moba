@@ -56,7 +56,7 @@ defmodule MobaWeb.ArenaLive.Edit do
   end
 
   def handle_event("add-hero", %{"id" => id}, socket) do
-    %{selected_team: selected_team, current_player: current_player} = socket.assigns
+    %{selected_team: selected_team} = socket.assigns
     hero = Game.get_hero!(id)
 
     if valid_addition?(hero, socket) do

@@ -72,7 +72,12 @@ defmodule Moba.Admin.Matches do
     end)
     |> Enum.map(fn {pick_id, score} ->
       hero = Enum.find(heroes, &(&1.id == pick_id))
-      {hero.avatar.code, hero, score}
+
+      if hero do
+        {hero.avatar.code, hero, score}
+      else
+        {nil, %{skills: []}, score}
+      end
     end)
   end
 
