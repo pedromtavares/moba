@@ -12,20 +12,27 @@ defmodule Moba.Admin.Matches do
   def match_stats do
     %{
       "pvp" => filtered_stats(nil),
+      "elite" => filtered_stats([1, 2]),
       "immortals" => filtered_stats(2),
       "shadows" => filtered_stats(1),
       "plebs" => filtered_stats(0)
     }
   end
 
-  defp filtered_stats(pvp_tier) do
-    query =
-      if pvp_tier do
-        from(m in Match, join: p in assoc(m, :player), where: p.pvp_tier == ^pvp_tier)
-      else
-        Match
-      end
+  defp filtered_query(tiers) when is_list(tiers) do
+    from(m in Match, join: p in assoc(m, :player), where: p.pvp_tier in ^tiers)
+  end
 
+  defp filtered_query(tier) do
+    if tier do
+      from(m in Match, join: p in assoc(m, :player), where: p.pvp_tier == ^tier)
+    else
+      Match
+    end
+  end
+
+  defp filtered_stats(pvp_tier) do
+    query = filtered_query(pvp_tier)
     matches = Repo.all(from(m in query, where: m.phase == "scored"))
 
     if length(matches) > 0 do
@@ -50,6 +57,7 @@ defmodule Moba.Admin.Matches do
         acc ++ match.player_picks
       end)
       |> Game.get_heroes()
+      |> Enum.filter(& &1)
 
     Enum.reduce(matches, %{}, fn match, acc ->
       Enum.reduce(match.player_picks, acc, fn pick_id, inner_acc ->

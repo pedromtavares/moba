@@ -60,6 +60,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a href="javascript:;" phx-click="stats-filter" phx-value-type="elite" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "elite", do: "active"}"} phx-hook="Loading" id="pleb-ranking-button">
+                                <span class="d-inline-block loading-text">Elite</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a href="javascript:;" phx-click="stats-filter" phx-value-type="plebs" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "plebs", do: "active"}"} phx-hook="Loading" id="pleb-ranking-button">
                                 <span class="d-inline-block loading-text">Plebs</span>
                             </a>

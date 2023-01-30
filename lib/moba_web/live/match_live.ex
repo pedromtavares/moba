@@ -18,11 +18,8 @@ defmodule MobaWeb.MatchLive do
     {:noreply, assign(socket, hero_tab: tab)}
   end
 
-  def handle_event("repeat", _, %{assigns: %{latest_match: match, trained_heroes: trained}} = socket)
-      when not is_nil(match) do
-    trained_ids = Enum.map(trained, & &1.id)
-    picked_heroes = Enum.filter(match.player_picks, &Enum.member?(trained_ids, &1.id))
-    {:noreply, assign(socket, picked_heroes: picked_heroes)}
+  def handle_event("repeat", _, %{assigns: %{latest_match: match}} = socket) when not is_nil(match) do
+    {:noreply, assign(socket, picked_heroes: match.player_picks)}
   end
 
   def handle_event("repeat", _, socket), do: {:noreply, socket}

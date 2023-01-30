@@ -59,8 +59,9 @@ defmodule MobaWeb.ArenaLive.Edit do
     %{selected_team: selected_team, current_player: current_player} = socket.assigns
     hero = Game.get_hero!(id)
 
-    if (hero.player_id == current_player.id || Game.available_hero?(hero)) && length(selected_team.picks) < 5 do
-      team = Game.update_team!(selected_team, %{pick_ids: selected_team.pick_ids ++ [hero.id]})
+    if valid_addition?(hero, socket) do
+      pick_ids = sanitize_pick_ids(selected_team.pick_ids ++ [hero.id])
+      team = Game.update_team!(selected_team, %{pick_ids: pick_ids})
       {:noreply, assign(socket, selected_team: team) |> update_teams()}
     else
       {:noreply, socket}
@@ -70,7 +71,8 @@ defmodule MobaWeb.ArenaLive.Edit do
   def handle_event("remove-hero", %{"id" => id}, socket) do
     %{selected_team: selected_team} = socket.assigns
 
-    team = Game.update_team!(selected_team, %{pick_ids: selected_team.pick_ids -- [String.to_integer(id)]})
+    pick_ids = sanitize_pick_ids(selected_team.pick_ids -- [String.to_integer(id)])
+    team = Game.update_team!(selected_team, %{pick_ids: pick_ids})
 
     {:noreply, assign(socket, selected_team: team) |> update_teams()}
   end
@@ -122,6 +124,8 @@ defmodule MobaWeb.ArenaLive.Edit do
     assign(socket, selected_team: team) |> update_teams()
   end
 
+  defp sanitize_pick_ids(pick_ids), do: pick_ids |> Enum.uniq() |> Enum.map(& &1)
+
   defp socket_init(%{assigns: %{current_player: player}} = socket) do
     with sidebar_code = "arena",
          match = Game.latest_manual_match(player),
@@ -151,5 +155,13 @@ defmodule MobaWeb.ArenaLive.Edit do
       end)
 
     assign(socket, teams: teams)
+  end
+
+  defp valid_addition?(hero, socket) do
+    %{selected_team: selected_team, current_player: current_player} = socket.assigns
+
+    (hero.player_id == current_player.id || Game.available_hero?(hero)) &&
+      length(selected_team.picks) < 5 &&
+      not Enum.member?(selected_team.pick_ids, hero.id)
   end
 end
