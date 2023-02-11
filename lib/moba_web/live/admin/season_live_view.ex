@@ -32,7 +32,7 @@ defmodule MobaWeb.Admin.SeasonLiveView do
     data = Admin.get_server_data()
 
     filter = socket.assigns[:filter] || :weekly
-    stats_filter = socket.assigns[:stats_filter] || "pvp"
+    stats_filter = socket.assigns[:stats_filter] || "elite"
 
     assign(socket,
       players: data.players,

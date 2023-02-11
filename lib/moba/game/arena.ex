@@ -38,15 +38,16 @@ defmodule Moba.Game.Arena do
     latest_battle = Engine.latest_match_battle(match.id)
     last_turn = if latest_battle, do: List.last(latest_battle.turns), else: nil
 
-    {attacker, attacker_player, defender, defender_player} =
-      Matches.get_latest_battlers(match, latest_battle, last_turn)
+    {attacker, defender} = Matches.get_latest_battlers(match, latest_battle, last_turn)
 
     battle =
       Engine.create_match_battle!(%{
-        attacker: attacker,
-        attacker_player: attacker_player,
-        defender: defender,
-        defender_player: defender_player,
+        attacker: attacker.hero,
+        attacker_player: attacker.player,
+        attacker_pick_position: attacker.position,
+        defender: defender.hero,
+        defender_player: defender.player,
+        defender_pick_position: defender.position,
         match: match
       })
 

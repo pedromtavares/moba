@@ -24,7 +24,7 @@
 								<% end %>
 							</h2>
 						<% else %>
-							<%= if length(@picked_heroes) >= 5 do %>
+							<%= if length(@picked_heroes) >= 5 && @current_player.id == @match.player_id do %>
 								<button type="button" class="btn text-center btn-lg btn-block btn-primary dark-button margin-auto shadow-fx" phx-click="start" phx-hook="Loading" id="start-match-button">
 									<span class="loading-text">
 										<i class="fa fa-play mr-1"></i>
@@ -43,7 +43,7 @@
 					</div>
 				</div>
 			</div>
-			<%= unless @match.phase do %>
+			<%= if is_nil(@match.phase) && @current_player.id == @match.player_id do %>
 				<div class="row mt-1">
 					<div class="col">
 						<div class="card mb-0 mt-2" phx-hook="EqualHeight" phx-target="#opponent-heroes-container" id="picks-card">

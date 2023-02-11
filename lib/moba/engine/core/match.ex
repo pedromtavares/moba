@@ -21,17 +21,17 @@ defmodule Moba.Engine.Core.Match do
     |> generate_snapshots()
   end
 
-  defp battle_for(battle) do
-    %{attacker: attacker, attacker_player: aplayer, defender: defender, defender_player: dplayer, match: match} = battle
-
+  defp battle_for(attrs) do
     %Battle{
-      attacker: attacker,
-      defender: defender,
-      attacker_player: aplayer,
-      defender_player: dplayer,
-      match_id: match.id,
+      attacker: attrs[:attacker],
+      defender: attrs[:defender],
+      attacker_player: attrs[:attacker_player],
+      defender_player: attrs[:defender_player],
+      attacker_pick_position: attrs[:attacker_pick_position],
+      defender_pick_position: attrs[:defender_pick_position],
+      match_id: attrs[:match].id,
       type: Engine.battle_types().match,
-      match: match
+      match: attrs[:match]
     }
   end
 

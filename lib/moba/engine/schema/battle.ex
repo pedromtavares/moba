@@ -25,6 +25,9 @@ defmodule Moba.Engine.Schema.Battle do
     field :difficulty, :string
     field :finished, :boolean
 
+    field :attacker_pick_position, :integer
+    field :defender_pick_position, :integer
+
     embeds_one :rewards, Engine.Schema.Rewards, on_replace: :update
     embeds_one :attacker_snapshot, Engine.Schema.HeroSnapshot, on_replace: :update
     embeds_one :defender_snapshot, Engine.Schema.HeroSnapshot, on_replace: :update
@@ -40,7 +43,7 @@ defmodule Moba.Engine.Schema.Battle do
     initiator_id = initiator && initiator.id
 
     battle
-    |> cast(attrs, [:difficulty, :finished, :duel_id])
+    |> cast(attrs, [:difficulty, :finished, :duel_id, :attacker_pick_position, :defender_pick_position])
     |> cast_embed(:rewards)
     |> cast_embed(:attacker_snapshot)
     |> cast_embed(:defender_snapshot)

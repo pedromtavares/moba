@@ -31,8 +31,9 @@ defmodule Moba.Game.Matches do
   end
 
   def get_latest_battlers(match, _, nil) do
-    %{player: player, player_picks: player_picks, opponent: opponent, opponent_picks: opponent_picks} = match
-    {List.first(player_picks), player, List.first(opponent_picks), opponent}
+    attacker = %{hero: List.first(match.player_picks), player: match.player, position: 0}
+    defender = %{hero: List.first(match.opponent_picks), player: match.opponent, position: 0}
+    {attacker, defender}
   end
 
   def get_latest_battlers(match, battle, last_turn) do
@@ -44,24 +45,37 @@ defmodule Moba.Game.Matches do
 
     winner_is_player_pick = winner_player.id == player.id && Enum.find(player_picks, &(&1.id == winner.hero_id))
 
-    {attacker_pick, attacker_player, defender_pick, defender_player} =
+    {attacker, defender} =
       if winner_is_player_pick do
+        winner_pick_index = Enum.find_index(player_picks, &(&1.id == winner_is_player_pick.id))
         opponent_loser_index = Enum.find_index(opponent_picks, &(&1.id == loser.hero_id)) || 0
+        next_opponent_pick = Enum.at(opponent_picks, opponent_loser_index + 1)
 
-        {winner_is_player_pick, player, Enum.at(opponent_picks, opponent_loser_index + 1), opponent}
+        attacker = %{hero: winner_is_player_pick, player: player, position: winner_pick_index}
+        defender = %{hero: next_opponent_pick, player: opponent, position: opponent_loser_index + 1}
+
+        {attacker, defender}
       else
         winner_is_opponent_pick = Enum.find(opponent_picks, &(&1.id == winner.hero_id))
+        winner_pick_index = Enum.find_index(opponent_picks, &(&1.id == winner.hero_id))
         player_loser_index = Enum.find_index(player_picks, &(&1.id == loser.hero_id)) || 0
+        next_player_pick = Enum.at(player_picks, player_loser_index + 1)
 
-        {winner_is_opponent_pick, opponent, Enum.at(player_picks, player_loser_index + 1), player}
+        attacker = %{hero: winner_is_opponent_pick, player: opponent, position: winner_pick_index}
+        defender = %{hero: next_player_pick, player: player, position: player_loser_index + 1}
+
+        {attacker, defender}
       end
 
     attacker_pick =
-      attacker_pick
+      attacker.hero
       |> Map.put(:initial_hp, winner.current_hp + winner.total_hp * 0.2)
       |> Map.put(:initial_mp, winner.current_mp + winner.total_mp * 0.2)
 
-    {attacker_pick, attacker_player, defender_pick, defender_player}
+    {
+      %{attacker | hero: attacker_pick},
+      defender
+    }
   end
 
   def get_match!(id), do: load() |> Repo.get!(id) |> load_picks()
@@ -85,21 +99,28 @@ defmodule Moba.Game.Matches do
 
   def update!(match, attrs), do: Match.changeset(match, attrs) |> Repo.update!()
 
-  defp hero_loser?(_pick, %{winner: winner} = _battle) when is_nil(winner), do: false
-  defp hero_loser?(%{id: pick_id}, %{winner_id: winner_id}) when pick_id == winner_id, do: false
-  defp hero_loser?(%{id: pid}, %{attacker_id: aid, defender_id: did}) when pid != aid and pid != did, do: false
-  defp hero_loser?(_, _), do: true
-
-  defp last_winner(match, latest_battle) do
-    %{player_picks: player_picks, player: player, opponent: opponent, opponent_picks: opponent_picks} = match
-    %{winner_player: winner_player} = latest_battle
-    last_player_pick = List.last(player_picks)
-    last_opponent_pick = List.last(opponent_picks)
+  defp last_winner(match, battle) do
+    battle_attacker_is_match_player = battle.attacker_player_id == match.player_id
 
     cond do
-      hero_loser?(last_player_pick, latest_battle) && winner_player.id == opponent.id -> match.opponent
-      hero_loser?(last_opponent_pick, latest_battle) && winner_player.id == player.id -> match.player
-      true -> false
+      battle_attacker_is_match_player && battle.winner_player_id == battle.attacker_player_id &&
+          battle.defender_pick_position == 4 ->
+        match.player
+
+      battle_attacker_is_match_player && battle.winner_player_id == battle.defender_player_id &&
+          battle.attacker_pick_position == 4 ->
+        match.opponent
+
+      !battle_attacker_is_match_player && battle.winner_player_id == battle.attacker_player_id &&
+        battle.defender_pick_position == 4 ->
+          match.opponent
+
+      !battle_attacker_is_match_player && battle.winner_player_id == battle.defender_player_id &&
+          battle.attacker_pick_position == 4 ->
+        match.player
+
+      true ->
+        false
     end
   end
 
