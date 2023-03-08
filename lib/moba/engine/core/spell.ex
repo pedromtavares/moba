@@ -377,6 +377,7 @@ defmodule Moba.Engine.Core.Spell do
 
       %{turn | resource: resource, skill: resource}
       |> Effect.attacker_bonus(last_skill.name)
+      |> Effect.add_turn_power()
     else
       Effect.atk_damage(turn)
     end

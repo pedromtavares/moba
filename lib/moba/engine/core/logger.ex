@@ -315,8 +315,8 @@ defmodule Moba.Engine.Core.Logger do
     "#{attacker} has no skill to reuse, dealing [damage]#{damage} damage[/damage] to #{defender}"
   end
 
-  defp description_for("rearm", %{"bonus" => {skill, attacker}}, _) do
-    "#{attacker} has reset all cooldowns and reused #{skill}"
+  defp description_for("rearm", %{"bonus" => {skill, attacker}, "turn_power" => {power, _attacker}}, _) do
+    "#{attacker} has reset all cooldowns and reused #{skill} with extra [power]#{power} Power[/power]!"
   end
 
   defp description_for("remote_mines", %{"delayed_skill" => {_, hero}}, _) do
