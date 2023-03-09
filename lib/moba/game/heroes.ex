@@ -92,7 +92,8 @@ defmodule Moba.Game.Heroes do
   and thus have their stats greatly reduced
   """
   def create_bot!(avatar, level, difficulty, league_tier) do
-    name = if Enum.member?(["pvp_master", "pvp_grandmaster"], difficulty), do: Faker.Superhero.name(), else: avatar.name
+    pvp? = Enum.member?(["pvp_master", "pvp_grandmaster"], difficulty)
+    name = if pvp?, do: Faker.Superhero.name(), else: avatar.name
 
     attrs = %{
       bot_difficulty: difficulty,
@@ -105,6 +106,7 @@ defmodule Moba.Game.Heroes do
     build_attrs = Map.put(attrs, :level, level)
     build = Game.generate_bot_build(build_attrs, avatar)
     attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
+    attrs = if pvp?, do: Map.merge(attrs, Game.item_attributes(build.items)), else: attrs
     bot = create!(attrs, nil, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
 
     if level > 0 do

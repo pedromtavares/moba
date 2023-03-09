@@ -48,6 +48,18 @@ defmodule Moba.Game.Items do
   def get_item_by_code!(code) when code == "", do: nil
   def get_item_by_code!(code), do: Repo.get_by!(ItemQuery.single_current(), code: code)
 
+  def item_attributes(items) do
+    %{
+      item_hp: attribute_sum(items, :base_hp),
+      item_mp: attribute_sum(items, :base_mp),
+      item_atk: attribute_sum(items, :base_atk),
+      item_speed: speed_sum(items),
+      item_power: attribute_sum(items, :base_power),
+      item_armor: attribute_sum(items, :base_armor),
+      item_order: items_to_order(items)
+    }
+  end
+
   def item_ingredients_count(item) do
     cond do
       rare?(item) -> 3
@@ -128,7 +140,7 @@ defmodule Moba.Game.Items do
 
     Game.update_hero!(
       hero,
-      new_inventory_stats(new_inventory),
+      item_attributes(new_inventory),
       new_inventory
     )
   end
@@ -139,7 +151,7 @@ defmodule Moba.Game.Items do
 
     Game.update_hero!(
       hero,
-      new_inventory_stats(new_inventory),
+      item_attributes(new_inventory),
       new_inventory
     )
   end
@@ -154,18 +166,6 @@ defmodule Moba.Game.Items do
         legendary?(result) -> Enum.all?(ingredients, fn item -> epic?(item) end)
         true -> false
       end
-  end
-
-  defp new_inventory_stats(inventory) do
-    %{
-      item_hp: attribute_sum(inventory, :base_hp),
-      item_mp: attribute_sum(inventory, :base_mp),
-      item_atk: attribute_sum(inventory, :base_atk),
-      item_speed: speed_sum(inventory),
-      item_power: attribute_sum(inventory, :base_power),
-      item_armor: attribute_sum(inventory, :base_armor),
-      item_order: items_to_order(inventory)
-    }
   end
 
   defp attribute_sum(items, attribute) do

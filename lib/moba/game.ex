@@ -156,6 +156,8 @@ defmodule Moba.Game do
 
   defdelegate get_item_by_code!(code), to: Items
 
+  defdelegate item_attributes(items), to: Items
+
   defdelegate item_ingredients_count(item), to: Items
 
   defdelegate item_price(item), to: Items
