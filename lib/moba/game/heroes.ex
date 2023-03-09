@@ -106,8 +106,10 @@ defmodule Moba.Game.Heroes do
     build_attrs = Map.put(attrs, :level, level)
     build = Game.generate_bot_build(build_attrs, avatar)
     attrs = Map.merge(attrs, %{item_order: build.item_order, skill_order: build.skill_order})
-    attrs = if pvp?, do: Map.merge(attrs, Game.item_attributes(build.items)), else: attrs
-    bot = create!(attrs, nil, avatar, build.skills, Enum.uniq_by(build.items, & &1.id))
+
+    items = Enum.uniq_by(build.items, & &1.id)
+    attrs = if pvp?, do: Map.merge(attrs, Game.item_attributes(items)), else: attrs
+    bot = create!(attrs, nil, avatar, build.skills, items)
 
     if level > 0 do
       xp = xp_until_hero_level(level)
