@@ -112,8 +112,8 @@ defmodule Moba.Game.Matches do
         match.opponent
 
       !battle_attacker_is_match_player && battle.winner_player_id == battle.attacker_player_id &&
-        battle.defender_pick_position == 4 ->
-          match.opponent
+          battle.defender_pick_position == 4 ->
+        match.opponent
 
       !battle_attacker_is_match_player && battle.winner_player_id == battle.defender_player_id &&
           battle.attacker_pick_position == 4 ->
