@@ -256,9 +256,9 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "abaddon" do
     [
       {
-        ["echo_stomp", "borrowed_time", "fury_swipes", "jinada"],
+        ["empower", "borrowed_time", "fury_swipes", "jinada"],
         ["maelstrom", "heavens_halberd", "orchid_malevolence", "satanic", "linkens_sphere", "daedalus"],
-        "casualPlayer"
+        "custom"
       },
       {
         ["double_edge", "borrowed_time", "decay", "fiery_soul"],
@@ -271,14 +271,14 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "axe" do
     [
       {
-        ["double_edge", "fiery_soul", "counter_helix", "culling_blade"],
+        ["static_link", "double_edge", "counter_helix", "culling_blade"],
         ["vanguard", "satanic", "assault_cuirass", "orchid_malevolence", "shivas_guard", "daedalus"],
-        "mantwi"
+        "custom"
       },
       {
-        ["decay", "jinada", "counter_helix", "culling_blade"],
+        ["shuriken_toss", "decay", "jinada", "culling_blade"],
         ["maelstrom", "shivas_guard", "boots_of_travel", "linkens_sphere", "orchid_malevolence", "daedalus"],
-        "digdaya666"
+        "custom"
       }
     ]
   end
@@ -286,9 +286,9 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "dazzle" do
     [
       {
-        ["bad_juju", "decay", "echo_stomp", "fiery_soul"],
+        ["bad_juju", "decay", "lightning_bolt", "fiery_soul"],
         ["maelstrom", "satanic", "silver_edge", "boots_of_travel", "shivas_guard", "daedalus"],
-        "casualPlayer"
+        "custom"
       },
       {
         ["bad_juju", "decay", "illuminate", "fiery_soul"],
@@ -391,9 +391,9 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "pugna" do
     [
       {
-        ["life_drain", "death_pulse", "illuminate", "mana_burn"],
+        ["life_drain", "mana_burn", "lightning_bolt", "phase_shift"],
         ["vanguard", "dagon5", "diffusal_blade", "silver_edge", "linkens_sphere", "shivas_guard"],
-        "matheusdsm"
+        "custom"
       },
       {
         ["life_drain", "illuminate", "mana_shield", "fiery_soul"],
@@ -501,9 +501,9 @@ defmodule Moba.Game.Builds do
         "Atsuki"
       },
       {
-        ["illuminate", "rearm", "mana_shield", "fiery_soul"],
-        ["vanguard", "boots_of_travel", "dagon5", "satanic", "shivas_guard", "linkens_sphere"],
-        "casualPlayer"
+        ["mana_burn", "rearm", "mana_shield", "fiery_soul"],
+        ["vanguard", "boots_of_travel", "scythe_of_vyse", "satanic", "shivas_guard", "linkens_sphere"],
+        "custom"
       }
     ]
   end
