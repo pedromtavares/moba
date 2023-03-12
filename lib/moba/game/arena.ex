@@ -153,7 +153,7 @@ defmodule Moba.Game.Arena do
     end
   end
 
-  defp match_picks(player_id, _, _, defensive) do
+  defp match_picks(player_id, _, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
 
     pick_ids =
@@ -176,8 +176,7 @@ defmodule Moba.Game.Arena do
     diff = 5 - length(pick_ids)
 
     if diff > 0 do
-      top_available = Moba.pve_ranking_available() |> Enum.reject(&Enum.member?(pick_ids, &1.id))
-      available_ids = Enum.shuffle(top_available) |> Enum.take(diff) |> Enum.map(& &1.id)
+      available_ids = Enum.shuffle(bot_ids) |> Enum.take(diff)
       pick_ids ++ available_ids
     else
       pick_ids
