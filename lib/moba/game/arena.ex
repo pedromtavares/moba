@@ -131,7 +131,7 @@ defmodule Moba.Game.Arena do
 
   defp create_match!(_, _, _), do: nil
 
-  defp match_picks(nil, _, _, _), do: []
+  defp match_picks(nil, _pvp_tier, _bot_ids, _defensive), do: []
 
   defp match_picks(player_id, 0, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
@@ -143,7 +143,7 @@ defmodule Moba.Game.Arena do
         Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
       end
 
-    auto_fill(pick_ids, bot_ids)
+    match_pick_auto_fill_ids(pick_ids, bot_ids)
   end
 
   defp match_picks(player_id, _, bot_ids, defensive) do
@@ -166,10 +166,10 @@ defmodule Moba.Game.Arena do
         if first_id, do: grandmasters ++ [first_id], else: grandmasters
       end
 
-    auto_fill(pick_ids, bot_ids)
+    match_pick_auto_fill_ids(pick_ids, bot_ids)
   end
 
-  defp auto_fill(pick_ids, bot_ids) do
+  defp match_pick_auto_fill_ids(pick_ids, bot_ids) do
     diff = 5 - length(pick_ids)
 
     if diff > 0 do
