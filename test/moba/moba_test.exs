@@ -18,7 +18,22 @@ defmodule Moba.MobaTest do
       assert Moba.victory_duel_points(-200) == 2
     end
 
-    test "match victory" do
+    test "tie" do
+      assert Moba.tie_duel_points(100) == 5
+      assert Moba.tie_duel_points(80) == 4
+      assert Moba.tie_duel_points(40) == 2
+      assert Moba.tie_duel_points(20) == 2
+      assert Moba.tie_duel_points(0) == 2
+      assert Moba.tie_duel_points(-20) == -2
+      assert Moba.tie_duel_points(-40) == -2
+      assert Moba.tie_duel_points(-80) == -4
+      assert Moba.tie_duel_points(-100) == -5
+      assert Moba.tie_duel_points(-200) == -10
+    end
+  end
+
+  describe "match points" do
+    test "victory" do
       # Enum.each(-200..200, fn n -> IO.inspect("#{n} - #{Moba.victory_match_points(n)}") end)
       assert Moba.victory_match_points(200) == 10
       assert Moba.victory_match_points(100) == 5
@@ -34,17 +49,19 @@ defmodule Moba.MobaTest do
       assert Moba.victory_match_points(-200) == 1
     end
 
-    test "tie" do
-      assert Moba.tie_duel_points(100) == 5
-      assert Moba.tie_duel_points(80) == 4
-      assert Moba.tie_duel_points(40) == 2
-      assert Moba.tie_duel_points(20) == 2
-      assert Moba.tie_duel_points(0) == 2
-      assert Moba.tie_duel_points(-20) == -2
-      assert Moba.tie_duel_points(-40) == -2
-      assert Moba.tie_duel_points(-80) == -4
-      assert Moba.tie_duel_points(-100) == -5
-      assert Moba.tie_duel_points(-200) == -10
+    test "defeat" do
+      assert Moba.defeat_match_points(200) == 2
+      assert Moba.defeat_match_points(100) == 2
+      assert Moba.defeat_match_points(80) == 2
+      assert Moba.defeat_match_points(40) == 3
+      assert Moba.defeat_match_points(20) == 3
+      assert Moba.defeat_match_points(0) == 3
+      assert Moba.defeat_match_points(-20) == 3
+      assert Moba.defeat_match_points(-40) == 3
+      assert Moba.defeat_match_points(-50) == 4
+      assert Moba.defeat_match_points(-80) == 5
+      assert Moba.defeat_match_points(-100) == 7
+      assert Moba.defeat_match_points(-200) == 13
     end
   end
 

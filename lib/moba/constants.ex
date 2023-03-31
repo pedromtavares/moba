@@ -183,9 +183,6 @@ defmodule Moba.Constants do
 
       def available_hero_days, do: @available_hero_days
 
-      def victory_match_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference,
-        do: 0
-
       def victory_match_points(diff) when diff > -40 and diff < 40, do: 2
 
       def victory_match_points(diff) when diff < 0,
@@ -193,7 +190,7 @@ defmodule Moba.Constants do
 
       def victory_match_points(diff), do: ceil(diff * 0.05)
 
-      def defeat_match_points(diff), do: victory_match_points(-diff)
+      def defeat_match_points(diff), do: ceil(victory_match_points(-diff) * 1.25)
     end
   end
 end
