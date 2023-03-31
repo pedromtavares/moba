@@ -95,6 +95,31 @@ defmodule Moba.Game.Matches do
     preload(queryable, player: :user, opponent: :user, winner: :user)
   end
 
+  def pvp_points(player, opponent, winner) do
+    diff = opponent.pvp_points - player.pvp_points
+    victory_points = Moba.victory_match_points(diff)
+    defeat_points = Moba.defeat_match_points(diff)
+
+    {player_points, opponent_points} =
+      cond do
+        winner && player.id == winner.id ->
+          {victory_points, victory_points * -1}
+
+        winner && opponent.id == winner.id ->
+          {defeat_points * -1, defeat_points}
+
+        true ->
+          {0, 0}
+      end
+
+    %{
+      total_player_points: points_limits(player.pvp_points + player_points),
+      player_points: player_points,
+      total_opponent_points: points_limits(opponent.pvp_points + opponent_points),
+      opponent_points: opponent_points
+    }
+  end
+
   def types, do: @types
 
   def update!(match, attrs), do: Match.changeset(match, attrs) |> Repo.update!()
@@ -149,6 +174,9 @@ defmodule Moba.Game.Matches do
   defp load_picks(_), do: nil
 
   defp load_picks_hero(heroes, hero_id), do: Enum.find(heroes, &(&1.id == hero_id))
+
+  defp points_limits(result) when result < 0, do: 0
+  defp points_limits(result), do: result
 
   defp type_query(query, nil), do: query
 

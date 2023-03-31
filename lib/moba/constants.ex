@@ -153,25 +153,47 @@ defmodule Moba.Constants do
       def minimum_duel_points(points) when points < @minimum_duel_points, do: @minimum_duel_points
       def minimum_duel_points(points), do: points
 
-      def victory_duel_points(diff, skip_max_limit \\ false)
-
-      def victory_duel_points(diff, false) when diff < -@maximum_points_difference or diff > @maximum_points_difference,
+      def victory_duel_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference,
         do: 0
 
-      def victory_duel_points(diff, _) when diff > -40 and diff < 40, do: 5
-      def victory_duel_points(diff, _) when diff < 0, do: ceil(150 / abs(diff)) |> minimum_duel_points()
-      def victory_duel_points(diff, _), do: ceil(diff * 0.15)
-      def defeat_duel_points(diff, skip_max_limit), do: victory_duel_points(-diff, skip_max_limit)
+      def victory_duel_points(diff) when diff > -40 and diff < 40, do: 5
+
+      def victory_duel_points(diff) when diff < 0,
+        do: ceil(150 / abs(diff)) |> minimum_duel_points()
+
+      def victory_duel_points(diff), do: ceil(diff * 0.15)
+
+      def defeat_duel_points(diff), do: victory_duel_points(-diff)
+
       def tie_duel_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference, do: 0
       def tie_duel_points(diff) when diff < 0, do: -(ceil(-diff * 0.05) |> minimum_duel_points())
       def tie_duel_points(diff), do: ceil(diff * 0.05) |> minimum_duel_points()
+
       def duel_timer_in_seconds, do: @duel_timer_in_seconds
+
       def turn_timer_in_seconds, do: @turn_timer_in_seconds
+
       def daily_ranking_limit, do: @daily_ranking_limit
+
       def season_ranking_limit, do: @season_ranking_limit
+
       def daily_match_limit, do: @daily_match_limit
+
       def immortal_streak_multiplier, do: @immortal_streak_multiplier
+
       def available_hero_days, do: @available_hero_days
+
+      def victory_match_points(diff) when diff < -@maximum_points_difference or diff > @maximum_points_difference,
+        do: 0
+
+      def victory_match_points(diff) when diff > -40 and diff < 40, do: 2
+
+      def victory_match_points(diff) when diff < 0,
+        do: ceil(50 / abs(diff))
+
+      def victory_match_points(diff), do: ceil(diff * 0.05)
+
+      def defeat_match_points(diff), do: victory_match_points(-diff)
     end
   end
 end

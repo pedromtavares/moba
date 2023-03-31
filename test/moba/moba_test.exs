@@ -18,6 +18,22 @@ defmodule Moba.MobaTest do
       assert Moba.victory_duel_points(-200) == 2
     end
 
+    test "match victory" do
+      # Enum.each(-200..200, fn n -> IO.inspect("#{n} - #{Moba.victory_match_points(n)}") end)
+      assert Moba.victory_match_points(200) == 10
+      assert Moba.victory_match_points(100) == 5
+      assert Moba.victory_match_points(80) == 4
+      assert Moba.victory_match_points(40) == 2
+      assert Moba.victory_match_points(20) == 2
+      assert Moba.victory_match_points(0) == 2
+      assert Moba.victory_match_points(-20) == 2
+      assert Moba.victory_match_points(-40) == 2
+      assert Moba.victory_match_points(-50) == 1
+      assert Moba.victory_match_points(-80) == 1
+      assert Moba.victory_match_points(-100) == 1
+      assert Moba.victory_match_points(-200) == 1
+    end
+
     test "tie" do
       assert Moba.tie_duel_points(100) == 5
       assert Moba.tie_duel_points(80) == 4
