@@ -98,7 +98,7 @@ defmodule Moba.Game.Query.PlayerQuery do
       join: user in assoc(player, :user),
       where: user.last_online_at > ^@current_ranking_date,
       order_by: [
-        desc: fragment("(1000 * ?) + (500 * ?) + ?", player.best_immortal_streak, player.pve_tier, player.pvp_points),
+        desc: fragment("(500 * ?) + (500 * ?) + ?", player.best_immortal_streak, player.pve_tier, player.pvp_points),
         desc: player.total_wins
       ]
     )

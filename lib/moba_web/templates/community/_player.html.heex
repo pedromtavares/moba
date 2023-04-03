@@ -8,7 +8,7 @@
                     <%= @player.user.username %>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-icon btn-outline-light text-white"  data-toggle="tooltip" title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 500 + Best Immortal Streak (#{@player.best_immortal_streak}) x 1000 + Season Points (#{@player.pvp_points})"}>
+                    <button class="btn btn-icon btn-outline-light text-white"  data-toggle="tooltip" title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 500 + Best Immortal Streak (#{@player.best_immortal_streak}) x 500 + Season Points (#{@player.pvp_points})"}>
                         <i class="fa fa-globe"></i>
                         <%= PlayerView.season_score(@player) %>
                     </button>
