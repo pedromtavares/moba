@@ -8,6 +8,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   alias Game.Query.HeroQuery
 
   @current_ranking_date Moba.current_ranking_date()
+  @daily_match_limit Moba.daily_match_limit()
 
   import Ecto.Query
 
@@ -152,5 +153,12 @@ defmodule Moba.Game.Query.PlayerQuery do
     base = query |> non_bots() |> non_guests()
 
     from player in base, where: player.total_matches > 0
+  end
+
+  def order_and_limit_by_top_pvp_points(base, limit \\ 70) do
+    from player in base,
+      where: player.daily_matches < @daily_match_limit,
+      order_by: [desc: player.pvp_points],
+      limit: ^limit
   end
 end

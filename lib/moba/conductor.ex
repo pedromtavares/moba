@@ -102,6 +102,7 @@ defmodule Moba.Conductor do
 
   defp auto_matchmaking do
     PlayerQuery.pvp_available()
+    |> PlayerQuery.order_and_limit_by_top_pvp_points()
     |> Repo.all()
     |> Repo.preload(:user)
     |> Enum.map(fn player ->
