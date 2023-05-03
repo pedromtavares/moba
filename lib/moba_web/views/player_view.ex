@@ -45,7 +45,7 @@ defmodule MobaWeb.PlayerView do
   end
 
   def season_score(player) do
-    500 * player.best_immortal_streak + 500 * player.pve_tier + player.pvp_points
+    100 * player.best_immortal_streak + 100 * player.pve_tier + player.pvp_points
   end
 
   def shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
