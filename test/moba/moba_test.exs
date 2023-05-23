@@ -60,8 +60,8 @@ defmodule Moba.MobaTest do
       assert Moba.defeat_match_points(-40) == 3
       assert Moba.defeat_match_points(-50) == 4
       assert Moba.defeat_match_points(-80) == 5
-      assert Moba.defeat_match_points(-100) == 7
-      assert Moba.defeat_match_points(-200) == 13
+      assert Moba.defeat_match_points(-100) == 6
+      assert Moba.defeat_match_points(-200) == 11
     end
   end
 
