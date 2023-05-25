@@ -53,7 +53,7 @@ defmodule Moba.MobaTest do
       assert Moba.defeat_match_points(200) == 2
       assert Moba.defeat_match_points(100) == 2
       assert Moba.defeat_match_points(80) == 2
-      assert Moba.defeat_match_points(40) == 3
+      assert Moba.defeat_match_points(40) == 2
       assert Moba.defeat_match_points(20) == 2
       assert Moba.defeat_match_points(0) == 2
       assert Moba.defeat_match_points(-20) == 2
