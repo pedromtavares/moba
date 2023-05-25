@@ -190,6 +190,8 @@ defmodule Moba.Constants do
 
       def victory_match_points(diff), do: ceil(diff * 0.05)
 
+      def defeat_match_points(diff) when diff > -40 and diff < 40, do: 2
+
       def defeat_match_points(diff), do: ceil(victory_match_points(-diff) * 1.1)
     end
   end
