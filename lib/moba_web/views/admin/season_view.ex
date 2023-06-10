@@ -25,8 +25,8 @@ defmodule MobaWeb.Admin.SeasonView do
     |> Enum.take(10)
   end
 
-  def winrate_class(diff) when diff > 4 or diff < -4, do: "text-danger"
-  def winrate_class(diff) when diff > 2 or diff < -2, do: "text-warning"
+  def winrate_class(diff) when diff > 10 or diff < -10, do: "text-danger"
+  def winrate_class(diff) when diff > 5 or diff < -5, do: "text-warning"
   def winrate_class(_), do: "text-success"
 
   defp mapped_stats(stats, key) do
