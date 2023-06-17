@@ -165,7 +165,6 @@ defmodule Moba.Engine.Core.Spell do
     turn
     |> Effect.base_damage()
     |> Effect.atk_damage()
-    |> Effect.pierce_turn_armor()
     |> Effect.add_debuff()
   end
 
