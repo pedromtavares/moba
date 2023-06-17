@@ -529,6 +529,7 @@ SeedHelper.create_skill(%{
   armor_amount: 10,
   mp_cost: 6,
   cooldown: 2,
+  duration: 2,
   damage_type: "normal"
 })
 

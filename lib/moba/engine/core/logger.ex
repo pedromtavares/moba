@@ -181,11 +181,15 @@ defmodule Moba.Engine.Core.Logger do
 
   defp description_for("shuriken_toss", %{"damage" => {damage, defender}, "turn_armor" => {armor, _}}, heroes)
        when armor < 0 do
-    "Apparently a ninja now, #{opponent_for(defender, heroes)} threw a shuriken at #{defender} dealing [damage]#{damage} damage[/damage] and piercing [armor]#{armor * -1} Armor[/armor] for this turn"
+    "Apparently a ninja now, #{opponent_for(defender, heroes)} threw a shuriken at #{defender} dealing [damage]#{damage} damage[/damage] and piercing [armor]#{armor * -1} Armor[/armor]"
   end
 
   defp description_for("shuriken_toss", %{"damage" => {damage, defender}}, heroes) do
     "Apparently a ninja now, #{opponent_for(defender, heroes)} threw a shuriken at #{defender} dealing [damage]#{damage} damage[/damage]"
+  end
+
+  defp description_for("shuriken_toss", %{"turn_armor" => {armor, defender}}, heroes) do
+    "#{defender} has a shuriken stuck at their body, losing [armor]#{armor * -1} Armor[/armor] this turn."
   end
 
   defp description_for("static_link", %{"damage" => {damage, defender}, "turn_atk" => [{_, _}, {atk, attacker}]}, _) do

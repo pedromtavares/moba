@@ -157,11 +157,16 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.hp_regen_by_base_amount()
   end
 
+  defp effects_for(%{resource: %Skill{code: "shuriken_toss", debuff: true}} = turn, _options) do
+    Effect.pierce_turn_armor(turn)
+  end
+
   defp effects_for(%{resource: %Skill{code: "shuriken_toss"}} = turn, _options) do
     turn
     |> Effect.base_damage()
     |> Effect.atk_damage()
     |> Effect.pierce_turn_armor()
+    |> Effect.add_debuff()
   end
 
   defp effects_for(%{resource: %Skill{code: "static_link", buff: nil, debuff: nil}} = turn, _options) do
