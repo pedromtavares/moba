@@ -61,7 +61,7 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, heroes} ->
       {
         code,
-        Enum.sort_by(heroes, &{!is_nil(&1.pve_ranking), &1.pve_ranking, &1.id}, :desc)
+        Enum.sort_by(heroes, &{is_nil(&1.pve_ranking), &1.pve_ranking, &1.id}, :asc)
         |> List.first()
       }
     end)
