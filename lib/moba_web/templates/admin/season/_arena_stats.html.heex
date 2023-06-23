@@ -8,7 +8,7 @@
                 <h4><%= record.name %></h4>
             </td>
             <td>
-                <h3 class={"#{winrate_class(diff)} text-center m-0"}><%= round(winrate) %>% <br/><small><em>(<%= total %>)</em></small></h3>
+                <h3 class={"#{winrate_class(diff, @stats_filter)} text-center m-0"}><%= round(winrate) %>% <br/><small><em>(<%= total %>)</em></small></h3>
             </td>
         </tr>
     <% end %>

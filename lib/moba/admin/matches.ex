@@ -43,7 +43,8 @@ defmodule Moba.Admin.Matches do
       %{
         skills: skill_winrates(scores),
         avatars: avatar_winrates(scores),
-        winrate: total_winrate
+        winrate: total_winrate,
+        total: length(matches)
       }
     else
       %{}

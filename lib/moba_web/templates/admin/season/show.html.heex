@@ -52,7 +52,7 @@
         <div class="col">
             <div class="card">
                 <div class="card-body p-0 pt-2">
-                    <h2 class="text-center mt-0 mb-0">Arena Stats</h2><h5 class="text-center">Avg Winrate: <%= Float.round(@match_stats.winrate, 1) %>%</h5>
+                    <h2 class="text-center mt-0 mb-0">Arena Stats</h2><h5 class="text-center">Avg Winrate: <%= Float.round(@match_stats.winrate, 1) %>% <small>(<%=@match_stats.total%> total matches)</small></h5>
                     <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-center">
                         <li class="nav-item">
                             <a href="javascript:;" phx-click="stats-filter" phx-value-type="pvp" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "pvp", do: "active"}"} phx-hook="Loading" id="immortal-ranking-button">
@@ -60,13 +60,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="javascript:;" phx-click="stats-filter" phx-value-type="elite" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "elite", do: "active"}"} phx-hook="Loading" id="pleb-ranking-button">
-                                <span class="d-inline-block loading-text">Elite</span>
+                            <a href="javascript:;" phx-click="stats-filter" phx-value-type="plebs" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "plebs", do: "active"}"} phx-hook="Loading" id="pleb-ranking-button">
+                                <span class="d-inline-block loading-text">Plebs</span>
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a href="javascript:;" phx-click="stats-filter" phx-value-type="plebs" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "plebs", do: "active"}"} phx-hook="Loading" id="pleb-ranking-button">
-                                <span class="d-inline-block loading-text">Plebs</span>
+                            <a href="javascript:;" phx-click="stats-filter" phx-value-type="elite" data-toggle="tab" class={"nav-link px-2 py-1 #{if @stats_filter == "elite", do: "active"}"} phx-hook="Loading" id="pleb-ranking-button">
+                                <span class="d-inline-block loading-text">Elite</span>
                             </a>
                         </li>
                         <li class="nav-item">
@@ -85,10 +85,10 @@
                             <div>
                                 <div class="row no-gutters">
                                     <div class="col">
-                                        <%= render "_arena_stats.html", records: top_performing(@match_stats, :avatars), key: :avatars %>
+                                        <%= render "_arena_stats.html", records: top_performing(@match_stats, :avatars), key: :avatars, stats_filter: @stats_filter %>
                                     </div>
                                     <div class="col">
-                                        <%= render "_arena_stats.html", records: bottom_performing(@match_stats, :avatars), key: :avatars %>
+                                        <%= render "_arena_stats.html", records: bottom_performing(@match_stats, :avatars), key: :avatars, stats_filter: @stats_filter %>
                                     </div>
                                 </div>
                             </div>
@@ -97,10 +97,10 @@
                             <div>
                                 <div class="row no-gutters">
                                     <div class="col">
-                                        <%= render "_arena_stats.html", records: top_performing(@match_stats, :skills), key: :skills %>
+                                        <%= render "_arena_stats.html", records: top_performing(@match_stats, :skills), key: :skills, stats_filter: @stats_filter %>
                                     </div>
                                     <div class="col">
-                                        <%= render "_arena_stats.html", records: bottom_performing(@match_stats, :skills), key: :skills %>
+                                        <%= render "_arena_stats.html", records: bottom_performing(@match_stats, :skills), key: :skills, stats_filter: @stats_filter %>
                                     </div>
                                 </div>
                             </div>
