@@ -73,7 +73,7 @@ defmodule MobaWeb.CurrentHeroView do
     title = "Armor: #{hero.armor + hero.item_armor}"
 
     sub =
-      "Reduces the total damage you take on a defending turn, applied after the amplification from the opponent's Power. Each point of Armor will give 1% of damage reduction before 25 points, 0.5% after 25 points and 0.1% after 50 points. E.g. 150 Armor will give 47.5% reduction."
+      "Reduces the total damage you take on a defending turn, applied after the amplification from the opponent's Power. Each point of Armor will give 1% of damage reduction, with a maximum of 90%."
 
     main = "Current base Armor: #{hero.armor} <br/>Armor given by items: #{hero.item_armor}"
     attribute_description(title, sub, main)

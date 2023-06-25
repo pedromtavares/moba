@@ -114,12 +114,7 @@ defmodule Moba.Engine.Core.Helper do
     battler.base_armor + battler.battle_armor + battler.turn_armor + battler.next_armor
   end
 
-  @doc """
-  There are significant diminishing returns the higher Armor a battler has, to make sure
-  you can't just go full Armor and avoid all damage.
-  """
-  def total_damage_reduction(armor) when armor > 50, do: 37.5 + (armor - 50) * 0.1
-  def total_damage_reduction(armor) when armor > 25, do: 25 + (armor - 25) * 0.5
+  def total_damage_reduction(armor) when armor > 90, do: 90
   def total_damage_reduction(armor) when armor < 0, do: 0
   def total_damage_reduction(armor), do: armor
 

@@ -188,7 +188,7 @@ defmodule Moba.Engine.Core.Logger do
     "Apparently a ninja now, #{opponent_for(defender, heroes)} threw a shuriken at #{defender} dealing [damage]#{damage} damage[/damage]"
   end
 
-  defp description_for("shuriken_toss", %{"turn_armor" => {armor, defender}}, heroes) do
+  defp description_for("shuriken_toss", %{"turn_armor" => {armor, defender}}, _heroes) do
     "#{defender} has a shuriken stuck at their body, losing [armor]#{armor * -1} Armor[/armor] this turn."
   end
 
