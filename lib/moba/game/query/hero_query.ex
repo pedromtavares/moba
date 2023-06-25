@@ -39,7 +39,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def pve_targets(difficulty, farm_range, exclude_list, codes, limit) do
-    Hero
+    bots()
     |> by_difficulty(difficulty)
     |> by_total_xp_farm(farm_range)
     |> by_codes(codes)
