@@ -14,15 +14,19 @@ defmodule MobaWeb.Admin.SeasonView do
   def gold_farm_percentage(hero), do: 100 - xp_farm_percentage(hero)
 
   def bottom_performing(stats, key) do
+    limit = if key == :items, do: 6, else: 10
+
     mapped_stats(stats, key)
     |> Enum.sort_by(fn {_record, {_winrate, _, diff}} -> diff end)
-    |> Enum.take(10)
+    |> Enum.take(limit)
   end
 
   def top_performing(stats, key) do
+    limit = if key == :items, do: 6, else: 10
+
     mapped_stats(stats, key)
     |> Enum.sort_by(fn {_record, {_winrate, _, diff}} -> diff * -1 end)
-    |> Enum.take(10)
+    |> Enum.take(limit)
   end
 
   def winrate_class(diff, "pvp") when diff > 4 or diff < -4, do: "text-danger"

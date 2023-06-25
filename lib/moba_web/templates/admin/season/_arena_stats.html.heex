@@ -1,6 +1,6 @@
 <table class="table-dark table border m-0">
     <%= for {record, {winrate, total, diff}} <- @records do %>
-        <tr id={"#{record.code}-row"}>
+        <tr id={"#{record.code}-stats-row"}>
             <td>
                 <img src={GH.image_url(record)} class={"img-border-xs"} style="height: 50px"/>
             </td>

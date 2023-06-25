@@ -5,7 +5,7 @@ defmodule Moba.Admin.Matches do
 
   alias Moba.{Repo, Game}
   alias Game.Schema.Match
-  alias Game.Query.SkillQuery
+  alias Game.Query.{ItemQuery, SkillQuery}
 
   import Ecto.Query
 
@@ -43,6 +43,7 @@ defmodule Moba.Admin.Matches do
       %{
         skills: skill_winrates(scores),
         avatars: avatar_winrates(scores),
+        items: item_winrates(scores),
         winrate: total_winrate,
         total: length(matches)
       }
@@ -119,6 +120,29 @@ defmodule Moba.Admin.Matches do
       winrate = Float.round(wins / total * 100, 2)
 
       Map.put(acc, avatar, {winrate, wins + losses})
+    end)
+  end
+
+  defp item_winrates(scores) do
+    items =
+      ItemQuery.base_canon() |> ItemQuery.enabled() |> ItemQuery.with_rarities(["epic", "legendary"]) |> Repo.all()
+
+    Enum.reduce(items, %{}, fn item, acc ->
+      {wins, losses} =
+        Enum.reduce(scores, {0, 0}, fn {_, hero, {win, loss}}, {acc_win, acc_loss} = acc ->
+          hero_item_codes = Enum.map(hero.items, & &1.code)
+
+          if Enum.member?(hero_item_codes, item.code) do
+            {acc_win + win, acc_loss + loss}
+          else
+            acc
+          end
+        end)
+
+      total = if wins + losses == 0, do: 1, else: wins + losses
+      winrate = Float.round(wins / total * 100, 2)
+
+      Map.put(acc, item, {winrate, wins + losses})
     end)
   end
 end

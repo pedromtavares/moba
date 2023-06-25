@@ -45,6 +45,10 @@ defmodule Moba.Game.Query.ItemQuery do
       order_by: item.name
   end
 
+  def with_rarities(query, rarities) do
+    from item in query, where: item.rarity in ^rarities
+  end
+
   def with_code(query, code) do
     from item in query, where: item.code == ^code
   end

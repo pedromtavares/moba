@@ -106,6 +106,21 @@
                             </div>
                         </div>
                     </div>  
+                    <h5 class="text-center">Avg Winrate: <%= Float.round(@match_stats.winrate, 1) %>% <small>(<%=@match_stats.total%> total matches)</small></h5>
+                    <div class="row">
+                        <div class="col-md-6 margin-auto">
+                            <div>
+                                <div class="row no-gutters">
+                                    <div class="col">
+                                        <%= render "_arena_stats.html", records: top_performing(@match_stats, :items), key: :items, stats_filter: @stats_filter %>
+                                    </div>
+                                    <div class="col">
+                                        <%= render "_arena_stats.html", records: bottom_performing(@match_stats, :items), key: :items, stats_filter: @stats_filter %>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> 
                 </div>
             </div>
         </div>
