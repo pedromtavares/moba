@@ -47,7 +47,7 @@ defmodule Moba.Constants do
         6 => "Grandmaster",
         7 => "Invoker"
       }
-      @turn_mp_regen_multiplier 0.01
+      @turn_mp_regen_multiplier 0.02
       @current_ranking_date Timex.parse!("06-02-2022", "%d-%m-%Y", :strftime)
       @shard_buyback_minimum 5
 
