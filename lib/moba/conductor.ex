@@ -104,7 +104,11 @@ defmodule Moba.Conductor do
     PlayerQuery.pvp_available()
     |> PlayerQuery.order_and_limit_by_top_pvp_points()
     |> Repo.all()
-    |> Enum.filter(&(length(&1.hero_collection) > 2))
+    |> Enum.filter(fn player ->
+      gm_heroes = Enum.filter(player.hero_collection, &(&1["tier"] >= Moba.max_league_tier()))
+      master_heroes = Enum.filter(player.hero_collection, &(&1["tier"] >= Moba.master_league_tier()))
+      length(gm_heroes) > 0 || length(master_heroes) > 1
+    end)
     |> Repo.preload(:user)
     |> Enum.map(fn player ->
       match = Game.auto_matchmaking!(player)
