@@ -104,6 +104,7 @@ defmodule Moba.Conductor do
     PlayerQuery.pvp_available()
     |> PlayerQuery.order_and_limit_by_top_pvp_points()
     |> Repo.all()
+    |> Enum.filter(&(length(&1.hero_collection) > 2))
     |> Repo.preload(:user)
     |> Enum.map(fn player ->
       match = Game.auto_matchmaking!(player)
