@@ -3,7 +3,7 @@
         <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
             <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @player.season_ranking %></span>
-                <div>
+                <div class="f-rpg">
                     <img src={"/images/pve/#{@player.pve_tier}.png"} style="max-height: 40px">
                     <%= @player.user.username %>
                 </div>
