@@ -8,14 +8,10 @@
                     <%= @player.user.username %>
                 </div>
                 <div class="btn-group">
-                    <button class="btn btn-icon btn-outline-light text-white"  data-toggle="tooltip" title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Season Points (#{@player.pvp_points})"}>
-                        <i class="fa fa-globe"></i>
+                    <div class="f-rpg text-white" data-toggle="tooltip" title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Season Points (#{@player.pvp_points})"}>
+                        <i class="fa-thin fa-globe"></i>
                         <%= PlayerView.season_score(@player) %>
-                    </button>
-                    <button class="btn btn-icon btn-outline-light text-white" data-toggle="tooltip" title="Registered since">
-                        <i class="fa fa-clock-o"></i>
-                        <%= @player.user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-                    </button>
+                    </div>
                 </div>
             </h4>
         </div>
