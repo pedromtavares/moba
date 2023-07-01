@@ -322,14 +322,21 @@ defmodule MobaWeb.BattleView do
 
   def power_description(hero) do
     power = (hero.power != 0 && "Power: #{hero.power}. ") || ""
-    buff = (hero.power != 0 && "Total Damage/Regen Buff: #{Kernel.round(hero.total_buff * 100)}% ") || ""
+    total_buff = Kernel.round((hero.total_buff - hero.pierce_buff) * 100)
+    buff = (hero.power != 0 && "Total Damage/Regen Buff: #{total_buff}% ") || ""
     "#{power}#{buff}"
   end
 
-  def armor_description(hero) do
+  def armor_description(%{armor: armor} = hero) when armor > 0 do
     armor = (hero.armor != 0 && "Armor: #{hero.armor}. ") || ""
     reduction = (hero.armor != 0 && "Damage Reduction: #{Kernel.round(hero.total_reduction * 100)}% ") || ""
     "#{armor}#{reduction}"
+  end
+
+  def armor_description(%{armor: armor} = hero) when armor < 0 do
+    armor = (hero.armor != 0 && "Armor: #{hero.armor}. ") || ""
+    buff = (hero.armor != 0 && "Extra Damage Taken: #{Kernel.round(hero.pierce_buff * 100)}% ") || ""
+    "#{armor}#{buff}"
   end
 
   def atk_description(hero) do

@@ -96,6 +96,8 @@ defmodule Moba.Engine.Core.Turns do
         mp_regen: 0,
         mp_burn: 0,
         total_buff: 0,
+        pierce_buff: 0,
+        regen_buff: 0,
         total_reduction: 0,
         null_armor: false,
         effects: [],

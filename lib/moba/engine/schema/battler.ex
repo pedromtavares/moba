@@ -53,6 +53,8 @@ defmodule Moba.Engine.Schema.Battler do
 
     field :turn_atk, :integer, default: 0
 
+    field :pierce_buff, :float, default: 0.0
+    field :regen_buff, :float, default: 0.0
     field :total_buff, :float, default: 0.0
     field :total_reduction, :float, default: 0.0
 

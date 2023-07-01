@@ -147,12 +147,14 @@ defmodule Moba.Engine.Core.Processor do
   # defender (in case of damage)
   # Note that increases (provided by Power) are also applied to HP and MP regen
   defp increases_and_reductions(%{attacker: attacker, defender: defender} = turn) do
-    total_buff = Helper.calculate_damage_buff(attacker, defender)
-    attacker_self_damage = attacker.self_damage * total_buff
+    damage_buff = Helper.calculate_damage_buff(attacker, defender)
+    regen_buff = Helper.calculate_regen_buff(attacker, defender)
+    pierce_buff = Helper.calculate_pierce_buff(defender)
+    attacker_self_damage = attacker.self_damage * damage_buff
     attacker_damage = if attacker.damage < 0, do: 0, else: attacker.damage
-    defender_damage = defender.damage + defender.damage * total_buff
-    attacker_hp_regen = attacker.hp_regen + attacker.hp_regen * total_buff
-    attacker_mp_regen = attacker.mp_regen + attacker.mp_regen * total_buff
+    defender_damage = defender.damage + defender.damage * damage_buff
+    attacker_hp_regen = attacker.hp_regen + attacker.hp_regen * regen_buff
+    attacker_mp_regen = attacker.mp_regen + attacker.mp_regen * regen_buff
 
     attacker = %{
       attacker
@@ -160,7 +162,9 @@ defmodule Moba.Engine.Core.Processor do
         last_damage_caused: round(defender_damage),
         hp_regen: round(attacker_hp_regen),
         mp_regen: round(attacker_mp_regen),
-        total_buff: total_buff
+        total_buff: damage_buff,
+        pierce_buff: pierce_buff,
+        regen_buff: regen_buff
     }
 
     total_reduction = Helper.calculate_damage_reduction(defender)
@@ -171,7 +175,8 @@ defmodule Moba.Engine.Core.Processor do
       defender
       | damage: defender_damage,
         last_damage_taken: defender_damage,
-        total_reduction: total_reduction
+        total_reduction: total_reduction,
+        pierce_buff: pierce_buff
     }
 
     %{turn | attacker: attacker, defender: defender}

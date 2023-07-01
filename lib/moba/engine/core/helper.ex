@@ -70,9 +70,27 @@ defmodule Moba.Engine.Core.Helper do
   end
 
   def calculate_damage_buff(attacker, defender) do
+    total = final_power(attacker, defender) + total_pierce_buff(defender)
+
+    if total > 0, do: total / 100, else: 0
+  end
+
+  def calculate_regen_buff(attacker, defender) do
     total = final_power(attacker, defender)
 
     if total > 0, do: total / 100, else: 0
+  end
+
+  def calculate_pierce_buff(defender) do
+    buff = total_pierce_buff(defender)
+
+    if buff > 0, do: buff / 100, else: 0
+  end
+
+  def total_pierce_buff(defender) do
+    armor = total_armor(defender)
+
+    if armor < 0, do: armor * -1, else: 0
   end
 
   @doc """

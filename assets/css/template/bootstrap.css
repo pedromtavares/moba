@@ -8333,6 +8333,11 @@ a.text-purple:hover, a.text-purple:focus {
   background-color: rgba(101, 89, 204, 0.2);
   color: #6559cc !important; }
 
+.badge-light-orange {
+  background-color: rgba(255, 99, 71, 0.2); /* Tomato with 20% opacity */
+  color: #ff6347 !important; /* Tomato */
+}
+
 .bg-soft-primary {
   background-color: rgba(59, 175, 218, 0.25) !important; }
 
