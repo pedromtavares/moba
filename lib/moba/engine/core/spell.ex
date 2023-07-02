@@ -651,14 +651,23 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Item{code: "daedalus"}} = turn, %{is_attacking: true}) do
     turn
     |> roll(
+      fn turn -> turn |> Effect.pierce_turn_armor() end,
+      fn turn -> turn end
+    )
+  end
+
+  defp effects_for(%{resource: %Item{code: "scythe_of_vyse"}} = turn, %{is_attacking: true}) do
+    turn
+    |> roll(
       fn turn -> turn |> Effect.add_turn_power() end,
       fn turn -> turn end
     )
   end
 
-  defp effects_for(%{resource: %Item{code: "scythe_of_vyse"}} = turn, _options) do
+  defp effects_for(%{resource: %Item{code: "scythe_of_vyse"}} = turn, %{active: true}) do
     turn
     |> Effect.stun()
+    |> effects_for(%{is_attacking: true})
   end
 
   defp effects_for(%{resource: %Item{code: "satanic", final: true}} = turn, _options) do

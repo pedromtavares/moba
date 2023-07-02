@@ -20,7 +20,15 @@ defmodule Moba.Engine.Core.Helper do
       end
 
     codes = resources |> Enum.map(& &1.code)
-    cooldown = battler.cooldowns[resource.code]
+
+    # skip cooldown check for passive fx when resource is both active and passive
+    # initially done for scythe of vyse proc chance to not interfere with stun cd
+    cooldown =
+      if type == :passive && Map.get(resource, :active) && Map.get(resource, :passive) do
+        nil
+      else
+        battler.cooldowns[resource.code]
+      end
 
     Enum.member?(codes, resource.code) &&
       (is_nil(resource.mp_cost) || battler.current_mp >= resource.mp_cost) &&

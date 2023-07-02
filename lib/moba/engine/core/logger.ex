@@ -455,8 +455,16 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} is [status]imune to stuns, silences and disarms[/status] this turn"
   end
 
+  defp description_for("scythe_of_vyse", %{"stunned" => {_, defender}, "turn_power" => {power, attacker}}, _) do
+    "#{attacker} gained [power]#{power} Power[/power] this turn and has hexed #{defender}, who is now [status]stunned[/status] on the next turn"
+  end
+
   defp description_for("scythe_of_vyse", %{"stunned" => {_, hero}}, heroes) do
     "#{opponent_for(hero, heroes)} has hexed #{hero}, who is now [status]stunned[/status] on the next turn"
+  end
+
+  defp description_for("scythe_of_vyse", %{"turn_power" => {power, hero}}, _) do
+    "Behold the power of Vyse! #{hero}'s [power]Power increased by #{power}[/power] this turn"
   end
 
   defp description_for("orchid_malevolence", %{"silenced" => {_, hero}, "turn_armor" => {armor, _}}, heroes) do
@@ -471,8 +479,8 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} has demonically regenerated [hp]#{round(hp)} Health[/hp] by stealing life from #{opponent_for(hero, heroes)}"
   end
 
-  defp description_for("daedalus", %{"turn_power" => {power, hero}}, _) do
-    "Massive critical hit! #{hero}'s [power]Power increased by #{power}[/power] this turn"
+  defp description_for("daedalus", %{"turn_armor" => {armor, hero}}, _) do
+    "Massive critical hit! #{hero} [armor]loses #{armor * -1} Armor[/armor] this turn"
   end
 
   # EXTRAS

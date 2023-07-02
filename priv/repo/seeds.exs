@@ -230,7 +230,7 @@ SeedHelper.create_item(%{
   code: "daedalus",
   name: "Daedalus",
   roll_number: 25,
-  power_amount: 50,
+  armor_amount: 40,
   base_atk: 21,
   rarity: "legendary",
   passive: true
@@ -275,7 +275,9 @@ SeedHelper.create_item(%{
   base_mp: 40,
   active: true,
   cooldown: 3,
-  rarity: "legendary"
+  rarity: "legendary",
+  roll_number: 25,
+  power_amount: 40
 })
 
 SeedHelper.create_item(%{
