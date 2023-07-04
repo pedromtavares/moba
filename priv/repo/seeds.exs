@@ -456,7 +456,8 @@ SeedHelper.create_skill(%{
 SeedHelper.create_skill(%{
   code: "jinada",
   name: "Jinada",
-  power_amount: 20,
+  armor_amount: 20,
+  base_damage: 20,
   passive: true,
   level_requirement: 6,
   damage_type: "normal"

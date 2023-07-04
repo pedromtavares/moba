@@ -147,6 +147,10 @@ defmodule Moba.Engine.Core.Logger do
     "A master of Jinada, #{attacker} dealt [damage]#{damage} damage[/damage] to #{defender} while also [power]gaining #{power} Power[/power] this turn"
   end
 
+  defp description_for("jinada", %{"damage" => {damage, defender}, "turn_armor" => {armor, _}}, heroes) do
+    "A master of deadly blades, #{opponent_for(defender, heroes)} dealt [damage]#{damage} damage[/damage] to #{defender} while also [armor]piercing #{armor * -1} Armor[/armor] this turn"
+  end
+
   defp description_for("maledict", %{"damage" => {damage, defender}, "next_power_magic" => {power, attacker}}, _) do
     "#{attacker} cursed #{defender}, dealing [damage]#{damage} damage[/damage] and granting [power]#{power} Power[/power] for the next skill cast"
   end
@@ -481,6 +485,10 @@ defmodule Moba.Engine.Core.Logger do
 
   defp description_for("daedalus", %{"turn_armor" => {armor, hero}}, _) do
     "Massive critical hit! #{hero} [armor]loses #{armor * -1} Armor[/armor] this turn"
+  end
+
+  defp description_for("daedalus", %{"turn_power" => {power, hero}}, _) do
+    "Massive critical hit! #{hero}'s [power]Power increased by #{power}[/power] this turn"
   end
 
   # EXTRAS

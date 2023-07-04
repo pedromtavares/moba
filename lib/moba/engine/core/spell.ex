@@ -473,7 +473,7 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Skill{code: "jinada"}} = turn, %{is_attacking: true}) do
     if Helper.normal_damage?(turn.defender) do
       turn
-      |> Effect.add_turn_power()
+      |> Effect.pierce_turn_armor()
       |> Effect.base_damage()
     else
       turn

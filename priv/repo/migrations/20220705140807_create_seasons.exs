@@ -38,7 +38,7 @@ defmodule Moba.Repo.Migrations.CreateSeasons do
 
     uuid = UUID.uuid1()
 
-    active_season =
+    _active_season =
       Repo.insert!(%Season{
         active: true,
         resource_uuid: uuid,

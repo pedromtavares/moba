@@ -1,10 +1,6 @@
 defmodule Moba.Repo.Migrations.CreateHeroesSkills do
   use Ecto.Migration
 
-  alias Moba.{Repo, Game}
-  alias Game.Schema.{BuildSkill, HeroSkill, Build}
-  import Ecto.Query
-
   def up do
     drop_if_exists table(:heroes_skills)
 
