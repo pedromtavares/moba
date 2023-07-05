@@ -101,7 +101,7 @@ defmodule Moba.Conductor do
   end
 
   defp auto_matchmaking do
-    PlayerQuery.with_pve_tier_above(1)
+    PlayerQuery.with_pve_tier_above(0)
     |> PlayerQuery.order_by_top_pvp_points()
     |> Repo.all()
     |> Enum.filter(fn player ->
