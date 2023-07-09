@@ -14,7 +14,6 @@ defmodule Moba.Admin.Duels do
         limit: 20,
         join: player in assoc(duel, :player),
         where: is_nil(player.bot_options),
-        where: duel.auto == false,
         order_by: [desc: duel.id]
     )
     |> Repo.preload(player: :user, opponent_player: :user, winner_player: :user)
