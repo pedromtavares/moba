@@ -82,15 +82,18 @@ defmodule MobaWeb.DuelLive do
       when phase not in ["user_battle", "opponent_battle", "finished"] do
     Process.send_after(self(), :check_phase, 1000 + Enum.random(1..200))
 
-    if DuelView.pick_timer(duel, Timex.now()) <= 0 do
-      Game.continue_duel!(duel, :auto)
-    end
+    duel =
+      if DuelView.pick_timer(duel, Timex.now()) <= 0 do
+        Game.continue_duel!(duel, :auto)
+      else
+        duel
+      end
 
-    {:noreply, assign(socket, current_time: Timex.now())}
+    {:noreply, assign(socket, current_time: Timex.now(), duel: duel)}
   end
 
   def handle_info(:check_phase, socket) do
-    {:noreply, socket}
+    {:noreply, assign(socket, current_time: Timex.now())}
   end
 
   def render(assigns) do

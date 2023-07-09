@@ -6,9 +6,14 @@
                 <% end %>
         <% else %>
             <div class="d-flex justify-content-center my-2">
+                <a href="javascript:;" phx-click="season-duel" class={"btn btn-lg btn-primary px-2 py-1"} phx-hook="Loading" id="immortal-ranking-button">
+                    <span class="d-inline-block loading-text"><i class="fa fa-swords mr-1"></i>Play a Season Duel</span>
+                </a>
+            </div>
+            <div class="d-flex justify-content-center my-4">
                 <div class="custom-control custom-switch">
                     <input type="checkbox" class="custom-control-input" id="set-status" phx-click="set-status" checked={@current_player.status == "available"}>
-                    <label class="custom-control-label" for="set-status">I am available for PvP Duels</label>
+                    <label class="custom-control-label" for="set-status">I am available for live PvP Duels</label>
                 </div>
             </div>
             <%= if length(@duel_opponents) > 0 do %>

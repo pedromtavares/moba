@@ -15,11 +15,13 @@
                             <%= if casual?(@duel) do %>
                                 <span class="font-15 badge badge-pill badge-light-success" data-toggle="tooltip" title="This duel is worth no Season Points because the points difference of players is too high">Casual</span>
                             <% end %>
-                            <span class="font-15 badge badge-pill badge-light-danger" data-toggle="tooltip" title="All-time score between players">
-                                <%= @duel.player.duel_score["#{@duel.opponent_player_id}"] || 0 %>
-                                 x 
-                                <%= @duel.opponent_player.duel_score["#{@duel.player_id}"] || 0 %>    
-                            </span>
+                            <%= unless @duel.auto do %>
+                                <span class="font-15 badge badge-pill badge-light-danger" data-toggle="tooltip" title="All-time score between players">
+                                    <%= @duel.player.duel_score["#{@duel.opponent_player_id}"] || 0 %>
+                                     x 
+                                    <%= @duel.opponent_player.duel_score["#{@duel.player_id}"] || 0 %>    
+                                </span>
+                            <% end %>
                         </div>
                     </div>
                     <div class="col d-flex align-items-center justify-content-around text-center">
@@ -40,7 +42,9 @@
                                         <%= if @duel.rewards.defender_pvp_points > 0 do %>
                                             <span class="badge badge-pill badge-light-success"><%= username(@duel.opponent_player) %>: +<%= @duel.rewards.defender_pvp_points %> SP</span>
                                         <% else %>
-                                            <span class="badge badge-pill badge-light-dark"><%= username(@duel.opponent_player) %>: <%= @duel.rewards.defender_pvp_points %> SP</span>
+                                            <%= if @duel.rewards.defender_pvp_points != 0 do %>
+                                                <span class="badge badge-pill badge-light-dark"><%= username(@duel.opponent_player) %>: <%= @duel.rewards.defender_pvp_points %> SP</span>
+                                            <% end %>
                                         <% end %>
                                     </h3>
                                 <% end %>
@@ -65,32 +69,34 @@
                 </div>
             </div>
         </div>
-        <div class="col-4">
-            <div class="card-box p-0 pt-1 darker">
-                <div class="inbox-widget messages px-2 mb-1">
-                    <%= for message <- @messages do %>
-                        <div class="inbox-item">              
-                            <div class="inbox-item-img">
-                                <img src={"/images/pve/#{message.tier}.png"}/>
+        <%= unless @duel.auto do %>
+            <div class="col-4">
+                <div class="card-box p-0 pt-1 darker">
+                    <div class="inbox-widget messages px-2 mb-1">
+                        <%= for message <- @messages do %>
+                            <div class="inbox-item">              
+                                <div class="inbox-item-img">
+                                    <img src={"/images/pve/#{message.tier}.png"}/>
+                                </div>
+                                <p class="inbox-item-text">
+                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id), class: "text-dark mr-1" %>
+                                     <%= message.body %>
+                                </p>
+                                <p class="inbox-item-date">
+                                    <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>       
+                                </p>
+                                <%= if @current_player.user.is_admin do %>
+                                    <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3"><i class="fa fa-trash"></i></a>
+                                <% end %>
                             </div>
-                            <p class="inbox-item-text">
-                                <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id), class: "text-dark mr-1" %>
-                                 <%= message.body %>
-                            </p>
-                            <p class="inbox-item-date">
-                                <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>       
-                            </p>
-                            <%= if @current_player.user.is_admin do %>
-                                <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3"><i class="fa fa-trash"></i></a>
-                            <% end %>
-                        </div>
-                    <% end %>
+                        <% end %>
+                    </div>
+                    <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
+                        <%= text_input form, :body, class: "form-control darker", placeholder: "Type and press Enter to chat", maxlength: 200, minlength: 2 %>
+                    </.form>
                 </div>
-                <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
-                    <%= text_input form, :body, class: "form-control darker", placeholder: "Type and press Enter to chat", maxlength: 200, minlength: 2 %>
-                </.form>
             </div>
-        </div>
+        <% end %>
     </div>
 
     <div class="duel-details">

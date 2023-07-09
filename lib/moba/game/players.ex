@@ -20,6 +20,8 @@ defmodule Moba.Game.Players do
     |> Repo.insert!()
   end
 
+  def duel_opponent(player), do: matchmaking_opponent(player)
+
   def duel_opponents(player, online_ids) do
     PlayerQuery.non_bots()
     |> PlayerQuery.non_guests()

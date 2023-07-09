@@ -52,7 +52,7 @@ defmodule Moba.Game do
 
   defdelegate continue_duel!(duel, hero \\ nil), to: Arena
 
-  defdelegate create_duel!(player, opponent), to: Arena
+  defdelegate create_duel!(player, opponent, auto \\ false), to: Arena
 
   defdelegate duel_challenge(player, opponent), to: Arena
 
@@ -207,6 +207,8 @@ defmodule Moba.Game do
   defdelegate create_player!(attrs), to: Players
 
   defdelegate daily_ranking(limit), to: Players
+
+  defdelegate duel_opponent(player), to: Players
 
   defdelegate duel_opponents(player, online_ids), to: Players
 

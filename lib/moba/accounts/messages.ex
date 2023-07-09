@@ -34,6 +34,6 @@ defmodule Moba.Accounts.Messages do
   def notification_count(nil), do: 0
 
   def notification_count(%{community_seen_at: time}) do
-    from(m in Message, where: m.inserted_at > ^time) |> Repo.aggregate(:count)
+    from(m in Message, where: m.inserted_at > ^time, where: m.channel == "community") |> Repo.aggregate(:count)
   end
 end

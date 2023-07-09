@@ -126,9 +126,18 @@ defmodule Moba.Engine.Core do
   end
 
   # Skips to the next turn if the current action is to be performed by an automated opponent
-  defp maybe_skip_next_turn(%{duel: %{auto: true}} = battle, _) do
-    battle = Repo.preload(battle, :turns)
-    create_turn!(battle, %{auto: true})
+  defp maybe_skip_next_turn(%{duel: %{auto: true, opponent_player_id: opponent_player_id}} = battle, _) do
+    battle = Repo.preload(battle, turns: Engine.ordered_turns_query())
+    last_turn = List.last(battle.turns)
+    bot_initiator = is_nil(last_turn) && battle.initiator_player_id == opponent_player_id
+    bot_attacker = last_turn && last_turn.defender.player_id == opponent_player_id
+    attacker_disabled? = last_turn && Helper.disabled?(last_turn.defender)
+
+    if bot_attacker || bot_initiator || attacker_disabled? do
+      create_turn!(battle, %{auto: true})
+    else
+      battle
+    end
   end
 
   defp maybe_skip_next_turn(battle, _) do

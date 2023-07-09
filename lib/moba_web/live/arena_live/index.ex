@@ -1,4 +1,4 @@
-defmodule MobaWeb.Arena.Index do
+defmodule MobaWeb.ArenaLive.Index do
   use MobaWeb, :live_view
 
   alias MobaWeb.{ArenaView, Presence, TutorialComponent}
@@ -48,6 +48,17 @@ defmodule MobaWeb.Arena.Index do
       {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match.id))}
     else
       {:noreply, assign(socket, current_player: Game.get_player!(player.id))}
+    end
+  end
+
+  def handle_event("season-duel", _, %{assigns: %{current_player: player}} = socket) do
+    opponent = Game.duel_opponent(player)
+    duel = Game.create_duel!(player, opponent, true)
+
+    if duel do
+      {:noreply, push_redirect(socket, to: Routes.live_path(socket, MobaWeb.DuelLive, duel.id))}
+    else
+      {:noreply, socket}
     end
   end
 

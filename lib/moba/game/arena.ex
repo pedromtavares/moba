@@ -11,12 +11,17 @@ defmodule Moba.Game.Arena do
 
   def continue_duel!(%{phase: "opponent_battle"} = duel, _) do
     score = score_duel!(duel)
-    Players.set_player_available!(duel.player) && Players.set_player_available!(duel.opponent_player)
+    Players.set_player_available!(duel.player)
+
+    unless duel.auto do
+      Players.set_player_available!(duel.opponent_player)
+    end
+
     Duels.finish!(duel, score)
   end
 
   def continue_duel!(duel, hero) do
-    updated = if hero == :auto, do: Duels.auto_next_phase!(duel), else: Duels.next_phase!(duel, hero)
+    updated = Duels.next_phase!(duel, hero)
     hero && hero != :auto && Game.update_hero!(hero, %{pvp_last_picked: Timex.now(), pvp_picks: hero.pvp_picks + 1})
     MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
     updated
@@ -56,13 +61,16 @@ defmodule Moba.Game.Arena do
     |> continue_match!()
   end
 
-  def create_duel!(player, opponent) do
-    duel = Duels.create!(player, opponent)
+  def create_duel!(player, opponent, auto) do
+    duel = Duels.create!(player, opponent, auto)
 
-    Players.set_player_unavailable!(player) && Players.set_player_unavailable!(opponent)
+    Players.set_player_unavailable!(player)
 
-    MobaWeb.broadcast("player-#{player.id}", "duel", %{id: duel.id})
-    MobaWeb.broadcast("player-#{opponent.id}", "duel", %{id: duel.id})
+    unless auto do
+      Players.set_player_unavailable!(opponent)
+      MobaWeb.broadcast("player-#{player.id}", "duel", %{id: duel.id})
+      MobaWeb.broadcast("player-#{opponent.id}", "duel", %{id: duel.id})
+    end
 
     duel
   end
@@ -180,7 +188,7 @@ defmodule Moba.Game.Arena do
     end
   end
 
-  defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent} = duel) do
+  defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent, auto: auto} = duel) do
     %{winner_id: first_winner_id} = Engine.first_duel_battle(duel)
     %{winner_id: last_winner_id} = Engine.last_duel_battle(duel)
 
@@ -195,12 +203,15 @@ defmodule Moba.Game.Arena do
         true -> nil
       end
 
-    duel_points = Duels.pvp_points(player, opponent, winner)
-    player_updates = if player_win, do: %{loser_id: opponent.id}, else: %{}
-    opponent_updates = if opponent_win, do: %{loser_id: player.id}, else: %{}
+    duel_points = Duels.pvp_points(player, opponent, winner, auto)
+    player_updates = if player_win && !auto, do: %{loser_id: opponent.id}, else: %{}
 
     Players.duel_update!(player, Map.merge(player_updates, %{pvp_points: duel_points.total_player_points}))
-    Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: duel_points.total_opponent_points}))
+
+    unless auto do
+      opponent_updates = if opponent_win, do: %{loser_id: player.id}, else: %{}
+      Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: duel_points.total_opponent_points}))
+    end
 
     Moba.update_pvp_rankings()
 
