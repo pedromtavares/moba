@@ -630,6 +630,7 @@ coup =
     code: "coup",
     name: "Coup de Grace",
     power_amount: 35,
+    armor_amount: 35,
     roll_number: 20,
     passive: true,
     ultimate: true

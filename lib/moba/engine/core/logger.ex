@@ -251,6 +251,10 @@ defmodule Moba.Engine.Core.Logger do
     "Merciful blow! #{hero}'s [power]Power significantly increased by #{power}[/power] this turn"
   end
 
+  defp description_for("coup", %{"turn_armor" => {armor, hero}}, _) do
+    "Merciful blow! #{hero} [armor]loses #{armor * -1} Armor[/armor] this turn"
+  end
+
   defp description_for("culling_blade", %{"executed" => {true, hero}}, heroes) do
     "#{hero} has been instantly executed by #{opponent_for(hero, heroes)}. [status]RIP[/status]"
   end

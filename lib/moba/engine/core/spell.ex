@@ -533,7 +533,7 @@ defmodule Moba.Engine.Core.Spell do
   defp effects_for(%{resource: %Skill{code: "coup"}} = turn, %{is_attacking: true}) do
     turn
     |> roll(
-      fn turn -> turn |> Effect.add_turn_power() end,
+      fn turn -> turn |> Effect.pierce_turn_armor() end,
       fn turn -> turn end
     )
   end
@@ -640,7 +640,6 @@ defmodule Moba.Engine.Core.Spell do
     turn
     |> Effect.attacker_extra()
     |> Effect.add_attacker_debuff()
-    |> effects_for(%{is_attacking: true})
   end
 
   defp effects_for(%{resource: %Item{code: "silver_edge", attacker_debuff: true}} = turn, _options) do
