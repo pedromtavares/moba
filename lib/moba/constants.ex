@@ -159,7 +159,7 @@ defmodule Moba.Constants do
 
       def defeat_duel_points(diff, auto \\ false)
 
-      def victory_duel_points(diff, true), do: victory_duel_points(diff, false)
+      def victory_duel_points(diff, true), do: victory_duel_points(diff, false) * 3
 
       def tie_duel_points(diff, true), do: minimum_duel_points(0)
 
