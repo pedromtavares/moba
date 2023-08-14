@@ -78,7 +78,7 @@ defmodule Moba.Admin.Matches do
       if hero do
         {hero.avatar.code, hero, score}
       else
-        {nil, %{skills: []}, score}
+        {nil, %{skills: [], items: []}, score}
       end
     end)
   end
