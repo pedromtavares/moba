@@ -45,20 +45,22 @@ defmodule Moba.Game.Arena do
 
     {attacker, defender} = Matches.get_latest_battlers(match, latest_battle, last_turn)
 
-    battle =
-      Engine.create_match_battle!(%{
-        attacker: attacker.hero,
-        attacker_player: attacker.player,
-        attacker_pick_position: attacker.position,
-        defender: defender.hero,
-        defender_player: defender.player,
-        defender_pick_position: defender.position,
-        match: match
-      })
+    if attacker.hero && defender.hero do
+      battle =
+        Engine.create_match_battle!(%{
+          attacker: attacker.hero,
+          attacker_player: attacker.player,
+          attacker_pick_position: attacker.position,
+          defender: defender.hero,
+          defender_player: defender.player,
+          defender_pick_position: defender.position,
+          match: match
+        })
 
-    match
-    |> Matches.finish!(battle)
-    |> continue_match!()
+      match
+      |> Matches.finish!(battle)
+      |> continue_match!()
+    end
   end
 
   def create_duel!(player, opponent, auto) do
