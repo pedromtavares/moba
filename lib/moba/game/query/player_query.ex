@@ -158,7 +158,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   def order_by_top_pvp_points(base) do
     from player in base,
       where: player.daily_matches < @daily_match_limit,
-      order_by: [desc: player.pvp_points]
+      order_by: [desc: player.pvp_tier, desc: player.pvp_points]
   end
 
   def with_pve_tier_above(tier) do
