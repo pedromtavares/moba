@@ -70,7 +70,7 @@ defmodule Moba.MixProject do
       {:appsignal, "~> 2.0"},
       {:appsignal_phoenix, "~> 2.0"},
       {:ueberauth_discord, "~> 0.6"},
-      {:nostrum, "~> 0.6", runtime: Mix.env() != :test},
+      {:nostrum, "~> 0.8", runtime: Mix.env() != :test},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:gun, "2.0.1", hex: "remedy_gun", override: true},
       {:pow_postgres_store, github: "ZennerIoT/pow_postgres_store"},
