@@ -13,9 +13,9 @@ A community-made turn-based RPG built with Phoenix LiveView.
 MOBA is an opportunity to get your feet wet with Phoenix LiveView (or even Elixir) beyond simple counter demos. It's first and foremost a fun learning experience for all developer skill levels, while also being an actual product with real users deployed in a production environment. Interested? [Get Involved.](https://github.com/pedromtavares/moba/issues/90)
 
 ### Requirements
- * PostgreSQL 12
- * Elixir 1.13.3
- * Erlang 23.3
+ * PostgreSQL 15
+ * Elixir 1.14.1
+ * Erlang 25.3.2.6
  * node.js 17.0.1
 
 ### Setup
