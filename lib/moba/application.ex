@@ -20,6 +20,7 @@ defmodule Moba.Application do
       Moba.Server,
       Moba.Admin.Server,
       Moba.Ranker,
+      Moba.DiscordConsumer,
       {Task.Supervisor, name: Moba.TaskSupervisor},
       {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
     ]
