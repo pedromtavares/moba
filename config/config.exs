@@ -31,9 +31,6 @@ config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
   client_id: System.get_env("DISCORD_CLIENT_ID"),
   client_secret: System.get_env("DISCORD_CLIENT_SECRET")
 
-config :nostrum,
-  token: System.get_env("DISCORD_BOT_TOKEN") || "test"
-
 config :torch,
   otp_app: :moba,
   template_format: "eex"

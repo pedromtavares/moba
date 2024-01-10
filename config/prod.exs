@@ -30,6 +30,9 @@ config :moba, MobaWeb.PowMailer,
   adapter: Bamboo.SendGridAdapter,
   api_key: System.get_env("SENDGRID_KEY")
 
+config :nostrum,
+  token: System.get_env("DISCORD_BOT_TOKEN")
+
 config :sentry,
   dsn: System.get_env("SENTRY_DSN"),
   environment_name: :prod,
