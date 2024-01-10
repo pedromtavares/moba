@@ -32,7 +32,7 @@ config :ueberauth, Ueberauth.Strategy.Discord.OAuth,
   client_secret: System.get_env("DISCORD_CLIENT_SECRET")
 
 config :nostrum,
-  token: System.get_env("DISCORD_BOT_TOKEN")
+  token: System.get_env("DISCORD_BOT_TOKEN") || "test"
 
 config :torch,
   otp_app: :moba,
