@@ -145,9 +145,11 @@ defmodule Moba.Game.Arena do
 
   defp match_picks(player_id, 0, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
+    team_heroes = team && Game.get_heroes(team.pick_ids) |> Enum.filter(&(&1))
+    team_has_heroes? = team_heroes && length(team_heroes) >= 5
 
     pick_ids =
-      if team do
+      if team_has_heroes? do
         Enum.take(team.pick_ids, 5)
       else
         Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
@@ -158,9 +160,11 @@ defmodule Moba.Game.Arena do
 
   defp match_picks(player_id, _, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
+    team_heroes = team && Game.get_heroes(team.pick_ids) |> Enum.filter(&(&1))
+    team_has_heroes? = team_heroes && length(team_heroes) >= 5
 
     pick_ids =
-      if team do
+      if team_has_heroes? do
         Enum.take(team.pick_ids, 5)
       else
         trained = Heroes.trained_pvp_heroes(player_id)
