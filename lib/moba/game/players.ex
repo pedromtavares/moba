@@ -54,7 +54,8 @@ defmodule Moba.Game.Players do
   def get_player_from_user!(user_id), do: Repo.get_by(PlayerQuery.load(), user_id: user_id)
 
   def matchmaking_opponent(%{pvp_tier: 0, id: id, pvp_points: points}) do
-    PlayerQuery.pleb_opponents(id, points) |> Repo.all() |> List.first()
+    pleb = PlayerQuery.pleb_opponents(id, points) |> Repo.all() |> List.first()
+    pleb || PlayerQuery.matchmaking_opponents(id, tier) |> Repo.all() |> List.first()
   end
 
   def matchmaking_opponent(%{pvp_tier: tier, id: id}) do
