@@ -1,33 +1,49 @@
 <div class="col-lg-4 col-md-6" id={"player-card-#{@player.id}"}>
-    <%= live_redirect class: "hero-card card mb-3", style: "background-image: url(#{GH.background_url(@player.top_hero)})", to: Routes.player_path(@socket, :show, @player.id) do %>
-        <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
-            <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-                <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @player.season_ranking %></span>
-                <div class="f-rpg">
-                    <img src={"/images/pve/#{@player.pve_tier}.png"} style="max-height: 40px">
-                    <%= @player.user.username %>
-                </div>
-                <div class="btn-group">
-                    <div class="f-rpg text-white" data-toggle="tooltip" title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Season Points (#{@player.pvp_points})"}>
-                        <i class="fa-thin fa-globe"></i>
-                        <%= PlayerView.season_score(@player) %>
-                    </div>
-                </div>
-            </h4>
+  <.link
+    class="hero-card card mb-3"
+    style={"background-image: url(#{GH.background_url(@player.top_hero)})"}
+    navigate={Routes.player_path(@socket, :show, @player.id)}
+  >
+    <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
+      <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
+        <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @player.season_ranking %></span>
+        <div class="f-rpg">
+          <img src={"/images/pve/#{@player.pve_tier}.png"} style="max-height: 40px" />
+          <%= @player.user.username %>
         </div>
-        <div class="card-body p-0 d-flex align-items-center justify-content-center">
+        <div class="btn-group">
+          <div
+            class="f-rpg text-white"
+            data-toggle="tooltip"
+            title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Season Points (#{@player.pvp_points})"}
+          >
+            <i class="fa-thin fa-globe"></i>
+            <%= PlayerView.season_score(@player) %>
+          </div>
         </div>
-        <div class="card-footer transparent p-1"  style="background:rgba(0,0,0,0.8)">
-            <div class="row">
-                <div class="col justify-content-center d-flex">
-                    <div class="btn-group hero-stats">  
-                        <button class="btn btn-icon btn-outline-dark text-info" data-toggle="tooltip" title="Season Points"> <i class="fa fa-arrows-to-dot"></i> <%= @player.pvp_points %></button>
-                        <button class="btn btn-icon btn-outline-dark text-danger" data-toggle="tooltip" title="Total Arena Win Rate"> <i class="fa fa-swords mr-1"></i> <%= PlayerView.total_win_rate(@player) %></button>
-                        <button class="btn btn-icon btn-outline-dark text-warning" data-toggle="tooltip" title="Best Immortal Streak"> <i class="fa fa-trophy"></i> <%= @player.best_immortal_streak %></button>
-                    </div>
-
-                </div>
-            </div>
+      </h4>
+    </div>
+    <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
+    <div class="card-footer transparent p-1" style="background:rgba(0,0,0,0.8)">
+      <div class="row">
+        <div class="col justify-content-center d-flex">
+          <div class="btn-group hero-stats">
+            <button class="btn btn-icon btn-outline-dark text-info" data-toggle="tooltip" title="Season Points">
+              <i class="fa fa-arrows-to-dot"></i> <%= @player.pvp_points %>
+            </button>
+            <button class="btn btn-icon btn-outline-dark text-danger" data-toggle="tooltip" title="Total Arena Win Rate">
+              <i class="fa fa-swords mr-1"></i> <%= PlayerView.total_win_rate(@player) %>
+            </button>
+            <button
+              class="btn btn-icon btn-outline-dark text-warning"
+              data-toggle="tooltip"
+              title="Best Immortal Streak"
+            >
+              <i class="fa fa-trophy"></i> <%= @player.best_immortal_streak %>
+            </button>
+          </div>
         </div>
-    <% end %>
+      </div>
+    </div>
+  </.link>
 </div>

@@ -1,12 +1,15 @@
 <%= if non_guest?(assigns), do: live_render(@socket, MobaWeb.CurrentPlayerLive, id: "current-player") %>
 
 <%= if show_sidebar?(assigns) do %>
-    <div class="row">
-        <%= live_render(@socket, MobaWeb.SidebarLive, session: %{"sidebar_code" => assigns[:sidebar_code], "notifications" => assigns[:notifications]}, id: "sidebar-view") %>
-        <div class="col">
-            <%= @inner_content %>
-        </div>
+  <div class="row">
+    <%= live_render(@socket, MobaWeb.SidebarLive,
+      session: %{"sidebar_code" => assigns[:sidebar_code], "notifications" => assigns[:notifications]},
+      id: "sidebar-view"
+    ) %>
+    <div class="col">
+      <%= @inner_content %>
     </div>
+  </div>
 <% else %>
-    <%= @inner_content %>
+  <%= @inner_content %>
 <% end %>

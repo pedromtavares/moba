@@ -1,40 +1,40 @@
 <header id="topnav" class="d-md-none">
-    <div class="topbar-menu">
-        <div class="container-fluid clean-container">
-            <div id="inner-navigation">
-                <div class="col-xl-11 margin-auto">
-                    <div class="row text-center game-nav no-gutters">
-                        <div class="col d-flex justify-content-center">
-                            <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
-                                <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TrainingLive), class: "nav-link" do %>
-                                    <i class="fa fa-sword"></i>
-                                <% end %>
-                            <% end %>
-                            <%= live_redirect to: Routes.live_path(@conn, MobaWeb.DashboardLive), class: "nav-link" do %>
-                                <i class="fa fa-home"></i>
-                            <% end %>
-                            <%= if assigns[:current_player] do %>
-                                <%= if length(@current_player.hero_collection) > 0 do %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.ArenaLive.Index), class: "nav-link" do %>
-                                        <i class="fa fa-swords"></i>
-                                    <% end %>
-                                <% end %>
-                                <%= if @current_player.user_id do %>
-                                    <%= live_redirect to: Routes.player_path(@conn, :show, @current_player.id), class: "nav-link" do %>
-                                        <i class="fa fa-helmet-battle"></i>
-                                    <% end %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.CommunityLive), class: "nav-link" do %>
-                                        <i class="fa fa-globe"></i>
-                                    <% end %>
-                                    <%= live_redirect to: Routes.live_path(@conn, MobaWeb.TavernLive), class: "nav-link" do %>
-                                        <i class="fa fa-dungeon"></i>
-                                    <% end %>
-                                <% end %>
-                            <% end %>
-                        </div>
-                    </div>
-                </div>
+  <div class="topbar-menu">
+    <div class="container-fluid clean-container">
+      <div id="inner-navigation">
+        <div class="col-xl-11 margin-auto">
+          <div class="row text-center game-nav no-gutters">
+            <div class="col d-flex justify-content-center">
+              <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
+                <.link navigate={Routes.live_path(@conn, MobaWeb.TrainingLive)} class="nav-link">
+                  <i class="fa fa-sword"></i>
+                </.link>
+              <% end %>
+              <.link navigate={Routes.live_path(@conn, MobaWeb.DashboardLive)} class="nav-link">
+                <i class="fa fa-home"></i>
+              </.link>
+              <%= if assigns[:current_player] do %>
+                <%= if length(@current_player.hero_collection) > 0 do %>
+                  <.link navigate={Routes.live_path(@conn, MobaWeb.ArenaLive.Index)} class="nav-link">
+                    <i class="fa fa-swords"></i>
+                  </.link>
+                <% end %>
+                <%= if @current_player.user_id do %>
+                  <.link navigate={Routes.player_path(@conn, :show, @current_player.id)} class="nav-link">
+                    <i class="fa fa-helmet-battle"></i>
+                  </.link>
+                  <.link navigate={Routes.live_path(@conn, MobaWeb.CommunityLive)} class="nav-link">
+                    <i class="fa fa-globe"></i>
+                  </.link>
+                  <.link navigate={Routes.live_path(@conn, MobaWeb.TavernLive)} class="nav-link">
+                    <i class="fa fa-dungeon"></i>
+                  </.link>
+                <% end %>
+              <% end %>
             </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </header>

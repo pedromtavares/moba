@@ -1,55 +1,88 @@
 <div class="card duels" phx-hook="EqualHeight" phx-target=".ranking" id="pvp_duels">
-    <div class="card-body p-0">
-        <%= if @pending_duel do %>
-            <%= live_redirect to: Routes.live_path(@socket, MobaWeb.DuelLive, @pending_duel), class: "btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3" do %>
-                    <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
+  <div class="card-body p-0">
+    <%= if @pending_duel do %>
+      <.link
+        navigate={Routes.live_path(@socket, MobaWeb.DuelLive, @pending_duel)}
+        class="btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3"
+      >
+        <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
+      </.link>
+    <% else %>
+      <div class="d-flex justify-content-center my-2">
+        <a
+          href="javascript:;"
+          phx-click="season-duel"
+          class="btn btn-lg btn-primary px-2 py-1"
+          phx-hook="Loading"
+          id="immortal-ranking-button"
+        >
+          <span class="d-inline-block loading-text"><i class="fa fa-swords mr-1"></i>Play a Season Duel</span>
+        </a>
+      </div>
+      <div class="d-flex justify-content-center my-4">
+        <div class="custom-control custom-switch">
+          <input
+            type="checkbox"
+            class="custom-control-input"
+            id="set-status"
+            phx-click="set-status"
+            checked={@current_player.status == "available"}
+          />
+          <label class="custom-control-label" for="set-status">I am available for live PvP Duels</label>
+        </div>
+      </div>
+      <%= if length(@duel_opponents) > 0 do %>
+        <table class="table-dark table">
+          <%= for player <- @duel_opponents do %>
+            <tr id={"player-#{player.id}"}>
+              <td class="text-right">
+                <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height:  50px" />
+              </td>
+              <td>
+                <h5>
+                  <.link navigate={Routes.player_path(@socket, :show, player.id)}>player.user.username</.link>
+                  <br /><small><%= player.pvp_points %> SP</small>
+                </h5>
+              </td>
+              <td>
+                Last active <%= player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
+              </td>
+              <td>
+                <%= if can_be_challenged?(@current_player, @current_time) && can_be_challenged?(player, @current_time) do %>
+                  <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id={player.id}>
+                    <i class="fa fa-bullseye mr-1" id={"can-duel-#{player.id}"}></i>Duel
+                  </button>
+                <% else %>
+                  <button
+                    type="button"
+                    class="btn btn-danger btn-block disabled no-action"
+                    data-toggle="tooltip"
+                    title="You currently cannot challenge this player, please wait a few seconds."
+                    id={"cannot-duel-#{player.id}"}
+                  >
+                    <i class="fa fa-bullseye mr-1"></i>Duel
+                  </button>
                 <% end %>
-        <% else %>
-            <div class="d-flex justify-content-center my-2">
-                <a href="javascript:;" phx-click="season-duel" class={"btn btn-lg btn-primary px-2 py-1"} phx-hook="Loading" id="immortal-ranking-button">
-                    <span class="d-inline-block loading-text"><i class="fa fa-swords mr-1"></i>Play a Season Duel</span>
-                </a>
-            </div>
-            <div class="d-flex justify-content-center my-4">
-                <div class="custom-control custom-switch">
-                    <input type="checkbox" class="custom-control-input" id="set-status" phx-click="set-status" checked={@current_player.status == "available"}>
-                    <label class="custom-control-label" for="set-status">I am available for live PvP Duels</label>
-                </div>
-            </div>
-            <%= if length(@duel_opponents) > 0 do %>
-                <table class="table-dark table">
-                    <%= for player <- @duel_opponents do %>
-                        <tr id={"player-#{player.id}"}>
-                            <td class="text-right">
-                                <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height:  50px"/>
-                            </td>
-                            <td>
-                                <h5><%= live_redirect player.user.username, to: Routes.player_path(@socket, :show, player.id) %><br/><small><%= player.pvp_points %> SP</small></h5>
-                            </td>
-                            <td>
-                                Last active <%= player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-                            </td>
-                            <td>
-                                <%= if can_be_challenged?(@current_player, @current_time) && can_be_challenged?(player, @current_time) do %>
-                                    <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id={player.id}><i class="fa fa-bullseye mr-1" id={"can-duel-#{player.id}"}></i>Duel</button>
-                                <% else %>
-                                    <button type="button" class="btn btn-danger btn-block disabled no-action" data-toggle="tooltip" title="You currently cannot challenge this player, please wait a few seconds." id={"cannot-duel-#{player.id}"}><i class="fa fa-bullseye mr-1"></i>Duel</button>
-                                <% end %>
-                            </td>
-                        </tr>
-                    <% end %>
-                </table>
-            <% end %>
+              </td>
+            </tr>
+          <% end %>
+        </table>
+      <% end %>
 
-            <%= if length(@duels) > 0 do %>
-                <div class="history">
-                    <table class="table-dark table mb-0">
-                        <%= for duel <- @duels do %>
-                            <%= render "_duel_row.html", duel: duel, opponent: opponent_for(duel, @current_player), player_id: @current_player.id, socket: @socket %>
-                        <% end %>
-                    </table>
-                </div>
+      <%= if length(@duels) > 0 do %>
+        <div class="history">
+          <table class="table-dark table mb-0">
+            <%= for duel <- @duels do %>
+              <%= render("_duel_row.html",
+                duel: duel,
+                opponent: opponent_for(duel, @current_player),
+                player_id: @current_player.id,
+                socket: @socket
+              ) %>
             <% end %>
-        <% end %>
-    </div>
+          </table>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 </div>

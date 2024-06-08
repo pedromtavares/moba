@@ -3,13 +3,22 @@
     <div class="card-body mb-0">
       <div class="d-flex justify-content-center mb-2">
         <%= for pick <- @team.picks do %>
-            <%= GH.hero_avatar(pick) %>
+          <%= GH.hero_avatar(pick) %>
         <% end %>
       </div>
       <%= if @picked_ids == @team.pick_ids do %>
         <button class="btn btn-block btn-secondary dark-button" disabled>Picked <%= @team.name %></button>
       <% else %>
-        <button class="btn btn-block btn-secondary dark-button" phx-click="pick-team" phx-value-id={@team.id} id={"pick-team-#{@team.id}"} phx-hook="Loading" loading="Picking..."><span class="loading-text">Pick <%= @team.name %></span></button>
+        <button
+          class="btn btn-block btn-secondary dark-button"
+          phx-click="pick-team"
+          phx-value-id={@team.id}
+          id={"pick-team-#{@team.id}"}
+          phx-hook="Loading"
+          loading="Picking..."
+        >
+          <span class="loading-text">Pick <%= @team.name %></span>
+        </button>
       <% end %>
     </div>
   </div>

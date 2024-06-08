@@ -130,7 +130,7 @@ defmodule MobaWeb.MatchLive do
         battles: battles,
         tick: tick,
         trained_heroes: trained_heroes,
-        picked_heroes: Enum.filter(match.player_picks, &(&1)),
+        picked_heroes: Enum.filter(match.player_picks, & &1),
         generated_heroes: generated_heroes,
         tutorial_step: player.tutorial_step,
         hero_tab: hero_tab,

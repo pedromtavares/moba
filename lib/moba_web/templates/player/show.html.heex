@@ -1,207 +1,279 @@
 <div class="user-profile">
-    <div class="row mt-2">
-        <div class="col-md-6 col-xl-4">
-            <div class="collection-container">
-                <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
-                <div class="card collection mb-0">
-                    <div class="card-body pb-1 d-flex">
-                        <div class="row">
-                            <%= for hero <- @player.hero_collection do %>
-                                <div class="col-3 text-center">
-                                    <a href="javascript:;" class={if @featured.id == hero["hero_id"], do: "current-featured"} phx-click="set-featured" phx-value-id={hero["hero_id"]} phx-hook="Loading" id={"set-featured-#{hero["hero_id"]}"}>
-                                        <div class='avatar-container'>
-                                            <img src={GH.image_url(hero["avatar"])} class={avatar_class(hero)}/>
-                                            <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo">
-                                        </div>
-
-                                    </a>
-                                </div>
-                            <% end %>
-                            <%= for avatar <- @blank_collection do %>
-                                <div class="col-3 text-center">
-                                    <div class='avatar-container'>
-                                        <img src={GH.image_url(avatar)} class="avatar blank-avatar"/>
-                                    </div>
-                                </div>
-                            <% end %>
-                        </div>
+  <div class="row mt-2">
+    <div class="col-md-6 col-xl-4">
+      <div class="collection-container">
+        <%= @featured && render("_hero.html", hero: @featured, user: @user, socket: @socket) %>
+        <div class="card collection mb-0">
+          <div class="card-body pb-1 d-flex">
+            <div class="row">
+              <%= for hero <- @player.hero_collection do %>
+                <div class="col-3 text-center">
+                  <a
+                    href="javascript:;"
+                    class={if @featured.id == hero["hero_id"], do: "current-featured"}
+                    phx-click="set-featured"
+                    phx-value-id={hero["hero_id"]}
+                    phx-hook="Loading"
+                    id={"set-featured-#{hero["hero_id"]}"}
+                  >
+                    <div class="avatar-container">
+                      <img src={GH.image_url(hero["avatar"])} class={avatar_class(hero)} />
+                      <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo" />
                     </div>
+                  </a>
                 </div>
+              <% end %>
+              <%= for avatar <- @blank_collection do %>
+                <div class="col-3 text-center">
+                  <div class="avatar-container">
+                    <img src={GH.image_url(avatar)} class="avatar blank-avatar" />
+                  </div>
+                </div>
+              <% end %>
             </div>
+          </div>
         </div>
-        <div class="col-md-6 col-xl-4">
-            <div class="card" phx-hook="EqualHeight" phx-target=".collection-container" id="user-profile">
-                <%= if @player.id == @current_player.id do %>
-                    <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">  
-                        <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
-                            <i class="fa fa-edit mr-1"></i>Edit Profile
-                        <% end %>
-                        <%= link to: "/auth/discord", class: "text-white" do %>
-                            <i class="fab fa-discord"></i> Connect Discord
-                        <% end %>
-                        <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
-                            <i class="fa fa-sign-out-alt"></i>
-                            <span class="d-none d-md-inline">Log out</span>
-                        <% end %>
-                    </h5>
-                <% end %>
-                <div class="card-body p-2 text-center">
-                    <img src={"/images/pve/#{@player.pve_tier}.png"} class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}data-toggle="tooltip" title={"#{Moba.pve_tiers[@player.pve_tier]} (#{@player.pve_tier})"}/>
-                    <h2 class="text-white f-rpg">
-                        <span class={"name-shadow-#{shadow_rank(@player)}"}>
-                            <%= if @player.user.discord.id do %>
-                                <img src={@player.user.discord.avatar} class="discord-avatar" data-toggle="tooltip" title={"Discord: #{@player.user.discord.nickname}"}/>
-                            <% end %>
-                            <%= username(@player) %>    
-                        </span>
-                    </h2>
-                </div>
-                <hr/>
-                <div class="row no-gutters py-1">
-                    <div class="col text-center">
-                        <strong title="Season Points" data-toggle="tooltip">
-                            <i class="fa fa-arrows-to-dot text-white"></i> <%= @player.pvp_points %> SP
-                        </strong>
-                    </div>
-                    <div class="col text-center">
-                        <strong title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"} data-toggle="tooltip">
-                            <i class="fa fa-swords text-white"></i> <%= total_win_rate(@player)%>
-                        </strong>
-                    </div>
-                    <div class="col text-center">
-                        <strong title={"Current Immortal Streak: #{@player.current_immortal_streak}<br/>Best Immortal Streak: #{@player.best_immortal_streak}"} data-toggle="tooltip">
-                            <i class="fa fa-trophy text-white"></i> <%= @player.best_immortal_streak %>
-                        </strong>
-                    </div>
-                    <div class="col text-center">
-                        <strong title={"Season Rank"} data-toggle="tooltip">
-                            <i class="fa-solid fa-hashtag text-white"></i> <%= @player.season_ranking %>
-                        </strong>
-                    </div>
-                </div>
-                <%= if length(@duels) > 0 do %>
-                    <hr/>
-                    <div class="row">
-                        <div class="col d-flex justify-content-center">
-                            <div class="pt-2 pb-2">
-                                <div class="btn-group">
-                                    <%= if @filter == "matches" do %>
-                                        <button type="button" class="btn btn-sm btn-secondary no-action">
-                                            <span class="loading-text">Matches</span>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-light" phx-click="show-duels" phx-hook="Loading" id="duels-btn">
-                                            <span class="loading-text">Duels</span>
-                                        </button>
-                                    <% else %>
-                                        <button type="button" class="btn btn-sm btn-light" phx-click="show-matches" phx-hook="Loading" id="matches-btn">
-                                            <span class="loading-text">Matches</span>
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-secondary no-action">
-                                            <span class="loading-text">Duels</span>
-                                        </button>
-                                    <% end %>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                <% end %>
-                <%= if @filter == "matches", do: render "_matches.html", assigns %>
-                <%= if @filter == "duels", do: render "_duels.html", assigns %>
-
-                <div class="card-footer p-1">
-                    <div class="row">
-                        <div class="col text-center">
-                            <span class="font-italic text-dark">
-                                <%= registered_label(@player) %>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-12 col-xl-4">
-            <div class="card ranking" phx-hook="EqualHeight" phx-target=".collection-container" id="user-ranking">
-                <div class="card-body" id="ranking-card">
-                    <table class="table table-dark text-center m-0 table-sm">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <a href="javascript:;" phx-click="switch-ranking" data-toggle="tooltip" title={"Switch to #{if @ranking_display == "daily", do: "Season", else: "Daily"} Rank"} phx-hook="Loading" class="text-white" id="loading-ranking">
-                                        <span class="loading-text">
-                                            <i class="fa fa-arrows-cross mr-1 text-primary"></i>
-                                            <%= if @ranking_display == "daily", do: "Daily", else: "Season"%> Rank
-                                        </span>
-                                    </a>
-                                </th>
-                                <th>Player</th>
-                                <%= if @ranking_display == "daily" do %>
-                                    <th>Daily Win Rate</th>
-                                <% else %>
-                                    <th data-toggle="tooltip" title="Score calculation: Best Immortal Streak x 100 + Training Rank x 100 + Season Points">Season Score</th>
-                                <% end %>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
-                                <tr id={"player-#{player.id}"} phx-hook={if player.id == @player.id, do: "HalfScroll"} phx-container="#user-ranking" class={if player.id == @player.id, do: "selected-player"}>
-                                    <td>
-                                        <h1 class="f-rpg" >
-                                            <%= if @ranking_display == "daily" do %>
-                                                #<%= player.ranking || index %>
-                                            <% else %>
-                                                #<%= player.season_ranking %>
-                                            <% end %>
-                                        </h1>
-                                    </td>
-                                    <td>
-                                        <%= live_redirect to: Routes.player_path(@socket, :show, player.id), title: "#{player.pvp_points} Season Points", data: [toggle: "tooltip"] do %>
-                                            <img src={"/images/pve/#{player.pve_tier}.png"} class={"pvp-rank rank-shadow-#{shadow_rank(player)}"} />
-                                            <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}>
-                                                <%= if player.user.discord.id do %>
-                                                    <img src={player.user.discord.avatar} class="mini-discord-avatar"/>
-                                                <% end %>
-                                                <%= username(player) %>   
-                                            </h5>
-                                        <% end %>
-                                    </td>
-                                    <td>
-                                        <%= if @ranking_display == "daily" do %>
-                                            <h3 class={performance_class(player)} title={"#{player.daily_wins} wins / #{player.daily_matches} matches"} data-toggle="tooltip" id={"daily-player-#{player.id}"}><%= daily_win_rate(player)%></h3>
-                                        <% else %>
-                                            <h3 class="text-success"  id={"season-player-#{player.id}"}><%= season_score(player) %></h3>
-                                        <% end %>
-                                    </td>
-                                </tr>
-                            <% end %>
-                        </tbody>
-                        <%= if not in_ranking?(@ranking, @player) do %>
-                            <tfoot>
-                                <tr>
-                                    <th>
-                                        <%= if @player.ranking do %>
-                                            <h1 class="text-info f-rpg">#<%= @player.ranking %></h1>
-                                        <% else %>
-                                            <h4 class="text-info font-italic">Unranked</h4>
-                                        <% end %>
-                                    </th>
-                                    <th>
-                                        <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
-                                        <h5 class="font-weight-bold mb-0 mt-1 text-info">
-                                            <%= if @player.user.discord.id do %>
-                                                <img src={@player.user.discord.avatar} class="mini-discord-avatar"/>
-                                            <% end %>
-                                            <%= username(@player) %>    
-                                        </h5>
-                                    </th>
-                                    <th>
-                                        <h3 class={performance_class(@player)} title={"#{@player.daily_wins} wins / #{@player.daily_matches} matches"} data-toggle="tooltip"><%= daily_win_rate(@player)%></h3>
-                                    </th>
-                                </tr>           
-                            </tfoot>
-                        <% end %>
-                    </table>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
+    <div class="col-md-6 col-xl-4">
+      <div class="card" phx-hook="EqualHeight" phx-target=".collection-container" id="user-profile">
+        <%= if @player.id == @current_player.id do %>
+          <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">
+            <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
+              <i class="fa fa-edit mr-1"></i>Edit Profile
+            <% end %>
+            <%= link to: "/auth/discord", class: "text-white" do %>
+              <i class="fab fa-discord"></i> Connect Discord
+            <% end %>
+            <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
+              <i class="fa fa-sign-out-alt"></i>
+              <span class="d-none d-md-inline">Log out</span>
+            <% end %>
+          </h5>
+        <% end %>
+        <div class="card-body p-2 text-center">
+          <img
+            src={"/images/pve/#{@player.pve_tier}.png"}
+            class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}
+            data-toggle="tooltip"
+            title={"#{Moba.pve_tiers[@player.pve_tier]} (#{@player.pve_tier})"}
+          />
+          <h2 class="text-white f-rpg">
+            <span class={"name-shadow-#{shadow_rank(@player)}"}>
+              <%= if @player.user.discord.id do %>
+                <img
+                  src={@player.user.discord.avatar}
+                  class="discord-avatar"
+                  data-toggle="tooltip"
+                  title={"Discord: #{@player.user.discord.nickname}"}
+                />
+              <% end %>
+              <%= username(@player) %>
+            </span>
+          </h2>
+        </div>
+        <hr />
+        <div class="row no-gutters py-1">
+          <div class="col text-center">
+            <strong title="Season Points" data-toggle="tooltip">
+              <i class="fa fa-arrows-to-dot text-white"></i> <%= @player.pvp_points %> SP
+            </strong>
+          </div>
+          <div class="col text-center">
+            <strong
+              title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
+              data-toggle="tooltip"
+            >
+              <i class="fa fa-swords text-white"></i> <%= total_win_rate(@player) %>
+            </strong>
+          </div>
+          <div class="col text-center">
+            <strong
+              title={"Current Immortal Streak: #{@player.current_immortal_streak}<br/>Best Immortal Streak: #{@player.best_immortal_streak}"}
+              data-toggle="tooltip"
+            >
+              <i class="fa fa-trophy text-white"></i> <%= @player.best_immortal_streak %>
+            </strong>
+          </div>
+          <div class="col text-center">
+            <strong title="Season Rank" data-toggle="tooltip">
+              <i class="fa-solid fa-hashtag text-white"></i> <%= @player.season_ranking %>
+            </strong>
+          </div>
+        </div>
+        <%= if length(@duels) > 0 do %>
+          <hr />
+          <div class="row">
+            <div class="col d-flex justify-content-center">
+              <div class="pt-2 pb-2">
+                <div class="btn-group">
+                  <%= if @filter == "matches" do %>
+                    <button type="button" class="btn btn-sm btn-secondary no-action">
+                      <span class="loading-text">Matches</span>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-light"
+                      phx-click="show-duels"
+                      phx-hook="Loading"
+                      id="duels-btn"
+                    >
+                      <span class="loading-text">Duels</span>
+                    </button>
+                  <% else %>
+                    <button
+                      type="button"
+                      class="btn btn-sm btn-light"
+                      phx-click="show-matches"
+                      phx-hook="Loading"
+                      id="matches-btn"
+                    >
+                      <span class="loading-text">Matches</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-secondary no-action">
+                      <span class="loading-text">Duels</span>
+                    </button>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% end %>
+        <%= if @filter == "matches", do: render("_matches.html", assigns) %>
+        <%= if @filter == "duels", do: render("_duels.html", assigns) %>
+
+        <div class="card-footer p-1">
+          <div class="row">
+            <div class="col text-center">
+              <span class="font-italic text-dark">
+                <%= registered_label(@player) %>
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-xl-4">
+      <div class="card ranking" phx-hook="EqualHeight" phx-target=".collection-container" id="user-ranking">
+        <div class="card-body" id="ranking-card">
+          <table class="table table-dark text-center m-0 table-sm">
+            <thead>
+              <tr>
+                <th>
+                  <a
+                    href="javascript:;"
+                    phx-click="switch-ranking"
+                    data-toggle="tooltip"
+                    title={"Switch to #{if @ranking_display == "daily", do: "Season", else: "Daily"} Rank"}
+                    phx-hook="Loading"
+                    class="text-white"
+                    id="loading-ranking"
+                  >
+                    <span class="loading-text">
+                      <i class="fa fa-arrows-cross mr-1 text-primary"></i>
+                      <%= if @ranking_display == "daily", do: "Daily", else: "Season" %> Rank
+                    </span>
+                  </a>
+                </th>
+                <th>Player</th>
+                <%= if @ranking_display == "daily" do %>
+                  <th>Daily Win Rate</th>
+                <% else %>
+                  <th
+                    data-toggle="tooltip"
+                    title="Score calculation: Best Immortal Streak x 100 + Training Rank x 100 + Season Points"
+                  >
+                    Season Score
+                  </th>
+                <% end %>
+              </tr>
+            </thead>
+            <tbody>
+              <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
+                <tr
+                  id={"player-#{player.id}"}
+                  phx-hook={if player.id == @player.id, do: "HalfScroll"}
+                  phx-container="#user-ranking"
+                  class={if player.id == @player.id, do: "selected-player"}
+                >
+                  <td>
+                    <h1 class="f-rpg">
+                      <%= if @ranking_display == "daily" do %>
+                        #<%= player.ranking || index %>
+                      <% else %>
+                        #<%= player.season_ranking %>
+                      <% end %>
+                    </h1>
+                  </td>
+                  <td>
+                    <.link
+                      navigate={Routes.player_path(@socket, :show, player.id)}
+                      title={"#{player.pvp_points} Season Points"}
+                      data={[toggle: "tooltip"]}
+                    >
+                      <img
+                        src={"/images/pve/#{player.pve_tier}.png"}
+                        class={"pvp-rank rank-shadow-#{shadow_rank(player)}"}
+                      />
+                      <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}>
+                        <%= if player.user.discord.id do %>
+                          <img src={player.user.discord.avatar} class="mini-discord-avatar" />
+                        <% end %>
+                        <%= username(player) %>
+                      </h5>
+                    </.link>
+                  </td>
+                  <td>
+                    <%= if @ranking_display == "daily" do %>
+                      <h3
+                        class={performance_class(player)}
+                        title={"#{player.daily_wins} wins / #{player.daily_matches} matches"}
+                        data-toggle="tooltip"
+                        id={"daily-player-#{player.id}"}
+                      >
+                        <%= daily_win_rate(player) %>
+                      </h3>
+                    <% else %>
+                      <h3 class="text-success" id={"season-player-#{player.id}"}><%= season_score(player) %></h3>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </tbody>
+            <%= if not in_ranking?(@ranking, @player) do %>
+              <tfoot>
+                <tr>
+                  <th>
+                    <%= if @player.ranking do %>
+                      <h1 class="text-info f-rpg">#<%= @player.ranking %></h1>
+                    <% else %>
+                      <h4 class="text-info font-italic">Unranked</h4>
+                    <% end %>
+                  </th>
+                  <th>
+                    <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
+                    <h5 class="font-weight-bold mb-0 mt-1 text-info">
+                      <%= if @player.user.discord.id do %>
+                        <img src={@player.user.discord.avatar} class="mini-discord-avatar" />
+                      <% end %>
+                      <%= username(@player) %>
+                    </h5>
+                  </th>
+                  <th>
+                    <h3
+                      class={performance_class(@player)}
+                      title={"#{@player.daily_wins} wins / #{@player.daily_matches} matches"}
+                      data-toggle="tooltip"
+                    >
+                      <%= daily_win_rate(@player) %>
+                    </h3>
+                  </th>
+                </tr>
+              </tfoot>
+            <% end %>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

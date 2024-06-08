@@ -1,32 +1,33 @@
 <div class="col-xl-4 col-lg-6 col-sm-12 mb-2" id={"avatar-#{@avatar.id}"}>
-    <div class="hero-card card ribbon-box">
-        <div class="ribbon-two ribbon-two-purple"><span>Free</span></div>
-        <div class="card-body text-center p-0" style={"background-image: url(#{GH.background_url(@avatar)}"}>
-            <div class="name">
-               <h3 class="m-0 text-center p-2 text-white f-rpg"><%= @avatar.name %></h3>
-            </div>
-            <div class="ultimate" data-toggle="tooltip" title={GH.skill_description(@avatar.ultimate)}>
-                <h4 class="mt-0">Ultimate</h4>
-                <img src={"#{GH.image_url(@avatar.ultimate)}"} style="width: 70px" class="img-border-sm"/>
-                <h5 class="mb-0"><%= @avatar.ultimate.name %></h5>
-                <small><em>(mouse over for info)</em></small>
-            </div>
-        </div>
-
-        <div class="transparent card-footer text-center">
-            <%= CreateView.render "_stats.html", avatar: @avatar, avatars: @avatars %>
-            <div class="row mt-3">
-                <div class="col">
-                    <h4 class="mt-0 d-none d-lg-block">Gameplay</h4>
-                    <div class="description">
-                        <em><%=@avatar.description%></em>
-                    </div>
-                    <div class="text-center my-2">
-                        <a href="/auth?origin=tavern" class="btn btn-purple btn-lg btn-block"><i class="fab fa-discord"></i> Connect with Discord to Unlock</a>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+  <div class="hero-card card ribbon-box">
+    <div class="ribbon-two ribbon-two-purple"><span>Free</span></div>
+    <div class="card-body text-center p-0" style={"background-image: url(#{GH.background_url(@avatar)}"}>
+      <div class="name">
+        <h3 class="m-0 text-center p-2 text-white f-rpg"><%= @avatar.name %></h3>
+      </div>
+      <div class="ultimate" data-toggle="tooltip" title={GH.skill_description(@avatar.ultimate)}>
+        <h4 class="mt-0">Ultimate</h4>
+        <img src={"#{GH.image_url(@avatar.ultimate)}"} style="width: 70px" class="img-border-sm" />
+        <h5 class="mb-0"><%= @avatar.ultimate.name %></h5>
+        <small><em>(mouse over for info)</em></small>
+      </div>
     </div>
+
+    <div class="transparent card-footer text-center">
+      <%= CreateView.render("_stats.html", avatar: @avatar, avatars: @avatars) %>
+      <div class="row mt-3">
+        <div class="col">
+          <h4 class="mt-0 d-none d-lg-block">Gameplay</h4>
+          <div class="description">
+            <em><%= @avatar.description %></em>
+          </div>
+          <div class="text-center my-2">
+            <a href="/auth?origin=tavern" class="btn btn-purple btn-lg btn-block">
+              <i class="fab fa-discord"></i> Connect with Discord to Unlock
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

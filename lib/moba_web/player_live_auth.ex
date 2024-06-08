@@ -1,5 +1,7 @@
 defmodule MobaWeb.PlayerLiveAuth do
   import Phoenix.LiveView
+  import Phoenix.Component
+
   alias Moba.{Accounts, Game}
 
   def on_mount(:default, _params, %{"player_id" => player_id} = _session, socket) do

@@ -1,15 +1,17 @@
 <table class="table-dark table border m-0">
-    <%= for {record, {winrate, total, diff}} <- @records do %>
-        <tr id={"#{record.code}-stats-row"}>
-            <td>
-                <img src={GH.image_url(record)} class={"img-border-xs"} style="height: 50px"/>
-            </td>
-            <td>
-                <h4><%= record.name %></h4>
-            </td>
-            <td>
-                <h3 class={"#{winrate_class(diff, @stats_filter)} text-center m-0"}><%= round(winrate) %>% <br/><small><em>(<%= total %>)</em></small></h3>
-            </td>
-        </tr>
-    <% end %>
+  <%= for {record, {winrate, total, diff}} <- @records do %>
+    <tr id={"#{record.code}-stats-row"}>
+      <td>
+        <img src={GH.image_url(record)} class="img-border-xs" style="height: 50px" />
+      </td>
+      <td>
+        <h4><%= record.name %></h4>
+      </td>
+      <td>
+        <h3 class={"#{winrate_class(diff, @stats_filter)} text-center m-0"}>
+          <%= round(winrate) %>% <br /><small><em>(<%= total %>)</em></small>
+        </h3>
+      </td>
+    </tr>
+  <% end %>
 </table>

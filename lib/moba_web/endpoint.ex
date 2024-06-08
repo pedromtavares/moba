@@ -1,7 +1,6 @@
 defmodule MobaWeb.Endpoint do
   use Phoenix.Endpoint, otp_app: :moba
   use Sentry.PlugCapture
-  use Appsignal.Phoenix
 
   @session_options [
     store: :cookie,

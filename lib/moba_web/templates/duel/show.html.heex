@@ -1,269 +1,305 @@
 <div class="duel mt-2" style="margin-bottom: 100px">
+  <div class="row">
+    <div class="col">
+      <div class="card-box pb-2 darker mb-3 header">
+        <div class="row">
+          <div class="col text-center d-flex align-items-center justify-content-center" style="white-space: nowrap;">
+            <div>
+              <h2 class="mb-0">
+                <img src={"/images/pve/#{@duel.player.pve_tier}.png"} style="max-height: 50px" />
+                <.link navigate={Routes.player_path(@socket, :show, @duel.player)}>
+                  <%= username(@duel.player) %>
+                </.link>
+                vs
+                <.link navigate={Routes.player_path(@socket, :show, @duel.opponent_player)}>
+                  <%= username(@duel.opponent_player) %>
+                </.link>
+                <img src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"} style="max-height: 50px" />
+              </h2>
+
+              <%= if casual?(@duel) do %>
+                <span
+                  class="font-15 badge badge-pill badge-light-success"
+                  data-toggle="tooltip"
+                  title="This duel is worth no Season Points because the points difference of players is too high"
+                >
+                  Casual
+                </span>
+              <% end %>
+              <%= unless @duel.auto do %>
+                <span
+                  class="font-15 badge badge-pill badge-light-danger"
+                  data-toggle="tooltip"
+                  title="All-time score between players"
+                >
+                  <%= @duel.player.duel_score["#{@duel.opponent_player_id}"] || 0 %> x <%= @duel.opponent_player.duel_score[
+                    "#{@duel.player_id}"
+                  ] || 0 %>
+                </span>
+              <% end %>
+            </div>
+          </div>
+          <div class="col d-flex align-items-center justify-content-around text-center">
+            <%= if finished?(@duel) do %>
+              <div>
+                <%= if @duel.winner_player do %>
+                  <h1 class="text-center">
+                    <i class="fa fa-crown mr-1 text-warning"></i> Winner: <%= username(@duel.winner_player) %>
+                  </h1>
+                <% else %>
+                  <h1 class="text-center text-muted"><i class="fa fa-adjust mr-1"></i> Tie</h1>
+                <% end %>
+                <%= unless casual?(@duel) do %>
+                  <h3 class="center">
+                    <%= if @duel.rewards.attacker_pvp_points > 0 do %>
+                      <span class="badge badge-pill badge-light-success">
+                        <%= username(@duel.player) %>: +<%= @duel.rewards.attacker_pvp_points %> SP
+                      </span>
+                    <% else %>
+                      <span class="badge badge-pill badge-light-dark">
+                        <%= username(@duel.player) %>: <%= @duel.rewards.attacker_pvp_points %> SP
+                      </span>
+                    <% end %>
+                    <%= if @duel.rewards.defender_pvp_points > 0 do %>
+                      <span class="badge badge-pill badge-light-success">
+                        <%= username(@duel.opponent_player) %>: +<%= @duel.rewards.defender_pvp_points %> SP
+                      </span>
+                    <% else %>
+                      <%= if @duel.rewards.defender_pvp_points != 0 do %>
+                        <span class="badge badge-pill badge-light-dark">
+                          <%= username(@duel.opponent_player) %>: <%= @duel.rewards.defender_pvp_points %> SP
+                        </span>
+                      <% end %>
+                    <% end %>
+                  </h3>
+                <% end %>
+              </div>
+            <% else %>
+              <div>
+                <h2 class="text-white"><%= user_instructions(@duel) %></h2>
+                <h2 class="text-white"><%= opponent_instructions(@duel) %></h2>
+                <%= if show_timer?(@duel) do %>
+                  <h3 class="text-warning"><%= pick_timer(@duel, @current_time) %> seconds left</h3>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <%= if show_rematch?(assigns) do %>
+            <a href="javascript:;" class="h3 mt-2 nav-link text-danger mb-0 text-center" phx-click="rematch">
+              <i class="fa fa-refresh fa-2x align-middle"></i>
+              <br /> Rematch
+            </a>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <%= unless @duel.auto do %>
+      <div class="col-4">
+        <div class="card-box p-0 pt-1 darker">
+          <div class="inbox-widget messages px-2 mb-1">
+            <%= for message <- @messages do %>
+              <div class="inbox-item">
+                <div class="inbox-item-img">
+                  <img src={"/images/pve/#{message.tier}.png"} />
+                </div>
+                <p class="inbox-item-text">
+                  <span class="text-dark mr-1"><%= message.author %></span>
+                  <%= message.body %>
+                </p>
+                <p class="inbox-item-date">
+                  <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>
+                </p>
+                <%= if @current_player.user.is_admin do %>
+                  <a
+                    href="javascript:void(0)"
+                    phx-click="delete-message"
+                    phx-value-id={message.id}
+                    class="text-left text-danger float-right small ml-3"
+                  >
+                    <i class="fa fa-trash"></i>
+                  </a>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          <.form :let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
+            <%= text_input(form, :body,
+              class: "form-control darker",
+              placeholder: "Type and press Enter to chat",
+              maxlength: 200,
+              minlength: 2
+            ) %>
+          </.form>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <div class="duel-details">
+    <%= if @first_battle && @first_battle.finished do %>
+      <ul class="nav nav-pills nav-justified form-wizard-header mb-2">
+        <li class="nav-item">
+          <a href="javascript:;" class={phase_class(@duel, "player_first_pick")}>
+            <span class="number">1</span>
+            <span class="d-none d-sm-inline"><%= username(@duel.player) %> First Pick</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:;" class={phase_class(@duel, "opponent_first_pick")}>
+            <span class="number">2</span>
+            <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> First Pick</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:;" class={phase_class(@duel, "player_battle")}>
+            <span class="number">3</span>
+            <span class="d-none d-sm-inline">First Battle</span>
+          </a>
+        </li>
+      </ul>
+    <% end %>
     <div class="row">
-        <div class="col">
-            <div class="card-box pb-2 darker mb-3 header">
-                <div class="row">
-                    <div class="col text-center d-flex align-items-center justify-content-center" style="white-space: nowrap;">
-                        <div>
-                            <h2 class="mb-0">
-                                <img src={"/images/pve/#{@duel.player.pve_tier}.png"} style="max-height:  50px"/>
-                                <%= live_redirect username(@duel.player), to: Routes.player_path(@socket, :show, @duel.player) %>
-                                 vs 
-                                <%= live_redirect username(@duel.opponent_player), to: Routes.player_path(@socket, :show, @duel.opponent_player) %>
-                                <img src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"} style="max-height:  50px"/>
-                            </h2>
-                            <%= if casual?(@duel) do %>
-                                <span class="font-15 badge badge-pill badge-light-success" data-toggle="tooltip" title="This duel is worth no Season Points because the points difference of players is too high">Casual</span>
-                            <% end %>
-                            <%= unless @duel.auto do %>
-                                <span class="font-15 badge badge-pill badge-light-danger" data-toggle="tooltip" title="All-time score between players">
-                                    <%= @duel.player.duel_score["#{@duel.opponent_player_id}"] || 0 %>
-                                     x 
-                                    <%= @duel.opponent_player.duel_score["#{@duel.player_id}"] || 0 %>    
-                                </span>
-                            <% end %>
-                        </div>
-                    </div>
-                    <div class="col d-flex align-items-center justify-content-around text-center">
-                        <%= if finished?(@duel) do %>
-                            <div>
-                                <%= if @duel.winner_player do %>
-                                    <h1 class="text-center"><i class="fa fa-crown mr-1 text-warning"></i> Winner: <%= username(@duel.winner_player) %></h1>
-                                <% else %>
-                                    <h1 class="text-center text-muted"><i class="fa fa-adjust mr-1"></i> Tie</h1>
-                                <% end %>
-                                <%= unless casual?(@duel) do %>
-                                    <h3 class="center">
-                                        <%= if @duel.rewards.attacker_pvp_points > 0 do %>
-                                            <span class="badge badge-pill badge-light-success"><%= username(@duel.player) %>: +<%= @duel.rewards.attacker_pvp_points %> SP</span>
-                                        <% else %>
-                                            <span class="badge badge-pill badge-light-dark"><%= username(@duel.player) %>: <%= @duel.rewards.attacker_pvp_points %> SP</span>
-                                        <% end %>
-                                        <%= if @duel.rewards.defender_pvp_points > 0 do %>
-                                            <span class="badge badge-pill badge-light-success"><%= username(@duel.opponent_player) %>: +<%= @duel.rewards.defender_pvp_points %> SP</span>
-                                        <% else %>
-                                            <%= if @duel.rewards.defender_pvp_points != 0 do %>
-                                                <span class="badge badge-pill badge-light-dark"><%= username(@duel.opponent_player) %>: <%= @duel.rewards.defender_pvp_points %> SP</span>
-                                            <% end %>
-                                        <% end %>
-                                    </h3>
-                                <% end %>
-                            </div>
-                        <% else %>
-                            <div>
-                                <h2 class="text-white"><%= user_instructions(@duel) %></h2>
-                                <h2 class="text-white"><%= opponent_instructions(@duel) %></h2>
-                                <%= if show_timer?(@duel) do %>
-                                    <h3 class="text-warning"><%= pick_timer(@duel, @current_time) %> seconds left</h3>
-                                <% end %>
-                            </div>
-                        <% end %>
-                    </div>
-                    <%= if show_rematch?(assigns) do %>
-                        <a href="javascript:;" class="h3 mt-2 nav-link text-danger mb-0 text-center" phx-click="rematch">
-                            <i class="fa fa-refresh fa-2x align-middle"></i>
-                            <br/>
-                            Rematch
-                        </a>
-                    <% end %>
-                </div>
-            </div>
+      <%= if @duel.player_first_pick do %>
+        <div class="col-md-4">
+          <%= render("_picked_hero.html", hero: @duel.player_first_pick, socket: @socket) %>
         </div>
-        <%= unless @duel.auto do %>
-            <div class="col-4">
-                <div class="card-box p-0 pt-1 darker">
-                    <div class="inbox-widget messages px-2 mb-1">
-                        <%= for message <- @messages do %>
-                            <div class="inbox-item">              
-                                <div class="inbox-item-img">
-                                    <img src={"/images/pve/#{message.tier}.png"}/>
-                                </div>
-                                <p class="inbox-item-text">
-                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id), class: "text-dark mr-1" %>
-                                     <%= message.body %>
-                                </p>
-                                <p class="inbox-item-date">
-                                    <%= Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1) %>       
-                                </p>
-                                <%= if @current_player.user.is_admin do %>
-                                    <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3"><i class="fa fa-trash"></i></a>
-                                <% end %>
-                            </div>
-                        <% end %>
-                    </div>
-                    <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
-                        <%= text_input form, :body, class: "form-control darker", placeholder: "Type and press Enter to chat", maxlength: 200, minlength: 2 %>
-                    </.form>
-                </div>
-            </div>
-        <% end %>
+      <% end %>
+      <%= if @duel.opponent_first_pick do %>
+        <div class="col-md-4">
+          <%= render("_picked_hero.html", hero: @duel.opponent_first_pick, socket: @socket) %>
+        </div>
+      <% end %>
+      <%= if @first_battle do %>
+        <div class="col-md-4">
+          <%= render("_battle_review.html", battle: @first_battle, socket: @socket) %>
+        </div>
+      <% end %>
     </div>
-
-    <div class="duel-details">
-        <%= if @first_battle && @first_battle.finished do %>
-            <ul class="nav nav-pills nav-justified form-wizard-header mb-2">
-                <li class="nav-item">
-                    <a href="javascript:;" class={phase_class(@duel, "player_first_pick")}>
-                        <span class="number">1</span>
-                        <span class="d-none d-sm-inline"><%= username(@duel.player) %> First Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class={phase_class(@duel, "opponent_first_pick")}>
-                        <span class="number">2</span>
-                        <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> First Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class={phase_class(@duel, "player_battle")}>
-                        <span class="number">3</span>
-                        <span class="d-none d-sm-inline">First Battle</span>
-                    </a>
-                </li>
-            </ul>
+    <%= if @duel.phase == "player_first_pick" && @duel.player_id == @current_player.id do %>
+      <div class="row">
+        <%= for hero <- @heroes do %>
+          <%= render("_eligible_hero.html", hero: hero) %>
         <% end %>
-        <div class="row">
-            <%= if @duel.player_first_pick do %>
-                <div class="col-md-4">
-                    <%= render "_picked_hero.html", hero: @duel.player_first_pick, socket: @socket %>
-                </div>
-            <% end %>
-            <%= if @duel.opponent_first_pick do %>
-                <div class="col-md-4">
-                    <%= render "_picked_hero.html", hero: @duel.opponent_first_pick, socket: @socket %>
-                </div>
-            <% end %>
-            <%= if @first_battle do %>
-                <div class="col-md-4">
-                    <%= render "_battle_review.html", battle: @first_battle, socket: @socket %>
-                </div>
-            <% end %>
+      </div>
+    <% end %>
+
+    <%= if @duel.phase == "opponent_first_pick" && @duel.opponent_player_id == @current_player.id do %>
+      <hr style="border-width: 10px;" class="mb-3" />
+      <div class="row">
+        <%= for hero <- @heroes do %>
+          <%= render("_eligible_hero.html", hero: hero) %>
+        <% end %>
+      </div>
+    <% end %>
+    <%= if @first_battle && @first_battle.finished do %>
+      <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2">
+        <li class="nav-item">
+          <a href="javascript:;" class={phase_class(@duel, "opponent_second_pick")}>
+            <span class="number">4</span>
+            <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> Final Pick</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:;" class={phase_class(@duel, "user_second_pick")}>
+            <span class="number">5</span>
+            <span class="d-none d-sm-inline"><%= username(@duel.player) %> Final Pick</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="javascript:;" class={phase_class(@duel, "opponent_battle")}>
+            <span class="number">6</span>
+            <span class="d-none d-sm-inline">Final Battle</span>
+          </a>
+        </li>
+      </ul>
+    <% end %>
+    <div class="row">
+      <%= if @duel.opponent_second_pick do %>
+        <div class="col-md-4">
+          <%= render("_picked_hero.html", hero: @duel.opponent_second_pick, socket: @socket) %>
         </div>
-        <%= if @duel.phase == "player_first_pick" && @duel.player_id == @current_player.id do %>
-            <div class="row">
-                <%= for hero <- @heroes do %>
-                    <%= render "_eligible_hero.html", hero: hero %>
-                <% end %>
-            </div>
-        <% end %>
-
-        <%= if @duel.phase == "opponent_first_pick" && @duel.opponent_player_id == @current_player.id do %>
-            <hr style="border-width: 10px;" class="mb-3"/>
-            <div class="row">
-                <%= for hero <- @heroes do %>
-                    <%= render "_eligible_hero.html", hero: hero %>
-                <% end %>
-            </div>
-        <% end %>
-        <%= if @first_battle && @first_battle.finished do %>
-            <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2">
-                <li class="nav-item">
-                    <a href="javascript:;" class={phase_class(@duel, "opponent_second_pick")}>
-                        <span class="number">4</span>
-                        <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> Final Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class={phase_class(@duel, "user_second_pick")}>
-                        <span class="number">5</span>
-                        <span class="d-none d-sm-inline"><%= username(@duel.player) %> Final Pick</span>
-                    </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class={phase_class(@duel, "opponent_battle")}>
-                        <span class="number">6</span>
-                        <span class="d-none d-sm-inline">Final Battle</span>
-                    </a>
-                </li>
-            </ul>
-        <% end %>
-        <div class="row">
-            <%= if @duel.opponent_second_pick do %>
-                <div class="col-md-4">
-                    <%= render "_picked_hero.html", hero: @duel.opponent_second_pick, socket: @socket %>
-                </div>
-            <% end %>
-            <%= if @duel.player_second_pick do %>
-                <div class="col-md-4">
-                    <%= render "_picked_hero.html", hero: @duel.player_second_pick, socket: @socket %>
-                </div>
-            <% end %>
-            <%= if @last_battle do %>
-                <div class="col-md-4">
-                    <%= render "_battle_review.html", battle: @last_battle, socket: @socket %>
-                </div>
-            <% end %>
+      <% end %>
+      <%= if @duel.player_second_pick do %>
+        <div class="col-md-4">
+          <%= render("_picked_hero.html", hero: @duel.player_second_pick, socket: @socket) %>
         </div>
-        <%= if @duel.phase == "opponent_second_pick" && @duel.opponent_player_id == @current_player.id do %>
-            <div class="row">
-                <%= for hero <- @heroes do %>
-                    <%= render "_eligible_hero.html", hero: hero %>
-                <% end %>
-            </div>
-        <% end %>
-
-        <%= if @duel.phase == "player_second_pick" do %>
-            <%= if @duel.player_id == @current_player.id do %>
-                <hr style="border-width: 10px;" class="mb-3 mt-3"/>
-                <div class="row">
-                    <%= for hero <- @heroes do %>
-                        <%= render "_eligible_hero.html", hero: hero %>
-                    <% end %>
-                </div>
-            <% end %>
-        <% end %>
+      <% end %>
+      <%= if @last_battle do %>
+        <div class="col-md-4">
+          <%= render("_battle_review.html", battle: @last_battle, socket: @socket) %>
+        </div>
+      <% end %>
     </div>
+    <%= if @duel.phase == "opponent_second_pick" && @duel.opponent_player_id == @current_player.id do %>
+      <div class="row">
+        <%= for hero <- @heroes do %>
+          <%= render("_eligible_hero.html", hero: hero) %>
+        <% end %>
+      </div>
+    <% end %>
+
+    <%= if @duel.phase == "player_second_pick" do %>
+      <%= if @duel.player_id == @current_player.id do %>
+        <hr style="border-width: 10px;" class="mb-3 mt-3" />
+        <div class="row">
+          <%= for hero <- @heroes do %>
+            <%= render("_eligible_hero.html", hero: hero) %>
+          <% end %>
+        </div>
+      <% end %>
+    <% end %>
+  </div>
 </div>
 
 <%= unless finished?(@duel) do %>
-    <div id="battle-bar" class="duel-battle-bar">
-        <div class="container-fluid">
-            <div class="row">
-                <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2 w-100">
-                    <li class="nav-item">
-                        <a href="javascript:;" class={phase_class(@duel, "player_first_pick")}>
-                            <span class="number mb-1">1</span>
-                            <br/>
-                            <span class="d-none d-sm-inline"><%= username(@duel.player)%> First Pick</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="javascript:;" class={phase_class(@duel, "opponent_first_pick")}>
-                            <span class="number mb-1">2</span>
-                            <br/>
-                            <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> First Pick</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="javascript:;" class={phase_class(@duel, "player_battle")}>
-                            <span class="number mb-1">3</span>
-                            <br/>
-                            <span class="d-none d-sm-inline">First Battle</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="javascript:;" class={phase_class(@duel, "opponent_second_pick")}>
-                            <span class="number mb-1">4</span>
-                            <br/>
-                            <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> Final Pick</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="javascript:;" class={phase_class(@duel, "user_second_pick")}>
-                            <span class="number mb-1">5</span>
-                            <br/>
-                            <span class="d-none d-sm-inline"><%= username(@duel.player)%> Final Pick</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="javascript:;" class={phase_class(@duel, "opponent_battle")}>
-                            <span class="number mb-1">6</span>
-                            <br/>
-                            <span class="d-none d-sm-inline">Final Battle</span>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
+  <div id="battle-bar" class="duel-battle-bar">
+    <div class="container-fluid">
+      <div class="row">
+        <ul class="nav nav-pills nav-justified form-wizard-header mb-2 mt-2 w-100">
+          <li class="nav-item">
+            <a href="javascript:;" class={phase_class(@duel, "player_first_pick")}>
+              <span class="number mb-1">1</span>
+              <br />
+              <span class="d-none d-sm-inline"><%= username(@duel.player) %> First Pick</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:;" class={phase_class(@duel, "opponent_first_pick")}>
+              <span class="number mb-1">2</span>
+              <br />
+              <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> First Pick</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:;" class={phase_class(@duel, "player_battle")}>
+              <span class="number mb-1">3</span>
+              <br />
+              <span class="d-none d-sm-inline">First Battle</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:;" class={phase_class(@duel, "opponent_second_pick")}>
+              <span class="number mb-1">4</span>
+              <br />
+              <span class="d-none d-sm-inline"><%= username(@duel.opponent_player) %> Final Pick</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:;" class={phase_class(@duel, "user_second_pick")}>
+              <span class="number mb-1">5</span>
+              <br />
+              <span class="d-none d-sm-inline"><%= username(@duel.player) %> Final Pick</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="javascript:;" class={phase_class(@duel, "opponent_battle")}>
+              <span class="number mb-1">6</span>
+              <br />
+              <span class="d-none d-sm-inline">Final Battle</span>
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
+  </div>
 <% end %>

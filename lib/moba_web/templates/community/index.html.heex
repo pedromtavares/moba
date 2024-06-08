@@ -1,119 +1,166 @@
 <div class="community">
-    <div class="row mt-2">
-        <div class="col">
-            <a href="https://discord.gg/QNwEdPS" target="_blank" class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"><i class="fab fa-discord mr-1"></i>Join our Discord!</a>
-        </div>
-    </div> 
-    <div class="row mt-2">
-        <div class="col-lg-6">
-            <div class="card mb-0">
-                <h5 class="card-header font-17 text-white"><i class="fa fa-comments mr-1"></i> Message Board<span class="text-muted font-italic font-15 ml-2">Bug reports or any feedback for the devs is deeply appreciated!</span></h5>
-                <div class="card-body">
-                    <div class="inbox-widget messages">
-                        <%= for message <- @messages do %>
-                            <div class="inbox-item">              
-                                <div class="inbox-item-img">
-                                    <img src={"/images/pve/#{message.tier}.png"}/>
-                                </div>
-                                <p class="inbox-item-author">
-                                    <%= live_redirect message.author, to: Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id), class: if(message.is_admin, do: "text-danger", else: "text-dark") %>
-                                    <%= if message.is_admin do %>
-                                        <small class="text-danger">(admin)</small>
-                                    <% end %>
-                                </p>
-                                <p class="inbox-item-text"><%= formatted_body(message) %></p>
-                                <p class="inbox-item-date">
-                                    <%= if @current_player.user.is_admin do %>
-                                        <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={message.id} class="text-left text-danger float-right small ml-3">Delete</a>
-                                    <% end %>        
-                                </p>
-                            </div>
-                        <% end %>
-                    </div>
-                    <%= unless @current_player.status == "silenced" do %>
-                        <hr class="my-2">
-                        <.form let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
-                            <%= text_input form, :body, class: "form-control", placeholder: "Type and press Enter to send", maxlength: 500, minlength: 2 %>
-                        </.form>
-                    <% end %>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-6">
-            <div class="card mb-0">
-                <h5 class="card-header font-17 text-white"><i class="fa fa-globe mr-1"></i> Updates <span class="text-muted font-italic font-15 ml-2">Stay up to date with the latest development updates in BrowserMOBA</span></h5>
-                <div class="card-body updates">
-                    <ul class="list-unstyled timeline-sm">
-                        <%= for update <- @updates do %>
-                            <li class="timeline-sm-item">
-                                <%= if @current_player.user.is_admin do %>
-                                    <a href="javascript:void(0)" phx-click="delete-message" phx-value-id={update.id} class="text-left text-danger float-right small ml-3">Delete</a>
-                                <% end %> 
-                                <h5 class="mt-0 mb-1"><%= update.title %></h5>
-                                <p class="text-muted mt-2"><%= formatted_body(update) %></p>
-                            </li>
-                        <% end %>
-                    </ul>
-                    <%= if @current_player.user.is_admin do %>
-                        <hr/>
-                        <.form let={form} for={@changeset} phx-submit="create-update" class="form-horizontal">
-                            <%= text_input form, :title, class: "form-control" %>
-                            <br/>
-                            <%= textarea form, :body, class: "form-control", rows: 10 %>
-                            <br/>
-                            <button type="submit" class="btn btn-primary btn-sm">Submit</button>
-                        </.form>
-                    <% end %>
-                </div>
-            </div>
-        </div>
-        
+  <div class="row mt-2">
+    <div class="col">
+      <a
+        href="https://discord.gg/QNwEdPS"
+        target="_blank"
+        class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"
+      >
+        <i class="fab fa-discord mr-1"></i>Join our Discord!
+      </a>
     </div>
-    <div class="row mt-3">
-        <div class="col text-center">
-            <ul class="nav nav-tabs nav-bordered nav-justified">
-                <li class="nav-item">
-                    <a href="javascript:;" class={"h5 mt-0 nav-link #{if @active_tab == "pvp", do: "active"}"} phx-click="show-pvp" phx-hook="Loading" id="show-pvp-link">
-                        <span class="loading-text"><i class="fa fa-swords fa-2x text-danger"></i><br/>Season Ranking</span>
+  </div>
+  <div class="row mt-2">
+    <div class="col-lg-6">
+      <div class="card mb-0">
+        <h5 class="card-header font-17 text-white">
+          <i class="fa fa-comments mr-1"></i>
+          Message Board<span class="text-muted font-italic font-15 ml-2">Bug reports or any feedback for the devs is deeply appreciated!</span>
+        </h5>
+        <div class="card-body">
+          <div class="inbox-widget messages">
+            <%= for message <- @messages do %>
+              <div class="inbox-item">
+                <div class="inbox-item-img">
+                  <img src={"/images/pve/#{message.tier}.png"} />
+                </div>
+                <p class="inbox-item-author">
+                  <.link
+                    navigate={Routes.live_path(@socket, MobaWeb.PlayerLive, message.user_id)}
+                    class={if(message.is_admin, do: "text-danger", else: "text-dark")}
+                  >
+                    <%= message.author %>
+                  </.link>
+                  <%= if message.is_admin do %>
+                    <small class="text-danger">(admin)</small>
+                  <% end %>
+                </p>
+                <p class="inbox-item-text"><%= formatted_body(message) %></p>
+                <p class="inbox-item-date">
+                  <%= if @current_player.user.is_admin do %>
+                    <a
+                      href="javascript:void(0)"
+                      phx-click="delete-message"
+                      phx-value-id={message.id}
+                      class="text-left text-danger float-right small ml-3"
+                    >
+                      Delete
                     </a>
-                </li>
-                <li class="nav-item">
-                    <a href="javascript:;" class={"h5 mt-0 nav-link #{if @active_tab == "pve", do: "active"}"} phx-click="show-pve" phx-hook="Loading" id="show-pve-link">
-                        <span class="loading-text"><i class="fa fa-star fa-2x text-warning"></i><br/>Hero Hall of Fame</span>
-                    </a>
-                </li>
-
-                
-            </ul>
-            <div class={"mt-1 mb-1 #{unless @active_tab == "pvp", do: "d-none"}"}>
-                <div class="row">
-                    <div class="col">
-                        <%= if length(@pve_ranking) > 0 do %>
-                            <h3 class="f-rpg">Best players of the current season</h3>
-                        <% else %>
-                            <h3 class="f-rpg"><i class="fa fa-loading fa-spin fa-2x"></i> Loading... </h3>
-                        <% end %>
-                    </div>
-                </div>
-                <div class="row">
-                    <%= for player <- @pvp_ranking do %>
-                        <%= render "_player.html", player: player, socket: @socket %>
-                    <% end %>                        
-                </div>
-            </div>
-            <div class={"mt-1 mb-1 #{unless @active_tab == "pve", do: "d-none"}"}>
-                <div class="row">
-                    <div class="col">
-                        <h3 class="text-center f-rpg">Best heroes of the current season</h3>
-                    </div>
-                </div>
-                <div class="row">
-                    <%= for hero <- @pve_ranking do %>
-                        <%= render "_hero.html", hero: hero, socket: @socket %>
-                    <% end %>
-                </div>
-            </div>
-            
+                  <% end %>
+                </p>
+              </div>
+            <% end %>
+          </div>
+          <%= unless @current_player.status == "silenced" do %>
+            <hr class="my-2" />
+            <.form :let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
+              <%= text_input(form, :body,
+                class: "form-control",
+                placeholder: "Type and press Enter to send",
+                maxlength: 500,
+                minlength: 2
+              ) %>
+            </.form>
+          <% end %>
         </div>
+      </div>
     </div>
+    <div class="col-lg-6">
+      <div class="card mb-0">
+        <h5 class="card-header font-17 text-white">
+          <i class="fa fa-globe mr-1"></i>
+          Updates
+          <span class="text-muted font-italic font-15 ml-2">
+            Stay up to date with the latest development updates in BrowserMOBA
+          </span>
+        </h5>
+        <div class="card-body updates">
+          <ul class="list-unstyled timeline-sm">
+            <%= for update <- @updates do %>
+              <li class="timeline-sm-item">
+                <%= if @current_player.user.is_admin do %>
+                  <a
+                    href="javascript:void(0)"
+                    phx-click="delete-message"
+                    phx-value-id={update.id}
+                    class="text-left text-danger float-right small ml-3"
+                  >
+                    Delete
+                  </a>
+                <% end %>
+                <h5 class="mt-0 mb-1"><%= update.title %></h5>
+                <p class="text-muted mt-2"><%= formatted_body(update) %></p>
+              </li>
+            <% end %>
+          </ul>
+          <%= if @current_player.user.is_admin do %>
+            <hr />
+            <.form :let={form} for={@changeset} phx-submit="create-update" class="form-horizontal">
+              <%= text_input(form, :title, class: "form-control") %>
+              <br />
+              <%= textarea(form, :body, class: "form-control", rows: 10) %>
+              <br />
+              <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+            </.form>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col text-center">
+      <ul class="nav nav-tabs nav-bordered nav-justified">
+        <li class="nav-item">
+          <a
+            href="javascript:;"
+            class={"h5 mt-0 nav-link #{if @active_tab == "pvp", do: "active"}"}
+            phx-click="show-pvp"
+            phx-hook="Loading"
+            id="show-pvp-link"
+          >
+            <span class="loading-text"><i class="fa fa-swords fa-2x text-danger"></i> <br />Season Ranking</span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="javascript:;"
+            class={"h5 mt-0 nav-link #{if @active_tab == "pve", do: "active"}"}
+            phx-click="show-pve"
+            phx-hook="Loading"
+            id="show-pve-link"
+          >
+            <span class="loading-text"><i class="fa fa-star fa-2x text-warning"></i> <br />Hero Hall of Fame</span>
+          </a>
+        </li>
+      </ul>
+      <div class={"mt-1 mb-1 #{unless @active_tab == "pvp", do: "d-none"}"}>
+        <div class="row">
+          <div class="col">
+            <%= if length(@pve_ranking) > 0 do %>
+              <h3 class="f-rpg">Best players of the current season</h3>
+            <% else %>
+              <h3 class="f-rpg"><i class="fa fa-loading fa-spin fa-2x"></i> Loading...</h3>
+            <% end %>
+          </div>
+        </div>
+        <div class="row">
+          <%= for player <- @pvp_ranking do %>
+            <%= render("_player.html", player: player, socket: @socket) %>
+          <% end %>
+        </div>
+      </div>
+      <div class={"mt-1 mb-1 #{unless @active_tab == "pve", do: "d-none"}"}>
+        <div class="row">
+          <div class="col">
+            <h3 class="text-center f-rpg">Best heroes of the current season</h3>
+          </div>
+        </div>
+        <div class="row">
+          <%= for hero <- @pve_ranking do %>
+            <%= render("_hero.html", hero: hero, socket: @socket) %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,42 +1,53 @@
 <div class="col-lg-4 col-md-6">
-    <%= live_redirect class: "hero-card card mb-3", style: "background-image: url(#{GH.background_url(@hero)})", to: Routes.live_path(@socket, MobaWeb.HeroLive, @hero) do %>
-        <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
-            <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-                <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @hero.pve_ranking %></span>
-                <div data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
-                    <img src={"/images/pve/#{@hero.player.pve_tier}.png"} style="max-height: 40px">
-                    <%= @hero.name %>
-                </div>
-                <div class="btn-group">
-                    <button class="btn btn-icon btn-outline-light text-white" data-toggle="tooltip" title={"Total farm: #{@hero.total_xp_farm + @hero.total_gold_farm}. Gold farm: #{@hero.total_gold_farm}. XP farm: #{@hero.total_xp_farm}<br/>"}>
-                        <i class="fa fa-crown"></i>
-                        <%= GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm) %>
-                    </button>
-                    <button class="btn btn-icon btn-outline-light text-white" data-toggle="tooltip" title="Time it took to finish Training">
-                        <i class="fa fa-clock-o"></i>
-                        <%= GH.finished_time(@hero) %> min
-                    </button>
-                </div>
-            </h4>
+  <.link
+    class="hero-card card mb-3"
+    style={"background-image: url(#{GH.background_url(@hero)})"}
+    navigate={Routes.live_path(@socket, MobaWeb.HeroLive, @hero)}
+  >
+    <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
+      <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
+        <span class="font-italic f-rpg" style="font-size: 30px;">#<%= @hero.pve_ranking %></span>
+        <div data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
+          <img src={"/images/pve/#{@hero.player.pve_tier}.png"} style="max-height: 40px" />
+          <%= @hero.name %>
         </div>
-        <div class="card-body p-0 d-flex align-items-center justify-content-center">
+        <div class="btn-group">
+          <button
+            class="btn btn-icon btn-outline-light text-white"
+            data-toggle="tooltip"
+            title={"Total farm: #{@hero.total_xp_farm + @hero.total_gold_farm}. Gold farm: #{@hero.total_gold_farm}. XP farm: #{@hero.total_xp_farm}<br/>"}
+          >
+            <i class="fa fa-crown"></i>
+            <%= GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm) %>
+          </button>
+          <button
+            class="btn btn-icon btn-outline-light text-white"
+            data-toggle="tooltip"
+            title="Time it took to finish Training"
+          >
+            <i class="fa fa-clock-o"></i>
+            <%= GH.finished_time(@hero) %> min
+          </button>
         </div>
-        <div class="card-footer transparent p-1">
-            <div class="row">
-                <div class="col justify-content-center d-flex">
-                    <%= GH.hero_stats(@hero, true) %>
-                </div>
-            </div>
-            <div class="row mt-1">
-                <div class="col-12">
-                    <div class="skills-container d-flex justify-content-between">
-                        <%= GH.hero_skill_list(@hero) %>
-                    </div>
-                    <div class="items-container row no-gutters float-right">
-                        <%= GH.hero_item_list(@hero) %>
-                    </div>
-                </div>
-            </div>
+      </h4>
+    </div>
+    <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
+    <div class="card-footer transparent p-1">
+      <div class="row">
+        <div class="col justify-content-center d-flex">
+          <%= GH.hero_stats(@hero, true) %>
         </div>
-    <% end %>
+      </div>
+      <div class="row mt-1">
+        <div class="col-12">
+          <div class="skills-container d-flex justify-content-between">
+            <%= GH.hero_skill_list(@hero) %>
+          </div>
+          <div class="items-container row no-gutters float-right">
+            <%= GH.hero_item_list(@hero) %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </.link>
 </div>

@@ -21,6 +21,9 @@ defmodule MobaWeb.BattleLiveTest do
     assert html =~ "Click to select a skill"
   end
 
+  # This test sometimes prints out
+  # [error] Postgrex.Protocol (#PID<0.867.0>) disconnected: ** (DBConnection.ConnectionError) owner #PID<0.2148.0> exited
+  # Client #PID<0.2253.0> is still using a connection from owner at location
   test "next turn event", %{conn: conn, battle: battle, attacker: attacker} do
     skill = base_skill()
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")

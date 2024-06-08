@@ -1,18 +1,28 @@
 <% last_turn = List.last(@battle.turns) %>
 <div class="col-md-12 mt-2">
-	<div class="card mb-0">
-	    <div class="card-body p-2">
-	    	<%= live_redirect to: Routes.live_path(@socket, MobaWeb.BattleLive, @battle) do %>		        
-		    	<div class="row">
-		           <div class="col center pr-4">
-		              <%= render "_turn_hero.html", battle: @battle, turn: last_turn, hero: player_pick(@battle, @match), player: @match.player %>
-		           </div>
-			        <hr class="mt-2 mb-1" />
-		          <div class="col center pr-4">
-		              <%= render "_turn_hero.html", battle: @battle, turn: last_turn, hero: opponent_pick(@battle, @match), player: @match.opponent %>
-		          </div>
-			    </div>
-		    <% end %>
-	    </div>
-	</div>
+  <div class="card mb-0">
+    <div class="card-body p-2">
+      <.link navigate={Routes.live_path(@socket, MobaWeb.BattleLive, @battle)}>
+        <div class="row">
+          <div class="col center pr-4">
+            <%= render("_turn_hero.html",
+              battle: @battle,
+              turn: last_turn,
+              hero: player_pick(@battle, @match),
+              player: @match.player
+            ) %>
+          </div>
+          <hr class="mt-2 mb-1" />
+          <div class="col center pr-4">
+            <%= render("_turn_hero.html",
+              battle: @battle,
+              turn: last_turn,
+              hero: opponent_pick(@battle, @match),
+              player: @match.opponent
+            ) %>
+          </div>
+        </div>
+      </.link>
+    </div>
+  </div>
 </div>

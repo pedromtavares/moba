@@ -95,15 +95,19 @@ defmodule MobaWeb.ArenaView do
     assigns = Map.put(assigns, :nerf, nerf)
 
     ~H"""
-      <span class='badge badge-light-danger mt-2' data-toggle="tooltip" title="The title of being The Immortal comes with a weakness.">
-        <i class='fa-solid fa-diamond mr-1'></i>- <%= @nerf %>% Hero Stats
-      </span>
+    <span
+      class="badge badge-light-danger mt-2"
+      data-toggle="tooltip"
+      title="The title of being The Immortal comes with a weakness."
+    >
+      <i class="fa-solid fa-diamond mr-1"></i>- <%= @nerf %>% Hero Stats
+    </span>
     """
   end
 
   def tier_buff(assigns),
     do: ~H"""
-      <span></span>
+    <span></span>
     """
 
   def tier_label(%{pvp_tier: 2}), do: "Immortal"

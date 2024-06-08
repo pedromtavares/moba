@@ -1,60 +1,90 @@
 <div class="card dark-bg mb-0" id="pvp-progression">
-    <div class="card-body pb-0">
-        <div class="row mb-3 d-flex justify-content-center">
-            <div class="col">
-                <div class="progress mt-1" style="height:50px;" id="daily-progression">
-                    <div style={"width:#{manual_matches_percentage(@manual_matches)}%;"} class="progress-bar manual-bar" data-toggle="tooltip" data-tippy-placement="bottom" title={"Manual matches played: #{length(@manual_matches)}"} ></div>
-                    <div style={"width:#{auto_matches_percentage(@auto_matches)}%;"} class="progress-bar auto-bar" data-toggle="tooltip" data-tippy-placement="bottom" title={"Auto matches played: #{length(@auto_matches)}"}></div>
-                    <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
-                        <%= @current_player.daily_matches %> / <%= Moba.daily_match_limit() %> Daily Matches
-                    </h5>
-                </div>
-                <div class="mt-4 d-flex justify-content-between align-items-center">
-                    <div class="col text-center">
-                        <h4 id="current-pvp-tier" class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}><%= tier_title(@current_player) %></h4>
-                        <.tier_buff player={@current_player}/>
-                    </div>
-                    <div class="col">
-                        <div class="row d-flex justify-content-around">
-                            <%= if length(@manual_matches) < Moba.daily_match_limit() do %>
-                                <a href="javascript:;" phx-click="matchmaking" class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx" phx-hook="Loading" loading="Entering..." id="enter-arena-button">
-                                    <span class="loading-text">
-                                        <i class="fa fa-swords mr-1 fa-2x"></i>
-                                        <br/>
-                                        Enter the Arena
-                                    </span>
-                                    <br/>
-                                    <span class="badge badge-light-primary"><i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards</span>
-                                </a>
-                            <% else %>
-                                <a href="javascript:;" class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button">
-                                    <i class="fa fa-clock-o mr-1 fa-2x"></i>
-                                    <br/>
-                                    <%= reset_timer() %>
-                                </a>
-                            <% end %>
-                        </div>
-                        
-                    </div>
-                    <div class="col d-flex justify-content-center">
-                        <h3 class="info-box text-warning">
-                            <span class="f-rpg"><%= @current_player.pvp_points %></span>
-                            <br/>
-                            <small class="text-muted">Season Points</small>
-                        </h3>
-                        <h3 class="info-box text-primary" data-toggle="tooltip" title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}>
-                            <span class="f-rpg"><%= PlayerView.total_win_rate(@current_player) %></span>
-                            <br/>
-                            <small class="text-muted">Total Win Rate</small>
-                        </h3>
-                        <h3 class="info-box text-success">
-                            <span class="f-rpg"><%= PlayerView.daily_win_rate(@current_player) %></span>
-                            <br/>
-                            <small class="text-muted">Daily Win Rate</small>
-                        </h3>
-                    </div>
-                </div>
-            </div>
+  <div class="card-body pb-0">
+    <div class="row mb-3 d-flex justify-content-center">
+      <div class="col">
+        <div class="progress mt-1" style="height:50px;" id="daily-progression">
+          <div
+            style={"width:#{manual_matches_percentage(@manual_matches)}%;"}
+            class="progress-bar manual-bar"
+            data-toggle="tooltip"
+            data-tippy-placement="bottom"
+            title={"Manual matches played: #{length(@manual_matches)}"}
+          >
+          </div>
+          <div
+            style={"width:#{auto_matches_percentage(@auto_matches)}%;"}
+            class="progress-bar auto-bar"
+            data-toggle="tooltip"
+            data-tippy-placement="bottom"
+            title={"Auto matches played: #{length(@auto_matches)}"}
+          >
+          </div>
+          <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
+            <%= @current_player.daily_matches %> / <%= Moba.daily_match_limit() %> Daily Matches
+          </h5>
         </div>
+        <div class="mt-4 d-flex justify-content-between align-items-center">
+          <div class="col text-center">
+            <h4
+              id="current-pvp-tier"
+              class={"text-center mb-0 mt-0 f-rpg rank-shadow-#{PlayerView.shadow_rank(@current_player)}"}
+            >
+              <%= tier_title(@current_player) %>
+            </h4>
+            <.tier_buff player={@current_player} />
+          </div>
+          <div class="col">
+            <div class="row d-flex justify-content-around">
+              <%= if length(@manual_matches) < Moba.daily_match_limit() do %>
+                <a
+                  href="javascript:;"
+                  phx-click="matchmaking"
+                  class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx"
+                  phx-hook="Loading"
+                  loading="Entering..."
+                  id="enter-arena-button"
+                >
+                  <span class="loading-text">
+                    <i class="fa fa-swords mr-1 fa-2x"></i>
+                    <br /> Enter the Arena
+                  </span>
+                  <br />
+                  <span class="badge badge-light-primary">
+                    <i class="fab fa-ethereum"></i> +<%= Moba.matchmaking_shards() %> Shards
+                  </span>
+                </a>
+              <% else %>
+                <a href="javascript:;" class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button">
+                  <i class="fa fa-clock-o mr-1 fa-2x"></i>
+                  <br />
+                  <%= reset_timer() %>
+                </a>
+              <% end %>
+            </div>
+          </div>
+          <div class="col d-flex justify-content-center">
+            <h3 class="info-box text-warning">
+              <span class="f-rpg"><%= @current_player.pvp_points %></span>
+              <br />
+              <small class="text-muted">Season Points</small>
+            </h3>
+            <h3
+              class="info-box text-primary"
+              data-toggle="tooltip"
+              title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}
+            >
+              <span class="f-rpg"><%= PlayerView.total_win_rate(@current_player) %></span>
+              <br />
+              <small class="text-muted">Total Win Rate</small>
+            </h3>
+            <h3 class="info-box text-success">
+              <span class="f-rpg"><%= PlayerView.daily_win_rate(@current_player) %></span>
+              <br />
+              <small class="text-muted">Daily Win Rate</small>
+            </h3>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>
