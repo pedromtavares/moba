@@ -36,3 +36,4 @@ jobs:
       - run: mix seed_test
         env:
           MIX_ENV: test
+          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
