@@ -3,19 +3,20 @@
 ![Test Suite](https://github.com/pedromtavares/moba/workflows/Test%20Suite/badge.svg)
 [![Discord](https://img.shields.io/badge/chat-discord-7289da.svg)][discord]
 
-# ![MOBA](assets/static/images/favicon.png)
+A turn-based RPG built with Phoenix LiveView. Online since 2020 with over 1500 players.
 
-A community-made turn-based RPG built with Phoenix LiveView.
+### [`PRESS START`](https://browsermoba.com/)
 
- * <a href="https://browsermoba.com/" target="_blank">Play</a>
-
-## Get Involved
-MOBA is an opportunity to get your feet wet with Phoenix LiveView (or even Elixir) beyond simple counter demos. It's first and foremost a fun learning experience for all developer skill levels, while also being an actual product with real users deployed in a production environment. Interested? [Get Involved.](https://github.com/pedromtavares/moba/issues/90)
+## Features
+ * Choose from a roster of 20 avatars, 20+ abilities and 25+ items to train your custom hero in a complete PvE mode
+ * Battle your way through 7 leagues and a boss fight to compete for the fastest game completion time
+ * Master all playstyles with full account level progression to compete in a season leaderboard
+ * Competitive PvP mode featuring 5v5 team battles with skill brackets and 1v1 real-time duels
 
 ### Requirements
  * PostgreSQL 15
- * Elixir 1.14.1
- * Erlang 25.3.2.6
+ * Elixir 1.16.2
+ * Erlang 26.2.4
  * node.js 17.0.1
 
 ### Setup
