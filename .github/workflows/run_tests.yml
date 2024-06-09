@@ -13,6 +13,7 @@ env:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
+    environment: test
     services:
       postgres:
         image: postgres:12
@@ -36,4 +37,3 @@ jobs:
       - run: mix seed_test
         env:
           MIX_ENV: test
-          DISCORD_BOT_TOKEN: ${{ secrets.DISCORD_BOT_TOKEN }}
