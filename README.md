@@ -17,7 +17,7 @@ A turn-based RPG built with Phoenix LiveView. Online since 2020 with over 1500 p
  * PostgreSQL 15
  * Elixir 1.16.2
  * Erlang 26.2.4
- * node.js 17.0.1
+ * node.js 20.14.0
 
 ### Setup
   * Install dependencies with `mix deps.get`
