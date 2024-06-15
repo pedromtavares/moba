@@ -46,7 +46,7 @@
           navigate={Routes.live_path(@socket, MobaWeb.BattleLive, @battle)}
           class="btn btn-outline-danger btn-block btn-lg pt-5"
           phx-hook="Loading"
-          loading="Entering..."
+          data-loading="Entering..."
           id={"loading-battle-#{@battle.id}"}
         >
           <span class="loading-text">

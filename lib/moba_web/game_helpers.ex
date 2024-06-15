@@ -3,7 +3,8 @@ defmodule MobaWeb.GameHelpers do
   Global utilities used by templates and views throughout the app
   """
 
-  use Phoenix.HTML
+  import Phoenix.HTML
+  use PhoenixHTMLHelpers
 
   def image_url(%{"code" => "basic_attack"}), do: "/images/basic_attack.png"
   def image_url(%{code: "basic_attack"}), do: "/images/basic_attack.png"

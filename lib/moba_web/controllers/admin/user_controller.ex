@@ -4,7 +4,7 @@ defmodule MobaWeb.Admin.UserController do
   alias Moba.Admin
   alias Moba.Accounts.Schema.User
 
-  plug(:put_layout, {MobaWeb.LayoutView, "torch.html"})
+  plug(:put_layout, html: {MobaWeb.LayoutView, :torch})
 
   def index(conn, params) do
     case Admin.paginate_users(params) do

@@ -9,7 +9,7 @@ defmodule Moba.Game.Schema.Skill do
   """
 
   use Ecto.Schema
-  use Arc.Ecto.Schema
+  use Waffle.Ecto.Schema
   import Ecto.Changeset
 
   @derive {Jason.Encoder, except: [:__meta__]}

@@ -2,7 +2,9 @@
   <div class="sidebar-nav d-none d-md-flex">
     <.link
       navigate={Routes.live_path(@socket, MobaWeb.DashboardLive)}
-      data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+      data-toggle="tooltip"
+      data-tippy-placement="right"
+      data-tippy-arrow={false}
       title="<h3 class='ml-2 mr-2'>Training</h3>"
       class={sidebar_class(["training", "base"], assigns)}
     >
@@ -11,7 +13,9 @@
     <%= if @current_player.user_id do %>
       <.link
         navigate={Routes.live_path(@socket, MobaWeb.ArenaLive.Index)}
-        data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+        data-toggle="tooltip"
+        data-tippy-placement="right"
+        data-tippy-arrow={false}
         title="<h3 class='ml-2 mr-2'>Arena</h3>"
         class={sidebar_class("arena", assigns)}
       >
@@ -31,7 +35,9 @@
     <%= if guest?(@current_player) do %>
       <.link
         navigate={Routes.pow_registration_path(@socket, :new)}
-        data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+        data-toggle="tooltip"
+        data-tippy-placement="right"
+        data-tippy-arrow={false}
         title="<h3 class='ml-2 mr-2'>Create an Account</h3>"
         id="create-account-link"
       >
@@ -40,7 +46,9 @@
     <% else %>
       <.link
         navigate={Routes.player_path(@socket, :show, @current_player.id)}
-        data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+        data-toggle="tooltip"
+        data-tippy-placement="right"
+        data-tippy-arrow={false}
         title="<h3 class='ml-2 mr-2'>Profile</h3>"
         class={sidebar_class("user", assigns)}
       >
@@ -48,7 +56,9 @@
       </.link>
       <.link
         navigate={Routes.live_path(@socket, MobaWeb.TavernLive)}
-        data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+        data-toggle="tooltip"
+        data-tippy-placement="right"
+        data-tippy-arrow={false}
         title="<h3 class='ml-2 mr-2'>Tavern</h3>"
         class={sidebar_class("tavern", assigns)}
       >
@@ -56,7 +66,9 @@
       </.link>
       <.link
         navigate={Routes.live_path(@socket, MobaWeb.CommunityLive)}
-        data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+        data-toggle="tooltip"
+        data-tippy-placement="right"
+        data-tippy-arrow={false}
         title="<h3 class='ml-2 mr-2'>Community</h3>"
         class={sidebar_class("community", assigns)}
       >
@@ -68,7 +80,9 @@
     <% end %>
     <.link
       navigate={Routes.live_path(@socket, MobaWeb.LibraryLive)}
-      data={[toggle: "tooltip", "tippy-placement": "right", "tippy-arrow": false]}
+      data-toggle="tooltip"
+      data-tippy-placement="right"
+      data-tippy-arrow={false}
       title="<h3 class='ml-2 mr-2'>Game Manual</h3>"
       class={sidebar_class("library", assigns)}
       id="game-manual"

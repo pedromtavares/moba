@@ -103,7 +103,7 @@ Hooks.Loading = {
     let code = $(el).attr("phx-value-code");
     let type = $(el).attr("phx-value-type");
     let page = $(el).attr("phx-value-page");
-    let loading = $(el).attr("loading") || "<span class='d-none d-md-inline'>Loading...</span>"
+    let loading = $(el).attr("loading") || $(el).attr("data-loading") || "<span class='d-none d-md-inline'>Loading...</span>"
     el.addEventListener("click", e => {
       const loadingText = $(el).find(".loading-text");
       

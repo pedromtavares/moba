@@ -1,0 +1,158 @@
+<%= form_for @changeset, @action, [multipart: true, id: "torch-form"], fn f -> %>
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+
+    <div class="torch-form-group">
+      <%= label(f, :enabled) %>
+      <div class="torch-form-group-input">
+        <%= checkbox(f, :enabled) %>
+        <%= error_tag(f, :enabled) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :name) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :name) %>
+        <%= error_tag(f, :name) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :code) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :code) %>
+        <%= error_tag(f, :code) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :image) %>
+      <div class="torch-form-group-input">
+        <%= file_input(f, :image) %>
+        <%= error_tag(f, :image) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :background) %>
+      <div class="torch-form-group-input">
+        <%= file_input(f, :background) %>
+        <%= error_tag(f, :background) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :role) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :role) %>
+        <%= error_tag(f, :role) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :level_requirement) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :level_requirement) %>
+        <%= error_tag(f, :level_requirement) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :atk) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :atk) %>
+        <%= error_tag(f, :atk) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :total_hp) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :total_hp) %>
+        <%= error_tag(f, :total_hp) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :total_mp) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :total_mp) %>
+        <%= error_tag(f, :total_mp) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :atk_per_level) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :atk_per_level) %>
+        <%= error_tag(f, :atk_per_level) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :hp_per_level) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :hp_per_level) %>
+        <%= error_tag(f, :hp_per_level) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :mp_per_level) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :mp_per_level) %>
+        <%= error_tag(f, :mp_per_level) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :speed) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :speed) %>
+        <%= error_tag(f, :speed) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :power) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :power) %>
+        <%= error_tag(f, :power) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :armor) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :armor) %>
+        <%= error_tag(f, :armor) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :ultimate_code) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :ultimate_code) %>
+        <%= error_tag(f, :ultimate_code) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :description) %>
+      <div class="torch-form-group-input">
+        <%= textarea(f, :description) %>
+        <%= error_tag(f, :description) %>
+      </div>
+    </div>
+
+    <div class="torch-submit-form">
+      <%= submit("Submit", class: "torch-submit-button") %>
+    </div>
+  </fieldset>
+<% end %>

@@ -1,0 +1,86 @@
+<%= form_for @changeset, @action, [multipart: true, id: "torch-form"], fn f -> %>
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+
+    <div class="torch-form-group">
+      <%= label(f, :username) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :username) %>
+        <%= error_tag(f, :username) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :email) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :email) %>
+        <%= error_tag(f, :email) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :is_admin) %>
+      <div class="torch-form-group-input">
+        <%= checkbox(f, :is_admin) %>
+        <%= error_tag(f, :is_admin) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :level) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :level) %>
+        <%= error_tag(f, :level) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :shard_count) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :shard_count) %>
+        <%= error_tag(f, :shard_count) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :medal_count) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :medal_count) %>
+        <%= error_tag(f, :medal_count) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :experience) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :experience) %>
+        <%= error_tag(f, :experience) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :tutorial_step) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :tutorial_step) %>
+        <%= error_tag(f, :tutorial_step) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :status) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :status) %>
+        <%= error_tag(f, :status) %>
+      </div>
+    </div>
+
+    <div class="torch-submit-form">
+      <%= submit("Submit", class: "torch-submit-button") %>
+    </div>
+  </fieldset>
+<% end %>

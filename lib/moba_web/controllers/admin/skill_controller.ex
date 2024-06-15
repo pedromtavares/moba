@@ -5,7 +5,7 @@ defmodule MobaWeb.Admin.SkillController do
   alias Moba.Game.Schema.Skill
   import Ecto.Query, warn: false
 
-  plug(:put_layout, {MobaWeb.LayoutView, "torch.html"})
+  plug(:put_layout, html: {MobaWeb.LayoutView, :torch})
 
   def index(conn, params) do
     case Admin.paginate_skills(params) do

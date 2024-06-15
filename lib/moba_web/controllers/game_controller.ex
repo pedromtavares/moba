@@ -19,7 +19,7 @@ defmodule MobaWeb.GameController do
       player && player.tutorial_step == 30 -> redirect(conn, to: "/arena")
       hero && is_nil(hero.finished_at) -> redirect(conn, to: "/training")
       player -> redirect(conn, to: "/base")
-      true -> render(conn, "homepage.html", layout: {MobaWeb.LayoutView, "homepage.html"})
+      true -> render(conn, :homepage, layout: false)
     end
   end
 

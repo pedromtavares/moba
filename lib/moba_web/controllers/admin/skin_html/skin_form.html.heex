@@ -1,0 +1,70 @@
+<%= form_for @changeset, @action, [multipart: true, id: "torch-form"], fn f -> %>
+  <fieldset class="torch-panel">
+    <legend>
+      <span>Details</span>
+    </legend>
+    <%= if @changeset.action do %>
+      <p class="torch-form-error">Oops, something went wrong! Please check the errors below.</p>
+    <% end %>
+
+    <div class="torch-form-group">
+      <%= label(f, :name) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :name) %>
+        <%= error_tag(f, :name) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :background) %>
+      <div class="torch-form-group-input">
+        <%= file_input(f, :background) %>
+        <%= error_tag(f, :background) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :code) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :code) %>
+        <%= error_tag(f, :code) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :avatar_code) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :avatar_code) %>
+        <%= error_tag(f, :avatar_code) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :author_name) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :author_name) %>
+        <%= error_tag(f, :author_name) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :author_link) %>
+      <div class="torch-form-group-input">
+        <%= text_input(f, :author_link) %>
+        <%= error_tag(f, :author_link) %>
+      </div>
+    </div>
+
+    <div class="torch-form-group">
+      <%= label(f, :league_tier) %>
+      <div class="torch-form-group-input">
+        <%= number_input(f, :league_tier) %>
+        <%= error_tag(f, :league_tier) %>
+      </div>
+    </div>
+
+    <div class="torch-submit-form">
+      <%= submit("Submit", class: "torch-submit-button") %>
+    </div>
+  </fieldset>
+<% end %>

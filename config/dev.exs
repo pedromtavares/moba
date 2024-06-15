@@ -22,8 +22,8 @@ config :moba, MobaWeb.Endpoint,
     ]
   ]
 
-config :arc,
-  storage: Arc.Storage.Local
+config :waffle,
+  storage: Waffle.Storage.Local
 
 # ## SSL Support
 #

@@ -1,0 +1,14 @@
+<section id="torch-toolbar">
+  <div class="torch-container">
+    <%= link("Cancel", to: Routes.skin_path(@conn, :index), class: "torch-button") %>
+  </div>
+</section>
+
+<section id="torch-header-and-content">
+  <div class="torch-container">
+    <header class="header">
+      <h3>New Skin</h3>
+    </header>
+    <.skin_form changeset={@changeset} action={~p"/admin/skins"} />
+  </div>
+</section>

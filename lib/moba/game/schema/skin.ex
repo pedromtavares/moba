@@ -5,7 +5,7 @@ defmodule Moba.Game.Schema.Skin do
   Skins can be unlocked with shards, and can be of different league_tiers (Master/Grandmaster)
   """
   use Ecto.Schema
-  use Arc.Ecto.Schema
+  use Waffle.Ecto.Schema
   import Ecto.Changeset
 
   @derive {Jason.Encoder, except: [:__meta__]}

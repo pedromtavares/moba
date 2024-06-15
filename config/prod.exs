@@ -22,8 +22,8 @@ config :ex_aws,
   access_key_id: [{:system, "AWS_ACCESS_KEY_ID"}, :instance_role],
   secret_access_key: [{:system, "AWS_SECRET_ACCESS_KEY"}, :instance_role]
 
-config :arc,
-  storage: Arc.Storage.S3,
+config :waffle,
+  storage: Waffle.Storage.S3,
   bucket: {:system, "S3_BUCKET"}
 
 config :moba, MobaWeb.PowMailer,

@@ -1,8 +1,0 @@
-<div class="btn-group stats-group f-rpg">
-    <button class="btn btn-icon btn-outline-dark text-danger tooltip-mobile no-action" type="button" data-toggle="tooltip" title="<%=total_hp_description(@current_hero)%>"> <i class="fa fa-heart mr-1"></i> <%=@current_hero.total_hp + @current_hero.item_hp%></button>
-    <button class="btn btn-icon btn-outline-dark text-info tooltip-mobile no-action" type="button" data-toggle="tooltip" title="<%=total_mp_description(@current_hero)%>"> <i class="fa fa-bolt"></i> <%=@current_hero.total_mp + @current_hero.item_mp%></button>
-    <button class="btn btn-icon btn-outline-dark text-success tooltip-mobile no-action" type="button" data-toggle="tooltip" title="<%=total_atk_description(@current_hero)%>"> <i class="fa fa-dagger"></i> <%=@current_hero.atk + @current_hero.item_atk%></button>
-    <button class="btn btn-icon btn-outline-dark text-pink tooltip-mobile no-action" type="button" data-toggle="tooltip" title="<%=total_power_description(@current_hero)%>"> <i class="fa fa-galaxy"></i> <%=@current_hero.power + @current_hero.item_power%></button>
-    <button class="btn btn-icon btn-outline-dark text-warning tooltip-mobile no-action" type="button" data-toggle="tooltip" title="<%=total_armor_description(@current_hero)%>"> <i class="fa fa-shield-halved"></i> <%=@current_hero.armor + @current_hero.item_armor%></button>
-    <button class="btn btn-icon btn-outline-dark text-orange tooltip-mobile no-action" type="button" data-toggle="tooltip" title="<%=total_speed_description(@current_hero)%>"> <i class="fa fa-running"></i> <%=@current_hero.speed + @current_hero.item_speed%></button>
-</div>

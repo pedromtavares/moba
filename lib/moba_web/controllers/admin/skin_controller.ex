@@ -4,7 +4,7 @@ defmodule MobaWeb.Admin.SkinController do
   alias Moba.Admin
   alias Moba.Game.Schema.Skin
 
-  plug(:put_layout, {MobaWeb.LayoutView, "torch.html"})
+  plug(:put_layout, html: {MobaWeb.LayoutView, :torch})
 
   def index(conn, params) do
     case Admin.paginate_skins(params) do

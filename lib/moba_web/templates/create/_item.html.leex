@@ -1,3 +1,0 @@
-<div class="col-md-4 mb-2 d-flex justify-content-center">
-  <img src="<%=GH.image_url(@item)%>" data-toggle="tooltip" title="<%=GH.item_description(@item)%>" class="item-img code-<%=@item.code%> tooltip-mobile <%=if @item.active, do: "active"%> <%=if Enum.member?(@selected, @item), do: "current"%>" phx-click="select-item" phx-value-code="<%=@item.code%>" id="item-<%=@item.id%>" />
-</div>

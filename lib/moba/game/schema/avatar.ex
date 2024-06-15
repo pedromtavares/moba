@@ -7,7 +7,7 @@ defmodule Moba.Game.Schema.Avatar do
   Avatars can be unlocked with shards, and may have a user level_requirement
   """
   use Ecto.Schema
-  use Arc.Ecto.Schema
+  use Waffle.Ecto.Schema
   import Ecto.Changeset
   alias Moba.Game
 

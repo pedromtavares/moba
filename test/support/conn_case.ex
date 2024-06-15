@@ -34,6 +34,8 @@ defmodule MobaWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint MobaWeb.Endpoint
+
+      use MobaWeb, :verified_routes
     end
   end
 

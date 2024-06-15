@@ -4,7 +4,7 @@ defmodule MobaWeb.Admin.AvatarController do
   alias Moba.Admin
   alias Moba.Game.Schema.Avatar
 
-  plug(:put_layout, {MobaWeb.LayoutView, "torch.html"})
+  plug(:put_layout, html: {MobaWeb.LayoutView, :torch})
 
   def index(conn, params) do
     case Admin.paginate_avatars(params) do

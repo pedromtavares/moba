@@ -1,8 +1,7 @@
 defmodule Moba.Background do
-  use Arc.Definition
+  use Waffle.Definition
 
-  # Include ecto support (requires package arc_ecto installed):
-  use Arc.Ecto.Definition
+  use Waffle.Ecto.Definition
 
   alias MobaWeb.Endpoint
 
@@ -10,9 +9,9 @@ defmodule Moba.Background do
 
   def __storage do
     if Application.get_env(:moba, :env) == :prod do
-      Arc.Storage.S3
+      Waffle.Storage.S3
     else
-      Arc.Storage.Local
+      Waffle.Storage.Local
     end
   end
 

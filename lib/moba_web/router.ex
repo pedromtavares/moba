@@ -12,16 +12,21 @@ defmodule MobaWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
+    # plug :put_root_layout, {MobaWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
   end
 
-  pipeline :root_layout do
+  pipeline :base_layout do
     plug :put_root_layout, {MobaWeb.LayoutView, :root}
   end
 
   pipeline :pow_layout do
-    plug :put_pow_layout, {MobaWeb.LayoutView, :root}
+    plug :put_pow_layout, %{"html" => {MobaWeb.LayoutView, :root}}
+  end
+
+  pipeline :admin_layout do
+    plug :put_root_layout, {MobaWeb.LayoutView, :admin}
   end
 
   pipeline :protected do
@@ -50,13 +55,13 @@ defmodule MobaWeb.Router do
   end
 
   scope "/", MobaWeb do
-    pipe_through [:browser, :root_layout]
+    pipe_through [:browser]
 
     live "/battles/:id", BattleLive
   end
 
   scope "/", MobaWeb do
-    pipe_through [:browser, :root_layout, :player_protected]
+    pipe_through [:browser, :player_protected, :base_layout]
 
     get "/auth", AuthController, :start
     get "/auth/:provider", AuthController, :request
@@ -97,12 +102,16 @@ defmodule MobaWeb.Router do
     resources "/items", Admin.ItemController
     resources "/avatars", Admin.AvatarController
     resources "/users", Admin.UserController
-    resources "/seasons", Admin.SeasonController
     resources "/skins", Admin.SkinController
 
     live_dashboard "/dashboard", metrics: MobaWeb.Telemetry, ecto_repos: [Moba.Repo]
 
     get "/", Admin.SkillController, :root
+  end
+
+  scope "/admin/seasons", MobaWeb do
+    pipe_through [:browser, :protected, :admin_protected, :admin_layout]
+    live "/current", Admin.SeasonLiveView
   end
 
   defp put_pow_layout(conn, layout), do: put_private(conn, :phoenix_layout, layout)

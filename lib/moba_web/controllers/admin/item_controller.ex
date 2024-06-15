@@ -4,7 +4,7 @@ defmodule MobaWeb.Admin.ItemController do
   alias Moba.Admin
   alias Moba.Game.Schema.Item
 
-  plug(:put_layout, {MobaWeb.LayoutView, "torch.html"})
+  plug(:put_layout, html: {MobaWeb.LayoutView, :torch})
 
   def index(conn, params) do
     case Admin.paginate_items(params) do
