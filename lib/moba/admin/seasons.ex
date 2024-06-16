@@ -91,17 +91,17 @@ defmodule Moba.Admin.Seasons do
 
   def players_count do
     latest = from(p in Player, order_by: [desc: p.id], limit: 1) |> Repo.all() |> List.first()
-    (latest && Map.get(latest, :id)) || 18_000
+    (latest && Map.get(latest, :id)) || 0
   end
 
   def heroes_count do
     latest = from(h in Hero, order_by: [desc: h.id], limit: 1) |> Repo.all() |> List.first()
-    (latest && Map.get(latest, :id)) || 830_000
+    (latest && Map.get(latest, :id)) || 0
   end
 
   def matches_count do
     latest = from(m in Match, order_by: [desc: m.id], limit: 1) |> Repo.all() |> List.first()
-    (latest && Map.get(latest, :id)) || 1_900_000
+    (latest && Map.get(latest, :id)) || 0
   end
 
   defp do_paginate(filter, params) do

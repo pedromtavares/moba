@@ -26,13 +26,10 @@ defmodule MobaWeb.GameController do
         redirect(conn, to: ~p"/base")
 
       true ->
-        data = Admin.get_server_data()
-
-        # default values taken Jun 16, 2024
         counts = %{
-          players: format_number(data[:players_count] || 18_120),
-          heroes: format_number(data[:heroes_count] || 831_114),
-          matches: format_number(data[:matches_count] || 1_892_922)
+          players: Admin.players_count(),
+          heroes: Admin.heroes_count(),
+          matches: Admin.matches_count()
         }
 
         conn
