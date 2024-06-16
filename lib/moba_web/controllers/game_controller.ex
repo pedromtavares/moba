@@ -1,5 +1,5 @@
 defmodule MobaWeb.GameController do
-  alias Moba.Game
+  alias Moba.{Admin, Game}
   use MobaWeb, :controller
 
   def index(conn, _params) do
@@ -16,10 +16,28 @@ defmodule MobaWeb.GameController do
     hero = player && player.current_pve_hero
 
     cond do
-      player && player.tutorial_step == 30 -> redirect(conn, to: "/arena")
-      hero && is_nil(hero.finished_at) -> redirect(conn, to: "/training")
-      player -> redirect(conn, to: "/base")
-      true -> render(conn, :homepage, layout: false)
+      player && player.tutorial_step == 30 ->
+        redirect(conn, to: ~p"/arena")
+
+      hero && is_nil(hero.finished_at) ->
+        redirect(conn, to: ~p"/training")
+
+      player ->
+        redirect(conn, to: ~p"/base")
+
+      true ->
+        data = Admin.get_server_data()
+
+        # default values taken Jun 16, 2024
+        counts = %{
+          players: format_number(data[:players_count] || 18_120),
+          heroes: format_number(data[:heroes_count] || 831_114),
+          matches: format_number(data[:matches_count] || 1_892_922)
+        }
+
+        conn
+        |> assign(:counts, counts)
+        |> render(:homepage, layout: false)
     end
   end
 
@@ -45,6 +63,16 @@ defmodule MobaWeb.GameController do
 
     conn
     |> put_session(:player_id, player.id)
-    |> redirect(to: "/training")
+    |> redirect(to: ~p"/training")
+  end
+
+  defp format_number(n) do
+    "#{n}"
+    |> to_charlist()
+    |> Enum.reverse()
+    |> Enum.chunk_every(3)
+    |> Enum.map(&Enum.reverse(&1))
+    |> Enum.reverse()
+    |> Enum.join(",")
   end
 end

@@ -4,7 +4,7 @@ defmodule Moba.Admin.Seasons do
   """
 
   alias Moba.{Repo, Game}
-  alias Game.Schema.Season
+  alias Game.Schema.{Player, Hero, Match, Season}
   alias Game.Query.{PlayerQuery, HeroQuery, SkillQuery}
 
   import Ecto.Query
@@ -87,6 +87,21 @@ defmodule Moba.Admin.Seasons do
     |> Repo.preload(current_pve_hero: [:avatar, :items, skills: SkillQuery.ordered()])
     |> Enum.filter(& &1.current_pve_hero)
     |> Enum.sort_by(& &1.current_pve_hero.league_tier, :desc)
+  end
+
+  def players_count do
+    latest = from(p in Player, order_by: [desc: p.id], limit: 1) |> Repo.all() |> List.first()
+    (latest && Map.get(latest, :id)) || 18_000
+  end
+
+  def heroes_count do
+    latest = from(h in Hero, order_by: [desc: h.id], limit: 1) |> Repo.all() |> List.first()
+    (latest && Map.get(latest, :id)) || 830_000
+  end
+
+  def matches_count do
+    latest = from(m in Match, order_by: [desc: m.id], limit: 1) |> Repo.all() |> List.first()
+    (latest && Map.get(latest, :id)) || 1_900_000
   end
 
   defp do_paginate(filter, params) do

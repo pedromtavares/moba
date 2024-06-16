@@ -60,6 +60,10 @@ defmodule Moba.Game.Query.PlayerQuery do
     from _ in query, order_by: fragment("RANDOM()")
   end
 
+  def finished_training_tutorial(query) do
+    from player in query, where: player.tutorial_step >= 19
+  end
+
   def daily_ranked(limit) do
     from(player in limit_by(Player, limit),
       where: not is_nil(player.ranking),

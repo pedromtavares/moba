@@ -92,6 +92,12 @@ defmodule Moba.Admin do
 
   defdelegate current_guests, to: Seasons
 
+  defdelegate players_count, to: Seasons
+
+  defdelegate heroes_count, to: Seasons
+
+  defdelegate matches_count, to: Seasons
+
   # SKINS
 
   def paginate_skins(params \\ %{}), do: Skins.paginate(params)

@@ -57,6 +57,7 @@ config :moba, MobaWeb.Endpoint,
       ~r{priv/gettext/.*(po)$},
       ~r{lib/moba_web/views/.*(ex)$},
       ~r{lib/moba_web/templates/.*(eex)$},
+      ~r{lib/moba_web/controllers/.*(eex)$},
       ~r{lib/moba_web/live/.*(ex)$}
     ]
   ]

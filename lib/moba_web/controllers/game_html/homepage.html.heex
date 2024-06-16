@@ -13,6 +13,31 @@
       font-display: swap;
     }
 
+    @font-face {
+      font-family: rpg;
+      src: url("/fonts/rpg.ttf");
+    }
+
+    .f-rpg{
+      font-family: rpg;
+    }
+
+    @keyframes shadow {
+      0% {
+        box-shadow: inset 0px 0px 10px black;
+      }
+      50% {
+        box-shadow: inset 0px 0px 35px black;
+      }
+      100% {
+        box-shadow: inset 0px 0px 10px black;
+      }
+    }
+
+    .shadow-fx{
+      animation: 3s shadow infinite;
+    }
+
     html,
     body {
       width: 100%;
@@ -47,6 +72,7 @@
       width: 100%;
       min-height: 730px;
       box-shadow: 0px 0px 50px 50px rgba(0,0,0,1);
+      padding-top: 280px;
     }
     .flex-center {
       display: flex;
@@ -61,12 +87,42 @@
       font-weight: bold;
       font-family: pressStart;
       font-size: 0.8rem;
+      margin-bottom: 80px;
+      animation: 2s shadow infinite;
+    }
+    .stat-box{
+      background: rgba(0, 0, 0, 0.85);
+      border-radius: 10px;
+      width: 250px;
+      font-size: 1.2rem;
+      font-family: rpg;
+      text-align: center;
+      margin-left: 30px;
+      margin-right: 30px;
+      padding: 10px;
+      box-shadow: 0px 0px 13px 2px rgba(255,255,255,0.75);
+    }
+    .number{
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: white;
     }
   </style>
   <body style="background: black">
     <div class="hero flex-center">
       <div class="sub-hero flex-center">
         <a href="/start" class="btn btn-lg btn-danger start">PRESS START</a>
+        <div class="stats row">
+          <div class="stat-box col">
+            <span class="number"><%= @counts.players %></span> <br /> TOTAL PLAYERS
+          </div>
+          <div class="stat-box col">
+            <span class="number"><%= @counts.heroes %></span> <br /> HEROES INVOKED
+          </div>
+          <div class="stat-box col">
+            <span class="number"><%= @counts.matches %></span> <br /> MATCHES PLAYED
+          </div>
+        </div>
       </div>
     </div>
     <script type="text/javascript" src={Routes.static_path(@conn, "/js/app.js")}>
