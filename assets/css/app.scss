@@ -299,6 +299,11 @@ hr{
   background-color: rgba(54, 64, 74, 0.8);
 }
 
+.dark-bg-lighter{
+  background: #38414a !important;
+  box-shadow: inset 0px 0px 80px black;
+}
+
 .dark-bg{
   background: #38414a !important;
   box-shadow: inset 0px 0px 300px black;
@@ -695,5 +700,19 @@ b, strong {
 
   .item-list{
     margin: 3px 0;
+  }
+}
+
+.stats-footer{
+  h5{
+    margin:0
+  }
+  img{
+    margin-top:-3px;
+    height: 16px;
+  }
+
+  .undefeated{
+    box-shadow: 0 0 10px red;
   }
 }

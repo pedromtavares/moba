@@ -104,6 +104,24 @@ defmodule Moba.Admin.Seasons do
     (latest && Map.get(latest, :id)) || 0
   end
 
+  def masters_count do
+    HeroQuery.non_bots()
+    |> HeroQuery.masters()
+    |> Repo.aggregate(:count)
+  end
+
+  def grandmasters_count do
+    HeroQuery.non_bots()
+    |> HeroQuery.grandmasters()
+    |> Repo.aggregate(:count)
+  end
+
+  def undefeated_count do
+    HeroQuery.non_bots()
+    |> HeroQuery.undefeated()
+    |> Repo.aggregate(:count)
+  end
+
   defp do_paginate(filter, params) do
     Season
     |> Filtrex.query(filter)

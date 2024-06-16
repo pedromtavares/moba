@@ -12,7 +12,7 @@
             class="progress mt-3"
             style="height:50px;"
             data-toggle="tooltip"
-            title={current_quest_avatars(@current_player)}
+            title={"Already trained: #{current_quest_avatars(@current_player)}"}
           >
             <div style={"width:#{current_quest_progression_percentage(@current_player)}%;"} class="progress-bar pve-bar">
             </div>

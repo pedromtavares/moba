@@ -98,6 +98,12 @@ defmodule Moba.Admin do
 
   defdelegate matches_count, to: Seasons
 
+  defdelegate masters_count, to: Seasons
+
+  defdelegate grandmasters_count, to: Seasons
+
+  defdelegate undefeated_count, to: Seasons
+
   # SKINS
 
   def paginate_skins(params \\ %{}), do: Skins.paginate(params)

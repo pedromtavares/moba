@@ -11,6 +11,8 @@ defmodule Moba.Game.Query.HeroQuery do
 
   @platinum_league_tier Moba.platinum_league_tier()
   @master_league_tier Moba.master_league_tier()
+  @max_league_tier Moba.max_league_tier()
+  @max_total_farm Moba.max_total_farm()
   @current_ranking_date Moba.current_ranking_date()
   @base_hero_count Moba.base_hero_count()
 
@@ -89,6 +91,19 @@ defmodule Moba.Game.Query.HeroQuery do
     |> random()
     |> unarchived()
     |> load()
+  end
+
+  def masters(query \\ Hero) do
+    from hero in query, where: hero.league_tier == @master_league_tier
+  end
+
+  def grandmasters(query \\ Hero) do
+    from hero in query, where: hero.league_tier == @max_league_tier
+  end
+
+  def undefeated(query \\ Hero) do
+    max_farm = div(@max_total_farm, 2)
+    from hero in query, where: hero.total_gold_farm == ^max_farm, where: hero.total_xp_farm == ^max_farm
   end
 
   def by_difficulty(query, difficulty) do

@@ -46,7 +46,10 @@ defmodule Moba.Admin.Server do
       guests: Admin.current_guests(),
       user_stats: Admin.get_user_stats(),
       duels: Admin.list_recent_duels(),
-      match_stats: Admin.match_stats()
+      match_stats: Admin.match_stats(),
+      masters_count: Admin.masters_count(),
+      grandmasters_count: Admin.grandmasters_count(),
+      undefeated_count: Admin.undefeated_count()
     }
   end
 
