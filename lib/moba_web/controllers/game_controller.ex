@@ -27,7 +27,7 @@ defmodule MobaWeb.GameController do
 
       true ->
         counts = %{
-          players: format_number(Admin.active_players_count()),
+          players: format_number(Admin.players_count()),
           heroes: format_number(Admin.heroes_count()),
           matches: format_number(Admin.matches_count())
         }
