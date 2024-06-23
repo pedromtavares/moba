@@ -95,12 +95,8 @@ defmodule Moba.Admin.Seasons do
     |> Repo.aggregate(:count)
   end
 
-  # this is an approximation due to guest heroes being deleted after a week
   def trained_heroes_count do
-    guests = PlayerQuery.non_bots() |> PlayerQuery.guests() |> Repo.aggregate(:count)
-    finished = HeroQuery.non_bots() |> HeroQuery.finished() |> Repo.aggregate(:count)
-
-    guests + finished
+    HeroQuery.non_bots() |> HeroQuery.finished() |> Repo.aggregate(:count)
   end
 
   def players_count do
