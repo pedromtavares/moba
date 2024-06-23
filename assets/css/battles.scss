@@ -440,6 +440,17 @@
       left: 20px;
       font-size: 0.8rem;
     }
+
+    .hotkey{
+      position: relative;
+      bottom: 60px;
+      right: 23px;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 0.4rem;
+      border-radius: 1rem;
+      font-size: 1rem;
+    }
   }
 
   .item-container{
@@ -465,10 +476,32 @@
       left: 20px;
       font-size: 0.7rem;
     }
+
+    .hotkey{
+      position: relative;
+      bottom: 45px;
+      right: 20px;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 0.3rem;
+      border-radius: 1rem;
+      font-size: 0.8rem;
+    }
   }
 
   .basic-attack{
     margin-left: 2rem;
+
+    .hotkey{
+      position: relative;
+      bottom: 13px;
+      right: 63px;
+      font-size: 0.8rem;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 0.4rem;
+      border-radius: 1rem;
+      font-size: 1rem;
+    }
   }
 
 

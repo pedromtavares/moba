@@ -35,7 +35,8 @@ defmodule MobaWeb.LayoutView do
 
     %{
       players: format_number(Admin.players_count()),
-      heroes: format_number(Admin.heroes_count()),
+      active: format_number(Admin.active_players_count()),
+      heroes: format_number(Admin.trained_heroes_count()),
       matches: format_number(Admin.matches_count()),
       masters: format_number(masters),
       grandmasters: format_number(grandmasters),

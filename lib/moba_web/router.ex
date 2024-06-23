@@ -55,7 +55,7 @@ defmodule MobaWeb.Router do
   end
 
   scope "/", MobaWeb do
-    pipe_through [:browser]
+    pipe_through [:browser, :base_layout]
 
     live "/battles/:id", BattleLive
   end

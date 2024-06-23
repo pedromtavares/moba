@@ -135,7 +135,8 @@ defmodule MobaWeb.MatchLive do
         tutorial_step: player.tutorial_step,
         hero_tab: hero_tab,
         latest_match: latest_match,
-        teams: teams
+        teams: teams,
+        hide_footer: true
       )
     end
   end

@@ -37,6 +37,30 @@ window.jQuery = $;
 window.$ = $;
 window.liveSocket = liveSocket;
 
+document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('keydown', (event) => {
+    const skillKeys = ['q', 'w', 'e', 'r', 'f'];
+    const itemKeys = ['1', '2', '3', '4', '5', '6'];
+
+    const key = event.key.toLowerCase();
+    
+    if (skillKeys.includes(key)) {
+      const index = skillKeys.indexOf(key);
+      const skillElement = document.querySelector(`.skill-img[data-index="${index}"].can-use`);
+      if (skillElement) {
+        skillElement.click();
+        document.getElementById('attack-button').click();
+      }
+    } else if (itemKeys.includes(key)) {
+      const index = itemKeys.indexOf(key);
+      const itemElement = document.querySelector(`.item-img[data-index="${index}"].can-use`);
+      if (itemElement) {
+        itemElement.click();
+      }
+    }
+  });
+});
+
 // runs every time there is a LiveView update
 $(document).on('phx:update', event => {
   initTooltips();

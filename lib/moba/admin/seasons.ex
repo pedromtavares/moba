@@ -89,6 +89,18 @@ defmodule Moba.Admin.Seasons do
     |> Enum.sort_by(& &1.current_pve_hero.league_tier, :desc)
   end
 
+  def active_players_count do
+    PlayerQuery.non_bots()
+    |> PlayerQuery.guests()
+    |> Repo.aggregate(:count)
+  end
+
+  def trained_heroes_count do
+    HeroQuery.non_bots()
+    |> HeroQuery.finished()
+    |> Repo.aggregate(:count)
+  end
+
   def players_count do
     latest = from(p in Player, order_by: [desc: p.id], limit: 1) |> Repo.all() |> List.first()
     (latest && Map.get(latest, :id)) || 0

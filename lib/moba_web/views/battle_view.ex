@@ -433,6 +433,19 @@ defmodule MobaWeb.BattleView do
     end
   end
 
+  def skill_hotkey(0), do: "Q"
+  def skill_hotkey(1), do: "W"
+  def skill_hotkey(2), do: "E"
+  def skill_hotkey(3), do: "R"
+  def skill_hotkey(4), do: "F"
+
+  def item_hotkey(0), do: "1"
+  def item_hotkey(1), do: "2"
+  def item_hotkey(2), do: "3"
+  def item_hotkey(3), do: "4"
+  def item_hotkey(4), do: "5"
+  def item_hotkey(5), do: "6"
+
   defp current_attacker?(%{type: "duel", duel: duel, attacker: attacker}, player_id) do
     (attacker.id == duel.player_first_pick_id && duel.player_id == player_id) ||
       (attacker.id == duel.opponent_second_pick_id && duel.opponent_player_id == player_id)
