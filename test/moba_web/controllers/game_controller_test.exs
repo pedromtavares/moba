@@ -3,7 +3,7 @@ defmodule MobaWeb.GameControllerTest do
 
   test "homepage loads", %{conn: conn} do
     conn = get(conn, "/")
-    assert html_response(conn, 200) =~ "PRESS START"
+    assert html_response(conn, 200) =~ "ENTER THE ARENA"
   end
 
   test "user has active pve hero and is redirected to training", %{conn: conn} do
