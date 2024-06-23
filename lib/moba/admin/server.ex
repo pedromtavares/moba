@@ -50,7 +50,7 @@ defmodule Moba.Admin.Server do
       masters_count: Admin.masters_count(),
       grandmasters_count: Admin.grandmasters_count(),
       undefeated_count: Admin.undefeated_count(),
-      active_players_count: Admin.active_player_count(),
+      active_players_count: Admin.active_players_count(),
       trained_heroes_count: Admin.trained_heroes_count()
     }
   end
