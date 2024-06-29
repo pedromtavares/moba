@@ -137,13 +137,19 @@ defmodule MobaWeb.CommunityView do
         </span>
       </td>
       <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/player/#{@player.id}")}>
-        <h2 class="f-rpg text-danger">#<%= @player.ranking %></h2>
+        <h2 class="f-rpg text-danger">
+          <%= if @player.ranking do %>
+            #<%= @player.ranking %>
+          <% else %>
+            ?
+          <% end %>
+        </h2>
         <h4 class={"rank-shadow-#{PlayerView.shadow_rank(@player)} f-rpg"}><%= MobaWeb.ArenaView.tier_label(@player) %></h4>
       </td>
-      <td class="text-center">
-        <div class="row">
+      <td>
+        <div class="d-flex justify-content-start">
           <%= for hero <- @player.latest_heroes do %>
-            <div class="col">
+            <div class="col-2">
               <.link navigate={~p"/hero/#{hero}"}>
                 <img
                   src={"#{GH.image_url(hero.avatar)}"}

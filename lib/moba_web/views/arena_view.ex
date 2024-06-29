@@ -110,6 +110,7 @@ defmodule MobaWeb.ArenaView do
     <span></span>
     """
 
+  def tier_label(%{ranking: nil}), do: "Training"
   def tier_label(%{pvp_tier: 2}), do: "Immortal"
   def tier_label(%{pvp_tier: 1}), do: "Shadow"
   def tier_label(_), do: "Pleb"
