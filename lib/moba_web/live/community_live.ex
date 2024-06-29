@@ -128,7 +128,7 @@ defmodule MobaWeb.CommunityLive do
         match_filter: match_filter,
         match_stats: data.match_stats[match_filter],
         duels: data.duels,
-        is_admin: user.is_admin
+        is_admin: user && user.is_admin
       )
     end
   end
@@ -155,6 +155,8 @@ defmodule MobaWeb.CommunityLive do
       |> stats_assigns()
     end
   end
+
+  defp tick_user(socket, nil), do: socket
 
   defp tick_user(socket, user) do
     user = Accounts.update_user!(user, %{community_seen_at: DateTime.utc_now()})

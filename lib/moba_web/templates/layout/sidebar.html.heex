@@ -1,7 +1,7 @@
 <div class="sidebar-nav-container">
   <div class="sidebar-nav d-none d-md-flex">
     <.link
-      navigate={Routes.live_path(@socket, MobaWeb.DashboardLive)}
+      navigate={~p"/base"}
       data-toggle="tooltip"
       data-tippy-placement="right"
       data-tippy-arrow={false}
@@ -12,7 +12,7 @@
     </.link>
     <%= if @current_player.user_id do %>
       <.link
-        navigate={Routes.live_path(@socket, MobaWeb.ArenaLive.Index)}
+        navigate={~p"/arena"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -34,7 +34,7 @@
     <% end %>
     <%= if guest?(@current_player) do %>
       <.link
-        navigate={Routes.pow_registration_path(@socket, :new)}
+        navigate={~p"/registration/new"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -45,7 +45,7 @@
       </.link>
     <% else %>
       <.link
-        navigate={Routes.player_path(@socket, :show, @current_player.id)}
+        navigate={~p"/player/#{@current_player.id}"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -55,7 +55,7 @@
         <i class="fa-duotone fa-helmet-battle"></i>
       </.link>
       <.link
-        navigate={Routes.live_path(@socket, MobaWeb.TavernLive)}
+        navigate={~p"/tavern"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -64,22 +64,22 @@
       >
         <i class="fa-duotone fa-dungeon"></i>
       </.link>
-      <.link
-        navigate={Routes.live_path(@socket, MobaWeb.CommunityLive)}
-        data-toggle="tooltip"
-        data-tippy-placement="right"
-        data-tippy-arrow={false}
-        title="<h3 class='ml-2 mr-2'>Community</h3>"
-        class={sidebar_class("community", assigns)}
-      >
-        <i class={"fa-duotone fa-globe #{if show_notifications?(assigns), do: "text-info"}"}></i>
-        <%= if show_notifications?(assigns) do %>
-          <span class="badge badge-light-info"><%= @notifications %></span>
-        <% end %>
-      </.link>
     <% end %>
     <.link
-      navigate={Routes.live_path(@socket, MobaWeb.LibraryLive)}
+      navigate={~p"/community"}
+      data-toggle="tooltip"
+      data-tippy-placement="right"
+      data-tippy-arrow={false}
+      title="<h3 class='ml-2 mr-2'>Community</h3>"
+      class={sidebar_class("community", assigns)}
+    >
+      <i class={"fa-duotone fa-globe #{if show_notifications?(assigns), do: "text-info"}"}></i>
+      <%= if show_notifications?(assigns) do %>
+        <span class="badge badge-light-info"><%= @notifications %></span>
+      <% end %>
+    </.link>
+    <.link
+      navigate={~p"/library"}
       data-toggle="tooltip"
       data-tippy-placement="right"
       data-tippy-arrow={false}

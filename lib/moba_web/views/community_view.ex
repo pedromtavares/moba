@@ -74,39 +74,38 @@ defmodule MobaWeb.CommunityView do
   defp guest(assigns) do
     ~H"""
     <div class="col-md-1 col-2" id={"guest-#{@player.id}"}>
-      <div class="card-box p-1">
-        <img src={GH.image_url(@player.current_pve_hero.avatar)} style="width: 100%" class="img-border-xs" /><br />
-        <h5 class="text-white text-center">
-          <img src={"/images/league/#{@player.current_pve_hero.league_tier}.png"} style="width: 20px;" /> Lv
-          <span class={if @player.current_pve_hero.pve_state == "dead", do: "text-muted"}>
-            <%= @player.current_pve_hero.level %>
-          </span>
-          (<%= length(@player.hero_collection) %>)
-        </h5>
-        <div>
-          <%= for skill <- @player.current_pve_hero.skills do %>
-            <%= img_tag(GH.image_url(skill), style: "width: 20%") %>
-          <% end %>
+      <div class="card">
+        <div
+          class="card-header border p-0"
+          style="background: rgba(0,0,0, 0.1)"
+          data-toggle={if @is_admin, do: "tooltip"}
+          title={
+            if @is_admin,
+              do:
+                "Created #{@player.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)}.<br/>Total heroes: #{length(@player.hero_collection)}"
+          }
+        >
+          <h5 class="f-rpg"><%= if @current, do: "YOU", else: "GUEST" %></h5>
         </div>
-        <div>
-          <%= for item <- @player.current_pve_hero.items do %>
-            <%= img_tag(GH.image_url(item), style: "width: 20%") %>
-          <% end %>
+        <div class="card-body p-1 border" style="border-radius: 0">
+          <img src={GH.image_url(@player.current_pve_hero.avatar)} style="width: 100%" class="img-border-xs" /><br />
+          <h5 class="text-white text-center">
+            <img src={"/images/league/#{@player.current_pve_hero.league_tier}.png"} style="width: 20px;" /> Lv
+            <span class={if @player.current_pve_hero.pve_state == "dead", do: "text-muted"}>
+              <%= @player.current_pve_hero.level %>
+            </span>
+          </h5>
+          <div>
+            <%= for skill <- @player.current_pve_hero.skills do %>
+              <%= img_tag(GH.image_url(skill), style: "width: 20%") %>
+            <% end %>
+          </div>
+          <div>
+            <%= for item <- @player.current_pve_hero.items do %>
+              <%= img_tag(GH.image_url(item), style: "width: 20%") %>
+            <% end %>
+          </div>
         </div>
-        <p class="text-center m-0">
-          <span class="text-muted">
-            <%= @player.current_pve_hero.pve_total_turns + @player.current_pve_hero.pve_current_turns %>t
-          </span>
-          | <span class="text-primary"><%= @player.tutorial_step %></span>
-          |
-          <span class="text-success">
-            <%= @player.current_pve_hero.total_gold_farm + @player.current_pve_hero.total_xp_farm %>
-          </span>
-          <br />
-          <small class="text-dark font-italic">
-            <%= @player.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>
-          </small>
-        </p>
       </div>
     </div>
     """

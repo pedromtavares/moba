@@ -37,7 +37,7 @@
                 </p>
                 <p class="inbox-item-text"><%= formatted_body(message) %></p>
                 <p class="inbox-item-date">
-                  <%= if @current_player.user.is_admin do %>
+                  <%= if @is_admin do %>
                     <a
                       href="javascript:void(0)"
                       phx-click="delete-message"
@@ -56,9 +56,14 @@
             <.form :let={form} for={@changeset} phx-submit="create-message" class="form-horizontal">
               <%= text_input(form, :body,
                 class: "form-control",
-                placeholder: "Type and press Enter to send",
+                placeholder:
+                  if(is_nil(@current_player.user),
+                    do: "Create an account to send messages",
+                    else: "Type and press Enter to send"
+                  ),
                 maxlength: 500,
-                minlength: 2
+                minlength: 2,
+                disabled: is_nil(@current_player.user)
               ) %>
             </.form>
           <% end %>
@@ -78,7 +83,7 @@
           <ul class="list-unstyled timeline-sm">
             <%= for update <- @updates do %>
               <li class="timeline-sm-item">
-                <%= if @current_player.user.is_admin do %>
+                <%= if @is_admin do %>
                   <a
                     href="javascript:void(0)"
                     phx-click="delete-message"
@@ -93,7 +98,7 @@
               </li>
             <% end %>
           </ul>
-          <%= if @current_player.user.is_admin do %>
+          <%= if @is_admin do %>
             <hr />
             <.form :let={form} for={@changeset} phx-submit="create-update" class="form-horizontal">
               <%= text_input(form, :title, class: "form-control") %>
@@ -205,11 +210,17 @@
             <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
               <tbody id="hall-of-training">
                 <tr class="f-rpg font-17 text-white">
-                  <th class="border" width="10%" phx-click={if @current_player.user.is_admin, do: "toggle-admin"}>
+                  <th
+                    class="border"
+                    width="10%"
+                    phx-click={if @current_player.user && @current_player.user.is_admin, do: "toggle-admin"}
+                  >
                     Player
                   </th>
                   <th class="border" width="10%">Arena</th>
-                  <th class="border">LATEST HEROES</th>
+                  <th class="border text-left">
+                    <div class="ml-4">LATEST HEROES</div>
+                  </th>
                 </tr>
                 <%= for player <- @players do %>
                   <.player_row player={player} is_admin={@is_admin} current={player.id == @current_player.id} />
@@ -218,12 +229,17 @@
             </table>
           </div>
         </div>
-        <div :if={@is_admin} class="row mt-3">
+        <div class="row mt-3">
           <%= for player <- @guests do %>
-            <.guest :if={player.current_pve_hero} player={player} />
+            <.guest
+              :if={player.current_pve_hero}
+              is_admin={@is_admin}
+              player={player}
+              current={player.id == @current_player.id}
+            />
           <% end %>
         </div>
-        <div :if={@is_admin} class="row mt-3">
+        <div :if={@is_admin} class="row">
           <div class="col">
             <div class="card">
               <div class="card-body p-0 pt-2">
