@@ -88,7 +88,7 @@ defmodule MobaWeb.CommunityLive do
     end
   end
 
-  def handle_event("toggle-admin", params, socket) do
+  def handle_event("toggle-admin", _, socket) do
     {:noreply, assign(socket, is_admin: !socket.assigns.is_admin)}
   end
 
