@@ -61,7 +61,7 @@ defmodule Moba.Admin.Server do
     Utils.run_async(fn ->
       state = current_state()
       Cachex.put(:game_cache, "match_stats", state)
-      MobaWeb.broadcast("admin", "server", %{})
+      MobaWeb.broadcast("stats", "server", %{})
     end)
   end
 end

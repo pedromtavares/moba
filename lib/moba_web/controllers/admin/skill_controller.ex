@@ -19,10 +19,6 @@ defmodule MobaWeb.Admin.SkillController do
     end
   end
 
-  def root(conn, _) do
-    redirect(conn, to: "/admin/seasons/current")
-  end
-
   def new(conn, _params) do
     changeset = Admin.change_skill(%Skill{})
     render(conn, "new.html", changeset: changeset, skills: [])

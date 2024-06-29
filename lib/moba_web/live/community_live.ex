@@ -1,14 +1,21 @@
 defmodule MobaWeb.CommunityLive do
   use MobaWeb, :live_view
 
+  alias Moba.Admin
+
   def mount(_, _session, socket) do
     with %{assigns: %{channel: channel}} = socket = socket_init(socket) do
       if connected?(socket), do: MobaWeb.subscribe(channel)
+      if connected?(socket), do: MobaWeb.subscribe("stats")
 
       Process.send_after(self(), :load_rankings, 100)
 
       {:ok, socket}
     end
+  end
+
+  def handle_event("show-online", _, socket) do
+    {:noreply, assign(socket, active_tab: "online")}
   end
 
   def handle_event("show-pvp", _, socket) do
@@ -70,6 +77,25 @@ defmodule MobaWeb.CommunityLive do
     end
   end
 
+  def handle_event("user-filter", _, %{assigns: %{user_filter: filter}} = socket) do
+    new_filter = if filter == :weekly, do: :daily, else: :weekly
+    {:noreply, assign(socket, user_filter: new_filter) |> stats_assigns()}
+  end
+
+  def handle_event("match-filter", params, socket) do
+    with filter = Map.get(params, "type") do
+      {:noreply, assign(socket, match_filter: filter) |> stats_assigns()}
+    end
+  end
+
+  def handle_event("toggle-admin", params, socket) do
+    {:noreply, assign(socket, is_admin: !socket.assigns.is_admin)}
+  end
+
+  def handle_info({"server", _}, socket) do
+    {:noreply, stats_assigns(socket)}
+  end
+
   def handle_info({"general", message}, %{assigns: %{messages: messages, current_player: player}} = socket) do
     {:noreply, assign(socket, messages: messages ++ [message]) |> tick_user(player.user)}
   end
@@ -90,8 +116,25 @@ defmodule MobaWeb.CommunityLive do
     MobaWeb.CommunityView.render("index.html", assigns)
   end
 
+  defp stats_assigns(%{assigns: %{current_player: %{user: user}}} = socket) do
+    with data = Admin.get_server_data(),
+         user_filter = socket.assigns[:user_filter] || :weekly,
+         match_filter = socket.assigns[:match_filter] || "elite" do
+      assign(socket,
+        players: data.players,
+        guests: data.guests,
+        user_filter: user_filter,
+        user_stats: data.user_stats[user_filter],
+        match_filter: match_filter,
+        match_stats: data.match_stats[match_filter],
+        duels: data.duels,
+        is_admin: user.is_admin
+      )
+    end
+  end
+
   defp socket_init(%{assigns: %{current_player: %{user: user}}} = socket) do
-    with active_tab = "pvp",
+    with active_tab = "online",
          changeset = Accounts.change_message(),
          channel = "community",
          messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse(),
@@ -109,6 +152,7 @@ defmodule MobaWeb.CommunityLive do
         notifications: 0
       )
       |> tick_user(user)
+      |> stats_assigns()
     end
   end
 

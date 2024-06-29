@@ -205,6 +205,10 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
+  def max_farm?(hero) do
+    hero.total_gold_farm + hero.total_xp_farm == Moba.max_total_farm()
+  end
+
   @doc """
   Retrieves top PVE ranked Heroes
   """

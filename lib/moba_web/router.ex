@@ -106,12 +106,7 @@ defmodule MobaWeb.Router do
 
     live_dashboard "/dashboard", metrics: MobaWeb.Telemetry, ecto_repos: [Moba.Repo]
 
-    get "/", Admin.SkillController, :root
-  end
-
-  scope "/admin/seasons", MobaWeb do
-    pipe_through [:browser, :protected, :admin_protected, :admin_layout]
-    live "/current", Admin.SeasonLiveView
+    get "/", Admin.UserController, :index
   end
 
   defp put_pow_layout(conn, layout), do: put_private(conn, :phoenix_layout, layout)

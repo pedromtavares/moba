@@ -114,6 +114,8 @@ defmodule Moba.Game do
 
   defdelegate master_league?(hero), to: Training
 
+  defdelegate max_farm?(hero), to: Heroes
+
   defdelegate max_league?(hero), to: Training
 
   defdelegate maybe_finish_pve(hero), to: Training

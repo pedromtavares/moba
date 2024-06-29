@@ -65,11 +65,11 @@ defmodule Moba.Admin.Seasons do
   def current_active_players do
     PlayerQuery.non_bots()
     |> PlayerQuery.non_guests()
-    |> PlayerQuery.currently_active()
+    |> PlayerQuery.currently_active(168)
     |> Repo.all()
     |> Repo.preload(:user)
     |> Enum.map(fn player ->
-      heroes = HeroQuery.latest(player.id, 5) |> HeroQuery.load_avatar() |> Repo.all()
+      heroes = HeroQuery.latest(player.id, 6) |> HeroQuery.load_avatar() |> Repo.all()
 
       count = HeroQuery.with_player(HeroQuery.unarchived(), player.id) |> Repo.aggregate(:count)
 
