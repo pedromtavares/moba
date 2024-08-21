@@ -46,7 +46,7 @@
         <tr>
           <th width="33%">Rank</th>
           <th width="33%">Player</th>
-          <th width="33%">Daily Win Rate</th>
+          <th width="33%">Daily Wins</th>
         </tr>
       </thead>
       <tbody>
@@ -79,11 +79,11 @@
             </td>
             <td>
               <h3
-                class={PlayerView.performance_class(player)}
+                class="text-success"
                 title={"#{player.daily_wins} wins / #{player.daily_matches} matches"}
                 data-toggle="tooltip"
               >
-                <%= PlayerView.daily_win_rate(player) %>
+                <%= player.daily_wins %>
               </h3>
             </td>
           </tr>

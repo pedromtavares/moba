@@ -177,7 +177,7 @@
                 </th>
                 <th>Player</th>
                 <%= if @ranking_display == "daily" do %>
-                  <th>Daily Win Rate</th>
+                  <th>Daily Wins</th>
                 <% else %>
                   <th
                     data-toggle="tooltip"
@@ -226,12 +226,12 @@
                   <td>
                     <%= if @ranking_display == "daily" do %>
                       <h3
-                        class={performance_class(player)}
+                        class="text-success"
                         title={"#{player.daily_wins} wins / #{player.daily_matches} matches"}
                         data-toggle="tooltip"
                         id={"daily-player-#{player.id}"}
                       >
-                        <%= daily_win_rate(player) %>
+                        <%= player.daily_wins %>
                       </h3>
                     <% else %>
                       <h3 class="text-success" id={"season-player-#{player.id}"}><%= season_score(player) %></h3>
