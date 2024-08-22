@@ -261,11 +261,11 @@
                   </th>
                   <th>
                     <h3
-                      class={performance_class(@player)}
+                      class="text-success"
                       title={"#{@player.daily_wins} wins / #{@player.daily_matches} matches"}
                       data-toggle="tooltip"
                     >
-                      <%= daily_win_rate(@player) %>
+                      <%= @player.daily_wins %>
                     </h3>
                   </th>
                 </tr>
