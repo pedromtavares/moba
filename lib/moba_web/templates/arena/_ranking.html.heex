@@ -112,7 +112,7 @@
                 title={"#{@current_player.daily_wins} wins / #{@current_player.daily_matches} matches"}
                 data-toggle="tooltip"
               >
-                <%= PlayerView.daily_win_rate(@current_player) %>
+                <%= @current_player.daily_wins %>
               </h3>
             </th>
           </tr>
