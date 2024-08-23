@@ -200,6 +200,31 @@
                     <h1 class="f-rpg">
                       <%= if @ranking_display == "daily" do %>
                         #<%= player.ranking || index %>
+
+                        <%= if player.ranking in [6,7,8,9] do %>
+                          <i
+                            class="fa fa-chevrons-up text-success text-small h4"
+                            data-toggle="tooltip"
+                            title={"#{username(player)} will rank up to Immortal"}
+                          >
+                          </i>
+                        <% end %>
+                        <%= if player.ranking in [26, 27, 28, 29, 30] do %>
+                          <i
+                            class="fa fa-chevrons-up text-success text-small h4"
+                            data-toggle="tooltip"
+                            title={"#{username(player)} will rank up to Shadow"}
+                          >
+                          </i>
+                        <% end %>
+                        <%= if player.ranking in [21, 22, 23, 24, 25] do %>
+                          <i
+                            class="fa fa-chevrons-down text-danger text-small h4"
+                            data-toggle="tooltip"
+                            title={"#{username(player)} will rank down to Pleb"}
+                          >
+                          </i>
+                        <% end %>
                       <% else %>
                         #<%= player.season_ranking %>
                       <% end %>
