@@ -40,7 +40,7 @@
               </td>
               <td>
                 <h5>
-                  <.link navigate={Routes.player_path(@socket, :show, player.id)}>player.user.username</.link>
+                  <.link navigate={Routes.player_path(@socket, :show, player.id)}><%= player.user.username %></.link>
                   <br /><small><%= player.pvp_points %> SP</small>
                 </h5>
               </td>
