@@ -5,12 +5,17 @@ defmodule Moba.Cleaner do
   import Ecto.Query, only: [from: 2]
 
   alias Moba.{Repo, Game, Engine}
-  alias Game.Schema.{Player, Hero, Skill, Item, Avatar, Match}
+  alias Game.Schema.{Duel, Player, Hero, Skill, Item, Avatar, Match}
   alias Engine.Schema.Battle
 
   def cleanup_old_records do
     IO.puts("Cleaning up records...")
-    # yesterday = Timex.now() |> Timex.shift(days: -1)
+    last_hour = Timex.now() |> Timex.shift(hours: -1)
+
+    # deletes duels that have not finished within the hour
+    query = from d in Duel, where: d.inserted_at <= ^last_hour, where: d.phase != "finished", order_by: d.id, limit: 20
+    Repo.all(query) |> delete_records()
+
     last_week = Timex.now() |> Timex.shift(days: -7)
 
     # deletes all non-duel battles from over a week ago
