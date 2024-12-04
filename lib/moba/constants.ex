@@ -86,7 +86,7 @@ defmodule Moba.Constants do
       @daily_ranking_limit 50
       @season_ranking_limit 50
       @daily_match_limit 30
-      @immortal_streak_multiplier 0.03
+      @immortal_streak_multiplier 0.02
       @available_hero_days 30
 
       def base_hero_count, do: @base_hero_count
