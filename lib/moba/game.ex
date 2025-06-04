@@ -254,6 +254,8 @@ defmodule Moba.Game do
 
   defdelegate basic_attack, to: Skills
 
+  defdelegate evade, to: Skills
+
   defdelegate can_level_skill?(hero, skill), to: Skills
 
   defdelegate get_current_skills_from(skills), to: Skills

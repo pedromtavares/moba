@@ -179,4 +179,17 @@ defmodule Moba.Engine.Core.Helper do
   def calculate_atk(battler) do
     %{battler | atk: battler.base_atk + battler.turn_atk}
   end
+
+  @doc """
+  1% of evade chance is given for every 1 speed above 100
+  """
+  def can_evade?(%{speed: speed} = battler) when speed > 100 do
+    chance = speed - 100
+    cooldown = battler.cooldowns["evade"]
+    has_cooldown? = is_nil(cooldown) || cooldown + 1 <= 0
+
+    has_cooldown? && chance >= Enum.random(1..100)
+  end
+
+  def can_evade?(_battler), do: false
 end

@@ -94,6 +94,7 @@ defmodule Moba.Engine.Schema.Battler do
     field :inneffectable, :boolean, default: false
     field :miss, :boolean, default: false
     field :disarmed, :boolean, default: false
+    field :evaded, :boolean, default: false
     field :undisarmable, :boolean, default: false
     field :executed, :boolean, default: false
     field :charging, :boolean, default: false

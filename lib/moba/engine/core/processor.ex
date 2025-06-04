@@ -141,6 +141,7 @@ defmodule Moba.Engine.Core.Processor do
     turn
     |> use_passives(%{owner: attacker, is_attacking: true})
     |> use_passives(%{owner: defender, is_attacking: false})
+    |> maybe_evade()
   end
 
   # Applies increases and reductions to both attacker (in case of self damage) and
@@ -218,14 +219,12 @@ defmodule Moba.Engine.Core.Processor do
     %{turn | defender: %{defender | current_hp: 0, hp_regen: 0}}
   end
 
-  defp defend_damage(%{attacker: %{disarmed: true}, defender: %{damage_type: type} = defender} = turn)
-       when type == "normal" do
+  defp defend_damage(%{attacker: %{disarmed: true}, defender: %{damage_type: "normal"} = defender} = turn) do
     %{turn | defender: %{defender | damage: 0}}
     |> Effect.disarmed()
   end
 
-  defp defend_damage(%{defender: %{damage_type: type, physically_invulnerable: true} = defender} = turn)
-       when type == "normal" do
+  defp defend_damage(%{defender: %{damage_type: "normal", physically_invulnerable: true} = defender} = turn) do
     %{turn | defender: %{defender | damage: 0}}
     |> Effect.invulnerable()
   end
@@ -234,6 +233,10 @@ defmodule Moba.Engine.Core.Processor do
        when type != "pure" do
     %{turn | defender: %{defender | damage: 0}}
     |> Effect.invulnerable()
+  end
+
+  defp defend_damage(%{defender: %{evaded: true, damage_type: "normal"} = defender} = turn) do
+    %{turn | defender: %{defender | damage: 0}}
   end
 
   defp defend_damage(turn), do: turn
@@ -459,4 +462,15 @@ defmodule Moba.Engine.Core.Processor do
     |> Enum.take(1)
     |> List.first()
   end
+
+  defp maybe_evade(%{defender: defender} = turn) do
+    if Helper.can_evade?(defender) && turn.attacker.last_skill && !turn.attacker.last_skill.ultimate do
+      %{turn | resource: Moba.evade()}
+      |> apply_spell()
+    else
+      turn
+    end
+  end
+
+  defp maybe_evade(turn), do: turn
 end

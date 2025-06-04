@@ -430,6 +430,12 @@ defmodule Moba.Engine.Core.Spell do
 
   # PASSIVES
 
+  defp effects_for(%{resource: %Skill{code: "evade"}} = turn, _options) do
+    turn
+    |> Effect.evade()
+    |> Effect.add_defender_cooldown()
+  end
+
   defp effects_for(%{resource: %Skill{code: "counter_helix"}} = turn, %{is_attacking: false}) do
     turn
     |> roll(

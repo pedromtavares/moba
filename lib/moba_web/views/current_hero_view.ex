@@ -83,7 +83,7 @@ defmodule MobaWeb.CurrentHeroView do
     title = "Speed: #{hero.speed + hero.item_speed}"
 
     sub =
-      "Each point in Speed gives you 1% chance to initiate a battle. E.g. 50 Speed will give you 50% chance to initiate. Speed only applies to whom is attacking."
+      "Each point in Speed gives you 1% chance to initiate a battle. E.g. 50 Speed will give you 50% chance to initiate. When defending, each point in Speed over 100 gives you 1% chance to Evade the next non-ultimate normal damage attack. Evade costs no Energy and has a 2 turn cooldown. E.g. 120 Speed will give you 20% chance to Evade."
 
     main = "Current base Speed: #{hero.speed} <br/>Speed given by items: #{hero.item_speed}"
     attribute_description(title, sub, main)

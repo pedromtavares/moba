@@ -8,6 +8,7 @@ defmodule Moba do
   use Constants
 
   defdelegate basic_attack, to: Game
+  defdelegate evade, to: Game
 
   def cached_items do
     %{resource_uuid: uuid} = Game.current_season()
@@ -109,7 +110,7 @@ defmodule Moba do
 
     case Cachex.get(:game_cache, "resources-#{uuid}") do
       {:ok, nil} ->
-        resources = Game.shop_list() ++ Game.list_all_current_avatars() ++ Game.list_all_current_skills()
+        resources = Game.shop_list() ++ Game.list_all_current_avatars() ++ Game.list_all_current_skills() ++ [evade()]
         Cachex.put(:game_cache, "resources-#{uuid}", resources)
         resources
 

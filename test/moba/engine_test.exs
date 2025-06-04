@@ -322,7 +322,7 @@ defmodule Moba.EngineTest do
       assert last_turn.number == 4
 
       assert previous_turn.skill_code == "basic_attack"
-      assert previous_turn.attacker.cooldowns == %{"decay" => 0}
+      assert previous_turn.attacker.cooldowns["decay"] == 0
 
       battle =
         battle
@@ -335,7 +335,7 @@ defmodule Moba.EngineTest do
       assert last_turn.number == 8
 
       assert previous_turn.skill_code == "decay"
-      assert previous_turn.attacker.cooldowns == %{"decay" => 1}
+      assert previous_turn.attacker.cooldowns["decay"] == 1
     end
 
     test "#continue_battle! uses item", %{strong_hero: attacker, alternate_hero: defender} do

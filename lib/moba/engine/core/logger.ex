@@ -505,6 +505,10 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} is [status]invulnerable[/status] and will take no damage this turn"
   end
 
+  defp description_for("evade", %{"evaded" => {true, hero}}, _) do
+    "#{hero} has [status]evaded[/status] the attack, taking no damage"
+  end
+
   defp description_for(_, %{"stunned" => {_, hero}}, _) do
     "#{hero} has been [status]stunned[/status]"
   end

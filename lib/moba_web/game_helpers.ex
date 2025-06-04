@@ -10,6 +10,7 @@ defmodule MobaWeb.GameHelpers do
   def image_url(%{code: "basic_attack"}), do: "/images/basic_attack.png"
   def image_url(%{code: "disarmed"}), do: "/images/disarmed.png"
   def image_url(%{code: "invulnerable"}), do: "/images/invulnerable.png"
+  def image_url(%{code: "evade"}), do: "/images/evade.png"
   def image_url(%{image: image} = resource), do: get_url(image, resource)
   def image_url(%{"image" => image} = resource), do: get_url(image, resource)
 

@@ -436,6 +436,10 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker(turn, :charging, true)
   end
 
+  def evade(turn) do
+    update_defender(turn, :evaded, true)
+  end
+
   # EXTRAS
 
   def extra_damage(%{resource: resource} = turn) do

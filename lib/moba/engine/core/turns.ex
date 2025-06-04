@@ -52,6 +52,7 @@ defmodule Moba.Engine.Core.Turns do
     %{
       battler
       | invulnerable: false,
+        evaded: false,
         immortal: false,
         physically_invulnerable: false,
         inneffectable: false,

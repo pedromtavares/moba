@@ -27,6 +27,18 @@ defmodule Moba.Game.Skills do
     }
   end
 
+  def evade do
+    %Skill{
+      name: "Evade",
+      code: "evade",
+      mp_cost: 0,
+      cooldown: 2,
+      passive: true,
+      description: "Evade the next non-ultimate normal damage attack",
+      damage_type: "normal"
+    }
+  end
+
   def boss! do
     [
       get_skill_by_code!("boss_slam", false, 1),
