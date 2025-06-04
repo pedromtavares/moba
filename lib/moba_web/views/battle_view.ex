@@ -413,6 +413,9 @@ defmodule MobaWeb.BattleView do
   def total_armor_for(hero, nil), do: hero.armor + hero.item_armor
   def total_armor_for(_, last_hero), do: last_hero.base_armor
 
+  def total_speed_for(hero, nil), do: hero.speed + hero.item_speed
+  def total_speed_for(_, last_hero), do: last_hero.speed
+
   def show_timer?(%{battle: %{duel_id: duel_id} = battle, last_turn: last_turn, hero: hero}) when not is_nil(duel_id) do
     if last_turn do
       last_turn.attacker.hero_id != hero.id
