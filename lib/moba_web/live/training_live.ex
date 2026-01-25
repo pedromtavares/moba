@@ -202,7 +202,6 @@ defmodule MobaWeb.TrainingLive do
         pending_battle: pending_battle,
         farm_rewards: farm_rewards,
         farm_tab: farm_tab,
-        farm_rewards: [],
         selected_turns: hero.pve_current_turns,
         sidebar_code: "training",
         targets: targets,

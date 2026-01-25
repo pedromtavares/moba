@@ -1,6 +1,6 @@
 defmodule Moba.Constants do
   @moduledoc """
-  Core game constants 
+  Core game constants
   """
 
   defmacro __using__(_) do
@@ -86,7 +86,7 @@ defmodule Moba.Constants do
       @daily_ranking_limit 50
       @season_ranking_limit 50
       @daily_match_limit 30
-      @immortal_streak_multiplier 0.02
+      @immortal_streak_multiplier 0.01
       @available_hero_days 30
 
       def base_hero_count, do: @base_hero_count
