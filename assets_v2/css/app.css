@@ -1,0 +1,172 @@
+/* V2 Styles - BrowserMOBA
+ * WC3UI imports will go here once the library is validated.
+ * For now, minimal styles to prove the pipeline works.
+ */
+
+/* Reset + base styles for v2 (no Bootstrap) */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  background-color: #1a1a2e;
+  color: #e0e0e0;
+  min-height: 100vh;
+}
+
+/* V2 layout scaffolding */
+.v2-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.v2-sidebar {
+  width: 240px;
+  background-color: #16213e;
+  border-right: 1px solid #0f3460;
+  padding: 1rem;
+  flex-shrink: 0;
+}
+
+.v2-main {
+  flex: 1;
+  padding: 1.5rem;
+  overflow-y: auto;
+}
+
+/* Basic component styles for spike */
+.v2-panel {
+  background-color: #16213e;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.v2-panel h2 {
+  margin-top: 0;
+  color: #e0a526;
+  font-size: 1.25rem;
+}
+
+.v2-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background-color: #0f3460;
+  color: #e0e0e0;
+  border: 1px solid #e0a526;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.15s ease;
+}
+
+.v2-btn:hover {
+  background-color: #1a4a7a;
+}
+
+.v2-btn.active {
+  background-color: #e0a526;
+  color: #1a1a2e;
+}
+
+/* Hero card grid */
+.v2-hero-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.v2-hero-card {
+  background-color: #1a1a3e;
+  border: 1px solid #0f3460;
+  border-radius: 4px;
+  padding: 1rem;
+  transition: border-color 0.15s ease;
+}
+
+.v2-hero-card:hover {
+  border-color: #e0a526;
+}
+
+.v2-hero-card .hero-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #e0a526;
+  margin-bottom: 0.5rem;
+}
+
+.v2-hero-card .hero-level {
+  font-size: 0.875rem;
+  color: #a0a0b0;
+}
+
+.v2-hero-card .hero-stats {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #8080a0;
+}
+
+/* Flash messages */
+.v2-flash {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+}
+
+.v2-flash.info {
+  background-color: #0f3460;
+  border: 1px solid #4a7abf;
+}
+
+.v2-flash.error {
+  background-color: #3d1010;
+  border: 1px solid #bf4a4a;
+}
+
+/* Empty state */
+.v2-empty {
+  text-align: center;
+  padding: 2rem;
+  color: #606080;
+  font-style: italic;
+}
+
+/* Nav links */
+.v2-sidebar a {
+  display: block;
+  padding: 0.5rem 0.75rem;
+  color: #a0a0c0;
+  text-decoration: none;
+  border-radius: 3px;
+  margin-bottom: 0.25rem;
+}
+
+.v2-sidebar a:hover {
+  background-color: #1a2a4e;
+  color: #e0e0e0;
+}
+
+.v2-sidebar a.active {
+  background-color: #0f3460;
+  color: #e0a526;
+}
+
+.v2-sidebar h3 {
+  color: #e0a526;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 1rem 0 0.5rem;
+}
+
+.v2-filter-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}

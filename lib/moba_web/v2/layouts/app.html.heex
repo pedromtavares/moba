@@ -1,0 +1,33 @@
+<div class="v2-wrapper">
+  <aside class="v2-sidebar">
+    <h3>BrowserMOBA</h3>
+    <nav>
+      <a href={~p"/v2/base"} class="active">Base</a>
+    </nav>
+
+    <%= if assigns[:current_player] do %>
+      <h3>Player</h3>
+      <div style="color: #a0a0c0; font-size: 0.875rem;">
+        PvE Tier: <%= @current_player.pve_tier %>
+      </div>
+    <% end %>
+
+    <%= if assigns[:current_hero] do %>
+      <h3>Current Hero</h3>
+      <div style="color: #a0a0c0; font-size: 0.875rem;">
+        Lv. <%= @current_hero.level %> — <%= @current_hero.avatar.name %>
+      </div>
+    <% end %>
+  </aside>
+
+  <main class="v2-main">
+    <%= if Phoenix.Flash.get(@flash, :info) do %>
+      <div class="v2-flash info"><%= Phoenix.Flash.get(@flash, :info) %></div>
+    <% end %>
+    <%= if Phoenix.Flash.get(@flash, :error) do %>
+      <div class="v2-flash error"><%= Phoenix.Flash.get(@flash, :error) %></div>
+    <% end %>
+
+    <%= @inner_content %>
+  </main>
+</div>

@@ -19,7 +19,8 @@ config :moba, MobaWeb.Endpoint,
       "--watch",
       "--watch-options-stdin",
       cd: Path.expand("../assets", __DIR__)
-    ]
+    ],
+    esbuild: {Esbuild, :install_and_run, [:v2, ~w(--sourcemap=inline --watch)]}
   ]
 
 config :waffle,
@@ -58,7 +59,9 @@ config :moba, MobaWeb.Endpoint,
       ~r{lib/moba_web/views/.*(ex)$},
       ~r{lib/moba_web/templates/.*(eex)$},
       ~r{lib/moba_web/controllers/.*(eex)$},
-      ~r{lib/moba_web/live/.*(ex)$}
+      ~r{lib/moba_web/live/.*(ex)$},
+      ~r{lib/moba_web/v2/.*(ex|heex)$},
+      ~r{priv/static/v2/.*(js|css)$}
     ]
   ]
 

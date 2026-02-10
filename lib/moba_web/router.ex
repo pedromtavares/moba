@@ -95,6 +95,21 @@ defmodule MobaWeb.Router do
     end
   end
 
+  # V2 routes — separate live_session, separate layout, separate asset pipeline
+  scope "/v2", MobaWeb.V2 do
+    pipe_through [:browser, :player_protected]
+
+    live_session :v2_game,
+      on_mount: [
+        MobaWeb.V2.Hooks.RequireAuth,
+        MobaWeb.V2.Hooks.LoadGameState
+      ],
+      layout: {MobaWeb.V2.Layouts, :app},
+      root_layout: {MobaWeb.V2.Layouts, :root} do
+      live "/base", DashboardLive
+    end
+  end
+
   scope "/admin", MobaWeb do
     pipe_through [:browser, :protected, :admin_protected]
 

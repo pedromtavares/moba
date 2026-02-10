@@ -1,0 +1,57 @@
+<div>
+  <div class="v2-panel">
+    <h2>Base — Your Heroes</h2>
+    <p style="color: #8080a0; margin-bottom: 1rem;">
+      Player PvE Tier: <%= @current_player.pve_tier %> |
+      Heroes: <%= length(@all_heroes) %>
+    </p>
+
+    <div class="v2-filter-bar">
+      <button
+        class={"v2-btn #{if @filter == "unfinished", do: "active"}"}
+        phx-click="filter"
+        phx-value-filter="unfinished"
+      >
+        In Training
+      </button>
+      <button
+        class={"v2-btn #{if @filter == "finished", do: "active"}"}
+        phx-click="filter"
+        phx-value-filter="finished"
+      >
+        Finished
+      </button>
+    </div>
+  </div>
+
+  <%= if Enum.empty?(@visible_heroes) do %>
+    <div class="v2-empty">
+      No heroes found. Create one to get started!
+    </div>
+  <% else %>
+    <div class="v2-hero-grid">
+      <%= for hero <- @visible_heroes do %>
+        <div class="v2-hero-card" id={"hero-#{hero.id}"}>
+          <div class="hero-name"><%= hero.avatar.name %></div>
+          <div class="hero-level">Level <%= hero.level %></div>
+          <div class="hero-stats">
+            <span>Gold: <%= hero.gold %></span>
+            <span>HP: <%= hero.total_hp %></span>
+            <span>ATK: <%= hero.atk %></span>
+          </div>
+          <%= if is_nil(hero.finished_at) do %>
+            <div style="margin-top: 0.75rem;">
+              <button class="v2-btn" phx-click="continue" phx-value-id={hero.id}>
+                Continue Training
+              </button>
+            </div>
+          <% else %>
+            <div style="margin-top: 0.5rem; font-size: 0.8rem; color: #606080;">
+              Finished — League: <%= hero.league_tier %>
+            </div>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+  <% end %>
+</div>

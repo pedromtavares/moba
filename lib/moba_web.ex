@@ -25,7 +25,7 @@ defmodule MobaWeb do
     Phoenix.PubSub.broadcast(Moba.PubSub, channel, {event, payload})
   end
 
-  def static_paths, do: ~w(assets css fonts images resources js favicon.ico robots.txt ads.txt .well-known)
+  def static_paths, do: ~w(assets css fonts images resources js v2 favicon.ico robots.txt ads.txt .well-known)
 
   def router do
     quote do
@@ -74,6 +74,18 @@ defmodule MobaWeb do
     end
   end
 
+  def v2_live_view do
+    quote do
+      use Phoenix.LiveView, layout: {MobaWeb.V2.Layouts, :app}
+
+      alias Moba.{Game, Accounts, Engine, Utils}
+
+      import MobaWeb.Gettext
+
+      unquote(v2_html_helpers())
+    end
+  end
+
   def live_component do
     quote do
       use Phoenix.LiveComponent
@@ -115,6 +127,22 @@ defmodule MobaWeb do
         namespace: MobaWeb
 
       unquote(html_helpers())
+    end
+  end
+
+  defp v2_html_helpers do
+    quote do
+      import Phoenix.HTML
+
+      import MobaWeb.Gettext
+
+      alias Phoenix.LiveView.JS
+
+      alias Moba.{Game, Accounts, Engine, Utils}
+
+      import Moba.Utils
+
+      unquote(verified_routes())
     end
   end
 

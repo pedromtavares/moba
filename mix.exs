@@ -74,7 +74,8 @@ defmodule Moba.MixProject do
       {:gun, "2.0.1", hex: "remedy_gun", override: true},
       {:pow_postgres_store, github: "ZennerIoT/pow_postgres_store"},
       {:floki, ">= 0.36.2", only: :test},
-      {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false}
+      {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false},
+      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev}
     ]
   end
 
