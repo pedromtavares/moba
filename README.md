@@ -86,3 +86,7 @@ mix test
 ```
 
 [discord]: https://discord.gg/QNwEdPS
+
+---
+
+*Test contribution by Suliman*
