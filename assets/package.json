@@ -45,7 +45,7 @@
     "serialize-javascript": ">=3.1.0",
     "ssri": ">=8.0.1",
     "style-loader": "^0.23.1",
-    "tar": "^6.1.11",
+    "tar": "^7.5.8",
     "terser-webpack-plugin": "^5.3.1",
     "trim-newlines": ">=3.0.1",
     "webpack": "^5.68.0",
