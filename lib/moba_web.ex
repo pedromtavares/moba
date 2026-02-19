@@ -136,6 +136,12 @@ defmodule MobaWeb do
 
       import MobaWeb.Gettext
 
+      import MobaWeb.V2.Components.CoreComponents
+      import MobaWeb.V2.Components.GameComponents
+      import MobaWeb.V2.Components.LayoutComponents
+
+      alias MobaWeb.V2.Components.GameHelpers, as: GH
+
       alias Phoenix.LiveView.JS
 
       alias Moba.{Game, Accounts, Engine, Utils}

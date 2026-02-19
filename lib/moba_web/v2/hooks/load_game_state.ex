@@ -1,7 +1,7 @@
 defmodule MobaWeb.V2.Hooks.LoadGameState do
   @moduledoc """
   on_mount hook that loads the current player and hero into assigns.
-  Subscribes to PubSub for real-time updates when connected.
+  Subscribes to player-level PubSub topic when connected.
   """
   import Phoenix.LiveView
   import Phoenix.Component
@@ -31,7 +31,7 @@ defmodule MobaWeb.V2.Hooks.LoadGameState do
 
   defp maybe_subscribe(socket, player) do
     if connected?(socket) do
-      Phoenix.PubSub.subscribe(Moba.PubSub, "player:#{player.id}")
+      MobaWeb.subscribe("player-#{player.id}")
     end
 
     socket

@@ -9,6 +9,7 @@ defmodule Moba.Accounts.Users do
   alias Moba.{Repo, Accounts}
   alias Accounts.Schema.User
   alias Accounts.Query.UserQuery
+  alias Accounts.LegacyPassword
 
   def get_user!(nil), do: nil
   def get_user!(id), do: Repo.get!(User, id)
@@ -27,6 +28,29 @@ defmodule Moba.Accounts.Users do
     user
     |> User.update_changeset(attrs)
     |> Repo.update!()
+  end
+
+  @doc """
+  Returns the user if the email and password match a Pow-generated pbkdf2 hash.
+  Used during the migration window to verify existing users before bcrypt is in place.
+  """
+  def get_user_by_legacy_password(email, password)
+      when is_binary(email) and is_binary(password) do
+    user = Repo.get_by(User, email: String.downcase(email))
+
+    cond do
+      is_nil(user) ->
+        nil
+
+      is_nil(user.password_hash) ->
+        nil
+
+      LegacyPassword.verify(password, user.password_hash) ->
+        user
+
+      true ->
+        nil
+    end
   end
 
   def set_online_now(user) do

@@ -1,33 +1,14 @@
-<div class="v2-wrapper">
-  <aside class="v2-sidebar">
-    <h3>BrowserMOBA</h3>
-    <nav>
-      <a href={~p"/v2/base"} class="active">Base</a>
-    </nav>
+<div class="flex min-h-screen">
+  <.sidebar
+    current_player={assigns[:current_player]}
+    current_hero={assigns[:current_hero]}
+    sidebar_code={assigns[:sidebar_code]}
+  />
 
-    <%= if assigns[:current_player] do %>
-      <h3>Player</h3>
-      <div style="color: #a0a0c0; font-size: 0.875rem;">
-        PvE Tier: <%= @current_player.pve_tier %>
-      </div>
-    <% end %>
-
-    <%= if assigns[:current_hero] do %>
-      <h3>Current Hero</h3>
-      <div style="color: #a0a0c0; font-size: 0.875rem;">
-        Lv. <%= @current_hero.level %> — <%= @current_hero.avatar.name %>
-      </div>
-    <% end %>
-  </aside>
-
-  <main class="v2-main">
-    <%= if Phoenix.Flash.get(@flash, :info) do %>
-      <div class="v2-flash info"><%= Phoenix.Flash.get(@flash, :info) %></div>
-    <% end %>
-    <%= if Phoenix.Flash.get(@flash, :error) do %>
-      <div class="v2-flash error"><%= Phoenix.Flash.get(@flash, :error) %></div>
-    <% end %>
-
-    <%= @inner_content %>
+  <main class="flex-1 overflow-y-auto">
+    <div class="max-w-6xl mx-auto px-6 py-6">
+      <.flash_group flash={@flash} />
+      <%= @inner_content %>
+    </div>
   </main>
 </div>

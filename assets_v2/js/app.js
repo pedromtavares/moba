@@ -1,8 +1,6 @@
 // V2 Asset Pipeline - BrowserMOBA
-// Imports CSS so esbuild bundles it alongside JS
-import "../css/app.css"
+// CSS is built separately by Tailwind, not bundled via esbuild
 
-// Phoenix LiveView setup
 import "phoenix_html"
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
@@ -12,7 +10,23 @@ let csrfToken = document.querySelector("meta[name='csrf-token']")?.getAttribute(
 // V2 hooks - vanilla JS only, no jQuery
 let Hooks = {}
 
+// Tooltip hook — shows/hides game tooltip on hover
+Hooks.Tooltip = {
+  mounted() {
+    const tooltip = this.el.querySelector("[data-tooltip-content]")
+    if (!tooltip) return
+
+    this.el.addEventListener("mouseenter", () => {
+      tooltip.classList.add("visible")
+    })
+    this.el.addEventListener("mouseleave", () => {
+      tooltip.classList.remove("visible")
+    })
+  }
+}
+
 let liveSocket = new LiveSocket("/live", Socket, {
+  longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
   hooks: Hooks
 })

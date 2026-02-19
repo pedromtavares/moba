@@ -20,7 +20,8 @@ config :moba, MobaWeb.Endpoint,
       "--watch-options-stdin",
       cd: Path.expand("../assets", __DIR__)
     ],
-    esbuild: {Esbuild, :install_and_run, [:v2, ~w(--sourcemap=inline --watch)]}
+    esbuild: {Esbuild, :install_and_run, [:v2, ~w(--sourcemap=inline --watch)]},
+    tailwind: {Tailwind, :install_and_run, [:v2, ~w(--watch)]}
   ]
 
 config :waffle,

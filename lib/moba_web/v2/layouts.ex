@@ -3,6 +3,9 @@ defmodule MobaWeb.V2.Layouts do
 
   import Phoenix.Controller, only: [get_csrf_token: 0]
 
+  import MobaWeb.V2.Components.CoreComponents
+  import MobaWeb.V2.Components.LayoutComponents
+
   use Phoenix.VerifiedRoutes,
     endpoint: MobaWeb.Endpoint,
     router: MobaWeb.Router,
