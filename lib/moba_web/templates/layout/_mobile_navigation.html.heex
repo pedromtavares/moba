@@ -6,27 +6,27 @@
           <div class="row text-center game-nav no-gutters">
             <div class="col d-flex justify-content-center">
               <%= if assigns[:current_hero] && is_nil(assigns[:current_hero].finished_at) do %>
-                <.link navigate={Routes.live_path(@conn, MobaWeb.TrainingLive)} class="nav-link">
+                <.link navigate={~p"/training"} class="nav-link">
                   <i class="fa fa-sword"></i>
                 </.link>
               <% end %>
-              <.link navigate={Routes.live_path(@conn, MobaWeb.DashboardLive)} class="nav-link">
+              <.link navigate={~p"/base"} class="nav-link">
                 <i class="fa fa-home"></i>
               </.link>
               <%= if assigns[:current_player] do %>
                 <%= if length(@current_player.hero_collection) > 0 do %>
-                  <.link navigate={Routes.live_path(@conn, MobaWeb.ArenaLive.Index)} class="nav-link">
+                  <.link navigate={~p"/arena"} class="nav-link">
                     <i class="fa fa-swords"></i>
                   </.link>
                 <% end %>
                 <%= if @current_player.user_id do %>
-                  <.link navigate={Routes.player_path(@conn, :show, @current_player.id)} class="nav-link">
+                  <.link navigate={~p"/player/#{@current_player.id}"} class="nav-link">
                     <i class="fa fa-helmet-battle"></i>
                   </.link>
-                  <.link navigate={Routes.live_path(@conn, MobaWeb.CommunityLive)} class="nav-link">
+                  <.link navigate={~p"/community"} class="nav-link">
                     <i class="fa fa-globe"></i>
                   </.link>
-                  <.link navigate={Routes.live_path(@conn, MobaWeb.TavernLive)} class="nav-link">
+                  <.link navigate={~p"/tavern"} class="nav-link">
                     <i class="fa fa-dungeon"></i>
                   </.link>
                 <% end %>

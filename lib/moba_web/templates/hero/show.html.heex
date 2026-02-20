@@ -11,7 +11,7 @@
               <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic font-15">Level <%= @hero.level %></span>
                 <%= if @hero.player.user_id do %>
-                  <.link class="text-white font-20 f-rpg" navigate={Routes.player_path(@socket, :show, @hero.player_id)}>
+                  <.link class="text-white font-20 f-rpg" navigate={~p"/player/#{@hero.player_id}"}>
                     <%= @hero.name %>
                   </.link>
                 <% end %>
@@ -43,7 +43,7 @@
                     <div class="col">
                       <.link
                         class="btn btn-light btn-block mt-1"
-                        navigate={Routes.live_path(@socket, MobaWeb.TavernLive, %{avatar: @hero.avatar.code})}
+                        navigate={~p"/tavern?#{%{avatar: @hero.avatar.code}}"}
                       >
                         <i class="fa fa-palette mr-1"></i>View Skins
                       </.link>
@@ -135,7 +135,7 @@
           <%= if @hero.player.user_id do %>
             <.link
               class="btn btn-block btn-light mb-1 btn-lg"
-              navigate={Routes.player_path(@socket, :show, @hero.player_id)}
+              navigate={~p"/player/#{@hero.player_id}"}
             >
               <i class="fa fa-user"></i> View Player Profile
             </.link>
@@ -172,7 +172,7 @@
                         </h1>
                       </td>
                       <td>
-                        <.link navigate={Routes.live_path(@socket, MobaWeb.HeroLive, hero)}>
+                        <.link navigate={~p"/hero/#{hero}"}>
                           <%= GH.hero_avatar(hero) %>
                           <br />
                           <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>

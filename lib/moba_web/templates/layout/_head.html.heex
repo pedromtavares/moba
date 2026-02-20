@@ -9,8 +9,8 @@
   <.live_title prefix="Browser MOBA – ">
     <%= assigns[:page_title] || "Free Strategy Game" %>
   </.live_title>
-  <link rel="stylesheet" href={Routes.static_path(@conn, "/css/app.css")} />
-  <link rel="shortcut icon" href={assigns[:favicon] || Routes.static_path(@conn, "/images/favicon.png")} />
+  <link rel="stylesheet" href={~p"/css/app.css"} />
+  <link rel="shortcut icon" href={assigns[:favicon] || ~p"/images/favicon.png"} />
   <link rel="stylesheet" href="https://use.typekit.net/juc8mry.css" />
   <script src="https://kit.fontawesome.com/26d6de301e.js">
   </script>

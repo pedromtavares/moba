@@ -56,9 +56,9 @@ defmodule MobaWeb.BattleLive do
     latest = Engine.latest_battle(battle.attacker.id)
 
     if latest.type == "league" && latest.id != String.to_integer(id) do
-      {:noreply, socket |> push_patch(to: Routes.live_path(socket, MobaWeb.BattleLive, latest.id))}
+      {:noreply, socket |> push_patch(to: ~p"/battles/#{latest.id}")}
     else
-      {:noreply, socket |> push_navigate(to: Routes.live_path(socket, MobaWeb.TrainingLive))}
+      {:noreply, socket |> push_navigate(to: ~p"/training")}
     end
   end
 

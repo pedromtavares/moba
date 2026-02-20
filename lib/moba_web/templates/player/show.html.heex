@@ -232,7 +232,7 @@
                   </td>
                   <td>
                     <.link
-                      navigate={Routes.player_path(@socket, :show, player.id)}
+                      navigate={~p"/player/#{player.id}"}
                       title={"#{player.pvp_points} Season Points"}
                       data-toggle="tooltip"
                     >

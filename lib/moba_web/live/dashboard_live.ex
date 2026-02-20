@@ -70,7 +70,7 @@ defmodule MobaWeb.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> push_navigate(to: Routes.live_path(socket, MobaWeb.TrainingLive))}
+       |> push_navigate(to: ~p"/training")}
     else
       {:noreply, socket}
     end

@@ -32,7 +32,7 @@
             </button>
           <% end %>
           <%= if @hero.finished_at do %>
-            <.link class="btn btn-primary" navigate={Routes.live_path(@socket, MobaWeb.HeroLive, @hero)}>
+            <.link class="btn btn-primary" navigate={~p"/hero/#{@hero}"}>
               <i class="fa fa-address-card mr-1"></i> Customize
             </.link>
           <% else %>

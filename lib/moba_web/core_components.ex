@@ -36,7 +36,7 @@ defmodule MobaWeb.CoreComponents do
         <p :if={@title} class={["font-semibold text-sm", @kind == :info && "text-blue-600", @kind == :error && "text-red-600"]}>
           {@title}
         </p>
-        <p class="text-sm break-words"><%= msg %></p>
+        <p class="text-sm break-words">{msg}</p>
       </div>
       <button
         type="button"
@@ -63,10 +63,10 @@ defmodule MobaWeb.CoreComponents do
     ~H"""
     <.form for={@for} as={@as} {@rest}>
       <div class="space-y-4">
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </div>
       <div :for={action <- @actions} class="mt-4 flex items-center justify-between gap-6">
-        <%= render_slot(action) %>
+        {render_slot(action)}
       </div>
     </.form>
     """
@@ -86,13 +86,13 @@ defmodule MobaWeb.CoreComponents do
     if rest[:href] || rest[:navigate] || rest[:patch] do
       ~H"""
       <.link class={@class} {@rest}>
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </.link>
       """
     else
       ~H"""
       <button class={@class} {@rest}>
-        <%= render_slot(@inner_block) %>
+        {render_slot(@inner_block)}
       </button>
       """
     end
@@ -124,9 +124,11 @@ defmodule MobaWeb.CoreComponents do
                 multiple pattern placeholder readonly required rows size step)
 
   def input(%{field: %HTML.FormField{} = field} = assigns) do
+    errors = if Phoenix.Component.used_input?(field), do: field.errors, else: []
+
     assigns
     |> assign(field: nil, id: assigns.id || field.id)
-    |> assign(:errors, Enum.map(field.errors, &translate_error(&1)))
+    |> assign(:errors, Enum.map(errors, &translate_error(&1)))
     |> assign_new(:name, fn -> if assigns.multiple, do: field.name <> "[]", else: field.name end)
     |> assign_new(:value, fn -> field.value end)
     |> input()
@@ -151,9 +153,9 @@ defmodule MobaWeb.CoreComponents do
           class={@class || "rounded border-zinc-300"}
           {@rest}
         />
-        <%= @label %>
+        {@label}
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -162,7 +164,7 @@ defmodule MobaWeb.CoreComponents do
     ~H"""
     <div class="mb-2">
       <label class="block text-sm font-medium text-zinc-700">
-        <span :if={@label} class="block mb-1"><%= @label %></span>
+        <span :if={@label} class="block mb-1">{@label}</span>
         <select
           id={@id}
           name={@name}
@@ -170,11 +172,11 @@ defmodule MobaWeb.CoreComponents do
           multiple={@multiple}
           {@rest}
         >
-          <option :if={@prompt} value=""><%= @prompt %></option>
-          <%= Form.options_for_select(@options, @value) %>
+          <option :if={@prompt} value="">{@prompt}</option>
+          {Form.options_for_select(@options, @value)}
         </select>
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -183,7 +185,7 @@ defmodule MobaWeb.CoreComponents do
     ~H"""
     <div class="mb-2">
       <label class="block text-sm font-medium text-zinc-700">
-        <span :if={@label} class="block mb-1"><%= @label %></span>
+        <span :if={@label} class="block mb-1">{@label}</span>
         <textarea
           id={@id}
           name={@name}
@@ -192,9 +194,9 @@ defmodule MobaWeb.CoreComponents do
             @errors != [] && (@error_class || "border-red-500")
           ]}
           {@rest}
-          ><%= Form.normalize_value("textarea", @value) %></textarea>
+          >{Form.normalize_value("textarea", @value)}</textarea>
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -203,7 +205,7 @@ defmodule MobaWeb.CoreComponents do
     ~H"""
     <div class="mb-2">
       <label class="block text-sm font-medium text-zinc-700">
-        <span :if={@label} class="block mb-1"><%= @label %></span>
+        <span :if={@label} class="block mb-1">{@label}</span>
         <input
           type={@type}
           name={@name}
@@ -216,7 +218,7 @@ defmodule MobaWeb.CoreComponents do
           {@rest}
         />
       </label>
-      <.error :for={msg <- @errors}><%= msg %></.error>
+      <.error :for={msg <- @errors}>{msg}</.error>
     </div>
     """
   end
@@ -231,13 +233,13 @@ defmodule MobaWeb.CoreComponents do
     <header class={[@actions != [] && "flex items-center justify-between gap-6", "pb-4"]}>
       <div>
         <h1 class="text-lg font-semibold leading-8">
-          <%= render_slot(@inner_block) %>
+          {render_slot(@inner_block)}
         </h1>
         <p :if={@subtitle != []} class="text-sm text-zinc-600">
-          <%= render_slot(@subtitle) %>
+          {render_slot(@subtitle)}
         </p>
       </div>
-      <div class="flex-none"><%= render_slot(@actions) %></div>
+      <div class="flex-none">{render_slot(@actions)}</div>
     </header>
     """
   end
@@ -288,7 +290,7 @@ defmodule MobaWeb.CoreComponents do
     ~H"""
     <p class="mt-1.5 flex gap-2 items-center text-sm text-red-600">
       <.icon name="hero-exclamation-circle" class="size-5" />
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </p>
     """
   end

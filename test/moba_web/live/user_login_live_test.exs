@@ -9,7 +9,6 @@ defmodule MobaWeb.UserLoginLiveTest do
       {:ok, _lv, html} = live(conn, ~p"/users/log_in")
 
       assert html =~ "Sign In"
-      assert html =~ "Sign Up"
       assert html =~ "Forgot your password?"
     end
 
@@ -58,18 +57,6 @@ defmodule MobaWeb.UserLoginLiveTest do
   end
 
   describe "login navigation" do
-    test "redirects to registration page when the Register button is clicked", %{conn: conn} do
-      {:ok, lv, _html} = live(conn, ~p"/users/log_in")
-
-      {:ok, _login_live, login_html} =
-        lv
-        |> element(~s|a[href="/users/register"]|)
-        |> render_click()
-        |> follow_redirect(conn, ~p"/users/register")
-
-      assert login_html =~ "Create an account"
-    end
-
     test "redirects to forgot password page when the Forgot Password button is clicked", %{
       conn: conn
     } do

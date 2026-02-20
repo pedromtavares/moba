@@ -29,7 +29,7 @@ defmodule MobaWeb do
 
   def router do
     quote do
-      use Phoenix.Router
+      use Phoenix.Router, helpers: false
 
       # Import common connection and controller functions to use in pipelines
       import Plug.Conn
@@ -50,10 +50,8 @@ defmodule MobaWeb do
         formats: [:html, :json]
 
       import Plug.Conn
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
       import Phoenix.LiveView.Controller, only: [live_render: 3, live_render: 2]
-
-      alias MobaWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
     end
@@ -65,7 +63,7 @@ defmodule MobaWeb do
 
       alias Moba.{Game, Accounts, Engine, Utils}
 
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
 
       unquote(html_helpers())
 
@@ -79,7 +77,7 @@ defmodule MobaWeb do
 
       alias Moba.{Game, Accounts, Engine, Utils}
 
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
 
       unquote(v2_html_helpers())
     end
@@ -133,9 +131,11 @@ defmodule MobaWeb do
     quote do
       import Phoenix.HTML
 
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
 
       import MobaWeb.V2.Components.CoreComponents
+
+      alias MobaWeb.V2.Layouts
       import MobaWeb.V2.Components.GameComponents
       import MobaWeb.V2.Components.LayoutComponents
 
@@ -153,20 +153,15 @@ defmodule MobaWeb do
 
   defp html_helpers do
     quote do
-      # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components and translation
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
       import MobaWeb.CoreComponents
 
       alias MobaWeb.ErrorHelpers
 
-      # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 
       use PhoenixHTMLHelpers
-
-      alias MobaWeb.Router.Helpers, as: Routes
 
       alias MobaWeb.GameHelpers, as: GH
 

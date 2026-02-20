@@ -1,6 +1,54 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" source(none);
+@source "../css";
+@source "../js";
+@source "../../lib/moba_web";
+
+@theme {
+  --color-faction-bg: var(--faction-bg, #1A1A2A);
+  --color-faction-bg-light: var(--faction-bg-light, #242438);
+  --color-faction-bg-surface: var(--faction-bg-surface, #2A2A40);
+  --color-faction-text: var(--faction-text, #C8C0D0);
+  --color-faction-text-muted: var(--faction-text-muted, #8080A0);
+  --color-faction-accent: var(--faction-accent, #6A4ABF);
+  --color-faction-glow: var(--faction-glow, #8866FF);
+
+  --color-gold: #E0A526;
+  --color-gold-light: #F0C060;
+  --color-gold-dark: #B08018;
+
+  --color-hp: #4CAF50;
+  --color-hp-dark: #2E7D32;
+  --color-hp-light: #81C784;
+  --color-mp: #42A5F5;
+  --color-mp-dark: #1565C0;
+  --color-mp-light: #90CAF9;
+  --color-atk: #EF5350;
+  --color-atk-dark: #C62828;
+  --color-atk-light: #EF9A9A;
+  --color-power: #EC407A;
+  --color-power-dark: #AD1457;
+  --color-power-light: #F48FB1;
+  --color-armor: #FFA726;
+  --color-armor-dark: #E65100;
+  --color-armor-light: #FFCC80;
+  --color-speed: #AB47BC;
+  --color-speed-dark: #6A1B9A;
+  --color-speed-light: #CE93D8;
+
+  --color-rarity-normal: #9E9E9E;
+  --color-rarity-rare: #42A5F5;
+  --color-rarity-epic: #AB47BC;
+  --color-rarity-legendary: #EF5350;
+
+  --color-surface: #16213E;
+  --color-surface-light: #1A2A4E;
+  --color-surface-dark: #0F1628;
+  --color-surface-border: #0F3460;
+  --color-surface-border-light: #1A4A7A;
+
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
+    "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+}
 
 :root {
   --faction-bg: #1A1A2A;

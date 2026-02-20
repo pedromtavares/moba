@@ -1,6 +1,6 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <%= link("Create User", to: Routes.user_path(@conn, :new)) %>
+    <%= link("Create User", to: ~p"/admin/users/new") %>
   </div>
 </section>
 <section id="torch-index-content">
@@ -36,7 +36,7 @@
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: Routes.user_path(@conn, :index)) %>
+        <%= link("Clear Filters", to: ~p"/admin/users") %>
       <% end %>
     </section>
 
@@ -68,8 +68,8 @@
                 <td><%= user.shard_count %></td>
 
                 <td class="torch-actions">
-                  <span><%= link("Show", to: Routes.user_path(@conn, :show, user)) %></span>
-                  <span><%= link("Edit", to: Routes.user_path(@conn, :edit, user)) %></span>
+                  <span><%= link("Show", to: ~p"/admin/users/#{user}") %></span>
+                  <span><%= link("Edit", to: ~p"/admin/users/#{user}/edit") %></span>
                 </td>
               </tr>
             <% end %>

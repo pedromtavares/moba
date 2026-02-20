@@ -61,7 +61,7 @@
   <div class="row battle-border-top pt-1 mt-1">
     <div class="col-4">
       <.link
-        navigate={Routes.live_path(@socket, MobaWeb.BattlesLive)}
+        navigate={~p"/battles"}
         class="btn btn-outline-secondary btn-lg btn-block"
         phx-hook="Loading"
         id="load-battles"
@@ -71,7 +71,7 @@
     </div>
     <div class="col">
       <.link
-        navigate={Routes.live_path(@socket, MobaWeb.TrainingLive)}
+        navigate={~p"/training"}
         class="btn btn-outline-success btn-lg btn-block"
         phx-hook="Loading"
         id="load-training"

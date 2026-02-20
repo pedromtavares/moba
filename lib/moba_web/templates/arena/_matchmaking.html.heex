@@ -1,7 +1,7 @@
 <div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".arena .ranking">
   <div class="card-body p-0">
     <div class="d-flex justify-content-around my-2">
-      <.link navigate={Routes.edit_arena_path(@socket, :edit)} class="btn btn-sm btn-primary text-primary">
+      <.link navigate={~p"/arena/edit"} class="btn btn-sm btn-primary text-primary">
         <i class="fa fa-group"></i> Edit Teams
       </.link>
     </div>
@@ -16,7 +16,7 @@
               <img src={"/images/pve/#{match.opponent.pve_tier}.png"} class="mr-2" style="max-height:  40px" />
               <div style="width: 70%">
                 <h4 class="mt-2">
-                  <.link navigate={Routes.player_path(@socket, :show, match.opponent.id)} class="text-white">
+                  <.link navigate={~p"/player/#{match.opponent.id}"} class="text-white">
                     <%= username(match.opponent) %>
                   </.link>
                 </h4>
@@ -30,7 +30,7 @@
               <% end %>
             </td>
             <td>
-              <.link navigate={Routes.live_path(@socket, MobaWeb.MatchLive, match)} class="btn btn-light">
+              <.link navigate={~p"/matches/#{match}"} class="btn btn-light">
                 <i class="fa fa-eye"></i>
               </.link>
             </td>

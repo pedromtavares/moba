@@ -2,7 +2,7 @@
   <div class="card-body p-0">
     <%= if @pending_duel do %>
       <.link
-        navigate={Routes.live_path(@socket, MobaWeb.DuelLive, @pending_duel)}
+        navigate={~p"/arena/#{@pending_duel}"}
         class="btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3"
       >
         <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
@@ -40,7 +40,7 @@
               </td>
               <td>
                 <h5>
-                  <.link navigate={Routes.player_path(@socket, :show, player.id)}><%= player.user.username %></.link>
+                  <.link navigate={~p"/player/#{player.id}"}><%= player.user.username %></.link>
                   <br /><small><%= player.pvp_points %> SP</small>
                 </h5>
               </td>

@@ -15,7 +15,7 @@ defmodule MobaWeb.Admin.SkillController do
       error ->
         conn
         |> put_flash(:error, "There was an error rendering Skills. #{inspect(error)}")
-        |> redirect(to: Routes.skill_path(conn, :index))
+        |> redirect(to: ~p"/admin/skills")
     end
   end
 
@@ -29,7 +29,7 @@ defmodule MobaWeb.Admin.SkillController do
       {:ok, skill} ->
         conn
         |> put_flash(:info, "Skill created successfully.")
-        |> redirect(to: Routes.skill_path(conn, :show, skill))
+        |> redirect(to: ~p"/admin/skills/#{skill}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -57,7 +57,7 @@ defmodule MobaWeb.Admin.SkillController do
       {:ok, skill} ->
         conn
         |> put_flash(:info, "Skill updated successfully.")
-        |> redirect(to: Routes.skill_path(conn, :show, skill))
+        |> redirect(to: ~p"/admin/skills/#{skill}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", skill: skill, changeset: changeset)
@@ -70,6 +70,6 @@ defmodule MobaWeb.Admin.SkillController do
 
     conn
     |> put_flash(:info, "Skill deleted successfully.")
-    |> redirect(to: Routes.skill_path(conn, :index))
+    |> redirect(to: ~p"/admin/skills")
   end
 end

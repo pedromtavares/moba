@@ -58,7 +58,7 @@
               <div class="text-center col-12">
                 <%= if @battle.type == "pve" do %>
                   <.link
-                    navigate={Routes.live_path(@socket, MobaWeb.TrainingLive)}
+                    navigate={~p"/training"}
                     phx-hook="Loading"
                     id="battle-over-training"
                   >
@@ -81,7 +81,7 @@
                 <% end %>
                 <%= if @battle.type == "duel" do %>
                   <.link
-                    navigate={Routes.live_path(@socket, MobaWeb.DuelLive, @battle.duel_id)}
+                    navigate={~p"/arena/#{@battle.duel_id}"}
                     phx-hook="Loading"
                     id="battle-over-duel"
                   >

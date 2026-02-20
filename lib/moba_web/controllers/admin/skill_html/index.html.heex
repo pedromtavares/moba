@@ -84,7 +84,7 @@
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: Routes.skill_path(@conn, :index)) %>
+        <%= link("Clear Filters", to: ~p"/admin/skills") %>
       <% end %>
     </section>
 
@@ -133,8 +133,8 @@
                 <td><%= skill.level_requirement %></td>
 
                 <td class="torch-actions">
-                  <span><%= link("Show", to: Routes.skill_path(@conn, :show, skill)) %></span>
-                  <span><%= link("Edit", to: Routes.skill_path(@conn, :edit, skill)) %></span>
+                  <span><%= link("Show", to: ~p"/admin/skills/#{skill}") %></span>
+                  <span><%= link("Edit", to: ~p"/admin/skills/#{skill}/edit") %></span>
                 </td>
               </tr>
             <% end %>

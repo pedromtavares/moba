@@ -1,7 +1,7 @@
 defmodule MobaWeb.BattlesLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{BattleView, BattleLive}
+  alias MobaWeb.BattleView
 
   def mount(_, _session, socket) do
     with socket = socket_init(socket) do
@@ -10,7 +10,7 @@ defmodule MobaWeb.BattlesLive do
   end
 
   def handle_event("redirect", %{"id" => id}, socket) do
-    {:noreply, socket |> push_navigate(to: Routes.live_path(socket, BattleLive, id))}
+    {:noreply, socket |> push_navigate(to: ~p"/battles/#{id}")}
   end
 
   def render(assigns) do

@@ -14,7 +14,7 @@ defmodule MobaWeb.Admin.ItemController do
       error ->
         conn
         |> put_flash(:error, "There was an error rendering Items. #{inspect(error)}")
-        |> redirect(to: Routes.item_path(conn, :index))
+        |> redirect(to: ~p"/admin/items")
     end
   end
 
@@ -28,7 +28,7 @@ defmodule MobaWeb.Admin.ItemController do
       {:ok, item} ->
         conn
         |> put_flash(:info, "Item created successfully.")
-        |> redirect(to: Routes.item_path(conn, :show, item))
+        |> redirect(to: ~p"/admin/items/#{item}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -53,7 +53,7 @@ defmodule MobaWeb.Admin.ItemController do
       {:ok, item} ->
         conn
         |> put_flash(:info, "Item updated successfully.")
-        |> redirect(to: Routes.item_path(conn, :show, item))
+        |> redirect(to: ~p"/admin/items/#{item}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", item: item, changeset: changeset)
@@ -66,6 +66,6 @@ defmodule MobaWeb.Admin.ItemController do
 
     conn
     |> put_flash(:info, "Item deleted successfully.")
-    |> redirect(to: Routes.item_path(conn, :index))
+    |> redirect(to: ~p"/admin/items")
   end
 end

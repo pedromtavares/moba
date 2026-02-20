@@ -63,14 +63,13 @@ config :esbuild,
 
 # Tailwind configuration for v2 asset pipeline
 config :tailwind,
-  version: "3.4.17",
+  version: "4.1.7",
   v2: [
     args: ~w(
-      --config=tailwind.config.js
-      --input=css/app.css
-      --output=../priv/static/v2/assets/app.css
+      --input=assets_v2/css/app.css
+      --output=priv/static/v2/assets/app.css
     ),
-    cd: Path.expand("../assets_v2", __DIR__)
+    cd: Path.expand("..", __DIR__)
   ]
 
 # Import environment specific config. This must remain at the bottom

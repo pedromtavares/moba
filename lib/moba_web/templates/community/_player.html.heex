@@ -2,7 +2,7 @@
   <.link
     class="hero-card card mb-3"
     style={"background-image: url(#{GH.background_url(@player.top_hero)})"}
-    navigate={Routes.player_path(@socket, :show, @player.id)}
+    navigate={~p"/player/#{@player.id}"}
   >
     <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
       <h4 class="text-white d-flex justify-content-between align-items-center mb-0">

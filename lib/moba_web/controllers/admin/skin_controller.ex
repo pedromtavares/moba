@@ -14,7 +14,7 @@ defmodule MobaWeb.Admin.SkinController do
       error ->
         conn
         |> put_flash(:error, "There was an error rendering Skins. #{inspect(error)}")
-        |> redirect(to: Routes.skin_path(conn, :index))
+        |> redirect(to: ~p"/admin/skins")
     end
   end
 
@@ -28,7 +28,7 @@ defmodule MobaWeb.Admin.SkinController do
 
     conn
     |> put_flash(:info, "Skin created successfully.")
-    |> redirect(to: Routes.skin_path(conn, :show, skin))
+    |> redirect(to: ~p"/admin/skins/#{skin}")
   end
 
   def show(conn, %{"id" => id}) do
@@ -49,7 +49,7 @@ defmodule MobaWeb.Admin.SkinController do
       {:ok, skin} ->
         conn
         |> put_flash(:info, "Skin updated successfully.")
-        |> redirect(to: Routes.skin_path(conn, :show, skin))
+        |> redirect(to: ~p"/admin/skins/#{skin}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", skin: skin, changeset: changeset)
@@ -62,6 +62,6 @@ defmodule MobaWeb.Admin.SkinController do
 
     conn
     |> put_flash(:info, "Skin deleted successfully.")
-    |> redirect(to: Routes.skin_path(conn, :index))
+    |> redirect(to: ~p"/admin/skins")
   end
 end

@@ -45,7 +45,7 @@ defmodule MobaWeb.ArenaLive.Index do
     match = if pending, do: pending, else: Game.manual_matchmaking!(player)
 
     if match do
-      {:noreply, push_navigate(socket, to: Routes.live_path(socket, MobaWeb.MatchLive, match.id))}
+      {:noreply, push_navigate(socket, to: ~p"/matches/#{match.id}")}
     else
       {:noreply, assign(socket, current_player: Game.get_player!(player.id))}
     end
@@ -56,7 +56,7 @@ defmodule MobaWeb.ArenaLive.Index do
     duel = Game.create_duel!(player, opponent, true)
 
     if duel do
-      {:noreply, push_navigate(socket, to: Routes.live_path(socket, MobaWeb.DuelLive, duel.id))}
+      {:noreply, push_navigate(socket, to: ~p"/arena/#{duel.id}")}
     else
       {:noreply, socket}
     end

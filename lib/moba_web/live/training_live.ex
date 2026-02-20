@@ -23,7 +23,7 @@ defmodule MobaWeb.TrainingLive do
   def handle_event("battle", %{"id" => id}, socket) do
     with socket = TutorialComponent.next_step(socket, 2),
          battle = Game.get_target!(id) |> Game.start_pve_battle!() do
-      {:noreply, push_navigate(socket, to: Routes.live_path(socket, MobaWeb.BattleLive, battle.id))}
+      {:noreply, push_navigate(socket, to: ~p"/battles/#{battle.id}")}
     end
   end
 
@@ -37,7 +37,7 @@ defmodule MobaWeb.TrainingLive do
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
     with socket = TutorialComponent.next_step(socket, 10),
          battle = Game.start_league_battle!(hero) do
-      {:noreply, socket |> push_navigate(to: Routes.live_path(socket, MobaWeb.BattleLive, battle.id))}
+      {:noreply, socket |> push_navigate(to: ~p"/battles/#{battle.id}")}
     end
   end
 
@@ -168,7 +168,7 @@ defmodule MobaWeb.TrainingLive do
 
   defp maybe_redirect(%{assigns: %{current_hero: %{finished_at: finished_at} = hero}} = socket)
        when not is_nil(finished_at) do
-    redirect(socket, to: Routes.live_path(socket, MobaWeb.HeroLive, hero.id))
+    redirect(socket, to: ~p"/hero/#{hero.id}")
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: current_hero}} = socket) when is_nil(current_hero) do

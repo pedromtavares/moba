@@ -3,7 +3,7 @@
     <img src={"/images/pve/#{@opponent.pve_tier}.png"} class="mr-2" style="max-height:  40px" />
     <div style="width: 70%">
       <h4 class="mt-2">
-        <.link navigate={Routes.player_path(@socket, :show, @opponent.id)} class="text-white">
+        <.link navigate={~p"/player/#{@opponent.id}"} class="text-white">
           <%= username(@opponent) %>
         </.link>
       </h4>
@@ -22,7 +22,7 @@
   </td>
 
   <td class="text-center">
-    <.link navigate={Routes.live_path(@socket, MobaWeb.DuelLive, @duel)} class="btn btn-light">
+    <.link navigate={~p"/arena/#{@duel}"} class="btn btn-light">
       <i class="fa fa-eye"></i>
     </.link>
   </td>

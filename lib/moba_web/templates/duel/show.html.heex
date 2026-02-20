@@ -7,11 +7,11 @@
             <div>
               <h2 class="mb-0">
                 <img src={"/images/pve/#{@duel.player.pve_tier}.png"} style="max-height: 50px" />
-                <.link navigate={Routes.player_path(@socket, :show, @duel.player)}>
+                <.link navigate={~p"/player/#{@duel.player}"}>
                   <%= username(@duel.player) %>
                 </.link>
                 vs
-                <.link navigate={Routes.player_path(@socket, :show, @duel.opponent_player)}>
+                <.link navigate={~p"/player/#{@duel.opponent_player}"}>
                   <%= username(@duel.opponent_player) %>
                 </.link>
                 <img src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"} style="max-height: 50px" />
