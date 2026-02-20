@@ -10,7 +10,7 @@ defmodule MobaWeb.BattlesLive do
   end
 
   def handle_event("redirect", %{"id" => id}, socket) do
-    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, BattleLive, id))}
+    {:noreply, socket |> push_navigate(to: Routes.live_path(socket, BattleLive, id))}
   end
 
   def render(assigns) do

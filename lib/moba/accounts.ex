@@ -4,7 +4,7 @@ defmodule Moba.Accounts do
   """
 
   alias Moba.Accounts
-  alias Accounts.{Users, Messages, Unlocks}
+  alias Accounts.{Auth, Users, Messages, Unlocks}
 
   # USERS
 
@@ -47,4 +47,46 @@ defmodule Moba.Accounts do
   defdelegate unlocked_codes_for(user), to: Unlocks
 
   defdelegate price_to_unlock(resource), to: Unlocks
+
+  # AUTH
+
+  defdelegate get_user_by_email(email), to: Auth
+
+  defdelegate get_user_by_email_and_password(email, password), to: Auth
+
+  defdelegate register_user(attrs), to: Auth
+
+  defdelegate change_user_registration(user, attrs \\ %{}), to: Auth
+
+  defdelegate change_user_settings(user, attrs \\ %{}), to: Auth
+
+  defdelegate update_user_settings(user, attrs), to: Auth
+
+  defdelegate change_user_email(user, attrs \\ %{}), to: Auth
+
+  defdelegate apply_user_email(user, password, attrs), to: Auth
+
+  defdelegate update_user_email(user, token), to: Auth
+
+  defdelegate deliver_user_update_email_instructions(user, current_email, update_email_url_fun), to: Auth
+
+  defdelegate change_user_password(user, attrs \\ %{}), to: Auth
+
+  defdelegate update_user_password(user, password, attrs), to: Auth
+
+  defdelegate generate_user_session_token(user), to: Auth
+
+  defdelegate get_user_by_session_token(token), to: Auth
+
+  defdelegate delete_user_session_token(token), to: Auth
+
+  defdelegate deliver_user_confirmation_instructions(user, confirmation_url_fun), to: Auth
+
+  defdelegate confirm_user(token), to: Auth
+
+  defdelegate deliver_user_reset_password_instructions(user, reset_password_url_fun), to: Auth
+
+  defdelegate get_user_by_reset_password_token(token), to: Auth
+
+  defdelegate reset_user_password(user, attrs), to: Auth
 end

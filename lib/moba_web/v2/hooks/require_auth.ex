@@ -1,15 +1,11 @@
 defmodule MobaWeb.V2.Hooks.RequireAuth do
   @moduledoc """
-  on_mount hook that ensures a player_id exists in the session.
-  Redirects to /start if not authenticated.
+  on_mount hook that ensures the user is authenticated via user_token.
+  Delegates to MobaWeb.UserAuth.on_mount/4 which redirects to the login page
+  if no valid session token is found.
   """
-  import Phoenix.LiveView
 
-  def on_mount(:default, _params, %{"player_id" => player_id}, socket) when is_integer(player_id) do
-    {:cont, socket}
-  end
-
-  def on_mount(:default, _params, _session, socket) do
-    {:halt, redirect(socket, to: "/start")}
+  def on_mount(:default, params, session, socket) do
+    MobaWeb.UserAuth.on_mount(:ensure_authenticated, params, session, socket)
   end
 end

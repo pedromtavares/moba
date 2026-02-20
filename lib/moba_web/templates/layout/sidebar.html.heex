@@ -34,7 +34,7 @@
     <% end %>
     <%= if guest?(@current_player) do %>
       <.link
-        navigate={~p"/registration/new"}
+        navigate={~p"/users/register"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}

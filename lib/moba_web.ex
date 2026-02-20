@@ -47,8 +47,7 @@ defmodule MobaWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-        formats: [:html, :json],
-        layouts: [html: MobaWeb.Layouts]
+        formats: [:html, :json]
 
       import Plug.Conn
       import MobaWeb.Gettext
@@ -158,6 +157,7 @@ defmodule MobaWeb do
       import Phoenix.HTML
       # Core UI components and translation
       import MobaWeb.Gettext
+      import MobaWeb.CoreComponents
 
       alias MobaWeb.ErrorHelpers
 

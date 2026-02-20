@@ -21,8 +21,7 @@ defmodule Moba.Application do
       Moba.Admin.Server,
       Moba.Ranker,
       Moba.DiscordConsumer,
-      {Task.Supervisor, name: Moba.TaskSupervisor},
-      {Pow.Postgres.Store.AutoDeleteExpired, [interval: :timer.hours(1)]}
+      {Task.Supervisor, name: Moba.TaskSupervisor}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

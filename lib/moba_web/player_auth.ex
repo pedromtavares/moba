@@ -6,7 +6,7 @@ defmodule MobaWeb.PlayerAuth do
   end
 
   def call(conn, _) do
-    current_user = Pow.Plug.current_user(conn)
+    current_user = conn.assigns[:current_user]
     player_id = get_session(conn, :player_id)
     player = player_id && Moba.Game.get_player!(player_id)
 

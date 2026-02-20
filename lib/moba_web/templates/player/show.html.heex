@@ -39,16 +39,16 @@
       <div class="card" phx-hook="EqualHeight" phx-target=".collection-container" id="user-profile">
         <%= if @player.id == @current_player.id do %>
           <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">
-            <%= link to: Routes.pow_registration_path(@socket, :edit), class: "text-white" do %>
+            <%= link to: ~p"/users/settings", class: "text-white" do %>
               <i class="fa fa-edit mr-1"></i>Edit Profile
             <% end %>
             <%= link to: "/auth/discord", class: "text-white" do %>
               <i class="fab fa-discord"></i> Connect Discord
             <% end %>
-            <%= link to: Routes.pow_session_path(@socket, :delete), method: :delete, class: "text-white" do %>
+            <.link href={~p"/users/log_out"} method="delete" class="text-white">
               <i class="fa fa-sign-out-alt"></i>
               <span class="d-none d-md-inline">Log out</span>
-            <% end %>
+            </.link>
           </h5>
         <% end %>
         <div class="card-body p-2 text-center">

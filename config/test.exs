@@ -1,5 +1,8 @@
 import Config
 
+# Only in tests, remove the complexity from the password hashing algorithm
+config :bcrypt_elixir, :log_rounds, 1
+
 # We don't run a server during test. If one is required,
 # you can enable the server option below.
 config :moba, MobaWeb.Endpoint,
@@ -17,9 +20,8 @@ config :moba, Moba.Repo,
   hostname: "localhost",
   pool: Ecto.Adapters.SQL.Sandbox
 
-config :moba, MobaWeb.PowMailer, adapter: Bamboo.TestAdapter
+config :moba, Moba.Mailer, adapter: Swoosh.Adapters.Test
 
-config :pow, Pow.Ecto.Schema.Password, iterations: 1
 
 config :waffle,
   storage: Waffle.Storage.Local

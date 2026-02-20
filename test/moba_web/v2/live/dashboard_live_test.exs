@@ -12,7 +12,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
   describe "connected mount" do
     test "renders pve progression and hero list", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, _view, html} = live(conn, "/v2/base")
 
@@ -24,7 +24,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
     test "shows unfinished heroes by default when they exist", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
@@ -33,7 +33,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
     test "renders sidebar with player info", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
@@ -44,7 +44,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
   describe "filter event" do
     test "switches to finished tab", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
@@ -55,7 +55,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
     test "switches back to unfinished tab", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
@@ -69,7 +69,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
   describe "toggle-rewards event" do
     test "shows and hides progression rewards panel", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, html} = live(conn, "/v2/base")
 
@@ -87,7 +87,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
   describe "continue event" do
     test "redirects to v1 training", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
@@ -101,7 +101,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
   describe "archive event" do
     test "removes hero from the list", %{conn: conn} do
       hero = create_base_hero()
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 

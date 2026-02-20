@@ -38,21 +38,8 @@ config :torch,
   otp_app: :moba,
   template_format: "eex"
 
-config :moba, :pow,
-  user: Moba.Accounts.Schema.User,
-  repo: Moba.Repo,
-  web_module: MobaWeb,
-  extensions: [PowResetPassword, PowPersistentSession],
-  # extensions: [PowResetPassword, PowEmailConfirmation],
-  controller_callbacks: MobaWeb.PowControllerCallbacks,
-  mailer_backend: MobaWeb.PowMailer,
-  web_mailer_module: MobaWeb,
-  routes_backend: MobaWeb.PowRoutes,
-  cache_store_backend: Pow.Postgres.Store
 
-config :pow, Pow.Postgres.Store, repo: Moba.Repo
-
-config :moba, MobaWeb.PowMailer, adapter: Bamboo.LocalAdapter
+config :moba, Moba.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configures Elixir's Logger
 config :logger, :console,

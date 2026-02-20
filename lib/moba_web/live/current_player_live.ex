@@ -46,7 +46,7 @@ defmodule MobaWeb.CurrentPlayerLive do
   end
 
   def handle_info({"duel", %{id: id}}, socket) do
-    {:noreply, socket |> push_redirect(to: Routes.live_path(socket, MobaWeb.DuelLive, id))}
+    {:noreply, socket |> push_navigate(to: Routes.live_path(socket, MobaWeb.DuelLive, id))}
   end
 
   def handle_info(

@@ -1,11 +1,11 @@
 defmodule MobaWeb.Router do
   use MobaWeb, :router
-  use Pow.Phoenix.Router
-  use Pow.Extension.Phoenix.Router, otp_app: :moba
+
+  import MobaWeb.UserAuth
   import Phoenix.LiveDashboard.Router
 
   if Mix.env() == :dev do
-    forward "/sent_emails", Bamboo.SentEmailViewerPlug
+    forward "/dev/mailbox", Plug.Swoosh.MailboxPreview
   end
 
   pipeline :browser do
@@ -15,14 +15,11 @@ defmodule MobaWeb.Router do
     # plug :put_root_layout, {MobaWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :base_layout do
     plug :put_root_layout, {MobaWeb.LayoutView, :root}
-  end
-
-  pipeline :pow_layout do
-    plug :put_pow_layout, %{"html" => {MobaWeb.LayoutView, :root}}
   end
 
   pipeline :admin_layout do
@@ -30,8 +27,7 @@ defmodule MobaWeb.Router do
   end
 
   pipeline :protected do
-    plug Pow.Plug.RequireAuthenticated,
-      error_handler: Pow.Phoenix.PlugErrorHandler
+    plug :require_authenticated_user
   end
 
   pipeline :player_protected do
@@ -43,15 +39,16 @@ defmodule MobaWeb.Router do
   end
 
   scope "/" do
-    pipe_through [:browser, :pow_layout]
-
-    pow_routes()
-    pow_extension_routes()
-
-    get "/start", MobaWeb.GameController, :start
-    post "/start", MobaWeb.GameController, :create
+    pipe_through [:browser]
 
     get "/", MobaWeb.GameController, :index
+  end
+
+  scope "/", MobaWeb do
+    pipe_through [:browser, :require_authenticated_user, :base_layout]
+
+    get "/start", GameController, :start
+    post "/start", GameController, :create
   end
 
   scope "/", MobaWeb do
@@ -124,5 +121,43 @@ defmodule MobaWeb.Router do
     get "/", Admin.UserController, :index
   end
 
-  defp put_pow_layout(conn, layout), do: put_private(conn, :phoenix_layout, layout)
+  ## Authentication routes
+
+  scope "/", MobaWeb do
+    pipe_through [:browser, :redirect_if_user_is_authenticated]
+
+    live_session :redirect_if_user_is_authenticated,
+      root_layout: {MobaWeb.LayoutView, :root},
+      on_mount: [{MobaWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      live "/users/register", UserRegistrationLive, :new
+      live "/users/log_in", UserLoginLive, :new
+      live "/users/reset_password", UserForgotPasswordLive, :new
+      live "/users/reset_password/:token", UserResetPasswordLive, :edit
+    end
+
+    post "/users/log_in", UserSessionController, :create
+  end
+
+  scope "/", MobaWeb do
+    pipe_through [:browser, :require_authenticated_user]
+
+    live_session :require_authenticated_user,
+      root_layout: {MobaWeb.LayoutView, :root},
+      on_mount: [{MobaWeb.UserAuth, :ensure_authenticated}] do
+      live "/users/settings", UserSettingsLive, :edit
+      live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+    end
+  end
+
+  scope "/", MobaWeb do
+    pipe_through [:browser]
+
+    delete "/users/log_out", UserSessionController, :delete
+
+    live_session :current_user,
+      on_mount: [{MobaWeb.UserAuth, :mount_current_user}] do
+      live "/users/confirm/:token", UserConfirmationLive, :edit
+      live "/users/confirm", UserConfirmationInstructionsLive, :new
+    end
+  end
 end
