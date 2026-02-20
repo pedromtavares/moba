@@ -94,7 +94,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           </.link>
         <% end %>
         <.link
-          navigate={~p"/community"}
+          navigate={~p"/v2/community"}
           data-toggle="tooltip"
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -104,7 +104,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           <i class="fa-duotone fa-globe"></i>
         </.link>
         <.link
-          navigate={~p"/library"}
+          navigate={~p"/v2/library"}
           data-toggle="tooltip"
           data-tippy-placement="right"
           data-tippy-arrow={false}

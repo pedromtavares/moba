@@ -1,0 +1,457 @@
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+<div class="community">
+  <div class="row mt-2">
+    <div class="col">
+      <a
+        href="https://discord.gg/QNwEdPS"
+        target="_blank"
+        class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"
+      >
+        <i class="fab fa-discord mr-1"></i>Join our Discord!
+      </a>
+    </div>
+  </div>
+  <div class="row mt-2">
+    <div class="col-lg-6">
+      <div class="card mb-0">
+        <h5 class="card-header font-17 text-white">
+          <i class="fa fa-comments mr-1"></i>
+          Message Board<span class="text-muted font-italic font-15 ml-2">Bug reports or any feedback for the devs are deeply appreciated!</span>
+        </h5>
+        <div class="card-body">
+          <div class="inbox-widget messages">
+            <%= for message <- @messages do %>
+              <div class="inbox-item">
+                <div class="inbox-item-img">
+                  <img src={"/images/pve/#{message.tier}.png"} />
+                </div>
+                <p class="inbox-item-author">
+                  <.link
+                    navigate={~p"/player/#{message.user_id}"}
+                    class={if(message.is_admin, do: "text-danger", else: "text-dark")}
+                  >
+                    {message.author}
+                  </.link>
+                  <%= if message.is_admin do %>
+                    <small class="text-danger">(admin)</small>
+                  <% end %>
+                </p>
+                <p class="inbox-item-text">{formatted_body(message)}</p>
+                <p class="inbox-item-date">
+                  <%= if @is_admin do %>
+                    <a
+                      href="javascript:void(0)"
+                      phx-click="delete-message"
+                      phx-value-id={message.id}
+                      class="text-left text-danger float-right small ml-3"
+                    >
+                      Delete
+                    </a>
+                  <% end %>
+                </p>
+              </div>
+            <% end %>
+          </div>
+          <%= unless @current_player.status == "silenced" do %>
+            <hr class="my-2" />
+            <.form for={@form} phx-submit="create-message" id="community-message-form" class="form-horizontal">
+              <input
+                type="text"
+                id={@form[:body].id}
+                name={@form[:body].name}
+                class="form-control"
+                placeholder={
+                  if is_nil(@current_player.user),
+                    do: "Create an account to send messages",
+                    else: "Type and press Enter to send"
+                }
+                maxlength="500"
+                minlength="2"
+                disabled={is_nil(@current_player.user)}
+              />
+            </.form>
+          <% end %>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="card mb-0">
+        <h5 class="card-header font-17 text-white">
+          <i class="fa fa-globe mr-1"></i>
+          Updates
+          <span class="text-muted font-italic font-15 ml-2">
+            Stay up to date with the latest development updates in BrowserMOBA
+          </span>
+        </h5>
+        <div class="card-body updates">
+          <ul class="list-unstyled timeline-sm">
+            <%= for update <- @updates do %>
+              <li class="timeline-sm-item">
+                <%= if @is_admin do %>
+                  <a
+                    href="javascript:void(0)"
+                    phx-click="delete-message"
+                    phx-value-id={update.id}
+                    class="text-left text-danger float-right small ml-3"
+                  >
+                    Delete
+                  </a>
+                <% end %>
+                <h5 class="mt-0 mb-1">{update.title}</h5>
+                <p class="text-muted mt-2">{formatted_body(update)}</p>
+              </li>
+            <% end %>
+          </ul>
+          <%= if @is_admin do %>
+            <hr />
+            <.form for={@form} phx-submit="create-update" id="community-update-form" class="form-horizontal">
+              <input type="text" id={@form[:title].id} name={@form[:title].name} class="form-control" />
+              <br />
+              <textarea id={@form[:body].id} name={@form[:body].name} class="form-control" rows="10"></textarea>
+              <br />
+              <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+            </.form>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col text-center">
+      <ul class="nav nav-tabs nav-bordered nav-justified">
+        <li class="nav-item">
+          <a
+            href="javascript:;"
+            class={"h5 mt-0 nav-link #{if @active_tab == "online", do: "active"}"}
+            phx-click="show-online"
+            phx-hook={if @active_tab != "online", do: "Loading"}
+            id="show-online-link"
+          >
+            <span class="loading-text f-rpg">
+              <i class={"fa fa-users fa-2x text-#{if @active_tab == "online", do: "success", else: "white"}"}></i>
+              <br />RECENT PLAYERS
+            </span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="javascript:;"
+            class={"h5 mt-0 nav-link #{if @active_tab == "pvp", do: "active"}"}
+            phx-click="show-pvp"
+            phx-hook={if @active_tab != "pvp", do: "Loading"}
+            id="show-pvp-link"
+          >
+            <span class="loading-text f-rpg">
+              <i class={"fa fa-trophy fa-2x text-#{if @active_tab == "pvp", do: "success", else: "white"}"}></i>
+              <br />TOP PLAYERS
+            </span>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a
+            href="javascript:;"
+            class={"h5 mt-0 nav-link #{if @active_tab == "pve", do: "active"}"}
+            phx-click="show-pve"
+            phx-hook={if @active_tab != "pve", do: "Loading"}
+            id="show-pve-link"
+          >
+            <span class="loading-text f-rpg">
+              <i class={"fa fa-helmet-battle fa-2x text-#{if @active_tab == "pve", do: "success", else: "white"}"}></i>
+              <br />TOP HEROES
+            </span>
+          </a>
+        </li>
+      </ul>
+      <div class={"mt-2 mb-2 #{unless @active_tab == "online", do: "d-none"}"}>
+        <div :if={@is_admin} class="row mt-3">
+          <div class="col-xl-3 col-md-6">
+            <div class="widget-simple text-center card-box" phx-click="user-filter">
+              <h3 class="text-success counter mt-0">{@user_stats.new_guests}</h3>
+              <p class="text-muted mb-0">New Guests</p>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6">
+            <div class="widget-simple text-center card-box" phx-click="user-filter">
+              <h3 class="text-primary counter mt-0">
+                {@user_stats.new_users}
+                <%= if @user_stats.new_guests > 0 do %>
+                  ({div(@user_stats.new_users * 100, @user_stats.new_guests)}%)
+                <% end %>
+              </h3>
+              <p class="text-muted mb-0">New Users (% converted)</p>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6">
+            <div class="widget-simple text-center card-box" phx-click="user-filter">
+              <h3 class="text-pink mt-0 counter">
+                {@user_stats.online_today}
+                <%= if @user_stats.online_today > 0 do %>
+                  ({div(@user_stats.new_users * 100, @user_stats.online_today)}%)
+                <% end %>
+              </h3>
+              <p class="text-muted mb-0">
+                Online {if @user_filter == :daily, do: "Today", else: "This Week"} (% new)
+              </p>
+            </div>
+          </div>
+
+          <div class="col-xl-3 col-md-6">
+            <div class="widget-simple text-center card-box" phx-click="user-filter">
+              <h3 class="text-danger counter mt-0">
+                {@user_stats.new_heroes}
+                <%= if @user_stats.online_today > 0 do %>
+                  ({Float.round(@user_stats.new_heroes / @user_stats.online_today, 1)}x)
+                <% end %>
+              </h3>
+              <p class="text-muted mb-0">New Heroes (x online)</p>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
+              <tbody id="hall-of-training">
+                <tr class="f-rpg font-17 text-white">
+                  <th
+                    class="border"
+                    width="10%"
+                    phx-click={if @current_player.user && @current_player.user.is_admin, do: "toggle-admin"}
+                  >
+                    Player
+                  </th>
+                  <th class="border" width="10%">Arena</th>
+                  <th class="border text-left">
+                    <div class="ml-4">LATEST HEROES</div>
+                  </th>
+                </tr>
+                <%= for player <- @players do %>
+                  <.player_row player={player} is_admin={@is_admin} current={player.id == @current_player.id} />
+                <% end %>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="row mt-3">
+          <%= for player <- @guests do %>
+            <.guest
+              :if={player.current_pve_hero}
+              is_admin={@is_admin}
+              player={player}
+              current={player.id == @current_player.id}
+            />
+          <% end %>
+        </div>
+        <div :if={@is_admin} class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-body p-0 pt-2">
+                <h2 class="text-center mt-0 mb-0">Arena Stats</h2>
+                <h5 class="text-center">
+                  Avg Winrate: {Float.round(@match_stats.winrate, 1)}%
+                  <small>({@match_stats.total} total matches)</small>
+                </h5>
+                <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-center">
+                  <li class="nav-item">
+                    <a
+                      href="javascript:;"
+                      phx-click="match-filter"
+                      phx-value-type="pvp"
+                      data-toggle="tab"
+                      class={"nav-link px-2 py-1 #{if @match_filter == "pvp", do: "active"}"}
+                      phx-hook="Loading"
+                      id="immortal-ranking-button"
+                    >
+                      <span class="d-inline-block loading-text">All</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      href="javascript:;"
+                      phx-click="match-filter"
+                      phx-value-type="plebs"
+                      data-toggle="tab"
+                      class={"nav-link px-2 py-1 #{if @match_filter == "plebs", do: "active"}"}
+                      phx-hook="Loading"
+                      id="pleb-ranking-button"
+                    >
+                      <span class="d-inline-block loading-text">Plebs</span>
+                    </a>
+                  </li>
+                  <li class="nav-item">
+                    <a
+                      href="javascript:;"
+                      phx-click="match-filter"
+                      phx-value-type="elite"
+                      data-toggle="tab"
+                      class={"nav-link px-2 py-1 #{if @match_filter == "elite", do: "active"}"}
+                      phx-hook="Loading"
+                      id="elite-ranking-button"
+                    >
+                      <span class="d-inline-block loading-text">Elite</span>
+                    </a>
+                  </li>
+                </ul>
+                <div class="row">
+                  <div class="col">
+                    <div>
+                      <div class="row no-gutters">
+                        <div class="col">
+                          <.arena_stats
+                            records={top_performing(@match_stats, :avatars)}
+                            key={:avatars}
+                            match_filter={@match_filter}
+                          />
+                        </div>
+                        <div class="col">
+                          <.arena_stats
+                            records={bottom_performing(@match_stats, :avatars)}
+                            key={:avatars}
+                            match_filter={@match_filter}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col">
+                    <div>
+                      <div class="row no-gutters">
+                        <div class="col">
+                          <.arena_stats
+                            records={top_performing(@match_stats, :skills)}
+                            key={:skills}
+                            match_filter={@match_filter}
+                          />
+                        </div>
+                        <div class="col">
+                          <.arena_stats
+                            records={bottom_performing(@match_stats, :skills)}
+                            key={:skills}
+                            match_filter={@match_filter}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <h5 class="text-center">
+                  Avg Winrate: {Float.round(@match_stats.winrate, 1)}%
+                  <small>({@match_stats.total} total matches)</small>
+                </h5>
+                <div class="row">
+                  <div class="col-md-6 margin-auto">
+                    <div>
+                      <div class="row no-gutters">
+                        <div class="col">
+                          <.arena_stats
+                            records={top_performing(@match_stats, :items)}
+                            key={:items}
+                            match_filter={@match_filter}
+                          />
+                        </div>
+                        <div class="col">
+                          <.arena_stats
+                            records={bottom_performing(@match_stats, :items)}
+                            key={:items}
+                            match_filter={@match_filter}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div :if={@is_admin} class="row mt-3">
+          <div class="col-xl-6 col-lg-8 margin-auto col-xs-12">
+            <table class="table table-dark mb-0 border-left border-right border-bottom text-center">
+              <%= for duel <- @duels do %>
+                <tr>
+                  <td>
+                    <h5><.link navigate={~p"/arena/#{duel}"}>Duel {duel.id}</.link></h5>
+                  </td>
+                  <td>
+                    {duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)}
+                  </td>
+                  <td>
+                    <img src={"/images/pve/#{duel.player.pve_tier}.png"} style="max-height:  40px" /><br />
+                    {username(duel.player)}
+                  </td>
+                  <td style="width: 1%">
+                    vs
+                  </td>
+                  <td>
+                    <img src={"/images/pve/#{duel.opponent_player.pve_tier}.png"} style="max-height:  40px" /><br />
+                    {username(duel.opponent_player)}
+                  </td>
+                  <td>
+                    <%= if duel.phase == "finished" do %>
+                      <%= if duel.winner_player do %>
+                        <span class="text-success">Winner: {username(duel.winner_player)}</span>
+                      <% else %>
+                        <span class="text-muted">Tie</span>
+                      <% end %>
+                      <br />
+                      <%= if duel.rewards.attacker_pvp_points > 0 do %>
+                        <span class="badge badge-pill badge-light-success">
+                          {username(duel.player)}: +{duel.rewards.attacker_pvp_points}
+                        </span>
+                      <% else %>
+                        <span class="badge badge-pill badge-light-dark">
+                          {username(duel.player)}: {duel.rewards.attacker_pvp_points}
+                        </span>
+                      <% end %>
+                      <%= if duel.rewards.defender_pvp_points != 0 do %>
+                        <%= if duel.rewards.defender_pvp_points > 0 do %>
+                          <span class="badge badge-pill badge-light-success">
+                            {username(duel.opponent_player)}: +{duel.rewards.defender_pvp_points}
+                          </span>
+                        <% else %>
+                          <span class="badge badge-pill badge-light-dark">
+                            {username(duel.opponent_player)}: {duel.rewards.defender_pvp_points}
+                          </span>
+                        <% end %>
+                      <% end %>
+                    <% else %>
+                      <span class="text-danger">In progress</span>
+                    <% end %>
+                  </td>
+                  <td>
+                    <%= if duel.auto do %>
+                      <span class="text-muted">Auto</span>
+                    <% else %>
+                      <span class="text-danger">Live</span>
+                    <% end %>
+                  </td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class={"mt-1 mb-1 #{unless @active_tab == "pvp", do: "d-none"}"}>
+        <div class="row">
+          <%= for player <- @pvp_ranking do %>
+            <.player_card player={player} />
+          <% end %>
+        </div>
+      </div>
+      <div class={"mt-1 mb-1 #{unless @active_tab == "pve", do: "d-none"}"}>
+        <div class="row">
+          <%= for hero <- @pve_ranking do %>
+            <.pve_hero_card hero={hero} />
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</Layouts.app>

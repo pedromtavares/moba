@@ -4,6 +4,8 @@
 
 Upgrade the frontend infrastructure to modern Phoenix/LiveView patterns while keeping the current product behavior and screen design effectively the same.
 
+**v2 is a mirror of v1.** Every screen, layout, style, and interaction should look and behave identically to v1. The only things that change are infra-level concerns: moving frontend code into function components, replacing legacy template/partial patterns, modernizing LiveView wiring, and cleaning up the process architecture. Nothing visible to the user should change.
+
 This is a safety-first migration:
 
 - Keep v1 live during migration
@@ -30,12 +32,15 @@ This is a safety-first migration:
 - New game features
 - Gameplay mechanics changes
 - Reworking copy/content unless required for technical migration
+- CSS framework migration (no Tailwind adoption for now — Bootstrap and all v1 styles are kept as-is)
 
 ---
 
 ## Design Direction
 
-Keep the current design language. Do not adopt WC3UI, WarcraftCN, or any new visual framework as part of this migration.
+Keep the current design language. Do not adopt WC3UI, WarcraftCN, Tailwind, or any new visual framework as part of this migration.
+
+All v1 CSS structure, Bootstrap classes, and custom styles carry over to v2 unchanged. Tailwind is not being introduced at this time.
 
 If any temporary v2 styling diverges from v1 visuals, treat it as migration debt and normalize before cutover.
 
@@ -114,7 +119,7 @@ end
 Maintain strict separation throughout migration:
 
 - `assets/` remains the v1 pipeline (existing webpack/bootstrap stack)
-- `assets_v2/` remains the v2 pipeline (esbuild + tailwind)
+- `assets_v2/` remains the v2 pipeline (esbuild — no Tailwind; Bootstrap and v1 styles are reused)
 - v1 root layout loads only v1 bundles
 - v2 root layout loads only v2 bundles
 
@@ -325,8 +330,8 @@ passes the per-screen parity checklist above.
 | `/player/:player_id` | `PlayerLive :show` | Low | 3 | Not started |
 | `/hero/:id` | `HeroLive` | Low | 3 | Not started |
 | `/tavern` | `TavernLive` | Medium | 4 | Not started |
-| `/community` | `CommunityLive` | Low | 3 | Not started |
-| `/library` | `LibraryLive` | Low | 3 | Not started |
+| `/community` | `CommunityLive` | Low | 3 | Done — `/v2/community` |
+| `/library` | `LibraryLive` | Low | 3 | Done — `/v2/library` |
 
 ---
 

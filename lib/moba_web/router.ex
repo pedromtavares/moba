@@ -103,6 +103,8 @@ defmodule MobaWeb.Router do
       ],
       root_layout: {MobaWeb.V2.Layouts, :root} do
       live "/base", DashboardLive
+      live "/library", LibraryLive
+      live "/community", CommunityLive
     end
   end
 
