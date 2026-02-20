@@ -1,7 +1,13 @@
 @import "tailwindcss" source(none);
+@import url('https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&display=swap');
 @source "../css";
 @source "../js";
 @source "../../lib/moba_web";
+
+@font-face {
+  font-family: rpg;
+  src: url("/fonts/rpg.ttf");
+}
 
 @theme {
   --color-faction-bg: var(--faction-bg, #1A1A2A);
@@ -40,6 +46,8 @@
   --color-rarity-epic: #AB47BC;
   --color-rarity-legendary: #EF5350;
 
+  --color-pve: #1ABC9C;
+
   --color-surface: #16213E;
   --color-surface-light: #1A2A4E;
   --color-surface-dark: #0F1628;
@@ -48,6 +56,7 @@
 
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell,
     "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  --font-rpg: rpg;
 }
 
 :root {
@@ -62,7 +71,15 @@
 
 @layer base {
   body {
-    @apply bg-faction-bg text-faction-text min-h-screen antialiased;
+    background: #272E35;
+    @apply text-faction-text min-h-screen antialiased;
+    font-family: 'Nunito', sans-serif;
+    padding-bottom: 12px;
+  }
+
+  hr {
+    border-color: #424e5a;
+    margin: 0;
   }
 }
 
@@ -104,5 +121,61 @@
     @apply ring-2;
     --tw-ring-color: var(--faction-accent);
     --tw-ring-opacity: 0.6;
+  }
+
+  /* Hero card gradient border — matches v1's radial-gradient border-image */
+  .hero-card-border {
+    border: 3px solid;
+    border-image-source: radial-gradient(white, rgb(47, 60, 74));
+    border-image-slice: 1;
+  }
+
+  /* Sidebar — icon-only, fixed, narrow, matching v1 */
+  .sidebar-nav-container {
+    width: 6vw;
+    min-width: 70px;
+    flex-shrink: 0;
+  }
+
+  .sidebar-nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: rgba(0, 0, 0, 0.2);
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    width: 6vw;
+    min-width: 70px;
+    border-right: 1px solid #36404a;
+    z-index: 10;
+  }
+
+  .sidebar-nav a {
+    color: white;
+    text-align: center;
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    margin-right: auto;
+    margin-left: auto;
+    text-decoration: none;
+    display: block;
+    max-height: 75px;
+  }
+
+  .sidebar-nav a:first-child {
+    margin-top: 1rem;
+  }
+
+  .sidebar-nav a:hover,
+  .sidebar-nav a.active {
+    color: #1abc9c;
+  }
+
+  .sidebar-icon {
+    font-size: 2.5rem;
+    display: block;
+    padding: 1rem;
+    text-align: center;
   }
 }

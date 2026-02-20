@@ -54,64 +54,41 @@ defmodule MobaWeb.V2.Components.GameComponents do
     ~H"""
     <div
       id={"hero-card-#{@hero.id}"}
-      class={[
-        "bg-surface border border-surface-border rounded overflow-hidden",
-        "hover:border-gold/50 transition-colors duration-150",
-        @class
-      ]}
+      class={["hero-card-border min-h-[380px] flex flex-col bg-cover bg-center overflow-hidden", @class]}
+      style={"background-image: url('#{GH.background_url(@hero)}')"}
     >
-      <%!-- Hero header with background --%>
-      <div class="relative h-28 overflow-hidden">
-        <img
-          src={GH.background_url(@hero)}
-          alt=""
-          class="absolute inset-0 w-full h-full object-cover opacity-60"
-          loading="lazy"
-        />
-        <div class="absolute inset-0 bg-gradient-to-t from-surface via-surface/60 to-transparent"></div>
-        <div :if={@hero.pve_ranking} class="absolute top-2 left-2">
-          <span class="text-xs font-bold text-gold bg-surface/80 px-1.5 py-0.5 rounded">
-            #<%= @hero.pve_ranking %>
-          </span>
-        </div>
-        <div class="absolute bottom-2 left-3 flex items-end gap-2">
-          <.portrait_frame src={GH.image_url(@hero.avatar)} size="sm" />
-          <div class="min-w-0">
-            <div class="text-gold font-semibold text-sm leading-tight truncate"><%= @hero.name || @hero.avatar.name %></div>
-            <div class="text-faction-text-muted text-xs"><%= @hero.avatar.name %> · Lv. <%= @hero.level %></div>
-          </div>
-        </div>
-        <div class="absolute top-2 right-2">
+      <%!-- Header --%>
+      <div class="px-3 pt-2 pb-1 flex justify-between items-center bg-[rgba(54,64,74,0.8)]">
+        <span class="italic text-xl text-white font-rpg leading-none w-12 shrink-0">
+          <%= if @hero.pve_ranking, do: "##{@hero.pve_ranking}" %>
+        </span>
+        <div class="flex items-center gap-1 font-bold text-white">
           <.league_badge tier={@hero.league_tier} size="sm" />
+          <%= @hero.name || @hero.avatar.name %>
         </div>
-      </div>
-
-      <%!-- Skills row --%>
-      <div class="px-3 pt-2 flex gap-1">
-        <.skill_icon :for={skill <- @hero.skills} skill={skill} size="sm" />
-      </div>
-
-      <%!-- Items row --%>
-      <div class="px-3 pt-1 flex gap-1">
-        <.item_slot :for={item <- sort_items(@hero.items)} item={item} size="sm" />
-      </div>
-
-      <%!-- Stats --%>
-      <div class="px-3 pt-2">
-        <.hero_stats_compact hero={@hero} />
-      </div>
-
-      <%!-- Gold --%>
-      <div class="px-3 pt-1 pb-2">
-        <span class="inline-flex items-center gap-1 text-xs">
-          <span class="text-gold">⚜</span>
-          <span class="text-gold font-semibold tabular-nums"><%= GH.farming_amount_label(@hero.gold) %></span>
+        <span class="italic text-sm text-white text-right w-28 shrink-0" title={hero_stats_title(@hero)}>
+          Level <%= @hero.level %> <%= @hero.avatar.name %>
         </span>
       </div>
 
-      <%!-- Actions slot --%>
-      <div :if={@actions != []} class="px-3 pb-3 flex gap-2">
-        <%= render_slot(@actions) %>
+      <%!-- Body (empty — background image shows through) --%>
+      <div class="flex-1"></div>
+
+      <%!-- Footer --%>
+      <div class="p-1 bg-[rgba(54,64,74,0.95)]">
+        <%!-- Actions row: delete / continue / customize / farming --%>
+        <div :if={@actions != []} class="flex items-center px-1 py-1">
+          <%= render_slot(@actions) %>
+        </div>
+        <%!-- Skills + Items row --%>
+        <div class="flex items-start justify-between px-1 pt-1">
+          <div class="flex gap-0.5 w-[70%]">
+            <.skill_icon :for={skill <- @hero.skills} skill={skill} size="sm" />
+          </div>
+          <div class="flex flex-wrap gap-0.5 justify-end w-[30%]">
+            <.item_slot :for={item <- sort_items(@hero.items)} item={item} size="sm" />
+          </div>
+        </div>
       </div>
     </div>
     """
@@ -379,4 +356,8 @@ defmodule MobaWeb.V2.Components.GameComponents do
 
   defp sort_items(items) when is_list(items), do: Enum.sort_by(items, fn item -> !item.active end)
   defp sort_items(_), do: []
+
+  defp hero_stats_title(hero) do
+    "HP: #{hero.total_hp} | MP: #{hero.total_mp} | ATK: #{hero.atk} | POW: #{hero.power} | ARM: #{hero.armor} | SPD: #{hero.speed}"
+  end
 end

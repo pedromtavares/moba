@@ -401,6 +401,7 @@ defmodule MobaWeb.V2.Components.CoreComponents do
   defp progress_color("green"), do: "bg-hp"
   defp progress_color("blue"), do: "bg-mp"
   defp progress_color("red"), do: "bg-atk"
+  defp progress_color("pve"), do: "bg-pve"
   defp progress_color("accent"), do: "bg-faction-accent"
   defp progress_color(_), do: "bg-faction-accent"
 

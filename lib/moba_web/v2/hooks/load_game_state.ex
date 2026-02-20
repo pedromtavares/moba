@@ -29,6 +29,10 @@ defmodule MobaWeb.V2.Hooks.LoadGameState do
     end
   end
 
+  def on_mount(:default, _params, _session, socket) do
+    {:halt, redirect(socket, to: "/start")}
+  end
+
   defp maybe_subscribe(socket, player) do
     if connected?(socket) do
       MobaWeb.subscribe("player-#{player.id}")

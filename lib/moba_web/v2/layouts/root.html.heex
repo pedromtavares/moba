@@ -2,13 +2,32 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="Description"
+      content="Train your own custom heroes with MOBA abilities and items to battle against other players in turn-based strategy matches. Online, no downloads, for free."
+    />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <title>BrowserMOBA v2</title>
-    <link rel="stylesheet" href={~p"/v2/assets/app.css"} />
-    <script defer phx-track-static type="text/javascript" src={~p"/v2/assets/app.js"}></script>
+    <.live_title prefix="Browser MOBA – ">
+      {assigns[:page_title] || "Free Strategy Game"}
+    </.live_title>
+    <link rel="stylesheet" href={~p"/css/app.css"} />
+    <link rel="shortcut icon" href={assigns[:favicon] || ~p"/images/favicon.png"} />
+    <link rel="stylesheet" href="https://use.typekit.net/juc8mry.css" />
+    <script src="https://kit.fontawesome.com/26d6de301e.js">
+    </script>
   </head>
   <body>
-    <%= @inner_content %>
+    <%= if assigns[:current_player] do %>
+      <.mobile_navigation current_player={@current_player} current_hero={assigns[:current_hero]} />
+    <% end %>
+    <div class="wrapper" id="main-wrapper">
+      <div class="container-fluid">
+        {@inner_content}
+      </div>
+    </div>
+    <script type="text/javascript" src={~p"/js/app.js"}>
+    </script>
   </body>
 </html>

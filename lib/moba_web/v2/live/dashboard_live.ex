@@ -8,19 +8,18 @@ defmodule MobaWeb.V2.DashboardLive do
     {:ok, socket_init(socket, player)}
   end
 
-  def handle_event("filter", %{"filter" => filter}, socket) do
+  def handle_event("show-finished", _, socket) do
     %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket
+    visible = Enum.filter(all_heroes, & &1.finished_at)
+    loaded = if length(visible) < @base_hero_count, do: Enum.uniq(loaded ++ ["finished"]), else: loaded
+    {:noreply, assign(socket, visible_heroes: visible, filter: "finished", loaded: loaded)}
+  end
 
-    visible =
-      case filter do
-        "finished" -> Enum.filter(all_heroes, & &1.finished_at)
-        "unfinished" -> Enum.filter(all_heroes, &is_nil(&1.finished_at))
-        _ -> all_heroes
-      end
-
-    loaded = if length(visible) < @base_hero_count, do: Enum.uniq(loaded ++ [filter]), else: loaded
-
-    {:noreply, assign(socket, visible_heroes: visible, filter: filter, loaded: loaded)}
+  def handle_event("show-unfinished", _, socket) do
+    %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket
+    visible = Enum.filter(all_heroes, &is_nil(&1.finished_at))
+    loaded = if length(visible) < @base_hero_count, do: Enum.uniq(loaded ++ ["unfinished"]), else: loaded
+    {:noreply, assign(socket, visible_heroes: visible, filter: "unfinished", loaded: loaded)}
   end
 
   def handle_event("load-all", _, socket) do
@@ -39,10 +38,6 @@ defmodule MobaWeb.V2.DashboardLive do
        all_heroes: all_heroes,
        loaded: Enum.uniq(loaded ++ [filter])
      )}
-  end
-
-  def handle_event("toggle-rewards", _, socket) do
-    {:noreply, assign(socket, show_rewards: !socket.assigns.show_rewards)}
   end
 
   def handle_event("continue", %{"id" => id}, socket) do
@@ -102,9 +97,7 @@ defmodule MobaWeb.V2.DashboardLive do
       loaded: loaded,
       blank_collection: blank_collection,
       collection_codes: collection_codes,
-      hero_count: length(all_heroes),
-      next_pve_tier: next_pve_tier(player),
-      show_rewards: false
+      hero_count: length(all_heroes)
     )
   end
 
@@ -151,8 +144,8 @@ defmodule MobaWeb.V2.DashboardLive do
 
   @max_total_farm Moba.max_total_farm()
 
-  defp collection_avatar_class(%{"total_farm" => farm}) when farm == @max_total_farm, do: "ring-2 ring-gold"
-  defp collection_avatar_class(_), do: ""
+  defp collection_avatar_class(%{"total_farm" => farm}) when farm == @max_total_farm, do: "avatar max-farm"
+  defp collection_avatar_class(_), do: "avatar"
 
   defp training_difficulty_for(tier) do
     Map.get(Game.get_quest(tier), :difficulty) || Game.get_quest(7).difficulty

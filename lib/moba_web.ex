@@ -73,7 +73,7 @@ defmodule MobaWeb do
 
   def v2_live_view do
     quote do
-      use Phoenix.LiveView, layout: {MobaWeb.V2.Layouts, :app}
+      use Phoenix.LiveView
 
       alias Moba.{Game, Accounts, Engine, Utils}
 

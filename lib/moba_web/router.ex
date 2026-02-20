@@ -101,7 +101,6 @@ defmodule MobaWeb.Router do
         MobaWeb.V2.Hooks.RequireAuth,
         MobaWeb.V2.Hooks.LoadGameState
       ],
-      layout: {MobaWeb.V2.Layouts, :app},
       root_layout: {MobaWeb.V2.Layouts, :root} do
       live "/base", DashboardLive
     end

@@ -1,225 +1,390 @@
-<%!-- PvE Progression --%>
-<div id="pve-progression" class="bg-surface border border-surface-border rounded p-4 mb-4">
-  <%= if @next_pve_tier do %>
-    <div class="flex items-center justify-between gap-4">
-      <%!-- Current tier --%>
-      <div class="text-center flex-shrink-0 w-24">
-        <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="w-16 h-16 mx-auto" loading="lazy" />
-        <div class="text-white font-bold uppercase text-sm mt-1">
-          <%= GH.pve_tier_name(@current_player.pve_tier) %>
-        </div>
-      </div>
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+<div class="dashboard mt-2">
+  <div class="row">
+    <div class="col">
 
-      <%!-- Quest progress --%>
-      <div class="flex-1 text-center">
-        <h4 class="text-faction-text text-sm mb-3">
-          <%= current_quest_description(@current_player) %>
-        </h4>
-        <div title={quest_avatars_title(@current_player)}>
-          <.progress_bar
-            value={quest_progression_pct(@current_player)}
-            label={quest_progression_label(@current_player)}
-            class="h-10 text-sm cursor-help"
-          />
-        </div>
-        <div class="mt-3">
-          <%= if @current_player.pvp_tier != Moba.max_pvp_tier() do %>
-            <.button variant="secondary" phx-click="toggle-rewards">
-              Progression Rewards
-            </.button>
-          <% end %>
-        </div>
-      </div>
-
-      <%!-- Next tier --%>
-      <div class="text-center flex-shrink-0 w-24">
-        <img src={"/images/pve/#{@next_pve_tier}.png"} class="w-16 h-16 mx-auto" loading="lazy" />
-        <div class="text-white font-bold uppercase text-sm mt-1">
-          <%= GH.pve_tier_name(@next_pve_tier) %>
-        </div>
-      </div>
-    </div>
-  <% else %>
-    <div class="text-center">
-      <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="w-28 h-28 mx-auto" loading="lazy" />
-      <div class="text-white font-bold uppercase text-xl mt-2">
-        <%= GH.pve_tier_name(@current_player.pve_tier) %>
-      </div>
-    </div>
-  <% end %>
-</div>
-
-<%!-- Progression Rewards (inline panel, replaces Bootstrap modal) --%>
-<%= if @show_rewards && @next_pve_tier do %>
-  <div id="pve-tier-rewards" class="bg-surface border border-surface-border rounded p-4 mb-4">
-    <div class="text-center mb-3">
-      <img src={"/images/pve/#{@next_pve_tier}.png"} class="w-14 h-14 mx-auto" loading="lazy" />
-      <h3 class="text-gold font-bold mt-1"><%= GH.pve_tier_name(@next_pve_tier) %></h3>
-      <div class="text-faction-text-muted text-xs">Progression Rewards</div>
-    </div>
-    <table class="w-full text-sm">
-      <tbody>
-        <tr class="border-t border-surface-border">
-          <td class="py-2 pr-4 text-atk font-medium w-2/5">⚔ Training Difficulty</td>
-          <td class="py-2 text-faction-text"><%= training_difficulty_for(@next_pve_tier) %></td>
-        </tr>
-        <%= if bonus = training_bonus_for(@next_pve_tier) do %>
-          <tr class="border-t border-surface-border">
-            <td class="py-2 pr-4 text-hp font-medium w-2/5">⚔ Training Bonus</td>
-            <td class="py-2 text-faction-text"><%= bonus %></td>
-          </tr>
-        <% end %>
-        <tr class="border-t border-surface-border">
-          <td class="py-2 pr-4 text-mp font-medium w-2/5">❋ Farming per Turn</td>
-          <td class="py-2 text-faction-text"><%= GH.farming_per_turn_label(@next_pve_tier) %></td>
-        </tr>
-        <tr class="border-t border-surface-border">
-          <td class="py-2 pr-4 text-gold font-medium w-2/5">🏆 Maximum League</td>
-          <td class="py-2 text-faction-text"><%= max_league_allowed_for(@next_pve_tier) %></td>
-        </tr>
-        <tr class="border-t border-surface-border">
-          <td class="py-2 pr-4 text-mp font-medium w-2/5">
-            <.link href="/tavern" class="hover:text-mp-light underline">⟁ Shards</.link>
-          </td>
-          <td class="py-2 text-gold font-semibold">+ <%= quest_shard_prize(@next_pve_tier) %></td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-<% end %>
-
-<%!-- Hero List --%>
-<div id="hero-list-container" class="bg-surface border border-surface-border rounded">
-  <%!-- Train button --%>
-  <div class="p-4 text-center">
-    <.link
-      href="/invoke"
-      class="inline-block w-full max-w-sm px-4 py-3 text-base border border-hp/60 text-hp rounded hover:bg-hp/10 transition-colors"
-    >
-      + Train a new Hero
-    </.link>
-  </div>
-
-  <%!-- Hero collection --%>
-  <div class="flex flex-wrap justify-center gap-x-2 gap-y-3 px-4 pb-4">
-    <%= for hero <- (@current_player.hero_collection || []) do %>
-      <div class="relative w-[72px] text-center" title={hero["avatar"]["name"]}>
-        <img
-          src={GH.image_url(hero["avatar"])}
-          class={["w-14 h-14 mx-auto rounded object-cover", collection_avatar_class(hero)]}
-        />
-        <img
-          src={"/images/league/#{hero["tier"]}.png"}
-          class="absolute bottom-0 right-1 w-5 h-5"
-          loading="lazy"
-        />
-      </div>
-    <% end %>
-    <%= for avatar <- @blank_collection do %>
-      <div class="relative w-[72px] text-center" title={avatar.name}>
-        <img
-          src={GH.image_url(avatar)}
-          class="w-14 h-14 mx-auto rounded object-cover opacity-20 grayscale"
-        />
-      </div>
-    <% end %>
-  </div>
-
-  <%!-- Hero grid with filter tabs --%>
-  <%= if @hero_count > 0 do %>
-    <div class="border-t border-surface-border">
-      <%!-- Filter tabs --%>
-      <div class="flex justify-center pt-3 px-4">
-        <.tab_bar>
-          <.tab
-            active={@filter == "unfinished"}
-            phx-click="filter"
-            phx-value-filter="unfinished"
-            id="in-progress-heroes-tab"
-          >
-            In Progress
-          </.tab>
-          <.tab
-            active={@filter == "finished"}
-            phx-click="filter"
-            phx-value-filter="finished"
-            id="finished-heroes-tab"
-          >
-            Finished
-          </.tab>
-        </.tab_bar>
-      </div>
-
-      <%!-- Hero grid --%>
-      <div class="p-4" id={"hero-list-#{@filter}"}>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <%= for hero <- @visible_heroes do %>
-            <.hero_card hero={hero}>
-              <:actions>
-                <%!-- Delete --%>
-                <%= if can_delete_hero?(hero) do %>
-                  <.button
-                    variant="danger"
-                    phx-click="archive"
-                    phx-value-id={hero.id}
-                    data-confirm="Are you sure you want to DELETE your hero?"
-                    class="text-xs !px-2 !py-1"
-                  >
-                    Delete
-                  </.button>
-                <% end %>
-
-                <%!-- Continue / Customize --%>
-                <%= if is_nil(hero.finished_at) do %>
-                  <.button
-                    variant="primary"
-                    phx-click="continue"
-                    phx-value-id={hero.id}
-                    title={"#{hero.pve_total_turns + hero.pve_current_turns} turns left"}
-                  >
-                    Continue
-                  </.button>
+      <%!-- PvE Progression --%>
+      <div class="row">
+        <div class="col">
+          <div class="card dark-bg mb-3" id="pve-progression">
+            <div class="card-body pb-0">
+              <div class="row mt-3 mb-3 d-flex justify-content-center">
+                <%= if next = next_pve_tier(@current_player) do %>
+                  <div class="col pve-tier-container text-center">
+                    <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="pve-rank" />
+                    <h4 class="text-uppercase text-white my-0 f-rpg">
+                      {Moba.pve_tiers()[@current_player.pve_tier]}
+                    </h4>
+                  </div>
+                  <div class="col-8">
+                    <h4 class="text-center mb-0 mt-0">
+                      {current_quest_description(@current_player)}
+                    </h4>
+                    <div
+                      class="progress mt-3"
+                      style="height:50px;"
+                      data-toggle="tooltip"
+                      title={quest_avatars_title(@current_player)}
+                    >
+                      <div
+                        style={"width:#{quest_progression_pct(@current_player)}%;"}
+                        class="progress-bar pve-bar"
+                      >
+                      </div>
+                      <h5
+                        class="justify-content-center d-flex position-absolute w-100 text-white"
+                        style="margin-top: 18px"
+                      >
+                        {quest_progression_label(@current_player)}
+                      </h5>
+                    </div>
+                    <div class="mt-4 text-center">
+                      <%= unless @current_player.pvp_tier == Moba.max_pvp_tier() do %>
+                        <button
+                          type="button"
+                          class="btn btn-sm btn-light"
+                          data-toggle="modal"
+                          data-target="#pve-tier-rewards"
+                        >
+                          <i class="fa fa-crown mr-1"></i>Progression Rewards
+                        </button>
+                      <% end %>
+                    </div>
+                  </div>
+                  <div class="col pve-tier-container text-center">
+                    <img src={"/images/pve/#{next}.png"} class="pve-rank" />
+                    <h4 class="text-uppercase text-white my-0 f-rpg">
+                      {Moba.pve_tiers()[next]}
+                    </h4>
+                  </div>
                 <% else %>
-                  <.link
-                    href={"/hero/#{hero.id}"}
-                    class="inline-flex items-center justify-center px-4 py-2 text-sm bg-surface border border-mp/50 text-mp rounded hover:bg-mp/10 hover:border-mp transition-colors"
-                  >
-                    Customize
-                  </.link>
+                  <div class="col text-center mb-2">
+                    <img
+                      src={"/images/pve/#{@current_player.pve_tier}.png"}
+                      style="width: 150px"
+                      class="user-rank"
+                    />
+                    <h4 class="my-0 text-uppercase text-white f-rpg">
+                      {Moba.pve_tiers()[@current_player.pve_tier]}
+                    </h4>
+                  </div>
                 <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                <%!-- Farm + time --%>
-                <div class="ml-auto flex items-center gap-2 text-xs text-faction-text-muted">
-                  <span
-                    title={"Total farm: #{GH.total_farm(hero)}. Gold: #{hero.total_gold_farm}. XP: #{hero.total_xp_farm}"}
-                  >
-                    👑 <%= GH.farming_amount_label(GH.total_farm(hero)) %>
-                  </span>
-                  <%= if hero.finished_at do %>
-                    <span title="Time to finish Training">
-                      🕐 <%= GH.finished_time(hero) %> min
-                    </span>
+      <%!-- Hero List --%>
+      <div class="row">
+        <div class="col">
+          <div class="card">
+            <div class="card-body p-0 text-center" id="hero-list-container">
+              <.link
+                navigate={~p"/invoke"}
+                class="btn p-2 btn-block btn-lg btn-outline-success col-xl-4 margin-auto mt-2 dark-button"
+              >
+                <i class="fa fa-plus-large mr-1"></i>Train a new Hero
+              </.link>
+
+              <%!-- Hero collection --%>
+              <div class="pt-3">
+                <div class="collection">
+                  <%= for hero <- (@current_player.hero_collection || []) do %>
+                    <div
+                      style="width: 100px;"
+                      class="avatar-container text-center mx-1"
+                      data-toggle="tooltip"
+                      title={hero["avatar"]["name"]}
+                    >
+                      <img
+                        src={GH.image_url(hero["avatar"])}
+                        class={collection_avatar_class(hero)}
+                      />
+                      <img
+                        src={"/images/league/#{hero["tier"]}.png"}
+                        class="league-logo"
+                      />
+                    </div>
+                  <% end %>
+                  <%= for avatar <- @blank_collection do %>
+                    <div style="width:100px;height:75px" class="avatar-container text-center mx-1">
+                      <img
+                        src={GH.image_url(avatar)}
+                        class="avatar blank-avatar"
+                        data-toggle="tooltip"
+                        title={avatar.name}
+                      />
+                    </div>
                   <% end %>
                 </div>
-              </:actions>
-            </.hero_card>
-          <% end %>
-        </div>
+              </div>
 
-        <%!-- Load All --%>
-        <%= unless all_loaded?(@loaded, @filter) do %>
-          <div class="mt-4">
-            <.button
-              variant="secondary"
-              phx-click="load-all"
-              class="w-full"
-              id={"load-all-heroes-#{@filter}"}
-            >
-              + Load All
-            </.button>
+              <%!-- Hero grid with filter buttons --%>
+              <%= if @hero_count > 0 do %>
+                <hr />
+                <div class="row">
+                  <div class="col d-flex justify-content-center">
+                    <div class="pt-3 pb-3 pr-3">
+                      <div class="btn-group">
+                        <%= if @filter == "unfinished" do %>
+                          <button type="button" class="btn btn-secondary no-action">
+                            <span class="loading-text">In Progress</span>
+                          </button>
+                          <button
+                            type="button"
+                            class="btn btn-light"
+                            phx-click="show-finished"
+                            phx-hook="Loading"
+                            id="finished-heroes-btn"
+                          >
+                            <span class="loading-text">Finished</span>
+                          </button>
+                        <% else %>
+                          <button
+                            type="button"
+                            class="btn btn-light"
+                            phx-click="show-unfinished"
+                            phx-hook="Loading"
+                            id="in-progress-heroes-btn"
+                          >
+                            <span class="loading-text">In Progress</span>
+                          </button>
+                          <button type="button" class="btn btn-secondary no-action">
+                            <span class="loading-text">Finished</span>
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <%!-- Hero grid --%>
+                <div class="w-100 hero-list darker" id={"hero-list-#{@filter}"}>
+                  <div class="row no-gutters">
+                    <%= for hero <- @visible_heroes do %>
+                      <div class="col-lg-4 col-md-6" id={"visible-hero-#{hero.id}"}>
+                        <div
+                          class="card hero-card mb-0"
+                          style={"background-image: url(#{GH.background_url(hero)})"}
+                        >
+                          <div class="card-header pt-0 pb-1">
+                            <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
+                              <span class="font-italic font-20 f-rpg">
+                                <%= if hero.pve_ranking do %>
+                                  #{hero.pve_ranking}
+                                <% end %>
+                              </span>
+                              <div>
+                                <img
+                                  src={"/images/league/#{hero.league_tier}.png"}
+                                  class="league-logo"
+                                />
+                                {hero.name}
+                              </div>
+                              <span class="font-15 font-italic">
+                                Level {hero.level} {hero.avatar.name}
+                              </span>
+                            </h4>
+                          </div>
+                          <div class="card-body p-0 d-flex align-items-center justify-content-center">
+                          </div>
+                          <div class="card-footer transparent p-1">
+                            <div class="row">
+                              <div class="col justify-content-between d-flex">
+                                <%= if can_delete_hero?(hero) do %>
+                                  <button
+                                    type="button"
+                                    class="btn btn-danger"
+                                    data-confirm="Are you sure you want to DELETE your hero?"
+                                    phx-click="archive"
+                                    phx-value-id={hero.id}
+                                  >
+                                    <i class="fa fa-trash-alt mr-1"></i>Delete
+                                  </button>
+                                <% end %>
+                                <%= if hero.finished_at do %>
+                                  <.link class="btn btn-primary" navigate={~p"/hero/#{hero}"}>
+                                    <i class="fa fa-address-card mr-1"></i> Customize
+                                  </.link>
+                                <% else %>
+                                  <button
+                                    type="button"
+                                    class="btn btn-success"
+                                    phx-click="continue"
+                                    phx-value-id={hero.id}
+                                    data-toggle="tooltip"
+                                    title={"#{hero.pve_total_turns + hero.pve_current_turns} turns left"}
+                                  >
+                                    <i class="fa fa-sword mr-1"></i> Continue
+                                  </button>
+                                <% end %>
+                                <div class="btn-group">
+                                  <button
+                                    class="btn btn-icon btn-outline-light text-warning"
+                                    data-toggle="tooltip"
+                                    title={"Total farm: #{hero.total_xp_farm + hero.total_gold_farm}. Gold farm: #{hero.total_gold_farm}. XP farm: #{hero.total_xp_farm}"}
+                                  >
+                                    <i class="fa fa-crown"></i>
+                                    {GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm)}
+                                  </button>
+                                  <%= if hero.finished_at do %>
+                                    <button
+                                      class="btn btn-icon btn-outline-light text-success"
+                                      data-toggle="tooltip"
+                                      title="Time it took to finish Training"
+                                    >
+                                      <i class="fa fa-clock-o"></i>
+                                      {GH.finished_time(hero)} min
+                                    </button>
+                                  <% end %>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="row mt-1">
+                              <div class="col-12">
+                                <div class="skills-container d-flex justify-content-between">
+                                  <%= for skill <- hero.skills do %>
+                                    <img
+                                      src={GH.image_url(skill)}
+                                      data-toggle="tooltip"
+                                      class={"skill-img img-border-sm #{if skill.passive, do: "passive"} tooltip-mobile"}
+                                      id={"skill-#{skill.id}-#{hero.id}"}
+                                    />
+                                  <% end %>
+                                </div>
+                                <div class="items-container row no-gutters float-right">
+                                  <%= for item <- Moba.Game.sort_items(hero.items) do %>
+                                    <div class="item-container col-4">
+                                      <img
+                                        src={GH.image_url(item)}
+                                        data-toggle="tooltip"
+                                        class={"item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"}
+                                        id={"item-#{item.id}-#{hero.id}"}
+                                      />
+                                    </div>
+                                  <% end %>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </div>
+
+                  <%!-- Load All --%>
+                  <%= unless all_loaded?(@loaded, @filter) do %>
+                    <div class="row">
+                      <div class="col">
+                        <button
+                          type="button"
+                          class="btn btn-light btn-block btn-lg img-border-sm"
+                          phx-click="load-all"
+                          phx-hook="Loading"
+                          id={"load-all-heroes-#{@filter}"}
+                        >
+                          <span class="loading-text">
+                            <i class="fa fa-plus mr-1"></i>Load All
+                          </span>
+                        </button>
+                      </div>
+                    </div>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
           </div>
-        <% end %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<%!-- PvE Tier Rewards Modal --%>
+<%= if next_pve_tier(@current_player) do %>
+  <div
+    id="pve-tier-rewards"
+    class="modal fade"
+    tabindex="-1"
+    role="dialog"
+    aria-labelledby="pve-tier-rewards-label"
+  >
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title margin-auto pl-3" id="pve-tier-rewards-label">
+            Progression Rewards
+          </h4>
+          <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">
+            ×
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="text-center">
+            <img src={"/images/pve/#{@current_player.pve_tier + 1}.png"} style="max-height: 70px" />
+            <br />
+            <h3>{Moba.pve_tiers()[@current_player.pve_tier + 1]}</h3>
+          </div>
+          <table class="table table-dark border margin-auto">
+            <tr>
+              <td class="text-center text-danger">
+                <i class="fa fa-sword fa-2x"></i> <br /> Training Difficulty
+              </td>
+              <td class="text-left">
+                <h5>{training_difficulty_for(@current_player.pve_tier + 1)}</h5>
+              </td>
+            </tr>
+            <%= if bonus = training_bonus_for(@current_player.pve_tier + 1) do %>
+              <tr>
+                <td class="text-center text-success">
+                  <i class="fa fa-sword fa-2x"></i> <br /> Training Bonus
+                </td>
+                <td class="text-left">
+                  <h5>{bonus}</h5>
+                </td>
+              </tr>
+            <% end %>
+            <tr>
+              <td class="text-center text-primary">
+                <i class="fa fa-spa fa-2x"></i> <br /> Farming per Turn
+              </td>
+              <td class="text-left">
+                <h5>{GH.farming_per_turn_label(@current_player.pve_tier + 1)}</h5>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center text-warning">
+                <i class="fa fa-trophy fa-2x"></i> <br /> Maximum League
+              </td>
+              <td class="text-left">
+                <h4>{max_league_allowed_for(@current_player.pve_tier + 1)}</h4>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center text-info">
+                <.link
+                  navigate={~p"/tavern"}
+                  data-toggle="tooltip"
+                  title="Shards are the in-game currency that you can use to unlock game content."
+                >
+                  <i class="fab fa-ethereum fa-2x"></i> <br /> Shards
+                </.link>
+              </td>
+              <td class="text-left">
+                <h4>+ {quest_shard_prize(@current_player.pve_tier + 1)}</h4>
+              </td>
+            </tr>
+          </table>
+        </div>
       </div>
     </div>
-  <% end %>
-</div>
+  </div>
+<% end %>
+</Layouts.app>
