@@ -54,6 +54,7 @@ config :waffle,
 # Watch static and templates for browser reloading.
 config :moba, MobaWeb.Endpoint,
   live_reload: [
+    web_console_logger: true,
     patterns: [
       ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
       ~r{priv/gettext/.*(po)$},
@@ -62,6 +63,7 @@ config :moba, MobaWeb.Endpoint,
       ~r{lib/moba_web/controllers/.*(eex)$},
       ~r{lib/moba_web/live/.*(ex)$},
       ~r{lib/moba_web/v2/.*(ex|heex)$},
+      ~r{lib/moba_web/(?:controllers|live|components|v2)/?.*\.(ex|heex)$},
       ~r{priv/static/v2/.*(js|css)$}
     ]
   ]
@@ -76,6 +78,11 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :phoenix_live_view,
+  debug_heex_annotations: true,
+  debug_attributes: true,
+  enable_expensive_runtime_checks: true
 
 # Configure your database
 config :moba, Moba.Repo,

@@ -9,6 +9,8 @@ defmodule Moba.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      compilers: [:phoenix_live_view] ++ Mix.compilers(),
+      listeners: [Phoenix.CodeReloader],
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
       preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
@@ -48,7 +50,7 @@ defmodule Moba.MixProject do
       {:postgrex, ">= 0.15.3"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.1"},
-      {:plug_cowboy, "~> 2.2"},
+      {:bandit, "~> 1.5"},
       {:mix_test_watch, "~> 0.6", only: :dev, runtime: false},
       {:waffle, "~> 1.1.9"},
       {:waffle_ecto, "~> 0.0.12"},
@@ -72,9 +74,19 @@ defmodule Moba.MixProject do
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:gun, "2.0.1", hex: "remedy_gun", override: true},
       {:floki, ">= 0.36.2", only: :test},
+      {:lazy_html, ">= 0.1.0", only: :test},
       {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false},
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.2", runtime: Mix.env() == :dev}
+      {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
+      {:heroicons,
+       github: "tailwindlabs/heroicons",
+       tag: "v2.2.0",
+       sparse: "optimized",
+       app: false,
+       compile: false,
+       depth: 1},
+      {:dns_cluster, "~> 0.2.0"},
+      {:req, "~> 0.5"}
     ]
   end
 

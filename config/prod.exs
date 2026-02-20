@@ -30,6 +30,12 @@ config :moba, Moba.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
   api_key: System.get_env("SENDGRID_KEY")
 
+# Configures Swoosh API Client
+config :swoosh, api_client: Swoosh.ApiClient.Req
+
+# Disable Swoosh Local Memory Storage
+config :swoosh, local: false
+
 config :sentry,
   dsn: System.get_env("SENTRY_DSN"),
   environment_name: :prod,

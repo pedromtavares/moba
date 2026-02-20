@@ -12,6 +12,7 @@ defmodule Moba.Application do
       MobaWeb.Telemetry,
       {Phoenix.PubSub, name: Moba.PubSub},
       MobaWeb.Presence,
+      {DNSCluster, query: Application.get_env(:moba, :dns_cluster_query) || :ignore},
       MobaWeb.Endpoint,
       # Cache for hero creation
       {Cachex, name: :game_cache},

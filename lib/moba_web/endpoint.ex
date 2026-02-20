@@ -7,7 +7,8 @@ defmodule MobaWeb.Endpoint do
     key: "_moba_key",
     signing_salt: "5hkIoMFs",
     # 37 days
-    max_age: 24 * 60 * 60 * 37
+    max_age: 24 * 60 * 60 * 37,
+    same_site: "Lax"
   ]
 
   socket "/socket", MobaWeb.UserSocket,
@@ -23,7 +24,7 @@ defmodule MobaWeb.Endpoint do
   plug Plug.Static,
     at: "/",
     from: :moba,
-    gzip: false,
+    gzip: not code_reloading?,
     # cache_control_for_etags: "public, max-age=86400",
     only: MobaWeb.static_paths()
 
@@ -47,6 +48,7 @@ defmodule MobaWeb.Endpoint do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :moba
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,
@@ -54,7 +56,7 @@ defmodule MobaWeb.Endpoint do
     cookie_key: "request_logger"
 
   plug Plug.RequestId
-  plug Plug.Logger
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
