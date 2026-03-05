@@ -105,6 +105,10 @@ defmodule MobaWeb.Router do
       live "/base", DashboardLive
       live "/library", LibraryLive
       live "/community", CommunityLive
+      live "/user/:id", PlayerLive
+      live "/player/:player_id", PlayerLive, :show, as: :player
+      live "/hero/:id", HeroLive
+      live "/tavern", TavernLive
     end
   end
 

@@ -7,7 +7,7 @@ import Config
 # watchers to your application. For example, we use it
 # with webpack to recompile .js and .css sources.
 config :moba, MobaWeb.Endpoint,
-  http: [port: 4000],
+  http: [port: String.to_integer(System.get_env("PORT") || "4000")],
   debug_errors: true,
   code_reloader: true,
   check_origin: false,

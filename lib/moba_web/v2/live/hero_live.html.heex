@@ -1,0 +1,424 @@
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+  <div class={"hero-review #{if @hero.player_id == @current_player.id, do: "content-with-hero-bar"}"} id="hero-review">
+    <%= if finished_hero = just_finished_training?(@current_player, @hero) do %>
+      <div class="row mt-3">
+        <%= if @completed_quest do %>
+          <div class="col-xl-6 margin-auto">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="text-center m-0">You have ranked up to {@completed_quest.title}!</h3>
+              </div>
+              <div class="card-body">
+                <table class="table table-dark mb-0 border text-center">
+                  <tr>
+                    <td><strong>{@completed_quest.description}</strong></td>
+                  </tr>
+                </table>
+                <div class="text-center mt-2">
+                  <img src={"/images/pve/#{@current_player.pve_tier}.png"} style="max-height: 70px" /><br />
+                  <button type="button" class="btn btn-light mt-2" data-toggle="modal" data-target="#pve-tier-rewards">
+                    <i class="fa fa-crown mr-1"></i>Rewards
+                  </button>
+                </div>
+              </div>
+              <div class="card-footer p-0">
+                <%= if is_nil(@current_player.user_id) do %>
+                  <a href="/arena" class="btn btn-danger btn-block btn-lg">
+                    <i class="fa fa-swords fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Proceed to the Arena</strong>
+                  </a>
+                <% else %>
+                  <.link navigate={~p"/v2/base"} class="btn btn-success btn-block btn-lg">
+                    <i class="fa fa-home fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Proceed to Base</strong>
+                  </.link>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% else %>
+          <div class="col-xl-6 margin-auto">
+            <div class="card collection">
+              <div class="card-header">
+                <h3 class="text-center m-0">
+                  <img class="mb-2" src={"/images/league/#{finished_hero.league_tier}.png"} style="max-width: 100px" />
+                  <br />
+                  <%= if finished_hero.league_tier >= Moba.platinum_league_tier() do %>
+                    Congratulations on reaching the <span class={"text-league-#{finished_hero.league_tier}"}>
+                      {Moba.leagues()[finished_hero.league_tier]}
+                    </span>!
+                  <% else %>
+                    You reached the <span class={"text-league-#{finished_hero.league_tier}"}>
+                      {Moba.leagues()[finished_hero.league_tier]}
+                    </span>, nice try!
+                  <% end %>
+                </h3>
+              </div>
+              <div class="card-body p-0">
+                <%= if finished_hero.league_tier >= Moba.platinum_league_tier() do %>
+                  <.link navigate={~p"/v2/base"} class="btn btn-success btn-block btn-lg">
+                    <i class="fa fa-home font-20 mr-1 mt-2 pb-3 pt-2"></i>
+                    <strong class="font-20">Proceed to your Base</strong>
+                  </.link>
+                <% else %>
+                  <.link navigate={~p"/invoke"} class="btn btn-success btn-block btn-lg">
+                    <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
+                    <strong class="font-20 d-block">Try Again</strong>
+                  </.link>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+
+    <div class="row mt-3">
+      <div class="col-md-6 col-xl-6">
+        <div class="row">
+          <div class="col">
+            <div class="hero-card card">
+              <div class="card-header pt-1 pb-2">
+                <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+                  <span class="font-italic font-15">Level {@hero.level}</span>
+                  <%= if @hero.player.user_id do %>
+                    <.link class="text-white font-20 f-rpg" navigate={~p"/v2/player/#{@hero.player_id}"}>
+                      {@hero.name}
+                    </.link>
+                  <% else %>
+                    <span class="text-white font-20 f-rpg">{@hero.name}</span>
+                  <% end %>
+                  <span class="font-italic font-15">{@hero.avatar.name}</span>
+                </h4>
+              </div>
+              <div class="card-body text-center">
+                <img src={GH.background_url(@hero)} />
+              </div>
+              <div class="card-footer p-0 text-center">
+                <div class="row align-items-center d-flex ml-1 mt-1 mr-1">
+                  <div class="col">
+                    <.hero_stats_buttons hero={@hero} />
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12 mt-1 d-flex justify-content-center">
+                    <div class="skills-container d-flex justify-content-between">
+                      <%= for skill <- @hero.skills do %>
+                        <img
+                          src={GH.image_url(skill)}
+                          class={["skill-img img-border-sm tooltip-mobile", skill.passive && "passive"]}
+                          data-toggle="tooltip"
+                          title={GH.skill_description(skill)}
+                          id={"skill-#{skill.id}-#{@hero.id}"}
+                        />
+                      <% end %>
+                    </div>
+                    <div class="items-container row no-gutters">
+                      <%= for item <- Game.sort_items(@hero.items) do %>
+                        <div class="item-container col-4">
+                          <img
+                            src={GH.image_url(item)}
+                            class={["item-img img-border-xs tooltip-mobile", !item.active && "passive"]}
+                            data-toggle="tooltip"
+                            title={GH.item_description(item)}
+                            id={"item-#{item.id}-#{@hero.id}"}
+                          />
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                <%= if @hero.player.user_id && @hero.player_id == @current_player.id do %>
+                  <div class="row">
+                    <%= if @skin_selection do %>
+                      <div class="col">
+                        <.link
+                          class="btn btn-light btn-block mt-1"
+                          navigate={~p"/v2/tavern?#{%{avatar: @hero.avatar.code}}"}
+                        >
+                          <i class="fa fa-palette mr-1"></i>View Skins
+                        </.link>
+                      </div>
+                      <%= if has_previous_skin?(@skin_selection) do %>
+                        <div class="col">
+                          <a
+                            href="javascript:;"
+                            class="btn btn-secondary btn-block mt-1"
+                            phx-click="set-skin"
+                            phx-value-skin-code={previous_skin_for(@skin_selection)}
+                          >
+                            <i class="fa fa-chevron-left mr-1"></i> Change Skin
+                          </a>
+                        </div>
+                      <% end %>
+                      <%= if has_next_skin?(@skin_selection) do %>
+                        <div class="col">
+                          <a
+                            href="javascript:;"
+                            class="btn btn-secondary btn-block mt-1"
+                            phx-click="set-skin"
+                            phx-value-skin-code={next_skin_for(@skin_selection)}
+                          >
+                            Change Skin<i class="fa fa-chevron-right ml-1"></i>
+                          </a>
+                        </div>
+                      <% end %>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="card">
+              <div class="card-body pt-3 pb-2">
+                <div class="performance">
+                  <div class="row">
+                    <div class="col d-flex align-items-center">
+                      <%= for {tier, _} <- Moba.leagues() do %>
+                        <img src={"/images/league/#{tier}.png"} class={tier_class(tier, @hero.league_tier)} />
+                        <%= unless tier == Moba.max_league_tier() do %>
+                          <div class="progress" style="width: 30px;height: 3px; border-radius: 0">
+                            <div
+                              style="width:100%"
+                              class={"progress-bar #{if tier >= @hero.league_tier, do: "bg-dark", else: "bg-primary"}"}
+                            >
+                              <span></span>
+                            </div>
+                          </div>
+                        <% end %>
+                      <% end %>
+                    </div>
+                  </div>
+                  <h3 class={"text-center mt-2 mb-2 text-league-#{@hero.league_tier}"}>
+                    {Moba.leagues()[@hero.league_tier]}
+                  </h3>
+
+                  <div class="row text-center mt-3">
+                    <div class="col">
+                      <h4 class="text-warning" data-toggle="tooltip" title={@hero.total_xp_farm + @hero.total_gold_farm}>
+                        <i class="fa fa-crown"></i>
+                        Total Farm: {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
+                      </h4>
+                    </div>
+
+                    <div class="col">
+                      <%= if @hero.finished_at do %>
+                        <h4 class="text-center text-success">
+                          <i class="fa fa-clock-o"></i> Trained in {GH.finished_time(@hero)} min
+                        </h4>
+                      <% else %>
+                        <h4 class="text-center text-white">In Progress ({@hero.pve_total_turns} turns left)</h4>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-xl-6">
+        <div class="row">
+          <div class="col">
+            <%= if @hero.player.user_id do %>
+              <.link
+                class="btn btn-block btn-light mb-1 btn-lg"
+                navigate={~p"/v2/player/#{@hero.player_id}"}
+              >
+                <i class="fa fa-user"></i> View Player Profile
+              </.link>
+            <% end %>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col">
+            <div class="card ranking">
+              <div class={"card-body p-0 #{if is_nil(@hero.player.user_id), do: "extended-body"}"} id="ranking-card">
+                <table class="table table-dark text-center m-0 table-sm">
+                  <thead>
+                    <tr>
+                      <th>Rank</th>
+                      <th>Hero</th>
+                      <th>Total Farm</th>
+                      <th>Time</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <%= for hero <- @ranking do %>
+                      <tr
+                        id={"ranking-#{hero.id}"}
+                        phx-container="#ranking-card"
+                        phx-hook={if hero.id == @hero.id, do: "HalfScroll"}
+                      >
+                        <td>
+                          <h1 class={"#{if hero.id == @hero.id, do: "text-danger f-rpg", else: "f-rpg"}"}>
+                            <%= if hero.pve_ranking do %>
+                              #<%= hero.pve_ranking %>
+                            <% else %>
+                              ?
+                            <% end %>
+                          </h1>
+                        </td>
+                        <td>
+                          <.link navigate={~p"/v2/hero/#{hero}"}>
+                            <div class="avatar-container">
+                              <img src={GH.image_url(hero.avatar)} class="avatar img-border" />
+                            </div>
+                            <br />
+                            <h5 class="text-primary mb-0 mt-1">{hero.name}</h5>
+                          </.link>
+                        </td>
+                        <td>
+                          <h3 class="text-white" data-toggle="tooltip" title={hero.total_xp_farm + hero.total_gold_farm}>
+                            <img src={"/images/league/#{hero.league_tier}.png"} style="max-width: 30px;" /> {GH.farming_amount_label(
+                              hero.total_xp_farm + hero.total_gold_farm
+                            )}
+                          </h3>
+                        </td>
+                        <td>
+                          <h3 class="text-success">
+                            <i class="fa fa-clock-o"></i>
+                            <%= if hero.finished_at do %>
+                              {GH.finished_time(hero)} min
+                            <% else %>
+                              ??
+                            <% end %>
+                          </h3>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                  <%= if not in_ranking?(@ranking, @hero) do %>
+                    <tfoot>
+                      <tr>
+                        <th>
+                          <%= if @hero.pve_ranking do %>
+                            <h1 class="text-danger f-rpg">#<%= @hero.pve_ranking %></h1>
+                          <% else %>
+                            <h4 class="text-danger font-italic">Unranked</h4>
+                          <% end %>
+                        </th>
+                        <th>
+                          <div class="avatar-container">
+                            <img src={GH.image_url(@hero.avatar)} class="avatar img-border" />
+                          </div>
+                          <br />
+                          <h5 class="text-primary mb-0 mt-1">{@hero.name}</h5>
+                        </th>
+                        <th>
+                          <h3 class="text-white" data-toggle="tooltip" title={@hero.total_xp_farm + @hero.total_gold_farm}>
+                            <img src={"/images/league/#{@hero.league_tier}.png"} style="max-width: 30px;" /> {GH.farming_amount_label(
+                              @hero.total_xp_farm + @hero.total_gold_farm
+                            )}
+                          </h3>
+                        </th>
+                        <th>
+                          <h3 class="text-success">
+                            <i class="fa fa-clock-o"></i>
+                            <%= if @hero.finished_at do %>
+                              {GH.finished_time(@hero)} min
+                            <% else %>
+                              ??
+                            <% end %>
+                          </h3>
+                        </th>
+                      </tr>
+                    </tfoot>
+                  <% end %>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%= if @completed_quest do %>
+    <div
+      id="pve-tier-rewards"
+      class="modal fade"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="pve-tier-rewards-label"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title margin-auto pl-3" id="pve-tier-rewards-label">
+              Progression Rewards
+            </h4>
+            <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">
+              ×
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="text-center">
+              <img src={"/images/pve/#{@current_player.pve_tier + 1}.png"} style="max-height: 70px" />
+              <br />
+              <h3>{Moba.pve_tiers()[@current_player.pve_tier + 1]}</h3>
+            </div>
+            <table class="table table-dark border margin-auto">
+              <tr>
+                <td class="text-center text-danger">
+                  <i class="fa fa-sword fa-2x"></i> <br /> Training Difficulty
+                </td>
+                <td class="text-left">
+                  <h5>{training_difficulty_for(@current_player.pve_tier + 1)}</h5>
+                </td>
+              </tr>
+              <%= if bonus = training_bonus_for(@current_player.pve_tier + 1) do %>
+                <tr>
+                  <td class="text-center text-success">
+                    <i class="fa fa-sword fa-2x"></i> <br /> Training Bonus
+                  </td>
+                  <td class="text-left">
+                    <h5>{bonus}</h5>
+                  </td>
+                </tr>
+              <% end %>
+              <tr>
+                <td class="text-center text-primary">
+                  <i class="fa fa-spa fa-2x"></i> <br /> Farming per Turn
+                </td>
+                <td class="text-left">
+                  <h5>{GH.farming_per_turn_label(@current_player.pve_tier + 1)}</h5>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-center text-warning">
+                  <i class="fa fa-trophy fa-2x"></i> <br /> Maximum League
+                </td>
+                <td class="text-left">
+                  <h4>{max_league_allowed_for(@current_player.pve_tier + 1)}</h4>
+                </td>
+              </tr>
+              <tr>
+                <td class="text-center text-info">
+                  <.link
+                    navigate={~p"/v2/tavern"}
+                    data-toggle="tooltip"
+                    title="Shards are the in-game currency that you can use to unlock game content."
+                  >
+                    <i class="fab fa-ethereum fa-2x"></i> <br /> Shards
+                  </.link>
+                </td>
+                <td class="text-left">
+                  <h4>+ {quest_shard_prize(@current_player.pve_tier + 1)}</h4>
+                </td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</Layouts.app>

@@ -32,7 +32,7 @@
                 </div>
                 <p class="inbox-item-author">
                   <.link
-                    navigate={~p"/player/#{message.user_id}"}
+                    navigate={~p"/v2/player/#{message.user_id}"}
                     class={if(message.is_admin, do: "text-danger", else: "text-dark")}
                   >
                     {message.author}

@@ -73,7 +73,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           </.link>
         <% else %>
           <.link
-            navigate={~p"/player/#{@current_player.id}"}
+            navigate={~p"/v2/player/#{@current_player.id}"}
             data-toggle="tooltip"
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -83,7 +83,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             <i class="fa-duotone fa-helmet-battle"></i>
           </.link>
           <.link
-            navigate={~p"/tavern"}
+            navigate={~p"/v2/tavern"}
             data-toggle="tooltip"
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -158,13 +158,13 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
                       </.link>
                     <% end %>
                     <%= if @current_player.user_id do %>
-                      <.link navigate={~p"/player/#{@current_player.id}"} class="nav-link">
+                      <.link navigate={~p"/v2/player/#{@current_player.id}"} class="nav-link">
                         <i class="fa fa-helmet-battle"></i>
                       </.link>
-                      <.link navigate={~p"/community"} class="nav-link">
+                      <.link navigate={~p"/v2/community"} class="nav-link">
                         <i class="fa fa-globe"></i>
                       </.link>
-                      <.link navigate={~p"/tavern"} class="nav-link">
+                      <.link navigate={~p"/v2/tavern"} class="nav-link">
                         <i class="fa fa-dungeon"></i>
                       </.link>
                     <% end %>

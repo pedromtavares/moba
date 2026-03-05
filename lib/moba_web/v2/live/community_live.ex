@@ -118,7 +118,7 @@ defmodule MobaWeb.V2.CommunityLive do
       <.link
         class="hero-card card mb-3"
         style={"background-image: url(#{GH.background_url(@player.top_hero)})"}
-        navigate={~p"/player/#{@player.id}"}
+        navigate={~p"/v2/player/#{@player.id}"}
       >
         <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
           <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
@@ -168,7 +168,7 @@ defmodule MobaWeb.V2.CommunityLive do
       <.link
         class="hero-card card mb-3"
         style={"background-image: url(#{GH.background_url(@hero)})"}
-        navigate={~p"/hero/#{@hero}"}
+        navigate={~p"/v2/hero/#{@hero}"}
       >
         <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
           <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
@@ -318,7 +318,7 @@ defmodule MobaWeb.V2.CommunityLive do
   defp player_row(assigns) do
     ~H"""
     <tr id={"user-#{@player.id}"} style={if @current, do: "background: rgba(255,255,255, 0.02)"}>
-      <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/player/#{@player.id}")}>
+      <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/v2/player/#{@player.id}")}>
         <span
           class="text-white"
           data-toggle={if @is_admin, do: "tooltip"}
@@ -340,7 +340,7 @@ defmodule MobaWeb.V2.CommunityLive do
           <.status_pill player={@player} />
         </span>
       </td>
-      <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/player/#{@player.id}")}>
+      <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/v2/player/#{@player.id}")}>
         <h2 class="f-rpg text-danger">
           <%= if @player.ranking do %>
             #{@player.ranking}
@@ -354,7 +354,7 @@ defmodule MobaWeb.V2.CommunityLive do
         <div class="d-flex justify-content-start">
           <%= for hero <- @player.latest_heroes do %>
             <div class="col-2">
-              <.link navigate={~p"/hero/#{hero}"}>
+              <.link navigate={~p"/v2/hero/#{hero}"}>
                 <img
                   src={GH.image_url(hero.avatar)}
                   style={"width: 100px; #{if Game.max_farm?(hero), do: "border: 1px solid red; border-radius:2px"}"}
