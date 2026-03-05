@@ -1,0 +1,245 @@
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+  <div class="matches">
+    <div class="row mt-2">
+      <div class="col-4">
+        <div class="card mb-0" id="player-card">
+          <h2 class="text-center f-rpg">
+            <.link navigate={~p"/v2/player/#{@match.player}"} class="text-white">{username(@match.player)}</.link>
+          </h2>
+        </div>
+        <div class="row mt-2">
+          <div :for={hero <- @picked_heroes} class="col-md-12 mt-1" id={"hero-#{hero.id}"}>
+            <.pvp_hero_card hero={hero}>
+              <:actions>
+                <button
+                  :if={is_nil(@match.winner)}
+                  class="btn btn-xs btn-block btn-secondary m-0 mr-1"
+                  phx-click="move-up"
+                  phx-value-id={hero.id}
+                  id={"move-up-#{hero.id}"}
+                >
+                  <span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span>
+                </button>
+                <button
+                  :if={is_nil(@match.winner)}
+                  class="btn btn-xs btn-block btn-secondary m-0 mx-1"
+                  phx-click="move-down"
+                  phx-value-id={hero.id}
+                  id={"move-down-#{hero.id}"}
+                >
+                  <span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span>
+                </button>
+              </:actions>
+            </.pvp_hero_card>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="row">
+          <div class="col">
+            <div class="card mb-0" id="winner-card">
+              <%= if @match.phase do %>
+                <h2 class="text-center">
+                  Winner:
+                  <%= if @match.winner && @tick >= length(@battles) do %>
+                    {username(@match.winner)}
+                  <% else %>
+                    ?
+                  <% end %>
+                </h2>
+              <% else %>
+                <%= if length(@picked_heroes) >= 5 && @current_player.id == @match.player_id do %>
+                  <button
+                    type="button"
+                    class="btn text-center btn-lg btn-block btn-primary dark-button margin-auto shadow-fx"
+                    phx-click="start"
+                    id="start-match-button"
+                  >
+                    <span class="loading-text"><i class="fa fa-play mr-1"></i> Lock Picks and Start Match</span>
+                  </button>
+                <% else %>
+                  <h2 class="text-center text-white">
+                    Pick 5 Heroes
+                    <i :if={@latest_match} class="fa-solid fa-repeat text-right ml-4 action-cursor" phx-click="repeat">
+                    </i>
+                  </h2>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div :if={is_nil(@match.phase) && @current_player.id == @match.player_id} class="row mt-1">
+          <div class="col">
+            <div class="card mb-0 mt-2" id="picks-card">
+              <ul class="nav nav-pills navtab-bg mt-2 justify-content-center">
+                <li class="nav-item">
+                  <a
+                    href="javascript:;"
+                    phx-click="hero-tab"
+                    phx-value-type="teams"
+                    class={["nav-link px-2 py-1", @hero_tab == "teams" && "active"]}
+                    id="teams-heroes-button"
+                  >
+                    <span class="d-inline-block loading-text"><i class="fa fa-group mr-1"></i>Teams</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    href="javascript:;"
+                    phx-click="hero-tab"
+                    phx-value-type="trained"
+                    class={["nav-link px-2 py-1", @hero_tab == "trained" && "active"]}
+                    id="trained-heroes-button"
+                  >
+                    <span class="d-inline-block loading-text"><i class="fa fa-sword mr-1"></i>Trained Heroes</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    href="javascript:;"
+                    phx-click="hero-tab"
+                    phx-value-type="available"
+                    class={["nav-link px-2 py-1", @hero_tab == "available" && "active"]}
+                    id="available-heroes-button"
+                  >
+                    <span class="d-inline-block loading-text"><i class="fa fa-dice mr-1"></i>Available Heroes</span>
+                  </a>
+                </li>
+              </ul>
+              <div class="tab-content pt-0 mt-2">
+                <div class={["tab-pane fade", @hero_tab == "teams" && "active show"]} id="teams-heroes">
+                  <hr class="mb-2" />
+                  <div :for={team <- @teams} class="col-md-12 team">
+                    <div class="card border">
+                      <div class="card-body mb-0">
+                        <div class="d-flex justify-content-center mb-2">
+                          <img :for={pick <- team.picks} src={GH.image_url(pick.avatar)} class="avatar mr-1" />
+                        </div>
+                        <%= if Enum.map(@picked_heroes, & &1.id) == team.pick_ids do %>
+                          <button class="btn btn-block btn-secondary dark-button" disabled>Picked {team.name}</button>
+                        <% else %>
+                          <button
+                            class="btn btn-block btn-secondary dark-button"
+                            phx-click="pick-team"
+                            phx-value-id={team.id}
+                            id={"pick-team-#{team.id}"}
+                          >
+                            <span class="loading-text">Pick {team.name}</span>
+                          </button>
+                        <% end %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class={["tab-pane fade", @hero_tab == "trained" && "active show"]} id="trained-heroes">
+                  <hr class="mb-2" />
+                  <div :for={hero <- @trained_heroes} class="col-md-12 mt-1" id={"available-hero-#{hero.id}"}>
+                    <.pvp_hero_card hero={hero} picked={Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id)}>
+                      <:actions>
+                        <button
+                          :if={Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id)}
+                          type="button"
+                          class="btn btn-secondary dark-button text-white btn-block pick-button"
+                          phx-click="unpick-hero"
+                          phx-value-id={hero.id}
+                          id={"unpick-hero-#{hero.id}"}
+                        >
+                          <span class="loading-text">Unpick {hero.avatar.name}</span>
+                        </button>
+                        <button
+                          :if={!Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id) && length(@picked_heroes) < 5}
+                          type="button"
+                          class="btn btn-secondary dark-button text-white btn-block pick-button"
+                          phx-click="pick-hero"
+                          phx-value-id={hero.id}
+                          id={"pick-hero-#{hero.id}"}
+                        >
+                          <span class="loading-text">Pick {hero.avatar.name}</span>
+                        </button>
+                      </:actions>
+                    </.pvp_hero_card>
+                  </div>
+                </div>
+                <div class={["tab-pane fade", @hero_tab == "available" && "active show"]} id="available-heroes">
+                  <hr class="mb-2" />
+                  <div :for={hero <- @generated_heroes} class="col-md-12 mt-1" id={"generated-hero-#{hero.id}"}>
+                    <.pvp_hero_card hero={hero} picked={Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id)}>
+                      <:actions>
+                        <button
+                          :if={Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id)}
+                          type="button"
+                          class="btn btn-secondary dark-button text-white btn-block pick-button"
+                          phx-click="unpick-hero"
+                          phx-value-id={hero.id}
+                          id={"unpick-hero-#{hero.id}"}
+                        >
+                          <span class="loading-text">Unpick {hero.avatar.name}</span>
+                        </button>
+                        <button
+                          :if={!Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id) && length(@picked_heroes) < 5}
+                          type="button"
+                          class="btn btn-secondary dark-button text-white btn-block pick-button"
+                          phx-click="pick-hero"
+                          phx-value-id={hero.id}
+                          id={"pick-hero-#{hero.id}"}
+                        >
+                          <span class="loading-text">Pick {hero.avatar.name}</span>
+                        </button>
+                      </:actions>
+                    </.pvp_hero_card>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row mt-1">
+          <div :for={battle <- Enum.take(@battles, @tick)} class="col-md-12 mt-2">
+            <div class="card mb-0">
+              <div class="card-body p-2">
+                <.link navigate={~p"/v2/battles/#{battle}"} id={"battle-review-#{battle.id}"}>
+                  <div class="row">
+                    <div class="col center pr-4">
+                      <.turn_snapshot
+                        hero={player_pick(battle, @match)}
+                        turn_hero={turn_hero_for(battle, @match.player)}
+                      />
+                    </div>
+                    <div class="col center pr-4">
+                      <.turn_snapshot
+                        hero={opponent_pick(battle, @match)}
+                        turn_hero={turn_hero_for(battle, @match.opponent)}
+                      />
+                    </div>
+                  </div>
+                </.link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-4">
+        <div class="card mb-0">
+          <h2 class="text-center f-rpg">
+            <.link navigate={~p"/v2/player/#{@match.opponent}"} class="text-white">{username(@match.opponent)}</.link>
+          </h2>
+        </div>
+        <div class="row mt-2" id="opponent-heroes-container">
+          <div :for={hero <- @match.opponent_picks} class="col-md-12 mt-1" id={"opponent-hero-#{hero.id}"}>
+            <.pvp_hero_card hero={hero} />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+</Layouts.app>

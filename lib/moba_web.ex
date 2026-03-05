@@ -25,6 +25,10 @@ defmodule MobaWeb do
     Phoenix.PubSub.broadcast(Moba.PubSub, channel, {event, payload})
   end
 
+  def broadcast_from(from, channel, event, payload) do
+    Phoenix.PubSub.broadcast_from(Moba.PubSub, from, channel, {event, payload})
+  end
+
   def static_paths, do: ~w(assets css fonts images resources js v2 favicon.ico robots.txt ads.txt .well-known)
 
   def router do
@@ -146,6 +150,7 @@ defmodule MobaWeb do
       alias MobaWeb.V2.Layouts
       import MobaWeb.V2.Components.GameComponents
       import MobaWeb.V2.Components.LayoutComponents
+      import MobaWeb.V2.Components.PvpComponents
 
       alias MobaWeb.V2.Components.GameHelpers, as: GH
 

@@ -1,0 +1,333 @@
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+<div class="arena mt-2">
+  <div class="row">
+    <div class="col">
+      <div class="row mb-3">
+        <div class="col">
+          <div class="card dark-bg mb-0" id="pvp-progression">
+            <div class="card-body pb-0">
+              <div class="row mb-3 d-flex justify-content-center">
+                <div class="col">
+                  <div class="progress mt-1" style="height:50px;" id="daily-progression">
+                    <div
+                      style={"width:#{manual_matches_percentage(@manual_matches)}%;"}
+                      class="progress-bar manual-bar"
+                      title={"Manual matches played: #{length(@manual_matches)}"}
+                    >
+                    </div>
+                    <div
+                      style={"width:#{auto_matches_percentage(@auto_matches)}%;"}
+                      class="progress-bar auto-bar"
+                      title={"Auto matches played: #{length(@auto_matches)}"}
+                    >
+                    </div>
+                    <h5 class="justify-content-center d-flex position-absolute w-100 text-white" style="margin-top: 18px">
+                      {@current_player.daily_matches} / {Moba.daily_match_limit()} Daily Matches
+                    </h5>
+                  </div>
+                  <div class="mt-4 d-flex justify-content-between align-items-center">
+                    <div class="col text-center">
+                      <h4 id="current-pvp-tier" class="text-center mb-0 mt-0 f-rpg">
+                        {tier_title(@current_player)}
+                      </h4>
+                      <span :if={tier_buff_pct(@current_player)} class="badge badge-light-danger mt-2">
+                        <i class="fa-solid fa-diamond mr-1"></i>- {tier_buff_pct(@current_player)}% Hero Stats
+                      </span>
+                    </div>
+                    <div class="col">
+                      <div class="row d-flex justify-content-around">
+                        <%= if length(@manual_matches) < Moba.daily_match_limit() do %>
+                          <button
+                            type="button"
+                            phx-click="matchmaking"
+                            class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx"
+                            id="enter-arena-button"
+                          >
+                            <span class="loading-text">
+                              <i class="fa fa-swords mr-1 fa-2x"></i>
+                              <br /> Enter the Arena
+                            </span>
+                            <br />
+                            <span class="badge badge-light-primary">
+                              <i class="fab fa-ethereum"></i> +{Moba.matchmaking_shards()} Shards
+                            </span>
+                          </button>
+                        <% else %>
+                          <span class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button">
+                            <i class="fa fa-clock-o mr-1 fa-2x"></i>
+                            <br />
+                            {reset_timer()}
+                          </span>
+                        <% end %>
+                      </div>
+                    </div>
+                    <div class="col d-flex justify-content-center">
+                      <h3 class="info-box text-warning">
+                        <span class="f-rpg">{@current_player.pvp_points}</span>
+                        <br />
+                        <small class="text-muted">Season Points</small>
+                      </h3>
+                      <h3
+                        class="info-box text-primary"
+                        title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}
+                      >
+                        <span class="f-rpg">{total_win_rate(@current_player)}</span>
+                        <br />
+                        <small class="text-muted">Total Win Rate</small>
+                      </h3>
+                      <h3 class="info-box text-success">
+                        <span class="f-rpg">{@current_player.daily_wins}</span>
+                        <br />
+                        <small class="text-muted">Daily Wins</small>
+                      </h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col">
+          <div class="card matchmaking" id="matchmaking-container">
+            <div class="card-body p-0">
+              <div class="d-flex justify-content-around my-2">
+                <.link navigate={~p"/v2/arena/edit"} class="btn btn-sm btn-primary text-primary">
+                  <i class="fa fa-group"></i> Edit Teams
+                </.link>
+              </div>
+              <div class="history">
+                <table class="table-dark table mb-0">
+                  <%= for match <- @matches do %>
+                    <% rewards = rewards_badge(match.rewards.attacker_pvp_points) %>
+                    <tr>
+                      <td>
+                        <h3 class="f-rpg m-0">
+                          <span title={match_type_title(match)}>{match_type_label(match)}</span>
+                        </h3>
+                      </td>
+                      <td class="d-flex justify-content-center">
+                        <img src={"/images/pve/#{match.opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
+                        <div style="width: 70%">
+                          <h4 class="mt-2">
+                            <.link navigate={~p"/v2/player/#{match.opponent.id}"} class="text-white">
+                              {username(match.opponent)}
+                            </.link>
+                          </h4>
+                        </div>
+                      </td>
+                      <td width="15%" class="text-center">
+                        <h5 class={match_result_class(match)}>{match_result_label(match)}</h5>
+                        <span :if={rewards} class={rewards.class}>{rewards.label}</span>
+                      </td>
+                      <td>
+                        <.link navigate={~p"/v2/matches/#{match}"} class="btn btn-light">
+                          <i class="fa fa-eye"></i>
+                        </.link>
+                      </td>
+                    </tr>
+                  <% end %>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="card ranking">
+            <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-around">
+              <li class="nav-item">
+                <a
+                  href="javascript:;"
+                  phx-click="tiered-ranking"
+                  phx-value-type="immortals"
+                  class={["nav-link px-2 py-1", @ranking_tab == "immortals" && "active", "rank-shadow-2"]}
+                  id="immortal-ranking-button"
+                >
+                  <span class="d-inline-block loading-text">Immortals</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  href="javascript:;"
+                  phx-click="tiered-ranking"
+                  phx-value-type="shadows"
+                  class={["nav-link px-2 py-1", @ranking_tab == "shadows" && "active", "rank-shadow-1"]}
+                  id="shadow-ranking-button"
+                >
+                  <span class="d-inline-block loading-text">Shadows</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  href="javascript:;"
+                  phx-click="tiered-ranking"
+                  phx-value-type="plebs"
+                  class={["nav-link px-2 py-1", @ranking_tab == "plebs" && "active", "rank-shadow-0 border"]}
+                  id="pleb-ranking-button"
+                >
+                  <span class="d-inline-block loading-text">Plebs</span>
+                </a>
+              </li>
+            </ul>
+            <div class="card-body">
+              <table class="table table-dark text-center m-0 table-sm">
+                <thead>
+                  <tr>
+                    <th width="33%">Rank</th>
+                    <th width="33%">Player</th>
+                    <th width="33%">Daily Wins</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
+                    <tr id={"player-#{player.id}"} class={player.id == @current_player.id && "selected-player"}>
+                      <td><h1 class="f-rpg">#{player.ranking || index}</h1></td>
+                      <td>
+                        <.link navigate={~p"/v2/player/#{player.id}"} title={"#{player.pvp_points} Season Points"}>
+                          <img src={"/images/pve/#{player.pve_tier}.png"} class="pvp-rank" />
+                          <h4 class="text-white font-weight-bold mb-0 mt-1">{username(player)}</h4>
+                        </.link>
+                      </td>
+                      <td>
+                        <h3 class="text-success" title={"#{player.daily_wins} wins / #{player.daily_matches} matches"}>
+                          {player.daily_wins}
+                        </h3>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+                <tfoot :if={!ranking_inclusion?(@ranking, @current_player)}>
+                  <tr>
+                    <th>
+                      <%= if @current_player.ranking do %>
+                        <h1 class="text-info f-rpg">#{@current_player.ranking}</h1>
+                      <% else %>
+                        <h4 class="text-info font-italic">Unranked</h4>
+                      <% end %>
+                    </th>
+                    <th>
+                      <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="pvp-rank" />
+                      <h5 class="font-weight-bold mb-0 mt-1 text-info">{username(@current_player)}</h5>
+                    </th>
+                    <th>
+                      <h3 class="text-success" title={"#{@current_player.daily_wins} wins / #{@current_player.daily_matches} matches"}>
+                        {@current_player.daily_wins}
+                      </h3>
+                    </th>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col" :if={@current_player.status != "silenced"}>
+          <div class="card duels" id="pvp_duels">
+            <div class="card-body p-0">
+              <%= if @pending_duel do %>
+                <.link
+                  navigate={~p"/v2/arena/#{@pending_duel}"}
+                  class="btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3"
+                >
+                  <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
+                </.link>
+              <% else %>
+                <div class="d-flex justify-content-center my-2">
+                  <button
+                    type="button"
+                    phx-click="season-duel"
+                    class="btn btn-lg btn-primary px-2 py-1"
+                    id="season-duel-button"
+                  >
+                    <span class="d-inline-block loading-text"><i class="fa fa-swords mr-1"></i>Play a Season Duel</span>
+                  </button>
+                </div>
+                <div class="d-flex justify-content-center my-4">
+                  <div class="custom-control custom-switch">
+                    <input
+                      type="checkbox"
+                      class="custom-control-input"
+                      id="set-status"
+                      phx-click="set-status"
+                      checked={@current_player.status == "available"}
+                    />
+                    <label class="custom-control-label" for="set-status">I am available for live PvP Duels</label>
+                  </div>
+                </div>
+                <table :if={length(@duel_opponents) > 0} class="table-dark table">
+                  <%= for player <- @duel_opponents do %>
+                    <tr id={"duel-player-#{player.id}"}>
+                      <td class="text-right">
+                        <img src={"/images/pve/#{player.pve_tier}.png"} style="max-height: 50px" />
+                      </td>
+                      <td>
+                        <h5>
+                          <.link navigate={~p"/v2/player/#{player.id}"}>{player.user.username}</.link>
+                          <br /><small>{player.pvp_points} SP</small>
+                        </h5>
+                      </td>
+                      <td>
+                        Last active {player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)}
+                      </td>
+                      <td>
+                        <%= if can_be_challenged?(@current_player, @current_time) && can_be_challenged?(player, @current_time) do %>
+                          <button type="button" class="btn btn-danger btn-block" phx-click="challenge" phx-value-id={player.id}>
+                            <i class="fa fa-bullseye mr-1" id={"can-duel-#{player.id}"}></i>Duel
+                          </button>
+                        <% else %>
+                          <button type="button" class="btn btn-danger btn-block disabled no-action" id={"cannot-duel-#{player.id}"}>
+                            <i class="fa fa-bullseye mr-1"></i>Duel
+                          </button>
+                        <% end %>
+                      </td>
+                    </tr>
+                  <% end %>
+                </table>
+
+                <div :if={length(@duels) > 0} class="history">
+                  <table class="table-dark table mb-0">
+                    <%= for duel <- @duels do %>
+                      <% opponent = opponent_for(duel, @current_player) %>
+                      <% rewards = if duel.player_id == @current_player.id, do: rewards_badge(duel.rewards.attacker_pvp_points), else: rewards_badge(duel.rewards.defender_pvp_points) %>
+                      <tr>
+                        <td class="d-flex justify-content-center">
+                          <img src={"/images/pve/#{opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
+                          <div style="width: 70%">
+                            <h4 class="mt-2">
+                              <.link navigate={~p"/v2/player/#{opponent.id}" } class="text-white">
+                                {username(opponent)}
+                              </.link>
+                            </h4>
+                          </div>
+                        </td>
+                        <td width="33%" class="text-center">
+                          <h5 class={duel_result_class(duel, @current_player.id)}>{duel_result_label(duel, @current_player.id)}</h5>
+                          <span :if={rewards} class={rewards.class}>{rewards.label}</span>
+                        </td>
+                        <td class="text-center">
+                          <span class={duel_badge_class(duel)}>{duel_label(duel)}</span>
+                          <.link navigate={~p"/v2/arena/#{duel}"} class="btn btn-light ml-2">
+                            <i class="fa fa-eye"></i>
+                          </.link>
+                        </td>
+                      </tr>
+                    <% end %>
+                  </table>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+</Layouts.app>

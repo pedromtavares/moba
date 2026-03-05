@@ -39,7 +39,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
         </.link>
         <%= if @current_player.user_id do %>
           <.link
-            navigate={~p"/arena"}
+            navigate={~p"/v2/arena"}
             data-toggle="tooltip"
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -152,7 +152,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
                   </.link>
                   <%= if @current_player do %>
                     <%= if length(@current_player.hero_collection) > 0 do %>
-                      <.link navigate={~p"/arena"} class="nav-link">
+                      <.link navigate={~p"/v2/arena"} class="nav-link">
                         <i class="fa fa-swords"></i>
                       </.link>
                     <% end %>
@@ -228,9 +228,9 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
 
   defp build_footer_stats do
     server_data = Admin.get_server_data()
-    masters = (server_data && server_data.masters_count) || 0
-    grandmasters = (server_data && server_data.grandmasters_count) || 0
-    undefeated = (server_data && server_data.undefeated_count) || 0
+    masters = server_stat(server_data, :masters_count)
+    grandmasters = server_stat(server_data, :grandmasters_count)
+    undefeated = server_stat(server_data, :undefeated_count)
 
     %{
       active: format_number(Admin.active_players_count()),
@@ -241,6 +241,9 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
       undefeated: format_number(undefeated)
     }
   end
+
+  defp server_stat(server_data, key) when is_map(server_data), do: Map.get(server_data, key, 0)
+  defp server_stat(_, _), do: 0
 
   defp format_number(n) do
     "#{n}"

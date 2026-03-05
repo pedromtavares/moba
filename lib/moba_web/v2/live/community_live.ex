@@ -5,9 +5,16 @@ defmodule MobaWeb.V2.CommunityLive do
 
   def mount(_, _session, socket) do
     %{assigns: %{channel: channel}} = socket = socket_init(socket)
-    if connected?(socket), do: MobaWeb.subscribe(channel)
-    if connected?(socket), do: MobaWeb.subscribe("stats")
-    Process.send_after(self(), :load_rankings, 100)
+
+    socket =
+      if connected?(socket) do
+        MobaWeb.subscribe(channel)
+        MobaWeb.subscribe("stats")
+        load_rankings(socket)
+      else
+        socket
+      end
+
     {:ok, socket}
   end
 
@@ -100,14 +107,6 @@ defmodule MobaWeb.V2.CommunityLive do
 
   def handle_info({"updates", message}, %{assigns: %{updates: updates}} = socket) do
     {:noreply, assign(socket, updates: [message] ++ updates)}
-  end
-
-  def handle_info(:load_rankings, socket) do
-    {:noreply,
-     assign(socket,
-       pvp_ranking: Moba.season_ranking() |> Enum.filter(& &1.top_hero) |> Enum.take(30),
-       pve_ranking: Moba.pve_ranking() |> Enum.take(30)
-     )}
   end
 
   # Private function components
@@ -487,6 +486,13 @@ defmodule MobaWeb.V2.CommunityLive do
   end
 
   defp player_season_score(player), do: 100 * player.best_immortal_streak + 100 * player.pve_tier + player.pvp_points
+
+  defp load_rankings(socket) do
+    assign(socket,
+      pvp_ranking: Moba.season_ranking() |> Enum.filter(& &1.top_hero) |> Enum.take(30),
+      pve_ranking: Moba.pve_ranking() |> Enum.take(30)
+    )
+  end
 
   defp player_shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
   defp player_shadow_rank(%{pvp_tier: tier}), do: tier

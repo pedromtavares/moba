@@ -70,7 +70,7 @@ defmodule Moba.MixProject do
       {:telemetry_metrics, "~> 0.6"},
       {:sentry, "~> 11.0.4"},
       {:ueberauth_discord, "~> 0.6"},
-      {:nostrum, github: "Kraigie/nostrum"},
+      {:nostrum, github: "Kraigie/nostrum", runtime: Mix.env() == :prod},
       {:cowlib, "~> 2.11", hex: :remedy_cowlib, override: true},
       {:gun, "2.0.1", hex: "remedy_gun", override: true},
       {:floki, ">= 0.36.2", only: :test},
@@ -79,12 +79,7 @@ defmodule Moba.MixProject do
       {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
       {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:heroicons,
-       github: "tailwindlabs/heroicons",
-       tag: "v2.2.0",
-       sparse: "optimized",
-       app: false,
-       compile: false,
-       depth: 1},
+       github: "tailwindlabs/heroicons", tag: "v2.2.0", sparse: "optimized", app: false, compile: false, depth: 1},
       {:dns_cluster, "~> 0.2.0"},
       {:req, "~> 0.5"}
     ]

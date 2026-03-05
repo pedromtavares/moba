@@ -29,9 +29,9 @@ defmodule MobaWeb.LayoutView do
 
   def footer_stats do
     server_data = Admin.get_server_data()
-    masters = (server_data && server_data.masters_count) || 0
-    grandmasters = (server_data && server_data.grandmasters_count) || 0
-    undefeated = (server_data && server_data.undefeated_count) || 0
+    masters = server_stat(server_data, :masters_count)
+    grandmasters = server_stat(server_data, :grandmasters_count)
+    undefeated = server_stat(server_data, :undefeated_count)
 
     %{
       players: format_number(Admin.players_count()),
@@ -43,6 +43,9 @@ defmodule MobaWeb.LayoutView do
       undefeated: format_number(undefeated)
     }
   end
+
+  defp server_stat(server_data, key) when is_map(server_data), do: Map.get(server_data, key, 0)
+  defp server_stat(_, _), do: 0
 
   defp format_number(n) do
     "#{n}"

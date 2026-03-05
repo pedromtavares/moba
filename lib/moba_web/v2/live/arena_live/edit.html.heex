@@ -1,0 +1,312 @@
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+  <div class="arena arena-edit mt-2">
+    <div class="row">
+      <div class="col">
+        <div class="card main-card" id="teams-container" style={if @hero, do: "height: 75vh", else: "height: 90vh"}>
+          <.form for={@team_form} id="arena-team-form" phx-submit="new-team">
+            <div class="d-flex">
+              <input
+                type="text"
+                name={@team_form[:name].name}
+                value={@team_form[:name].value}
+                maxlength="20"
+                class="form-control w-50"
+                placeholder="Team name"
+                required
+              />
+              <button class="btn btn-primary w-50" id="create-team-button">
+                <span class="loading-text"><i class="fa fa-plus"></i> Create Team</span>
+              </button>
+            </div>
+          </.form>
+          <div class="overflow">
+            <table class="table table-dark text-center m-0 mt-2 table-sm">
+              <%= for team <- @teams do %>
+                <tr
+                  class={["action-cursor", @selected_team && @selected_team.id == team.id && "selected-team"]}
+                  phx-click="select-team"
+                  phx-value-id={team.id}
+                  id={"team-row-#{team.id}"}
+                >
+                  <td class="py-3" style="width: 30%">
+                    <h5 class="m-0"><span class="loading-text">{team.name}</span></h5>
+                  </td>
+                  <td style="width: 1%">
+                    <i :if={team.defensive} class="fa fa-shield-halved"></i>
+                  </td>
+                  <td>
+                    <img :for={pick <- team.picks} src={GH.image_url(pick.avatar)} class="avatar mr-1" />
+                  </td>
+                  <td style="width: 1%">{team.used_count}</td>
+                </tr>
+              <% end %>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card main-card" id="current-team-container">
+          <%= if @selected_team do %>
+            <div class="d-flex justify-content-around">
+              <button
+                class="btn btn-danger btn-sm my-1"
+                data-confirm="Are you sure?"
+                phx-click="remove-team"
+                id="remove-selected-team"
+              >
+                <span class="loading-text"><i class="fa fa-trash"></i> Remove</span>
+              </button>
+              <h3 class="text-center">{@selected_team.name}</h3>
+              <div class="custom-control custom-switch mt-2">
+                <input
+                  type="checkbox"
+                  class="custom-control-input"
+                  id="toggle-defensive"
+                  phx-click="toggle-defensive"
+                  checked={@selected_team.defensive}
+                />
+                <label class="custom-control-label" for="toggle-defensive">Defensive</label>
+              </div>
+            </div>
+            <hr />
+            <div class="overflow">
+              <div class="row">
+                <div :for={pick <- @selected_team.picks} class="col-md-12 mt-1" id={"team-hero-#{pick.id}"}>
+                  <.pvp_hero_card hero={pick}>
+                    <:actions>
+                      <button
+                        class="btn btn-sm btn-block btn-secondary m-0 mr-1"
+                        phx-click="move-up"
+                        phx-value-id={pick.id}
+                        id={"move-up-#{pick.id}"}
+                      >
+                        <span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-block btn-secondary m-0 mx-1"
+                        phx-click="move-down"
+                        phx-value-id={pick.id}
+                        id={"move-down-#{pick.id}"}
+                      >
+                        <span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span>
+                      </button>
+                      <button
+                        :if={@selected_team.player_id == pick.player_id}
+                        class="btn btn-sm btn-block btn-warning m-0 mr-1"
+                        phx-click="edit-hero"
+                        phx-value-id={pick.id}
+                        id={"edit-hero-#{pick.id}"}
+                      >
+                        <span class="loading-text"><i class="fa fa-edit"></i> Edit</span>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-block btn-danger m-0 ml-1"
+                        phx-click="remove-hero"
+                        phx-value-id={pick.id}
+                        id={"remove-hero-#{pick.id}"}
+                      >
+                        <span class="loading-text"><i class="fa fa-times"></i> Remove</span>
+                      </button>
+                    </:actions>
+                  </.pvp_hero_card>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+      <div class="col">
+        <div class="card main-card" id="heroes-container">
+          <div class="d-flex justify-content-around">
+            <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-around">
+              <li class="nav-item">
+                <a
+                  href="javascript:;"
+                  phx-click="hero-list"
+                  phx-value-type="trained"
+                  class={["nav-link px-2 py-1", @heroes_tab == "trained" && "active"]}
+                  id="trained-heroes-button"
+                >
+                  <span class="d-inline-block loading-text">Trained Heroes</span>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a
+                  href="javascript:;"
+                  phx-click="hero-list"
+                  phx-value-type="available"
+                  class={["nav-link px-2 py-1", @heroes_tab == "available" && "active"]}
+                  id="available-heroes-button"
+                >
+                  <span class="d-inline-block loading-text">Available Heroes</span>
+                </a>
+              </li>
+            </ul>
+            <a :if={@heroes_tab == "trained"} href="javascript:;" class="h5 mt-2" phx-click="sort" id="hero-sort">
+              <i class="fa fa-circle-sort mt-1"></i> Sorted by {if @sort == :recent, do: "Recent", else: "Rank"}
+            </a>
+          </div>
+          <hr />
+          <div class="overflow">
+            <div class="row">
+              <div :for={hero <- @heroes} class="col-md-12 mt-1" id={"available-hero-#{hero.id}"}>
+                <.pvp_hero_card hero={hero}>
+                  <:actions>
+                    <button
+                      :if={
+                        @selected_team && !Enum.member?(@selected_team.pick_ids, hero.id) &&
+                          length(@selected_team.picks) < 5
+                      }
+                      class="btn btn-block btn-success m-0 mr-1"
+                      phx-click="add-hero"
+                      phx-value-id={hero.id}
+                      id={"add-button-#{hero.id}"}
+                    >
+                      <span class="loading-text"><i class="fa fa-arrow-left"></i> Add</span>
+                    </button>
+                  </:actions>
+                </.pvp_hero_card>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div :if={@hero} class="row mt-3">
+    <div class="col">
+      <div id="hero-bar">
+        <div class="container-fluid">
+          <form phx-submit="finalize-edit">
+            <div class="row">
+              <div class="d-none d-md-block col-3 col-md-2 col-lg-2 col-xl-2 center">
+                <div class="row mt-2">
+                  <div class="col" title={"<img src='#{GH.background_url(@hero)}' style='max-width:500px'/>"}>
+                    <div class="avatar-container">
+                      <img src={GH.image_url(@hero.avatar)} class="avatar img-border" />
+                    </div>
+                  </div>
+                </div>
+                <h3 class="mb-0 mt-1 hero-name">{@hero.name}</h3>
+              </div>
+              <div class={"col col-md-5 col-lg-5 col-xl-4 #{if @show_build, do: "d-none"}"}>
+                <div class="row d-none d-md-block no-gutters" id="current-hero-stats">
+                  <div class="col flex no-wrap pl-0" style="overflow: visible;">
+                    <.hero_stats_compact hero={@hero} show_speed class="w-100 justify-content-start" />
+                  </div>
+                </div>
+              </div>
+              <div class={"col-lg-5 col-xl-4 d-none d-md-block col-md-4 #{if @show_build, do: "d-block"}"}>
+                <div class="row">
+                  <div class="col center">
+                    <div class={"skills-container #{if @editing, do: "editing"}"}>
+                      <%= for skill <- sorted_skills(@hero) do %>
+                        <div class={"skill-container #{if skill.passive, do: "passive", else: "active"}"}>
+                          <img
+                            src={GH.image_url(skill)}
+                            data-toggle="tooltip"
+                            title={GH.skill_description(skill)}
+                            class={"skill-img img-border tooltip-mobile #{if skill.passive, do: "passive"} #{if skill.ultimate, do: "ultimate"}"}
+                          />
+                          <%= if @editing && !skill.passive do %>
+                            <div class="form-group">
+                              <select class="custom-select" name={"skill_order[#{skill.code}]"}>
+                                <%= for {code, index} <- Enum.with_index(@hero.skill_order, 1) do %>
+                                  <option value={index} selected={if code == skill.code, do: "selected"}>
+                                    {index}
+                                  </option>
+                                <% end %>
+                              </select>
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mt-1">
+                  <div class="col center">
+                    <%= if @editing do %>
+                      <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2">
+                        Save
+                      </button>
+                    <% else %>
+                      <a
+                        href="javascript:;"
+                        id="edit-button"
+                        phx-click="start-edit"
+                        title={edit_orders_label(@hero)}
+                        class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"
+                      >
+                        <i class="fa fa-edit mr-1"></i>Edit Orders
+                      </a>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+              <div class="col-lg-2 d-none d-xl-block" id="current-hero-gold">
+                <div class="row">
+                  <div class="col center">
+                    <h3 class="mb-1 mt-0 no-wrap">
+                      <span class="text-warning mr-1"><i class="fa fa-coins"></i> {@hero.gold}</span>
+                    </h3>
+                    <div class={"inventory #{if @editing, do: "editing"}"}>
+                      <%= for item <- sorted_items(@hero) do %>
+                        <div
+                          class={"item-container #{if !item.active, do: "passive", else: "active"}"}
+                          id={"inventory-#{item.id}"}
+                        >
+                          <img
+                            src={GH.image_url(item)}
+                            data-toggle="tooltip"
+                            title={GH.item_description(item)}
+                            class="item-img img-border-sm"
+                          />
+                          <%= if @editing && item.active do %>
+                            <div class="form-group">
+                              <select class="custom-select" name={"item_order[#{item.code}]"}>
+                                <%= for {code, index} <- Enum.with_index(@hero.item_order, 1) do %>
+                                  <option value={index} selected={if code == item.code, do: "selected"}>{index}</option>
+                                <% end %>
+                              </select>
+                            </div>
+                          <% end %>
+                        </div>
+                      <% end %>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row d-flex d-md-none mobile-row no-gutters">
+              <div class="col-12 mobile-nav-buttons">
+                <%= if @show_build do %>
+                  <button
+                    type="button"
+                    class="btn btn-block btn-outline-info text-primary rounded-0"
+                    phx-click="show-navigation"
+                  >
+                    <i class="fa fa-arrow-circle-left mr-1"></i>Show Navigation
+                  </button>
+                <% else %>
+                  <button
+                    type="button"
+                    class="btn btn-block btn-outline-info text-primary rounded-0 btn-xs"
+                    phx-click="show-build"
+                  >
+                    Show Build<i class="fa fa-arrow-circle-right ml-1"></i>
+                  </button>
+                <% end %>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layouts.app>

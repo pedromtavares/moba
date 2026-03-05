@@ -4,26 +4,28 @@ defmodule Moba.Application do
   @moduledoc false
 
   use Application
+  require Logger
 
   def start(_type, _args) do
     # List all child processes to be supervised
-    children = [
-      Moba.Repo,
-      MobaWeb.Telemetry,
-      {Phoenix.PubSub, name: Moba.PubSub},
-      MobaWeb.Presence,
-      {DNSCluster, query: Application.get_env(:moba, :dns_cluster_query) || :ignore},
-      MobaWeb.Endpoint,
-      # Cache for hero creation
-      {Cachex, name: :game_cache},
-      # Starts a worker by calling: Moba.Worker.start_link(arg)
-      # {Moba.Worker, arg},
-      Moba.Server,
-      Moba.Admin.Server,
-      Moba.Ranker,
-      Moba.DiscordConsumer,
-      {Task.Supervisor, name: Moba.TaskSupervisor}
-    ]
+    children =
+      [
+        Moba.Repo,
+        MobaWeb.Telemetry,
+        {Phoenix.PubSub, name: Moba.PubSub},
+        MobaWeb.Presence,
+        {DNSCluster, query: Application.get_env(:moba, :dns_cluster_query) || :ignore},
+        MobaWeb.Endpoint,
+        # Cache for hero creation
+        {Cachex, name: :game_cache},
+        # Starts a worker by calling: Moba.Worker.start_link(arg)
+        # {Moba.Worker, arg},
+        Moba.Server,
+        Moba.Admin.Server,
+        Moba.Ranker,
+        {Task.Supervisor, name: Moba.TaskSupervisor}
+      ]
+      |> maybe_add_discord_consumer()
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
@@ -36,5 +38,22 @@ defmodule Moba.Application do
   def config_change(changed, _new, removed) do
     MobaWeb.Endpoint.config_change(changed, removed)
     :ok
+  end
+
+  defp maybe_add_discord_consumer(children) do
+    env = Application.get_env(:moba, :env)
+    token = System.get_env("DISCORD_BOT_TOKEN")
+
+    cond do
+      env == :prod and token not in [nil, ""] ->
+        children ++ [Moba.DiscordConsumer]
+
+      env == :prod ->
+        raise "DISCORD_BOT_TOKEN is required in prod"
+
+      true ->
+        Logger.warning("Skipping Discord consumer startup outside prod")
+        children
+    end
   end
 end

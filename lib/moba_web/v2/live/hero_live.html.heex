@@ -28,10 +28,10 @@
               </div>
               <div class="card-footer p-0">
                 <%= if is_nil(@current_player.user_id) do %>
-                  <a href="/arena" class="btn btn-danger btn-block btn-lg">
+                  <.link navigate={~p"/v2/arena"} class="btn btn-danger btn-block btn-lg">
                     <i class="fa fa-swords fa-2x mr-1 mt-2"></i>
                     <strong class="font-20 d-block">Proceed to the Arena</strong>
-                  </a>
+                  </.link>
                 <% else %>
                   <.link navigate={~p"/v2/base"} class="btn btn-success btn-block btn-lg">
                     <i class="fa fa-home fa-2x mr-1 mt-2"></i>
@@ -261,7 +261,7 @@
                         <td>
                           <h1 class={"#{if hero.id == @hero.id, do: "text-danger f-rpg", else: "f-rpg"}"}>
                             <%= if hero.pve_ranking do %>
-                              #<%= hero.pve_ranking %>
+                              #{hero.pve_ranking}
                             <% else %>
                               ?
                             <% end %>
@@ -301,7 +301,7 @@
                       <tr>
                         <th>
                           <%= if @hero.pve_ranking do %>
-                            <h1 class="text-danger f-rpg">#<%= @hero.pve_ranking %></h1>
+                            <h1 class="text-danger f-rpg">#{@hero.pve_ranking}</h1>
                           <% else %>
                             <h4 class="text-danger font-italic">Unranked</h4>
                           <% end %>
@@ -314,7 +314,11 @@
                           <h5 class="text-primary mb-0 mt-1">{@hero.name}</h5>
                         </th>
                         <th>
-                          <h3 class="text-white" data-toggle="tooltip" title={@hero.total_xp_farm + @hero.total_gold_farm}>
+                          <h3
+                            class="text-white"
+                            data-toggle="tooltip"
+                            title={@hero.total_xp_farm + @hero.total_gold_farm}
+                          >
                             <img src={"/images/league/#{@hero.league_tier}.png"} style="max-width: 30px;" /> {GH.farming_amount_label(
                               @hero.total_xp_farm + @hero.total_gold_farm
                             )}

@@ -107,6 +107,10 @@ defmodule MobaWeb.Router do
       live "/training", TrainingLive
       live "/battles", BattlesLive
       live "/battles/:id", BattleLive
+      live "/arena", ArenaLive, :index
+      live "/arena/edit", ArenaLive, :edit, as: :edit_arena
+      live "/arena/:id", DuelLive
+      live "/matches/:id", MatchLive
       live "/library", LibraryLive
       live "/community", CommunityLive
       live "/user/:id", PlayerLive

@@ -119,7 +119,7 @@ defmodule MobaWeb.V2.BattleLive do
     next_turn = Engine.build_turn(battle)
     turn_number = (last_turn && last_turn.number + 1) || 1
 
-    MobaWeb.broadcast("battle-#{battle.id}", :turn, %{battle_id: battle.id, turn_number: turn_number})
+    MobaWeb.broadcast_from(self(), "battle-#{battle.id}", :turn, %{battle_id: battle.id, turn_number: turn_number})
     turn_assigns(socket, battle, next_turn, turn_number)
   end
 

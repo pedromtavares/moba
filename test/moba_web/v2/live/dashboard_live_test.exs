@@ -28,72 +28,79 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
-      assert has_element?(view, "#hero-card-#{hero.id}")
+      assert has_element?(view, "#visible-hero-#{hero.id}")
     end
 
-    test "renders sidebar with player info", %{conn: conn} do
+    test "renders the dashboard navigation controls", %{conn: conn} do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
-      assert has_element?(view, "[data-role=sidebar]")
+      assert has_element?(view, "#finished-heroes-btn")
+      assert has_element?(view, "#hero-list-unfinished")
     end
   end
 
   describe "filter event" do
     test "switches to finished tab", %{conn: conn} do
-      hero = create_base_hero()
-      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
+      player = create_player!()
+      _unfinished = create_base_hero(%{name: "In Progress"}, player)
+      finished = create_base_hero(%{name: "Finished"}, player) |> Game.update_hero!(%{finished_at: Timex.now()})
+      user = Accounts.get_user!(player.user_id)
+
+      conn = conn |> log_in_user(user) |> put_session(:player_id, player.id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
-      render_click(view, :filter, %{"filter" => "finished"})
+      render_click(view, "show-finished", %{})
 
-      refute has_element?(view, "#hero-card-#{hero.id}")
+      assert has_element?(view, "#hero-list-finished")
+      assert has_element?(view, "#visible-hero-#{finished.id}")
+      refute has_element?(view, "#visible-hero-#{player.current_pve_hero_id}")
     end
 
     test "switches back to unfinished tab", %{conn: conn} do
-      hero = create_base_hero()
-      conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
+      player = create_player!()
+      unfinished = create_base_hero(%{name: "In Progress"}, player)
+      _finished = create_base_hero(%{name: "Finished"}, player) |> Game.update_hero!(%{finished_at: Timex.now()})
+      user = Accounts.get_user!(player.user_id)
+
+      conn = conn |> log_in_user(user) |> put_session(:player_id, player.id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
-      render_click(view, :filter, %{"filter" => "finished"})
-      render_click(view, :filter, %{"filter" => "unfinished"})
+      render_click(view, "show-finished", %{})
+      render_click(view, "show-unfinished", %{})
 
-      assert has_element?(view, "#hero-card-#{hero.id}")
+      assert has_element?(view, "#hero-list-unfinished")
+      assert has_element?(view, "#visible-hero-#{unfinished.id}")
     end
   end
 
-  describe "toggle-rewards event" do
-    test "shows and hides progression rewards panel", %{conn: conn} do
+  describe "rewards modal" do
+    test "renders the progression rewards modal and trigger", %{conn: conn} do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, html} = live(conn, "/v2/base")
 
-      refute html =~ "pve-tier-rewards"
-
-      html = render_click(view, "toggle-rewards")
       assert html =~ "pve-tier-rewards"
       assert html =~ "Progression Rewards"
-
-      html = render_click(view, "toggle-rewards")
-      refute html =~ "pve-tier-rewards"
+      assert has_element?(view, "button[data-target='#pve-tier-rewards']")
     end
   end
 
   describe "continue event" do
-    test "redirects to v1 training", %{conn: conn} do
+    test "redirects to v2 training", %{conn: conn} do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, _html} = live(conn, "/v2/base")
 
-      assert {:error, {:redirect, %{to: "/training"}}} =
+      assert {:error, {:redirect, %{to: "/v2/training"}}} =
                view
-               |> element("#hero-card-#{hero.id} [phx-click=continue]")
+               |> element("#visible-hero-#{hero.id} [phx-click=continue]")
                |> render_click()
     end
   end
@@ -106,10 +113,10 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       {:ok, view, _html} = live(conn, "/v2/base")
 
       view
-      |> element("#hero-card-#{hero.id} [phx-click=archive]")
+      |> element("#visible-hero-#{hero.id} [phx-click=archive]")
       |> render_click()
 
-      refute has_element?(view, "#hero-card-#{hero.id}")
+      refute has_element?(view, "#visible-hero-#{hero.id}")
     end
   end
 end

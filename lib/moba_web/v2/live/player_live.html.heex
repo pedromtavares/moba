@@ -168,7 +168,7 @@
 
                         <td class="text-center" width="33%">
                           <.link
-                            navigate={~p"/matches/#{match}"}
+                            navigate={~p"/v2/matches/#{match}"}
                             class="btn btn-light btn-sm"
                             data-toggle="tooltip"
                             title={String.capitalize(match.type)}
@@ -233,7 +233,7 @@
                     </td>
 
                     <td>
-                      <.link navigate={~p"/arena/#{duel}"} class="btn btn-light btn-sm">
+                      <.link navigate={~p"/v2/arena/#{duel}"} class="btn btn-light btn-sm">
                         <i class="fa fa-eye"></i>
                       </.link>
                     </td>
