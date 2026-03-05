@@ -138,9 +138,39 @@ defmodule MobaWeb.V2.TavernLive do
     "Not enough Shards to unlock (#{user.shard_count}/#{price})"
   end
 
-  defp role(avatar), do: MobaWeb.CreateView.role(avatar)
-  defp role_description(avatar), do: MobaWeb.CreateView.role_description(avatar)
-  defp display_percentage(type, avatar, avatars), do: MobaWeb.CreateView.display_percentage(type, avatar, avatars)
+  defp role(%{role: role}) when not is_nil(role), do: String.capitalize(role)
+  defp role(_), do: ""
+
+  defp role_description(%{role: role}) do
+    case role do
+      "tank" -> "High defense for sustained damage absorption."
+      "bruiser" -> "Tankier than most, good offense."
+      "nuker" -> "Obliterate opponents with constant spellcasting."
+      "carry" -> "Swift destruction."
+      "support" -> "Tactical spellcasting for elegant victories."
+      _ -> ""
+    end
+  end
+
+  defp display_percentage(:offense, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_offense end)
+    avatar.display_offense * 100 / max.display_offense
+  end
+
+  defp display_percentage(:defense, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_defense end)
+    avatar.display_defense * 100 / max.display_defense
+  end
+
+  defp display_percentage(:magic, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_magic end)
+    avatar.display_magic * 100 / max.display_magic
+  end
+
+  defp display_percentage(:speed, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_speed end)
+    avatar.display_speed * 100 / max.display_speed
+  end
 
   defp tavern_unlock_actions(assigns) do
     ~H"""

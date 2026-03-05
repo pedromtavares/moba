@@ -150,7 +150,11 @@ defmodule MobaWeb.V2.CommunityLive do
                 <button class="btn btn-icon btn-outline-dark text-danger" data-toggle="tooltip" title="Total Arena Win Rate">
                   <i class="fa fa-swords mr-1"></i> {player_total_win_rate(@player)}
                 </button>
-                <button class="btn btn-icon btn-outline-dark text-warning" data-toggle="tooltip" title="Best Immortal Streak">
+                <button
+                  class="btn btn-icon btn-outline-dark text-warning"
+                  data-toggle="tooltip"
+                  title="Best Immortal Streak"
+                >
                   <i class="fa fa-trophy"></i> {@player.best_immortal_streak}
                 </button>
               </div>
@@ -186,7 +190,11 @@ defmodule MobaWeb.V2.CommunityLive do
                 <i class="fa fa-crown"></i>
                 {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
               </button>
-              <button class="btn btn-icon btn-outline-light text-white" data-toggle="tooltip" title="Time it took to finish Training">
+              <button
+                class="btn btn-icon btn-outline-light text-white"
+                data-toggle="tooltip"
+                title="Time it took to finish Training"
+              >
                 <i class="fa fa-clock-o"></i>
                 {GH.finished_time(@hero)} min
               </button>
@@ -201,19 +209,39 @@ defmodule MobaWeb.V2.CommunityLive do
                 <button class="btn btn-icon waves-effect btn-outline-dark text-danger" data-toggle="tooltip" title="Health">
                   <i class="fa fa-heart mr-1"></i> {@hero.total_hp + @hero.item_hp}
                 </button>
-                <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-info" data-toggle="tooltip" title="Energy">
+                <button
+                  class="btn btn-icon waves-effect waves-light btn-outline-dark text-info"
+                  data-toggle="tooltip"
+                  title="Energy"
+                >
                   <i class="fa fa-bolt"></i> {@hero.total_mp + @hero.item_mp}
                 </button>
-                <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-success" data-toggle="tooltip" title="Attack">
+                <button
+                  class="btn btn-icon waves-effect waves-light btn-outline-dark text-success"
+                  data-toggle="tooltip"
+                  title="Attack"
+                >
                   <i class="fa fa-dagger"></i> {@hero.atk + @hero.item_atk}
                 </button>
-                <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-pink" data-toggle="tooltip" title="Power">
+                <button
+                  class="btn btn-icon waves-effect waves-light btn-outline-dark text-pink"
+                  data-toggle="tooltip"
+                  title="Power"
+                >
                   <i class="fa fa-galaxy"></i> {@hero.power + @hero.item_power}
                 </button>
-                <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-warning" data-toggle="tooltip" title="Armor">
+                <button
+                  class="btn btn-icon waves-effect waves-light btn-outline-dark text-warning"
+                  data-toggle="tooltip"
+                  title="Armor"
+                >
                   <i class="fa fa-shield-halved"></i> {@hero.armor + @hero.item_armor}
                 </button>
-                <button class="btn btn-icon waves-effect waves-light btn-outline-dark text-orange" data-toggle="tooltip" title="Speed">
+                <button
+                  class="btn btn-icon waves-effect waves-light btn-outline-dark text-orange"
+                  data-toggle="tooltip"
+                  title="Speed"
+                >
                   <i class="fa fa-running"></i> {@hero.speed + @hero.item_speed}
                 </button>
               </div>
@@ -324,8 +352,7 @@ defmodule MobaWeb.V2.CommunityLive do
           data-toggle={if @is_admin, do: "tooltip"}
           title={
             if @is_admin,
-              do:
-                "Online #{@player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)}<br/>
+              do: "Online #{@player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)}<br/>
                 Registered #{@player.user.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)}<br/>
                 Total heroes: #{@player.hero_count}"
           }
@@ -419,7 +446,7 @@ defmodule MobaWeb.V2.CommunityLive do
     |> Phoenix.HTML.safe_to_string()
     |> String.replace(
       ~r/https:\/\/browsermoba.com\/battles\/([0-9]+)/,
-      "<a href='/battles/\\1' class='text-primary'>Battle #\\1</span>"
+      "<a href='/v2/battles/\\1' class='text-primary'>Battle #\\1</span>"
     )
     |> Phoenix.HTML.raw()
   end

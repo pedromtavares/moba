@@ -78,7 +78,13 @@ defmodule MobaWeb.V2.PlayerLive do
     )
   end
 
-  defp avatar_class(hero), do: MobaWeb.DashboardView.avatar_class(hero)
+  defp avatar_class(hero) do
+    if hero["total_farm"] == Moba.max_total_farm() do
+      "avatar max-farm"
+    else
+      "avatar"
+    end
+  end
 
   defp in_ranking?(ranking, %{id: id}) do
     ranking
@@ -134,7 +140,7 @@ defmodule MobaWeb.V2.PlayerLive do
           <span
             class="font-15 font-italic"
             data-toggle="tooltip"
-            title={MobaWeb.GameHelpers.hero_stats_string(@hero, true)}
+            title={GH.hero_stats_string(@hero, true)}
           >
             Level {@hero.level} {@hero.avatar.name}
           </span>
@@ -183,6 +189,35 @@ defmodule MobaWeb.V2.PlayerLive do
       <%= if @rewards < 0 do %>
         <span class="badge badge-pill badge-light-dark">{@rewards} Season Points</span>
       <% end %>
+    <% end %>
+    """
+  end
+
+  defp match_result(assigns) do
+    ~H"""
+    <%= if @match.phase != "scored" do %>
+      <h5>In Progress</h5>
+    <% else %>
+      <%= if @match.winner_id == @match.player_id do %>
+        <h5 class="text-success">Victory</h5>
+      <% else %>
+        <h5 class="text-muted">Defeat</h5>
+      <% end %>
+    <% end %>
+    """
+  end
+
+  defp duel_result(assigns) do
+    ~H"""
+    <%= cond do %>
+      <% @duel.phase != "finished" -> %>
+        <h5>In Progress</h5>
+      <% is_nil(@duel.winner_player) -> %>
+        <h5 class="text-white">Tie</h5>
+      <% @duel.winner_player_id == @player_id -> %>
+        <h5 class="text-success">Victory</h5>
+      <% true -> %>
+        <h5 class="text-muted">Defeat</h5>
     <% end %>
     """
   end

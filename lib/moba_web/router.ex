@@ -45,7 +45,7 @@ defmodule MobaWeb.Router do
   end
 
   scope "/", MobaWeb do
-    pipe_through [:browser, :require_authenticated_user, :base_layout]
+    pipe_through [:browser, :base_layout]
 
     get "/start", GameController, :start
     post "/start", GameController, :create
@@ -104,6 +104,9 @@ defmodule MobaWeb.Router do
       root_layout: {MobaWeb.V2.Layouts, :root} do
       live "/base", DashboardLive
       live "/invoke", CreateLive
+      live "/training", TrainingLive
+      live "/battles", BattlesLive
+      live "/battles/:id", BattleLive
       live "/library", LibraryLive
       live "/community", CommunityLive
       live "/user/:id", PlayerLive

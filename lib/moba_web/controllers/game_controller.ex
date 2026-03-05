@@ -47,7 +47,6 @@ defmodule MobaWeb.GameController do
       end
 
     conn
-    |> put_layout(false)
     |> live_render(MobaWeb.CreateLive,
       session: %{"token" => get_csrf_token(), "cache_key" => get_session(conn, :cache_key)}
     )

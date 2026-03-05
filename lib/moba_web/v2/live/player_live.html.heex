@@ -162,7 +162,7 @@
                         </td>
 
                         <td class="text-center" width="33%">
-                          {MobaWeb.ArenaView.match_result(match)}
+                          <.match_result match={match} />
                           <.rewards_badge rewards={match.rewards.attacker_pvp_points} />
                         </td>
 
@@ -224,7 +224,7 @@
                     </td>
 
                     <td class="text-center">
-                      {MobaWeb.ArenaView.duel_result(duel, @player.id)}
+                      <.duel_result duel={duel} player_id={@player.id} />
                       <%= if duel.player_id == @player.id do %>
                         <.rewards_badge rewards={duel.rewards.attacker_pvp_points} />
                       <% else %>
@@ -272,7 +272,7 @@
                     >
                       <span class="loading-text">
                         <i class="fa fa-arrows-cross mr-1 text-primary"></i>
-                        <%= if @ranking_display == "daily", do: "Daily", else: "Season" %> Rank
+                        {if @ranking_display == "daily", do: "Daily", else: "Season"} Rank
                       </span>
                     </a>
                   </th>
@@ -300,7 +300,7 @@
                     <td>
                       <h1 class="f-rpg">
                         <%= if @ranking_display == "daily" do %>
-                          #<%= player.ranking || index %>
+                          #{player.ranking || index}
 
                           <%= if player.ranking in [6, 7, 8, 9] do %>
                             <i
@@ -327,7 +327,7 @@
                             </i>
                           <% end %>
                         <% else %>
-                          #<%= player.season_ranking %>
+                          #{player.season_ranking}
                         <% end %>
                       </h1>
                     </td>
@@ -371,7 +371,7 @@
                   <tr>
                     <th>
                       <%= if @player.ranking do %>
-                        <h1 class="text-info f-rpg">#<%= @player.ranking %></h1>
+                        <h1 class="text-info f-rpg">#{@player.ranking}</h1>
                       <% else %>
                         <h4 class="text-info font-italic">Unranked</h4>
                       <% end %>

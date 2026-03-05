@@ -2,11 +2,10 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   @moduledoc """
   Game display helpers for v2 templates.
 
-  Ported from `MobaWeb.GameHelpers` with HEEx-safe outputs:
+  Game display utilities for v2 HEEx templates:
   - No `content_tag`, no `raw/1`
   - Returns strings or structured data that components render
   """
-
   @league_names %{
     0 => "Bronze",
     1 => "Silver",
@@ -55,6 +54,36 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
   def background_url(_), do: "/images/default_background.jpg"
 
+  def hero_stats_string(hero, show_speed \\ false) do
+    speed_button =
+      if show_speed do
+        "<button class='btn btn-icon waves-effect waves-light btn-outline-dark text-orange' data-toggle='tooltip' title='Speed'><i class='fa fa-running'></i> #{hero.speed + hero.item_speed}</button>"
+      else
+        ""
+      end
+
+    "
+      <div class='btn-group hero-stats'>
+        <button class='btn btn-icon waves-effect btn-outline-dark text-danger' data-toggle='tooltip' title='Health'>
+          <i class='fa fa-heart mr-1'></i> #{hero.total_hp + hero.item_hp}
+        </button>
+        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-info' data-toggle='tooltip' title='Energy'>
+          <i class='fa fa-bolt'></i> #{hero.total_mp + hero.item_mp}
+        </button>
+        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-success' data-toggle='tooltip' title='Attack'>
+          <i class='fa fa-dagger'></i> #{hero.atk + hero.item_atk}
+        </button>
+        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-pink' data-toggle='tooltip' title='Power'>
+          <i class='fa fa-galaxy'></i> #{hero.power + hero.item_power}
+        </button>
+        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-warning' data-toggle='tooltip' title='Armor'>
+          <i class='fa fa-shield-halved'></i> #{hero.armor + hero.item_armor}
+        </button>
+        #{speed_button}
+      </div>
+    "
+  end
+
   # -------------------------------------------------------------------
   # Skill description — returns a map for tooltip rendering
   # -------------------------------------------------------------------
@@ -97,10 +126,16 @@ defmodule MobaWeb.V2.Components.GameHelpers do
     "<h3 class='text-center'>#{skill.name}</h3>#{skill.description}"
   end
 
+  def basic_attack_description do
+    basic = Moba.basic_attack()
+    "#{skill_description(basic)}<br/><br/>#{damage_type_html(basic) || ""}"
+  end
+
   def skill_description(skill, full_description \\ true, show_name \\ true) do
     name = show_name && "<h3 class='mb-1 text-center'>#{skill.name}</h3>"
     level = full_description && skill.level && "<h5 class='text-center'>Level #{skill.level}</h5>"
     full = (full_description && full_skill_description_html(skill)) || ""
+
     "#{name || ""}#{level || ""}<span class='text-dark'>#{skill.description}</span><div class='text-center'>#{full}</div>"
   end
 
@@ -221,12 +256,26 @@ defmodule MobaWeb.V2.Components.GameHelpers do
 
   def plain_effects_text(_), do: ""
 
+  def formatted_effect(effect) when is_binary(effect) do
+    effect
+    |> String.replace(~r/\n/, "<br/>")
+    |> String.replace(~r/\[(?:armor)\](.+?)\[\/(?:armor)\]/, "<span class='text-warning'>\\1</span>")
+    |> String.replace(~r/\[(?:damage)\](.+?)\[\/(?:damage)\]/, "<span class='text-danger'>\\1</span>")
+    |> String.replace(~r/\[(?:power)\](.+?)\[\/(?:power)\]/, "<span class='text-pink'>\\1</span>")
+    |> String.replace(~r/\[(?:hp)\](.+?)\[\/(?:hp)\]/, "<span class='text-success'>\\1</span>")
+    |> String.replace(~r/\[(?:mp)\](.+?)\[\/(?:mp)\]/, "<span class='text-primary'>\\1</span>")
+    |> String.replace(~r/\[(?:status)\](.+?)\[\/(?:status)\]/, "<span class='text-dark'>\\1</span>")
+    |> String.replace(~r/\[(?:speed)\](.+?)\[\/(?:speed)\]/, "<span class='text-purple'>\\1</span>")
+  end
+
+  def formatted_effect(_), do: ""
+
   # -------------------------------------------------------------------
   # Private helpers
   # -------------------------------------------------------------------
 
   def item_description(item) do
-    effects = resource_effects_text(item)
+    effects = formatted_effect_html(resource_effects_text(item))
 
     rarity =
       case item.rarity do
@@ -245,18 +294,52 @@ defmodule MobaWeb.V2.Components.GameHelpers do
       item.cooldown && item.cooldown > 0 &&
         "<span class='badge badge-light-warning'><i class='fa fa-clock mr-1'></i> #{item.cooldown}</span>"
 
-    base_hp = item.base_hp && item.base_hp > 0 && "<span class='badge badge-light-danger'><i class='fa fa-heart mr-1'></i> +#{item.base_hp} Health</span>"
-    base_mp = item.base_mp && item.base_mp > 0 && "<span class='badge badge-light-info'><i class='fa fa-bolt mr-1'></i> +#{item.base_mp} Energy</span>"
-    base_atk = item.base_atk && item.base_atk > 0 && "<span class='badge badge-light-success'><i class='fa fa-dagger mr-1'></i> +#{item.base_atk} Attack</span>"
-    base_power = item.base_power && item.base_power > 0 && "<span class='badge badge-light-pink'><i class='fa fa-galaxy mr-1'></i> +#{item.base_power} Power</span>"
-    base_armor = item.base_armor && item.base_armor > 0 && "<span class='badge badge-light-warning'><i class='fa fa-shield-halved mr-1'></i> +#{item.base_armor} Armor</span>"
-    base_speed = item.base_speed && item.base_speed > 0 && "<span class='badge badge-light-purple'><i class='fa fa-running mr-1'></i> +#{item.base_speed} Speed</span>"
+    base_hp =
+      item.base_hp && item.base_hp > 0 &&
+        "<span class='badge badge-light-danger'><i class='fa fa-heart mr-1'></i> +#{item.base_hp} Health</span>"
 
-    "<h3 class='mb-1 text-center'>#{item.name}</h3><div class='text-center mb-1 mt-1'>#{rarity}</div><span class='text-dark'>#{item.description}</span><div class='text-center mb-2 mt-1'>#{base_hp || ""}#{base_mp || ""}#{base_atk || ""}#{base_power || ""}#{base_armor || ""}#{base_speed || ""}</div><div class='text-center mb-2 mt-1'>#{mp_cost || ""}#{cooldown || ""}</div><div class='text-center'>#{effects}</div>"
+    base_mp =
+      item.base_mp && item.base_mp > 0 &&
+        "<span class='badge badge-light-info'><i class='fa fa-bolt mr-1'></i> +#{item.base_mp} Energy</span>"
+
+    base_atk =
+      item.base_atk && item.base_atk > 0 &&
+        "<span class='badge badge-light-success'><i class='fa fa-dagger mr-1'></i> +#{item.base_atk} Attack</span>"
+
+    base_power =
+      item.base_power && item.base_power > 0 &&
+        "<span class='badge badge-light-pink'><i class='fa fa-galaxy mr-1'></i> +#{item.base_power} Power</span>"
+
+    base_armor =
+      item.base_armor && item.base_armor > 0 &&
+        "<span class='badge badge-light-warning'><i class='fa fa-shield-halved mr-1'></i> +#{item.base_armor} Armor</span>"
+
+    base_speed =
+      item.base_speed && item.base_speed > 0 &&
+        "<span class='badge badge-light-purple'><i class='fa fa-running mr-1'></i> +#{item.base_speed} Speed</span>"
+
+    "
+      <h3 class='mb-1 text-center'>#{item.name}</h3>
+      <div class='text-center mb-1 mt-1'>#{rarity}</div>
+      <span class='text-dark'>#{item.description}</span>
+      <div class='text-center mb-2 mt-1'>
+        #{base_hp || ""}
+        #{base_mp || ""}
+        #{base_atk || ""}
+        #{base_power || ""}
+        #{base_armor || ""}
+        #{base_speed || ""}
+      </div>
+      <div class='text-center mb-2 mt-1'>
+        #{mp_cost || ""}
+        #{cooldown || ""}
+      </div>
+      <div class='text-center'>#{effects}</div>
+    "
   end
 
   defp full_skill_description_html(skill) do
-    effects = resource_effects_text(skill)
+    effects = formatted_effect_html(resource_effects_text(skill))
     damage_type = damage_type_html(skill)
 
     mp_cost =
@@ -272,7 +355,15 @@ defmodule MobaWeb.V2.Components.GameHelpers do
         do: "<span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>",
         else: ""
 
-    "<div class='text-center mb-2 mt-1'>#{mp_cost || ""}#{cooldown || ""}#{passive}#{if damage_type, do: "#{damage_type}<br/>", else: ""}</div>#{effects}"
+    "
+      <div class='text-center mb-2 mt-1'>
+        #{mp_cost || ""}
+        #{cooldown || ""}
+        #{passive}
+        #{if damage_type, do: "#{damage_type}<br/>", else: ""}
+      </div>
+      #{effects}
+    "
   end
 
   defp damage_type_html(%{damage_type: damage_type}) do
@@ -287,6 +378,20 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   defp positive_or_nil(nil), do: nil
   defp positive_or_nil(val) when val > 0, do: val
   defp positive_or_nil(_), do: nil
+
+  defp formatted_effect_html(effect) when is_binary(effect) do
+    effect
+    |> String.replace(~r/\n/, "<br/>")
+    |> String.replace(~r/\[(?:armor)\](.+?)\[\/(?:armor)\]/, "<span class='text-warning'>\\1</span>")
+    |> String.replace(~r/\[(?:damage)\](.+?)\[\/(?:damage)\]/, "<span class='text-danger'>\\1</span>")
+    |> String.replace(~r/\[(?:power)\](.+?)\[\/(?:power)\]/, "<span class='text-pink'>\\1</span>")
+    |> String.replace(~r/\[(?:hp)\](.+?)\[\/(?:hp)\]/, "<span class='text-success'>\\1</span>")
+    |> String.replace(~r/\[(?:mp)\](.+?)\[\/(?:mp)\]/, "<span class='text-primary'>\\1</span>")
+    |> String.replace(~r/\[(?:status)\](.+?)\[\/(?:status)\]/, "<span class='text-dark'>\\1</span>")
+    |> String.replace(~r/\[(?:speed)\](.+?)\[\/(?:speed)\]/, "<span class='text-purple'>\\1</span>")
+  end
+
+  defp formatted_effect_html(_), do: ""
 
   defp multiplier_text(resource, key) do
     case Map.get(resource, key) do

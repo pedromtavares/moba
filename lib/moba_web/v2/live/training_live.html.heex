@@ -1,0 +1,66 @@
+<Layouts.app
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+  <div class="training">
+    <%= if @pending_battle do %>
+      <.pending_battle battle={@pending_battle} />
+    <% else %>
+      <div class="row mt-2 training-header">
+        <div class="col">
+          <.header
+            current_hero={@current_hero}
+            current_player={@current_player}
+          />
+        </div>
+      </div>
+
+      <%= if dead?(@current_hero) do %>
+        <div class="row">
+          <div class="col">
+            <.dead current_hero={@current_hero} />
+          </div>
+        </div>
+      <% else %>
+        <%= if display_farm_tabs?(assigns) do %>
+          <div class="row">
+            <div class="col">
+              <.farm_tabs current_hero={@current_hero} farm_tab={@farm_tab} />
+            </div>
+          </div>
+        <% end %>
+
+        <%= case @farm_tab do %>
+          <% "meditation" -> %>
+            <.meditation
+              current_hero={@current_hero}
+              selected_turns={@selected_turns}
+              current_time={@current_time}
+              farm_rewards={@farm_rewards}
+            />
+          <% "mine" -> %>
+            <.mine
+              current_hero={@current_hero}
+              selected_turns={@selected_turns}
+              current_time={@current_time}
+              farm_rewards={@farm_rewards}
+            />
+          <% _ -> %>
+            <.gank current_hero={@current_hero} targets={@targets} />
+        <% end %>
+      <% end %>
+    <% end %>
+  </div>
+
+  <.hero_bar
+    current_hero={@current_hero}
+    show_build={@show_build}
+    show_shop={@show_shop}
+    editing={@editing}
+    tutorial_step={@tutorial_step}
+  />
+
+  <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+</Layouts.app>

@@ -50,7 +50,7 @@ defmodule MobaWeb.V2.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> redirect(to: "/training")}
+       |> redirect(to: "/v2/training")}
     else
       {:noreply, socket}
     end
@@ -129,7 +129,7 @@ defmodule MobaWeb.V2.DashboardLive do
   defp quest_avatars_title(%{pve_tier: tier, pve_progression: progression}) do
     quest = Game.get_quest(tier + 1)
     codes = Map.get(progression, quest.field, [])
-    names = Enum.map(codes, &(Moba.load_resource(&1).name))
+    names = Enum.map(codes, &Moba.load_resource(&1).name)
     "Already trained: " <> Enum.join(names, ", ")
   end
 

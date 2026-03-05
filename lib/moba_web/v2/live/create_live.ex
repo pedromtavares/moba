@@ -76,7 +76,7 @@ defmodule MobaWeb.V2.CreateLive do
     skills = selected_skills |> Enum.map(& &1.id) |> Game.list_chosen_skills()
     hero_name = hero_name(player, avatar, name, socket)
     Game.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
-    {:noreply, socket |> redirect(to: "/training")}
+    {:noreply, socket |> redirect(to: "/v2/training")}
   end
 
   def handle_event("validate", %{"name" => name}, socket) do
@@ -99,7 +99,9 @@ defmodule MobaWeb.V2.CreateLive do
   end
 
   defp manage_skills(selected_skills, skill) do
-    if Enum.member?(selected_skills, skill), do: remove_skill(selected_skills, skill), else: add_skill(selected_skills, skill)
+    if Enum.member?(selected_skills, skill),
+      do: remove_skill(selected_skills, skill),
+      else: add_skill(selected_skills, skill)
   end
 
   defp put_cache(cache_key, avatar, skills, selected_build_index) do
@@ -110,7 +112,9 @@ defmodule MobaWeb.V2.CreateLive do
     })
   end
 
-  defp set_name(%{assigns: %{current_player: %{user: %{username: username}}}} = socket, _), do: assign(socket, name: username)
+  defp set_name(%{assigns: %{current_player: %{user: %{username: username}}}} = socket, _),
+    do: assign(socket, name: username)
+
   defp set_name(socket, _), do: assign(socket, name: nil)
 
   defp socket_init(socket) do
@@ -159,12 +163,51 @@ defmodule MobaWeb.V2.CreateLive do
     end
   end
 
-  defp roles, do: MobaWeb.CreateView.roles()
-  defp build_title(avatar, selected_skills, index), do: MobaWeb.CreateView.build_title(avatar, selected_skills, index)
-  defp builds_for(role), do: MobaWeb.CreateView.builds_for(role)
-  defp role(avatar), do: MobaWeb.CreateView.role(avatar)
-  defp role_description(avatar), do: MobaWeb.CreateView.role_description(avatar)
-  defp display_percentage(type, avatar, avatars), do: MobaWeb.CreateView.display_percentage(type, avatar, avatars)
+  defp roles, do: ["tank", "bruiser", "nuker", "carry", "support"]
+
+  defp build_title(_, selected_skills, nil) when length(selected_skills) > 0, do: "Custom Build"
+  defp build_title(_, _, nil), do: "Skill Build"
+
+  defp build_title(avatar, _, index) do
+    build = Game.skill_build_for(avatar.role, index)
+    elem(build, 1)
+  end
+
+  defp builds_for(role), do: Game.skill_builds_for(role)
+
+  defp role(%{role: role}) when not is_nil(role), do: String.capitalize(role)
+  defp role(_), do: ""
+
+  defp role_description(%{role: role}) do
+    case role do
+      "tank" -> "High defense for sustained damage absorption."
+      "bruiser" -> "Tankier than most, good offense."
+      "nuker" -> "Obliterate opponents with constant spellcasting."
+      "carry" -> "Swift destruction."
+      "support" -> "Tactical spellcasting for elegant victories."
+      _ -> ""
+    end
+  end
+
+  defp display_percentage(:offense, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_offense end)
+    avatar.display_offense * 100 / max.display_offense
+  end
+
+  defp display_percentage(:defense, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_defense end)
+    avatar.display_defense * 100 / max.display_defense
+  end
+
+  defp display_percentage(:magic, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_magic end)
+    avatar.display_magic * 100 / max.display_magic
+  end
+
+  defp display_percentage(:speed, avatar, avatars) do
+    max = Enum.max_by(avatars, fn avatar -> avatar.display_speed end)
+    avatar.display_speed * 100 / max.display_speed
+  end
 
   defp create_avatar_stats(assigns) do
     ~H"""

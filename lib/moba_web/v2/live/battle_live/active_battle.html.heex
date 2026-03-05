@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col col-md-6">
+    <%= if active_attacker?(@battle, @last_turn, @current_player) do %>
+      <.active_turn
+        battle={@battle}
+        last_turn={@last_turn}
+        current_player={@current_player}
+        turn={@turn}
+        skill={@skill}
+        turn_timer={@turn_timer}
+        hero={@battle.attacker}
+      />
+    <% else %>
+      <.passive_turn
+        battle={@battle}
+        last_turn={@last_turn}
+        current_player={@current_player}
+        turn={@turn}
+        skill={@skill}
+        turn_timer={@turn_timer}
+        hero={@battle.attacker}
+      />
+    <% end %>
+  </div>
+  <div class="col-6 battle-border-left d-none d-md-block">
+    <%= if active_defender?(@battle, @last_turn, @current_player) do %>
+      <.active_turn
+        battle={@battle}
+        last_turn={@last_turn}
+        current_player={@current_player}
+        turn={@turn}
+        skill={@skill}
+        turn_timer={@turn_timer}
+        hero={@battle.defender}
+      />
+    <% else %>
+      <.passive_turn
+        battle={@battle}
+        last_turn={@last_turn}
+        current_player={@current_player}
+        turn={@turn}
+        skill={@skill}
+        turn_timer={@turn_timer}
+        hero={@battle.defender}
+      />
+    <% end %>
+  </div>
+</div>

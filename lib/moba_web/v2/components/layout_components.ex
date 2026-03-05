@@ -6,7 +6,6 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   """
   use Phoenix.Component
 
-  alias MobaWeb.LayoutView
   alias Moba.Admin
 
   use Phoenix.VerifiedRoutes,
@@ -34,7 +33,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           data-tippy-placement="right"
           data-tippy-arrow={false}
           title="<h3 class='ml-2 mr-2'>Training</h3>"
-          class={LayoutView.sidebar_class(["training", "base"], %{sidebar_code: @sidebar_code})}
+          class={sidebar_class(["training", "base"], %{sidebar_code: @sidebar_code})}
         >
           <i class="fa-duotone fa-sword"></i>
         </.link>
@@ -45,7 +44,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             data-tippy-placement="right"
             data-tippy-arrow={false}
             title="<h3 class='ml-2 mr-2'>Arena</h3>"
-            class={LayoutView.sidebar_class("arena", %{sidebar_code: @sidebar_code})}
+            class={sidebar_class("arena", %{sidebar_code: @sidebar_code})}
           >
             <i class="fa-duotone fa-swords"></i>
           </.link>
@@ -60,7 +59,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             <i class="fa-duotone fa-swords"></i>
           </a>
         <% end %>
-        <%= if LayoutView.guest?(@current_player) do %>
+        <%= if guest?(@current_player) do %>
           <.link
             navigate={~p"/users/register"}
             data-toggle="tooltip"
@@ -78,7 +77,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             data-tippy-placement="right"
             data-tippy-arrow={false}
             title="<h3 class='ml-2 mr-2'>Profile</h3>"
-            class={LayoutView.sidebar_class("user", %{sidebar_code: @sidebar_code})}
+            class={sidebar_class("user", %{sidebar_code: @sidebar_code})}
           >
             <i class="fa-duotone fa-helmet-battle"></i>
           </.link>
@@ -88,7 +87,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             data-tippy-placement="right"
             data-tippy-arrow={false}
             title="<h3 class='ml-2 mr-2'>Tavern</h3>"
-            class={LayoutView.sidebar_class("tavern", %{sidebar_code: @sidebar_code})}
+            class={sidebar_class("tavern", %{sidebar_code: @sidebar_code})}
           >
             <i class="fa-duotone fa-dungeon"></i>
           </.link>
@@ -99,7 +98,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           data-tippy-placement="right"
           data-tippy-arrow={false}
           title="<h3 class='ml-2 mr-2'>Community</h3>"
-          class={LayoutView.sidebar_class("community", %{sidebar_code: @sidebar_code})}
+          class={sidebar_class("community", %{sidebar_code: @sidebar_code})}
         >
           <i class="fa-duotone fa-globe"></i>
         </.link>
@@ -109,7 +108,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           data-tippy-placement="right"
           data-tippy-arrow={false}
           title="<h3 class='ml-2 mr-2'>Game Manual</h3>"
-          class={LayoutView.sidebar_class("library", %{sidebar_code: @sidebar_code})}
+          class={sidebar_class("library", %{sidebar_code: @sidebar_code})}
           id="game-manual"
         >
           <i class="fa-duotone fa-book-sparkles"></i>
@@ -144,7 +143,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
               <div class="row text-center game-nav no-gutters">
                 <div class="col d-flex justify-content-center">
                   <%= if @current_hero && is_nil(@current_hero.finished_at) do %>
-                    <.link navigate={~p"/training"} class="nav-link">
+                    <.link navigate={~p"/v2/training"} class="nav-link">
                       <i class="fa fa-sword"></i>
                     </.link>
                   <% end %>
@@ -251,5 +250,15 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
     |> Enum.map(&Enum.reverse(&1))
     |> Enum.reverse()
     |> Enum.join(",")
+  end
+
+  defp guest?(%{user_id: user_id}), do: is_nil(user_id)
+
+  defp sidebar_class(codes, assigns) when is_list(codes) do
+    if Enum.member?(codes, assigns[:sidebar_code]), do: "active", else: ""
+  end
+
+  defp sidebar_class(code, assigns) do
+    if assigns[:sidebar_code] == code, do: "active", else: ""
   end
 end

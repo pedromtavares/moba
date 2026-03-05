@@ -23,18 +23,17 @@ defmodule MobaWeb.GameControllerTest do
   end
 
   test "start loads", %{conn: conn} do
-    hero = create_base_hero()
-    conn = conn |> log_in_user(hero.player.user) |> get("/start")
+    conn = get(conn, "/start")
     assert html_response(conn, 200) =~ "Pick your\nAvatar"
   end
 
-  test "create", %{conn: conn} do
-    hero = create_base_hero()
+  test "create as guest", %{conn: conn} do
     skills = Enum.map(base_skills(), fn skill -> skill.id end)
     avatar = base_avatar().id
 
-    conn = conn |> log_in_user(hero.player.user) |> post("/start", %{"skills" => skills, "avatar" => avatar})
+    conn = post(conn, "/start", %{"skills" => skills, "avatar" => avatar})
 
     assert "/training" = redirected_to(conn, 302)
+    assert get_session(conn, :player_id)
   end
 end

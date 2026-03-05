@@ -5,8 +5,6 @@ defmodule MobaWeb.V2.Layouts do
 
   import MobaWeb.V2.Components.LayoutComponents
 
-  alias MobaWeb.LayoutView
-
   use Phoenix.VerifiedRoutes,
     endpoint: MobaWeb.Endpoint,
     router: MobaWeb.Router,
@@ -36,13 +34,13 @@ defmodule MobaWeb.V2.Layouts do
 
   def app(assigns) do
     ~H"""
-    <%= if LayoutView.show_sidebar?(assigns) do %>
+    <%= if show_sidebar?(assigns) do %>
       <div class="row">
         <.sidebar current_player={@current_player} sidebar_code={@sidebar_code} />
         <div class="col">
           <.flash_group flash={@flash} />
           {render_slot(@inner_block)}
-          <%= if LayoutView.show_footer?(assigns) do %>
+          <%= if show_footer?(assigns) do %>
             <.footer_stats />
           <% end %>
         </div>
@@ -52,6 +50,14 @@ defmodule MobaWeb.V2.Layouts do
       {render_slot(@inner_block)}
     <% end %>
     """
+  end
+
+  defp show_sidebar?(assigns) do
+    assigns[:current_player] && is_nil(assigns[:hide_sidebar]) && length(assigns[:current_player].hero_collection) > 0
+  end
+
+  defp show_footer?(assigns) do
+    is_nil(assigns[:hide_footer]) && assigns[:current_player] && assigns[:current_player].user_id
   end
 
   defp flash_group(assigns) do
