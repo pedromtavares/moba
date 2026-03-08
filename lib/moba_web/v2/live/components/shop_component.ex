@@ -61,21 +61,29 @@ defmodule MobaWeb.V2.ShopComponent do
     hero = Game.transmute_item!(assigns.current_hero, assigns.recipe, assigns.transmute)
     Game.broadcast_to_hero(hero.id)
 
-    {:noreply, assign(socket, transmute: nil, recipe: []) |> TutorialComponent.next_step(9)}
+    {:noreply,
+     socket
+     |> assign(transmute: nil, recipe: [])
+     |> TutorialComponent.next_step(9)
+     |> sync_hero_bar(hero)}
   end
 
   def handle_event("buy", _, %{assigns: assigns} = socket) do
     hero = Game.buy_item!(assigns.current_hero, assigns.selected_shop)
     Game.broadcast_to_hero(hero.id)
 
-    {:noreply, assign(socket, selected_shop: nil) |> check_tutorial(hero)}
+    {:noreply,
+     socket
+     |> assign(selected_shop: nil)
+     |> check_tutorial(hero)
+     |> sync_hero_bar(hero)}
   end
 
   def handle_event("sell", _, %{assigns: assigns} = socket) do
     hero = Game.sell_item!(assigns.current_hero, assigns.selected_inventory)
     Game.broadcast_to_hero(hero.id)
 
-    {:noreply, assign(socket, selected_inventory: nil)}
+    {:noreply, socket |> assign(selected_inventory: nil) |> sync_hero_bar(hero)}
   end
 
   def render(assigns) do
@@ -211,7 +219,27 @@ defmodule MobaWeb.V2.ShopComponent do
   end
 
   defp notify_close_shop(socket) do
-    send(self(), {:shop, :close})
+    if hero_bar_id = socket.assigns[:hero_bar_id] do
+      send_update(MobaWeb.V2.HeroBarComponent, id: hero_bar_id, shop_action: :close)
+    else
+      send(self(), {:shop, :close})
+    end
+
+    socket
+  end
+
+  defp sync_hero_bar(socket, hero) do
+    send(self(), {:hero_bar_updated, hero})
+
+    if hero_bar_id = socket.assigns[:hero_bar_id] do
+      send_update(
+        MobaWeb.V2.HeroBarComponent,
+        id: hero_bar_id,
+        current_hero: hero,
+        tutorial_step: socket.assigns.tutorial_step
+      )
+    end
+
     socket
   end
 end

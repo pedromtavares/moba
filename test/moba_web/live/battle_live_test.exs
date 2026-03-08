@@ -17,7 +17,7 @@ defmodule MobaWeb.BattleLiveTest do
   end
 
   test "connected mount", %{conn: conn, battle: battle} do
-    {:ok, _view, html} = live(conn, "/battles/#{battle.id}")
+    {:ok, _view, html} = live(conn, "/v1/battles/#{battle.id}")
     assert html =~ "Click to select a skill"
   end
 
@@ -26,7 +26,7 @@ defmodule MobaWeb.BattleLiveTest do
   # Client #PID<0.2253.0> is still using a connection from owner at location
   test "next turn event", %{conn: conn, battle: battle, attacker: attacker} do
     skill = base_skill()
-    {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
+    {:ok, view, _html} = live(conn, "/v1/battles/#{battle.id}")
 
     assert render_click(view, "next-turn", %{"skill_id" => skill.id, "item_id" => "", "hero_id" => attacker.id}) =~
              "used #{skill.name}"

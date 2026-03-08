@@ -95,10 +95,10 @@
       </div>
       <div class="row">
         <div class="col">
-          <div class="card matchmaking" id="matchmaking-container">
+          <div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".arena .ranking">
             <div class="card-body p-0">
               <div class="d-flex justify-content-around my-2">
-                <.link navigate={~p"/v2/arena/edit"} class="btn btn-sm btn-primary text-primary">
+                <.link navigate={~p"/arena/edit"} class="btn btn-sm btn-primary text-primary">
                   <i class="fa fa-group"></i> Edit Teams
                 </.link>
               </div>
@@ -116,7 +116,7 @@
                         <img src={"/images/pve/#{match.opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
                         <div style="width: 70%">
                           <h4 class="mt-2">
-                            <.link navigate={~p"/v2/player/#{match.opponent.id}"} class="text-white">
+                            <.link navigate={~p"/player/#{match.opponent.id}"} class="text-white">
                               {username(match.opponent)}
                             </.link>
                           </h4>
@@ -127,7 +127,7 @@
                         <span :if={rewards} class={rewards.class}>{rewards.label}</span>
                       </td>
                       <td>
-                        <.link navigate={~p"/v2/matches/#{match}"} class="btn btn-light">
+                        <.link navigate={~p"/matches/#{match}"} class="btn btn-light">
                           <i class="fa fa-eye"></i>
                         </.link>
                       </td>
@@ -190,7 +190,7 @@
                     <tr id={"player-#{player.id}"} class={player.id == @current_player.id && "selected-player"}>
                       <td><h1 class="f-rpg">#{player.ranking || index}</h1></td>
                       <td>
-                        <.link navigate={~p"/v2/player/#{player.id}"} title={"#{player.pvp_points} Season Points"}>
+                        <.link navigate={~p"/player/#{player.id}"} title={"#{player.pvp_points} Season Points"}>
                           <img src={"/images/pve/#{player.pve_tier}.png"} class="pvp-rank" />
                           <h4 class="text-white font-weight-bold mb-0 mt-1">{username(player)}</h4>
                         </.link>
@@ -229,11 +229,11 @@
         </div>
 
         <div class="col" :if={@current_player.status != "silenced"}>
-          <div class="card duels" id="pvp_duels">
+          <div class="card duels" id="pvp_duels" phx-hook="EqualHeight" phx-target=".arena .ranking">
             <div class="card-body p-0">
               <%= if @pending_duel do %>
                 <.link
-                  navigate={~p"/v2/arena/#{@pending_duel}"}
+                  navigate={~p"/arena/#{@pending_duel}"}
                   class="btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3"
                 >
                   <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
@@ -269,7 +269,7 @@
                       </td>
                       <td>
                         <h5>
-                          <.link navigate={~p"/v2/player/#{player.id}"}>{player.user.username}</.link>
+                          <.link navigate={~p"/player/#{player.id}"}>{player.user.username}</.link>
                           <br /><small>{player.pvp_points} SP</small>
                         </h5>
                       </td>
@@ -301,7 +301,7 @@
                           <img src={"/images/pve/#{opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
                           <div style="width: 70%">
                             <h4 class="mt-2">
-                              <.link navigate={~p"/v2/player/#{opponent.id}" } class="text-white">
+                              <.link navigate={~p"/player/#{opponent.id}" } class="text-white">
                                 {username(opponent)}
                               </.link>
                             </h4>
@@ -313,7 +313,7 @@
                         </td>
                         <td class="text-center">
                           <span class={duel_badge_class(duel)}>{duel_label(duel)}</span>
-                          <.link navigate={~p"/v2/arena/#{duel}"} class="btn btn-light ml-2">
+                          <.link navigate={~p"/arena/#{duel}"} class="btn btn-light ml-2">
                             <i class="fa fa-eye"></i>
                           </.link>
                         </td>

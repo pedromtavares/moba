@@ -26,7 +26,7 @@
                 </div>
                 <p class="inbox-item-author">
                   <.link
-                    navigate={~p"/player/#{message.user_id}"}
+                    navigate={~p"/v1/player/#{message.user_id}"}
                     class={if(message.is_admin, do: "text-danger", else: "text-dark")}
                   >
                     <%= message.author %>
@@ -367,7 +367,7 @@
               <%= for duel <- @duels do %>
                 <tr>
                   <td>
-                    <h5><.link navigate={~p"/arena/#{duel}"}>Duel <%= duel.id %></.link></h5>
+                    <h5><.link navigate={~p"/v1/arena/#{duel}"}>Duel <%= duel.id %></.link></h5>
                   </td>
                   <td>
                     <%= duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1) %>

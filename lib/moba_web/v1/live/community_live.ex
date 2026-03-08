@@ -1,4 +1,4 @@
-defmodule MobaWeb.CommunityLive do
+defmodule MobaWeb.V1.CommunityLive do
   use MobaWeb, :live_view
 
   alias Moba.Admin

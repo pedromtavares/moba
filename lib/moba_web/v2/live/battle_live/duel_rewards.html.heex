@@ -32,7 +32,7 @@
 <%= if @current_player do %>
   <div class="pt-1 mt-1">
     <.link
-      navigate={~p"/v2/base"}
+      navigate={~p"/arena/#{@battle.duel_id}"}
       class="btn btn-outline-primary btn-lg btn-block text-white"
       phx-hook="Loading"
       id="load-battles"

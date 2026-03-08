@@ -55,9 +55,9 @@ defmodule MobaWeb.V2.BattleLive do
     latest = Engine.latest_battle(battle.attacker.id)
 
     if latest.type == "league" && latest.id != String.to_integer(id) do
-      {:noreply, push_patch(socket, to: ~p"/v2/battles/#{latest.id}")}
+      {:noreply, push_patch(socket, to: ~p"/battles/#{latest.id}")}
     else
-      {:noreply, push_navigate(socket, to: ~p"/v2/training")}
+      {:noreply, push_navigate(socket, to: ~p"/training")}
     end
   end
 

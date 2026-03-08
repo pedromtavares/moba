@@ -33,32 +33,40 @@ defmodule MobaWeb.UserSettingsLive do
 
                 <.form for={@form} id="settings_form" phx-submit="save">
                   <div class="form-group">
-                    <label>Username</label>
-                    <%= for error <- @form[:username].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">Username</label>
+                      <%= for error <- @form[:username].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
                     <input type="text" id={@form[:username].id} name={@form[:username].name} value={@form[:username].value} class="form-control" required />
                   </div>
                   <div class="form-group">
-                    <label>E-mail</label>
-                    <%= for error <- @form[:email].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">E-mail</label>
+                      <%= for error <- @form[:email].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
                     <input type="email" id={@form[:email].id} name={@form[:email].name} value={@form[:email].value} class="form-control" required />
                   </div>
                   <div class="form-group">
-                    <label>Password</label>
-                    <%= for error <- @form[:password].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
-                    <input type="password" id={@form[:password].id} name={@form[:password].name} class="form-control" />
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">Password</label>
+                      <%= for error <- @form[:password].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
+                    <input type="password" id={@form[:password].id} name={@form[:password].name} value={@form[:password].value} class="form-control" />
                   </div>
                   <div class="form-group">
-                    <label>Confirm Password</label>
-                    <%= for error <- @form[:password_confirmation].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
-                    <input type="password" id={@form[:password_confirmation].id} name={@form[:password_confirmation].name} class="form-control" />
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">Confirm Password</label>
+                      <%= for error <- @form[:password_confirmation].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
+                    <input type="password" id={@form[:password_confirmation].id} name={@form[:password_confirmation].name} value={@form[:password_confirmation].value} class="form-control" />
                   </div>
                   <div class="form-group mb-0 text-center">
                     <button class="btn btn-primary btn-block" type="submit" phx-disable-with="Updating...">Update</button>

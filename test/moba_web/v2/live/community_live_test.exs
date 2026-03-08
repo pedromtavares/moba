@@ -11,7 +11,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, html} = live(conn, "/v2/community")
+    {:ok, view, html} = live(conn, "/community")
 
     assert html =~ "Message Board"
     assert html =~ "Updates"
@@ -33,7 +33,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, _html} = live(conn, "/v2/community")
+    {:ok, view, _html} = live(conn, "/community")
 
     html =
       view

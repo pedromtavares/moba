@@ -1,4 +1,4 @@
-defmodule MobaWeb.HeroLive do
+defmodule MobaWeb.V1.HeroLive do
   use MobaWeb, :live_view
 
   def mount(_, _, socket) do

@@ -7,7 +7,7 @@ defmodule MobaWeb.TavernLiveTest do
 
     conn = init_test_session(conn, player_id: hero.player_id)
 
-    {:ok, _view, html} = live(conn, "/tavern")
+    {:ok, _view, html} = live(conn, "/v1/tavern")
     assert html =~ "Skins"
   end
 end

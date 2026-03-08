@@ -1,7 +1,7 @@
-defmodule MobaWeb.CurrentHeroLive do
+defmodule MobaWeb.V1.CurrentHeroLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{TutorialComponent, Shop}
+  alias MobaWeb.V1.{Shop, TutorialComponent}
 
   def mount(_, session, socket) do
     with %{assigns: %{current_hero: hero}} = socket = socket_init(session, socket) do

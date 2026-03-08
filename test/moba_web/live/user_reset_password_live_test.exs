@@ -45,6 +45,21 @@ defmodule MobaWeb.UserResetPasswordLiveTest do
 
       assert result =~ "should be at least 6 character"
       assert result =~ "does not match password"
+      refute result =~ "Oops, something went wrong! Please check the errors below."
+    end
+
+    test "keeps password values while validating other fields", %{conn: conn, token: token} do
+      {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
+
+      result =
+        lv
+        |> element("#reset_password_form")
+        |> render_change(
+          user: %{"password" => "secret1", "password_confirmation" => "secret2"}
+        )
+
+      assert result =~ ~s(value="secret1")
+      assert result =~ ~s(value="secret2")
     end
   end
 
@@ -82,6 +97,7 @@ defmodule MobaWeb.UserResetPasswordLiveTest do
         |> render_submit()
 
       assert result =~ "Reset Password"
+      assert result =~ "Oops, something went wrong! Please check the errors below."
       assert result =~ "should be at least 6 character(s)"
       assert result =~ "does not match password"
     end

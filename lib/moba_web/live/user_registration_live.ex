@@ -47,24 +47,30 @@ defmodule MobaWeb.UserRegistrationLive do
                   <% end %>
 
                   <div class="form-group">
-                    <label>Username</label>
-                    <%= for error <- @form[:username].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">Username</label>
+                      <%= for error <- @form[:username].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
                     <input type="text" id={@form[:username].id} name={@form[:username].name} value={@form[:username].value} class="form-control" required />
                   </div>
                   <div class="form-group">
-                    <label>Password</label>
-                    <%= for error <- @form[:password].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
-                    <input type="password" id={@form[:password].id} name={@form[:password].name} class="form-control" required />
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">Password</label>
+                      <%= for error <- @form[:password].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
+                    <input type="password" id={@form[:password].id} name={@form[:password].name} value={@form[:password].value} class="form-control" required />
                   </div>
                   <div class="form-group mb-3">
-                    <label>E-mail <small>(used only for account recovery)</small></label>
-                    <%= for error <- @form[:email].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">E-mail <small>(used only for account recovery)</small></label>
+                      <%= for error <- @form[:email].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
                     <input type="email" id={@form[:email].id} name={@form[:email].name} value={@form[:email].value} class="form-control" required />
                   </div>
                   <div class="form-group mb-0 text-center">
@@ -104,12 +110,6 @@ defmodule MobaWeb.UserRegistrationLive do
     case Accounts.register_user(user_params) do
       {:ok, user} ->
         Moba.after_registration(user, socket.assigns.player_id)
-
-        {:ok, _} =
-          Accounts.deliver_user_confirmation_instructions(
-            user,
-            &url(~p"/users/confirm/#{&1}")
-          )
 
         changeset = Accounts.change_user_registration(user)
         {:noreply, socket |> assign(trigger_submit: true) |> assign_form(changeset)}

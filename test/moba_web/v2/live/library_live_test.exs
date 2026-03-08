@@ -11,7 +11,7 @@ defmodule MobaWeb.V2.LibraryLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, html} = live(conn, "/v2/library")
+    {:ok, view, html} = live(conn, "/library")
 
     assert html =~ "Frequently Asked Questions"
     assert html =~ "Training Guide"

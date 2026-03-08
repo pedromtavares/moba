@@ -125,7 +125,7 @@ defmodule MobaWeb.V2.PlayerLive do
       <.link
         class="hero-card card mb-0"
         style={"background-image: url(#{GH.background_url(@hero)})"}
-        navigate={~p"/v2/hero/#{@hero}"}
+        navigate={~p"/hero/#{@hero}"}
       >
         <h4 class="card-header text-white d-flex justify-content-between align-items-center mb-0 py-2">
           <span class="font-italic f-rpg font-16">

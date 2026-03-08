@@ -1,7 +1,8 @@
-defmodule MobaWeb.ArenaLive.Index do
+defmodule MobaWeb.V1.ArenaLive.Index do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{ArenaView, Presence, TutorialComponent}
+  alias MobaWeb.{ArenaView, Presence}
+  alias MobaWeb.V1.TutorialComponent
 
   def mount(_, _session, %{assigns: %{current_player: player}} = socket) do
     with socket = socket_init(socket) do
@@ -45,7 +46,7 @@ defmodule MobaWeb.ArenaLive.Index do
     match = if pending, do: pending, else: Game.manual_matchmaking!(player)
 
     if match do
-      {:noreply, push_navigate(socket, to: ~p"/matches/#{match.id}")}
+      {:noreply, push_navigate(socket, to: ~p"/v1/matches/#{match.id}")}
     else
       {:noreply, assign(socket, current_player: Game.get_player!(player.id))}
     end
@@ -56,7 +57,7 @@ defmodule MobaWeb.ArenaLive.Index do
     duel = Game.create_duel!(player, opponent, true)
 
     if duel do
-      {:noreply, push_navigate(socket, to: ~p"/arena/#{duel.id}")}
+      {:noreply, push_navigate(socket, to: ~p"/v1/arena/#{duel.id}")}
     else
       {:noreply, socket}
     end

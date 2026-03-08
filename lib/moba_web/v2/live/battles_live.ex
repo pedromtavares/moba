@@ -8,7 +8,7 @@ defmodule MobaWeb.V2.BattlesLive do
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: nil}} = socket) do
-    redirect(socket, to: "/v2/base")
+    redirect(socket, to: "/base")
   end
 
   defp maybe_redirect(socket), do: socket
@@ -195,7 +195,7 @@ defmodule MobaWeb.V2.BattlesLive do
         <% end %>
       </td>
       <td>
-        <.link navigate={~p"/v2/battles/#{@battle.id}"} class="loading-text">{relative_time(@battle)}</.link>
+        <.link navigate={~p"/battles/#{@battle.id}"} class="loading-text">{relative_time(@battle)}</.link>
       </td>
     </tr>
     """

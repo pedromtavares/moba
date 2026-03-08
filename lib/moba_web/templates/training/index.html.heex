@@ -28,9 +28,9 @@
   <% end %>
 </div>
 
-<%= live_render(@socket, MobaWeb.CurrentHeroLive,
+<%= live_render(@socket, MobaWeb.V1.CurrentHeroLive,
   session: %{"hero" => @current_hero, "tutorial_step" => @tutorial_step},
   id: "hero-bar"
 ) %>
 
-<.live_component module={MobaWeb.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+<.live_component module={MobaWeb.V1.TutorialComponent} step={@tutorial_step} id="tutorial-step" />

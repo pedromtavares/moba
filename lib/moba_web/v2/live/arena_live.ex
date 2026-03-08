@@ -57,7 +57,7 @@ defmodule MobaWeb.V2.ArenaLive do
     match = if pending, do: pending, else: Game.manual_matchmaking!(player)
 
     if match do
-      {:noreply, push_navigate(socket, to: ~p"/v2/matches/#{match.id}")}
+      {:noreply, push_navigate(socket, to: ~p"/matches/#{match.id}")}
     else
       {:noreply, socket |> assign(current_player: Game.get_player!(player.id)) |> assign_index()}
     end
@@ -68,7 +68,7 @@ defmodule MobaWeb.V2.ArenaLive do
     duel = opponent && Game.create_duel!(player, opponent, true)
 
     if duel do
-      {:noreply, push_navigate(socket, to: ~p"/v2/arena/#{duel.id}")}
+      {:noreply, push_navigate(socket, to: ~p"/arena/#{duel.id}")}
     else
       {:noreply, socket}
     end
@@ -227,6 +227,15 @@ defmodule MobaWeb.V2.ArenaLive do
     player = Game.get_player!(id)
     ranking = tiered_ranking(%{pvp_tier: pvp_tier_for(ranking_tab)})
     {:noreply, socket |> assign(current_player: player, ranking: ranking) |> assign_index()}
+  end
+
+  def handle_info({:hero_bar_updated, hero}, %{assigns: %{current_player: player, hero: current_hero}} = socket)
+      when not is_nil(current_hero) and current_hero.id == hero.id do
+    {:noreply, refresh_edit_hero(socket, player, hero)}
+  end
+
+  def handle_info({:hero_bar_updated, _hero}, socket) do
+    {:noreply, socket}
   end
 
   def render(%{live_action: :edit} = assigns), do: edit(assigns)
@@ -397,17 +406,6 @@ defmodule MobaWeb.V2.ArenaLive do
   defp manual_matches_percentage(manual_matches), do: length(manual_matches) * 100 / Moba.daily_match_limit()
   defp total_win_rate(%{total_matches: 0}), do: 0
   defp total_win_rate(player), do: trunc(player.total_wins * 100 / player.total_matches)
-
-  defp edit_orders_label(%{finished_at: finished_at}) when is_nil(finished_at) do
-    "Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle."
-  end
-
-  defp edit_orders_label(_) do
-    "Click to edit the skill and item orders that will be used when defending against other players in the Arena."
-  end
-
-  defp sorted_items(%{items: items}), do: Game.sort_items(items)
-  defp sorted_skills(%{skills: skills}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
 
   defp params_to_order(nil), do: []
 

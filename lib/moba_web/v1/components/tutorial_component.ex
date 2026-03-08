@@ -1,4 +1,4 @@
-defmodule MobaWeb.TutorialComponent do
+defmodule MobaWeb.V1.TutorialComponent do
   use MobaWeb, :live_component
 
   @final_training_step 19
@@ -30,4 +30,10 @@ defmodule MobaWeb.TutorialComponent do
   def finish_training(socket), do: set_step(socket, @final_training_step)
   def finish_base(socket), do: set_step(socket, @final_base_step)
   def finish_arena(socket), do: set_step(socket, @final_arena_step)
+
+  def render(assigns) do
+    ~H"""
+    <div phx-hook="TutorialStep" data-step={@step} id={"tutorial-step-#{@step}"}></div>
+    """
+  end
 end

@@ -32,7 +32,7 @@ defmodule MobaWeb.V2.DuelLive do
         user_id: user.id
       })
 
-      {:noreply, assign(socket, message_form: to_form(Accounts.change_message()))}
+      {:noreply, reset_message_form(socket, %{user_id: Timex.now()})}
     else
       {:noreply, socket}
     end
@@ -107,9 +107,9 @@ defmodule MobaWeb.V2.DuelLive do
       heroes: heroes,
       first_battle: Engine.first_duel_battle(duel),
       last_battle: Engine.last_duel_battle(duel),
-      messages: Accounts.latest_messages(channel, "general", 20) |> Enum.reverse(),
-      message_form: to_form(Accounts.change_message())
+      messages: Accounts.latest_messages(channel, "general", 20) |> Enum.reverse()
     )
+    |> reset_message_form()
   end
 
   defp refresh_duel(%{assigns: %{duel: duel}} = socket) do
@@ -186,4 +186,11 @@ defmodule MobaWeb.V2.DuelLive do
 
   defp parse_int(value) when is_integer(value), do: value
   defp parse_int(value), do: String.to_integer(value)
+
+  defp reset_message_form(socket, attrs \\ %{}) do
+    assign(socket,
+      message_form: to_form(Accounts.change_message(attrs)),
+      message_form_nonce: (socket.assigns[:message_form_nonce] || 0) + 1
+    )
+  end
 end

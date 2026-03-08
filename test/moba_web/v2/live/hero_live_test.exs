@@ -11,12 +11,12 @@ defmodule MobaWeb.V2.HeroLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, html} = live(conn, "/v2/hero/#{hero.id}")
+      {:ok, view, html} = live(conn, "/hero/#{hero.id}")
 
       assert html =~ hero.name
       assert has_element?(view, "#hero-review")
       assert has_element?(view, "#ranking-card")
-      assert has_element?(view, "a[href='/v2/player/#{hero.player_id}']")
+      assert has_element?(view, "a[href='/player/#{hero.player_id}']")
     end
 
     test "owner sees skin controls", %{conn: conn} do
@@ -27,9 +27,11 @@ defmodule MobaWeb.V2.HeroLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, _view, html} = live(conn, "/v2/hero/#{hero.id}")
+      {:ok, view, html} = live(conn, "/hero/#{hero.id}")
 
       assert html =~ "View Skins"
+      assert has_element?(view, "#hero-bar")
+      assert has_element?(view, "#toggle-shop")
     end
   end
 
@@ -43,7 +45,7 @@ defmodule MobaWeb.V2.HeroLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/hero/#{hero.id}")
+      {:ok, view, _html} = live(conn, "/hero/#{hero.id}")
 
       html = render_click(view, "set-skin", %{"skin-code" => default_skin.code})
       assert html =~ hero.name

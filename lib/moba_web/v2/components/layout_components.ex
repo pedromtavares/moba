@@ -28,7 +28,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
     <div class="sidebar-nav-container">
       <div class="sidebar-nav d-none d-md-flex">
         <.link
-          navigate={~p"/v2/base"}
+          navigate={~p"/base"}
           data-toggle="tooltip"
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -39,7 +39,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
         </.link>
         <%= if @current_player.user_id do %>
           <.link
-            navigate={~p"/v2/arena"}
+            navigate={~p"/arena"}
             data-toggle="tooltip"
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -72,7 +72,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           </.link>
         <% else %>
           <.link
-            navigate={~p"/v2/player/#{@current_player.id}"}
+            navigate={~p"/player/#{@current_player.id}"}
             data-toggle="tooltip"
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -82,7 +82,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             <i class="fa-duotone fa-helmet-battle"></i>
           </.link>
           <.link
-            navigate={~p"/v2/tavern"}
+            navigate={~p"/tavern"}
             data-toggle="tooltip"
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -93,7 +93,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           </.link>
         <% end %>
         <.link
-          navigate={~p"/v2/community"}
+          navigate={~p"/community"}
           data-toggle="tooltip"
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -103,7 +103,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           <i class="fa-duotone fa-globe"></i>
         </.link>
         <.link
-          navigate={~p"/v2/library"}
+          navigate={~p"/library"}
           data-toggle="tooltip"
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -143,27 +143,27 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
               <div class="row text-center game-nav no-gutters">
                 <div class="col d-flex justify-content-center">
                   <%= if @current_hero && is_nil(@current_hero.finished_at) do %>
-                    <.link navigate={~p"/v2/training"} class="nav-link">
+                    <.link navigate={~p"/training"} class="nav-link">
                       <i class="fa fa-sword"></i>
                     </.link>
                   <% end %>
-                  <.link navigate={~p"/v2/base"} class="nav-link">
+                  <.link navigate={~p"/base"} class="nav-link">
                     <i class="fa fa-home"></i>
                   </.link>
                   <%= if @current_player do %>
                     <%= if length(@current_player.hero_collection) > 0 do %>
-                      <.link navigate={~p"/v2/arena"} class="nav-link">
+                      <.link navigate={~p"/arena"} class="nav-link">
                         <i class="fa fa-swords"></i>
                       </.link>
                     <% end %>
                     <%= if @current_player.user_id do %>
-                      <.link navigate={~p"/v2/player/#{@current_player.id}"} class="nav-link">
+                      <.link navigate={~p"/player/#{@current_player.id}"} class="nav-link">
                         <i class="fa fa-helmet-battle"></i>
                       </.link>
-                      <.link navigate={~p"/v2/community"} class="nav-link">
+                      <.link navigate={~p"/community"} class="nav-link">
                         <i class="fa fa-globe"></i>
                       </.link>
-                      <.link navigate={~p"/v2/tavern"} class="nav-link">
+                      <.link navigate={~p"/tavern"} class="nav-link">
                         <i class="fa fa-dungeon"></i>
                       </.link>
                     <% end %>

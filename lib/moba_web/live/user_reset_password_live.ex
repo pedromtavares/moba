@@ -31,23 +31,27 @@ defmodule MobaWeb.UserResetPasswordLive do
                 </div>
 
                 <.form for={@form} id="reset_password_form" phx-submit="reset_password" phx-change="validate">
-                  <%= if @form.errors != [] do %>
+                  <%= if @check_errors do %>
                     <p class="alert alert-danger">Oops, something went wrong! Please check the errors below.</p>
                   <% end %>
 
                   <div class="form-group">
-                    <label>New Password</label>
-                    <%= for error <- @form[:password].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
-                    <input type="password" id={@form[:password].id} name={@form[:password].name} class="form-control" required />
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">New Password</label>
+                      <%= for error <- @form[:password].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
+                    <input type="password" id={@form[:password].id} name={@form[:password].name} value={@form[:password].value} class="form-control" required />
                   </div>
                   <div class="form-group">
-                    <label>Confirm New Password</label>
-                    <%= for error <- @form[:password_confirmation].errors do %>
-                      <span class="text-danger small d-block">{translate_error(error)}</span>
-                    <% end %>
-                    <input type="password" id={@form[:password_confirmation].id} name={@form[:password_confirmation].name} class="form-control" required />
+                    <div class="d-flex flex-wrap align-items-baseline mb-1">
+                      <label class="mb-0 mr-2">Confirm New Password</label>
+                      <%= for error <- @form[:password_confirmation].errors do %>
+                        <span class="text-danger small mr-2">{translate_error(error)}</span>
+                      <% end %>
+                    </div>
+                    <input type="password" id={@form[:password_confirmation].id} name={@form[:password_confirmation].name} value={@form[:password_confirmation].value} class="form-control" required />
                   </div>
                   <div class="form-group mb-0 text-center">
                     <button class="btn btn-primary btn-block" type="submit" phx-disable-with="Resetting...">Reset Password</button>
@@ -80,7 +84,8 @@ defmodule MobaWeb.UserResetPasswordLive do
           %{}
       end
 
-    {:ok, assign_form(socket, form_source), temporary_assigns: [form: nil]}
+    {:ok, socket |> assign(check_errors: false) |> assign_form(form_source),
+     temporary_assigns: [form: nil]}
   end
 
   # Do not log in the user after reset password to avoid a
@@ -94,13 +99,19 @@ defmodule MobaWeb.UserResetPasswordLive do
          |> redirect(to: ~p"/users/log_in")}
 
       {:error, changeset} ->
-        {:noreply, assign_form(socket, Map.put(changeset, :action, :insert))}
+        {:noreply,
+         socket
+         |> assign(check_errors: true)
+         |> assign_form(Map.put(changeset, :action, :insert))}
     end
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
     changeset = Accounts.change_user_password(socket.assigns.user, user_params)
-    {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
+    {:noreply,
+     socket
+     |> assign(check_errors: false)
+     |> assign_form(Map.put(changeset, :action, :validate))}
   end
 
   defp assign_user_and_token(socket, %{"token" => token}) do

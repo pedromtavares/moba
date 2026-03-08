@@ -38,6 +38,16 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply, assign(socket, hero: Game.get_hero!(id))}
   end
 
+  def handle_info({:hero_bar_updated, hero}, socket) do
+    socket =
+      socket
+      |> assign(hero: hero)
+      |> maybe_assign_current_hero(hero)
+      |> quest_assigns()
+
+    {:noreply, socket}
+  end
+
   def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
     {:noreply, assign(socket, ranking: Moba.pve_ranking(), hero: Game.get_hero!(id))}
   end
@@ -75,6 +85,13 @@ defmodule MobaWeb.V2.HeroLive do
     |> assign(:skin_selection, nil)
     |> assign(:sidebar_code, nil)
   end
+
+  defp maybe_assign_current_hero(%{assigns: %{current_hero: %{id: current_hero_id}}} = socket, %{id: hero_id} = hero)
+       when current_hero_id == hero_id do
+    assign(socket, current_hero: hero)
+  end
+
+  defp maybe_assign_current_hero(socket, _hero), do: socket
 
   defp just_finished_training?(_, %{finished_at: nil}), do: nil
 

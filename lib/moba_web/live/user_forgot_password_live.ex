@@ -31,7 +31,11 @@ defmodule MobaWeb.UserForgotPasswordLive do
                   <p class="text-white">We'll send a password reset link to your inbox</p>
                 </div>
 
-                <.form for={@form} id="reset_password_form" phx-submit="send_email">
+                <%= if info = Phoenix.Flash.get(@flash, :info) do %>
+                  <p class="alert alert-success" role="alert">{info}</p>
+                <% end %>
+
+                <.form for={@form} id="reset_password_form" phx-submit="send_email" phx-hook="ResetFormOnEvent" data-reset-event="reset-password-form">
                   <div class="form-group">
                     <label>E-mail</label>
                     <input type="email" id={@form[:email].id} name={@form[:email].name} value={@form[:email].value} class="form-control" required />
@@ -58,7 +62,7 @@ defmodule MobaWeb.UserForgotPasswordLive do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, form: to_form(%{}, as: "user"))}
+    {:ok, assign(socket, form: empty_form())}
   end
 
   def handle_event("send_email", %{"user" => %{"email" => email}}, socket) do
@@ -75,6 +79,11 @@ defmodule MobaWeb.UserForgotPasswordLive do
     {:noreply,
      socket
      |> put_flash(:info, info)
-     |> redirect(to: ~p"/")}
+     |> assign(form: empty_form())
+     |> push_event("reset-password-form", %{})}
+  end
+
+  defp empty_form do
+    to_form(%{"email" => ""}, as: "user")
   end
 end

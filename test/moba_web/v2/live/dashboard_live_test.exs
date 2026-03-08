@@ -4,7 +4,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
   describe "unauthenticated access" do
     test "redirects to /start without player_id in session", %{conn: conn} do
-      conn = get(conn, "/v2/base")
+      conn = get(conn, "/base")
       assert redirected_to(conn) == "/start"
     end
   end
@@ -14,7 +14,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, _view, html} = live(conn, "/v2/base")
+      {:ok, _view, html} = live(conn, "/base")
 
       assert html =~ "Train a new Hero"
       assert html =~ "In Progress"
@@ -26,7 +26,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/base")
+      {:ok, view, _html} = live(conn, "/base")
 
       assert has_element?(view, "#visible-hero-#{hero.id}")
     end
@@ -35,7 +35,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/base")
+      {:ok, view, _html} = live(conn, "/base")
 
       assert has_element?(view, "#finished-heroes-btn")
       assert has_element?(view, "#hero-list-unfinished")
@@ -51,7 +51,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       conn = conn |> log_in_user(user) |> put_session(:player_id, player.id)
 
-      {:ok, view, _html} = live(conn, "/v2/base")
+      {:ok, view, _html} = live(conn, "/base")
 
       render_click(view, "show-finished", %{})
 
@@ -68,7 +68,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       conn = conn |> log_in_user(user) |> put_session(:player_id, player.id)
 
-      {:ok, view, _html} = live(conn, "/v2/base")
+      {:ok, view, _html} = live(conn, "/base")
 
       render_click(view, "show-finished", %{})
       render_click(view, "show-unfinished", %{})
@@ -83,7 +83,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, html} = live(conn, "/v2/base")
+      {:ok, view, html} = live(conn, "/base")
 
       assert html =~ "pve-tier-rewards"
       assert html =~ "Progression Rewards"
@@ -96,9 +96,9 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/base")
+      {:ok, view, _html} = live(conn, "/base")
 
-      assert {:error, {:redirect, %{to: "/v2/training"}}} =
+      assert {:error, {:redirect, %{to: "/training"}}} =
                view
                |> element("#visible-hero-#{hero.id} [phx-click=continue]")
                |> render_click()
@@ -110,7 +110,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/base")
+      {:ok, view, _html} = live(conn, "/base")
 
       view
       |> element("#visible-hero-#{hero.id} [phx-click=archive]")

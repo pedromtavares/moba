@@ -16,4 +16,4 @@
 </div>
 
 <%= render("_pve_tier_rewards.html", Map.put(assigns, :pve_tier, @current_player.pve_tier + 1)) %>
-<.live_component module={MobaWeb.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+<.live_component module={MobaWeb.V1.TutorialComponent} step={@tutorial_step} id="tutorial-step" />

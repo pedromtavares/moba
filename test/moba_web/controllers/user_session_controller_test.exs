@@ -62,6 +62,20 @@ defmodule MobaWeb.UserSessionControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Account created successfully"
     end
 
+    test "restores player session on login when player_id is missing", %{conn: conn, user: user} do
+      conn =
+        post(conn, ~p"/users/log_in", %{
+          "user" => %{
+            "email" => user.email,
+            "password" => valid_user_password()
+          }
+        })
+
+      assert get_session(conn, :user_token)
+      assert get_session(conn, :player_id)
+      assert redirected_to(conn) == ~p"/base"
+    end
+
     test "login following password update", %{conn: conn, user: user} do
       conn =
         conn

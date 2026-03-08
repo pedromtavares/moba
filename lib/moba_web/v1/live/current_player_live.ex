@@ -1,4 +1,4 @@
-defmodule MobaWeb.CurrentPlayerLive do
+defmodule MobaWeb.V1.CurrentPlayerLive do
   use MobaWeb, :live_view
   alias MobaWeb.Presence
 
@@ -46,7 +46,7 @@ defmodule MobaWeb.CurrentPlayerLive do
   end
 
   def handle_info({"duel", %{id: id}}, socket) do
-    {:noreply, socket |> push_navigate(to: ~p"/arena/#{id}")}
+    {:noreply, socket |> push_navigate(to: ~p"/v1/arena/#{id}")}
   end
 
   def handle_info(

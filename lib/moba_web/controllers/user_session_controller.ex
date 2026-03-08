@@ -3,6 +3,7 @@ defmodule MobaWeb.UserSessionController do
 
   alias Moba.Accounts
   alias MobaWeb.UserAuth
+  alias Moba
 
   def create(conn, %{"_action" => "registered"} = params) do
     create(conn, params, "Account created successfully!")
@@ -22,7 +23,10 @@ defmodule MobaWeb.UserSessionController do
     %{"email" => email, "password" => password} = user_params
 
     if user = Accounts.get_user_by_email_and_password(email, password) do
+      player_id = get_session(conn, :player_id) || Moba.player_for(user).id
+
       conn
+      |> put_session(:player_id, player_id)
       |> put_flash(:info, info)
       |> UserAuth.log_in_user(user, user_params)
     else

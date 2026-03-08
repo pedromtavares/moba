@@ -9,7 +9,7 @@
       <div class="col-4">
         <div class="card mb-0" id="player-card">
           <h2 class="text-center f-rpg">
-            <.link navigate={~p"/v2/player/#{@match.player}"} class="text-white">{username(@match.player)}</.link>
+            <.link navigate={~p"/player/#{@match.player}"} class="text-white">{username(@match.player)}</.link>
           </h2>
         </div>
         <div class="row mt-2">
@@ -43,7 +43,7 @@
       <div class="col-4">
         <div class="row">
           <div class="col">
-            <div class="card mb-0" id="winner-card">
+            <div class="card mb-0" phx-hook="EqualHeight" phx-target="#player-card" id="winner-card">
               <%= if @match.phase do %>
                 <h2 class="text-center">
                   Winner:
@@ -77,7 +77,7 @@
 
         <div :if={is_nil(@match.phase) && @current_player.id == @match.player_id} class="row mt-1">
           <div class="col">
-            <div class="card mb-0 mt-2" id="picks-card">
+            <div class="card mb-0 mt-2" phx-hook="EqualHeight" phx-target="#opponent-heroes-container" id="picks-card">
               <ul class="nav nav-pills navtab-bg mt-2 justify-content-center">
                 <li class="nav-item">
                   <a
@@ -120,7 +120,9 @@
                     <div class="card border">
                       <div class="card-body mb-0">
                         <div class="d-flex justify-content-center mb-2">
-                          <img :for={pick <- team.picks} src={GH.image_url(pick.avatar)} class="avatar mr-1" />
+                          <div :for={pick <- team.picks} class="avatar-container mr-1">
+                            <img src={GH.image_url(pick.avatar)} class="avatar img-border" />
+                          </div>
                         </div>
                         <%= if Enum.map(@picked_heroes, & &1.id) == team.pick_ids do %>
                           <button class="btn btn-block btn-secondary dark-button" disabled>Picked {team.name}</button>
@@ -205,7 +207,7 @@
           <div :for={battle <- Enum.take(@battles, @tick)} class="col-md-12 mt-2">
             <div class="card mb-0">
               <div class="card-body p-2">
-                <.link navigate={~p"/v2/battles/#{battle}"} id={"battle-review-#{battle.id}"}>
+                <.link navigate={~p"/battles/#{battle}"} id={"battle-review-#{battle.id}"}>
                   <div class="row">
                     <div class="col center pr-4">
                       <.turn_snapshot
@@ -230,7 +232,7 @@
       <div class="col-4">
         <div class="card mb-0">
           <h2 class="text-center f-rpg">
-            <.link navigate={~p"/v2/player/#{@match.opponent}"} class="text-white">{username(@match.opponent)}</.link>
+            <.link navigate={~p"/player/#{@match.opponent}"} class="text-white">{username(@match.opponent)}</.link>
           </h2>
         </div>
         <div class="row mt-2" id="opponent-heroes-container">

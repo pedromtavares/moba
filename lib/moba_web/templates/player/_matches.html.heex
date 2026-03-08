@@ -6,7 +6,7 @@
           <tr>
             <td class="text-center" width="33%">
               <span class="opponent">
-                <.link navigate={~p"/player/#{match.opponent_id}"}>
+                <.link navigate={~p"/v1/player/#{match.opponent_id}"}>
                   <%= username(match.opponent) %>
                 </.link>
               </span>
@@ -19,7 +19,7 @@
 
             <td class="text-center" width="33%">
               <.link
-                navigate={~p"/matches/#{match}"}
+                navigate={~p"/v1/matches/#{match}"}
                 class="btn btn-light btn-sm"
                 data-toggle="tooltip"
                 title={String.capitalize(match.type)}

@@ -1,4 +1,4 @@
-defmodule MobaWeb.BattlesLive do
+defmodule MobaWeb.V1.BattlesLive do
   use MobaWeb, :live_view
 
   alias MobaWeb.BattleView
@@ -10,7 +10,7 @@ defmodule MobaWeb.BattlesLive do
   end
 
   def handle_event("redirect", %{"id" => id}, socket) do
-    {:noreply, socket |> push_navigate(to: ~p"/battles/#{id}")}
+    {:noreply, socket |> push_navigate(to: ~p"/v1/battles/#{id}")}
   end
 
   def render(assigns) do

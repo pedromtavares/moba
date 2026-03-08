@@ -1,4 +1,4 @@
-defmodule MobaWeb.TavernLive do
+defmodule MobaWeb.V1.TavernLive do
   use MobaWeb, :live_view
 
   alias MobaWeb.TavernView

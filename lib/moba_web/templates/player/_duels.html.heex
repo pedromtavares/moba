@@ -30,7 +30,7 @@
       <tr>
         <td class="text-center">
           <span class="opponent">
-            <.link navigate={~p"/player/#{opponent_for(duel, @player).id}"}>
+            <.link navigate={~p"/v1/player/#{opponent_for(duel, @player).id}"}>
               <%= opponent_for(duel, @player) |> username() %>
             </.link>
           </span>
@@ -46,7 +46,7 @@
         </td>
 
         <td>
-          <.link navigate={~p"/arena/#{duel}"} class="btn btn-light btn-sm">
+          <.link navigate={~p"/v1/arena/#{duel}"} class="btn btn-light btn-sm">
             <i class="fa fa-eye"></i>
           </.link>
         </td>

@@ -29,6 +29,8 @@ defmodule MobaWeb.V2.Layouts do
   attr :current_player, :map, default: nil
   attr :current_hero, :map, default: nil
   attr :sidebar_code, :string, default: nil
+  attr :hide_footer, :boolean, default: false
+  attr :hide_sidebar, :boolean, default: false
 
   slot :inner_block, required: true
 
@@ -38,7 +40,6 @@ defmodule MobaWeb.V2.Layouts do
       <div class="row">
         <.sidebar current_player={@current_player} sidebar_code={@sidebar_code} />
         <div class="col">
-          <.flash_group flash={@flash} />
           {render_slot(@inner_block)}
           <%= if show_footer?(assigns) do %>
             <.footer_stats />
@@ -46,40 +47,17 @@ defmodule MobaWeb.V2.Layouts do
         </div>
       </div>
     <% else %>
-      <.flash_group flash={@flash} />
       {render_slot(@inner_block)}
     <% end %>
     """
   end
 
   defp show_sidebar?(assigns) do
-    assigns[:current_player] && is_nil(assigns[:hide_sidebar]) && length(assigns[:current_player].hero_collection) > 0
+    assigns[:current_player] && !assigns[:hide_sidebar] && length(assigns[:current_player].hero_collection) > 0
   end
 
   defp show_footer?(assigns) do
-    is_nil(assigns[:hide_footer]) && assigns[:current_player] && assigns[:current_player].user_id
+    !assigns[:hide_footer] && assigns[:current_player] && assigns[:current_player].user_id
   end
 
-  defp flash_group(assigns) do
-    ~H"""
-    <%= if @flash != %{} do %>
-      <div class="row mt-2">
-        <div class="col">
-          <%= if msg = @flash["info"] do %>
-            <div class="alert alert-info alert-dismissible" role="alert">
-              <button type="button" class="close" data-dismiss="alert"><span>×</span></button>
-              {msg}
-            </div>
-          <% end %>
-          <%= if msg = @flash["error"] do %>
-            <div class="alert alert-danger alert-dismissible" role="alert">
-              <button type="button" class="close" data-dismiss="alert"><span>×</span></button>
-              {msg}
-            </div>
-          <% end %>
-        </div>
-      </div>
-    <% end %>
-    """
-  end
 end

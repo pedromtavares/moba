@@ -8,7 +8,7 @@
 <%= if @current_player do %>
   <div class="pt-1 mt-1">
     <.link
-      navigate={~p"/matches/#{@battle.match_id}"}
+      navigate={~p"/v1/matches/#{@battle.match_id}"}
       class="btn btn-outline-primary btn-lg btn-block text-white"
       phx-hook="Loading"
       id="load-battles"

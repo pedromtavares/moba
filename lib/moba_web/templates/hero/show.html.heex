@@ -11,7 +11,7 @@
               <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
                 <span class="font-italic font-15">Level <%= @hero.level %></span>
                 <%= if @hero.player.user_id do %>
-                  <.link class="text-white font-20 f-rpg" navigate={~p"/player/#{@hero.player_id}"}>
+                  <.link class="text-white font-20 f-rpg" navigate={~p"/v1/player/#{@hero.player_id}"}>
                     <%= @hero.name %>
                   </.link>
                 <% end %>
@@ -43,7 +43,7 @@
                     <div class="col">
                       <.link
                         class="btn btn-light btn-block mt-1"
-                        navigate={~p"/tavern?#{%{avatar: @hero.avatar.code}}"}
+                        navigate={~p"/v1/tavern?#{%{avatar: @hero.avatar.code}}"}
                       >
                         <i class="fa fa-palette mr-1"></i>View Skins
                       </.link>
@@ -135,7 +135,7 @@
           <%= if @hero.player.user_id do %>
             <.link
               class="btn btn-block btn-light mb-1 btn-lg"
-              navigate={~p"/player/#{@hero.player_id}"}
+              navigate={~p"/v1/player/#{@hero.player_id}"}
             >
               <i class="fa fa-user"></i> View Player Profile
             </.link>
@@ -172,7 +172,7 @@
                         </h1>
                       </td>
                       <td>
-                        <.link navigate={~p"/hero/#{hero}"}>
+                        <.link navigate={~p"/v1/hero/#{hero}"}>
                           <%= GH.hero_avatar(hero) %>
                           <br />
                           <h5 class="text-primary mb-0 mt-1"><%= hero.name %></h5>
@@ -243,4 +243,4 @@
 </div>
 
 <%= if @hero.player_id == @current_player.id,
-  do: live_render(@socket, MobaWeb.CurrentHeroLive, session: %{"hero" => @hero}, id: "hero-bar") %>
+  do: live_render(@socket, MobaWeb.V1.CurrentHeroLive, session: %{"hero" => @hero}, id: "hero-bar") %>

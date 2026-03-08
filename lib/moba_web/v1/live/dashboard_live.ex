@@ -1,7 +1,7 @@
-defmodule MobaWeb.DashboardLive do
+defmodule MobaWeb.V1.DashboardLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.TutorialComponent
+  alias MobaWeb.V1.TutorialComponent
 
   @base_hero_count Moba.base_hero_count()
 
@@ -70,7 +70,7 @@ defmodule MobaWeb.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> push_navigate(to: ~p"/training")}
+       |> push_navigate(to: ~p"/v1/training")}
     else
       {:noreply, socket}
     end

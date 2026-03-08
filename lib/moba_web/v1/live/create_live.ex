@@ -1,4 +1,4 @@
-defmodule MobaWeb.CreateLive do
+defmodule MobaWeb.V1.CreateLive do
   use MobaWeb, :live_view
 
   def mount(_params, %{"token" => token, "cache_key" => cache_key}, socket) do
@@ -90,7 +90,7 @@ defmodule MobaWeb.CreateLive do
          hero_name = hero_name(player, avatar, name, socket) do
       Game.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
 
-      {:noreply, socket |> redirect(to: "/training")}
+      {:noreply, socket |> redirect(to: "/v1/training")}
     end
   end
 

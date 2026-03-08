@@ -86,7 +86,7 @@
           <div class="card">
             <div class="card-body p-0 text-center" id="hero-list-container">
               <.link
-                navigate={~p"/v2/invoke"}
+                navigate={~p"/invoke"}
                 class="btn p-2 btn-block btn-lg btn-outline-success col-xl-4 margin-auto mt-2 dark-button"
               >
                 <i class="fa fa-plus-large mr-1"></i>Train a new Hero
@@ -209,7 +209,7 @@
                                   </button>
                                 <% end %>
                                 <%= if hero.finished_at do %>
-                                  <.link class="btn btn-primary" navigate={~p"/v2/hero/#{hero}"}>
+                                  <.link class="btn btn-primary" navigate={~p"/hero/#{hero}"}>
                                     <i class="fa fa-address-card mr-1"></i> Customize
                                   </.link>
                                 <% else %>
@@ -370,7 +370,7 @@
             <tr>
                 <td class="text-center text-info">
                   <.link
-                    navigate={~p"/v2/tavern"}
+                    navigate={~p"/tavern"}
                     data-toggle="tooltip"
                     title="Shards are the in-game currency that you can use to unlock game content."
                   >

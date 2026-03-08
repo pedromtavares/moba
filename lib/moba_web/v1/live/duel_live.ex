@@ -1,4 +1,4 @@
-defmodule MobaWeb.DuelLive do
+defmodule MobaWeb.V1.DuelLive do
   use MobaWeb, :live_view
 
   alias MobaWeb.DuelView

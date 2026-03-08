@@ -1,7 +1,7 @@
-defmodule MobaWeb.Shop do
+defmodule MobaWeb.V1.Shop do
   use MobaWeb, :live_component
 
-  alias MobaWeb.TutorialComponent
+  alias MobaWeb.V1.TutorialComponent
 
   def mount(socket) do
     {:ok,

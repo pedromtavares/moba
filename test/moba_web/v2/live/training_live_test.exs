@@ -10,18 +10,18 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, _view, html} = live(conn, "/v2/training")
+    {:ok, _view, html} = live(conn, "/training")
     assert html =~ "MEDITATE"
   end
 
-  test "guest with player_id can access /v2/training", %{conn: conn} do
+  test "guest with player_id can access /training", %{conn: conn} do
     hero = create_base_hero()
 
     conn =
       conn
       |> init_test_session(player_id: hero.player_id)
 
-    {:ok, _view, html} = live(conn, "/v2/training")
+    {:ok, _view, html} = live(conn, "/training")
     assert html =~ "MEDITATE"
   end
 
@@ -34,7 +34,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> log_in_user(user)
       |> put_session(:player_id, player.id)
 
-    live(conn, "/v2/training") |> follow_redirect(conn, "/v2/base")
+    live(conn, "/training") |> follow_redirect(conn, "/base")
   end
 
   test "league challenge starts a league battle and updates league progress", %{conn: conn} do
@@ -52,7 +52,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, _html} = live(conn, "/v2/training")
+    {:ok, view, _html} = live(conn, "/training")
     assert has_element?(view, "#start-league-challenge")
 
     {:ok, _battle_view, html} =
@@ -81,7 +81,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, _html} = live(conn, "/v2/training")
+    {:ok, view, _html} = live(conn, "/training")
     assert has_element?(view, "#buyback-hero")
 
     view |> element("#buyback-hero") |> render_click()
@@ -112,7 +112,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, html} = live(conn, "/v2/training")
+    {:ok, view, html} = live(conn, "/training")
     assert html =~ "Boss Fight"
     assert html =~ "one last time"
     assert has_element?(view, "#start-league-challenge")

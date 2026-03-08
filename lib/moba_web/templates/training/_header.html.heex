@@ -31,11 +31,11 @@
         <div class="mt-4 d-flex justify-content-between align-items-center">
           <div>
             <%= if assigns[:origin] do %>
-              <.link navigate={~p"/training"} class="btn btn-light">
+              <.link navigate={~p"/v1/training"} class="btn btn-light">
                 <i class="fa fa-sword mr-1 fa-2x"></i> <br />Return to Training
               </.link>
             <% else %>
-              <.link navigate={~p"/battles"} class="btn btn-light">
+              <.link navigate={~p"/v1/battles"} class="btn btn-light">
                 <i class="fa fa-list-ul mr-1 fa-2x"></i> <br />Battle Log
               </.link>
               <%= if @current_hero.pve_current_turns > 0 && @current_hero.refresh_targets_count > 0 do %>

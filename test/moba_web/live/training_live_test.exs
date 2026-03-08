@@ -7,7 +7,7 @@ defmodule MobaWeb.TrainingLiveTest do
 
     conn = init_test_session(conn, player_id: hero.player_id)
 
-    {:ok, _view, html} = live(conn, "/training")
+    {:ok, _view, html} = live(conn, "/v1/training")
     assert html =~ "MEDITATE"
   end
 
@@ -16,7 +16,7 @@ defmodule MobaWeb.TrainingLiveTest do
 
     conn = init_test_session(conn, player_id: player.id)
 
-    live(conn, "/training") |> follow_redirect(conn, "/base")
+    live(conn, "/v1/training") |> follow_redirect(conn, "/v1/base")
   end
 
   test "battle event", %{conn: conn} do
@@ -26,7 +26,7 @@ defmodule MobaWeb.TrainingLiveTest do
 
     target = Game.list_targets(hero) |> List.first()
 
-    {:ok, view, _html} = live(conn, "/training")
+    {:ok, view, _html} = live(conn, "/v1/training")
 
     {:ok, _, html} = render_click(view, :battle, %{"id" => target.id}) |> follow_redirect(conn)
 

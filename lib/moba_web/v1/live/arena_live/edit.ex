@@ -1,4 +1,4 @@
-defmodule MobaWeb.ArenaLive.Edit do
+defmodule MobaWeb.V1.ArenaLive.Edit do
   use MobaWeb, :live_view
 
   alias MobaWeb.ArenaView

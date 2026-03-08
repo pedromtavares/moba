@@ -1,7 +1,8 @@
-defmodule MobaWeb.BattleLive do
+defmodule MobaWeb.V1.BattleLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{BattleView, TutorialComponent}
+  alias MobaWeb.BattleView
+  alias MobaWeb.V1.TutorialComponent
 
   def mount(_, session, socket) do
     with socket = socket_init(session["player_id"], socket) do
@@ -56,9 +57,9 @@ defmodule MobaWeb.BattleLive do
     latest = Engine.latest_battle(battle.attacker.id)
 
     if latest.type == "league" && latest.id != String.to_integer(id) do
-      {:noreply, socket |> push_patch(to: ~p"/battles/#{latest.id}")}
+      {:noreply, socket |> push_patch(to: ~p"/v1/battles/#{latest.id}")}
     else
-      {:noreply, socket |> push_navigate(to: ~p"/training")}
+      {:noreply, socket |> push_navigate(to: ~p"/v1/training")}
     end
   end
 

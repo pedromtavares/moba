@@ -181,6 +181,78 @@ Hooks.AttackButton = {
   }
 }
 
+Hooks.BattleContinueHotkey = {
+  mounted(){
+    this.onKeyDown = (event) => {
+      if (event.key !== "Enter" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
+        return;
+      }
+
+      const activeElement = document.activeElement;
+      const tagName = activeElement && activeElement.tagName;
+
+      if (
+        activeElement &&
+          (activeElement.isContentEditable ||
+             tagName === "INPUT" ||
+             tagName === "TEXTAREA" ||
+             tagName === "SELECT" ||
+             tagName === "BUTTON")
+      ) {
+        return;
+      }
+
+      const selectors = ["#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training"];
+
+      const target = selectors
+        .map((selector) => this.el.querySelector(selector))
+        .find((element) => element && !element.disabled);
+
+      if (target) {
+        event.preventDefault();
+        target.click();
+      }
+    };
+
+    window.addEventListener("keydown", this.onKeyDown);
+  },
+  destroyed(){
+    window.removeEventListener("keydown", this.onKeyDown);
+  }
+}
+
+Hooks.ResetOnSubmit = {
+  mounted(){
+    this.el.addEventListener("submit", () => {
+      const fields = this.el.querySelectorAll("input[type='text'], textarea");
+
+      window.requestAnimationFrame(() => {
+        fields.forEach((field) => {
+          field.value = "";
+        });
+      });
+    });
+  }
+}
+
+Hooks.ResetFormOnEvent = {
+  mounted(){
+    const eventName = this.el.dataset.resetEvent;
+
+    if (!eventName) {
+      return;
+    }
+
+    this.handleEvent(eventName, () => {
+      const fields = this.el.querySelectorAll("input[type='text'], input[type='email'], input[type='password'], textarea");
+
+      fields.forEach((field) => {
+        field.value = "";
+      });
+    });
+  }
+}
+
 Hooks.ShareBattle = {
   mounted(){
     let button = $(this.el);

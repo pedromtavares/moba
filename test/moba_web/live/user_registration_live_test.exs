@@ -34,6 +34,17 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       assert result =~ "must have the @ sign and no spaces"
       assert result =~ "should be at least 6 character"
     end
+
+    test "keeps password value while validating other fields", %{conn: conn} do
+      {:ok, lv, _html} = live(conn, ~p"/users/register")
+
+      result =
+        lv
+        |> element("#registration_form")
+        |> render_change(user: %{"email" => "with spaces", "password" => "secret1"})
+
+      assert result =~ ~s(value="secret1")
+    end
   end
 
   describe "register user" do
@@ -46,6 +57,51 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       conn = follow_trigger_action(form, conn)
 
       assert redirected_to(conn) == ~p"/base"
+    end
+
+    test "guest onboarding keeps the created hero and logs the user in", %{conn: conn} do
+      skills = Enum.map(base_skills(), & &1.id)
+      avatar = base_avatar().id
+
+      conn = post(conn, ~p"/start", %{"skills" => skills, "avatar" => avatar})
+
+      guest_player_id = get_session(conn, :player_id)
+      guest_player = Game.get_player!(guest_player_id)
+      guest_hero = guest_player.current_pve_hero
+
+      assert redirected_to(conn) == ~p"/training"
+      assert guest_player.user_id == nil
+      assert guest_hero.player_id == guest_player_id
+
+      {:ok, lv, _html} =
+        conn
+        |> recycle()
+        |> live(~p"/users/register")
+
+      attrs = valid_user_attributes()
+      form = form(lv, "#registration_form", user: attrs)
+      render_submit(form)
+      conn = follow_trigger_action(form, conn)
+
+      redirected_path = redirected_to(conn)
+      user = Accounts.get_user_by_email(attrs.email)
+      player = Game.get_player!(guest_player_id)
+
+      assert redirected_path == ~p"/base"
+      assert get_session(conn, :user_token)
+      assert get_session(conn, :player_id) == guest_player_id
+      assert user
+      assert player.user_id == user.id
+      assert player.current_pve_hero_id == guest_hero.id
+      assert Game.get_hero!(guest_hero.id).player_id == guest_player_id
+      assert Game.get_hero!(guest_hero.id).name == user.username
+
+      conn =
+        conn
+        |> recycle()
+        |> get(redirected_path)
+
+      assert html_response(conn, 200) =~ "Train a new Hero"
     end
 
     test "renders errors for duplicated email", %{conn: conn} do

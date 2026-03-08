@@ -3,7 +3,7 @@
     <div class="col-4">
       <div class="card mb-0" id="player-card">
         <h2 class="text-center f-rpg">
-          <.link navigate={~p"/player/#{@match.player}"} class="text-white">
+          <.link navigate={~p"/v1/player/#{@match.player}"} class="text-white">
             <%= username(@match.player) %>
           </.link>
         </h2>
@@ -137,7 +137,7 @@
     <div class="col-4">
       <div class="card mb-0">
         <h2 class="text-center f-rpg">
-          <.link navigate={~p"/player/#{@match.opponent}"} class="text-white">
+          <.link navigate={~p"/v1/player/#{@match.opponent}"} class="text-white">
             <%= username(@match.opponent) %>
           </.link>
         </h2>
@@ -151,4 +151,4 @@
   </div>
 </div>
 
-<.live_component module={MobaWeb.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+<.live_component module={MobaWeb.V1.TutorialComponent} step={@tutorial_step} id="tutorial-step" />

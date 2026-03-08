@@ -50,7 +50,7 @@ defmodule MobaWeb.V2.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> redirect(to: "/v2/training")}
+       |> redirect(to: "/training")}
     else
       {:noreply, socket}
     end

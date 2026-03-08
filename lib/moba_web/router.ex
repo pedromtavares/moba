@@ -52,24 +52,23 @@ defmodule MobaWeb.Router do
   end
 
   scope "/", MobaWeb do
-    pipe_through [:browser, :base_layout]
-
-    live "/battles/:id", BattleLive
-  end
-
-  scope "/", MobaWeb do
     pipe_through [:browser, :player_protected, :base_layout]
 
     get "/auth", AuthController, :start
     get "/auth/:provider", AuthController, :request
     get "/auth/:provider/callback", AuthController, :callback
+  end
 
-    live_session :default, on_mount: MobaWeb.PlayerLiveAuth do
+  scope "/v1", MobaWeb.V1 do
+    pipe_through [:browser, :player_protected, :base_layout]
+
+    live_session :v1_game, on_mount: MobaWeb.PlayerLiveAuth do
       live "/invoke", CreateLive
 
       live "/training", TrainingLive
 
       live "/battles", BattlesLive
+      live "/battles/:id", BattleLive
 
       live "/base", DashboardLive
 
@@ -93,7 +92,7 @@ defmodule MobaWeb.Router do
   end
 
   # V2 routes — separate live_session, separate layout, separate asset pipeline
-  scope "/v2", MobaWeb.V2 do
+  scope "/", MobaWeb.V2 do
     pipe_through [:browser, :player_protected]
 
     live_session :v2_game,

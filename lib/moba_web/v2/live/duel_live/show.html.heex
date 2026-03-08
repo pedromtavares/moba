@@ -3,6 +3,7 @@
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
+  hide_footer={true}
 >
   <div class="duel mt-2" style="margin-bottom: 100px">
     <div class="row">
@@ -13,8 +14,8 @@
               <div>
                 <h2 class="mb-0">
                   <img src={"/images/pve/#{@duel.player.pve_tier}.png"} style="max-height: 50px" />
-                  <.link navigate={~p"/v2/player/#{@duel.player}"}>{username(@duel.player)}</.link>
-                  vs <.link navigate={~p"/v2/player/#{@duel.opponent_player}"}>{username(@duel.opponent_player)}</.link>
+                  <.link navigate={~p"/player/#{@duel.player}"}>{username(@duel.player)}</.link>
+                  vs <.link navigate={~p"/player/#{@duel.opponent_player}"}>{username(@duel.opponent_player)}</.link>
                   <img src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"} style="max-height: 50px" />
                 </h2>
                 <span :if={casual?(@duel)} class="font-15 badge badge-pill badge-light-success">Casual</span>
@@ -107,14 +108,16 @@
               </a>
             </div>
           </div>
-          <.form for={@message_form} id="duel-message-form" phx-submit="create-message" class="form-horizontal">
+          <.form for={@message_form} id="duel-message-form" phx-submit="create-message" phx-hook="ResetOnSubmit" class="form-horizontal">
             <input
+              id={"duel-message-body-#{@message_form_nonce}"}
               type="text"
               name={@message_form[:body].name}
               value={@message_form[:body].value}
               class="form-control darker"
               placeholder="Type and press Enter to chat"
               maxlength="200"
+              minlength="2"
             />
           </.form>
         </div>
@@ -148,7 +151,7 @@
           <%= if @first_battle.finished do %>
             <div class="card">
               <div class="card-body p-3">
-                <.link navigate={~p"/v2/battles/#{@first_battle}"} class="btn btn-lg btn-block btn-warning mb-2">
+                <.link navigate={~p"/battles/#{@first_battle}"} class="btn btn-lg btn-block btn-warning mb-2">
                   <i class="fa fa-eye"></i> View Battle
                 </.link>
                 <.turn_snapshot
@@ -163,16 +166,24 @@
               </div>
             </div>
           <% else %>
-            <.link
-              navigate={~p"/v2/battles/#{@first_battle}"}
-              class="btn btn-outline-danger btn-block btn-lg pt-5"
-              id={"loading-battle-#{@first_battle.id}"}
-            >
-              <span class="loading-text">
-                <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
-                <strong class="font-20 d-block">Enter Battle</strong>
-              </span>
-            </.link>
+            <div class="row">
+              <div class="col">
+                <div style="min-height: 250px" class="d-flex">
+                  <.link
+                    navigate={~p"/battles/#{@first_battle}"}
+                    class="btn btn-outline-danger btn-block btn-lg pt-5"
+                    phx-hook="Loading"
+                    data-loading="Entering..."
+                    id={"loading-battle-#{@first_battle.id}"}
+                  >
+                    <span class="loading-text">
+                      <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
+                      <strong class="font-20 d-block">Enter Battle</strong>
+                    </span>
+                  </.link>
+                </div>
+              </div>
+            </div>
           <% end %>
         </div>
       </div>
@@ -236,7 +247,7 @@
           <%= if @last_battle.finished do %>
             <div class="card">
               <div class="card-body p-3">
-                <.link navigate={~p"/v2/battles/#{@last_battle}"} class="btn btn-lg btn-block btn-warning mb-2">
+                <.link navigate={~p"/battles/#{@last_battle}"} class="btn btn-lg btn-block btn-warning mb-2">
                   <i class="fa fa-eye"></i> View Battle
                 </.link>
                 <.turn_snapshot
@@ -251,16 +262,24 @@
               </div>
             </div>
           <% else %>
-            <.link
-              navigate={~p"/v2/battles/#{@last_battle}"}
-              class="btn btn-outline-danger btn-block btn-lg pt-5"
-              id={"loading-battle-#{@last_battle.id}"}
-            >
-              <span class="loading-text">
-                <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
-                <strong class="font-20 d-block">Enter Battle</strong>
-              </span>
-            </.link>
+            <div class="row">
+              <div class="col">
+                <div style="min-height: 250px" class="d-flex">
+                  <.link
+                    navigate={~p"/battles/#{@last_battle}"}
+                    class="btn btn-outline-danger btn-block btn-lg pt-5"
+                    phx-hook="Loading"
+                    data-loading="Entering..."
+                    id={"loading-battle-#{@last_battle.id}"}
+                  >
+                    <span class="loading-text">
+                      <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
+                      <strong class="font-20 d-block">Enter Battle</strong>
+                    </span>
+                  </.link>
+                </div>
+              </div>
+            </div>
           <% end %>
         </div>
       </div>

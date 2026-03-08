@@ -1,7 +1,8 @@
-defmodule MobaWeb.TrainingLive do
+defmodule MobaWeb.V1.TrainingLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{TutorialComponent, Shop, TrainingView}
+  alias MobaWeb.{TrainingView}
+  alias MobaWeb.V1.{Shop, TutorialComponent}
 
   def mount(_, _, socket) do
     with %{assigns: %{current_hero: hero}} = socket = socket_init(socket) do
@@ -23,7 +24,7 @@ defmodule MobaWeb.TrainingLive do
   def handle_event("battle", %{"id" => id}, socket) do
     with socket = TutorialComponent.next_step(socket, 2),
          battle = Game.get_target!(id) |> Game.start_pve_battle!() do
-      {:noreply, push_navigate(socket, to: ~p"/battles/#{battle.id}")}
+      {:noreply, push_navigate(socket, to: ~p"/v1/battles/#{battle.id}")}
     end
   end
 
@@ -37,7 +38,7 @@ defmodule MobaWeb.TrainingLive do
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
     with socket = TutorialComponent.next_step(socket, 10),
          battle = Game.start_league_battle!(hero) do
-      {:noreply, socket |> push_navigate(to: ~p"/battles/#{battle.id}")}
+      {:noreply, socket |> push_navigate(to: ~p"/v1/battles/#{battle.id}")}
     end
   end
 
@@ -60,7 +61,7 @@ defmodule MobaWeb.TrainingLive do
          skills = Enum.map(hero.skills, &Game.get_skill_by_code!(&1.code, true, 1)) do
       Game.create_current_pve_hero!(%{name: hero.name}, player, hero.avatar, skills)
 
-      {:noreply, socket |> redirect(to: "/training")}
+      {:noreply, socket |> redirect(to: "/v1/training")}
     end
   end
 
@@ -168,11 +169,11 @@ defmodule MobaWeb.TrainingLive do
 
   defp maybe_redirect(%{assigns: %{current_hero: %{finished_at: finished_at} = hero}} = socket)
        when not is_nil(finished_at) do
-    redirect(socket, to: ~p"/hero/#{hero.id}")
+    redirect(socket, to: ~p"/v1/hero/#{hero.id}")
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: current_hero}} = socket) when is_nil(current_hero) do
-    redirect(socket, to: "/base")
+    redirect(socket, to: "/v1/base")
   end
 
   defp maybe_redirect(socket), do: socket

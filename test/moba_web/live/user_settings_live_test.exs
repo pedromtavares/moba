@@ -99,6 +99,25 @@ defmodule MobaWeb.UserSettingsLiveTest do
 
       assert result =~ "should be at least 6 character(s)"
     end
+
+    test "keeps password values after invalid password submit", %{conn: conn, user: user} do
+      {:ok, lv, _html} = live(conn, ~p"/users/settings")
+
+      result =
+        lv
+        |> form("#settings_form", %{
+          "user" => %{
+            "username" => user.username,
+            "email" => user.email,
+            "password" => "short",
+            "password_confirmation" => "mismatch"
+          }
+        })
+        |> render_submit()
+
+      assert result =~ ~s(value="short")
+      assert result =~ ~s(value="mismatch")
+    end
   end
 
   describe "confirm email" do

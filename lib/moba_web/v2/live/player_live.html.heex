@@ -155,7 +155,7 @@
                       <tr>
                         <td class="text-center" width="33%">
                           <span class="opponent">
-                            <.link navigate={~p"/v2/player/#{match.opponent_id}"}>
+                            <.link navigate={~p"/player/#{match.opponent_id}"}>
                               {username(match.opponent)}
                             </.link>
                           </span>
@@ -168,7 +168,7 @@
 
                         <td class="text-center" width="33%">
                           <.link
-                            navigate={~p"/v2/matches/#{match}"}
+                            navigate={~p"/matches/#{match}"}
                             class="btn btn-light btn-sm"
                             data-toggle="tooltip"
                             title={String.capitalize(match.type)}
@@ -217,7 +217,7 @@
                   <tr>
                     <td class="text-center">
                       <span class="opponent">
-                        <.link navigate={~p"/v2/player/#{opponent_for(duel, @player).id}"}>
+                        <.link navigate={~p"/player/#{opponent_for(duel, @player).id}"}>
                           {duel |> opponent_for(@player) |> username()}
                         </.link>
                       </span>
@@ -233,7 +233,7 @@
                     </td>
 
                     <td>
-                      <.link navigate={~p"/v2/arena/#{duel}"} class="btn btn-light btn-sm">
+                      <.link navigate={~p"/arena/#{duel}"} class="btn btn-light btn-sm">
                         <i class="fa fa-eye"></i>
                       </.link>
                     </td>
@@ -333,7 +333,7 @@
                     </td>
                     <td>
                       <.link
-                        navigate={~p"/v2/player/#{player.id}"}
+                        navigate={~p"/player/#{player.id}"}
                         title={"#{player.pvp_points} Season Points"}
                         data-toggle="tooltip"
                       >

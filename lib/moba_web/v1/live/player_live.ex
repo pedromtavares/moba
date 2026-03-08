@@ -1,4 +1,4 @@
-defmodule MobaWeb.PlayerLive do
+defmodule MobaWeb.V1.PlayerLive do
   use MobaWeb, :live_view
 
   def mount(_, _session, socket) do

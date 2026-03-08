@@ -11,7 +11,7 @@ defmodule MobaWeb.V2.CreateLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, html} = live(conn, "/v2/invoke")
+      {:ok, view, html} = live(conn, "/invoke")
 
       assert html =~ "Pick your"
       assert has_element?(view, "#randomize-button")
@@ -27,7 +27,7 @@ defmodule MobaWeb.V2.CreateLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/invoke")
+      {:ok, view, _html} = live(conn, "/invoke")
 
       avatar = Game.list_creation_avatars(Accounts.unlocked_codes_for(hero.player.user)) |> List.first()
 

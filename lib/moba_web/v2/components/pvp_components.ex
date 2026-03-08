@@ -4,8 +4,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   """
   use Phoenix.Component
 
-  import MobaWeb.V2.Components.GameComponents
-
+  alias MobaWeb.GameHelpers, as: LegacyGH
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
   attr :hero, :map, required: true
@@ -25,14 +24,14 @@ defmodule MobaWeb.V2.Components.PvpComponents do
       style={"background-image: url(#{GH.background_url(@hero)})"}
     >
       <div class="card-header pt-0 pb-1">
-        <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
+        <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
           <span class="font-italic font-20 f-rpg">
             <%= if @hero.pve_ranking do %>
-              #{@hero.pve_ranking}
+              {"##{@hero.pve_ranking}"}
             <% end %>
           </span>
           <div>
-            <.league_badge tier={@hero.league_tier} size="sm" class="mr-1" />
+            {LegacyGH.hero_league(@hero)}
             {@hero.name}
           </div>
           <span class="font-15 font-italic" title={hero_stats_title(@hero)}>
@@ -40,15 +39,35 @@ defmodule MobaWeb.V2.Components.PvpComponents do
           </span>
         </h4>
       </div>
-      <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
-      <div class="card-footer transparent p-1">
+      <div class="card-body text-center"></div>
+      <div class="transparent card-footer p-0 text-center">
+        <div class="row my-1">
+          <div class="col justify-content-center d-flex">
+            {LegacyGH.hero_stats(@hero, true)}
+          </div>
+        </div>
         <div class="row">
           <div class="col-12">
             <div class="skills-container d-flex justify-content-between">
-              <.skill_icon :for={skill <- @hero.skills} skill={skill} size="sm" />
+              <img
+                :for={skill <- @hero.skills}
+                src={GH.image_url(skill)}
+                data-toggle="tooltip"
+                title={LegacyGH.skill_description(skill)}
+                class={["skill-img img-border-sm tooltip-mobile", skill.passive && "passive"]}
+                alt={skill.name}
+              />
             </div>
-            <div class="items-container row no-gutters float-right">
-              <.item_slot :for={item <- sort_items(@hero.items)} item={item} size="sm" class="mr-1 mb-1" />
+            <div class="items-container row no-gutters">
+              <div :for={item <- sort_items(@hero.items)} class="item-container col-4">
+                <img
+                  src={GH.image_url(item)}
+                  data-toggle="tooltip"
+                  title={LegacyGH.item_description(item)}
+                  class={["item-img img-border-xs tooltip-mobile", !item.active && "passive"]}
+                  alt={item.name}
+                />
+              </div>
             </div>
           </div>
         </div>
@@ -123,10 +142,10 @@ defmodule MobaWeb.V2.Components.PvpComponents do
 
   defp mana_pct(_), do: 0
 
-  defp sort_items(items) when is_list(items), do: Enum.sort_by(items, fn item -> not item.active end)
-  defp sort_items(_), do: []
-
   defp hero_stats_title(hero) do
     "HP: #{hero.total_hp} | MP: #{hero.total_mp} | ATK: #{hero.atk} | POW: #{hero.power} | ARM: #{hero.armor} | SPD: #{hero.speed}"
   end
+
+  defp sort_items(items) when is_list(items), do: Moba.Game.sort_items(items)
+  defp sort_items(_), do: []
 end

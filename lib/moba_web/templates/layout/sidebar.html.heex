@@ -1,7 +1,7 @@
 <div class="sidebar-nav-container">
   <div class="sidebar-nav d-none d-md-flex">
     <.link
-      navigate={~p"/base"}
+      navigate={~p"/v1/base"}
       data-toggle="tooltip"
       data-tippy-placement="right"
       data-tippy-arrow={false}
@@ -12,7 +12,7 @@
     </.link>
     <%= if @current_player.user_id do %>
       <.link
-        navigate={~p"/arena"}
+        navigate={~p"/v1/arena"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -45,7 +45,7 @@
       </.link>
     <% else %>
       <.link
-        navigate={~p"/player/#{@current_player.id}"}
+        navigate={~p"/v1/player/#{@current_player.id}"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -55,7 +55,7 @@
         <i class="fa-duotone fa-helmet-battle"></i>
       </.link>
       <.link
-        navigate={~p"/tavern"}
+        navigate={~p"/v1/tavern"}
         data-toggle="tooltip"
         data-tippy-placement="right"
         data-tippy-arrow={false}
@@ -66,7 +66,7 @@
       </.link>
     <% end %>
     <.link
-      navigate={~p"/community"}
+      navigate={~p"/v1/community"}
       data-toggle="tooltip"
       data-tippy-placement="right"
       data-tippy-arrow={false}
@@ -79,7 +79,7 @@
       <% end %>
     </.link>
     <.link
-      navigate={~p"/library"}
+      navigate={~p"/v1/library"}
       data-toggle="tooltip"
       data-tippy-placement="right"
       data-tippy-arrow={false}

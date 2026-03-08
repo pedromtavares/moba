@@ -178,4 +178,161 @@
     padding: 1rem;
     text-align: center;
   }
+
+  .hero-card {
+    background-color: initial !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    min-height: 300px;
+  }
+
+  .hero-card .card-header {
+    background-color: rgba(54, 64, 74, 0.8);
+  }
+
+  .hero-card .card-body {
+    background-color: initial !important;
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: 80%;
+    min-height: 200px;
+  }
+
+  .hero-card .skills-container {
+    width: 70%;
+    float: left;
+    max-height: 90px;
+  }
+
+  .hero-card .skill-img {
+    width: 25%;
+    border: 0.2rem solid #36404a;
+  }
+
+  .hero-card .skill-img.passive {
+    border-color: #36404a !important;
+  }
+
+  .hero-card .items-container {
+    width: 30%;
+    float: left;
+    height: 100%;
+    border: 0.2rem solid #36404a;
+    border-right: 0;
+    border-bottom: 0;
+  }
+
+  .hero-card .item-container {
+    max-height: 43px;
+  }
+
+  .hero-card .item-img {
+    width: 100%;
+    height: 100%;
+    border: 0.1rem solid #36404a;
+  }
+
+  .hero-card .item-img.passive {
+    border-color: #36404a !important;
+    border-width: 0.1rem !important;
+  }
+
+  .duel .header {
+    height: 160px;
+    padding-top: 1.5rem;
+  }
+
+  .duel .hero-card {
+    min-height: 200px;
+    margin-bottom: 0;
+  }
+
+  .duel .hero-card .card-header {
+    min-height: 45px;
+  }
+
+  .duel .hero-card .card-footer {
+    background-color: rgba(54, 64, 74, 0.95) !important;
+  }
+
+  .duel .inbox-widget {
+    height: 110px;
+    overflow: auto;
+  }
+
+  .duel .inbox-item {
+    padding-bottom: 0.25rem !important;
+    padding-top: 0.25rem !important;
+  }
+
+  .duel .inbox-item p {
+    margin: 0;
+    float: left;
+    margin-top: -1px;
+  }
+
+  .duel .inbox-item-text {
+    width: 70%;
+  }
+
+  .duel .inbox-item-date {
+    width: 20%;
+  }
+
+  .duel .inbox-item-img,
+  .duel .inbox-item img {
+    width: 20px !important;
+  }
+
+  .duel .inbox-item-img {
+    margin-right: 5px !important;
+  }
+
+  .duel-battle-bar .nav-link {
+    text-align: center;
+  }
+
+  .matches .hero-card {
+    min-height: 150px;
+  }
+
+  .matches .picked-hero {
+    height: 155px;
+  }
+
+  .matches .picked-hero .card-footer {
+    display: none;
+  }
+
+  .matches .avatar {
+    max-width: 65px;
+  }
+
+  .matches .tab-content {
+    overflow: auto;
+  }
+
+  .matches .team .avatar {
+    max-width: initial !important;
+    width: 100%;
+  }
+
+  .matches .team .avatar-container {
+    width: 20%;
+  }
+
+.picked-hero-card {
+  border: 1px solid white !important;
+}
+
+.arena-edit .avatar-container {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.arena-edit .avatar-container .avatar {
+  vertical-align: middle;
+}
+
 }

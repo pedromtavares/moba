@@ -11,7 +11,7 @@ defmodule MobaWeb.V2.TavernLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, html} = live(conn, "/v2/tavern")
+      {:ok, view, html} = live(conn, "/tavern")
 
       assert html =~ "Skins"
       assert html =~ "Unlock new avatars, skills and skins"
@@ -30,7 +30,7 @@ defmodule MobaWeb.V2.TavernLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/v2/tavern")
+      {:ok, view, _html} = live(conn, "/tavern")
 
       html = render_click(view, "show-skills")
       assert html =~ "mouse over image for info"

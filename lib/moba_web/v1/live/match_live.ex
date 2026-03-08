@@ -1,7 +1,8 @@
-defmodule MobaWeb.MatchLive do
+defmodule MobaWeb.V1.MatchLive do
   use MobaWeb, :live_view
 
-  alias MobaWeb.{MatchView, TutorialComponent}
+  alias MobaWeb.MatchView
+  alias MobaWeb.V1.TutorialComponent
 
   @tick_timeout 500
   @max_tick 15

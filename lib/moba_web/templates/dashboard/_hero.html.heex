@@ -32,7 +32,7 @@
             </button>
           <% end %>
           <%= if @hero.finished_at do %>
-            <.link class="btn btn-primary" navigate={~p"/hero/#{@hero}"}>
+            <.link class="btn btn-primary" navigate={~p"/v1/hero/#{@hero}"}>
               <i class="fa fa-address-card mr-1"></i> Customize
             </.link>
           <% else %>

@@ -1,8 +1,9 @@
-<%= if @action_turn_number && !@battle.finished do %>
-  <div id="scroll-to-turn" phx-hook="ScrollToTarget" phx-target-element={"#turn-#{@action_turn_number}"} />
-<% end %>
+<div id="battle-page" phx-hook="BattleContinueHotkey">
+  <%= if @action_turn_number && !@battle.finished do %>
+    <div id="scroll-to-turn" phx-hook="ScrollToTarget" phx-target-element={"#turn-#{@action_turn_number}"} />
+  <% end %>
 
-<div id="hero-battle" class="battle mt-3">
+  <div id="hero-battle" class="battle mt-3">
   <div class="row">
     <div class="col-12 col-md-5">
       <.hero
@@ -56,7 +57,7 @@
             <div class="row">
               <div class="text-center col-12">
                 <%= if @battle.type == "pve" do %>
-                  <.link navigate={~p"/v2/training"} phx-hook="Loading" id="battle-over-training">
+                  <.link navigate={~p"/training"} phx-hook="Loading" id="battle-over-training">
                     <button class="btn btn-danger width-lg text-white">
                       <span class="loading-text">Battle Over!</span>
                     </button>
@@ -75,7 +76,7 @@
                   </a>
                 <% end %>
                 <%= if @battle.type == "duel" do %>
-                  <.link navigate={~p"/v2/base"} phx-hook="Loading" id="battle-over-duel">
+                  <.link navigate={~p"/arena/#{@battle.duel_id}"} phx-hook="Loading" id="battle-over-duel">
                     <button class="btn btn-danger width-lg text-white">
                       <span class="loading-text">Battle Over!</span>
                     </button>
@@ -109,50 +110,51 @@
     </div>
   </div>
   <div class="clearfix">&nbsp;</div>
-</div>
+  </div>
 
-<div id="battle-bar">
-  <div class="container-fluid">
-    <div class="row">
-      <.turn_hero
-        battle={@battle}
-        turn={@turn}
-        hero={@battle.attacker}
-        turn_hero={if(@turn.attacker.player_id == @battle.attacker_player_id, do: @turn.attacker, else: @turn.defender)}
-      />
+  <div id="battle-bar">
+    <div class="container-fluid">
+      <div class="row">
+        <.turn_hero
+          battle={@battle}
+          turn={@turn}
+          hero={@battle.attacker}
+          turn_hero={if(@turn.attacker.player_id == @battle.attacker_player_id, do: @turn.attacker, else: @turn.defender)}
+        />
 
-      <div class="col-12 col-xl-8 battle-border-left battle-border-right">
-        <%= if @battle.finished do %>
-          <%= case @battle.type do %>
-            <% "pve" -> %>
-              <.pve_rewards battle={@battle} snapshot={@snapshot} current_player={@current_player} />
-            <% "league" -> %>
-              <.league_rewards battle={@battle} snapshot={@snapshot} current_player={@current_player} />
-            <% "duel" -> %>
-              <.duel_rewards battle={@battle} current_player={@current_player} />
-            <% "match" -> %>
-              <.match_rewards battle={@battle} current_player={@current_player} />
-            <% _ -> %>
-              <div></div>
+        <div class="col-12 col-xl-8 battle-border-left battle-border-right">
+          <%= if @battle.finished do %>
+            <%= case @battle.type do %>
+              <% "pve" -> %>
+                <.pve_rewards battle={@battle} snapshot={@snapshot} current_player={@current_player} />
+              <% "league" -> %>
+                <.league_rewards battle={@battle} snapshot={@snapshot} current_player={@current_player} />
+              <% "duel" -> %>
+                <.duel_rewards battle={@battle} current_player={@current_player} />
+              <% "match" -> %>
+                <.match_rewards battle={@battle} current_player={@current_player} />
+              <% _ -> %>
+                <div></div>
+            <% end %>
+          <% else %>
+            <.active_battle
+              battle={@battle}
+              last_turn={@last_turn}
+              current_player={@current_player}
+              turn={@turn}
+              skill={@skill}
+              turn_timer={@turn_timer}
+            />
           <% end %>
-        <% else %>
-          <.active_battle
-            battle={@battle}
-            last_turn={@last_turn}
-            current_player={@current_player}
-            turn={@turn}
-            skill={@skill}
-            turn_timer={@turn_timer}
-          />
-        <% end %>
-      </div>
+        </div>
 
-      <.turn_hero
-        battle={@battle}
-        turn={@turn}
-        hero={@battle.defender}
-        turn_hero={if(@turn.attacker.player_id == @battle.attacker_player_id, do: @turn.defender, else: @turn.attacker)}
-      />
+        <.turn_hero
+          battle={@battle}
+          turn={@turn}
+          hero={@battle.defender}
+          turn_hero={if(@turn.attacker.player_id == @battle.attacker_player_id, do: @turn.defender, else: @turn.attacker)}
+        />
+      </div>
     </div>
   </div>
 </div>

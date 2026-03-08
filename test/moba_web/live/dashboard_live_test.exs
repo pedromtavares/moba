@@ -7,7 +7,7 @@ defmodule MobaWeb.DashboardLiveTest do
 
     conn = init_test_session(conn, player_id: player_id)
 
-    {:ok, _view, html} = live(conn, "/base")
+    {:ok, _view, html} = live(conn, "/v1/base")
     assert html =~ "Train a new Hero"
   end
 end
