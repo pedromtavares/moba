@@ -4,7 +4,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
   import Phoenix.LiveViewTest
 
   test "renders community and switches ranking tabs", %{conn: conn} do
-    hero = create_base_hero()
+    hero = create_base_hero(%{finished_at: Timex.now(), pve_ranking: 1})
 
     conn =
       conn
@@ -23,6 +23,8 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     render_click(view, "show-pve", %{})
     assert has_element?(view, "#show-pve-link.active")
+    assert has_element?(view, ".hero-stats .text-danger[title='Health']")
+    assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
   end
 
   test "creates a community message", %{conn: conn} do

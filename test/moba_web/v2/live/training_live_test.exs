@@ -103,6 +103,9 @@ defmodule MobaWeb.V2.TrainingLiveTest do
 
     {:ok, view, _html} = live(conn, "/training")
 
+    assert has_element?(view, "#hero-bar .stats-group .text-danger[title*='Health:']")
+    assert has_element?(view, "#hero-bar .stats-group .text-orange[title*='Speed:']")
+
     refute has_element?(view, "#shop-modal.d-block")
 
     view

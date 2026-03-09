@@ -222,6 +222,84 @@ defmodule MobaWeb.V2.Components.GameComponents do
     """
   end
 
+  @doc """
+  Renders one Bootstrap hero stat button.
+  """
+  attr :icon, :string, required: true
+  attr :value, :any, required: true
+  attr :variant, :string, default: "default"
+  attr :title, :string, required: true
+  attr :tone, :string, required: true
+
+  def hero_stat_button(assigns) do
+    ~H"""
+    <button
+      class={hero_stat_button_class(@variant, @tone)}
+      data-toggle="tooltip"
+      title={@title}
+      type={button_type(@variant)}
+    >
+      <i class={@icon}></i> {@value}
+    </button>
+    """
+  end
+
+  @doc """
+  Renders the standard six-stat hero button group.
+  """
+  attr :hero, :map, required: true
+  attr :tooltip_mode, :string, default: "simple"
+  attr :variant, :string, default: "default"
+
+  def hero_stat_group(assigns) do
+    ~H"""
+    <div class={hero_stat_group_class(@variant)}>
+      <.hero_stat_button
+        variant={@variant}
+        tone="danger"
+        icon="fa fa-heart mr-1"
+        title={hero_stat_title(@hero, :hp, @tooltip_mode)}
+        value={@hero.total_hp + @hero.item_hp}
+      />
+      <.hero_stat_button
+        variant={@variant}
+        tone="info"
+        icon="fa fa-bolt"
+        title={hero_stat_title(@hero, :mp, @tooltip_mode)}
+        value={@hero.total_mp + @hero.item_mp}
+      />
+      <.hero_stat_button
+        variant={@variant}
+        tone="success"
+        icon="fa fa-dagger"
+        title={hero_stat_title(@hero, :atk, @tooltip_mode)}
+        value={@hero.atk + @hero.item_atk}
+      />
+      <.hero_stat_button
+        variant={@variant}
+        tone="pink"
+        icon="fa fa-galaxy"
+        title={hero_stat_title(@hero, :power, @tooltip_mode)}
+        value={@hero.power + @hero.item_power}
+      />
+      <.hero_stat_button
+        variant={@variant}
+        tone="warning"
+        icon="fa fa-shield-halved"
+        title={hero_stat_title(@hero, :armor, @tooltip_mode)}
+        value={@hero.armor + @hero.item_armor}
+      />
+      <.hero_stat_button
+        variant={@variant}
+        tone="orange"
+        icon="fa fa-running"
+        title={hero_stat_title(@hero, :speed, @tooltip_mode)}
+        value={@hero.speed + @hero.item_speed}
+      />
+    </div>
+    """
+  end
+
   attr :label, :string, required: true
   attr :value, :any, required: true
   attr :color, :string, required: true
@@ -354,10 +432,118 @@ defmodule MobaWeb.V2.Components.GameComponents do
   defp stat_color("speed"), do: "text-speed"
   defp stat_color(_), do: "text-faction-text-muted"
 
+  defp hero_stat_group_class("hero_bar"), do: "btn-group stats-group f-rpg"
+  defp hero_stat_group_class(_), do: "btn-group hero-stats"
+
+  defp hero_stat_button_class("hero_bar", tone) do
+    "btn btn-icon btn-outline-dark #{tone_class(tone)} tooltip-mobile no-action"
+  end
+
+  defp hero_stat_button_class(_, "danger"), do: "btn btn-icon waves-effect btn-outline-dark text-danger"
+  defp hero_stat_button_class(_, tone), do: "btn btn-icon waves-effect waves-light btn-outline-dark #{tone_class(tone)}"
+
+  defp button_type("hero_bar"), do: "button"
+  defp button_type(_), do: nil
+
+  defp tone_class("danger"), do: "text-danger"
+  defp tone_class("info"), do: "text-info"
+  defp tone_class("success"), do: "text-success"
+  defp tone_class("pink"), do: "text-pink"
+  defp tone_class("warning"), do: "text-warning"
+  defp tone_class("orange"), do: "text-orange"
+
   defp sort_items(items) when is_list(items), do: Enum.sort_by(items, fn item -> !item.active end)
   defp sort_items(_), do: []
 
   defp hero_stats_title(hero) do
     "HP: #{hero.total_hp} | MP: #{hero.total_mp} | ATK: #{hero.atk} | POW: #{hero.power} | ARM: #{hero.armor} | SPD: #{hero.speed}"
+  end
+
+  defp hero_stat_title(hero, :hp, "detailed"), do: total_hp_description(hero)
+  defp hero_stat_title(hero, :mp, "detailed"), do: total_mp_description(hero)
+  defp hero_stat_title(hero, :atk, "detailed"), do: total_atk_description(hero)
+  defp hero_stat_title(hero, :power, "detailed"), do: total_power_description(hero)
+  defp hero_stat_title(hero, :armor, "detailed"), do: total_armor_description(hero)
+  defp hero_stat_title(hero, :speed, "detailed"), do: total_speed_description(hero)
+
+  defp hero_stat_title(_hero, :hp, _), do: "Health"
+  defp hero_stat_title(_hero, :mp, _), do: "Energy"
+  defp hero_stat_title(_hero, :atk, _), do: "Attack"
+  defp hero_stat_title(_hero, :power, _), do: "Power"
+  defp hero_stat_title(_hero, :armor, _), do: "Armor"
+  defp hero_stat_title(_hero, :speed, _), do: "Speed"
+
+  defp total_hp_description(hero) do
+    title = "Health: #{hero.total_hp + hero.item_hp}"
+    sub = "Main survival stat. When it reaches 0 in a battle, you die and receive no rewards."
+
+    main =
+      "Current base Health: #{hero.total_hp} <br/>Health given by items: #{hero.item_hp}<br/><br/>Health gain on level up: #{hero.avatar.hp_per_level}"
+
+    attribute_description(title, sub, main)
+  end
+
+  defp total_mp_description(hero) do
+    title = "Energy: #{hero.total_mp + hero.item_mp}"
+
+    sub =
+      "Main spending stat, used to power abilities and active items. When it reaches 0 in a battle, you will hit with a Basic Attack, which deals 100% Attack as Normal Damage."
+
+    main =
+      "Current base Energy: #{hero.total_mp} <br/>Energy given by items: #{hero.item_mp}<br/><br/>Energy gain on level up: #{hero.avatar.mp_per_level}"
+
+    attribute_description(title, sub, main)
+  end
+
+  defp total_atk_description(hero) do
+    title = "Attack: #{hero.atk + hero.item_atk}"
+    sub = "Base stat used to calculate damage in most skills and items."
+
+    main =
+      "Current Attack: #{hero.atk} <br/>Attack given by items: #{hero.item_atk}<br/><br/>Attack gain on level up: #{hero.avatar.atk_per_level}"
+
+    attribute_description(title, sub, main)
+  end
+
+  defp total_power_description(hero) do
+    title = "Power: #{hero.power + hero.item_power}"
+
+    sub =
+      "Amplifies your total damage output and regeneration in a turn by 1% for every point in Power. E.g. 10 Power will give you 10% amplification."
+
+    main = "Current Power: #{hero.power} <br/>Power given by items: #{hero.item_power}"
+    attribute_description(title, sub, main)
+  end
+
+  defp total_armor_description(hero) do
+    title = "Armor: #{hero.armor + hero.item_armor}"
+
+    sub =
+      "Reduces the total damage you take on a defending turn, applied after the amplification from the opponent's Power. Each point of Armor will give 1% of damage reduction, with a maximum of 90%."
+
+    main = "Current base Armor: #{hero.armor} <br/>Armor given by items: #{hero.item_armor}"
+
+    attribute_description(title, sub, main)
+  end
+
+  defp total_speed_description(hero) do
+    title = "Speed: #{hero.speed + hero.item_speed}"
+
+    sub =
+      "Each point in Speed gives you 1% chance to initiate a battle. E.g. 50 Speed will give you 50% chance to initiate. When defending, each point in Speed over 100 gives you 1% chance to Evade the next non-ultimate normal damage attack. Evade costs no Energy and has a 2 turn cooldown. E.g. 120 Speed will give you 20% chance to Evade."
+
+    main = "Current base Speed: #{hero.speed} <br/>Speed given by items: #{hero.item_speed}"
+
+    attribute_description(title, sub, main)
+  end
+
+  defp attribute_description(title, sub, main) do
+    "
+      <h3 class='mb-1 text-center'>#{title}</h3>
+      <span class='text-dark'>#{sub}</span>
+      <div class='text-center mt-1'>
+        #{main}
+      </div>
+    "
   end
 end

@@ -17,6 +17,8 @@ defmodule MobaWeb.V2.HeroLiveTest do
       assert has_element?(view, "#hero-review")
       assert has_element?(view, "#ranking-card")
       assert has_element?(view, "a[href='/player/#{hero.player_id}']")
+      assert has_element?(view, ".hero-stats .text-danger[title='Health']")
+      assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
     end
 
     test "owner sees skin controls", %{conn: conn} do
