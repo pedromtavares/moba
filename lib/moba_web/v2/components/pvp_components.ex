@@ -4,9 +4,8 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   """
   use Phoenix.Component
 
-  import MobaWeb.V2.Components.GameComponents, only: [hero_item_strip: 1, hero_skill_strip: 1]
+  import MobaWeb.V2.Components.GameComponents, only: [hero_item_strip: 1, hero_skill_strip: 1, hero_stat_group: 1]
 
-  alias MobaWeb.GameHelpers, as: LegacyGH
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
   attr :hero, :map, required: true
@@ -33,7 +32,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
             <% end %>
           </span>
           <div>
-            {LegacyGH.hero_league(@hero)}
+            <img src={"/images/league/#{@hero.league_tier}.png"} class="league-logo" alt="" />
             {@hero.name}
           </div>
           <span class="font-15 font-italic" title={hero_stats_title(@hero)}>
@@ -45,13 +44,13 @@ defmodule MobaWeb.V2.Components.PvpComponents do
       <div class="transparent card-footer p-0 text-center">
         <div class="row my-1">
           <div class="col justify-content-center d-flex">
-            {LegacyGH.hero_stats(@hero, true)}
+            <.hero_stat_group hero={@hero} />
           </div>
         </div>
         <div class="row">
           <div class="col-12">
-            <.hero_skill_strip skills={@hero.skills} tooltip_fun={&LegacyGH.skill_description/1} />
-            <.hero_item_strip items={sort_items(@hero.items)} tooltip_fun={&LegacyGH.item_description/1} />
+            <.hero_skill_strip skills={@hero.skills} />
+            <.hero_item_strip items={sort_items(@hero.items)} />
           </div>
         </div>
       </div>

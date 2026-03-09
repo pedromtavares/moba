@@ -21,6 +21,8 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     assert has_element?(view, "[id^=hero_]")
     assert has_element?(view, "#battle-bar")
+    assert has_element?(view, ".hero-card .league-logo")
+    assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
     refute has_element?(view, ".duel-pending-battle-card")
   end
 

@@ -39,6 +39,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
     assert has_element?(view, ~s|#winner-card[phx-hook="EqualHeight"][phx-target="#player-card"]|)
     assert has_element?(view, ~s|#picks-card[phx-hook="EqualHeight"][phx-target="#opponent-heroes-container"]|)
+    refute has_element?(view, ".stats-footer")
     render_click(view, "hero-tab", %{"type" => "trained"})
     render_click(view, "pick-hero", %{"id" => first_hero.id})
     assert has_element?(view, "#hero-#{first_hero.id}")
