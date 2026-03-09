@@ -187,35 +187,6 @@ defmodule MobaWeb.V2.BattleLive do
   defp item_name(%{name: name}), do: "and #{name}"
   defp item_name(item), do: "and #{item["name"]}"
 
-  defp cooldown_for(nil, _), do: nil
-  defp cooldown_for(%Game.Schema.Item{active: false}, _), do: nil
-  defp cooldown_for(%Game.Schema.Skill{passive: true}, _), do: nil
-
-  defp cooldown_for(resource, battler) do
-    cd = battler.cooldowns[resource.code]
-    display_cooldown(cd && cd + 1)
-  end
-
-  defp resource_status(resource, battler) do
-    cooldown = cooldown_for(resource, battler)
-
-    cond do
-      resource.mp_cost && battler.current_mp < resource.mp_cost ->
-        raw(
-          "<span class='badge badge-pill badge-primary cooldown'><i class='fa fa-bolt'></i> #{resource.mp_cost}</span>"
-        )
-
-      cooldown ->
-        raw("<span class='badge badge-pill badge-warning cooldown'><i class='fa fa-clock'></i> #{cooldown}</span>")
-
-      true ->
-        raw("<span class='badge badge-pill badge-danger passive'><i class='fa fa-times'></i></span>")
-    end
-  end
-
-  defp display_cooldown(result) when result < 0, do: 0
-  defp display_cooldown(result), do: result
-
   defp battle_result(%{type: "pve"} = battle) do
     cond do
       is_nil(battle.winner_id) -> "Draw! Both survived."

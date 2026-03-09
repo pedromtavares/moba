@@ -53,6 +53,138 @@ What is still mixed together:
 - Some helpers return raw HTML strings instead of HEEx/function components.
 - Some modules are still “ported v1 markup” rather than a stable `v2` API.
 
+## Progress Update
+
+The component plan is no longer just aspirational. Several core `v2` slices have already been implemented.
+
+### Completed So Far
+
+#### `/start` and `CreateLive`
+
+- `/start` is now a routed `v2` LiveView instead of a controller-mounted `live_render`.
+- cache-key setup moved into Plug/session setup instead of a controller wrapper.
+- `CreateLive` was split into orchestration plus page-local rendering in:
+  - `lib/moba_web/v2/live/create_live.ex`
+  - `lib/moba_web/v2/components/create_components.ex`
+- the create flow now uses named function components for:
+  - avatar picker
+  - selected avatar panel
+  - build picker
+  - custom skill picker
+  - selected skills bar
+  - create submit panel
+
+#### Shared game display primitives
+
+The following shared display components now exist in `lib/moba_web/v2/components/game_components.ex`:
+
+- `hero_stat_button`
+- `hero_stat_group`
+- `battle_hero_stat_group`
+- `hero_skill_strip`
+- `hero_item_strip`
+- `skill_image`
+- `league_badge`
+
+These are now used across multiple `v2` surfaces instead of duplicated inline markup.
+
+#### Battle turn primitives
+
+A dedicated battle component module now exists:
+
+- `lib/moba_web/v2/components/battle_components.ex`
+
+It currently owns the repeated battle-turn display primitives for:
+
+- battle resource images
+- battle status icons
+- empty item slots
+- resource status badges
+
+These are now used by:
+
+- `battle_live/active_turn.html.heex`
+- `battle_live/passive_turn.html.heex`
+- `battle_live/turn.html.heex`
+
+This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`.
+
+#### Hero stat row migration
+
+The shared stat row has already been adopted in:
+
+- `hero_bar_components.ex`
+- `hero_live.ex`
+- `community_live.ex`
+- `pvp_components.ex`
+- `battle_live/hero.html.heex` via `battle_hero_stat_group`
+
+#### Skill and item strip migration
+
+Shared skill/item rendering has already been adopted in:
+
+- `hero_live`
+- `community_live`
+- `pvp_components`
+- `player_live`
+- `training_live/target.html.heex`
+- `training_live/boss.html.heex`
+- `battle_live/hero.html.heex`
+- `dashboard_live.html.heex`
+
+#### League badge migration
+
+Direct `league-logo` image markup in `v2` was replaced with `league_badge/1` using a legacy-compatible rendering mode.
+
+This has already been adopted in:
+
+- `create_components`
+- `player_live`
+- `player_live.html.heex`
+- `dashboard_live.html.heex`
+- `training_live/header.html.heex`
+- `battles_live/training_header.html.heex`
+- `battle_live/hero.html.heex`
+- `pvp_components`
+
+#### Legacy helper cleanup
+
+`v2` no longer depends on `MobaWeb.GameHelpers` from `pvp_components.ex`.
+
+The major `LegacyGH` dependency that remained in shared PvP rendering has been removed.
+
+#### Stat tooltip cleanup
+
+`v2` no longer calls the old `hero_stats_string/2` API directly at page call sites.
+
+Current `v2` stat tooltip usage goes through:
+
+- `hero_stats_tooltip/2` in `lib/moba_web/v2/components/game_helpers.ex`
+
+Current direct `v2` call sites:
+
+- `player_live.ex`
+- `training_live/target.html.heex`
+- `training_live/boss.html.heex`
+
+#### Library cleanup
+
+`library_live.html.heex` now uses shared skill display primitives instead of hand-rolled skill image markup for:
+
+- avatar ultimate display
+- skill grid icons
+
+### What This Means
+
+The project is now past the “prove the pattern” stage.
+
+The `v2` component system already has a functioning base:
+
+- page-local extraction is working (`CreateComponents`)
+- shared game primitives are in place
+- several of the most duplicated stat/skill/item/league fragments are centralized
+- the remaining work is now mostly about finishing adoption and tackling the harder battle/shop surfaces
+
 ## Design Principles
 
 ### 1. LiveViews should orchestrate, not paint
@@ -282,8 +414,8 @@ Responsibilities:
 
 Rules:
 
-- Remove dependency on `MobaWeb.GameHelpers`.
-- Replace `LegacyGH` usage with `v2` equivalents before expanding this module further.
+- Keep this module on `v2` helpers/components only.
+- Do not reintroduce `MobaWeb.GameHelpers`.
 
 ### Battle
 
@@ -305,6 +437,13 @@ Sources to absorb:
 
 - `lib/moba_web/v2/live/battle_live/*.heex`
 - raw badge/cooldown HTML currently in `lib/moba_web/v2/live/battle_live.ex`
+
+Status:
+
+- started
+- shared icon/resource primitives are extracted
+- the turn templates now use `BattleComponents`
+- larger battle description/effect/reward composition is still in progress
 
 ### Community
 
@@ -472,42 +611,67 @@ These are explicit cleanup targets for the component plan.
 
 Current issue:
 
-- `lib/moba_web/v2/components/pvp_components.ex` depends on legacy `MobaWeb.GameHelpers`
+- most major shared `v2` surfaces no longer depend on legacy `MobaWeb.GameHelpers`
+- compatibility helpers still exist in the codebase, especially for legacy templates outside `v2`
 
 Target:
 
 - move needed formatting/description logic into `MobaWeb.V2.Components.GameHelpers`
 - keep output visually identical
 
+Status:
+
+- `pvp_components.ex` is complete
+- remaining work is mostly broader legacy coexistence, not the main `v2` shared surfaces
+
 ### 2. Raw HTML helper output
 
 Current issue:
 
-- some battle and helper code returns HTML strings
+- some tooltip and battle/helper code still returns HTML strings
+- `hero_stats_tooltip/2` is an explicit compatibility formatter, but still string-based
+- battle-related formatting still has remaining raw-string debt, but one major raw path was removed from `BattleLive`
 
 Target:
 
 - replace with components such as `cooldown_badge`, `resource_cost_badge`, and `effect_badge`
 
+Status:
+
+- improved, but not finished
+- still an active debt item
+
 ### 3. Repeated hero/item/skill markup
 
 Current issue:
 
-- similar markup appears in create, community, hero, player, arena, and battle surfaces
+- most core hero/item/skill card-footer patterns are already centralized
+- remaining duplication is now concentrated in battle-turn UIs, shop UIs, tavern/library-specific displays, and a few highly customized templates
 
 Target:
 
 - centralize into shared game/pvp component APIs
 
+Status:
+
+- major progress made
+- still incomplete in battle- and shop-specific surfaces
+
 ### 4. Overgrown page templates
 
 Current issue:
 
-- some `.html.heex` files still act like full view layers instead of page composition
+- several pages are now mostly composition-oriented
+- some templates still remain large and page-heavy, especially dashboard, training, battle, and library content sections
 
 Target:
 
 - page templates should read like assembly code: sections composed from named components
+
+Status:
+
+- partial progress
+- still a worthwhile ongoing refactor target
 
 ### 5. Stateful components with too much rendering logic
 
@@ -518,6 +682,116 @@ Current issue:
 Target:
 
 - keep stateful shell if needed, but move markup into reusable function components/templates
+
+Status:
+
+- not started in a serious way
+
+## Remaining Work
+
+The next steps should focus on the highest-value remaining duplication and the most structurally awkward modules.
+
+### Priority 1: Battle turn surfaces
+
+Still needs work in:
+
+- effect/reward/description extraction from the remaining battle templates and helpers
+- the larger non-icon battle composition around descriptions, effects, and summaries
+
+Why:
+
+- the icon/resource layer is now extracted
+- the remaining battle debt is in the heavier description/effect/reward rendering paths
+
+Likely target:
+
+- `lib/moba_web/v2/components/battle_components.ex`
+
+### Priority 2: Shop extraction
+
+Still needs work in:
+
+- `lib/moba_web/v2/live/components/shop_component.ex`
+- `lib/moba_web/v2/live/components/shop_component/*.heex`
+
+Why:
+
+- this is still the most rendering-heavy stateful surface
+- it mixes state, item display, recipes, and action UI together
+
+Likely target:
+
+- keep the LiveComponent shell if needed
+- move rendering into `shop_components.ex` or embedded templates owned by a shop component module
+
+### Priority 3: Training section extraction
+
+Still needs work in:
+
+- training headers
+- target/boss/dead-state/farm-tab section ownership
+- remaining large training template composition
+
+Why:
+
+- some repeated display fragments are fixed already, but page-level section ownership is still mixed
+
+Likely target:
+
+- `lib/moba_web/v2/components/training_components.ex`
+
+### Priority 4: Dashboard/Profile section extraction
+
+Still needs work in:
+
+- `dashboard_live.html.heex`
+- `player_live.html.heex`
+- larger profile/dashboard collection and summary blocks
+
+Why:
+
+- the shared primitives are now there
+- the remaining work is mostly section extraction, not low-level display work
+
+Likely target:
+
+- `profile_components.ex`
+- possibly smaller dashboard/profile section modules if needed
+
+### Priority 5: Community and library section modules
+
+Still needs work in:
+
+- page-level extraction of `community` blocks
+- page-level extraction of `library` informational blocks
+
+Why:
+
+- lower urgency than battle/shop/training
+- mostly a composition cleanup now that some display primitives already exist
+
+### Priority 6: HTML-string tooltip/effect cleanup
+
+Still needs work in:
+
+- explicit battle/effect/reward helpers that still emit HTML strings
+- compatibility tooltip helpers that are still string-based
+
+Why:
+
+- this is the remaining conceptual mismatch with the “HEEx-first” goal
+- it is important, but riskier than the display-component extractions above
+
+## Suggested Current Order
+
+If work continues from here, the most sensible order is:
+
+1. battle turn components
+2. shop rendering extraction
+3. training section components
+4. dashboard/profile section components
+5. community/library section cleanup
+6. final HTML-string helper retirement
 
 ## Migration Strategy
 

@@ -149,6 +149,7 @@ defmodule MobaWeb do
 
       alias MobaWeb.V2.Layouts
       import MobaWeb.V2.Components.CreateComponents
+      import MobaWeb.V2.Components.BattleComponents
       import MobaWeb.V2.Components.GameComponents
       import MobaWeb.V2.Components.LayoutComponents
       import MobaWeb.V2.Components.PvpComponents

@@ -20,12 +20,10 @@
       <%= for {skill, index} <- Enum.with_index(@hero.skills) do %>
         <%= if can_use?(@turn, skill) && !@turn.attacker.double_skill do %>
           <div class="img-container skill-container float-left" data-resource={skill.id}>
-            <img
+            <.battle_resource_image
+              resource={skill}
               phx-value-id={skill.id}
               data-index={index}
-              src={GH.image_url(skill)}
-              data-toggle="tooltip"
-              title={GH.skill_description(skill)}
               data-name={skill.name}
               class={"skill-img can-use #{if @skill && @skill.code == skill.code, do: "current-skill"}"}
               phx-hook="InstaSkill"
@@ -37,15 +35,13 @@
           </div>
         <% else %>
           <div class="img-container skill-container float-left inactive">
-            <img
-              src={GH.image_url(skill)}
-              data-toggle="tooltip"
+            <.battle_resource_image
+              resource={skill}
               data-index={index}
-              title={GH.skill_description(skill)}
               class="skill-img"
               id={"inactive-skill-#{skill.id}"}
             />
-            {resource_status(skill, @turn.attacker)}
+            <.resource_status_badge resource={skill} battler={@turn.attacker} />
           </div>
         <% end %>
       <% end %>
@@ -74,13 +70,11 @@
       <%= for {item, index} <- Enum.with_index(@hero.items) do %>
         <%= if can_use?(@turn, item) do %>
           <div class="img-container item-container float-left">
-            <img
+            <.battle_resource_image
+              resource={item}
               phx-value-id={item.id}
               data-index={index}
               phx-hook="InstaItem"
-              src={GH.image_url(item)}
-              data-toggle="tooltip"
-              title={GH.item_description(item)}
               data-name={item.name}
               class="item-img can-use"
               id={"attacker-item-#{item.id}"}
@@ -92,21 +86,19 @@
           </div>
         <% else %>
           <div class="img-container item-container float-left inactive">
-            <img
-              src={GH.image_url(item)}
-              data-toggle="tooltip"
+            <.battle_resource_image
+              resource={item}
               data-index={index}
-              title={GH.item_description(item)}
               class="item-img inactive"
             />
-            {resource_status(item, @turn.attacker)}
+            <.resource_status_badge resource={item} battler={@turn.attacker} />
           </div>
         <% end %>
       <% end %>
       <%= if Enum.count(@hero.items) < 6 do %>
         <%= for _ <- (Enum.count(@hero.items)..5) do %>
           <div class="img-container item-container float-left">
-            <div class="item-img empty-item"></div>
+            <.empty_item_slot />
           </div>
         <% end %>
       <% end %>

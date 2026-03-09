@@ -22,6 +22,9 @@ defmodule MobaWeb.V2.BattleLiveTest do
     assert has_element?(view, ".hero-card .text-danger[title='Health']")
     assert has_element?(view, ".hero-card .text-orange[title='Speed']")
     assert has_element?(view, "#skill-#{hd(attacker.skills).id}-#{attacker.id}")
+    assert has_element?(view, "[id^='active-skill-']")
+    assert has_element?(view, "#pick-basic-attack[title]")
+    assert has_element?(view, ".item-img.empty-item")
   end
 
   test "next turn event", %{conn: conn, battle: battle, attacker: attacker} do
