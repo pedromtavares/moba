@@ -25,17 +25,12 @@
       </div>
       <div class="row">
         <div class="col-12 mt-1">
-          <div class="skills-container d-flex justify-content-between float-none margin-auto">
-            <%= for skill <- @boss.skills do %>
-              <img
-                src={GH.image_url(skill)}
-                data-toggle="tooltip"
-                title={GH.skill_description(skill)}
-                class={["skill-img img-border-sm tooltip-mobile", skill.passive && "passive"]}
-                id={"skill-#{skill.id}-#{@boss.id}"}
-              />
-            <% end %>
-          </div>
+          <.hero_skill_strip
+            skills={@boss.skills}
+            container_class="skills-container d-flex justify-content-between float-none margin-auto"
+            id_prefix="skill"
+            id_suffix={@boss.id}
+          />
         </div>
       </div>
     </div>

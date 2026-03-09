@@ -4,7 +4,9 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
   describe "connected mount" do
     test "renders player profile from /player/:player_id", %{conn: conn} do
-      hero = create_base_hero()
+      hero =
+        create_base_hero()
+        |> Game.buy_item!(base_item())
 
       conn =
         conn
@@ -16,6 +18,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert html =~ hero.player.user.username
       assert has_element?(view, "#user-profile")
       assert has_element?(view, "#loading-ranking")
+      assert has_element?(view, "#skill-#{hd(hero.skills).id}-#{hero.id}")
+      assert has_element?(view, "#item-#{hd(hero.items).id}-#{hero.id}")
     end
 
     test "renders player profile from /user/:id", %{conn: conn} do

@@ -149,30 +149,8 @@ defmodule MobaWeb.V2.PlayerLive do
         <div class="transparent card-footer p-0 text-center">
           <div class="row">
             <div class="col-12 mt-1">
-              <div class="skills-container d-flex justify-content-between">
-                <%= for skill <- @hero.skills do %>
-                  <img
-                    src={GH.image_url(skill)}
-                    class={["skill-img img-border-sm tooltip-mobile", skill.passive && "passive"]}
-                    data-toggle="tooltip"
-                    title={GH.skill_description(skill)}
-                    id={"skill-#{skill.id}-#{@hero.id}"}
-                  />
-                <% end %>
-              </div>
-              <div class="items-container row no-gutters">
-                <%= for item <- Game.sort_items(@hero.items) do %>
-                  <div class="item-container col-4">
-                    <img
-                      src={GH.image_url(item)}
-                      class={["item-img img-border-xs tooltip-mobile", !item.active && "passive"]}
-                      data-toggle="tooltip"
-                      title={GH.item_description(item)}
-                      id={"item-#{item.id}-#{@hero.id}"}
-                    />
-                  </div>
-                <% end %>
-              </div>
+              <.hero_skill_strip skills={@hero.skills} id_prefix="skill" id_suffix={@hero.id} />
+              <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
             </div>
           </div>
         </div>
