@@ -18,5 +18,7 @@ defmodule MobaWeb.V2.LibraryLiveTest do
     assert html =~ "Arena Guide"
     assert html =~ "Contact"
     assert has_element?(view, "#library")
+    assert has_element?(view, "#library .skill-img[title]")
+    assert has_element?(view, "#library .img-border-sm[title]")
   end
 end

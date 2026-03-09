@@ -166,6 +166,29 @@ defmodule MobaWeb.V2.Components.GameComponents do
   end
 
   @doc """
+  Renders a skill image using the current Bootstrap tooltip/icon markup.
+  """
+  attr :skill, :map, required: true
+  attr :class, :string, default: "skill-img img-border-sm tooltip-mobile"
+  attr :title, :string, default: nil
+  attr :id, :string, default: nil
+  attr :style, :string, default: nil
+
+  def skill_image(assigns) do
+    ~H"""
+    <img
+      src={GH.image_url(@skill)}
+      class={[@class, @skill.passive && "passive"]}
+      data-toggle="tooltip"
+      title={@title || GH.skill_description(@skill)}
+      id={@id}
+      style={@style}
+      alt={@skill.name}
+    />
+    """
+  end
+
+  @doc """
   Renders a hero skill strip using the current Bootstrap card footer markup.
   """
   attr :skills, :list, required: true
@@ -178,14 +201,12 @@ defmodule MobaWeb.V2.Components.GameComponents do
   def hero_skill_strip(assigns) do
     ~H"""
     <div class={@container_class}>
-      <img
+      <.skill_image
         :for={skill <- @skills}
-        src={GH.image_url(skill)}
-        class={[@image_class, skill.passive && "passive"]}
-        data-toggle="tooltip"
+        skill={skill}
+        class={@image_class}
         title={tooltip_for(@tooltip_fun, skill, &GH.skill_description/1)}
         id={dom_id(@id_prefix, skill.id, @id_suffix)}
-        alt={skill.name}
       />
     </div>
     """

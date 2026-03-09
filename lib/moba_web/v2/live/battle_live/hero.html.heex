@@ -35,31 +35,14 @@
     </div>
     <div class="row">
       <div class="col-12 mt-1">
-        <div class={"skills-container d-flex justify-content-between #{if length(@hero.items) == 0, do: "float-none margin-auto"}"}>
-          <%= for skill <- @hero.skills do %>
-            <img
-              src={GH.image_url(skill)}
-              data-toggle="tooltip"
-              title={GH.skill_description(skill)}
-              class={"skill-img img-border-sm #{if skill.passive, do: "passive"} tooltip-mobile"}
-              id={"skill-#{skill.id}-#{@hero.id}"}
-            />
-          <% end %>
-        </div>
+        <.hero_skill_strip
+          skills={@hero.skills}
+          container_class={"skills-container d-flex justify-content-between #{if length(@hero.items) == 0, do: "float-none margin-auto"}"}
+          id_prefix="skill"
+          id_suffix={@hero.id}
+        />
         <%= if length(@hero.items) > 0 do %>
-          <div class="items-container row no-gutters">
-            <%= for item <- Game.sort_items(@hero.items) do %>
-              <div class="item-container col-4">
-                <img
-                  src={GH.image_url(item)}
-                  data-toggle="tooltip"
-                  title={GH.item_description(item)}
-                  class={"item-img img-border-xs #{if !item.active, do: "passive"} tooltip-mobile"}
-                  id={"item-#{item.id}-#{@hero.id}"}
-                />
-              </div>
-            <% end %>
-          </div>
+          <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
         <% end %>
       </div>
     </div>

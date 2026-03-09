@@ -11,7 +11,10 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
   describe "connected mount" do
     test "renders pve progression and hero list", %{conn: conn} do
-      hero = create_base_hero()
+      hero =
+        create_base_hero()
+        |> Game.buy_item!(base_item())
+
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
       {:ok, view, html} = live(conn, "/base")
@@ -21,6 +24,8 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       assert html =~ "Finished"
       assert html =~ "id=\"pve-progression\""
       assert has_element?(view, "#visible-hero-#{hero.id} .league-logo")
+      assert has_element?(view, "#skill-#{hd(hero.skills).id}-#{hero.id}[title]")
+      assert has_element?(view, "#item-#{hd(hero.items).id}-#{hero.id}[title]")
     end
 
     test "shows unfinished heroes by default when they exist", %{conn: conn} do

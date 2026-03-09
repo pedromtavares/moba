@@ -368,13 +368,7 @@
           <div class="row mt-1">
             <%= for ultimate <- ultimates_for(avatar, @ultimates) do %>
               <div class="col-4">
-                <img
-                  src={GH.image_url(ultimate)}
-                  class={["img-border-sm", ultimate.passive && "passive"]}
-                  style="width: 60px"
-                  data-toggle="tooltip"
-                  title={GH.skill_description(ultimate)}
-                />
+                <.skill_image skill={ultimate} class="img-border-sm" style="width: 60px" />
               </div>
             <% end %>
           </div>
@@ -395,11 +389,7 @@
     <%= for {first, levels} <- @skills do %>
       <div class="col-12 col-md-6 col-lg-4 col-xl-3 text-center mb-3 select-avatar">
         <div class="card-box mb-0">
-          <img
-            src={GH.image_url(first)}
-            class={["skill-img img-border-sm", first.passive && "passive"]}
-            style="width: 80px"
-          />
+          <.skill_image skill={first} class="skill-img img-border-sm" style="width: 80px" />
           <br />
           <div>
             <h4 class="mt-1">{first.name}</h4>
