@@ -27,7 +27,13 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "normal" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
         <% end %>
       </div>
     </div>
@@ -49,7 +55,13 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "rare" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
         <% end %>
       </div>
     </div>
@@ -71,7 +83,13 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "epic" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
         <% end %>
       </div>
     </div>
@@ -93,7 +111,13 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "legendary" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
         <% end %>
       </div>
     </div>
@@ -114,35 +138,13 @@
         </h3>
         <div class="row">
           <%= for item <- @current_hero.items do %>
-            <div class="col-4 col-md-2 inventory-item">
-              <%= if can_select_inventory(item, @transmute, @recipe) do %>
-                <img
-                  src={GH.image_url(item)}
-                  data-toggle="tooltip"
-                  title={GH.item_description(item)}
-                  class={if item.active, do: "item-img active", else: "item-img"}
-                  phx-click="select-inventory"
-                  phx-value-code={item.code}
-                  phx-target="#shop"
-                  id={"transmute-#{item.id}"}
-                />
-              <% else %>
-                <img
-                  src={GH.image_url(item)}
-                  data-toggle="tooltip"
-                  title={GH.item_description(item)}
-                  class="item-img inactive"
-                />
-              <% end %>
-            </div>
+            <.inventory_item item={item} selectable={can_select_inventory(item, @transmute, @recipe)} />
           <% end %>
           <%= if length(@current_hero.items) < 6 do %>
             <%= for _ <- (length(@current_hero.items)..5) do %>
               <div class="d-none d-md-block col-md-2">
                 <div class="item-container float-left">
-                  <div class="item-img empty-item d-flex justify-content-center align-items-center">
-                    <i class="fa fa-cube fa-2x"></i>
-                  </div>
+                  <.shop_empty_item_slot class="item-img empty-item d-flex justify-content-center align-items-center" icon_class="fa fa-cube fa-2x" />
                 </div>
               </div>
             <% end %>
@@ -150,16 +152,7 @@
         </div>
         <%= if @selected_inventory do %>
           <hr />
-          <div class="row selected-shop">
-            <div class="col center d-flex justify-content-center">
-              <img
-                src={GH.image_url(@selected_inventory)}
-                data-toggle="tooltip"
-                title={GH.item_description(@selected_inventory)}
-                class="item-img"
-              />
-            </div>
-          </div>
+          <.selected_item item={@selected_inventory} />
           <hr />
           <div class="row">
             <div class="col center">
@@ -181,20 +174,12 @@
             <div class="col-12 col-md-8 center margin-auto">
               <div class="row">
                 <%= for item <- @recipe do %>
-                  <div class="col-4 col-md-2">
-                    <img
-                      src={GH.image_url(item)}
-                      data-toggle="tooltip"
-                      title={GH.item_description(item)}
-                      class="item-img"
-                      id={"recipe-#{item.id}"}
-                    />
-                  </div>
+                  <.recipe_item item={item} />
                 <% end %>
                 <%= if length(@recipe) < ingredients_count_for(@transmute) do %>
                   <%= for _ <- 1..(ingredients_count_for(@transmute) - length(@recipe)) do %>
                     <div class="col-4 col-md-2 item-container">
-                      <div class="item-img empty-item"></div>
+                      <.shop_empty_item_slot />
                     </div>
                   <% end %>
                 <% end %>
@@ -202,12 +187,7 @@
                   <i class="fa fa-2x fa-arrow-circle-right"></i>
                 </div>
                 <div class="col-md-3 d-none d-md-block">
-                  <img
-                    src={GH.image_url(@transmute)}
-                    data-toggle="tooltip"
-                    title={GH.item_description(@transmute)}
-                    class="item-img float-right"
-                  />
+                  <.transmute_result item={@transmute} />
                 </div>
               </div>
             </div>
@@ -218,12 +198,7 @@
             </div>
             <div class="col-12 d-block d-md-none">
               <div class="col-3 margin-auto">
-                <img
-                  src={GH.image_url(@transmute)}
-                  data-toggle="tooltip"
-                  title={GH.item_description(@transmute)}
-                  class="item-img float-right"
-                />
+                <.transmute_result item={@transmute} />
               </div>
             </div>
           </div>

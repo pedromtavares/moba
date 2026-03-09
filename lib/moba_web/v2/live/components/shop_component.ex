@@ -69,72 +69,6 @@ defmodule MobaWeb.V2.ShopComponent do
     shop(assigns)
   end
 
-  attr :item, :map, required: true
-
-  defp shop_item(assigns) do
-    ~H"""
-    <div class="col-4 col-md-4 mb-2 d-flex justify-content-center">
-      <img
-        src={GH.image_url(@item)}
-        data-toggle="tooltip"
-        title={GH.item_description(@item)}
-        class={"item-img code-#{@item.code} tooltip-mobile #{if @item.active, do: "active"}"}
-        phx-click="select-shop"
-        phx-value-code={@item.code}
-        phx-target="#shop"
-        id={"item-#{@item.id}"}
-      />
-    </div>
-    """
-  end
-
-  attr :hero, :map, required: true
-  attr :selected_shop, :map, required: true
-  attr :event_target, :any, default: nil
-
-  defp shop_actions(assigns) do
-    ~H"""
-    <hr class="img-border-xs" />
-    <div class="row selected-shop">
-      <div class="col d-flex justify-content-center">
-        <img
-          src={GH.image_url(@selected_shop)}
-          data-toggle="tooltip"
-          title={GH.item_description(@selected_shop)}
-          class="item-img"
-        />
-      </div>
-    </div>
-    <hr />
-    <div class="row">
-      <div class="col center">
-        <button
-          class="btn btn-warning buy-button"
-          phx-click="buy"
-          phx-value-code={@selected_shop.code}
-          disabled={!can_buy?(@hero, @selected_shop)}
-          phx-hook="Loading"
-          loading="Buying..."
-          id="buy-button"
-          {target_attrs(@event_target)}
-        >
-          <span class="loading-text">Buy for <i class="fa fa-coins"></i> {price(@selected_shop)}</span>
-        </button>
-        <%= unless normal?(@selected_shop) do %>
-          <button
-            class="btn btn-primary transmute-button"
-            phx-click="start-transmute"
-            phx-target="#shop"
-            disabled={!can_transmute?(@hero, @selected_shop)}
-          >
-            <i class="fa fa-refresh"></i> Transmute
-          </button>
-        <% end %>
-      </div>
-    </div>
-    """
-  end
-
   defp get_item(code, socket) do
     Enum.find(socket.assigns.items, fn item -> item.code == code end)
   end
@@ -172,8 +106,6 @@ defmodule MobaWeb.V2.ShopComponent do
   defp proper_recipe(recipe, transmute) do
     length(recipe) == Game.item_ingredients_count(transmute)
   end
-
-  defp normal?(item), do: item.rarity == "normal"
 
   defp can_transmute?(hero, item), do: can_equip?(hero, item) && length(hero.items) >= ingredients_count_for(item)
 

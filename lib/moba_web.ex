@@ -153,6 +153,7 @@ defmodule MobaWeb do
       import MobaWeb.V2.Components.GameComponents
       import MobaWeb.V2.Components.LayoutComponents
       import MobaWeb.V2.Components.PvpComponents
+      import MobaWeb.V2.Components.ShopComponents
 
       alias MobaWeb.V2.Components.GameHelpers, as: GH
 

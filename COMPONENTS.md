@@ -109,6 +109,29 @@ These are now used by:
 
 This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`.
 
+#### Shop rendering primitives
+
+A dedicated shop component module now exists:
+
+- `lib/moba_web/v2/components/shop_components.ex`
+
+It currently owns the repeated shop rendering primitives for:
+
+- shop catalog item cells
+- generic shop item images
+- inventory item entries
+- selected item display
+- shop action block
+- recipe item display
+- transmute result display
+- shop empty item slots
+
+These are now used by:
+
+- `lib/moba_web/v2/live/components/shop_component/shop.html.heex`
+
+The `ShopComponent` LiveComponent still owns state and events, but much less of the rendering surface.
+
 #### Hero stat row migration
 
 The shared stat row has already been adopted in:
@@ -396,6 +419,13 @@ Notes:
 
 - The current hero bar may remain function-component based.
 - The shop can remain stateful if needed, but its rendering surface should be split into smaller function components.
+
+Status:
+
+- started
+- `shop_components.ex` now exists and owns the repeated item/image/action rendering
+- `ShopComponent` still owns state/event logic
+- further cleanup is still possible, especially around section-level composition and any remaining inline forms
 
 ### PvP / Arena
 
@@ -685,7 +715,9 @@ Target:
 
 Status:
 
-- not started in a serious way
+- in progress
+- the rendering surface has started moving into `shop_components.ex`
+- the LiveComponent shell still owns most state/event behavior, which is acceptable for now
 
 ## Remaining Work
 
@@ -711,13 +743,15 @@ Likely target:
 
 Still needs work in:
 
-- `lib/moba_web/v2/live/components/shop_component.ex`
-- `lib/moba_web/v2/live/components/shop_component/*.heex`
+- section-level composition cleanup in:
+  - `lib/moba_web/v2/live/components/shop_component.ex`
+  - `lib/moba_web/v2/live/components/shop_component/shop.html.heex`
+- possible extraction of the remaining transmute form/action area if it starts to grow again
 
 Why:
 
-- this is still the most rendering-heavy stateful surface
-- it mixes state, item display, recipes, and action UI together
+- this is still one of the most rendering-heavy stateful surfaces
+- the low-level repeated display pieces are extracted, but the larger shop screen is still assembled in one big template
 
 Likely target:
 
