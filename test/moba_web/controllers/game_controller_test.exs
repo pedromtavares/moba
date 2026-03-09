@@ -24,7 +24,10 @@ defmodule MobaWeb.GameControllerTest do
 
   test "start loads", %{conn: conn} do
     conn = get(conn, "/start")
-    assert html_response(conn, 200) =~ "Pick your\nAvatar"
+    html = html_response(conn, 200)
+    assert html =~ "Pick your"
+    assert html =~ "Avatar"
+    assert html =~ "randomize-button"
   end
 
   test "create as guest", %{conn: conn} do
