@@ -354,6 +354,42 @@ defmodule MobaWeb.V2.Components.GameComponents do
     """
   end
 
+  @doc """
+  Renders a battle stat row using explicit snapshot-aware values.
+  """
+  attr :hp, :any, required: true
+  attr :mp, :any, required: true
+  attr :atk, :any, required: true
+  attr :power, :any, required: true
+  attr :armor, :any, required: true
+  attr :speed, :any, required: true
+  attr :class, :string, default: "btn-group mt-1"
+
+  def battle_hero_stat_group(assigns) do
+    ~H"""
+    <div class={@class}>
+      <.hero_stat_button variant="default" tone="danger" icon="fa fa-heart mr-1" title="Health" value={@hp} />
+      <.hero_stat_button variant="default" tone="info" icon="fa fa-bolt" title="Energy" value={@mp} />
+      <.hero_stat_button variant="default" tone="success" icon="fa fa-dagger" title="Attack" value={@atk} />
+      <.hero_stat_button variant="default" tone="pink" icon="fa fa-galaxy" title="Power" value={@power} />
+      <.hero_stat_button
+        variant="default"
+        tone="warning"
+        icon="fa fa-shield-halved"
+        title="Armor"
+        value={@armor}
+      />
+      <.hero_stat_button
+        variant="default"
+        tone="orange"
+        icon="fa fa-running"
+        title="Speed"
+        value={@speed}
+      />
+    </div>
+    """
+  end
+
   attr :label, :string, required: true
   attr :value, :any, required: true
   attr :color, :string, required: true

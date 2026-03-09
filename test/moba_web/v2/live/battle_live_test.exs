@@ -19,6 +19,8 @@ defmodule MobaWeb.V2.BattleLiveTest do
     {:ok, view, html} = live(conn, "/battles/#{battle.id}")
     assert html =~ "Click to select a skill"
     assert has_element?(view, ~s|#battle-page[phx-hook="BattleContinueHotkey"]|)
+    assert has_element?(view, ".hero-card .text-danger[title='Health']")
+    assert has_element?(view, ".hero-card .text-orange[title='Speed']")
   end
 
   test "next turn event", %{conn: conn, battle: battle, attacker: attacker} do
