@@ -130,7 +130,7 @@ defmodule MobaWeb.V2.PlayerLive do
         <h4 class="card-header text-white d-flex justify-content-between align-items-center mb-0 py-2">
           <span class="font-italic f-rpg font-16">
             <%= if @hero.pve_ranking do %>
-              ##{@hero.pve_ranking}
+              #{@hero.pve_ranking}
             <% end %>
           </span>
           <div class="font-15">
@@ -140,7 +140,7 @@ defmodule MobaWeb.V2.PlayerLive do
           <span
             class="font-15 font-italic"
             data-toggle="tooltip"
-            title={GH.hero_stats_string(@hero, true)}
+            title={GH.hero_stats_tooltip(@hero, true)}
           >
             Level {@hero.level} {@hero.avatar.name}
           </span>

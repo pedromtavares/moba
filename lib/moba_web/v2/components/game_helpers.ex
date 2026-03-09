@@ -54,35 +54,15 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
   def background_url(_), do: "/images/default_background.jpg"
 
-  def hero_stats_string(hero, show_speed \\ false) do
-    speed_button =
-      if show_speed do
-        "<button class='btn btn-icon waves-effect waves-light btn-outline-dark text-orange' data-toggle='tooltip' title='Speed'><i class='fa fa-running'></i> #{hero.speed + hero.item_speed}</button>"
-      else
-        ""
-      end
+  def hero_stats_tooltip(hero, show_speed \\ false) do
+    buttons =
+      hero_stat_entries(hero, show_speed)
+      |> Enum.map_join(&hero_stat_tooltip_button/1)
 
-    "
-      <div class='btn-group hero-stats'>
-        <button class='btn btn-icon waves-effect btn-outline-dark text-danger' data-toggle='tooltip' title='Health'>
-          <i class='fa fa-heart mr-1'></i> #{hero.total_hp + hero.item_hp}
-        </button>
-        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-info' data-toggle='tooltip' title='Energy'>
-          <i class='fa fa-bolt'></i> #{hero.total_mp + hero.item_mp}
-        </button>
-        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-success' data-toggle='tooltip' title='Attack'>
-          <i class='fa fa-dagger'></i> #{hero.atk + hero.item_atk}
-        </button>
-        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-pink' data-toggle='tooltip' title='Power'>
-          <i class='fa fa-galaxy'></i> #{hero.power + hero.item_power}
-        </button>
-        <button class='btn btn-icon waves-effect waves-light btn-outline-dark text-warning' data-toggle='tooltip' title='Armor'>
-          <i class='fa fa-shield-halved'></i> #{hero.armor + hero.item_armor}
-        </button>
-        #{speed_button}
-      </div>
-    "
+    "<div class='btn-group hero-stats'>#{buttons}</div>"
   end
+
+  def hero_stats_string(hero, show_speed \\ false), do: hero_stats_tooltip(hero, show_speed)
 
   # -------------------------------------------------------------------
   # Skill description — returns a map for tooltip rendering
@@ -213,6 +193,26 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def damage_type_color("magic"), do: "purple"
   def damage_type_color("pure"), do: "red"
   def damage_type_color(_), do: "gray"
+
+  defp hero_stat_entries(hero, show_speed) do
+    stats = [
+      {"Health", "btn btn-icon waves-effect btn-outline-dark text-danger", "fa fa-heart mr-1", hero.total_hp + hero.item_hp},
+      {"Energy", "btn btn-icon waves-effect waves-light btn-outline-dark text-info", "fa fa-bolt", hero.total_mp + hero.item_mp},
+      {"Attack", "btn btn-icon waves-effect waves-light btn-outline-dark text-success", "fa fa-dagger", hero.atk + hero.item_atk},
+      {"Power", "btn btn-icon waves-effect waves-light btn-outline-dark text-pink", "fa fa-galaxy", hero.power + hero.item_power},
+      {"Armor", "btn btn-icon waves-effect waves-light btn-outline-dark text-warning", "fa fa-shield-halved", hero.armor + hero.item_armor}
+    ]
+
+    if show_speed do
+      stats ++ [{"Speed", "btn btn-icon waves-effect waves-light btn-outline-dark text-orange", "fa fa-running", hero.speed + hero.item_speed}]
+    else
+      stats
+    end
+  end
+
+  defp hero_stat_tooltip_button({title, class_name, icon, value}) do
+    "<button class='#{class_name}' data-toggle='tooltip' title='#{title}'><i class='#{icon}'></i> #{value}</button>"
+  end
 
   # -------------------------------------------------------------------
   # Resource effects — plain text with bracket tags for styling
