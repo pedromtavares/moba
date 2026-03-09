@@ -38,17 +38,14 @@ defmodule MobaWeb.Router do
     plug MobaWeb.AdminAuth
   end
 
+  pipeline :ensure_start_cache_key do
+    plug MobaWeb.EnsureStartCacheKey
+  end
+
   scope "/" do
     pipe_through [:browser]
 
     get "/", MobaWeb.GameController, :index
-  end
-
-  scope "/", MobaWeb do
-    pipe_through [:browser, :base_layout]
-
-    get "/start", GameController, :start
-    post "/start", GameController, :create
   end
 
   scope "/", MobaWeb do
@@ -89,6 +86,20 @@ defmodule MobaWeb.Router do
 
       live "/library", LibraryLive
     end
+  end
+
+  scope "/", MobaWeb.V2 do
+    pipe_through [:browser, :ensure_start_cache_key]
+
+    live_session :v2_guest_create, root_layout: {MobaWeb.V2.Layouts, :root} do
+      live "/start", CreateLive
+    end
+  end
+
+  scope "/", MobaWeb do
+    pipe_through [:browser]
+
+    post "/start", GameController, :create
   end
 
   # V2 routes — separate live_session, separate layout, separate asset pipeline

@@ -38,20 +38,6 @@ defmodule MobaWeb.GameController do
     end
   end
 
-  def start(conn, _params) do
-    conn =
-      if get_session(conn, :cache_key) do
-        conn
-      else
-        put_session(conn, :cache_key, UUID.uuid1())
-      end
-
-    conn
-    |> live_render(MobaWeb.V1.CreateLive,
-      session: %{"token" => get_csrf_token(), "cache_key" => get_session(conn, :cache_key)}
-    )
-  end
-
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
     player = Game.create_player!(%{})
     avatar = Game.get_avatar!(selected_avatar)

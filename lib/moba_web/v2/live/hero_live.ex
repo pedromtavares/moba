@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.HeroLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.V2.Components.HeroBarComponents
+
   def mount(_params, _session, socket) do
     {:ok, socket_init(socket)}
   end
@@ -34,22 +36,88 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply, assign(socket, hero: updated_hero, skin_selection: updated_selection)}
   end
 
-  def handle_info({"hero", %{id: id}}, socket) do
-    {:noreply, assign(socket, hero: Game.get_hero!(id))}
+  def handle_event("level", _, %{assigns: %{hero: current}} = socket) do
+    hero =
+      if Application.get_env(:moba, :env) == :dev do
+        Game.level_cheat(current)
+      else
+        current
+      end
+
+    Game.broadcast_to_hero(current.id)
+    {:noreply, update_hero_assigns(socket, hero)}
   end
 
-  def handle_info({:hero_bar_updated, hero}, socket) do
-    socket =
-      socket
-      |> assign(hero: hero)
-      |> maybe_assign_current_hero(hero)
-      |> quest_assigns()
+  def handle_event("skill", %{"code" => code}, %{assigns: %{hero: current}} = socket) do
+    hero = Game.level_up_skill!(current, code)
+    Game.broadcast_to_hero(hero.id)
+    {:noreply, update_hero_assigns(socket, hero)}
+  end
 
-    {:noreply, socket}
+  def handle_event("start-edit", _, socket) do
+    {:noreply, assign(socket, editing: true)}
+  end
+
+  def handle_event("finalize-edit", params, %{assigns: %{hero: current}} = socket) do
+    hero =
+      Game.update_hero!(current, %{
+        skill_order: params_to_order(params["skill_order"]),
+        item_order: params_to_order(params["item_order"])
+      })
+
+    {:noreply, socket |> assign(editing: false) |> update_hero_assigns(hero)}
+  end
+
+  def handle_event("show-build", _, socket) do
+    {:noreply, assign(socket, show_build: true)}
+  end
+
+  def handle_event("show-navigation", _, socket) do
+    {:noreply, assign(socket, show_build: false)}
+  end
+
+  def handle_event("close-shop", _, socket) do
+    {:noreply, assign(socket, show_shop: false)}
+  end
+
+  def handle_event("toggle-shop", _, socket) do
+    {:noreply, assign(socket, show_shop: !socket.assigns.show_shop)}
+  end
+
+  def handle_event("buy", %{"code" => code}, %{assigns: %{hero: hero}} = socket) do
+    updated_hero = Game.buy_item!(hero, cached_item!(code))
+    Game.broadcast_to_hero(updated_hero.id)
+    {:noreply, update_hero_assigns(socket, updated_hero)}
+  end
+
+  def handle_event("sell", %{"code" => code}, %{assigns: %{hero: hero}} = socket) do
+    updated_hero = Game.sell_item!(hero, hero_item_by_code!(hero, code))
+    Game.broadcast_to_hero(updated_hero.id)
+    {:noreply, update_hero_assigns(socket, updated_hero)}
+  end
+
+  def handle_event(
+        "finish-transmute",
+        %{"transmute_code" => transmute_code, "recipe_codes" => recipe_codes},
+        %{assigns: %{hero: hero}} = socket
+      ) do
+    transmute = cached_item!(transmute_code)
+    recipe = hero_items_by_codes(hero, recipe_codes)
+    updated_hero = Game.transmute_item!(hero, recipe, transmute)
+    Game.broadcast_to_hero(updated_hero.id)
+    {:noreply, update_hero_assigns(socket, updated_hero)}
+  end
+
+  def handle_info({"hero", %{id: id}}, socket) do
+    {:noreply, socket |> update_hero_assigns(Game.get_hero!(id)) |> maybe_reset_shop()}
   end
 
   def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
-    {:noreply, assign(socket, ranking: Moba.pve_ranking(), hero: Game.get_hero!(id))}
+    {:noreply,
+     socket
+     |> assign(ranking: Moba.pve_ranking())
+     |> update_hero_assigns(Game.get_hero!(id))
+     |> maybe_reset_shop()}
   end
 
   defp owner_assigns(
@@ -84,6 +152,10 @@ defmodule MobaWeb.V2.HeroLive do
     |> assign(:completed_quest, nil)
     |> assign(:skin_selection, nil)
     |> assign(:sidebar_code, nil)
+    |> assign(:editing, false)
+    |> assign(:show_build, false)
+    |> assign(:show_shop, false)
+    |> assign(:tutorial_step, player.tutorial_step)
   end
 
   defp maybe_assign_current_hero(%{assigns: %{current_hero: %{id: current_hero_id}}} = socket, %{id: hero_id} = hero)
@@ -132,6 +204,52 @@ defmodule MobaWeb.V2.HeroLive do
     selection.skins
     |> Enum.at(selection.index - 1)
     |> Map.fetch!(:code)
+  end
+
+  defp update_hero_assigns(socket, hero) do
+    socket
+    |> assign(hero: hero)
+    |> maybe_assign_current_hero(hero)
+    |> quest_assigns()
+  end
+
+  defp maybe_reset_shop(%{assigns: %{hero: %{id: shown_id}, current_hero: %{id: current_id}}} = socket)
+       when shown_id != current_id do
+    assign(socket, show_shop: false)
+  end
+
+  defp maybe_reset_shop(socket), do: socket
+
+  defp params_to_order(nil), do: []
+
+  defp params_to_order(params) do
+    Enum.sort(params, fn {_, v1}, {_, v2} ->
+      String.to_integer(v1) <= String.to_integer(v2)
+    end)
+    |> Enum.map(fn {code, _} -> code end)
+  end
+
+  defp cached_item!(code) do
+    Enum.find(Moba.cached_items(), &(&1.code == code))
+  end
+
+  defp hero_item_by_code!(hero, code) do
+    Enum.find(hero.items, &(&1.code == code))
+  end
+
+  defp hero_items_by_codes(hero, codes) do
+    {items, _remaining} =
+      Enum.map_reduce(codes, hero.items, fn code, remaining_items ->
+        {item, updated_items} = pop_item_by_code(remaining_items, code)
+        {item, updated_items}
+      end)
+
+    items
+  end
+
+  defp pop_item_by_code(items, code) do
+    {matched, rest} = Enum.split_with(items, &(&1.code == code))
+    {List.first(matched), Enum.drop(matched, 1) ++ rest}
   end
 
   defp hero_stats_buttons(assigns) do

@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.TrainingLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.V2.Components.HeroBarComponents
+
   alias MobaWeb.V2.TutorialComponent
 
   embed_templates "training_live/*"
@@ -148,6 +150,35 @@ defmodule MobaWeb.V2.TrainingLive do
     {:noreply, assign(socket, show_shop: !socket.assigns.show_shop)}
   end
 
+  def handle_event("buy", %{"code" => code}, %{assigns: %{current_hero: hero}} = socket) do
+    item = cached_item!(code)
+    updated_hero = Game.buy_item!(hero, item)
+    Game.broadcast_to_hero(updated_hero.id)
+
+    {:noreply, socket |> after_training_shop_update(updated_hero) |> assign(current_hero: updated_hero)}
+  end
+
+  def handle_event("sell", %{"code" => code}, %{assigns: %{current_hero: hero}} = socket) do
+    item = hero_item_by_code!(hero, code)
+    updated_hero = Game.sell_item!(hero, item)
+    Game.broadcast_to_hero(updated_hero.id)
+
+    {:noreply, assign(socket, current_hero: updated_hero)}
+  end
+
+  def handle_event(
+        "finish-transmute",
+        %{"transmute_code" => transmute_code, "recipe_codes" => recipe_codes},
+        %{assigns: %{current_hero: hero}} = socket
+      ) do
+    transmute = cached_item!(transmute_code)
+    recipe = hero_items_by_codes(hero, recipe_codes)
+    updated_hero = Game.transmute_item!(hero, recipe, transmute)
+    Game.broadcast_to_hero(updated_hero.id)
+
+    {:noreply, socket |> TutorialComponent.next_step(9) |> assign(current_hero: updated_hero)}
+  end
+
   def handle_event("select-turns", params, %{assigns: %{current_hero: hero}} = socket) do
     with turns = String.to_integer(params["turns"]),
          selected_turns = if(turns > hero.pve_current_turns, do: hero.pve_current_turns, else: turns) do
@@ -186,10 +217,6 @@ defmodule MobaWeb.V2.TrainingLive do
   def handle_info({:tutorial, %{step: step}}, socket) do
     show_shop = if Enum.member?([3, 7, 8, 9], step), do: true, else: socket.assigns.show_shop
     {:noreply, assign(socket, tutorial_step: step, show_shop: show_shop)}
-  end
-
-  def handle_info({:shop, :close}, socket) do
-    {:noreply, assign(socket, show_shop: false)}
   end
 
   def handle_info({"hero", %{id: id}}, socket) do
@@ -428,61 +455,6 @@ defmodule MobaWeb.V2.TrainingLive do
 
   defp league_success_rate(_), do: 0
 
-  defp hero_bar_stats(assigns) do
-    ~H"""
-    <div class="btn-group stats-group f-rpg">
-      <button
-        class="btn btn-icon btn-outline-dark text-danger tooltip-mobile no-action"
-        type="button"
-        data-toggle="tooltip"
-        title={total_hp_description(@current_hero)}
-      >
-        <i class="fa fa-heart mr-1"></i> {@current_hero.total_hp + @current_hero.item_hp}
-      </button>
-      <button
-        class="btn btn-icon btn-outline-dark text-info tooltip-mobile no-action"
-        type="button"
-        data-toggle="tooltip"
-        title={total_mp_description(@current_hero)}
-      >
-        <i class="fa fa-bolt"></i> {@current_hero.total_mp + @current_hero.item_mp}
-      </button>
-      <button
-        class="btn btn-icon btn-outline-dark text-success tooltip-mobile no-action"
-        type="button"
-        data-toggle="tooltip"
-        title={total_atk_description(@current_hero)}
-      >
-        <i class="fa fa-dagger"></i> {@current_hero.atk + @current_hero.item_atk}
-      </button>
-      <button
-        class="btn btn-icon btn-outline-dark text-pink tooltip-mobile no-action"
-        type="button"
-        data-toggle="tooltip"
-        title={total_power_description(@current_hero)}
-      >
-        <i class="fa fa-galaxy"></i> {@current_hero.power + @current_hero.item_power}
-      </button>
-      <button
-        class="btn btn-icon btn-outline-dark text-warning tooltip-mobile no-action"
-        type="button"
-        data-toggle="tooltip"
-        title={total_armor_description(@current_hero)}
-      >
-        <i class="fa fa-shield-halved"></i> {@current_hero.armor + @current_hero.item_armor}
-      </button>
-      <button
-        class="btn btn-icon btn-outline-dark text-orange tooltip-mobile no-action"
-        type="button"
-        data-toggle="tooltip"
-        title={total_speed_description(@current_hero)}
-      >
-        <i class="fa fa-running"></i> {@current_hero.speed + @current_hero.item_speed}
-      </button>
-    </div>
-    """
-  end
-
   defp params_to_order(nil), do: []
 
   defp params_to_order(params) do
@@ -494,101 +466,36 @@ defmodule MobaWeb.V2.TrainingLive do
     end)
   end
 
-  defp edit_orders_label(%{finished_at: finished_at}) when is_nil(finished_at) do
-    "Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle."
+  defp after_training_shop_update(%{assigns: %{tutorial_step: 3}} = socket, hero) when length(hero.items) > 1 do
+    socket
+    |> assign(show_shop: false)
+    |> TutorialComponent.next_step(4)
   end
 
-  defp edit_orders_label(_) do
-    "Click to edit the skill and item orders that will be used when defending against other players in the Arena."
+  defp after_training_shop_update(socket, _hero) do
+    TutorialComponent.next_step(socket, 7)
   end
 
-  defp sorted_items(%{items: items}), do: Game.sort_items(items)
-
-  defp sorted_skills(%{skills: skills}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
-
-  defp can_level_skill?(hero, skill), do: Game.can_level_skill?(hero, skill)
-
-  defp max_skill_level(skill), do: Game.max_skill_level(skill)
-
-  defp xp_percentage(hero), do: hero.experience * 100 / xp_to_next_level(hero)
-
-  defp xp_to_next_level(hero), do: Game.xp_to_next_hero_level(hero.level + 1)
-
-  defp next_skill_description(skill) do
-    next = Game.get_current_skill!(skill.code, skill.level + 1)
-
-    "#{GH.skill_description(skill)}<hr/>#{GH.skill_description(%{next | name: "Next Level (#{next.level})", level: nil, description: ""})}"
+  defp cached_item!(code) do
+    Enum.find(Moba.cached_items(), &(&1.code == code))
   end
 
-  defp total_hp_description(hero) do
-    title = "Health: #{hero.total_hp + hero.item_hp}"
-    sub = "Main survival stat. When it reaches 0 in a battle, you die and receive no rewards."
-
-    main =
-      "Current base Health: #{hero.total_hp} <br/>Health given by items: #{hero.item_hp}<br/><br/>Health gain on level up: #{hero.avatar.hp_per_level}"
-
-    attribute_description(title, sub, main)
+  defp hero_item_by_code!(hero, code) do
+    Enum.find(hero.items, &(&1.code == code))
   end
 
-  defp total_mp_description(hero) do
-    title = "Energy: #{hero.total_mp + hero.item_mp}"
+  defp hero_items_by_codes(hero, codes) do
+    {items, _remaining} =
+      Enum.map_reduce(codes, hero.items, fn code, remaining_items ->
+        {item, updated_items} = pop_item_by_code(remaining_items, code)
+        {item, updated_items}
+      end)
 
-    sub =
-      "Main spending stat, used to power abilities and active items. When it reaches 0 in a battle, you will hit with a Basic Attack, which deals 100% Attack as Normal Damage."
-
-    main =
-      "Current base Energy: #{hero.total_mp} <br/>Energy given by items: #{hero.item_mp}<br/><br/>Energy gain on level up: #{hero.avatar.mp_per_level}"
-
-    attribute_description(title, sub, main)
+    items
   end
 
-  defp total_atk_description(hero) do
-    title = "Attack: #{hero.atk + hero.item_atk}"
-    sub = "Base stat used to calculate damage in most skills and items."
-
-    main =
-      "Current Attack: #{hero.atk} <br/>Attack given by items: #{hero.item_atk}<br/><br/>Attack gain on level up: #{hero.avatar.atk_per_level}"
-
-    attribute_description(title, sub, main)
-  end
-
-  defp total_power_description(hero) do
-    title = "Power: #{hero.power + hero.item_power}"
-
-    sub =
-      "Amplifies your total damage output and regeneration in a turn by 1% for every point in Power. E.g. 10 Power will give you 10% amplification."
-
-    main = "Current Power: #{hero.power} <br/>Power given by items: #{hero.item_power}"
-    attribute_description(title, sub, main)
-  end
-
-  defp total_armor_description(hero) do
-    title = "Armor: #{hero.armor + hero.item_armor}"
-
-    sub =
-      "Reduces the total damage you take on a defending turn, applied after the amplification from the opponent's Power. Each point of Armor will give 1% of damage reduction, with a maximum of 90%."
-
-    main = "Current base Armor: #{hero.armor} <br/>Armor given by items: #{hero.item_armor}"
-    attribute_description(title, sub, main)
-  end
-
-  defp total_speed_description(hero) do
-    title = "Speed: #{hero.speed + hero.item_speed}"
-
-    sub =
-      "Each point in Speed gives you 1% chance to initiate a battle. E.g. 50 Speed will give you 50% chance to initiate. When defending, each point in Speed over 100 gives you 1% chance to Evade the next non-ultimate normal damage attack. Evade costs no Energy and has a 2 turn cooldown. E.g. 120 Speed will give you 20% chance to Evade."
-
-    main = "Current base Speed: #{hero.speed} <br/>Speed given by items: #{hero.item_speed}"
-    attribute_description(title, sub, main)
-  end
-
-  defp attribute_description(title, sub, main) do
-    "
-      <h3 class='mb-1 text-center'>#{title}</h3>
-      <span class='text-dark'>#{sub}</span>
-      <div class='text-center mt-1'>
-        #{main}
-      </div>
-    "
+  defp pop_item_by_code(items, code) do
+    {matched, rest} = Enum.split_with(items, &(&1.code == code))
+    {List.first(matched), Enum.drop(matched, 1) ++ rest}
   end
 end

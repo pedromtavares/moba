@@ -1,5 +1,7 @@
 <div class="shop" id="shop">
-  <div id="close-button" phx-click="close-shop" class="text-white"><i class="fa fa-times fa-3x"></i></div>
+  <div id="close-button" phx-click="close-shop" class="text-white" {target_attrs(@event_target)}>
+    <i class="fa fa-times fa-3x"></i>
+  </div>
   <div class="row">
     <div class="col-sm-12 text-center">
       <h2 class="page-title mb-3 mt-3">
@@ -25,7 +27,7 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "normal" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} />
+          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
         <% end %>
       </div>
     </div>
@@ -47,7 +49,7 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "rare" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} />
+          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
         <% end %>
       </div>
     </div>
@@ -69,7 +71,7 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "epic" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} />
+          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
         <% end %>
       </div>
     </div>
@@ -91,7 +93,7 @@
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "legendary" do %>
-          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} />
+          <.shop_actions selected_shop={@selected_shop} hero={@current_hero} event_target={@event_target} />
         <% end %>
       </div>
     </div>
@@ -161,7 +163,13 @@
           <hr />
           <div class="row">
             <div class="col center">
-              <button class="btn btn-danger" phx-click="sell" phx-target="#shop" id={"sell-#{@selected_inventory.id}"}>
+              <button
+                class="btn btn-danger"
+                phx-click="sell"
+                phx-value-code={@selected_inventory.code}
+                id={"sell-#{@selected_inventory.id}"}
+                {target_attrs(@event_target)}
+              >
                 <i class="fa fa-coins"></i> Sell for {sell_price(@current_hero, @selected_inventory)}
               </button>
             </div>
@@ -223,16 +231,18 @@
           <div class="row">
             <div class="col center">
               <div class="center">
-                <button
-                  class={if proper_recipe(@recipe, @transmute), do: "btn btn-primary", else: "btn btn-primary disabled"}
-                  phx-hook="Loading"
-                  loading="Transmuting..."
-                  phx-click="finish-transmute"
-                  phx-target="#shop"
-                  id="finish-transmute"
-                >
-                  <span class="loading-text"><i class="fa fa-refresh mr-1"></i>Transmute</span>
-                </button>
+                <form class="d-inline-block" phx-submit="finish-transmute" {target_attrs(@event_target)}>
+                  <input type="hidden" name="transmute_code" value={@transmute.code} />
+                  <input :for={item <- @recipe} type="hidden" name="recipe_codes[]" value={item.code} />
+                  <button
+                    class={if proper_recipe(@recipe, @transmute), do: "btn btn-primary", else: "btn btn-primary disabled"}
+                    phx-hook="Loading"
+                    loading="Transmuting..."
+                    id="finish-transmute"
+                  >
+                    <span class="loading-text"><i class="fa fa-refresh mr-1"></i>Transmute</span>
+                  </button>
+                </form>
                 <button class="btn btn-danger" phx-click="cancel-transmute" id="cancel-transmute" phx-target="#shop">
                   <i class="fa fa-times"></i> Cancel
                 </button>

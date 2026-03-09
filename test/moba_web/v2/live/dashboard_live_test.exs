@@ -40,6 +40,29 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       assert has_element?(view, "#finished-heroes-btn")
       assert has_element?(view, "#hero-list-unfinished")
     end
+
+    test "starts the base tutorial when the player is on step 19", %{conn: conn} do
+      hero = create_base_hero()
+      player = Game.update_tutorial_step!(hero.player, 19)
+      conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
+
+      {:ok, view, _html} = live(conn, "/base")
+
+      assert has_element?(view, "#tutorial-step-20[data-step='20']")
+    end
+
+    test "guest base tutorial keeps the v1 anchor targets", %{conn: conn} do
+      player = Game.create_player!(%{user_id: nil, tutorial_step: 20})
+      hero = create_base_hero(%{name: "Guest Hero"}, player)
+      player = Game.update_collection!(player, [%{id: hero.id}])
+      conn = conn |> init_test_session(player_id: player.id)
+
+      {:ok, view, _html} = live(conn, "/base")
+
+      assert has_element?(view, "#hero-list-container")
+      assert has_element?(view, "#create-account-link")
+      assert has_element?(view, "#tutorial-step-20[data-step='20']")
+    end
   end
 
   describe "filter event" do
@@ -117,6 +140,32 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       |> render_click()
 
       refute has_element?(view, "#visible-hero-#{hero.id}")
+    end
+  end
+
+  describe "tutorial events" do
+    test "advances from step 20 to 21", %{conn: conn} do
+      hero = create_base_hero()
+      player = Game.update_tutorial_step!(hero.player, 20)
+      conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
+
+      {:ok, view, _html} = live(conn, "/base")
+
+      render_click(view, "tutorial1", %{})
+
+      assert has_element?(view, "#tutorial-step-21[data-step='21']")
+    end
+
+    test "finish-tutorial completes the base tutorial", %{conn: conn} do
+      hero = create_base_hero()
+      player = Game.update_tutorial_step!(hero.player, 21)
+      conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
+
+      {:ok, view, _html} = live(conn, "/base")
+
+      render_click(view, "finish-tutorial", %{})
+
+      assert has_element?(view, "#tutorial-step-29[data-step='29']")
     end
   end
 end

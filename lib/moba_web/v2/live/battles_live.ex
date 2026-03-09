@@ -7,6 +7,10 @@ defmodule MobaWeb.V2.BattlesLive do
     {:ok, socket |> maybe_redirect() |> socket_init()}
   end
 
+  def handle_event("redirect", %{"id" => id}, socket) do
+    {:noreply, push_navigate(socket, to: ~p"/battles/#{id}")}
+  end
+
   defp maybe_redirect(%{assigns: %{current_hero: nil}} = socket) do
     redirect(socket, to: "/base")
   end
@@ -142,7 +146,13 @@ defmodule MobaWeb.V2.BattlesLive do
     <% rewards = @battle.rewards && reward_badges(@battle, @current_hero.id) %>
     <% league_result = league_step_result(@battle, @current_hero.id) %>
 
-    <tr id={"battle-#{@battle.id}"} class="battle-row">
+    <tr
+      id={"battle-#{@battle.id}"}
+      class="battle-row"
+      phx-click="redirect"
+      phx-value-id={@battle.id}
+      phx-hook="Loading"
+    >
       <td>
         <span class={result_badge_class(@battle, @current_hero.id)}>
           {result_badge_label(@battle, @current_hero.id)}
@@ -195,7 +205,7 @@ defmodule MobaWeb.V2.BattlesLive do
         <% end %>
       </td>
       <td>
-        <.link navigate={~p"/battles/#{@battle.id}"} class="loading-text">{relative_time(@battle)}</.link>
+        <span class="loading-text">{relative_time(@battle)}</span>
       </td>
     </tr>
     """

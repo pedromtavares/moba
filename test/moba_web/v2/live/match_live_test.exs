@@ -130,4 +130,44 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     assert player_index < opponent_index
   end
+
+  test "arena tutorial finishes from the match page", %{conn: conn} do
+    player = create_player!(%{pvp_tier: 1, tutorial_step: 31})
+    opponent = create_player!(%{pvp_tier: 1})
+    skills = base_skills()
+
+    _player_heroes =
+      for index <- 1..5 do
+        Game.create_hero!(%{name: "Player #{index}"}, player, strong_avatar(), skills)
+      end
+
+    opponent_heroes =
+      for index <- 1..5 do
+        Game.create_hero!(%{name: "Opponent #{index}"}, opponent, weak_avatar(), skills)
+      end
+
+    match =
+      Matches.create!(%{
+        player_id: player.id,
+        opponent_id: opponent.id,
+        player_picks: [],
+        opponent_picks: Enum.map(opponent_heroes, & &1.id),
+        generated_picks: [],
+        type: "manual"
+      })
+
+    conn =
+      conn
+      |> init_test_session(player_id: player.id)
+
+    {:ok, view, _html} = live(conn, "/matches/#{match.id}")
+
+    assert has_element?(view, "#picks-card")
+    assert has_element?(view, "#tutorial-step-31[data-step='31']")
+
+    render_click(view, "finish-tutorial", %{})
+
+    assert Game.get_player!(player.id).tutorial_step == 39
+    assert has_element?(view, "#tutorial-step-39[data-step='39']")
+  end
 end

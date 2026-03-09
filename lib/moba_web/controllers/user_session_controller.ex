@@ -3,7 +3,6 @@ defmodule MobaWeb.UserSessionController do
 
   alias Moba.Accounts
   alias MobaWeb.UserAuth
-  alias Moba
 
   def create(conn, %{"_action" => "registered"} = params) do
     create(conn, params, "Account created successfully!")

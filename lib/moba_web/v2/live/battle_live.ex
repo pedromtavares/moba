@@ -6,8 +6,8 @@ defmodule MobaWeb.V2.BattleLive do
 
   embed_templates "battle_live/*"
 
-  def mount(_, _, socket) do
-    {:ok, socket}
+  def mount(_, _, %{assigns: %{current_player: player}} = socket) do
+    {:ok, assign(socket, tutorial_step: player.tutorial_step)}
   end
 
   def handle_params(params, _uri, socket) do

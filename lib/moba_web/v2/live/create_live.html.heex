@@ -232,41 +232,60 @@
               </div>
             </div>
             <%= if Enum.count(@selected_skills) == 3 do %>
-              <div class="row mb-3">
-                <div class="col text-center">
-                  <form phx-change="validate">
-                    <input
-                      type="text"
-                      maxlength="15"
-                      minlength="3"
-                      class="form-control text-center"
-                      name="name"
-                      value={@current_player.user.username}
-                      style="max-width: 300px; margin:auto"
-                      data-toggle="tooltip"
-                      title="Edit your Hero's name"
-                    />
-                    <%= if @error do %>
-                      <span class="text-danger">{@error}</span>
-                    <% end %>
-                  </form>
-                </div>
-              </div>
-              <%= unless @error do %>
-                <div class="row">
-                  <div class="col">
-                    <button
-                      class="btn btn-outline-danger dark-bg p-3 btn-block btn-lg"
-                      phx-click="create"
-                      phx-hook="Loading"
-                      loading="Creating..."
-                      id="create-button"
-                    >
-                      <img src={GH.image_url(@selected_avatar)} class="avatar img-border" />
-                      <strong class="font-20 d-block loading-text">Invoke {@name}</strong>
-                    </button>
+              <%= if @current_player && @current_player.user_id do %>
+                <div class="row mb-3">
+                  <div class="col text-center">
+                    <form phx-change="validate">
+                      <input
+                        type="text"
+                        maxlength="15"
+                        minlength="3"
+                        class="form-control text-center"
+                        name="name"
+                        value={@current_player.user.username}
+                        style="max-width: 300px; margin:auto"
+                        data-toggle="tooltip"
+                        title="Edit your Hero's name"
+                      />
+                      <%= if @error do %>
+                        <span class="text-danger">{@error}</span>
+                      <% end %>
+                    </form>
                   </div>
                 </div>
+                <%= unless @error do %>
+                  <div class="row">
+                    <div class="col">
+                      <button
+                        class="btn btn-outline-danger dark-bg p-3 btn-block btn-lg"
+                        phx-click="create"
+                        phx-hook="Loading"
+                        loading="Creating..."
+                        id="create-button"
+                      >
+                        <img src={GH.image_url(@selected_avatar)} class="avatar img-border" />
+                        <strong class="font-20 d-block loading-text">Invoke {@name}</strong>
+                      </button>
+                    </div>
+                  </div>
+                <% end %>
+              <% else %>
+                <.form for={%{}} action="/start" method="post">
+                  <input type="hidden" name="avatar" value={@selected_avatar.id} />
+                  <%= for skill <- @selected_skills do %>
+                    <input type="hidden" name="skills[]" value={skill.id} />
+                  <% end %>
+                  <div class="row">
+                    <div class="col">
+                      <button class="btn btn-outline-danger dark-bg btn-block btn-lg p-3" type="submit" id="create-button">
+                        <img src={GH.image_url(@selected_avatar)} class="avatar img-border" />
+                        <strong class="font-20 d-block loading-text">
+                          Invoke a {build_title(@selected_avatar, @selected_skills, @selected_build_index)} {@selected_avatar.name}
+                        </strong>
+                      </button>
+                    </div>
+                  </div>
+                </.form>
               <% end %>
             <% end %>
           </div>

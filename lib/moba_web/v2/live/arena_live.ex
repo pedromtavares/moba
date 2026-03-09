@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.ArenaLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.V2.Components.HeroBarComponents
+
   alias MobaWeb.Presence
   alias MobaWeb.V2.TutorialComponent
 
@@ -11,7 +13,7 @@ defmodule MobaWeb.V2.ArenaLive do
       socket
       |> assign(sidebar_code: "arena", tutorial_step: player.tutorial_step)
       |> assign(team_form: to_form(%{"name" => ""}, as: :team))
-      |> assign(hero: nil, editing: false, show_build: false)
+      |> assign(hero: nil, editing: false, show_build: false, show_shop: false)
 
     if connected?(socket) do
       TutorialComponent.subscribe(player.id)
@@ -123,7 +125,7 @@ defmodule MobaWeb.V2.ArenaLive do
     hero = Game.get_hero!(id)
 
     if hero.player_id == current_player.id do
-      {:noreply, assign(socket, hero: hero, editing: false, show_build: true)}
+      {:noreply, assign(socket, hero: hero, editing: false, show_build: false, show_shop: false)}
     else
       {:noreply, socket}
     end
@@ -173,7 +175,7 @@ defmodule MobaWeb.V2.ArenaLive do
   end
 
   def handle_event("start-edit", _, %{assigns: %{hero: hero}} = socket) when not is_nil(hero) do
-    {:noreply, assign(socket, editing: true, show_build: true)}
+    {:noreply, assign(socket, editing: true)}
   end
 
   def handle_event("start-edit", _, socket), do: {:noreply, socket}
@@ -201,6 +203,72 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, assign(socket, show_build: false)}
   end
 
+  def handle_event("toggle-shop", _, %{assigns: %{hero: hero}} = socket) when not is_nil(hero) do
+    {:noreply, assign(socket, show_shop: !socket.assigns.show_shop)}
+  end
+
+  def handle_event("toggle-shop", _, socket), do: {:noreply, socket}
+
+  def handle_event("close-shop", _, socket) do
+    {:noreply, assign(socket, show_shop: false)}
+  end
+
+  def handle_event("level", _, %{assigns: %{hero: current, current_player: player}} = socket) when not is_nil(current) do
+    hero =
+      if Application.get_env(:moba, :env) == :dev do
+        Game.level_cheat(current)
+      else
+        current
+      end
+
+    Game.broadcast_to_hero(current.id)
+    {:noreply, refresh_edit_hero(socket, player, hero)}
+  end
+
+  def handle_event("level", _, socket), do: {:noreply, socket}
+
+  def handle_event("skill", %{"code" => code}, %{assigns: %{hero: current, current_player: player}} = socket)
+      when not is_nil(current) do
+    hero = Game.level_up_skill!(current, code)
+    Game.broadcast_to_hero(hero.id)
+    {:noreply, refresh_edit_hero(socket, player, hero)}
+  end
+
+  def handle_event("skill", _, socket), do: {:noreply, socket}
+
+  def handle_event("buy", %{"code" => code}, %{assigns: %{hero: hero, current_player: player}} = socket)
+      when not is_nil(hero) do
+    updated_hero = Game.buy_item!(hero, cached_item!(code))
+    Game.broadcast_to_hero(updated_hero.id)
+    {:noreply, refresh_edit_hero(socket, player, updated_hero)}
+  end
+
+  def handle_event("buy", _, socket), do: {:noreply, socket}
+
+  def handle_event("sell", %{"code" => code}, %{assigns: %{hero: hero, current_player: player}} = socket)
+      when not is_nil(hero) do
+    updated_hero = Game.sell_item!(hero, hero_item_by_code!(hero, code))
+    Game.broadcast_to_hero(updated_hero.id)
+    {:noreply, refresh_edit_hero(socket, player, updated_hero)}
+  end
+
+  def handle_event("sell", _, socket), do: {:noreply, socket}
+
+  def handle_event(
+        "finish-transmute",
+        %{"transmute_code" => transmute_code, "recipe_codes" => recipe_codes},
+        %{assigns: %{hero: hero, current_player: player}} = socket
+      )
+      when not is_nil(hero) do
+    transmute = cached_item!(transmute_code)
+    recipe = hero_items_by_codes(hero, recipe_codes)
+    updated_hero = Game.transmute_item!(hero, recipe, transmute)
+    Game.broadcast_to_hero(updated_hero.id)
+    {:noreply, refresh_edit_hero(socket, player, updated_hero)}
+  end
+
+  def handle_event("finish-transmute", _, socket), do: {:noreply, socket}
+
   def handle_info({:tutorial, %{step: step}}, socket) do
     {:noreply, assign(socket, tutorial_step: step)}
   end
@@ -227,15 +295,6 @@ defmodule MobaWeb.V2.ArenaLive do
     player = Game.get_player!(id)
     ranking = tiered_ranking(%{pvp_tier: pvp_tier_for(ranking_tab)})
     {:noreply, socket |> assign(current_player: player, ranking: ranking) |> assign_index()}
-  end
-
-  def handle_info({:hero_bar_updated, hero}, %{assigns: %{current_player: player, hero: current_hero}} = socket)
-      when not is_nil(current_hero) and current_hero.id == hero.id do
-    {:noreply, refresh_edit_hero(socket, player, hero)}
-  end
-
-  def handle_info({:hero_bar_updated, _hero}, socket) do
-    {:noreply, socket}
   end
 
   def render(%{live_action: :edit} = assigns), do: edit(assigns)
@@ -376,6 +435,7 @@ defmodule MobaWeb.V2.ArenaLive do
     assign(socket,
       hero: hero,
       editing: false,
+      show_shop: socket.assigns.show_shop,
       teams: teams,
       selected_team: selected_team,
       trained_heroes: trained_heroes,
@@ -414,6 +474,29 @@ defmodule MobaWeb.V2.ArenaLive do
       String.to_integer(v1) <= String.to_integer(v2)
     end)
     |> Enum.map(fn {code, _} -> code end)
+  end
+
+  defp cached_item!(code) do
+    Enum.find(Moba.cached_items(), &(&1.code == code))
+  end
+
+  defp hero_item_by_code!(hero, code) do
+    Enum.find(hero.items, &(&1.code == code))
+  end
+
+  defp hero_items_by_codes(hero, codes) do
+    {items, _remaining} =
+      Enum.map_reduce(codes, hero.items, fn code, remaining_items ->
+        {item, updated_items} = pop_item_by_code(remaining_items, code)
+        {item, updated_items}
+      end)
+
+    items
+  end
+
+  defp pop_item_by_code(items, code) do
+    {matched, rest} = Enum.split_with(items, &(&1.code == code))
+    {List.first(matched), Enum.drop(matched, 1) ++ rest}
   end
 
   defp tier_title(%{pvp_tier: 2, ranking: 1}), do: "You are The Immortal, defend your title."

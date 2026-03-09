@@ -1,14 +1,17 @@
 defmodule MobaWeb.V2.CreateLive do
   use MobaWeb, :v2_live_view
 
+  def mount(_params, _session, %{assigns: %{current_player: player}} = socket) when not is_nil(player) do
+    {:ok, socket_player_init(player.id, socket)}
+  end
+
+  def mount(_params, %{"cache_key" => cache_key}, socket) do
+    {:ok, socket_guest_init(cache_key, socket)}
+  end
+
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    {:ok, socket_init(assign(socket, current_hero: nil, current_player: nil))}
   end
-
-  def handle_params(_params, _uri, %{assigns: %{current_player: player}} = socket) do
-    {:noreply, socket_player_init(player.id, socket)}
-  end
-
   def handle_event("filter", %{"role" => role}, %{assigns: %{all_avatars: all_avatars, filter: filter}} = socket) do
     filter = if filter == role, do: nil, else: role
     avatars = if filter, do: Enum.filter(all_avatars, &(&1.role == role)), else: all_avatars
@@ -94,6 +97,8 @@ defmodule MobaWeb.V2.CreateLive do
     end
   end
 
+  defp hero_name(%{user_id: nil}, avatar, _name, _socket), do: avatar.name
+
   defp hero_name(player, _avatar, name, socket) do
     if !is_nil(name) && is_nil(validation_error(name, socket)), do: name, else: player.user.username
   end
@@ -112,6 +117,9 @@ defmodule MobaWeb.V2.CreateLive do
     })
   end
 
+  defp set_name(%{assigns: %{current_player: %{user_id: nil}}} = socket, avatar) when not is_nil(avatar),
+    do: assign(socket, name: avatar.name)
+
   defp set_name(%{assigns: %{current_player: %{user: %{username: username}}}} = socket, _),
     do: assign(socket, name: username)
 
@@ -125,6 +133,27 @@ defmodule MobaWeb.V2.CreateLive do
       name: nil,
       sidebar_code: "training"
     )
+  end
+
+  defp socket_guest_init(cache_key, socket) do
+    cached = get_cache(cache_key)
+    avatars = Game.list_creation_avatars()
+    skills = Game.list_creation_skills(1)
+
+    socket
+    |> socket_init()
+    |> assign(
+      all_avatars: avatars,
+      avatars: avatars,
+      cache_key: cache_key,
+      current_hero: nil,
+      current_player: %{hero_collection: [], user: nil, user_id: nil},
+      selected_avatar: cached.selected_avatar,
+      selected_skills: cached.selected_skills,
+      selected_build_index: cached.selected_build_index,
+      skills: skills
+    )
+    |> set_name(cached.selected_avatar)
   end
 
   defp socket_player_init(player_id, %{assigns: %{current_player: player}} = socket) do

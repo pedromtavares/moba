@@ -1,6 +1,6 @@
 <div id="hero-bar">
   <div class="container-fluid">
-    <form phx-submit="finalize-edit">
+    <form phx-submit="finalize-edit" {target_attrs(@event_target)}>
       <div class="row">
         <div class="d-none d-md-block col-3 col-md-2 col-lg-2 col-xl-2 center">
           <div class="row mt-2">
@@ -14,7 +14,7 @@
               </div>
             </div>
           </div>
-          <h3 class="mb-0 mt-1 hero-name" phx-click="level">
+          <h3 class="mb-0 mt-1 hero-name" phx-click="level" {target_attrs(@event_target)}>
             {@current_hero.name}
           </h3>
         </div>
@@ -47,7 +47,12 @@
                 <%= for skill <- sorted_skills(@current_hero) do %>
                   <div class={"skill-container #{if skill.passive, do: "passive", else: "active"}"}>
                     <%= if can_level_skill?(@current_hero, skill) do %>
-                      <a href="javascript:;" phx-click="skill" phx-value-code={skill.code}>
+                      <a
+                        href="javascript:;"
+                        phx-click="skill"
+                        phx-value-code={skill.code}
+                        {target_attrs(@event_target)}
+                      >
                         <img
                           src={GH.image_url(skill)}
                           data-toggle="tooltip"
@@ -79,7 +84,7 @@
                           <i class="fa fa-circle text-warning"></i>
                         <% end %>
                         <%= if skill.level < max_skill_level(skill) do %>
-                          <%= for _ <- ((skill.level+1)..max_skill_level(skill)) do %>
+                          <%= for _ <- ((skill.level + 1)..max_skill_level(skill)) do %>
                             <i class="fa fa-circle"></i>
                           <% end %>
                         <% end %>
@@ -111,6 +116,7 @@
                     data-toggle="tooltip"
                     title={edit_orders_label(@current_hero)}
                     class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"
+                    {target_attrs(@event_target)}
                   >
                     <i class="fa fa-edit mr-1"></i>Edit Orders
                   </a>
@@ -130,6 +136,7 @@
                   class={"badge badge-light-warning border border-warning toggle-shop #{if @show_shop, do: "active-shop"}"}
                   phx-click="toggle-shop"
                   phx-hook="ToggleShop"
+                  {target_attrs(@event_target)}
                 >
                   SHOP
                 </a>
@@ -201,6 +208,7 @@
                 id="toggle-tiny-shop"
                 phx-hook="ToggleShop"
                 class={"badge badge-light-warning border border-warning toggle-shop #{if @show_shop, do: "active-shop"}"}
+                {target_attrs(@event_target)}
               >
                 SHOP
               </a>
@@ -213,6 +221,7 @@
               type="button"
               class="btn btn-block btn-outline-info text-primary rounded-0"
               phx-click="show-navigation"
+              {target_attrs(@event_target)}
             >
               <i class="fa fa-arrow-circle-left mr-1"></i>Show Navigation
             </button>
@@ -222,6 +231,7 @@
                 type="button"
                 class="btn btn-block btn-outline-warning text-warning can-level rounded-0"
                 phx-click="show-build"
+                {target_attrs(@event_target)}
               >
                 You have an available skill point!<i class="fa fa-arrow-circle-right ml-1"></i>
               </button>
@@ -230,6 +240,7 @@
                 type="button"
                 class="btn btn-block btn-outline-info text-primary rounded-0 btn-xs"
                 phx-click="show-build"
+                {target_attrs(@event_target)}
               >
                 Show Build<i class="fa fa-arrow-circle-right ml-1"></i>
               </button>
@@ -247,6 +258,7 @@
       phx-click="toggle-shop"
       phx-hook="ToggleShop"
       class={"badge badge-light-warning border border-warning toggle-shop #{if @show_shop, do: "active-shop"}"}
+      {target_attrs(@event_target)}
     >
       SHOP
     </a>
@@ -256,12 +268,14 @@
     class={"shop-modal #{if @show_shop, do: "d-block", else: "d-none"}"}
     phx-window-keydown="close-shop"
     phx-key="Escape"
+    {target_attrs(@event_target)}
     id="shop-modal"
   >
     <.live_component
-      module={MobaWeb.V2.ShopComponent}
+      module={ShopComponent}
       current_hero={@current_hero}
       tutorial_step={@tutorial_step}
+      event_target={@event_target}
       id="shop"
     />
   </div>

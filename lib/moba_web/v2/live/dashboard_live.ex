@@ -1,11 +1,19 @@
 defmodule MobaWeb.V2.DashboardLive do
   use MobaWeb, :v2_live_view
 
+  alias MobaWeb.V2.TutorialComponent
+
   @base_hero_count Moba.base_hero_count()
 
   def mount(_params, _session, socket) do
     %{assigns: %{current_player: player}} = socket
-    {:ok, socket_init(socket, player)}
+    socket = socket_init(socket, player)
+
+    if connected?(socket) do
+      TutorialComponent.subscribe(player.id)
+    end
+
+    {:ok, socket}
   end
 
   def handle_event("show-finished", _, socket) do
@@ -77,6 +85,18 @@ defmodule MobaWeb.V2.DashboardLive do
     end
   end
 
+  def handle_event("tutorial1", _, socket) do
+    {:noreply, TutorialComponent.next_step(socket, 21)}
+  end
+
+  def handle_event("finish-tutorial", _, socket) do
+    {:noreply, TutorialComponent.finish_base(socket)}
+  end
+
+  def handle_info({:tutorial, %{step: step}}, socket) do
+    {:noreply, assign(socket, tutorial_step: step)}
+  end
+
   # Private functions
 
   defp socket_init(socket, player) do
@@ -91,6 +111,7 @@ defmodule MobaWeb.V2.DashboardLive do
 
     assign(socket,
       sidebar_code: "base",
+      tutorial_step: player.tutorial_step,
       all_heroes: all_heroes,
       visible_heroes: visible,
       filter: filter,
@@ -99,6 +120,11 @@ defmodule MobaWeb.V2.DashboardLive do
       collection_codes: collection_codes,
       hero_count: length(all_heroes)
     )
+    |> check_tutorial()
+  end
+
+  defp check_tutorial(socket) do
+    TutorialComponent.next_step(socket, 20)
   end
 
   @max_pve_tier Moba.max_pve_tier()

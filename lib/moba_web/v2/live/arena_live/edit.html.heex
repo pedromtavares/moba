@@ -180,11 +180,12 @@
       </div>
     </div>
   </div>
-  <.live_component
+  <.hero_bar
     :if={@hero}
-    module={MobaWeb.V2.HeroBarComponent}
     current_hero={@hero}
+    editing={@editing}
+    show_build={@show_build}
+    show_shop={@show_shop}
     tutorial_step={@tutorial_step}
-    id="hero-bar"
   />
 </Layouts.app>

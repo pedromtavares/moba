@@ -1,6 +1,7 @@
 defmodule MobaWeb.V2.ShopComponent do
   use MobaWeb, :v2_live_component
 
+  import MobaWeb.V2.Components.HeroBarComponents
   alias MobaWeb.V2.TutorialComponent
 
   embed_templates "shop_component/*"
@@ -16,14 +17,21 @@ defmodule MobaWeb.V2.ShopComponent do
      )}
   end
 
-  def update(%{current_hero: hero, tutorial_step: step}, socket) do
-    {:ok,
-     assign(socket,
-       items: Moba.cached_items(),
-       current_hero: hero,
-       tutorial_step: step,
-       current_player: hero.player
-     )}
+  def update(%{current_hero: hero, tutorial_step: step} = assigns, socket) do
+    hero_changed? = socket.assigns[:current_hero] != hero
+
+    socket =
+      socket
+      |> assign(
+        items: Moba.cached_items(),
+        current_hero: hero,
+        tutorial_step: step,
+        current_player: hero.player,
+        event_target: Map.get(assigns, :event_target)
+      )
+      |> reset_selection_if_hero_changed(hero_changed?)
+
+    {:ok, socket}
   end
 
   def handle_event("select-shop", %{"code" => code}, socket) do
@@ -57,35 +65,6 @@ defmodule MobaWeb.V2.ShopComponent do
     {:noreply, assign(socket, transmute: nil)}
   end
 
-  def handle_event("finish-transmute", _, %{assigns: assigns} = socket) do
-    hero = Game.transmute_item!(assigns.current_hero, assigns.recipe, assigns.transmute)
-    Game.broadcast_to_hero(hero.id)
-
-    {:noreply,
-     socket
-     |> assign(transmute: nil, recipe: [])
-     |> TutorialComponent.next_step(9)
-     |> sync_hero_bar(hero)}
-  end
-
-  def handle_event("buy", _, %{assigns: assigns} = socket) do
-    hero = Game.buy_item!(assigns.current_hero, assigns.selected_shop)
-    Game.broadcast_to_hero(hero.id)
-
-    {:noreply,
-     socket
-     |> assign(selected_shop: nil)
-     |> check_tutorial(hero)
-     |> sync_hero_bar(hero)}
-  end
-
-  def handle_event("sell", _, %{assigns: assigns} = socket) do
-    hero = Game.sell_item!(assigns.current_hero, assigns.selected_inventory)
-    Game.broadcast_to_hero(hero.id)
-
-    {:noreply, socket |> assign(selected_inventory: nil) |> sync_hero_bar(hero)}
-  end
-
   def render(assigns) do
     shop(assigns)
   end
@@ -111,6 +90,7 @@ defmodule MobaWeb.V2.ShopComponent do
 
   attr :hero, :map, required: true
   attr :selected_shop, :map, required: true
+  attr :event_target, :any, default: nil
 
   defp shop_actions(assigns) do
     ~H"""
@@ -131,11 +111,12 @@ defmodule MobaWeb.V2.ShopComponent do
         <button
           class="btn btn-warning buy-button"
           phx-click="buy"
-          phx-target="#shop"
+          phx-value-code={@selected_shop.code}
           disabled={!can_buy?(@hero, @selected_shop)}
           phx-hook="Loading"
           loading="Buying..."
           id="buy-button"
+          {target_attrs(@event_target)}
         >
           <span class="loading-text">Buy for <i class="fa fa-coins"></i> {price(@selected_shop)}</span>
         </button>
@@ -208,38 +189,9 @@ defmodule MobaWeb.V2.ShopComponent do
 
   defp rarity_filter(items, rarity), do: Enum.filter(items, fn item -> item.rarity == rarity end)
 
-  defp check_tutorial(%{assigns: %{tutorial_step: step}} = socket, hero) do
-    if length(hero.items) > 1 && step == 3 do
-      socket
-      |> TutorialComponent.next_step(4)
-      |> notify_close_shop()
-    else
-      socket |> TutorialComponent.next_step(7)
-    end
+  defp reset_selection_if_hero_changed(socket, true) do
+    assign(socket, selected_shop: nil, selected_inventory: nil, transmute: nil, recipe: [])
   end
 
-  defp notify_close_shop(socket) do
-    if hero_bar_id = socket.assigns[:hero_bar_id] do
-      send_update(MobaWeb.V2.HeroBarComponent, id: hero_bar_id, shop_action: :close)
-    else
-      send(self(), {:shop, :close})
-    end
-
-    socket
-  end
-
-  defp sync_hero_bar(socket, hero) do
-    send(self(), {:hero_bar_updated, hero})
-
-    if hero_bar_id = socket.assigns[:hero_bar_id] do
-      send_update(
-        MobaWeb.V2.HeroBarComponent,
-        id: hero_bar_id,
-        current_hero: hero,
-        tutorial_step: socket.assigns.tutorial_step
-      )
-    end
-
-    socket
-  end
+  defp reset_selection_if_hero_changed(socket, false), do: socket
 end

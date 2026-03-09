@@ -90,5 +90,43 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     assert has_element?(view, "#hero-bar #save-button")
     assert has_element?(view, "#hero-bar select[name='skill_order[decay]']")
+
+    view
+    |> element("#hero-bar #toggle-shop")
+    |> render_click()
+
+    assert has_element?(view, "#shop-modal.d-block")
+  end
+
+  test "starts the arena tutorial when the player is on step 29", %{conn: conn} do
+    hero = create_base_hero()
+    player = Game.update_tutorial_step!(hero.player, 29)
+
+    conn =
+      conn
+      |> init_test_session(player_id: player.id)
+
+    {:ok, view, _html} = live(conn, "/arena")
+
+    assert has_element?(view, "#tutorial-step-30[data-step='30']")
+  end
+
+  test "arena tutorial keeps the v1 anchor targets", %{conn: conn} do
+    hero = create_base_hero()
+    player =
+      hero.player
+      |> Game.update_collection!([%{id: hero.id}])
+      |> Game.update_tutorial_step!(29)
+
+    conn =
+      conn
+      |> init_test_session(player_id: player.id)
+
+    {:ok, view, _html} = live(conn, "/arena")
+
+    assert has_element?(view, "#pvp-progression")
+    assert has_element?(view, "#daily-progression")
+    assert has_element?(view, "#current-pvp-tier")
+    assert has_element?(view, "#game-manual")
   end
 end

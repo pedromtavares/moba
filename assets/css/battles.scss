@@ -456,6 +456,7 @@
   .item-container{
     width: 60px;
     height: 47px;
+    position: relative;
 
     .mp-cost{
       position: relative;
@@ -486,6 +487,15 @@
       padding: 0.3rem;
       border-radius: 1rem;
       font-size: 0.8rem;
+    }
+
+    .item-hotkey{
+      position: absolute;
+      top: -4px;
+      left: 2px;
+      right: auto;
+      bottom: auto;
+      line-height: 1;
     }
   }
 

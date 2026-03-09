@@ -425,10 +425,12 @@
       </div>
     </div>
   <% end %>
-  <.live_component
+  <.hero_bar
     :if={@hero.player_id == @current_player.id}
-    module={MobaWeb.V2.HeroBarComponent}
     current_hero={@hero}
-    id="hero-bar"
+    editing={@editing}
+    show_build={@show_build}
+    show_shop={@show_shop}
+    tutorial_step={@tutorial_step}
   />
 </Layouts.app>

@@ -53,6 +53,27 @@ defmodule MobaWeb.V2.BattleLiveTest do
     refute rewards_html =~ "Proceed to Battle"
   end
 
+  test "guest player ranking up after the first league challenge advances the tutorial", %{conn: conn} do
+    player = create_player!(%{user_id: nil, tutorial_step: 10})
+
+    attacker =
+      create_base_hero(%{league_tier: 0, league_step: 2}, player, strong_avatar())
+      |> Moba.Repo.preload(:skills)
+
+    battle = Game.start_league_battle!(attacker)
+    skill_id = attacker.skills |> List.first() |> Map.fetch!(:id)
+
+    conn =
+      conn
+      |> init_test_session(player_id: attacker.player_id)
+
+    {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
+    _rewards_html = play_until_finished(view, battle.id, attacker.id, skill_id, 20)
+
+    updated_player = Game.get_player!(player.id)
+    assert updated_player.tutorial_step == 11
+  end
+
   test "finished duel battle links back to the duel", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
@@ -119,9 +140,9 @@ defmodule MobaWeb.V2.BattleLiveTest do
   defp play_until_finished(view, battle_id, attacker_id, skill_id, attempts_left) when attempts_left > 0 do
     _html =
       render_click(view, "next-turn", %{
-        "skill_id" => skill_id,
+        "skill_id" => "#{skill_id}",
         "item_id" => "",
-        "hero_id" => attacker_id
+        "hero_id" => "#{attacker_id}"
       })
 
     if Engine.get_battle!(battle_id).finished do
