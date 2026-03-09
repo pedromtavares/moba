@@ -4,6 +4,8 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   """
   use Phoenix.Component
 
+  import MobaWeb.V2.Components.GameComponents, only: [hero_item_strip: 1, hero_skill_strip: 1]
+
   alias MobaWeb.GameHelpers, as: LegacyGH
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
@@ -48,27 +50,8 @@ defmodule MobaWeb.V2.Components.PvpComponents do
         </div>
         <div class="row">
           <div class="col-12">
-            <div class="skills-container d-flex justify-content-between">
-              <img
-                :for={skill <- @hero.skills}
-                src={GH.image_url(skill)}
-                data-toggle="tooltip"
-                title={LegacyGH.skill_description(skill)}
-                class={["skill-img img-border-sm tooltip-mobile", skill.passive && "passive"]}
-                alt={skill.name}
-              />
-            </div>
-            <div class="items-container row no-gutters">
-              <div :for={item <- sort_items(@hero.items)} class="item-container col-4">
-                <img
-                  src={GH.image_url(item)}
-                  data-toggle="tooltip"
-                  title={LegacyGH.item_description(item)}
-                  class={["item-img img-border-xs tooltip-mobile", !item.active && "passive"]}
-                  alt={item.name}
-                />
-              </div>
-            </div>
+            <.hero_skill_strip skills={@hero.skills} tooltip_fun={&LegacyGH.skill_description/1} />
+            <.hero_item_strip items={sort_items(@hero.items)} tooltip_fun={&LegacyGH.item_description/1} />
           </div>
         </div>
       </div>

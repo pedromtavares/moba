@@ -19,6 +19,8 @@ defmodule MobaWeb.V2.HeroLiveTest do
       assert has_element?(view, "a[href='/player/#{hero.player_id}']")
       assert has_element?(view, ".hero-stats .text-danger[title='Health']")
       assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
+      assert has_element?(view, "#skill-#{hero.skills |> List.first() |> Map.fetch!(:id)}-#{hero.id}")
+      assert has_element?(view, ".items-container")
     end
 
     test "owner sees skin controls", %{conn: conn} do

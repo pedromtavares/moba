@@ -25,6 +25,8 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#show-pve-link.active")
     assert has_element?(view, ".hero-stats .text-danger[title='Health']")
     assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
+    assert has_element?(view, "#skill-#{hero.skills |> List.first() |> Map.fetch!(:id)}-#{hero.id}")
+    assert has_element?(view, ".items-container")
   end
 
   test "creates a community message", %{conn: conn} do

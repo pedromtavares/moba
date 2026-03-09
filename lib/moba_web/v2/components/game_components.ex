@@ -165,6 +165,60 @@ defmodule MobaWeb.V2.Components.GameComponents do
     """
   end
 
+  @doc """
+  Renders a hero skill strip using the current Bootstrap card footer markup.
+  """
+  attr :skills, :list, required: true
+  attr :container_class, :string, default: "skills-container d-flex justify-content-between"
+  attr :image_class, :string, default: "skill-img img-border-sm tooltip-mobile"
+  attr :id_prefix, :string, default: nil
+  attr :id_suffix, :any, default: nil
+  attr :tooltip_fun, :any, default: nil
+
+  def hero_skill_strip(assigns) do
+    ~H"""
+    <div class={@container_class}>
+      <img
+        :for={skill <- @skills}
+        src={GH.image_url(skill)}
+        class={[@image_class, skill.passive && "passive"]}
+        data-toggle="tooltip"
+        title={tooltip_for(@tooltip_fun, skill, &GH.skill_description/1)}
+        id={dom_id(@id_prefix, skill.id, @id_suffix)}
+        alt={skill.name}
+      />
+    </div>
+    """
+  end
+
+  @doc """
+  Renders a hero item strip using the current Bootstrap card footer markup.
+  """
+  attr :items, :list, required: true
+  attr :container_class, :string, default: "items-container row no-gutters"
+  attr :image_class, :string, default: "item-img img-border-xs tooltip-mobile"
+  attr :item_container_class, :string, default: "item-container col-4"
+  attr :id_prefix, :string, default: nil
+  attr :id_suffix, :any, default: nil
+  attr :tooltip_fun, :any, default: nil
+
+  def hero_item_strip(assigns) do
+    ~H"""
+    <div class={@container_class}>
+      <div :for={item <- @items} class={@item_container_class}>
+        <img
+          src={GH.image_url(item)}
+          class={[@image_class, !item.active && "passive"]}
+          data-toggle="tooltip"
+          title={tooltip_for(@tooltip_fun, item, &GH.item_description/1)}
+          id={dom_id(@id_prefix, item.id, @id_suffix)}
+          alt={item.name}
+        />
+      </div>
+    </div>
+    """
+  end
+
   # -------------------------------------------------------------------
   # Hero Stats (compact inline)
   # -------------------------------------------------------------------
@@ -451,6 +505,13 @@ defmodule MobaWeb.V2.Components.GameComponents do
   defp tone_class("pink"), do: "text-pink"
   defp tone_class("warning"), do: "text-warning"
   defp tone_class("orange"), do: "text-orange"
+
+  defp tooltip_for(nil, value, default_fun), do: default_fun.(value)
+  defp tooltip_for(fun, value, _default_fun), do: fun.(value)
+
+  defp dom_id(nil, _id, _suffix), do: nil
+  defp dom_id(prefix, id, nil), do: "#{prefix}-#{id}"
+  defp dom_id(prefix, id, suffix), do: "#{prefix}-#{id}-#{suffix}"
 
   defp sort_items(items) when is_list(items), do: Enum.sort_by(items, fn item -> !item.active end)
   defp sort_items(_), do: []
