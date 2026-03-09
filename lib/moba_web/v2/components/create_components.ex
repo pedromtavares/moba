@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.Components.CreateComponents do
   use Phoenix.Component
 
+  import MobaWeb.V2.Components.GameComponents, only: [league_badge: 1]
+
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
@@ -27,10 +29,10 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 class="avatar-container text-center mx-1"
                 data-toggle="tooltip"
                 title={hero["avatar"]["name"]}
-              >
-                <img src={GH.image_url(hero["avatar"])} class="avatar" />
-                <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo" />
-              </div>
+            >
+              <img src={GH.image_url(hero["avatar"])} class="avatar" />
+              <.league_badge tier={hero["tier"]} variant="legacy" />
+            </div>
             <% end %>
             <%= for avatar <- @blank_collection do %>
               <div style="width:100px;height:75px" class="avatar-container text-center mx-1">

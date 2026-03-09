@@ -9,11 +9,12 @@ defmodule MobaWeb.V2.BattlesLiveTest do
       conn
       |> init_test_session(player_id: hero.player_id)
 
-    {:ok, _view, html} = live(conn, "/battles")
+    {:ok, view, html} = live(conn, "/battles")
 
     assert html =~ "Return to Training"
     assert html =~ "Wins/Losses"
     assert html =~ "League Challenge"
+    assert has_element?(view, "#current-training-rank .league-logo")
   end
 
   test "clicking a battle row navigates to the battle page", %{conn: conn} do

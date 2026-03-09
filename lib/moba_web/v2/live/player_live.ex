@@ -134,7 +134,7 @@ defmodule MobaWeb.V2.PlayerLive do
             <% end %>
           </span>
           <div class="font-15">
-            <img src={"/images/league/#{@hero.league_tier}.png"} class="league-logo" />
+            <.league_badge tier={@hero.league_tier} variant="legacy" />
             {@hero.name}
           </div>
           <span

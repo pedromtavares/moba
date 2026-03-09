@@ -24,7 +24,7 @@
                     >
                       <div class="avatar-container">
                         <img src={GH.image_url(hero["avatar"])} class={avatar_class(hero)} />
-                        <img src={"/images/league/#{hero["tier"]}.png"} class="league-logo" />
+                        <.league_badge tier={hero["tier"]} variant="legacy" />
                       </div>
                     </a>
                   </div>

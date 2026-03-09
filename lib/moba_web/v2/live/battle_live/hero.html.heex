@@ -3,9 +3,10 @@
     <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
       <span class="font-italic level font-15">Level {(@last_hero && @last_hero.level) || @hero.level}</span>
       <div>
-        <img
-          src={"/images/league/#{@snapshot && @snapshot.league_tier || @hero.league_tier}.png"}
-          class="league-logo mr-1"
+        <.league_badge
+          tier={@snapshot && @snapshot.league_tier || @hero.league_tier}
+          variant="legacy"
+          img_class="mr-1"
         />
         <span class="font-17">{@hero.name}</span>
       </div>

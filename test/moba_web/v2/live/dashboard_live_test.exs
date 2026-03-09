@@ -14,12 +14,13 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       hero = create_base_hero()
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-      {:ok, _view, html} = live(conn, "/base")
+      {:ok, view, html} = live(conn, "/base")
 
       assert html =~ "Train a new Hero"
       assert html =~ "In Progress"
       assert html =~ "Finished"
       assert html =~ "id=\"pve-progression\""
+      assert has_element?(view, "#visible-hero-#{hero.id} .league-logo")
     end
 
     test "shows unfinished heroes by default when they exist", %{conn: conn} do

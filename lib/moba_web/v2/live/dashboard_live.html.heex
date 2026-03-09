@@ -106,10 +106,7 @@
                         src={GH.image_url(hero["avatar"])}
                         class={collection_avatar_class(hero)}
                       />
-                      <img
-                        src={"/images/league/#{hero["tier"]}.png"}
-                        class="league-logo"
-                      />
+                      <.league_badge tier={hero["tier"]} variant="legacy" />
                     </div>
                   <% end %>
                   <%= for avatar <- @blank_collection do %>
@@ -181,10 +178,7 @@
                                 <% end %>
                               </span>
                               <div>
-                                <img
-                                  src={"/images/league/#{hero.league_tier}.png"}
-                                  class="league-logo"
-                                />
+                                <.league_badge tier={hero.league_tier} variant="legacy" />
                                 {hero.name}
                               </div>
                               <span class="font-15 font-italic">

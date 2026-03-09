@@ -4,7 +4,8 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   """
   use Phoenix.Component
 
-  import MobaWeb.V2.Components.GameComponents, only: [hero_item_strip: 1, hero_skill_strip: 1, hero_stat_group: 1]
+  import MobaWeb.V2.Components.GameComponents,
+    only: [hero_item_strip: 1, hero_skill_strip: 1, hero_stat_group: 1, league_badge: 1]
 
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
@@ -32,7 +33,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
             <% end %>
           </span>
           <div>
-            <img src={"/images/league/#{@hero.league_tier}.png"} class="league-logo" alt="" />
+            <.league_badge tier={@hero.league_tier} variant="legacy" />
             {@hero.name}
           </div>
           <span class="font-15 font-italic" title={hero_stats_title(@hero)}>

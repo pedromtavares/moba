@@ -414,14 +414,30 @@ defmodule MobaWeb.V2.Components.GameComponents do
   attr :tier, :integer, required: true
   attr :size, :string, default: "md"
   attr :show_name, :boolean, default: false
+  attr :variant, :string, default: "modern"
   attr :class, :string, default: nil
+  attr :img_class, :string, default: nil
 
   def league_badge(assigns) do
     ~H"""
-    <div class={["inline-flex items-center gap-1", @class]} title={GH.league_name(@tier)}>
-      <img src={"/images/league/#{@tier}.png"} alt={GH.league_name(@tier)} class={league_badge_size(@size)} loading="lazy" />
-      <span :if={@show_name} class="text-xs text-faction-text-muted"><%= GH.league_name(@tier) %></span>
-    </div>
+    <%= if @variant == "legacy" do %>
+      <img
+        src={"/images/league/#{@tier}.png"}
+        alt={GH.league_name(@tier)}
+        class={["league-logo", @img_class]}
+        loading="lazy"
+      />
+    <% else %>
+      <div class={["inline-flex items-center gap-1", @class]} title={GH.league_name(@tier)}>
+        <img
+          src={"/images/league/#{@tier}.png"}
+          alt={GH.league_name(@tier)}
+          class={[league_badge_size(@size), @img_class]}
+          loading="lazy"
+        />
+        <span :if={@show_name} class="text-xs text-faction-text-muted"><%= GH.league_name(@tier) %></span>
+      </div>
+    <% end %>
     """
   end
 
