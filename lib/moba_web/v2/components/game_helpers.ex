@@ -54,12 +54,6 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def background_url(%{"background" => background} = resource), do: get_background_url(background, resource)
   def background_url(_), do: "/images/default_background.jpg"
 
-  def hero_stats_tooltip(hero, show_speed \\ false) do
-    MobaWeb.V2.Components.TooltipComponents.hero_stats_tooltip(hero, show_speed)
-  end
-
-  def hero_stats_string(hero, show_speed \\ false), do: hero_stats_tooltip(hero, show_speed)
-
   # -------------------------------------------------------------------
   # Skill description — returns a map for tooltip rendering
   # -------------------------------------------------------------------
@@ -92,22 +86,6 @@ defmodule MobaWeb.V2.Components.GameHelpers do
       damage_type: skill.damage_type,
       effects: resource_effects_text(skill)
     }
-  end
-
-  # -------------------------------------------------------------------
-  # Skill description — returns an HTML string for Bootstrap tooltip titles
-  # -------------------------------------------------------------------
-
-  def skill_description(%{code: "basic_attack"} = skill) do
-    MobaWeb.V2.Components.TooltipComponents.skill_tooltip(skill)
-  end
-
-  def basic_attack_description do
-    MobaWeb.V2.Components.TooltipComponents.basic_attack_tooltip()
-  end
-
-  def skill_description(skill, full_description \\ true, show_name \\ true) do
-    MobaWeb.V2.Components.TooltipComponents.skill_tooltip(skill, full_description, show_name)
   end
 
   # -------------------------------------------------------------------
@@ -226,14 +204,6 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   end
 
   def plain_effects_text(_), do: ""
-
-  def formatted_effect(effect) when is_binary(effect) do
-    MobaWeb.V2.Components.TooltipComponents.formatted_effect_tooltip(effect)
-  end
-
-  def formatted_effect(_), do: ""
-
-  def item_description(item), do: MobaWeb.V2.Components.TooltipComponents.item_tooltip(item)
 
   defp positive_or_nil(nil), do: nil
   defp positive_or_nil(val) when val > 0, do: val

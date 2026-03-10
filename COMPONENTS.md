@@ -241,7 +241,7 @@ The major `LegacyGH` dependency that remained in shared PvP rendering has been r
 
 Current `v2` stat tooltip usage goes through:
 
-- `hero_stats_tooltip/2` in `lib/moba_web/v2/components/tooltip_components.ex`
+- `TT.hero_stats_tooltip/2` from `lib/moba_web/v2/components/tooltip_components.ex`
 
 Current direct `v2` call sites:
 
@@ -259,7 +259,8 @@ Completed in this pass:
 - the battle templates no longer use `raw(GH.formatted_effect(...))` for visible page content
 - training target reward tooltip generation was localized into explicit reward-tooltip helpers instead of one inline HTML blob in the template
 - tooltip HTML assembly was centralized in `lib/moba_web/v2/components/tooltip_components.ex`
-- `game_helpers.ex` now delegates tooltip-body generation instead of owning the HTML assembly itself
+- `v2` tooltip callers now use `TT.*` directly
+- the old tooltip wrapper API was removed from `game_helpers.ex`
 
 Still intentionally left in place:
 
@@ -434,6 +435,7 @@ Rules:
 
 - `GameHelpers` should return data and formatting values, not HTML fragments.
 - Any UI currently built with `raw(...)` or interpolated HTML strings should move into function components.
+- Bootstrap tooltip HTML compatibility belongs in `TooltipComponents`, not `GameHelpers`.
 
 Planned component families:
 

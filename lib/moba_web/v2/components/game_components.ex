@@ -7,6 +7,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
   use Phoenix.Component
 
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+  alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   # -------------------------------------------------------------------
   # Portrait Frame
@@ -180,7 +181,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
       src={GH.image_url(@skill)}
       class={[@class, @skill.passive && "passive"]}
       data-toggle="tooltip"
-      title={@title || GH.skill_description(@skill)}
+      title={@title || TT.skill_tooltip(@skill)}
       id={@id}
       style={@style}
       alt={@skill.name}
@@ -205,7 +206,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
         :for={skill <- @skills}
         skill={skill}
         class={@image_class}
-        title={tooltip_for(@tooltip_fun, skill, &GH.skill_description/1)}
+        title={tooltip_for(@tooltip_fun, skill, &TT.skill_tooltip/1)}
         id={dom_id(@id_prefix, skill.id, @id_suffix)}
       />
     </div>
@@ -231,7 +232,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
           src={GH.image_url(item)}
           class={[@image_class, !item.active && "passive"]}
           data-toggle="tooltip"
-          title={tooltip_for(@tooltip_fun, item, &GH.item_description/1)}
+          title={tooltip_for(@tooltip_fun, item, &TT.item_tooltip/1)}
           id={dom_id(@id_prefix, item.id, @id_suffix)}
           alt={item.name}
         />

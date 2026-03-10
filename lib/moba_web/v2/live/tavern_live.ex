@@ -278,7 +278,7 @@ defmodule MobaWeb.V2.TavernLive do
           <div class="name">
             <h3 class="m-0 text-center p-2 text-white f-rpg">{@avatar.name}</h3>
           </div>
-          <div class="ultimate" data-toggle="tooltip" title={GH.skill_description(@avatar.ultimate)}>
+          <div class="ultimate" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
             <h4 class="mt-0">Ultimate</h4>
             <img src={GH.image_url(@avatar.ultimate)} style="width: 70px" class="img-border-sm" />
             <h5 class="mb-0">{@avatar.ultimate.name}</h5>
@@ -325,7 +325,7 @@ defmodule MobaWeb.V2.TavernLive do
             src={GH.image_url(@skill)}
             class={["skill-img img-border", @skill.passive && "passive"]}
             data-toggle="tooltip"
-            title={GH.skill_description(@skill)}
+            title={TT.skill_tooltip(@skill)}
           />
           <br />
           <h3 class="f-rpg">

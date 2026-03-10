@@ -2,6 +2,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
   use Phoenix.Component
 
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+  alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   attr :item, :map, required: true
   attr :target, :string, default: "#shop"
@@ -12,7 +13,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
       <img
         src={GH.image_url(@item)}
         data-toggle="tooltip"
-        title={GH.item_description(@item)}
+        title={TT.item_tooltip(@item)}
         class={"item-img code-#{@item.code} tooltip-mobile #{if @item.active, do: "active"}"}
         phx-click="select-shop"
         phx-value-code={@item.code}
@@ -35,7 +36,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
     <img
       src={GH.image_url(@item)}
       data-toggle="tooltip"
-      title={GH.item_description(@item)}
+      title={TT.item_tooltip(@item)}
       class={@class}
       phx-click={@click}
       phx-value-code={@code}

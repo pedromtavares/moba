@@ -18,7 +18,7 @@
       <div class="img-container mr-4 float-left inactive">
         <.battle_status_icon
           code="basic_attack"
-          title={GH.basic_attack_description()}
+          title={TT.basic_attack_tooltip()}
           class={"skill-img #{if @last_turn && @last_turn.skill && @last_turn.skill.code == "basic_attack", do: "last-skill"}"}
         />
       </div>

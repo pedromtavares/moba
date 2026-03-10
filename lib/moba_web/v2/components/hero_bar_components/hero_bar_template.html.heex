@@ -64,7 +64,7 @@
                       <img
                         src={GH.image_url(skill)}
                         data-toggle="tooltip"
-                        title={GH.skill_description(skill)}
+                        title={TT.skill_tooltip(skill)}
                         class={"skill-img img-border tooltip-mobile #{if skill.passive, do: "passive"} #{if skill.ultimate, do: "ultimate"}"}
                       />
                     <% end %>
@@ -150,7 +150,7 @@
                     <img
                       src={GH.image_url(item)}
                       data-toggle="tooltip"
-                      title={GH.item_description(item)}
+                      title={TT.item_tooltip(item)}
                       class="item-img img-border-sm"
                     />
                     <%= if @editing do %>

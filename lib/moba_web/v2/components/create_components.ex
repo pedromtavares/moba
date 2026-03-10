@@ -5,6 +5,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
 
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+  alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   attr :avatars, :list, required: true
   attr :all_avatars, :list, required: true
@@ -152,7 +153,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                   src={GH.image_url(skill)}
                   class={"d-none d-md-inline skill img-border-sm #{if Enum.member?(@selected_skills, skill), do: "current"} #{if skill.passive, do: "passive"}"}
                   data-toggle="tooltip"
-                  title={GH.skill_description(skill)}
+                  title={TT.skill_tooltip(skill)}
                 />
                 <img
                   phx-click="pick-skill"
@@ -207,7 +208,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                     style="width: 70px"
                     class={"img-border-sm tooltip-mobile #{if skill.passive, do: "passive"}"}
                     data-toggle="tooltip"
-                    title={GH.skill_description(skill)}
+                    title={TT.skill_tooltip(skill)}
                     id={"skill_build_#{skill.id}_#{index}"}
                   />
                   <br />
@@ -260,7 +261,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                   src={GH.image_url(skill)}
                   class={"skill img-border-sm #{if skill.passive, do: "passive"}"}
                   data-toggle="tooltip"
-                  title={GH.skill_description(skill)}
+                  title={TT.skill_tooltip(skill)}
                   phx-click="pick-skill"
                   phx-value-id={skill.id}
                   id={"skill_#{skill.id}"}
@@ -287,7 +288,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 src={GH.image_url(@selected_avatar.ultimate)}
                 class={"skill img-border-sm #{if @selected_avatar.ultimate.passive, do: "passive"}"}
                 data-toggle="tooltip"
-                title={GH.skill_description(@selected_avatar.ultimate)}
+                title={TT.skill_tooltip(@selected_avatar.ultimate)}
                 id={"skill_#{@selected_avatar.ultimate.id}"}
               />
               <br /><strong class="d-none d-lg-block">{@selected_avatar.ultimate.name}</strong>
@@ -394,7 +395,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
             <h3 class="m-0 text-center p-2 text-white f-rpg">{@avatar.name}</h3>
           </div>
           <%= unless @selected do %>
-            <div class="ultimate p-2 tooltip-mobile" data-toggle="tooltip" title={GH.skill_description(@avatar.ultimate)}>
+            <div class="ultimate p-2 tooltip-mobile" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
               <h5 class="mt-0">Ultimate</h5>
               <img src={GH.image_url(@avatar.ultimate)} style="width: 70px" class="img-border-sm" />
               <h5 class="mb-0">{@avatar.ultimate.name}</h5>

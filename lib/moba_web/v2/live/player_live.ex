@@ -140,7 +140,7 @@ defmodule MobaWeb.V2.PlayerLive do
           <span
             class="font-15 font-italic"
             data-toggle="tooltip"
-            title={GH.hero_stats_tooltip(@hero, true)}
+            title={TT.hero_stats_tooltip(@hero, true)}
           >
             Level {@hero.level} {@hero.avatar.name}
           </span>
