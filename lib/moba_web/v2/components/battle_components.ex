@@ -3,6 +3,7 @@ defmodule MobaWeb.V2.Components.BattleComponents do
 
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+  alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   @effect_pattern ~r/\[(armor|damage|power|hp|mp|status|speed)\](.+?)\[\/\1\]/
 
@@ -104,8 +105,8 @@ defmodule MobaWeb.V2.Components.BattleComponents do
     """
   end
 
-  defp default_title(%Game.Schema.Item{} = item), do: GH.item_description(item)
-  defp default_title(%Game.Schema.Skill{} = skill), do: GH.skill_description(skill)
+  defp default_title(%Game.Schema.Item{} = item), do: TT.item_tooltip(item)
+  defp default_title(%Game.Schema.Skill{} = skill), do: TT.skill_tooltip(skill)
   defp default_title(resource), do: resource.name
 
   defp insufficient_mp?(resource, battler) do

@@ -241,7 +241,7 @@ The major `LegacyGH` dependency that remained in shared PvP rendering has been r
 
 Current `v2` stat tooltip usage goes through:
 
-- `hero_stats_tooltip/2` in `lib/moba_web/v2/components/game_helpers.ex`
+- `hero_stats_tooltip/2` in `lib/moba_web/v2/components/tooltip_components.ex`
 
 Current direct `v2` call sites:
 
@@ -258,11 +258,13 @@ Completed in this pass:
 - battle description/effect content is now rendered through `BattleComponents.effect_text/1`
 - the battle templates no longer use `raw(GH.formatted_effect(...))` for visible page content
 - training target reward tooltip generation was localized into explicit reward-tooltip helpers instead of one inline HTML blob in the template
+- tooltip HTML assembly was centralized in `lib/moba_web/v2/components/tooltip_components.ex`
+- `game_helpers.ex` now delegates tooltip-body generation instead of owning the HTML assembly itself
 
 Still intentionally left in place:
 
 - Bootstrap `title` tooltip bodies that still require HTML strings
-- compatibility formatters in `game_helpers.ex` that back those tooltip titles
+- a compatibility tooltip layer for those `title` bodies
 
 #### Library cleanup
 
@@ -760,7 +762,7 @@ Status:
 Current issue:
 
 - some tooltip and battle/helper code still returns HTML strings
-- `hero_stats_tooltip/2` is an explicit compatibility formatter, but still string-based
+- tooltip HTML generation is now centralized, but still string-based for Bootstrap compatibility
 - battle-related formatting still has remaining tooltip-string debt, but the visible `raw(...)` effect path was removed from `BattleLive`
 
 Target:
@@ -769,7 +771,7 @@ Target:
 
 Status:
 
-- improved, but not finished
+- centralized and improved, but not finished
 - still an active debt item
 
 ### 3. Repeated hero/item/skill markup
@@ -916,8 +918,8 @@ Why:
 
 Still needs work in:
 
-- compatibility battle/effect/reward tooltip helpers that still emit HTML strings
-- compatibility tooltip helpers that are still string-based
+- replacing the Bootstrap `title` compatibility layer with rendered tooltip/popover content if the JS layer is ever modernized
+- retiring the remaining string-based tooltip compatibility APIs once that UI contract changes
 
 Why:
 

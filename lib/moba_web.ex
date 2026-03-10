@@ -157,6 +157,7 @@ defmodule MobaWeb do
       import MobaWeb.V2.Components.PvpComponents
       import MobaWeb.V2.Components.ProfileComponents
       import MobaWeb.V2.Components.ShopComponents
+      import MobaWeb.V2.Components.TooltipComponents
       import MobaWeb.V2.Components.TrainingComponents
 
       alias MobaWeb.V2.Components.GameHelpers, as: GH

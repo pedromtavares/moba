@@ -6,6 +6,7 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
   alias MobaWeb.V2.ShopComponent
+  alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   embed_templates "hero_bar_components/*"
 
@@ -49,6 +50,6 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   def next_skill_description(skill) do
     next = Game.get_current_skill!(skill.code, skill.level + 1)
 
-    "#{GH.skill_description(skill)}<hr/>#{GH.skill_description(%{next | name: "Next Level (#{next.level})", level: nil, description: ""})}"
+    "#{TT.skill_tooltip(skill)}<hr/>#{TT.skill_tooltip(%{next | name: "Next Level (#{next.level})", level: nil, description: ""})}"
   end
 end

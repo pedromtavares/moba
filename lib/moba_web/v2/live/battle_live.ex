@@ -3,6 +3,7 @@ defmodule MobaWeb.V2.BattleLive do
 
   alias MobaWeb.V2.TutorialComponent
   alias Moba.Game
+  alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   embed_templates "battle_live/*"
 
@@ -306,17 +307,16 @@ defmodule MobaWeb.V2.BattleLive do
   defp turn_skill_description(turn) do
     turn.skill
     |> struct_from_map(as: %Game.Schema.Skill{})
-    |> GH.skill_description()
+    |> TT.skill_tooltip()
   end
 
   defp turn_item_description(turn) do
     item = struct_from_map(turn.item, as: %Game.Schema.Item{})
-    %{item | name: "#{turn.attacker.name} activated #{item.name}"} |> GH.item_description()
+    %{item | name: "#{turn.attacker.name} activated #{item.name}"} |> TT.item_tooltip()
   end
 
-  defp effect_tooltip(code) do
-    resource = get_resource(code)
-    "<h3>#{resource.name}</h3>#{resource.description}"
+  defp resource_effect_tooltip(code) do
+    code |> get_resource() |> TT.effect_tooltip()
   end
 
   defp effect_image(code), do: code |> get_resource() |> GH.image_url()
