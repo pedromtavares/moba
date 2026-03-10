@@ -132,6 +132,25 @@ These are now used by:
 
 The `ShopComponent` LiveComponent still owns state and events, but much less of the rendering surface.
 
+#### Training section shell
+
+A dedicated training section module now exists:
+
+- `lib/moba_web/v2/components/training_components.ex`
+
+It currently owns the main training page shell/conditional composition for:
+
+- pending battle vs main training view
+- dead-state vs active-state layout
+- farm tab visibility
+- meditation/mine/gank section switching
+
+This is now used by:
+
+- `lib/moba_web/v2/live/training_live.html.heex`
+
+The lower-level training section templates still live under `training_live/*`, but the page-level control flow is now centralized in a training component.
+
 #### Hero stat row migration
 
 The shared stat row has already been adopted in:
@@ -504,6 +523,13 @@ Responsibilities:
 - dead state
 - pending battle banner
 
+Status:
+
+- started
+- `training_components.ex` now owns the main training shell/section composition
+- lower-level section templates still live in `training_live/*`
+- further section extraction is still possible, especially if the individual training partials keep growing
+
 ### Profile / Hero / Library
 
 Target modules:
@@ -762,13 +788,16 @@ Likely target:
 
 Still needs work in:
 
-- training headers
-- target/boss/dead-state/farm-tab section ownership
-- remaining large training template composition
+- optional further extraction of:
+  - header-specific rendering
+  - farm-tab-specific section internals
+  - any shared farming UI between meditation and mining
+- possible migration of some `training_live/*` partial ownership into `training_components.ex` if that becomes worthwhile
 
 Why:
 
-- some repeated display fragments are fixed already, but page-level section ownership is still mixed
+- the page-level shell is now extracted
+- remaining work is about deeper section ownership, not the top-level training page flow
 
 Likely target:
 

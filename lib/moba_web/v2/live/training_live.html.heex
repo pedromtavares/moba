@@ -5,53 +5,44 @@
   sidebar_code={@sidebar_code}
 >
   <div class="training">
-    <%= if @pending_battle do %>
-      <.pending_battle battle={@pending_battle} />
-    <% else %>
-      <div class="row mt-2 training-header">
-        <div class="col">
-          <.header
-            current_hero={@current_hero}
-            current_player={@current_player}
-          />
-        </div>
-      </div>
-
-      <%= if dead?(@current_hero) do %>
-        <div class="row">
-          <div class="col">
-            <.dead current_hero={@current_hero} />
-          </div>
-        </div>
-      <% else %>
-        <%= if display_farm_tabs?(assigns) do %>
-          <div class="row">
-            <div class="col">
-              <.farm_tabs current_hero={@current_hero} farm_tab={@farm_tab} />
-            </div>
-          </div>
-        <% end %>
-
-        <%= case @farm_tab do %>
-          <% "meditation" -> %>
-            <.meditation
-              current_hero={@current_hero}
-              selected_turns={@selected_turns}
-              current_time={@current_time}
-              farm_rewards={@farm_rewards}
-            />
-          <% "mine" -> %>
-            <.mine
-              current_hero={@current_hero}
-              selected_turns={@selected_turns}
-              current_time={@current_time}
-              farm_rewards={@farm_rewards}
-            />
-          <% _ -> %>
-            <.gank current_hero={@current_hero} targets={@targets} />
-        <% end %>
-      <% end %>
-    <% end %>
+    <.training_shell
+      pending_battle={@pending_battle}
+      hero_dead={dead?(@current_hero)}
+      show_farm_tabs={display_farm_tabs?(assigns)}
+      farm_tab={@farm_tab}
+    >
+      <:pending>
+        <.pending_battle battle={@pending_battle} />
+      </:pending>
+      <:header>
+        <.header current_hero={@current_hero} current_player={@current_player} />
+      </:header>
+      <:dead>
+        <.dead current_hero={@current_hero} />
+      </:dead>
+      <:farm_tabs>
+        <.farm_tabs current_hero={@current_hero} farm_tab={@farm_tab} />
+      </:farm_tabs>
+      <:meditation>
+        <.meditation
+          current_hero={@current_hero}
+          selected_turns={@selected_turns}
+          current_time={@current_time}
+          farm_rewards={@farm_rewards}
+        />
+      </:meditation>
+      <:mine>
+        <.mine
+          current_hero={@current_hero}
+          selected_turns={@selected_turns}
+          current_time={@current_time}
+          farm_rewards={@farm_rewards}
+        />
+      </:mine>
+      <:gank>
+        <.gank current_hero={@current_hero} targets={@targets} />
+      </:gank>
+    </.training_shell>
   </div>
 
   <.hero_bar
