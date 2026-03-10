@@ -1,8 +1,4 @@
-<div class="row">
-  <div class="col center victory-title margin-auto mt-2">
-    <h3>{battle_result(@battle, @snapshot)}</h3>
-  </div>
-</div>
+<.battle_result_header title={battle_result(@battle, @snapshot)} class="col center victory-title margin-auto mt-2" />
 
 <%= if @battle.winner && @battle.winner_id == @battle.attacker_id do %>
   <%= if @snapshot.league_step == 0 do %>
@@ -72,23 +68,26 @@
 <% end %>
 <%= if @current_player do %>
   <%= if Game.master_league?(@snapshot) || @snapshot.league_step == 0 || @battle.attacker.league_step == 0 do %>
-    <div class="row battle-border-top pt-1 mt-2">
+    <.battle_action_row class="row battle-border-top pt-1 mt-2">
       <div class="col">
-        <.link
+        <.battle_nav_action
           navigate={~p"/training"}
           class="btn btn-outline-info btn-lg btn-block"
-          phx-hook="Loading"
           id="load-training"
-        >
-          <span class="loading-text"><i class="fa fa-play"></i> Continue</span>
-        </.link>
+          icon="fa fa-play"
+          label="Continue"
+        />
       </div>
-    </div>
+    </.battle_action_row>
   <% end %>
 <% else %>
-  <div class="row battle-border-top pt-1 mt-1">
+  <.battle_action_row>
     <div class="col">
-      <a href="/start" class="btn btn-primary btn-block btn-lg"><i class="fa fa-user-plus"></i> Create your Hero</a>
+      <.battle_guest_create_action
+        class="btn btn-primary btn-block btn-lg"
+        icon="fa fa-user-plus"
+        label="Create your Hero"
+      />
     </div>
-  </div>
+  </.battle_action_row>
 <% end %>

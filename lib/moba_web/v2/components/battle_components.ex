@@ -1,5 +1,6 @@
 defmodule MobaWeb.V2.Components.BattleComponents do
   use Phoenix.Component
+  import Moba.Utils, only: [username: 1]
 
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
@@ -105,6 +106,118 @@ defmodule MobaWeb.V2.Components.BattleComponents do
     """
   end
 
+  attr :title, :string, required: true
+  attr :class, :string, default: "col-12 col-md-8 center victory-title margin-auto"
+  slot :inner_block
+
+  def battle_result_header(assigns) do
+    ~H"""
+    <div class="row">
+      <div class={@class}>
+        <h3>
+          {@title}
+          <%= if @inner_block != [] do %>
+            <br />
+            <small><%= render_slot(@inner_block) %></small>
+          <% end %>
+        </h3>
+      </div>
+    </div>
+    """
+  end
+
+  attr :battle, :map, required: true
+
+  def pve_reward_badges(assigns) do
+    ~H"""
+    <%= if @battle.rewards.total_xp > 0 do %>
+      <span class="badge badge-pill badge-light-primary">+{@battle.rewards.total_xp} XP</span>
+    <% end %>
+    <%= if @battle.rewards.total_gold > 0 do %>
+      <span class="badge badge-pill badge-light-warning">+{@battle.rewards.total_gold}g</span>
+    <% end %>
+    <%= if @battle.rewards.total_xp == 0 do %>
+      <span class="badge badge-pill badge-light-dark">No rewards given on defeat</span>
+    <% end %>
+    """
+  end
+
+  attr :duel, :map, required: true
+
+  def duel_reward_badges(assigns) do
+    ~H"""
+    <%= if @duel.rewards do %>
+      <%= if @duel.rewards.attacker_pvp_points != 0 do %>
+        <span class={duel_reward_badge_class(@duel.rewards.attacker_pvp_points)}>
+          {username(@duel.player)}: {duel_reward_points_label(@duel.rewards.attacker_pvp_points)}
+        </span>
+      <% end %>
+      <%= if @duel.rewards.defender_pvp_points != 0 do %>
+        <span class={duel_reward_badge_class(@duel.rewards.defender_pvp_points)}>
+          {username(@duel.opponent_player)}: {duel_reward_points_label(@duel.rewards.defender_pvp_points)}
+        </span>
+      <% end %>
+    <% end %>
+    """
+  end
+
+  slot :inner_block, required: true
+  attr :class, :string, default: "row battle-border-top pt-1 mt-1"
+
+  def battle_action_row(assigns) do
+    ~H"""
+    <div class={@class}>
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  attr :navigate, :string, required: true
+  attr :id, :string, required: true
+  attr :class, :string, required: true
+  attr :label, :string, required: true
+  attr :icon, :string, required: true
+
+  def battle_nav_action(assigns) do
+    ~H"""
+    <.link navigate={@navigate} class={@class} phx-hook="Loading" id={@id}>
+      <span class="loading-text"><i class={@icon}></i> {@label}</span>
+    </.link>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :class, :string, required: true
+  attr :label, :string, required: true
+  attr :icon, :string, required: true
+  attr :click, :string, required: true
+  attr :value_id, :any, default: nil
+
+  def battle_event_action(assigns) do
+    ~H"""
+    <a
+      href="javascript:;"
+      id={@id}
+      phx-click={@click}
+      phx-value-id={@value_id}
+      class={@class}
+      phx-hook="Loading"
+    >
+      <span class="loading-text"><i class={@icon}></i> {@label}</span>
+    </a>
+    """
+  end
+
+  attr :class, :string, required: true
+  attr :label, :string, required: true
+  attr :icon, :string, required: true
+
+  def battle_guest_create_action(assigns) do
+    ~H"""
+    <a href="/start" class={@class}><i class={@icon}></i> {@label}</a>
+    """
+  end
+
   defp default_title(%Game.Schema.Item{} = item), do: TT.item_tooltip(item)
   defp default_title(%Game.Schema.Skill{} = skill), do: TT.skill_tooltip(skill)
   defp default_title(resource), do: resource.name
@@ -161,4 +274,10 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   defp effect_class("mp"), do: "text-primary"
   defp effect_class("status"), do: "text-dark"
   defp effect_class("speed"), do: "text-purple"
+
+  defp duel_reward_badge_class(points) when points > 0, do: "badge badge-pill badge-light-success"
+  defp duel_reward_badge_class(_points), do: "badge badge-pill badge-light-dark"
+
+  defp duel_reward_points_label(points) when points > 0, do: "+#{points} Season Points"
+  defp duel_reward_points_label(points), do: "#{points} Season Points"
 end

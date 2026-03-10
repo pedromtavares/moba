@@ -101,6 +101,9 @@ It currently owns the repeated battle-turn display primitives for:
 - empty item slots
 - resource status badges
 - inline effect text rendering
+- reward/result headers
+- reward badge groups
+- reward action rows and CTAs
 
 These are now used by:
 
@@ -109,8 +112,12 @@ These are now used by:
 - `battle_live/turn.html.heex`
 - `battle_live/description.html.heex`
 - `battle_live/first_description.html.heex`
+- `battle_live/pve_rewards.html.heex`
+- `battle_live/league_rewards.html.heex`
+- `battle_live/duel_rewards.html.heex`
+- `battle_live/match_rewards.html.heex`
 
-This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`, and the main battle description surfaces no longer depend on `raw(GH.formatted_effect(...))` in templates.
+This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`, the main battle description surfaces no longer depend on `raw(GH.formatted_effect(...))` in templates, and the end-of-battle reward/result templates now compose through `BattleComponents` instead of hand-rolling the repeated action/header/badge structure.
 
 #### Shop rendering primitives
 
@@ -552,7 +559,8 @@ Status:
 - shared icon/resource primitives are extracted
 - the turn templates now use `BattleComponents`
 - visible battle effect text is now component-based
-- tooltip/reward compatibility formatting is still in progress
+- reward/result headers and action rows are now componentized
+- tooltip compatibility formatting is still in progress
 
 ### Community
 
@@ -832,14 +840,15 @@ The next steps should focus on the highest-value remaining duplication and the m
 
 Still needs work in:
 
-- reward/summary extraction from the remaining battle templates and helpers
-- the larger non-icon battle composition around summaries, result blocks, and description tooltips
+- the larger non-icon battle composition around the still-custom league step/result surfaces
+- any remaining summary/result fragments that are still page-local to battle templates
 
 Why:
 
 - the icon/resource layer is now extracted
 - visible effect rendering is now extracted
-- the remaining battle debt is in reward/result composition and tooltip compatibility paths
+- reward/result composition is partially extracted
+- the remaining battle debt is now concentrated in league-specific result steps and tooltip compatibility paths
 
 Likely target:
 
