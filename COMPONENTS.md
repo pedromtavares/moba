@@ -151,6 +151,24 @@ This is now used by:
 
 The lower-level training section templates still live under `training_live/*`, but the page-level control flow is now centralized in a training component.
 
+#### Dashboard/profile section shells
+
+A dedicated profile/dashboard section module now exists:
+
+- `lib/moba_web/v2/components/profile_components.ex`
+
+It currently owns the top-level page section shells for:
+
+- dashboard progression + hero list + rewards modal composition
+- player profile collection + summary + ranking composition
+
+These are now used by:
+
+- `lib/moba_web/v2/live/dashboard_live.html.heex`
+- `lib/moba_web/v2/live/player_live.html.heex`
+
+This is intentionally a section-layer extraction only. The lower-level content and helper logic for those pages still mostly lives with the LiveViews for now.
+
 #### Hero stat row migration
 
 The shared stat row has already been adopted in:
@@ -544,6 +562,13 @@ Responsibilities:
 - manual/info blocks
 - glossary/stat explanation rows
 
+Status:
+
+- started
+- `profile_components.ex` now owns the top-level dashboard/player page shells
+- lower-level section internals still remain mostly in the LiveView/template layer
+- deeper extraction is still possible if those sections keep growing
+
 ## Layer 5: Stateful Units
 
 Purpose: genuinely stateful interactive widgets.
@@ -807,14 +832,15 @@ Likely target:
 
 Still needs work in:
 
-- `dashboard_live.html.heex`
-- `player_live.html.heex`
-- larger profile/dashboard collection and summary blocks
+- deeper extraction of the larger section internals inside:
+  - `dashboard_live.html.heex`
+  - `player_live.html.heex`
+- possible migration of more helper/render functions out of `PlayerLive` and `DashboardLive` if the pages continue to grow
 
 Why:
 
-- the shared primitives are now there
-- the remaining work is mostly section extraction, not low-level display work
+- the top-level section shells are now extracted
+- the remaining work is mostly about section internals and helper ownership, not primitive display duplication
 
 Likely target:
 

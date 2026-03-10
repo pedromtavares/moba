@@ -4,10 +4,8 @@
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-<div class="dashboard mt-2">
-  <div class="row">
-    <div class="col">
-
+<.dashboard_shell>
+  <:progression>
       <%!-- PvE Progression --%>
       <div class="row">
         <div class="col">
@@ -79,7 +77,8 @@
           </div>
         </div>
       </div>
-
+  </:progression>
+  <:hero_list>
       <%!-- Hero List --%>
       <div class="row">
         <div class="col">
@@ -285,13 +284,9 @@
           </div>
         </div>
       </div>
-
-    </div>
-  </div>
-</div>
-
+  </:hero_list>
+  <:rewards_modal :if={next_pve_tier(@current_player)}>
 <%!-- PvE Tier Rewards Modal --%>
-<%= if next_pve_tier(@current_player) do %>
   <div
     id="pve-tier-rewards"
     class="modal fade"
@@ -369,6 +364,7 @@
       </div>
     </div>
   </div>
-<% end %>
+  </:rewards_modal>
+</.dashboard_shell>
 <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
 </Layouts.app>
