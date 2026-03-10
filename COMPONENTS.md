@@ -169,6 +169,25 @@ These are now used by:
 
 This is intentionally a section-layer extraction only. The lower-level content and helper logic for those pages still mostly lives with the LiveViews for now.
 
+#### Community/library section shells
+
+Dedicated section modules now exist for these pages:
+
+- `lib/moba_web/v2/components/community_components.ex`
+- `lib/moba_web/v2/components/library_components.ex`
+
+They currently own the top-level page shell composition for:
+
+- community intro + boards + rankings
+- library intro + guide tabs + avatar section + skills section
+
+These are now used by:
+
+- `lib/moba_web/v2/live/community_live.html.heex`
+- `lib/moba_web/v2/live/library_live.html.heex`
+
+As with the profile/dashboard extraction, this is currently a page-section ownership pass, not a deep migration of every inner helper and render function.
+
 #### Hero stat row migration
 
 The shared stat row has already been adopted in:
@@ -526,6 +545,12 @@ Responsibilities:
 - pve/pvp ranking entries
 - message composer wrappers
 
+Status:
+
+- started
+- `community_components.ex` now owns the top-level community page shell
+- most inner rows/cards and helper-backed rendering still live in `CommunityLive`
+
 ### Training
 
 Target module:
@@ -568,6 +593,12 @@ Status:
 - `profile_components.ex` now owns the top-level dashboard/player page shells
 - lower-level section internals still remain mostly in the LiveView/template layer
 - deeper extraction is still possible if those sections keep growing
+
+Library status:
+
+- started
+- `library_components.ex` now owns the top-level library page shell
+- lower-level library content blocks still remain in the page template
 
 ## Layer 5: Stateful Units
 
@@ -851,13 +882,15 @@ Likely target:
 
 Still needs work in:
 
-- page-level extraction of `community` blocks
-- page-level extraction of `library` informational blocks
+- deeper extraction of the inner content blocks in:
+  - `community_live.html.heex`
+  - `library_live.html.heex`
+- possible migration of more local helper/render functions out of `CommunityLive`
 
 Why:
 
-- lower urgency than battle/shop/training
-- mostly a composition cleanup now that some display primitives already exist
+- the top-level shells are now extracted
+- the remaining work is inner content ownership, not page-level structure
 
 ### Priority 6: HTML-string tooltip/effect cleanup
 

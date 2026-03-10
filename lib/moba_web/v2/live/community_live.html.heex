@@ -4,7 +4,8 @@
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-<div class="community">
+<.community_shell>
+  <:intro>
   <div class="row mt-2">
     <div class="col">
       <a
@@ -16,6 +17,8 @@
       </a>
     </div>
   </div>
+  </:intro>
+  <:boards>
   <div class="row mt-2">
     <div class="col-lg-6">
       <div class="card mb-0">
@@ -121,6 +124,8 @@
       </div>
     </div>
   </div>
+  </:boards>
+  <:rankings>
   <div class="row mt-3">
     <div class="col text-center">
       <ul class="nav nav-tabs nav-bordered nav-justified">
@@ -453,5 +458,6 @@
       </div>
     </div>
   </div>
-</div>
+  </:rankings>
+</.community_shell>
 </Layouts.app>
