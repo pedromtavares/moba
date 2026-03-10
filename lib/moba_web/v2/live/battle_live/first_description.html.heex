@@ -2,7 +2,7 @@
   <div class="col">
     <div class="notification mt-0 mb-2 darker">
       <div class="center">
-        {raw(GH.formatted_effect(@effect))}
+        <.effect_text effect={@effect} />
       </div>
       <%= if length(@descriptions) > 0 do %>
         <div class="contracted-effects text-center">

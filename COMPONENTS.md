@@ -100,14 +100,17 @@ It currently owns the repeated battle-turn display primitives for:
 - battle status icons
 - empty item slots
 - resource status badges
+- inline effect text rendering
 
 These are now used by:
 
 - `battle_live/active_turn.html.heex`
 - `battle_live/passive_turn.html.heex`
 - `battle_live/turn.html.heex`
+- `battle_live/description.html.heex`
+- `battle_live/first_description.html.heex`
 
-This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`.
+This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`, and the main battle description surfaces no longer depend on `raw(GH.formatted_effect(...))` in templates.
 
 #### Shop rendering primitives
 
@@ -245,6 +248,21 @@ Current direct `v2` call sites:
 - `player_live.ex`
 - `training_live/target.html.heex`
 - `training_live/boss.html.heex`
+
+#### Helper cleanup
+
+The highest-risk raw helper path has been reduced without rewriting the Bootstrap tooltip model.
+
+Completed in this pass:
+
+- battle description/effect content is now rendered through `BattleComponents.effect_text/1`
+- the battle templates no longer use `raw(GH.formatted_effect(...))` for visible page content
+- training target reward tooltip generation was localized into explicit reward-tooltip helpers instead of one inline HTML blob in the template
+
+Still intentionally left in place:
+
+- Bootstrap `title` tooltip bodies that still require HTML strings
+- compatibility formatters in `game_helpers.ex` that back those tooltip titles
 
 #### Library cleanup
 
@@ -529,7 +547,8 @@ Status:
 - started
 - shared icon/resource primitives are extracted
 - the turn templates now use `BattleComponents`
-- larger battle description/effect/reward composition is still in progress
+- visible battle effect text is now component-based
+- tooltip/reward compatibility formatting is still in progress
 
 ### Community
 
@@ -742,7 +761,7 @@ Current issue:
 
 - some tooltip and battle/helper code still returns HTML strings
 - `hero_stats_tooltip/2` is an explicit compatibility formatter, but still string-based
-- battle-related formatting still has remaining raw-string debt, but one major raw path was removed from `BattleLive`
+- battle-related formatting still has remaining tooltip-string debt, but the visible `raw(...)` effect path was removed from `BattleLive`
 
 Target:
 
@@ -809,13 +828,14 @@ The next steps should focus on the highest-value remaining duplication and the m
 
 Still needs work in:
 
-- effect/reward/description extraction from the remaining battle templates and helpers
-- the larger non-icon battle composition around descriptions, effects, and summaries
+- reward/summary extraction from the remaining battle templates and helpers
+- the larger non-icon battle composition around summaries, result blocks, and description tooltips
 
 Why:
 
 - the icon/resource layer is now extracted
-- the remaining battle debt is in the heavier description/effect/reward rendering paths
+- visible effect rendering is now extracted
+- the remaining battle debt is in reward/result composition and tooltip compatibility paths
 
 Likely target:
 
@@ -896,7 +916,7 @@ Why:
 
 Still needs work in:
 
-- explicit battle/effect/reward helpers that still emit HTML strings
+- compatibility battle/effect/reward tooltip helpers that still emit HTML strings
 - compatibility tooltip helpers that are still string-based
 
 Why:

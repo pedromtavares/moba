@@ -407,10 +407,19 @@ defmodule MobaWeb.V2.TrainingLive do
     end
   end
 
-  defp reward_badges_for(%{pve_tier: pve_tier}, difficulty) do
+  defp target_rewards_tooltip(%{pve_tier: pve_tier}, difficulty) do
     rewards = Moba.pve_battle_rewards(difficulty, pve_tier)
 
-    "<div class='text-center'><span class='badge badge-pill badge-light-primary mr-1'>+#{rewards} XP</span><span class='badge badge-pill badge-light-warning mr-1'>+#{rewards} Gold</span></div>"
+    "<h4 class='text-center'>#{difficulty_label(difficulty)} Target Rewards</h4>" <>
+      "<div class='text-center'>" <>
+      reward_badge_html("primary", "#{rewards} XP") <>
+      reward_badge_html("warning", "#{rewards} Gold") <>
+      "</div>" <>
+      "<br/>"
+  end
+
+  defp reward_badge_html(color, label) do
+    "<span class='badge badge-pill badge-light-#{color} mr-1'>+#{label}</span>"
   end
 
   defp show_league_challenge?(%{pve_current_turns: 0, league_tier: league_tier}) do

@@ -9,7 +9,7 @@
         <span
           class="font-20 font-italic text-warning tooltip-cursor"
           data-toggle="tooltip"
-          title={"<h4 class='text-center'>#{difficulty_label @target.difficulty} Target Rewards</h4>#{ reward_badges_for(@current_hero, @target.difficulty)}<br/>"}
+          title={target_rewards_tooltip(@current_hero, @target.difficulty)}
         >
           <i class={"fa fa-crown text-#{ difficulty_color(@target.difficulty)}"}></i>
         </span>
