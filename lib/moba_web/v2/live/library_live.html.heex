@@ -4,8 +4,7 @@
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-<.library_shell>
-  <:intro>
+  <div class="content" id="library">
   <div class="row mt-2">
     <div class="col">
       <a
@@ -17,9 +16,7 @@
       </a>
     </div>
   </div>
-  </:intro>
 
-  <:guides>
   <div class="row mt-2">
     <div class="col-12">
       <div class="card-box">
@@ -319,9 +316,7 @@
       </div>
     </div>
   </div>
-  </:guides>
 
-  <:avatars>
   <div class="row">
     <div class="col">
       <h3 class="page-title mb-3 text-center">
@@ -381,9 +376,7 @@
       </div>
     <% end %>
   </div>
-  </:avatars>
 
-  <:skills>
   <div class="row">
     <div class="col">
       <h3 class="page-title mb-3 text-center">
@@ -416,6 +409,5 @@
       </div>
     <% end %>
   </div>
-  </:skills>
-</.library_shell>
+  </div>
 </Layouts.app>

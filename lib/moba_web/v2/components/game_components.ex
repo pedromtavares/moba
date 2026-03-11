@@ -10,92 +10,6 @@ defmodule MobaWeb.V2.Components.GameComponents do
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   # -------------------------------------------------------------------
-  # Portrait Frame
-  # -------------------------------------------------------------------
-
-  @doc """
-  Renders a hero avatar in a decorative frame.
-
-  ## Examples
-
-      <.portrait_frame src={GH.image_url(hero.avatar)} size="md" />
-  """
-  attr :src, :string, required: true
-  attr :size, :string, default: "md"
-  attr :class, :string, default: nil
-
-  def portrait_frame(assigns) do
-    ~H"""
-    <div class={["relative overflow-hidden rounded portrait-border", portrait_size(@size), @class]}>
-      <img src={@src} alt="" class="w-full h-full object-cover" loading="lazy" />
-    </div>
-    """
-  end
-
-  # -------------------------------------------------------------------
-  # Hero Card
-  # -------------------------------------------------------------------
-
-  @doc """
-  Renders a hero display card with portrait, name, level, stats, skills, items.
-
-  ## Examples
-
-      <.hero_card hero={hero}>
-        <:actions>
-          <.button phx-click="continue" phx-value-id={hero.id}>Continue</.button>
-        </:actions>
-      </.hero_card>
-  """
-  attr :hero, :map, required: true
-  attr :class, :string, default: nil
-  slot :actions
-
-  def hero_card(assigns) do
-    ~H"""
-    <div
-      id={"hero-card-#{@hero.id}"}
-      class={["hero-card-border min-h-[380px] flex flex-col bg-cover bg-center overflow-hidden", @class]}
-      style={"background-image: url('#{GH.background_url(@hero)}')"}
-    >
-      <%!-- Header --%>
-      <div class="px-3 pt-2 pb-1 flex justify-between items-center bg-[rgba(54,64,74,0.8)]">
-        <span class="italic text-xl text-white font-rpg leading-none w-12 shrink-0">
-          <%= if @hero.pve_ranking, do: "##{@hero.pve_ranking}" %>
-        </span>
-        <div class="flex items-center gap-1 font-bold text-white">
-          <.league_badge tier={@hero.league_tier} size="sm" />
-          <%= @hero.name || @hero.avatar.name %>
-        </div>
-        <span class="italic text-sm text-white text-right w-28 shrink-0" title={hero_stats_title(@hero)}>
-          Level <%= @hero.level %> <%= @hero.avatar.name %>
-        </span>
-      </div>
-
-      <%!-- Body (empty — background image shows through) --%>
-      <div class="flex-1"></div>
-
-      <%!-- Footer --%>
-      <div class="p-1 bg-[rgba(54,64,74,0.95)]">
-        <%!-- Actions row: delete / continue / customize / farming --%>
-        <div :if={@actions != []} class="flex items-center px-1 py-1">
-          <%= render_slot(@actions) %>
-        </div>
-        <%!-- Skills + Items row --%>
-        <div class="flex items-start justify-between px-1 pt-1">
-          <div class="flex gap-0.5 w-[70%]">
-            <.skill_icon :for={skill <- @hero.skills} skill={skill} size="sm" />
-          </div>
-          <div class="flex flex-wrap gap-0.5 justify-end w-[30%]">
-            <.item_slot :for={item <- sort_items(@hero.items)} item={item} size="sm" />
-          </div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  # -------------------------------------------------------------------
   # Skill Icon
   # -------------------------------------------------------------------
 
@@ -241,63 +155,6 @@ defmodule MobaWeb.V2.Components.GameComponents do
     """
   end
 
-  # -------------------------------------------------------------------
-  # Hero Stats (compact inline)
-  # -------------------------------------------------------------------
-
-  @doc """
-  Renders hero stats as a compact inline row.
-
-  ## Examples
-
-      <.hero_stats_compact hero={hero} />
-  """
-  attr :hero, :map, required: true
-  attr :show_speed, :boolean, default: false
-  attr :class, :string, default: nil
-
-  def hero_stats_compact(assigns) do
-    ~H"""
-    <div class={["flex flex-wrap gap-x-3 gap-y-0.5 text-xs", @class]}>
-      <span><span class="text-hp">HP</span> <span class="text-faction-text tabular-nums"><%= @hero.total_hp %></span></span>
-      <span><span class="text-mp">MP</span> <span class="text-faction-text tabular-nums"><%= @hero.total_mp %></span></span>
-      <span><span class="text-atk">ATK</span> <span class="text-faction-text tabular-nums"><%= @hero.atk %></span></span>
-      <span>
-        <span class="text-power">POW</span> <span class="text-faction-text tabular-nums"><%= @hero.power %></span>
-      </span>
-      <span>
-        <span class="text-armor">ARM</span> <span class="text-faction-text tabular-nums"><%= @hero.armor %></span>
-      </span>
-      <span :if={@show_speed}>
-        <span class="text-speed">SPD</span> <span class="text-faction-text tabular-nums"><%= @hero.speed %></span>
-      </span>
-    </div>
-    """
-  end
-
-  # -------------------------------------------------------------------
-  # Hero Stats (full display)
-  # -------------------------------------------------------------------
-
-  @doc """
-  Renders a full hero stats display in a grid layout.
-  """
-  attr :hero, :map, required: true
-  attr :class, :string, default: nil
-
-  def hero_stats(assigns) do
-    ~H"""
-    <div class={["grid grid-cols-3 gap-2 text-sm", @class]}>
-      <.stat_item label="HP" value={@hero.total_hp} color="hp" />
-      <.stat_item label="MP" value={@hero.total_mp} color="mp" />
-      <.stat_item label="ATK" value={@hero.atk} color="atk" />
-      <.stat_item label="Power" value={@hero.power} color="power" />
-      <.stat_item label="Armor" value={@hero.armor} color="armor" />
-      <.stat_item label="Speed" value={@hero.speed} color="speed" />
-    </div>
-    """
-  end
-
   @doc """
   Renders one Bootstrap hero stat button.
   """
@@ -412,56 +269,6 @@ defmodule MobaWeb.V2.Components.GameComponents do
     """
   end
 
-  attr :label, :string, required: true
-  attr :value, :any, required: true
-  attr :color, :string, required: true
-
-  defp stat_item(assigns) do
-    ~H"""
-    <div class="flex items-center justify-between bg-surface-dark/50 rounded px-2 py-1">
-      <span class={["text-xs font-medium", stat_color(@color)]}><%= @label %></span>
-      <span class="text-faction-text font-semibold tabular-nums text-xs"><%= @value %></span>
-    </div>
-    """
-  end
-
-  # -------------------------------------------------------------------
-  # Avatar Card
-  # -------------------------------------------------------------------
-
-  @doc """
-  Renders an avatar selection card.
-  """
-  attr :avatar, :map, required: true
-  attr :selected, :boolean, default: false
-  attr :class, :string, default: nil
-  attr :rest, :global, include: ~w(phx-click phx-value-id phx-target)
-
-  def avatar_card(assigns) do
-    ~H"""
-    <div
-      class={[
-        "relative rounded overflow-hidden cursor-pointer transition-all duration-150",
-        "border-2",
-        if(@selected,
-          do: "border-gold shadow-[0_0_8px_rgba(224,165,38,0.4)]",
-          else: "border-surface-border hover:border-faction-accent/50"
-        ),
-        @class
-      ]}
-      {@rest}
-    >
-      <div class="relative w-full aspect-square">
-        <img src={GH.image_url(@avatar)} alt={@avatar.name} class="w-full h-full object-cover" loading="lazy" />
-        <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
-          <div class="text-xs font-semibold text-white truncate"><%= @avatar.name %></div>
-          <div :if={@avatar.role} class="text-[10px] text-faction-text-muted"><%= GH.role_name(@avatar.role) %></div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
   # -------------------------------------------------------------------
   # League Badge
   # -------------------------------------------------------------------
@@ -500,37 +307,8 @@ defmodule MobaWeb.V2.Components.GameComponents do
   end
 
   # -------------------------------------------------------------------
-  # PvE Progression
-  # -------------------------------------------------------------------
-
-  @doc """
-  Renders the PvE tier progression display.
-  """
-  attr :player, :map, required: true
-  attr :class, :string, default: nil
-
-  def pve_progression(assigns) do
-    ~H"""
-    <div class={["flex items-center gap-3", @class]}>
-      <div class="flex items-center gap-2">
-        <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" class="w-8 h-8" loading="lazy" />
-        <div>
-          <div class="text-sm font-semibold text-gold"><%= GH.pve_tier_name(@player.pve_tier) %></div>
-          <div class="text-xs text-faction-text-muted">PvE Tier <%= @player.pve_tier %></div>
-        </div>
-      </div>
-    </div>
-    """
-  end
-
-  # -------------------------------------------------------------------
   # Private helpers
   # -------------------------------------------------------------------
-
-  defp portrait_size("sm"), do: "w-10 h-10"
-  defp portrait_size("md"), do: "w-16 h-16"
-  defp portrait_size("lg"), do: "w-24 h-24"
-  defp portrait_size(_), do: "w-16 h-16"
 
   defp skill_icon_size("sm"), do: "w-6 h-6"
   defp skill_icon_size("md"), do: "w-8 h-8"
@@ -551,14 +329,6 @@ defmodule MobaWeb.V2.Components.GameComponents do
   defp item_rarity_border("epic"), do: "border-rarity-epic/60"
   defp item_rarity_border("rare"), do: "border-rarity-rare/60"
   defp item_rarity_border(_), do: "border-white/10"
-
-  defp stat_color("hp"), do: "text-hp"
-  defp stat_color("mp"), do: "text-mp"
-  defp stat_color("atk"), do: "text-atk"
-  defp stat_color("power"), do: "text-power"
-  defp stat_color("armor"), do: "text-armor"
-  defp stat_color("speed"), do: "text-speed"
-  defp stat_color(_), do: "text-faction-text-muted"
 
   defp hero_stat_group_class("hero_bar"), do: "btn-group stats-group f-rpg"
   defp hero_stat_group_class(_), do: "btn-group hero-stats"
@@ -586,13 +356,6 @@ defmodule MobaWeb.V2.Components.GameComponents do
   defp dom_id(nil, _id, _suffix), do: nil
   defp dom_id(prefix, id, nil), do: "#{prefix}-#{id}"
   defp dom_id(prefix, id, suffix), do: "#{prefix}-#{id}-#{suffix}"
-
-  defp sort_items(items) when is_list(items), do: Enum.sort_by(items, fn item -> !item.active end)
-  defp sort_items(_), do: []
-
-  defp hero_stats_title(hero) do
-    "HP: #{hero.total_hp} | MP: #{hero.total_mp} | ATK: #{hero.atk} | POW: #{hero.power} | ARM: #{hero.armor} | SPD: #{hero.speed}"
-  end
 
   defp hero_stat_title(hero, :hp, "detailed"), do: total_hp_description(hero)
   defp hero_stat_title(hero, :mp, "detailed"), do: total_mp_description(hero)

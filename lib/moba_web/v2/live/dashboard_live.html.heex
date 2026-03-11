@@ -4,8 +4,9 @@
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-<.dashboard_shell>
-  <:progression>
+  <div class="dashboard mt-2">
+    <div class="row">
+      <div class="col">
       <%!-- PvE Progression --%>
       <div class="row">
         <div class="col">
@@ -77,8 +78,7 @@
           </div>
         </div>
       </div>
-  </:progression>
-  <:hero_list>
+
       <%!-- Hero List --%>
       <div class="row">
         <div class="col">
@@ -284,87 +284,89 @@
           </div>
         </div>
       </div>
-  </:hero_list>
-  <:rewards_modal :if={next_pve_tier(@current_player)}>
-<%!-- PvE Tier Rewards Modal --%>
-  <div
-    id="pve-tier-rewards"
-    class="modal fade"
-    tabindex="-1"
-    role="dialog"
-    aria-labelledby="pve-tier-rewards-label"
-  >
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title margin-auto pl-3" id="pve-tier-rewards-label">
-            Progression Rewards
-          </h4>
-          <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">
-            ×
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="text-center">
-            <img src={"/images/pve/#{@current_player.pve_tier + 1}.png"} style="max-height: 70px" />
-            <br />
-            <h3>{Moba.pve_tiers()[@current_player.pve_tier + 1]}</h3>
+
+        <%= if next_pve_tier(@current_player) do %>
+          <%!-- PvE Tier Rewards Modal --%>
+          <div
+            id="pve-tier-rewards"
+            class="modal fade"
+            tabindex="-1"
+            role="dialog"
+            aria-labelledby="pve-tier-rewards-label"
+          >
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h4 class="modal-title margin-auto pl-3" id="pve-tier-rewards-label">
+                    Progression Rewards
+                  </h4>
+                  <button type="button" class="close ml-0 pl-0" data-dismiss="modal" aria-hidden="true">
+                    ×
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="text-center">
+                    <img src={"/images/pve/#{@current_player.pve_tier + 1}.png"} style="max-height: 70px" />
+                    <br />
+                    <h3>{Moba.pve_tiers()[@current_player.pve_tier + 1]}</h3>
+                  </div>
+                  <table class="table table-dark border margin-auto">
+                    <tr>
+                      <td class="text-center text-danger">
+                        <i class="fa fa-sword fa-2x"></i> <br /> Training Difficulty
+                      </td>
+                      <td class="text-left">
+                        <h5>{training_difficulty_for(@current_player.pve_tier + 1)}</h5>
+                      </td>
+                    </tr>
+                    <%= if bonus = training_bonus_for(@current_player.pve_tier + 1) do %>
+                      <tr>
+                        <td class="text-center text-success">
+                          <i class="fa fa-sword fa-2x"></i> <br /> Training Bonus
+                        </td>
+                        <td class="text-left">
+                          <h5>{bonus}</h5>
+                        </td>
+                      </tr>
+                    <% end %>
+                    <tr>
+                      <td class="text-center text-primary">
+                        <i class="fa fa-spa fa-2x"></i> <br /> Farming per Turn
+                      </td>
+                      <td class="text-left">
+                        <h5>{GH.farming_per_turn_label(@current_player.pve_tier + 1)}</h5>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="text-center text-warning">
+                        <i class="fa fa-trophy fa-2x"></i> <br /> Maximum League
+                      </td>
+                      <td class="text-left">
+                        <h4>{max_league_allowed_for(@current_player.pve_tier + 1)}</h4>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="text-center text-info">
+                        <.link
+                          navigate={~p"/tavern"}
+                          data-toggle="tooltip"
+                          title="Shards are the in-game currency that you can use to unlock game content."
+                        >
+                          <i class="fab fa-ethereum fa-2x"></i> <br /> Shards
+                        </.link>
+                      </td>
+                      <td class="text-left">
+                        <h4>+ {quest_shard_prize(@current_player.pve_tier + 1)}</h4>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
           </div>
-          <table class="table table-dark border margin-auto">
-            <tr>
-              <td class="text-center text-danger">
-                <i class="fa fa-sword fa-2x"></i> <br /> Training Difficulty
-              </td>
-              <td class="text-left">
-                <h5>{training_difficulty_for(@current_player.pve_tier + 1)}</h5>
-              </td>
-            </tr>
-            <%= if bonus = training_bonus_for(@current_player.pve_tier + 1) do %>
-              <tr>
-                <td class="text-center text-success">
-                  <i class="fa fa-sword fa-2x"></i> <br /> Training Bonus
-                </td>
-                <td class="text-left">
-                  <h5>{bonus}</h5>
-                </td>
-              </tr>
-            <% end %>
-            <tr>
-              <td class="text-center text-primary">
-                <i class="fa fa-spa fa-2x"></i> <br /> Farming per Turn
-              </td>
-              <td class="text-left">
-                <h5>{GH.farming_per_turn_label(@current_player.pve_tier + 1)}</h5>
-              </td>
-            </tr>
-            <tr>
-              <td class="text-center text-warning">
-                <i class="fa fa-trophy fa-2x"></i> <br /> Maximum League
-              </td>
-              <td class="text-left">
-                <h4>{max_league_allowed_for(@current_player.pve_tier + 1)}</h4>
-              </td>
-            </tr>
-            <tr>
-                <td class="text-center text-info">
-                  <.link
-                    navigate={~p"/tavern"}
-                    data-toggle="tooltip"
-                    title="Shards are the in-game currency that you can use to unlock game content."
-                  >
-                  <i class="fab fa-ethereum fa-2x"></i> <br /> Shards
-                </.link>
-              </td>
-              <td class="text-left">
-                <h4>+ {quest_shard_prize(@current_player.pve_tier + 1)}</h4>
-              </td>
-            </tr>
-          </table>
-        </div>
+        <% end %>
       </div>
     </div>
   </div>
-  </:rewards_modal>
-</.dashboard_shell>
 <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
 </Layouts.app>

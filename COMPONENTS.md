@@ -35,13 +35,15 @@ The desired outcome is:
 
 ## Current State
 
-`v2` already has a partial component system:
+`v2` has a smaller, more intentional component surface now:
 
-- `lib/moba_web/v2/components/core_components.ex`
 - `lib/moba_web/v2/components/game_components.ex`
 - `lib/moba_web/v2/components/layout_components.ex`
 - `lib/moba_web/v2/components/hero_bar_components.ex`
 - `lib/moba_web/v2/components/pvp_components.ex`
+- `lib/moba_web/v2/components/create_components.ex`
+- `lib/moba_web/v2/components/battle_components.ex`
+- `lib/moba_web/v2/components/shop_components.ex`
 - `lib/moba_web/v2/components/tutorial_component.ex`
 - `lib/moba_web/v2/live/components/shop_component.ex`
 
@@ -49,9 +51,9 @@ What is still mixed together:
 
 - Page templates still contain large repeated markup blocks.
 - Some component families are split awkwardly between `components/` and `live/`.
-- `v2` still uses legacy helpers such as `MobaWeb.GameHelpers`.
-- Some helpers return raw HTML strings instead of HEEx/function components.
-- Some modules are still “ported v1 markup” rather than a stable `v2` API.
+- some pages still keep a lot of large inline markup because local readability is better than single-use wrapper components
+- tooltip compatibility still relies on Bootstrap `title` HTML strings
+- some modules are still “ported v1 markup” rather than a stable `v2` API
 
 ## Progress Update
 
@@ -139,67 +141,46 @@ It currently owns the repeated shop rendering primitives for:
 - transmute result display
 - shop empty item slots
 
-These are now used by:
+These are now used by `lib/moba_web/v2/live/components/shop_component/shop.html.heex`.
 
-- `lib/moba_web/v2/live/components/shop_component/shop.html.heex`
+The current preferred shop shape is:
 
-The `ShopComponent` LiveComponent still owns state and events, but much less of the rendering surface.
+- `ShopComponent` owns state/events top-down
+- `shop_components.ex` owns the repeated leaf markup
+- the main shop template stays readable in one place
 
-#### Training section shell
+#### Single-use component cleanup
 
-A dedicated training section module now exists:
+The initial extraction pass created several single-use shell wrappers and a few dead experimental components. Those have now been pruned.
 
-- `lib/moba_web/v2/components/training_components.ex`
+Removed entirely:
 
-It currently owns the main training page shell/conditional composition for:
-
-- pending battle vs main training view
-- dead-state vs active-state layout
-- farm tab visibility
-- meditation/mine/gank section switching
-
-This is now used by:
-
-- `lib/moba_web/v2/live/training_live.html.heex`
-
-The lower-level training section templates still live under `training_live/*`, but the page-level control flow is now centralized in a training component.
-
-#### Dashboard/profile section shells
-
-A dedicated profile/dashboard section module now exists:
-
-- `lib/moba_web/v2/components/profile_components.ex`
-
-It currently owns the top-level page section shells for:
-
-- dashboard progression + hero list + rewards modal composition
-- player profile collection + summary + ranking composition
-
-These are now used by:
-
-- `lib/moba_web/v2/live/dashboard_live.html.heex`
-- `lib/moba_web/v2/live/player_live.html.heex`
-
-This is intentionally a section-layer extraction only. The lower-level content and helper logic for those pages still mostly lives with the LiveViews for now.
-
-#### Community/library section shells
-
-Dedicated section modules now exist for these pages:
-
+- `lib/moba_web/v2/components/core_components.ex`
 - `lib/moba_web/v2/components/community_components.ex`
 - `lib/moba_web/v2/components/library_components.ex`
+- `lib/moba_web/v2/components/profile_components.ex`
+- `lib/moba_web/v2/components/training_components.ex`
 
-They currently own the top-level page shell composition for:
+Also removed from `game_components.ex` because they had no real callers:
 
-- community intro + boards + rankings
-- library intro + guide tabs + avatar section + skills section
+- `portrait_frame`
+- `hero_card`
+- `hero_stats_compact`
+- `hero_stats`
+- `avatar_card`
+- `pve_progression`
 
-These are now used by:
+And removed from `shop_components.ex` because they were orphaned after the shop simplification:
 
-- `lib/moba_web/v2/live/community_live.html.heex`
-- `lib/moba_web/v2/live/library_live.html.heex`
+- `shop_shell_content`
+- `shop_catalog_section`
+- `shop_inventory_header`
 
-As with the profile/dashboard extraction, this is currently a page-section ownership pass, not a deep migration of every inner helper and render function.
+The page-level shell wrappers for training, dashboard, player, community, and library were inlined back into their only templates. The rationale was simple:
+
+- single-use wrappers did not improve reuse
+- some of them, especially `training_shell`, made the page harder to scan
+- keeping the top-level page flow inline is easier to understand in this codebase
 
 #### Hero stat row migration
 
@@ -385,40 +366,9 @@ Target subgroups inside `LayoutComponents`:
 
 ## Layer 2: UI Primitives
 
-Purpose: generic reusable components with no MOBA-specific domain knowledge.
+Status: intentionally minimal.
 
-Owner module:
-
-- `lib/moba_web/v2/components/core_components.ex`
-
-Responsibilities:
-
-- buttons
-- badges
-- flash
-- panels
-- tabs
-- bars/counters
-- generic modal/container wrappers
-
-Rules:
-
-- These components should not know about heroes, battles, items, or players.
-- These should provide Phoenix-friendly interfaces and accept arbitrary classes for Bootstrap preservation.
-
-Planned additions:
-
-- `icon_button`
-- `action_button`
-- `tooltip_label`
-- `section_card`
-- `stat_badge`
-- `resource_badge`
-- `modal_frame`
-- `empty_state`
-- `loading_button`
-
-These should wrap repeated Bootstrap patterns instead of replacing them visually.
+The earlier `core_components.ex` experiment was removed because it had no real callers. For this codebase, generic UI primitives should only be added when they have actual reuse, not as a parallel design system.
 
 ## Layer 3: Game Primitives
 
@@ -431,15 +381,11 @@ Owner modules:
 
 Responsibilities:
 
-- hero avatars/portraits
 - hero stat rows
-- hero summary cards
-- skill icons
-- item slots
+- skill icons/images
+- item slots/strips
 - league badges
-- reward badges
-- battle effect rows
-- progress/status readouts
+- reward/status display pieces that are genuinely reused
 
 Rules:
 
@@ -447,19 +393,14 @@ Rules:
 - Any UI currently built with `raw(...)` or interpolated HTML strings should move into function components.
 - Bootstrap tooltip HTML compatibility belongs in `TooltipComponents`, not `GameHelpers`.
 
-Planned component families:
+Current component families:
 
-- `hero_card`
-- `hero_meta`
-- `hero_stats_row`
-- `hero_stats_grid`
-- `hero_skills`
-- `hero_items`
+- `hero_stat_group`
+- `battle_hero_stat_group`
+- `hero_skill_strip`
+- `hero_item_strip`
+- `skill_image`
 - `league_badge`
-- `reward_list`
-- `resource_cost_badge`
-- `cooldown_badge`
-- `status_badge`
 
 ## Layer 4: Domain-Specific Screen Families
 
@@ -568,72 +509,25 @@ Status:
 
 ### Community
 
-Target module:
+Current ownership:
 
-- `lib/moba_web/v2/components/community_components.ex`
-
-Responsibilities:
-
-- feed entries
-- update cards
-- online player list entries
-- pve/pvp ranking entries
-- message composer wrappers
-
-Status:
-
-- started
-- `community_components.ex` now owns the top-level community page shell
-- most inner rows/cards and helper-backed rendering still live in `CommunityLive`
+- `CommunityLive` still owns the top-level page flow
+- reusable inner rows/cards should be extracted only if they are used in more than one place
 
 ### Training
 
-Target module:
+Current ownership:
 
-- `lib/moba_web/v2/components/training_components.ex`
-
-Responsibilities:
-
-- training header
-- farming tabs
-- target cards
-- boss/gank/mine/meditation sections
-- dead state
-- pending battle banner
-
-Status:
-
-- started
-- `training_components.ex` now owns the main training shell/section composition
+- `training_live.html.heex` owns the top-level training flow directly
 - lower-level section templates still live in `training_live/*`
-- further section extraction is still possible, especially if the individual training partials keep growing
+- only repeated leaf pieces should be extracted from here
 
 ### Profile / Hero / Library
 
-Target modules:
+Current ownership:
 
-- `lib/moba_web/v2/components/profile_components.ex`
-- `lib/moba_web/v2/components/library_components.ex`
-
-Responsibilities:
-
-- player profile summary
-- hero history/collection cards
-- manual/info blocks
-- glossary/stat explanation rows
-
-Status:
-
-- started
-- `profile_components.ex` now owns the top-level dashboard/player page shells
-- lower-level section internals still remain mostly in the LiveView/template layer
-- deeper extraction is still possible if those sections keep growing
-
-Library status:
-
-- started
-- `library_components.ex` now owns the top-level library page shell
-- lower-level library content blocks still remain in the page template
+- `dashboard_live.html.heex`, `player_live.html.heex`, and `library_live.html.heex` own their top-level page flow directly
+- deeper extraction is still possible, but only for genuinely repeated inner sections
 
 ## Layer 5: Stateful Units
 
@@ -663,17 +557,12 @@ Target structure:
 lib/moba_web/v2/
   layouts.ex
   components/
-    core_components.ex
     layout_components.ex
     game_components.ex
     game_helpers.ex
     create_components.ex
-    training_components.ex
     battle_components.ex
     pvp_components.ex
-    community_components.ex
-    profile_components.ex
-    library_components.ex
     hero_bar_components.ex
     shop_components.ex
     tutorial_component.ex
@@ -709,9 +598,9 @@ Notes:
 Good:
 
 - `BattleComponents`
-- `TrainingComponents`
 - `CreateComponents`
-- `ProfileComponents`
+- `ShopComponents`
+- `GameComponents`
 
 Avoid:
 

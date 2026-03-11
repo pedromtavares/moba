@@ -4,8 +4,9 @@
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-  <.player_profile_shell>
-    <:collection>
+  <div class="user-profile">
+    <div class="row mt-2">
+      <div class="col-md-6 col-xl-4">
         <div class="collection-container">
           <.featured_hero_card :if={@featured} hero={@featured} />
           <div class="card collection mb-0">
@@ -39,8 +40,8 @@
             </div>
           </div>
         </div>
-    </:collection>
-    <:summary>
+      </div>
+      <div class="col-md-6 col-xl-4">
         <div class="card" phx-hook="EqualHeight" phx-target=".collection-container" id="user-profile">
           <%= if @player.id == @current_player.id do %>
             <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">
@@ -252,8 +253,8 @@
             </div>
           </div>
         </div>
-    </:summary>
-    <:ranking>
+      </div>
+      <div class="col-md-12 col-xl-4">
         <div class="card ranking" phx-hook="EqualHeight" phx-target=".collection-container" id="user-ranking">
           <div class="card-body" id="ranking-card">
             <table class="table table-dark text-center m-0 table-sm">
@@ -399,6 +400,7 @@
             </table>
           </div>
         </div>
-    </:ranking>
-  </.player_profile_shell>
+      </div>
+    </div>
+  </div>
 </Layouts.app>

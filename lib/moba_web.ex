@@ -145,19 +145,13 @@ defmodule MobaWeb do
 
       use Gettext, backend: MobaWeb.Gettext
 
-      import MobaWeb.V2.Components.CoreComponents
-
       alias MobaWeb.V2.Layouts
       import MobaWeb.V2.Components.CreateComponents
       import MobaWeb.V2.Components.BattleComponents
-      import MobaWeb.V2.Components.CommunityComponents
       import MobaWeb.V2.Components.GameComponents
       import MobaWeb.V2.Components.LayoutComponents
-      import MobaWeb.V2.Components.LibraryComponents
       import MobaWeb.V2.Components.PvpComponents
-      import MobaWeb.V2.Components.ProfileComponents
       import MobaWeb.V2.Components.ShopComponents
-      import MobaWeb.V2.Components.TrainingComponents
 
       alias MobaWeb.V2.Components.GameHelpers, as: GH
       alias MobaWeb.V2.Components.TooltipComponents, as: TT
