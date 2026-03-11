@@ -176,12 +176,15 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   attr :id, :string, required: true
   attr :class, :string, required: true
   attr :label, :string, required: true
-  attr :icon, :string, required: true
+  attr :icon, :string, default: nil
 
   def battle_nav_action(assigns) do
     ~H"""
     <.link navigate={@navigate} class={@class} phx-hook="Loading" id={@id}>
-      <span class="loading-text"><i class={@icon}></i> {@label}</span>
+      <span class="loading-text">
+        <i :if={@icon} class={@icon}></i>
+        {@label}
+      </span>
     </.link>
     """
   end
@@ -189,7 +192,7 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   attr :id, :string, required: true
   attr :class, :string, required: true
   attr :label, :string, required: true
-  attr :icon, :string, required: true
+  attr :icon, :string, default: nil
   attr :click, :string, required: true
   attr :value_id, :any, default: nil
 
@@ -203,7 +206,10 @@ defmodule MobaWeb.V2.Components.BattleComponents do
       class={@class}
       phx-hook="Loading"
     >
-      <span class="loading-text"><i class={@icon}></i> {@label}</span>
+      <span class="loading-text">
+        <i :if={@icon} class={@icon}></i>
+        {@label}
+      </span>
     </a>
     """
   end
@@ -215,6 +221,93 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   def battle_guest_create_action(assigns) do
     ~H"""
     <a href="/start" class={@class}><i class={@icon}></i> {@label}</a>
+    """
+  end
+
+  attr :hero, :map, required: true
+  attr :step, :integer, required: true
+  attr :label, :string, required: true
+  attr :variant, :string, values: ~w(winner loser), required: true
+
+  def league_step(assigns) do
+    ~H"""
+    <%= if show_league_step?(@hero, @step) do %>
+      <li class="nav-item">
+        <a href="javascript:;" class={league_step_class(@hero, @step, @variant)}>
+          <span class="number">
+            <%= if league_step_icon(@hero, @step, @variant) == :check do %>
+              <i class="fa fa-check"></i>
+            <% else %>
+              <%= if league_step_icon(@hero, @step, @variant) == :times do %>
+                <i class="fa fa-times"></i>
+              <% else %>
+                {@step}
+              <% end %>
+            <% end %>
+          </span>
+          <span class="d-none d-md-inline">{@label}</span>
+        </a>
+      </li>
+    <% end %>
+    """
+  end
+
+  attr :battle, :map, required: true
+
+  def battle_over_action(assigns) do
+    ~H"""
+    <div class="row">
+      <div class="text-center col-12">
+        <%= case @battle.type do %>
+          <% "pve" -> %>
+            <.battle_nav_action
+              navigate="/training"
+              class="btn btn-danger width-lg text-white"
+              id="battle-over-training"
+              icon=""
+              label="Battle Over!"
+            />
+          <% "league" -> %>
+            <.battle_event_action
+              id="league-battle-over"
+              click="next-battle"
+              value_id={@battle.id}
+              class="btn btn-danger width-lg text-white"
+              icon=""
+              label="Battle Over!"
+            />
+          <% "duel" -> %>
+            <.battle_nav_action
+              navigate={"/arena/#{@battle.duel_id}"}
+              class="btn btn-danger width-lg text-white"
+              id="battle-over-duel"
+              icon=""
+              label="Battle Over!"
+            />
+          <% _ -> %>
+            <span></span>
+        <% end %>
+      </div>
+    </div>
+    """
+  end
+
+  attr :battle, :map, required: true
+
+  def share_battle_action(assigns) do
+    ~H"""
+    <div class="row mt-5">
+      <div class="text-center col-12">
+        <button
+          class="btn btn-primary width-lg text-white"
+          data-link={"https://browsermoba.com/battles/#{@battle.id}"}
+          phx-hook="ShareBattle"
+          id="share-battle"
+        >
+          Share this Battle
+        </button>
+      </div>
+    </div>
     """
   end
 
@@ -280,4 +373,25 @@ defmodule MobaWeb.V2.Components.BattleComponents do
 
   defp duel_reward_points_label(points) when points > 0, do: "+#{points} Season Points"
   defp duel_reward_points_label(points), do: "#{points} Season Points"
+
+  defp show_league_step?(hero, step), do: step <= Game.max_league_step_for(hero.league_tier)
+
+  defp league_step_class(hero, step, "winner"),
+    do: "nav-link #{if hero.league_step > step, do: "success"}"
+
+  defp league_step_class(hero, step, "loser") do
+    "nav-link #{if hero.previous_league_step == step, do: "failure"} #{if hero.previous_league_step > step, do: "success"}"
+  end
+
+  defp league_step_icon(hero, step, "winner") do
+    if hero.league_step > step, do: :check, else: :step
+  end
+
+  defp league_step_icon(hero, step, "loser") do
+    cond do
+      hero.previous_league_step == step -> :times
+      hero.previous_league_step > step -> :check
+      true -> :step
+    end
+  end
 end

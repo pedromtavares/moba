@@ -104,6 +104,8 @@ It currently owns the repeated battle-turn display primitives for:
 - reward/result headers
 - reward badge groups
 - reward action rows and CTAs
+- league step pills
+- finished-battle footer/share controls
 
 These are now used by:
 
@@ -116,6 +118,7 @@ These are now used by:
 - `battle_live/league_rewards.html.heex`
 - `battle_live/duel_rewards.html.heex`
 - `battle_live/match_rewards.html.heex`
+- `battle_live/show.html.heex`
 
 This also removed the old raw-HTML `resource_status/2` rendering path from `BattleLive`, the main battle description surfaces no longer depend on `raw(GH.formatted_effect(...))` in templates, and the end-of-battle reward/result templates now compose through `BattleComponents` instead of hand-rolling the repeated action/header/badge structure.
 
@@ -560,6 +563,7 @@ Status:
 - the turn templates now use `BattleComponents`
 - visible battle effect text is now component-based
 - reward/result headers and action rows are now componentized
+- league step and finished-battle footer controls are now componentized
 - tooltip compatibility formatting is still in progress
 
 ### Community
@@ -840,15 +844,16 @@ The next steps should focus on the highest-value remaining duplication and the m
 
 Still needs work in:
 
-- the larger non-icon battle composition around the still-custom league step/result surfaces
-- any remaining summary/result fragments that are still page-local to battle templates
+- any future consolidation of battle-specific helper logic if the page continues to grow
+- optional cleanup of the remaining tooltip compatibility path if the tooltip system changes
 
 Why:
 
 - the icon/resource layer is now extracted
 - visible effect rendering is now extracted
 - reward/result composition is partially extracted
-- the remaining battle debt is now concentrated in league-specific result steps and tooltip compatibility paths
+- league-specific result steps are now extracted too
+- the remaining battle debt is now mostly at the tooltip compatibility boundary, not repeated battle markup
 
 Likely target:
 
