@@ -11,6 +11,8 @@ defmodule Moba.Engine.Core.Helper do
   """
   def can_use?(_, nil, _), do: false
 
+  def can_use?(%{pulse_nova: nova}, %{code: "pulse_nova"}, :active) when not is_nil(nova), do: false
+
   def can_use?(battler, resource, type) do
     resources =
       if type == :active do
@@ -153,11 +155,6 @@ defmodule Moba.Engine.Core.Helper do
       result > battler.total_hp -> battler.total_hp
       true -> round(result)
     end
-  end
-
-  def calculate_final_defender_damage(attacker, defender) do
-    total_buff = calculate_damage_buff(attacker, defender)
-    defender.damage + defender.damage * total_buff
   end
 
   def calculate_final_mp(battler) do

@@ -3,6 +3,14 @@ defmodule MobaWeb.V2.CreateLiveTest do
   import Phoenix.LiveViewTest
 
   describe "connected mount" do
+    test "guest /start shows the sign in bar", %{conn: conn} do
+      conn = get(conn, "/start")
+      html = html_response(conn, 200)
+
+      assert html =~ ~s(href="/users/log_in")
+      assert html =~ "Already registered? Sign in"
+    end
+
     test "renders avatar selection state", %{conn: conn} do
       hero = create_base_hero()
 

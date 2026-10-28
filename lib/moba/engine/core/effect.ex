@@ -4,7 +4,7 @@ defmodule Moba.Engine.Core.Effect do
   apply battle effects that can manipulate properties of a Battler.
   """
 
-  alias Moba.Engine.Core.Buff
+  alias Moba.Engine.Core.{Buff, BuffPause, Helper}
 
   # BASE DAMAGE
 
@@ -90,6 +90,65 @@ defmodule Moba.Engine.Core.Effect do
 
   # HP REGEN
 
+  def steal_hp(%{attacker: attacker, defender: defender, resource: resource} = turn) do
+    amount = round(resource.base_amount * (1 + Helper.calculate_regen_buff(attacker, defender)))
+    amount = min(amount, max(Helper.calculate_final_hp(defender), 0))
+
+    turn
+    |> update_attacker_number(:hp_regen, amount)
+    |> update_defender_number(:current_hp, -amount)
+  end
+
+  def grant_opponent_buff(%{defender: defender, resource: resource} = turn) do
+    buff = %Buff{resource: resource, duration: resource.duration}
+    update_defender(turn, :buffs, defender.buffs ++ [buff])
+  end
+
+  def pause_opponent_buffs(%{defender: defender} = turn) do
+    # Reapplication refreshes the pause without duplicating its timer.
+    debuffs = Enum.reject(defender.attacker_debuffs, &(&1.resource.code == "fortunes_end"))
+    turn = %{turn | defender: %{defender | attacker_debuffs: debuffs}} |> add_attacker_debuff()
+    %{turn | defender: BuffPause.suppress(turn.defender)}
+  end
+
+  def reduce_cooldowns(%{attacker: attacker, resource: resource} = turn) do
+    reduce = fn cooldowns ->
+      Map.new(cooldowns, fn {code, remaining} ->
+        {code, if(remaining >= 0, do: max(remaining - resource.extra_amount, -1), else: remaining)}
+      end)
+    end
+
+    %{
+      turn
+      | attacker: %{
+          attacker
+          | cooldowns: reduce.(attacker.cooldowns),
+            future_cooldowns: reduce.(attacker.future_cooldowns)
+        }
+    }
+    |> update_attacker(:extra, true, resource.extra_amount)
+  end
+
+  def start_pulse_nova(%{resource: resource} = turn), do: update_attacker(turn, :pulse_nova, resource)
+  def stop_pulse_nova(turn), do: update_attacker(turn, :pulse_nova, nil)
+
+  def pulse_nova_damage(%{attacker: attacker, defender: defender, resource: resource} = turn) do
+    if defender.invulnerable do
+      turn
+    else
+      target = %{defender | damage_type: "magic", null_armor: false}
+      raw_damage = resource.base_damage * (1 + Helper.calculate_damage_buff(attacker, target))
+      damage = raw_damage * (1 - Helper.calculate_damage_reduction(target))
+      turn = update_defender_number(turn, :damage, damage)
+
+      %{
+        turn
+        | defender: %{turn.defender | last_damage_taken: turn.defender.damage},
+          attacker: %{turn.attacker | last_damage_caused: attacker.last_damage_caused + round(raw_damage)}
+      }
+    end
+  end
+
   def add_hp_steal_by_defender_current_hp(%{defender: defender, resource: resource} = turn) do
     update_attacker_number(turn, :hp_steal, resource.hp_regen_multiplier * defender.current_hp)
   end
@@ -127,6 +186,21 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker_number(turn, :hp_regen, defender.damage * resource.hp_regen_multiplier)
   end
 
+  def steal_healing(%{attacker: attacker, resource: resource} = turn) do
+    damage = if attacker.immortal, do: 0, else: attacker.damage + attacker.self_damage
+    healing = min(attacker.hp_regen, max(attacker.total_hp - attacker.current_hp + damage, 0))
+    amount = round(healing * resource.hp_regen_multiplier)
+
+    if amount > 0 do
+      %{turn | attacker: %{attacker | hp_regen: healing}}
+      |> update_attacker_number(:hp_regen, -amount)
+      |> update_defender_number(:hp_regen, amount)
+      |> update_defender(:extra, true, amount)
+    else
+      turn
+    end
+  end
+
   def defender_hp_regen_by_defender_damage(%{defender: defender, resource: resource} = turn) do
     update_defender_number(turn, :hp_regen, defender.damage * resource.hp_regen_multiplier)
   end
@@ -138,6 +212,15 @@ defmodule Moba.Engine.Core.Effect do
   def cut_hp_regen(turn), do: turn
 
   # MP REGEN
+
+  def restore_and_drain_mp(%{attacker: attacker, defender: defender, resource: resource} = turn) do
+    amount = round(resource.base_amount * (1 + Helper.calculate_regen_buff(attacker, defender)))
+    drained = min(amount, Helper.calculate_final_mp(defender))
+
+    turn
+    |> update_attacker_number(:mp_regen, amount)
+    |> update_defender_number(:mp_burn, drained)
+  end
 
   def mp_regen_by_base_amount(%{resource: resource} = turn) do
     update_attacker_number(turn, :mp_regen, resource.base_amount)
@@ -289,8 +372,8 @@ defmodule Moba.Engine.Core.Effect do
 
   # STATUS
 
-  def add_to_final(%{resource: resource, final_effects: final_effects} = turn) do
-    %{turn | final_effects: final_effects ++ [resource]}
+  def add_to_final(%{resource: resource, final_effects: final_effects} = turn, phase \\ :effect) do
+    %{turn | final_effects: final_effects ++ [%{resource: resource, phase: phase}]}
   end
 
   def add_buff(%{resource: %{duration: duration} = resource, attacker: attacker} = turn, extra_duration \\ 0) do
@@ -300,8 +383,10 @@ defmodule Moba.Engine.Core.Effect do
   end
 
   def add_debuff(%{resource: %{duration: duration} = resource, defender: defender} = turn) do
+    debuff = %Buff{resource: resource, duration: duration, applied_order: next_debuff_order(defender)}
+
     turn
-    |> update_defender(:debuffs, defender.debuffs ++ [%Buff{resource: resource, duration: duration}])
+    |> update_defender(:debuffs, defender.debuffs ++ [debuff])
     |> Map.put(:resource, %{resource | debuff: true})
   end
 
@@ -311,8 +396,17 @@ defmodule Moba.Engine.Core.Effect do
   end
 
   def add_attacker_debuff(%{resource: %{duration: duration} = resource, defender: defender} = turn) do
+    debuff = %Buff{resource: resource, duration: duration, applied_order: next_debuff_order(defender)}
+
     turn
-    |> update_defender(:attacker_debuffs, defender.attacker_debuffs ++ [%Buff{resource: resource, duration: duration}])
+    |> update_defender(:attacker_debuffs, defender.attacker_debuffs ++ [debuff])
+  end
+
+  defp next_debuff_order(battler) do
+    (battler.debuffs ++ battler.attacker_debuffs)
+    |> Enum.map(&Map.get(&1, :applied_order, 0))
+    |> Enum.max(fn -> 0 end)
+    |> Kernel.+(1)
   end
 
   def refresh_debuff(%{resource: %{duration: duration} = resource, defender: defender} = turn) do
@@ -329,9 +423,21 @@ defmodule Moba.Engine.Core.Effect do
     )
   end
 
-  def dispel_debuffs(turn) do
+  def dispel_debuffs(%{attacker: attacker} = turn, limit \\ nil) do
+    debuffs =
+      (attacker.debuffs ++ attacker.attacker_debuffs)
+      |> Enum.with_index()
+      |> Enum.filter(fn {buff, _} -> buff.duration > 0 end)
+      |> Enum.sort_by(fn {buff, index} -> {Map.get(buff, :applied_order, 0), index} end, :desc)
+      |> Enum.uniq_by(fn {buff, _} -> buff.resource.code end)
+
+    removed = debuffs |> Enum.take(limit || length(debuffs)) |> MapSet.new(fn {buff, _} -> buff.resource.code end)
+    remaining = fn buffs -> Enum.reject(buffs, &(&1.duration <= 0 || MapSet.member?(removed, &1.resource.code))) end
+
     turn
-    |> update_attacker(:debuffs, [])
+    |> update_attacker(:debuffs, remaining.(attacker.debuffs))
+    |> update_attacker(:attacker_debuffs, remaining.(attacker.attacker_debuffs), MapSet.size(removed))
+    |> then(fn turn -> %{turn | attacker: BuffPause.resume(turn.attacker, true)} end)
   end
 
   def add_delayed_skill(%{resource: resource} = turn) do
@@ -462,6 +568,8 @@ defmodule Moba.Engine.Core.Effect do
     update_attacker(turn, :current_hp, attacker.last_hp)
   end
 
+  def reflect_damage(%{defender: %{immortal: true}} = turn), do: turn
+
   def reflect_damage(%{defender: defender, resource: resource} = turn) do
     update_attacker_number(turn, :damage, defender.damage * resource.extra_multiplier)
   end
@@ -563,49 +671,48 @@ defmodule Moba.Engine.Core.Effect do
   #  - resource: code of whatever resource triggered the effect
   #  - priority: where it should show up in the description list, lower numbers show first
   defp update_attacker(
-         %{attacker: attacker, resource: resource} = turn,
+         %{attacker: attacker} = turn,
          key,
          value,
          increment \\ true
        ) do
-    attacker = %{
-      attacker
-      | effects:
-          attacker.effects ++
-            [
-              %{
-                "key" => key,
-                "value" => effect_value(value, increment),
-                "resource" => resource.code,
-                "priority" => priority_for(turn, resource)
-              }
-            ]
-    }
+    event = effect_entry(turn, attacker, key, effect_value(value, increment))
+    attacker = %{attacker | effects: attacker.effects ++ [event]}
 
     %{turn | attacker: Map.put(attacker, key, round_number(value))}
   end
 
   defp update_defender(
-         %{defender: defender, resource: resource} = turn,
+         %{defender: defender} = turn,
          key,
          value,
          increment \\ true
        ) do
-    defender = %{
-      defender
-      | effects:
-          defender.effects ++
-            [
-              %{
-                "key" => key,
-                "value" => effect_value(value, increment),
-                "resource" => resource.code,
-                "priority" => priority_for(turn, resource)
-              }
-            ]
-    }
+    event = effect_entry(turn, defender, key, effect_value(value, increment))
+    defender = %{defender | effects: defender.effects ++ [event]}
 
     %{turn | defender: Map.put(defender, key, round_number(value))}
+  end
+
+  # Record skipped ticks without applying the buff or consuming its duration.
+  def paused_buff(turn, side \\ :attacker) do
+    battler = Map.fetch!(turn, side)
+    event = effect_entry(turn, battler, :buff_paused, turn.resource.name)
+    Map.put(turn, side, %{battler | effects: battler.effects ++ [event]})
+  end
+
+  defp effect_entry(%{resource: resource} = turn, battler, key, value) do
+    paused = BuffPause.paused?(battler) && BuffPause.deferred_effect?(key, value)
+
+    event = %{
+      "key" => key,
+      "value" => value,
+      "resource" => resource.code,
+      "priority" => priority_for(turn, resource),
+      "paused" => paused
+    }
+
+    if paused, do: Map.put(event, "resource_name", Map.get(resource, :name)), else: event
   end
 
   defp round_number(value) when is_integer(value) or is_float(value) do

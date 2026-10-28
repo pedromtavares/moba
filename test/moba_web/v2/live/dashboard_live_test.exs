@@ -75,6 +75,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
     test "switches to finished tab", %{conn: conn} do
       player = create_player!()
       _unfinished = create_base_hero(%{name: "In Progress"}, player)
+      player = Game.get_player!(player.id)
       finished = create_base_hero(%{name: "Finished"}, player) |> Game.update_hero!(%{finished_at: Timex.now()})
       user = Accounts.get_user!(player.user_id)
 
@@ -92,6 +93,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
     test "switches back to unfinished tab", %{conn: conn} do
       player = create_player!()
       unfinished = create_base_hero(%{name: "In Progress"}, player)
+      player = Game.get_player!(player.id)
       _finished = create_base_hero(%{name: "Finished"}, player) |> Game.update_hero!(%{finished_at: Timex.now()})
       user = Accounts.get_user!(player.user_id)
 

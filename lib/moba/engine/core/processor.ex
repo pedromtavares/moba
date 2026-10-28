@@ -4,7 +4,8 @@ defmodule Moba.Engine.Core.Processor do
   """
 
   alias Moba.Engine
-  alias Engine.Core.{Effect, Helper, Spell}
+  alias Engine.Core.{BuffPause, Effect, Helper, Spell}
+  @final_effect_order %{effect: 0, healing_reduction: 1, healing_steal: 2}
   # require Logger
 
   @doc """
@@ -13,28 +14,39 @@ defmodule Moba.Engine.Core.Processor do
   """
   def process_turn(turn) do
     turn
+    |> suppress_buffs()
     |> apply_buffs()
     |> apply_debuffs()
     |> apply_permanent_skill()
+    |> apply_pulse_nova()
     |> calculate_atk()
-    |> attack()
+    |> attack_and_resume_buffs()
+    |> suppress_buffs()
     |> tick_cooldowns()
     |> passives()
+    |> suppress_buffs()
     |> increases_and_reductions()
     |> apply_attacker_debuffs()
     |> apply_defender_buffs()
+    |> suppress_buffs()
     |> defend()
     |> final_effects()
+    |> suppress_buffs()
     |> finish()
+    |> resume_expired_buffs()
   end
 
   @doc """
   Applies all base effects of casting a Skill. This is a public function due to special Spells
   like spell_steal and rearm which need to call this directly.
   """
-  def cast_skill(turn, %{code: "basic_attack"}), do: basic_attack(turn)
+  def cast_skill(turn, skill, apply_base_effects \\ true)
 
-  def cast_skill(turn, skill, apply_base_effects \\ true) do
+  def cast_skill(turn, %{code: "basic_attack"}, _), do: basic_attack(turn)
+
+  def cast_skill(%{attacker: %{pulse_nova: nova}} = turn, %{code: "pulse_nova"}, _) when not is_nil(nova), do: turn
+
+  def cast_skill(turn, skill, apply_base_effects) do
     damage_type = skill.damage_type || Engine.damage_types().magic
     # Logger.info("Skill cast: #{skill.code}, type: #{damage_type}")
 
@@ -52,11 +64,44 @@ defmodule Moba.Engine.Core.Processor do
 
   defp base_cast_effects(turn) do
     turn
-    |> Effect.mp_cost()
+    |> skill_mp_cost()
     |> Effect.turn_mp_regen()
     |> Effect.add_cooldown()
     |> Effect.add_last_skill()
     |> Effect.increment_spell_count()
+  end
+
+  defp skill_mp_cost(%{resource: %{code: "pulse_nova"}} = turn) do
+    if BuffPause.paused?(turn.attacker), do: turn, else: Effect.mp_cost(turn)
+  end
+
+  defp skill_mp_cost(turn), do: Effect.mp_cost(turn)
+
+  defp suppress_buffs(turn) do
+    %{turn | attacker: BuffPause.suppress(turn.attacker), defender: BuffPause.suppress(turn.defender)}
+  end
+
+  defp resume_expired_buffs(turn) do
+    attacker = BuffPause.resume(turn.attacker)
+    defender = BuffPause.resume(turn.defender)
+
+    %{
+      turn
+      | attacker: %{attacker | power: Helper.final_power(attacker, defender), armor: Helper.total_armor(attacker)},
+        defender: %{defender | power: Helper.total_power(defender), armor: Helper.total_armor(defender)}
+    }
+  end
+
+  defp attack_and_resume_buffs(turn) do
+    paused = BuffPause.paused?(turn.attacker)
+    turn = attack(turn)
+
+    if paused && !BuffPause.paused?(turn.attacker) do
+      # Chakra resumes the ticks skipped at the start of this turn exactly once.
+      turn |> apply_buffs() |> apply_pulse_nova()
+    else
+      turn
+    end
   end
 
   # Buffs are benevolent effects that the attacker casts on itself.
@@ -81,6 +126,21 @@ defmodule Moba.Engine.Core.Processor do
   end
 
   defp apply_permanent_skill(turn), do: turn
+
+  defp apply_pulse_nova(%{attacker: %{pulse_nova: nil}} = turn), do: turn
+
+  defp apply_pulse_nova(%{attacker: attacker} = turn) do
+    cond do
+      BuffPause.paused?(attacker) ->
+        %{turn | resource: attacker.pulse_nova} |> Effect.paused_buff()
+
+      Helper.calculate_final_mp(attacker) >= attacker.pulse_nova.mp_cost ->
+        %{turn | resource: attacker.pulse_nova} |> Effect.mp_cost() |> Effect.add_to_final()
+
+      true ->
+        %{turn | resource: attacker.pulse_nova} |> Effect.stop_pulse_nova()
+    end
+  end
 
   # atk stat needs to be calculated before the attack phase starts
   defp calculate_atk(turn) do
@@ -241,10 +301,13 @@ defmodule Moba.Engine.Core.Processor do
 
   defp defend_damage(turn), do: turn
 
-  # Applies a list of final_effects that ignore all increases, reductions and defenses
+  # Resolve all late effects before reducing healing, then steal from the remainder.
+  # Sorting is stable so effects within a phase retain their original order.
   defp final_effects(%{final_effects: effects} = turn) when length(effects) > 0 do
-    Enum.reduce(effects, turn, fn resource, acc ->
-      acc |> apply_final_resource(resource)
+    effects
+    |> Enum.sort_by(&Map.fetch!(@final_effect_order, &1.phase))
+    |> Enum.reduce(turn, fn %{resource: resource}, acc ->
+      apply_final_resource(acc, resource)
     end)
   end
 
@@ -281,12 +344,16 @@ defmodule Moba.Engine.Core.Processor do
   end
 
   defp apply_buff(%{attacker: attacker} = turn, buff, duration) when duration > 0 do
-    resource = %{buff | buff: true}
+    if BuffPause.paused?(attacker) do
+      %{turn | resource: %{buff | buff: nil}} |> Effect.paused_buff()
+    else
+      resource = %{buff | buff: true}
 
-    turn
-    |> Map.put(:attacker, %{attacker | buffs: tick_buff_duration(attacker.buffs, buff)})
-    |> apply_resource(resource)
-    |> Map.put(:resource, %{buff | buff: nil})
+      turn
+      |> Map.put(:attacker, %{attacker | buffs: tick_buff_duration(attacker.buffs, buff)})
+      |> apply_resource(resource)
+      |> Map.put(:resource, %{buff | buff: nil})
+    end
   end
 
   defp apply_buff(turn, _, _), do: turn
@@ -303,12 +370,16 @@ defmodule Moba.Engine.Core.Processor do
   defp apply_debuff(turn, _, _), do: turn
 
   defp apply_defender_buff(%{defender: defender} = turn, buff, duration) when duration > 0 do
-    resource = %{buff | defender_buff: true}
+    if BuffPause.paused?(defender) do
+      %{turn | resource: buff} |> Effect.paused_buff(:defender)
+    else
+      resource = %{buff | defender_buff: true}
 
-    turn
-    |> Map.put(:defender, %{defender | defender_buffs: tick_buff_duration(defender.defender_buffs, buff)})
-    |> apply_resource(resource)
-    |> Map.put(:resource, %{buff | defender_buff: nil})
+      turn
+      |> Map.put(:defender, %{defender | defender_buffs: tick_buff_duration(defender.defender_buffs, buff)})
+      |> apply_resource(resource)
+      |> Map.put(:resource, %{buff | defender_buff: nil})
+    end
   end
 
   defp apply_defender_buff(turn, _, _), do: turn

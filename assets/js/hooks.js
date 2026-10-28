@@ -202,7 +202,7 @@ Hooks.BattleContinueHotkey = {
         return;
       }
 
-      const selectors = ["#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training"];
+      const selectors = ["#load-training", "#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training"];
 
       const target = selectors
         .map((selector) => this.el.querySelector(selector))

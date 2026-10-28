@@ -89,8 +89,13 @@ defmodule MobaWeb.V2.MatchLiveTest do
     opponent = create_player!(%{pvp_tier: 1})
     skills = base_skills()
 
+    opponent_avatar =
+      strong_avatar()
+      |> Ecto.Changeset.change(code: "review_opponent", image: %{file_name: "opponent-review.webp", updated_at: nil})
+      |> Moba.Repo.update!()
+
     player_hero = Game.create_hero!(%{name: "Player Hero"}, player, alternate_avatar(), skills)
-    opponent_hero = Game.create_hero!(%{name: "Opponent Hero"}, opponent, strong_avatar(), skills)
+    opponent_hero = Game.create_hero!(%{name: "Opponent Hero"}, opponent, opponent_avatar, skills)
 
     match =
       Matches.create!(%{
@@ -118,18 +123,18 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 
-    review_html = view |> element("#battle-review-#{battle.id}") |> render()
     player_avatar = MobaWeb.V2.Components.GameHelpers.image_url(player_hero.avatar)
     opponent_avatar = MobaWeb.V2.Components.GameHelpers.image_url(opponent_hero.avatar)
 
-    assert has_element?(view, "#battle-review-#{battle.id}")
-    assert String.contains?(review_html, player_avatar)
-    assert String.contains?(review_html, opponent_avatar)
+    assert has_element?(
+             view,
+             ~s|#battle-review-#{battle.id} > .row > .col:first-child img[src="#{player_avatar}"]|
+           )
 
-    {player_index, _} = :binary.match(review_html, player_avatar)
-    {opponent_index, _} = :binary.match(review_html, opponent_avatar)
-
-    assert player_index < opponent_index
+    assert has_element?(
+             view,
+             ~s|#battle-review-#{battle.id} > .row > .col:last-child img[src="#{opponent_avatar}"]|
+           )
   end
 
   test "arena tutorial finishes from the match page", %{conn: conn} do

@@ -3,7 +3,21 @@ defmodule MobaWeb.GameControllerTest do
 
   test "homepage loads", %{conn: conn} do
     conn = get(conn, "/")
-    assert html_response(conn, 200) =~ "ENTER THE ARENA"
+    document = conn |> html_response(200) |> LazyHTML.from_document()
+
+    assert Enum.count(LazyHTML.query(document, "#landing-entrance")) == 1
+    assert LazyHTML.query(document, "#landing-entrance") |> LazyHTML.attribute("href") == ["/start"]
+    assert Enum.count(LazyHTML.query(document, "#landing-stats .landing-stat")) == 3
+
+    for id <- ["players", "heroes", "matches"] do
+      value = document |> LazyHTML.query("#landing-stat-#{id} dd") |> LazyHTML.text()
+      assert value =~ ~r/^\d{1,3}(,\d{3})*$/
+    end
+
+    assert [mobile] = LazyHTML.query(document, "#landing-artwork source") |> LazyHTML.attribute("srcset")
+    assert mobile =~ "home-heroes-mobile-v1.webp"
+    assert [desktop] = LazyHTML.query(document, "#landing-artwork-image") |> LazyHTML.attribute("src")
+    assert desktop =~ "home-heroes-v5.png"
   end
 
   test "user has active pve hero and is redirected to training", %{conn: conn} do
@@ -34,7 +48,7 @@ defmodule MobaWeb.GameControllerTest do
     skills = Enum.map(base_skills(), fn skill -> skill.id end)
     avatar = base_avatar().id
 
-    conn = post(conn, "/start", %{"skills" => skills, "avatar" => avatar})
+    conn = conn |> get("/start") |> recycle() |> post("/start", %{"skills" => skills, "avatar" => avatar})
 
     assert "/training" = redirected_to(conn, 302)
     assert get_session(conn, :player_id)

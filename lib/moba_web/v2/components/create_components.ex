@@ -318,27 +318,29 @@ defmodule MobaWeb.V2.Components.CreateComponents do
   def create_submit_panel(assigns) do
     ~H"""
     <%= if Enum.count(@selected_skills) == 3 do %>
-      <%= if @current_player && @current_player.user_id do %>
-        <div class="row mb-3">
-          <div class="col text-center">
-            <form phx-change="validate">
-              <input
-                type="text"
-                maxlength="15"
-                minlength="3"
-                class="form-control text-center"
-                name="name"
-                value={@current_player.user.username}
-                style="max-width: 300px; margin:auto"
-                data-toggle="tooltip"
-                title="Edit your Hero's name"
-              />
-              <%= if @error do %>
-                <span class="text-danger">{@error}</span>
-              <% end %>
-            </form>
+      <%= if @current_player && Map.get(@current_player, :id) do %>
+        <%= if @current_player.user_id do %>
+          <div class="row mb-3">
+            <div class="col text-center">
+              <form phx-change="validate">
+                <input
+                  type="text"
+                  maxlength="15"
+                  minlength="3"
+                  class="form-control text-center"
+                  name="name"
+                  value={@current_player.user.username}
+                  style="max-width: 300px; margin:auto"
+                  data-toggle="tooltip"
+                  title="Edit your Hero's name"
+                />
+                <%= if @error do %>
+                  <span class="text-danger">{@error}</span>
+                <% end %>
+              </form>
+            </div>
           </div>
-        </div>
+        <% end %>
         <%= unless @error do %>
           <div class="row">
             <div class="col">

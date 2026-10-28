@@ -34,20 +34,44 @@ defmodule MobaWeb.GameController do
 
         conn
         |> assign(:counts, counts)
+        |> assign(
+          :landing_background,
+          Moba.Image.url({%{file_name: "home-heroes-v5.png", updated_at: nil}, %{code: "landing"}})
+        )
+        |> assign(
+          :landing_mobile_background,
+          Moba.Image.url({%{file_name: "home-heroes-mobile-v1.webp", updated_at: nil}, %{code: "landing"}})
+        )
         |> render(:homepage, layout: false)
     end
   end
 
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
-    player = Game.create_player!(%{})
-    avatar = Game.get_avatar!(selected_avatar)
-    skills = Game.list_chosen_skills(selected_skills)
+    cond do
+      get_session(conn, :player_id) || conn.assigns.current_user ->
+        redirect(conn, to: ~p"/")
 
-    Game.create_current_pve_hero!(%{name: avatar.name}, player, avatar, skills)
+      session_key = get_session(conn, :cache_key) ->
+        avatar = Game.get_avatar!(selected_avatar)
+        skills = Game.list_chosen_skills(selected_skills)
+        player = Game.start_guest!(session_key, avatar, skills)
 
-    conn
-    |> put_session(:player_id, player.id)
-    |> redirect(to: ~p"/training")
+        if player.user_id do
+          redirect(conn, to: ~p"/users/log_in")
+        else
+          path =
+            if player.current_pve_hero && is_nil(player.current_pve_hero.finished_at),
+              do: ~p"/training",
+              else: ~p"/base"
+
+          conn
+          |> put_session(:player_id, player.id)
+          |> redirect(to: path)
+        end
+
+      true ->
+        redirect(conn, to: ~p"/start")
+    end
   end
 
   defp format_number(n) do

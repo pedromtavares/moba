@@ -19,7 +19,20 @@
     </script>
   </head>
   <body>
-    <%= if assigns[:current_player] do %>
+    <%= if is_nil(assigns[:current_user]) &&
+            (is_nil(assigns[:current_player]) || is_nil(assigns[:current_player].user_id)) do %>
+      <header id="topnav">
+        <div class="topbar-menu py-2">
+          <div class="container-fluid text-right">
+            <div id="inner-navigation">
+              <.link href={~p"/users/log_in"} class="h4 text-white mr-2">
+                <i class="fa fa-sign-in mr-1"></i> Already registered? Sign in
+              </.link>
+            </div>
+          </div>
+        </div>
+      </header>
+    <% else %>
       <.mobile_navigation current_player={@current_player} current_hero={assigns[:current_hero]} />
     <% end %>
     <div class="wrapper" id="main-wrapper">

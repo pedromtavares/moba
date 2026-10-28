@@ -78,6 +78,8 @@ mix phx.server
 
 Visit [`localhost:4000`](http://localhost:4000). Admin login: `admin@browsermoba.com` / `123456`
 
+Fresh installs use the development balance snapshot and the [original artwork pack](priv/resources/original/README.md), including Master and Grandmaster skins for every playable hero. The seed script is for an empty database; existing installations should use the production content importer instead.
+
 ### Tests
 
 ```bash

@@ -241,7 +241,13 @@ defmodule Moba.EngineTest do
   describe "same hero battle" do
     test "attacker wins", %{strong_hero: strong, weak_hero: weak} do
       match = Game.Matches.create!(%{type: "manual", player_id: strong.player_id, opponent_id: weak.player_id})
-      attacker = Map.put(weak, :initial_hp, 100_000) |> Map.put(:total_hp, 100_000)
+
+      attacker =
+        weak
+        |> Map.put(:initial_hp, 100_000)
+        |> Map.put(:total_hp, 100_000)
+        |> Map.put(:atk, 1000)
+        |> Map.put(:skill_order, [""])
 
       battle =
         Engine.create_match_battle!(%{

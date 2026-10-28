@@ -73,12 +73,20 @@ defmodule Moba.Engine.Schema.Battler do
 
     field :double_skill, :map, virtual: true
     field :double_skill_code, :string
+    field :double_skill_level, :integer
     field :delayed_skill, :map, virtual: true
     field :delayed_skill_code, :string
+    field :delayed_skill_level, :integer
     field :permanent_skill, :map, virtual: true
     field :permanent_skill_code, :string
+    field :permanent_skill_level, :integer
+    field :pulse_nova, :map, virtual: true
+    field :pulse_nova_code, :string
+    field :pulse_nova_level, :integer
     field :last_skill, :map, virtual: true
     field :last_skill_code, :string
+
+    field :paused_bonuses, :map, default: %{}
 
     field :buffs, {:array, :map}, default: []
     field :debuffs, {:array, :map}, default: []

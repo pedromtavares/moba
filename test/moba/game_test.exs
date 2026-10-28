@@ -215,6 +215,10 @@ defmodule Moba.GameTest do
     end
 
     test "#finalize_boss!" do
+      Repo.get_by!(Game.Schema.Avatar, code: "boss")
+      |> Game.Schema.Avatar.changeset(%{total_hp: 3000})
+      |> Repo.update!()
+
       hero = create_base_hero() |> Game.generate_boss!()
       boss = Game.get_hero!(hero.boss_id)
 
@@ -278,6 +282,10 @@ defmodule Moba.GameTest do
 
   describe "builds" do
     test "#generate_bot_build!" do
+      # The hybrid Phantom Assassin build includes this expansion item.
+      bloodstone = Test.CombatCase.item("bloodstone")
+      Repo.insert!(%{bloodstone | current: true, enabled: true, resource_uuid: Game.current_season().resource_uuid})
+
       hero =
         create_base_hero(%{bot_difficulty: "strong", level: 25, gold: 999_999, total_gold_farm: 999_999})
         |> Game.generate_bot_build(base_avatar())

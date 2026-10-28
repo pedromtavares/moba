@@ -18,31 +18,41 @@
   <div class="col">
     <div class="skills-container">
       <%= for {skill, index} <- Enum.with_index(@hero.skills) do %>
-        <%= if can_use?(@turn, skill) && !@turn.attacker.double_skill do %>
-          <div class="img-container skill-container float-left" data-resource={skill.id}>
-            <.battle_resource_image
-              resource={skill}
-              phx-value-id={skill.id}
-              data-index={index}
-              data-name={skill.name}
-              class={"skill-img can-use #{if @skill && @skill.code == skill.code, do: "current-skill"}"}
-              phx-hook="InstaSkill"
-              id={"active-skill-#{skill.id}"}
-            />
-            <br />
-            <span class="badge badge-pill badge-primary mp-cost">{skill.mp_cost}</span>
-            <span class="hotkey f-rpg">{skill_hotkey(index)}</span>
-          </div>
-        <% else %>
-          <div class="img-container skill-container float-left inactive">
-            <.battle_resource_image
-              resource={skill}
-              data-index={index}
-              class="skill-img"
-              id={"inactive-skill-#{skill.id}"}
-            />
-            <.resource_status_badge resource={skill} battler={@turn.attacker} />
-          </div>
+        <%= cond do %>
+          <% skill.code == "pulse_nova" && @turn.attacker.pulse_nova -> %>
+            <div id="pulse-nova-running" class="img-container skill-container float-left pulse-nova-running">
+              <.battle_resource_image
+                resource={skill}
+                data-index={index}
+                class="skill-img"
+                id={"running-skill-#{skill.id}"}
+              />
+              <span class="badge badge-pill badge-primary mp-cost pulse-nova-status">{if Moba.Engine.Core.BuffPause.paused?(@turn.attacker), do: "PAUSED", else: "ON · #{skill.mp_cost}"}</span>
+            </div>
+          <% can_use?(@turn, skill) && !@turn.attacker.double_skill -> %>
+            <div class="img-container skill-container float-left" data-resource={skill.id}>
+              <.battle_resource_image
+                resource={skill}
+                phx-value-id={skill.id}
+                data-index={index}
+                data-name={skill.name}
+                class={"skill-img can-use #{if @skill && @skill.code == skill.code, do: "current-skill"}"}
+                phx-hook="InstaSkill"
+                id={"active-skill-#{skill.id}"}
+              />
+              <span class="badge badge-pill badge-primary mp-cost">{skill.mp_cost}</span>
+              <span class="hotkey f-rpg">{skill_hotkey(index)}</span>
+            </div>
+          <% true -> %>
+            <div class="img-container skill-container float-left inactive">
+              <.battle_resource_image
+                resource={skill}
+                data-index={index}
+                class="skill-img"
+                id={"inactive-skill-#{skill.id}"}
+              />
+              <.resource_status_badge resource={skill} battler={@turn.attacker} />
+            </div>
         <% end %>
       <% end %>
       <div class={"img-container basic-attack float-left #{@turn.attacker.double_skill && "inactive"}"} data-resource="">

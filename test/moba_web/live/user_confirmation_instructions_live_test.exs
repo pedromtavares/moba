@@ -17,7 +17,7 @@ defmodule MobaWeb.UserConfirmationInstructionsLiveTest do
       assert html =~ "Resend confirmation instructions"
     end
 
-    test "does not send a confirmation token", %{conn: conn, user: user} do
+    test "sends a usable confirmation token for an unconfirmed user", %{conn: conn, user: user} do
       {:ok, lv, _html} = live(conn, ~p"/users/confirm")
 
       {:ok, conn} =
@@ -29,7 +29,37 @@ defmodule MobaWeb.UserConfirmationInstructionsLiveTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
                "If your email is in our system"
 
-      refute Repo.get_by(Accounts.UserToken, user_id: user.id)
+      assert user_token = Repo.get_by(Accounts.UserToken, user_id: user.id, context: "confirm")
+      assert user_token.sent_to == user.email
+
+      assert_received {:email, email}
+      assert email.to == [{"", user.email}]
+      [_, token] = Regex.run(~r{/users/confirm/([^\s]+)}, email.text_body)
+      assert {:ok, confirmed_user} = Accounts.confirm_user(token)
+      assert confirmed_user.id == user.id
+      assert confirmed_user.confirmed_at
+      refute Repo.get_by(Accounts.UserToken, user_id: user.id, context: "confirm")
+    end
+
+    test "does not send a confirmation token for an already confirmed user", %{
+      conn: conn,
+      user: user
+    } do
+      user |> Moba.Accounts.Schema.User.confirm_changeset() |> Repo.update!()
+
+      {:ok, lv, _html} = live(conn, ~p"/users/confirm")
+
+      {:ok, conn} =
+        lv
+        |> form("#resend_confirmation_form", user: %{email: user.email})
+        |> render_submit()
+        |> follow_redirect(conn, ~p"/")
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :info) =~
+               "If your email is in our system"
+
+      refute Repo.get_by(Accounts.UserToken, user_id: user.id, context: "confirm")
+      refute_received {:email, _}
     end
 
     test "does not send confirmation token if email is invalid", %{conn: conn} do
@@ -45,6 +75,7 @@ defmodule MobaWeb.UserConfirmationInstructionsLiveTest do
                "If your email is in our system"
 
       assert Repo.all(Accounts.UserToken) == []
+      refute_received {:email, _}
     end
   end
 end

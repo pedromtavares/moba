@@ -63,7 +63,7 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       skills = Enum.map(base_skills(), & &1.id)
       avatar = base_avatar().id
 
-      conn = post(conn, ~p"/start", %{"skills" => skills, "avatar" => avatar})
+      conn = conn |> get(~p"/start") |> recycle() |> post(~p"/start", %{"skills" => skills, "avatar" => avatar})
 
       guest_player_id = get_session(conn, :player_id)
       guest_player = Game.get_player!(guest_player_id)
