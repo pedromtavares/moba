@@ -6,6 +6,7 @@ defmodule MobaWeb.V2.Layouts do
   import Phoenix.Controller, only: [get_csrf_token: 0]
 
   import MobaWeb.V2.Components.LayoutComponents
+  import MobaWeb.CoreComponents, only: [analytics: 1]
   import MobaWeb.Preview, only: [preview_path: 2]
 
   use Phoenix.VerifiedRoutes,

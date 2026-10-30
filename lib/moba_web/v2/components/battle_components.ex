@@ -118,15 +118,15 @@ defmodule MobaWeb.V2.Components.BattleComponents do
     <%= cond do %>
       <% insufficient_mp?(@resource, @battler) -> %>
         <span class="badge badge-pill badge-primary cooldown">
-          <i class="fa fa-bolt"></i> {@resource.mp_cost}
+          <i class="ui-icon ui-bolt"></i> {@resource.mp_cost}
         </span>
       <% cooldown = resource_cooldown(@resource, @battler) -> %>
         <span class="badge badge-pill badge-warning cooldown">
-          <i class="fa fa-clock"></i> {cooldown}
+          <i class="ui-icon ui-clock"></i> {cooldown}
         </span>
       <% true -> %>
         <span :if={!@preview} class="badge badge-pill badge-danger passive">
-          <i class="fa fa-times"></i>
+          <i class="ui-icon ui-close"></i>
         </span>
     <% end %>
     """
@@ -304,10 +304,10 @@ defmodule MobaWeb.V2.Components.BattleComponents do
         <a href="javascript:;" class={league_step_class(@hero, @step, @variant)}>
           <span class="number">
             <%= if league_step_icon(@hero, @step, @variant) == :check do %>
-              <i class="fa fa-check"></i>
+              <i class="ui-icon ui-check"></i>
             <% else %>
               <%= if league_step_icon(@hero, @step, @variant) == :times do %>
-                <i class="fa fa-times"></i>
+                <i class="ui-icon ui-close"></i>
               <% else %>
                 {@step}
               <% end %>

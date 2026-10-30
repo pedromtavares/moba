@@ -1,11 +1,11 @@
 <div class="shop" id="shop">
   <button type="button" aria-label="Close shop" id="close-button" phx-click="close-shop" class="text-white" {target_attrs(@event_target)}>
-    <i class="fa fa-times fa-3x"></i>
+    <i class="ui-icon ui-close ui-3x"></i>
   </button>
   <div class="row shop-header">
     <div class="col-sm-12 text-center">
       <h2 class="page-title mb-3 mt-3">
-        <i class="fa fa-shopping-cart"></i> Shop <br />
+        <i class="ui-icon ui-cart"></i> Shop <br />
         <small><em>Click on an item to buy or transmute</em></small>
       </h2>
     </div>
@@ -18,7 +18,7 @@
           <span class="text-dark">Normal Items</span>
           <br />
           <small>
-            <em><span class="text-warning"><i class="fa fa-coins"></i> {Moba.normal_items_price()}</span></em>
+            <em><span class="text-warning"><i class="ui-icon ui-coins"></i> {Moba.normal_items_price()}</span></em>
           </small>
         </h3>
         <div class="row">
@@ -44,7 +44,7 @@
           <br />
           <small>
             <em>
-              <span class="text-warning"><i class="fa fa-coins"></i> {Moba.rare_items_price()}</span>
+              <span class="text-warning"><i class="ui-icon ui-coins"></i> {Moba.rare_items_price()}</span>
               or <span class="text-dark">3 Normal</span>
             </em>
           </small>
@@ -72,7 +72,7 @@
           <br />
           <small>
             <em>
-              <span class="text-warning"><i class="fa fa-coins"></i> {Moba.epic_items_price()}</span>
+              <span class="text-warning"><i class="ui-icon ui-coins"></i> {Moba.epic_items_price()}</span>
               or <span class="text-primary">2 Rare</span>
             </em>
           </small>
@@ -100,7 +100,7 @@
           <br />
           <small>
             <em>
-              <span class="text-warning"><i class="fa fa-coins"></i> {Moba.legendary_items_price()}</span>
+              <span class="text-warning"><i class="ui-icon ui-coins"></i> {Moba.legendary_items_price()}</span>
               or <span class="text-purple">2 Epic</span>
             </em>
           </small>
@@ -150,7 +150,7 @@
                 <div class="item-container float-left">
                   <.shop_empty_item_slot
                     class="item-img empty-item d-flex justify-content-center align-items-center"
-                    icon_class="fa fa-cube fa-2x"
+                    icon_class="ui-icon ui-cube ui-2x"
                   />
                 </div>
               </div>
@@ -170,7 +170,7 @@
                 id={"sell-#{@selected_inventory.id}"}
                 {target_attrs(@event_target)}
               >
-                <i class="fa fa-coins"></i> Sell for {sell_price(@current_hero, @selected_inventory)}
+                <i class="ui-icon ui-coins"></i> Sell for {sell_price(@current_hero, @selected_inventory)}
               </button>
             </div>
           </div>
@@ -191,7 +191,7 @@
                   <% end %>
                 <% end %>
                 <div class="col-md-2 d-none d-md-block mt-2">
-                  <i class="fa fa-2x fa-arrow-circle-right"></i>
+                  <i class="ui-icon ui-2x ui-circle-arrow-right"></i>
                 </div>
                 <div class="col-md-3 d-none d-md-block">
                   <.transmute_result item={@transmute} />
@@ -200,7 +200,7 @@
             </div>
             <div class="col-12 d-block d-md-none">
               <div class="col-3 margin-auto mb-1 mt-1">
-                <i class="fa fa-2x fa-arrow-circle-down"></i>
+                <i class="ui-icon ui-2x ui-circle-arrow-down"></i>
               </div>
             </div>
             <div class="col-12 d-block d-md-none">
@@ -224,11 +224,11 @@
                     loading="Transmuting..."
                     id="finish-transmute"
                   >
-                    <span class="loading-text"><i class="fa fa-refresh mr-1"></i>Transmute</span>
+                    <span class="loading-text"><i class="ui-icon ui-refresh mr-1"></i>Transmute</span>
                   </button>
                 </form>
                 <button class="btn btn-danger" phx-click="cancel-transmute" id="cancel-transmute" phx-target="#shop">
-                  <i class="fa fa-times"></i> Cancel
+                  <i class="ui-icon ui-close"></i> Cancel
                 </button>
               </div>
             </div>

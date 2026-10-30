@@ -19,21 +19,21 @@
   <div class="battle-stat-group">
     <.hero_stat_button
       tone="success"
-      icon="fa fa-dagger"
+      icon="ui-icon ui-dagger"
       title={"ATK: #{@turn_hero.atk}"}
       value={@turn_hero.atk}
       label="Attack"
     />
     <.hero_stat_button
       tone="warning"
-      icon="fa fa-shield-halved"
+      icon="ui-icon ui-shield"
       title={"Armor: #{@turn_hero.armor}"}
       value={max(@turn_hero.armor, 0)}
       label="Armor"
     />
     <.hero_stat_button
       tone="pink"
-      icon="fa fa-galaxy"
+      icon="ui-icon ui-vortex"
       title={"Power: #{@turn_hero.power}"}
       value={@turn_hero.power}
       label="Power"

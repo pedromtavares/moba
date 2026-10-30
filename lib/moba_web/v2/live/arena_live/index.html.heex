@@ -50,7 +50,7 @@
                           {tier_title(@current_player)}
                         </h4>
                         <span :if={tier_buff_pct(@current_player)} class="badge badge-light-danger mt-2">
-                          <i class="fa-solid fa-diamond mr-1"></i>- {tier_buff_pct(@current_player)}% Hero Stats
+                          <i class="ui-icon ui-gem mr-1"></i>- {tier_buff_pct(@current_player)}% Hero Stats
                         </span>
                       </div>
                       <div class="col">
@@ -72,12 +72,12 @@
                                 id="enter-arena-button"
                               >
                                 <span class="loading-text">
-                                  <i class="fa fa-swords mr-1 fa-2x"></i>
+                                  <i class="ui-icon ui-swords mr-1 ui-2x"></i>
                                   <br :if={!@preview} /> Enter the Arena
                                 </span>
                                 <br :if={!@preview} />
                                 <span :if={!@preview} class="badge badge-light-primary">
-                                  <i class="fab fa-ethereum"></i> +{Moba.matchmaking_shards()} Shards
+                                  <i class="ui-icon ui-shard"></i> +{Moba.matchmaking_shards()} Shards
                                 </span>
                               </button>
                             <% else %>
@@ -89,7 +89,7 @@
                                 :if={!@preview}
                                 class="disabled btn btn-lg btn-danger margin-auto matchmaking-button dark-button"
                               >
-                                <i class="fa fa-clock-o mr-1 fa-2x"></i>
+                                <i class="ui-icon ui-clock mr-1 ui-2x"></i>
                                 <br />
                                 {reset_timer()}
                               </span>
@@ -103,7 +103,7 @@
                         >
                           <span>Match reward</span>
                           <strong>
-                            <i class="fab fa-ethereum" aria-hidden="true"></i> +{Moba.matchmaking_shards()} Shards
+                            <i class="ui-icon ui-shard" aria-hidden="true"></i> +{Moba.matchmaking_shards()} Shards
                           </strong>
                         </p>
                       </div>
@@ -148,7 +148,7 @@
                     ]}
                     id="edit-teams-button"
                   >
-                    <i class="fa fa-group"></i> Edit Teams
+                    <i class="ui-icon ui-users"></i> Edit Teams
                   </.link>
                 </div>
                 <div class="history arena-history">
@@ -191,7 +191,7 @@
                             class="btn btn-light game-review"
                             aria-label={"Review match #{match.id}"}
                           >
-                            <i class="fa fa-eye"></i>
+                            <i class="ui-icon ui-eye"></i>
                           </.link>
                         </td>
                       </tr>
@@ -328,7 +328,7 @@
                       navigate={preview_path(assigns, ~p"/arena/#{@pending_duel}")}
                       class="btn btn-block btn-lg btn-outline-danger col-xl-4 margin-auto my-3"
                     >
-                      <i class="fa fa-hourglass mr-1"></i>You have a pending duel, click to continue
+                      <i class="ui-icon ui-hourglass mr-1"></i>You have a pending duel, click to continue
                     </.link>
                   <% end %>
                 <% else %>
@@ -340,7 +340,7 @@
                       id="season-duel-button"
                     >
                       <span class="d-inline-block loading-text">
-                        <i class="fa fa-swords mr-1"></i>Play a Season Duel
+                        <i class="ui-icon ui-swords mr-1"></i>Play a Season Duel
                       </span>
                     </button>
                   </div>
@@ -396,7 +396,7 @@
                               phx-click="challenge"
                               phx-value-id={player.id}
                             >
-                              <i class="fa fa-bullseye mr-1" id={"can-duel-#{player.id}"}></i>Duel
+                              <i class="ui-icon ui-target mr-1" id={"can-duel-#{player.id}"}></i>Duel
                             </button>
                           <% else %>
                             <button
@@ -404,7 +404,7 @@
                               class="btn btn-danger btn-block disabled no-action"
                               id={"cannot-duel-#{player.id}"}
                             >
-                              <i class="fa fa-bullseye mr-1"></i>Duel
+                              <i class="ui-icon ui-target mr-1"></i>Duel
                             </button>
                           <% end %>
                         </td>
@@ -457,7 +457,7 @@
                               class="btn btn-light ml-2 game-review"
                               aria-label={"Review duel #{duel.id}"}
                             >
-                              <i class="fa fa-eye"></i>
+                              <i class="ui-icon ui-eye"></i>
                             </.link>
                           </td>
                         </tr>

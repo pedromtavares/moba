@@ -138,7 +138,7 @@ defmodule MobaWeb.V2.CommunityLive do
                 data-toggle="tooltip"
                 title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Season Points (#{@player.pvp_points})"}
               >
-                <i class="fa-thin fa-globe"></i>
+                <i class="ui-icon ui-globe"></i>
                 {player_season_score(@player)}
               </div>
             </div>
@@ -149,16 +149,16 @@ defmodule MobaWeb.V2.CommunityLive do
           <div class="row">
             <div class="col justify-content-center d-flex hero-card-stats">
               <div class="btn-group hero-stats">
-                <.hero_stat_button tone="info" icon="fa fa-arrows-to-dot" title="Season Points" value={@player.pvp_points} />
+                <.hero_stat_button tone="info" icon="ui-icon ui-focus" title="Season Points" value={@player.pvp_points} />
                 <.hero_stat_button
                   tone="danger"
-                  icon="fa fa-swords"
+                  icon="ui-icon ui-swords"
                   title="Total Arena Win Rate"
                   value={player_total_win_rate(@player)}
                 />
                 <.hero_stat_button
                   tone="warning"
-                  icon="fa fa-trophy"
+                  icon="ui-icon ui-trophy"
                   title="Best Immortal Streak"
                   value={@player.best_immortal_streak}
                 />
@@ -193,7 +193,7 @@ defmodule MobaWeb.V2.CommunityLive do
                 data-toggle="tooltip"
                 title={"Total farm: #{@hero.total_xp_farm + @hero.total_gold_farm}. Gold farm: #{@hero.total_gold_farm}. XP farm: #{@hero.total_xp_farm}<br/>"}
               >
-                <i class="fa fa-crown"></i>
+                <i class="ui-icon ui-crown"></i>
                 {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
               </span>
               <span
@@ -202,7 +202,7 @@ defmodule MobaWeb.V2.CommunityLive do
                 data-toggle="tooltip"
                 title="Time it took to finish Training"
               >
-                <i class="fa fa-clock-o"></i>
+                <i class="ui-icon ui-clock"></i>
                 {GH.minutes_label(GH.finished_time(@hero), @preview)} min
               </span>
             </div>

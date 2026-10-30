@@ -3,7 +3,7 @@
   enough_gold? = @current_hero.gold >= gold_cost %>
   <section id="death-panel" class="death-panel" aria-labelledby="death-title">
     <div class="death-overview">
-      <span class="death-emblem" aria-hidden="true"><i class="fa fa-skull-crossbones"></i></span>
+      <span class="death-emblem" aria-hidden="true"><i class="ui-icon ui-skull"></i></span>
       <p class="death-eyebrow">Training interrupted</p>
       <h2 id="death-title">Your hero has fallen.</h2>
       <p class="death-description">Buy back your hero to continue battling, or begin again with a fresh start.</p>
@@ -11,7 +11,7 @@
     <div class="death-buybacks" aria-label="Buyback options">
       <div class="death-option">
         <div class="death-currency death-gold">
-          <i class="fa fa-coins" aria-hidden="true"></i>
+          <i class="ui-icon ui-coins" aria-hidden="true"></i>
           <div>
             <h3>Gold buyback</h3>
             <p>{@current_hero.gold} Gold available</p>
@@ -36,7 +36,7 @@
       <%= if shard_count = Moba.can_shard_buyback?(@current_hero) do %>
         <div class="death-option">
           <div class="death-currency death-shards">
-            <i class="fab fa-ethereum" aria-hidden="true"></i>
+            <i class="ui-icon ui-shard" aria-hidden="true"></i>
             <div>
               <h3>Shard buyback</h3>
               <p>{shard_count} Shards available</p>
@@ -72,13 +72,13 @@
           data-confirm-title="Restart training?"
           data-confirm-accept="Restart hero"
         >
-          <i class="fa fa-recycle" aria-hidden="true"></i>Restart Hero
+          <i class="ui-icon ui-recycle" aria-hidden="true"></i>Restart Hero
         </button>
         <small>Level 1 · Same build</small>
       </div>
       <div class="death-alternative">
         <.link id="death-new-hero" navigate={preview_path(assigns, ~p"/invoke")} class="btn base-secondary">
-          <i class="fa fa-user-plus" aria-hidden="true"></i>New Hero
+          <i class="ui-icon ui-user-plus" aria-hidden="true"></i>New Hero
         </.link>
         <small>Your current hero is saved</small>
       </div>
@@ -86,7 +86,7 @@
   </section>
 <% else %>
   <div class="card-box border border-light bg-light" style="height: 450px">
-    <p class="text-center mt-1"><i class="fa fa-skull-crossbones fa-3x text-dark"></i></p>
+    <p class="text-center mt-1"><i class="ui-icon ui-skull ui-3x text-dark"></i></p>
     <h2 class="text-center mb-0">
       You are DEAD
     </h2>
@@ -101,13 +101,13 @@
           id="buyback-hero"
         >
           <span class="loading-text">
-            <i class="fa fa-coins mr-1"></i> Buyback with {Game.buyback_price(@current_hero)}g
+            <i class="ui-icon ui-coins mr-1"></i> Buyback with {Game.buyback_price(@current_hero)}g
           </span>
         </button>
       <% else %>
         <button class="btn btn-warning btn-lg disabled no-action">
           <span class="loading-text">
-            <i class="fa fa-coins mr-1"></i>
+            <i class="ui-icon ui-coins mr-1"></i>
             You do not have {Game.buyback_price(@current_hero)}g to Buyback, try selling one of your items on the Shop
           </span>
         </button>
@@ -126,7 +126,7 @@
           id="shard-buyback-hero"
         >
           <span class="loading-text">
-            <i class="fab fa-ethereum mr-1"></i>
+            <i class="ui-icon ui-shard mr-1"></i>
             Buyback with {Moba.shard_buyback_price(shard_count)} Shards ({shard_count} left)
           </span>
         </button>
@@ -141,7 +141,7 @@
         title="Resets your hero back to level 1 with the same build."
         data-confirm="WARNING: This reset your hero to level 1."
       >
-        <i class="fa fa-recycle mr-1"></i>Restart Hero
+        <i class="ui-icon ui-recycle mr-1"></i>Restart Hero
       </button>
       <.link
         navigate={preview_path(assigns, ~p"/invoke")}
@@ -149,7 +149,7 @@
         data-toggle="tooltip"
         title="Create a new hero. Your current hero will be saved."
       >
-        <i class="fa fa-user-plus mr-1"></i>New Hero
+        <i class="ui-icon ui-user-plus mr-1"></i>New Hero
       </.link>
     </div>
   </div>

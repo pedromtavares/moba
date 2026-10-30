@@ -148,10 +148,10 @@ Hooks.Loading = {
     el.addEventListener("click", e => {
       const loadingText = $(el).find(".loading-text");
       
-      if (loadingText.find(".fa-2x")[0]){
-        loadingText.html("<i class='fas fa-spinner fa-spin fa-2x'></i><br/>"+loading);
+      if (loadingText.find(".ui-2x")[0]){
+        loadingText.html("<i class='ui-icon ui-spinner ui-spin ui-2x'></i><br/>"+loading);
       }else{
-        loadingText.html("<i class='fas fa-spinner fa-spin mr-1'></i>"+loading);
+        loadingText.html("<i class='ui-icon ui-spinner ui-spin mr-1'></i>"+loading);
       }
       
       if (click){
@@ -233,7 +233,7 @@ Hooks.AttackButton = {
       let skill = $(el).attr("data-skill") || "";
       let item = $(el).attr("data-item") || "";
       const heroId = el.dataset.hero;
-      $(el).find(".loading-text").html("<i class='fas fa-spinner fa-spin mr-1'></i> Attacking...");
+      $(el).find(".loading-text").html("<i class='ui-icon ui-spinner ui-spin mr-1'></i> Attacking...");
       $(el).prop("disabled", true);
       this.pushEvent("next-turn", {skill_id: skill, item_id: item, hero_id: heroId});
       e.stopPropagation();
@@ -365,7 +365,7 @@ Hooks.ExpandEffects = {
         document.getElementById(el.getAttribute("aria-controls")).classList.toggle("active", expanded);
         el.setAttribute("aria-expanded", String(expanded));
         el.querySelector(".effect-toggle-label").textContent = expanded ? "Hide details" : "Details";
-        el.querySelector("i").className = expanded ? "fa fa-minus" : "fa fa-plus";
+        el.querySelector("i").className = expanded ? "ui-icon ui-minus" : "ui-icon ui-plus";
       } else {
         $("#turn-" + el.dataset.turn).find(".descriptions").addClass("active");
         $(el).closest(".contracted-effects").remove();

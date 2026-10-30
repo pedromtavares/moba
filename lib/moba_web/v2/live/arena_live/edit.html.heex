@@ -24,7 +24,7 @@
                   required
                 />
                 <button class="btn btn-primary w-50" id="create-team-button">
-                  <span class="loading-text"><i class="fa fa-plus"></i> Create Team</span>
+                  <span class="loading-text"><i class="ui-icon ui-plus"></i> Create Team</span>
                 </button>
               </div>
             </.form>
@@ -47,7 +47,7 @@
                       <h5 class="m-0"><span class="loading-text">{team.name}</span></h5>
                     </td>
                     <td style="width: 1%">
-                      <i :if={team.defensive} class="fa fa-shield-halved"></i>
+                      <i :if={team.defensive} class="ui-icon ui-shield"></i>
                     </td>
                     <td>
                       <div :for={pick <- team.picks} class="avatar-container">
@@ -71,7 +71,7 @@
                   phx-click="remove-team"
                   id="remove-selected-team"
                 >
-                  <span class="loading-text"><i class="fa fa-trash"></i> Remove</span>
+                  <span class="loading-text"><i class="ui-icon ui-trash"></i> Remove</span>
                 </button>
                 <h3 class="text-center">{@selected_team.name}</h3>
                 <div class="custom-control custom-switch mt-2">
@@ -103,7 +103,7 @@
                           phx-value-id={pick.id}
                           id={"move-up-#{pick.id}"}
                         >
-                          <span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span>
+                          <span class="loading-text"><i class="ui-icon ui-arrow-up"></i> Move Up</span>
                         </button>
                         <button
                           class="btn btn-sm btn-block btn-secondary m-0 mx-1"
@@ -111,7 +111,7 @@
                           phx-value-id={pick.id}
                           id={"move-down-#{pick.id}"}
                         >
-                          <span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span>
+                          <span class="loading-text"><i class="ui-icon ui-arrow-down"></i> Move Down</span>
                         </button>
                         <button
                           :if={@selected_team.player_id == pick.player_id}
@@ -120,7 +120,7 @@
                           phx-value-id={pick.id}
                           id={"edit-hero-#{pick.id}"}
                         >
-                          <span class="loading-text"><i class="fa fa-edit"></i> Edit</span>
+                          <span class="loading-text"><i class="ui-icon ui-edit"></i> Edit</span>
                         </button>
                         <button
                           class="btn btn-sm btn-block btn-danger m-0 ml-1"
@@ -128,7 +128,7 @@
                           phx-value-id={pick.id}
                           id={"remove-hero-#{pick.id}"}
                         >
-                          <span class="loading-text"><i class="fa fa-times"></i> Remove</span>
+                          <span class="loading-text"><i class="ui-icon ui-close"></i> Remove</span>
                         </button>
                       </:actions>
                     </.pvp_hero_card>
@@ -173,7 +173,7 @@
                 </li>
               </ul>
               <a :if={@heroes_tab == "trained"} href="javascript:;" class="h5 mt-2" phx-click="sort" id="hero-sort">
-                <i class="fa fa-circle-sort mt-1"></i> Sorted by {if @sort == :recent, do: "Recent", else: "Rank"}
+                <i class="ui-icon ui-sort mt-1"></i> Sorted by {if @sort == :recent, do: "Recent", else: "Rank"}
               </a>
             </div>
             <hr />
@@ -210,7 +210,7 @@
                         phx-value-id={hero.id}
                         id={"add-button-#{hero.id}"}
                       >
-                        <span class="loading-text"><i class="fa fa-arrow-left"></i> Add</span>
+                        <span class="loading-text"><i class="ui-icon ui-arrow-left"></i> Add</span>
                       </button>
                     </:actions>
                   </.pvp_hero_card>

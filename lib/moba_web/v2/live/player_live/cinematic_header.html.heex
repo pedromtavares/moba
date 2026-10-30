@@ -68,7 +68,7 @@
     </div>
     <div class="col text-center">
       <strong title="Season Points" data-toggle="tooltip">
-        <i class="fa fa-arrows-to-dot text-white"></i> {@player.pvp_points} SP
+        <i class="ui-icon ui-focus text-white"></i> {@player.pvp_points} SP
       </strong>
       <span :if={@preview} class="profile-metric-label">Season points</span>
     </div>
@@ -77,7 +77,7 @@
         title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
         data-toggle="tooltip"
       >
-        <i class="fa fa-swords text-white"></i> {total_win_rate(@player)}
+        <i class="ui-icon ui-swords text-white"></i> {total_win_rate(@player)}
       </strong>
       <span :if={@preview} class="profile-metric-label">Win rate</span>
     </div>
@@ -86,13 +86,13 @@
         title={"Current Immortal Streak: #{@player.current_immortal_streak}<br/>Best Immortal Streak: #{@player.best_immortal_streak}"}
         data-toggle="tooltip"
       >
-        <i class="fa fa-trophy text-white"></i> {@player.best_immortal_streak}
+        <i class="ui-icon ui-trophy text-white"></i> {@player.best_immortal_streak}
       </strong>
       <span :if={@preview} class="profile-metric-label">Best streak</span>
     </div>
     <div class="col text-center">
       <strong title="Season Rank" data-toggle="tooltip">
-        <i class="fa-solid fa-hashtag text-white"></i> {@player.season_ranking}
+        <i class="ui-icon ui-hashtag text-white"></i> {@player.season_ranking}
       </strong>
       <span :if={@preview} class="profile-metric-label">Season rank</span>
     </div>

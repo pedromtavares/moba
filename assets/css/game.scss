@@ -143,7 +143,7 @@ body:has(.game-page .tavern) #topnav a[href$="/tavern"] {
 @media (max-width: 767px) {
   .game-page {
     .nav-tabs .nav-link { padding: 10px 6px; font-size: 13px; }
-    .nav-tabs .nav-link .fa-2x { font-size: 1.4em; }
+    .nav-tabs .nav-link .ui-2x { font-size: 1.4em; }
     .account-pages { padding-top: 20px; }
     #hero-bar .btn { min-height: 30px; }
     .table .btn { padding-left: 6px; padding-right: 6px; }

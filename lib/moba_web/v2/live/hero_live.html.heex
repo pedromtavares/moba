@@ -30,19 +30,19 @@
                   <div class="text-center mt-2">
                     <img src={"/images/pve/#{@current_player.pve_tier}.png"} style="max-height: 70px" /><br />
                     <button type="button" class="btn btn-light mt-2" data-toggle="modal" data-target="#pve-tier-rewards">
-                      <i class="fa fa-crown mr-1"></i>Rewards
+                      <i class="ui-icon ui-crown mr-1"></i>Rewards
                     </button>
                   </div>
                 </div>
                 <div class="card-footer p-0">
                   <%= if is_nil(@current_player.user_id) do %>
                     <.link navigate={preview_path(assigns, ~p"/arena")} class="btn btn-danger btn-block btn-lg">
-                      <i class="fa fa-swords fa-2x mr-1 mt-2"></i>
+                      <i class="ui-icon ui-swords ui-2x mr-1 mt-2"></i>
                       <strong class="font-20 d-block">Proceed to the Arena</strong>
                     </.link>
                   <% else %>
                     <.link navigate={preview_path(assigns, ~p"/base")} class="btn btn-success btn-block btn-lg">
-                      <i class="fa fa-home fa-2x mr-1 mt-2"></i>
+                      <i class="ui-icon ui-home ui-2x mr-1 mt-2"></i>
                       <strong class="font-20 d-block">Proceed to Base</strong>
                     </.link>
                   <% end %>
@@ -70,12 +70,12 @@
                 <div class="card-body p-0">
                   <%= if finished_hero.league_tier >= Moba.platinum_league_tier() do %>
                     <.link navigate={preview_path(assigns, ~p"/base")} class="btn btn-success btn-block btn-lg">
-                      <i class="fa fa-home font-20 mr-1 mt-2 pb-3 pt-2"></i>
+                      <i class="ui-icon ui-home font-20 mr-1 mt-2 pb-3 pt-2"></i>
                       <strong class="font-20">Proceed to your Base</strong>
                     </.link>
                   <% else %>
                     <.link navigate={preview_path(assigns, ~p"/invoke")} class="btn btn-success btn-block btn-lg">
-                      <i class="fa fa-user-plus fa-2x mr-1 mt-2"></i>
+                      <i class="ui-icon ui-user-plus ui-2x mr-1 mt-2"></i>
                       <strong class="font-20 d-block">Try Again</strong>
                     </.link>
                   <% end %>
@@ -134,7 +134,7 @@
                             class="btn btn-light btn-block mt-1"
                             navigate={preview_path(assigns, ~p"/tavern?#{%{avatar: @hero.avatar.code}}")}
                           >
-                            <i class="fa fa-palette mr-1"></i>View Skins
+                            <i class="ui-icon ui-palette mr-1"></i>View Skins
                           </.link>
                         </div>
                         <%= if has_previous_skin?(@skin_selection) do %>
@@ -145,7 +145,7 @@
                               phx-click="set-skin"
                               phx-value-skin-code={previous_skin_for(@skin_selection)}
                             >
-                              <i class="fa fa-chevron-left mr-1"></i> Change Skin
+                              <i class="ui-icon ui-chevron-left mr-1"></i> Change Skin
                             </a>
                           </div>
                         <% end %>
@@ -157,7 +157,7 @@
                               phx-click="set-skin"
                               phx-value-skin-code={next_skin_for(@skin_selection)}
                             >
-                              Change Skin<i class="fa fa-chevron-right ml-1"></i>
+                              Change Skin<i class="ui-icon ui-chevron-right ml-1"></i>
                             </a>
                           </div>
                         <% end %>
@@ -201,7 +201,7 @@
                           data-toggle="tooltip"
                           title={@hero.total_xp_farm + @hero.total_gold_farm}
                         >
-                          <i class="fa fa-crown"></i>
+                          <i class="ui-icon ui-crown"></i>
                           Total Farm: {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
                         </h4>
                       </div>
@@ -209,7 +209,7 @@
                       <div class="col">
                         <%= if @hero.finished_at do %>
                           <h4 class="text-center text-success">
-                            <i class="fa fa-clock-o"></i>
+                            <i class="ui-icon ui-clock"></i>
                             Trained in {GH.minutes_label(GH.finished_time(@hero), @preview)} min
                           </h4>
                         <% else %>
@@ -231,7 +231,7 @@
                   class="btn btn-block btn-light mb-1 btn-lg"
                   navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}
                 >
-                  <i class="fa fa-user"></i> View Player Profile
+                  <i class="ui-icon ui-user"></i> View Player Profile
                 </.link>
               <% end %>
             </div>
@@ -287,7 +287,7 @@
                           </td>
                           <td>
                             <h3 class="text-success">
-                              <i class="fa fa-clock-o"></i>
+                              <i class="ui-icon ui-clock"></i>
                               <%= if hero.finished_at do %>
                                 {GH.minutes_label(GH.finished_time(hero), @preview)} min
                               <% else %>
@@ -328,7 +328,7 @@
                           </th>
                           <th>
                             <h3 class="text-success">
-                              <i class="fa fa-clock-o"></i>
+                              <i class="ui-icon ui-clock"></i>
                               <%= if @hero.finished_at do %>
                                 {GH.minutes_label(GH.finished_time(@hero), @preview)} min
                               <% else %>
@@ -379,7 +379,7 @@
               <table class="table table-dark border margin-auto">
                 <tr>
                   <td class="text-center text-danger">
-                    <i class="fa fa-sword fa-2x"></i> <br /> Training Difficulty
+                    <i class="ui-icon ui-sword ui-2x"></i> <br /> Training Difficulty
                   </td>
                   <td class="text-left">
                     <h5>{training_difficulty_for(@current_player.pve_tier + 1)}</h5>
@@ -388,7 +388,7 @@
                 <%= if bonus = training_bonus_for(@current_player.pve_tier + 1) do %>
                   <tr>
                     <td class="text-center text-success">
-                      <i class="fa fa-sword fa-2x"></i> <br /> Training Bonus
+                      <i class="ui-icon ui-sword ui-2x"></i> <br /> Training Bonus
                     </td>
                     <td class="text-left">
                       <h5>{bonus}</h5>
@@ -397,7 +397,7 @@
                 <% end %>
                 <tr>
                   <td class="text-center text-primary">
-                    <i class="fa fa-spa fa-2x"></i> <br /> Farming per Turn
+                    <i class="ui-icon ui-lotus ui-2x"></i> <br /> Farming per Turn
                   </td>
                   <td class="text-left">
                     <h5>{GH.farming_per_turn_label(@current_player.pve_tier + 1)}</h5>
@@ -405,7 +405,7 @@
                 </tr>
                 <tr>
                   <td class="text-center text-warning">
-                    <i class="fa fa-trophy fa-2x"></i> <br /> Maximum League
+                    <i class="ui-icon ui-trophy ui-2x"></i> <br /> Maximum League
                   </td>
                   <td class="text-left">
                     <h4>{max_league_allowed_for(@current_player.pve_tier + 1)}</h4>
@@ -418,7 +418,7 @@
                       data-toggle="tooltip"
                       title="Shards are the in-game currency that you can use to unlock game content."
                     >
-                      <i class="fab fa-ethereum fa-2x"></i> <br /> Shards
+                      <i class="ui-icon ui-shard ui-2x"></i> <br /> Shards
                     </.link>
                   </td>
                   <td class="text-left">

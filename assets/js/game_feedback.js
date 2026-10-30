@@ -66,8 +66,8 @@ export function tooltipContent(reference, title) {
   content.innerHTML = title || '';
   content.querySelectorAll('.badge').forEach(badge => {
     if (!/^\d+$/.test(badge.textContent.trim())) return;
-    if (badge.querySelector('.fa-bolt')) badge.append(' Energy');
-    if (badge.querySelector('.fa-clock')) badge.append(badge.textContent.trim() === '1' ? ' turn' : ' turns');
+    if (badge.querySelector('.ui-bolt')) badge.append(' Energy');
+    if (badge.querySelector('.ui-clock')) badge.append(badge.textContent.trim() === '1' ? ' turn' : ' turns');
   });
   content.querySelectorAll('.game-stat[title]').forEach(stat => {
     const label = document.createElement('small');

@@ -6,7 +6,6 @@ Website: https://coderthemes.com/
 Contact: support@coderthemes.com
 File: Main Css File
 */
-@import url("https://fonts.googleapis.com/css?family=Roboto:400,500,700");
 html {
   position: relative;
   min-height: 100%; }
@@ -134,7 +133,7 @@ body {
       display: block;
       color: #9097a7;
       font-size: 15px;
-      font-family: "Roboto", sans-serif;
+      font-family: "Nunito", sans-serif;
       -webkit-transition: all .5s ease;
       transition: all .5s ease;
       line-height: 20px;
@@ -524,7 +523,7 @@ Responsive Menu
       text-overflow: ellipsis;
       white-space: nowrap;
       color: #f7f7f7;
-      font-family: "Roboto", sans-serif; }
+      font-family: "Nunito", sans-serif; }
       .notification-list .notify-item .notify-details b {
         font-weight: 500; }
       .notification-list .notify-item .notify-details small {
@@ -1662,12 +1661,12 @@ Responsive Menu
 
 .jq-toast-single {
   padding: 15px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif;
   background-color: #3bafda;
   font-size: 13px;
   line-height: 22px; }
   .jq-toast-single h2 {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif; }
   .jq-toast-single a {
     font-size: 0.9rem; }
     .jq-toast-single a:hover {
@@ -1750,7 +1749,7 @@ Responsive Menu
   border-color: #f1556c; }
 
 .swal2-modal {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif;
   -webkit-box-shadow: 0 10px 33px rgba(0, 0, 0, 0.1);
           box-shadow: 0 10px 33px rgba(0, 0, 0, 0.1); }
   .swal2-modal .swal2-title {
@@ -1891,7 +1890,7 @@ Responsive Menu
   height: 28px; }
 
 .irs {
-  font-family: "Roboto", sans-serif; }
+  font-family: "Nunito", sans-serif; }
 
 .irs--flat .irs-bar,
 .irs--flat .irs-from,
@@ -2040,7 +2039,7 @@ Responsive Menu
 
 .ms-optgroup-label {
   font-weight: 500;
-  font-family: "Roboto", sans-serif;
+  font-family: "Nunito", sans-serif;
   color: #8a929a !important;
   font-size: 13px; }
 
@@ -2197,7 +2196,7 @@ Responsive Menu
   border: 2px solid #495561; }
 
 .daterangepicker {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif;
   border: 1px solid #424d58;
   -webkit-box-shadow: 0 0 15px 0 rgba(40, 48, 55, 0.6);
           box-shadow: 0 0 15px 0 rgba(40, 48, 55, 0.6);
@@ -2325,7 +2324,7 @@ Responsive Menu
         background-color: rgba(255, 255, 255, 0.2); }
 
 .ql-container {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif; }
   .ql-container.ql-snow {
     border-color: #495561; }
 
@@ -2334,7 +2333,7 @@ Responsive Menu
   border-radius: 0.2rem; }
 
 .ql-toolbar {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; }
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important; }
   .ql-toolbar span {
     outline: none !important;
     color: #8a929a; }
@@ -2430,7 +2429,7 @@ div.dt-button-info {
   .tablesaw thead tr:first-child th {
     border: none;
     font-weight: 500;
-    font-family: "Roboto", sans-serif; }
+    font-family: "Nunito", sans-serif; }
 
 .tablesaw td {
   border-top: 1px solid #3b4651 !important; }
@@ -2550,9 +2549,10 @@ div.dt-button-info {
     outline-offset: -2px;
     outline: none; }
   .responsive-table-plugin .checkbox-row input[type="checkbox"]:checked + label::after {
-    content: "\f00c";
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900; }
+    content: "";
+    background-color: currentColor;
+    -webkit-mask: url("/images/ui/check.png") center / 12px no-repeat;
+    mask: url("/images/ui/check.png") center / 12px no-repeat; }
   .responsive-table-plugin .checkbox-row input[type="checkbox"]:disabled + label::before {
     background-color: #495561;
     cursor: not-allowed; }
@@ -2605,7 +2605,7 @@ div.dt-button-info {
 
 .legend tr {
   height: 30px;
-  font-family: "Roboto", sans-serif; }
+  font-family: "Nunito", sans-serif; }
 
 .legend div:first-of-type {
   background-color: transparent !important; }
@@ -2629,7 +2629,7 @@ div.dt-button-info {
 .apex-charts {
   min-height: 10px !important; }
   .apex-charts text {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important;
     fill: #ced4da; }
   .apex-charts .apexcharts-canvas {
     margin: 0 auto; }
@@ -2645,7 +2645,7 @@ div.dt-button-info {
 
 .apexcharts-tooltip-title,
 .apexcharts-tooltip-text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important; }
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important; }
 
 .apexcharts-legend-series {
   font-weight: 600; }
@@ -2656,7 +2656,7 @@ div.dt-button-info {
 
 .apexcharts-legend-text {
   color: #ced4da !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important;
   font-size: 13px !important; }
 
 .apexcharts-pie-label {
@@ -2664,7 +2664,7 @@ div.dt-button-info {
 
 .apexcharts-yaxis text,
 .apexcharts-xaxis text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important;
   fill: #8a929a; }
 
 .apexcharts-radar-series polygon {
@@ -2675,7 +2675,7 @@ div.dt-button-info {
   stroke: #495561; }
 
 .morris-chart text {
-  font-family: "Roboto", sans-serif !important; }
+  font-family: "Nunito", sans-serif !important; }
 
 .morris-hover {
   position: absolute;
@@ -2687,11 +2687,11 @@ div.dt-button-info {
     padding: 10px 12px;
     background: #f1f5f7;
     color: #323b44;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif; }
     .morris-hover.morris-default-style .morris-hover-row-label {
       font-weight: bold;
       margin: 0.25em 0;
-      font-family: "Roboto", sans-serif; }
+      font-family: "Nunito", sans-serif; }
     .morris-hover.morris-default-style .morris-hover-point {
       white-space: nowrap;
       margin: 0.1em 0;
@@ -2703,7 +2703,7 @@ div.dt-button-info {
   opacity: 1; }
   .c3-tooltip td {
     border-left: none;
-    font-family: "Roboto", sans-serif; }
+    font-family: "Nunito", sans-serif; }
     .c3-tooltip td > span {
       background: #495561; }
   .c3-tooltip tr {
@@ -2716,12 +2716,12 @@ div.dt-button-info {
   font-weight: 600; }
 
 .c3 text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif;
   color: #8a929a;
   fill: #8a929a; }
 
 .c3-legend-item {
-  font-family: "Roboto", sans-serif;
+  font-family: "Nunito", sans-serif;
   font-size: 14px; }
 
 .c3 line, .c3 path {
@@ -2843,11 +2843,11 @@ div.dt-button-info {
   color: #323b44 !important;
   font-size: 12px !important;
   line-height: 18px !important;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 700 !important; }
 
 [data-plugin="knob"] {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important;
   font-weight: 600 !important; }
 
 .gmaps, .gmaps-panaroma {
@@ -2886,7 +2886,7 @@ div.dt-button-info {
   border: none;
   background: #495561;
   color: #fff;
-  font-family: "Roboto", sans-serif;
+  font-family: "Nunito", sans-serif;
   font-size: 0.9rem;
   padding: 5px 8px; }
 
@@ -2929,7 +2929,7 @@ div.dt-button-info {
   line-height: 24px; }
 
 .mapael .plotLegend text {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif !important;
   fill: #ced4da; }
 
 .calendar {
@@ -2987,7 +2987,7 @@ div.dt-button-info {
   background-color: #323b44;
   border-radius: 50%;
   margin: 5px;
-  font-family: "Roboto", sans-serif;
+  font-family: "Nunito", sans-serif;
   font-size: 12px; }
 
 .fc-button {
@@ -3077,7 +3077,7 @@ div.hopscotch-bubble {
     border-color: #3bafda !important;
     text-shadow: none !important;
     margin: 0 0 0 5px !important;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif;
     color: #fff !important; }
   div.hopscotch-bubble .hopscotch-bubble-content {
     margin: 0 0 0 50px; }
@@ -3107,11 +3107,11 @@ div.hopscotch-bubble {
   div.hopscotch-bubble .hopscotch-bubble-arrow-container.down .hopscotch-bubble-arrow-border {
     border-top: 0 solid rgba(0, 0, 0, 0.5); }
   div.hopscotch-bubble h3 {
-    font-family: "Roboto", sans-serif;
+    font-family: "Nunito", sans-serif;
     margin-bottom: 5px;
     color: #fff; }
   div.hopscotch-bubble .hopscotch-content {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Nunito, "Helvetica Neue", Arial, sans-serif;
     color: #dee2e6; }
 
 .button-list .btn {
@@ -3222,11 +3222,11 @@ div.hopscotch-bubble {
   text-shadow: rgba(59, 175, 218, 0.3) 5px 1px, rgba(59, 175, 218, 0.2) 10px 3px;
   font-size: 84px;
   line-height: 90px;
-  font-family: "Roboto", sans-serif; }
+  font-family: "Nunito", sans-serif; }
 
 .error-text-box {
   font-size: 8rem;
-  font-family: "Roboto", sans-serif;
+  font-family: "Nunito", sans-serif;
   line-height: 1; }
   .error-text-box .text {
     fill: none;
@@ -3695,7 +3695,7 @@ div.hopscotch-bubble {
     display: inline-block;
     margin-bottom: 5px;
     font-weight: 500;
-    font-family: "Roboto", sans-serif;
+    font-family: "Nunito", sans-serif;
     font-size: 13px;
     text-transform: uppercase;
     letter-spacing: 0.03rem; }

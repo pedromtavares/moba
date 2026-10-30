@@ -210,42 +210,42 @@ defmodule MobaWeb.V2.Components.GameComponents do
       <.hero_stat_button
         variant={@variant}
         tone="danger"
-        icon="fa fa-heart mr-1"
+        icon="ui-icon ui-heart mr-1"
         title={hero_stat_title(@hero, :hp, @tooltip_mode)}
         value={@hero.total_hp + @hero.item_hp}
       />
       <.hero_stat_button
         variant={@variant}
         tone="info"
-        icon="fa fa-bolt"
+        icon="ui-icon ui-bolt"
         title={hero_stat_title(@hero, :mp, @tooltip_mode)}
         value={@hero.total_mp + @hero.item_mp}
       />
       <.hero_stat_button
         variant={@variant}
         tone="success"
-        icon="fa fa-dagger"
+        icon="ui-icon ui-dagger"
         title={hero_stat_title(@hero, :atk, @tooltip_mode)}
         value={@hero.atk + @hero.item_atk}
       />
       <.hero_stat_button
         variant={@variant}
         tone="pink"
-        icon="fa fa-galaxy"
+        icon="ui-icon ui-vortex"
         title={hero_stat_title(@hero, :power, @tooltip_mode)}
         value={@hero.power + @hero.item_power}
       />
       <.hero_stat_button
         variant={@variant}
         tone="warning"
-        icon="fa fa-shield-halved"
+        icon="ui-icon ui-shield"
         title={hero_stat_title(@hero, :armor, @tooltip_mode)}
         value={@hero.armor + @hero.item_armor}
       />
       <.hero_stat_button
         variant={@variant}
         tone="orange"
-        icon="fa fa-running"
+        icon="ui-icon ui-runner"
         title={hero_stat_title(@hero, :speed, @tooltip_mode)}
         value={@hero.speed + @hero.item_speed}
       />
@@ -267,21 +267,21 @@ defmodule MobaWeb.V2.Components.GameComponents do
   def battle_hero_stat_group(assigns) do
     ~H"""
     <div class={@class}>
-      <.hero_stat_button variant="default" tone="danger" icon="fa fa-heart mr-1" title="Health" value={@hp} />
-      <.hero_stat_button variant="default" tone="info" icon="fa fa-bolt" title="Energy" value={@mp} />
-      <.hero_stat_button variant="default" tone="success" icon="fa fa-dagger" title="Attack" value={@atk} />
-      <.hero_stat_button variant="default" tone="pink" icon="fa fa-galaxy" title="Power" value={@power} />
+      <.hero_stat_button variant="default" tone="danger" icon="ui-icon ui-heart mr-1" title="Health" value={@hp} />
+      <.hero_stat_button variant="default" tone="info" icon="ui-icon ui-bolt" title="Energy" value={@mp} />
+      <.hero_stat_button variant="default" tone="success" icon="ui-icon ui-dagger" title="Attack" value={@atk} />
+      <.hero_stat_button variant="default" tone="pink" icon="ui-icon ui-vortex" title="Power" value={@power} />
       <.hero_stat_button
         variant="default"
         tone="warning"
-        icon="fa fa-shield-halved"
+        icon="ui-icon ui-shield"
         title="Armor"
         value={@armor}
       />
       <.hero_stat_button
         variant="default"
         tone="orange"
-        icon="fa fa-running"
+        icon="ui-icon ui-runner"
         title="Speed"
         value={@speed}
       />

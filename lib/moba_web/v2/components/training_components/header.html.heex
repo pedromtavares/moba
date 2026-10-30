@@ -36,7 +36,7 @@
               navigate={preview_path(assigns, "/training")}
               class="btn btn-light"
             >
-              <i class="fa fa-arrow-left mr-1 fa-2x" aria-hidden="true"></i> <br />Return to Training
+              <i class="ui-icon ui-arrow-left mr-1 ui-2x" aria-hidden="true"></i> <br />Return to Training
             </.link>
             <.link
               :if={!@history}
@@ -44,7 +44,7 @@
               navigate={preview_path(assigns, "/battles")}
               class="btn btn-light"
             >
-              <i class="fa fa-list-ul mr-1 fa-2x"></i> <br />Battle Log
+              <i class="ui-icon ui-list mr-1 ui-2x"></i> <br />Battle Log
             </.link>
             <%= if @show_controls && @current_hero.pve_current_turns > 0 && @current_hero.refresh_targets_count > 0 do %>
               <a
@@ -55,7 +55,7 @@
                 phx-click="refresh-targets"
                 class="btn btn-light"
               >
-                <i class="fa fa-refresh fa-2x mr-1"></i> <br />Refresh Targets
+                <i class="ui-icon ui-refresh ui-2x mr-1"></i> <br />Refresh Targets
               </a>
             <% end %>
           </div>

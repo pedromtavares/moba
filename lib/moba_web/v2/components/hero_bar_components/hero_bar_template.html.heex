@@ -93,11 +93,11 @@
                         aria-label={"#{skill.name} rank #{skill.level} of #{max_skill_level(skill)}"}
                       >
                         <%= for _ <- (1..skill.level) do %>
-                          <i class="fa fa-circle text-warning"></i>
+                          <i class="ui-icon ui-circle text-warning"></i>
                         <% end %>
                         <%= if skill.level < max_skill_level(skill) do %>
                           <%= for _ <- ((skill.level + 1)..max_skill_level(skill)) do %>
-                            <i class="fa fa-circle"></i>
+                            <i class="ui-icon ui-circle"></i>
                           <% end %>
                         <% end %>
                       </div>
@@ -147,7 +147,7 @@
                     class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"
                     {target_attrs(@event_target)}
                   >
-                    <i class="fa fa-edit mr-1"></i>Edit Orders
+                    <i class="ui-icon ui-edit mr-1"></i>Edit Orders
                   </a>
                 <% end %>
               <% end %>
@@ -158,7 +158,7 @@
           <div class="row">
             <div class="col center">
               <h3 class="mb-1 mt-0 no-wrap">
-                <span class="text-warning mr-1"><i class="fa fa-coins"></i> {@current_hero.gold}</span>
+                <span class="text-warning mr-1"><i class="ui-icon ui-coins"></i> {@current_hero.gold}</span>
                 <a
                   href="javascript:;"
                   id="toggle-shop"
@@ -200,7 +200,7 @@
                   <%= for _ <- (length(@current_hero.items)..5) do %>
                     <div class="item-container float-left">
                       <div class="item-img empty-item d-flex justify-content-center align-items-center">
-                        <i class="fa fa-cube fa-2x"></i>
+                        <i class="ui-icon ui-cube ui-2x"></i>
                       </div>
                     </div>
                   <% end %>
@@ -234,7 +234,7 @@
           </div>
           <div class="col-7">
             <h3 class="mb-1 mt-0 pt-1 text-right" id="tiny-shop">
-              <span class="text-warning mr-1"><i class="fa fa-coins"></i> {@current_hero.gold}</span>
+              <span class="text-warning mr-1"><i class="ui-icon ui-coins"></i> {@current_hero.gold}</span>
               <a
                 href="javascript:;"
                 phx-click="toggle-shop"
@@ -256,7 +256,7 @@
               phx-click="show-navigation"
               {target_attrs(@event_target)}
             >
-              <i class="fa fa-arrow-circle-left mr-1"></i>Show Navigation
+              <i class="ui-icon ui-circle-arrow-left mr-1"></i>Show Navigation
             </button>
           <% else %>
             <%= if @current_hero.skill_levels_available > 0 do %>
@@ -266,7 +266,7 @@
                 phx-click="show-build"
                 {target_attrs(@event_target)}
               >
-                You have an available skill point!<i class="fa fa-arrow-circle-right ml-1"></i>
+                You have an available skill point!<i class="ui-icon ui-circle-arrow-right ml-1"></i>
               </button>
             <% else %>
               <button
@@ -275,7 +275,7 @@
                 phx-click="show-build"
                 {target_attrs(@event_target)}
               >
-                Show Build<i class="fa fa-arrow-circle-right ml-1"></i>
+                Show Build<i class="ui-icon ui-circle-arrow-right ml-1"></i>
               </button>
             <% end %>
           <% end %>
@@ -284,7 +284,7 @@
     </form>
   </div>
   <h3 class="mb-1 mt-0 d-none d-md-block d-xl-none" id="small-shop">
-    <span class="text-warning mr-1"><i class="fa fa-coins"></i> {@current_hero.gold}</span>
+    <span class="text-warning mr-1"><i class="ui-icon ui-coins"></i> {@current_hero.gold}</span>
     <a
       href="javascript:;"
       id="toggle-small-shop"

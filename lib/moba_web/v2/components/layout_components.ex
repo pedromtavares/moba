@@ -228,13 +228,13 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           <div class="card-body pb-3 pt-3">
             <div class="row justify-content-center">
               <div class="col text-center">
-                <h5><i class="fa fa-swords mr-1"></i>{@stats.matches} matches</h5>
+                <h5><i class="ui-icon ui-swords mr-1"></i>{@stats.matches} matches</h5>
               </div>
               <div class="col text-center">
-                <h5><i class="fa fa-users mr-1"></i>{@stats.active} players</h5>
+                <h5><i class="ui-icon ui-users mr-1"></i>{@stats.active} players</h5>
               </div>
               <div class="col text-center">
-                <h5><i class="fa fa-helmet-battle mr-1"></i>{@stats.heroes} trained</h5>
+                <h5><i class="ui-icon ui-helmet mr-1"></i>{@stats.heroes} trained</h5>
               </div>
               <div class="col text-center">
                 <h5>

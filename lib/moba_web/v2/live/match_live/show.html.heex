@@ -30,7 +30,7 @@
                     phx-value-id={hero.id}
                     id={"move-up-#{hero.id}"}
                   >
-                    <span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span>
+                    <span class="loading-text"><i class="ui-icon ui-arrow-up"></i> Move Up</span>
                   </button>
                   <button
                     :if={is_nil(@match.winner)}
@@ -39,7 +39,7 @@
                     phx-value-id={hero.id}
                     id={"move-down-#{hero.id}"}
                   >
-                    <span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span>
+                    <span class="loading-text"><i class="ui-icon ui-arrow-down"></i> Move Down</span>
                   </button>
                 </:actions>
               </.pvp_hero_card>
@@ -115,14 +115,14 @@
                         phx-click="start"
                         id="start-match-button"
                       >
-                        <span class="loading-text"><i class="fa fa-play mr-1"></i> Lock Picks and Start Match</span>
+                        <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Lock Picks and Start Match</span>
                       </button>
                     <% else %>
                       <h2 class="text-center text-white">
                         Pick 5 Heroes
                         <i
                           :if={@latest_match}
-                          class="fa-solid fa-repeat text-right ml-4 action-cursor"
+                          class="ui-icon ui-repeat text-right ml-4 action-cursor"
                           phx-click="repeat"
                         >
                         </i>
@@ -146,7 +146,7 @@
                       class={["nav-link px-2 py-1", @hero_tab == "teams" && "active"]}
                       id="teams-heroes-button"
                     >
-                      <span class="d-inline-block loading-text"><i class="fa fa-group mr-1"></i>Teams</span>
+                      <span class="d-inline-block loading-text"><i class="ui-icon ui-users mr-1"></i>Teams</span>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -157,7 +157,7 @@
                       class={["nav-link px-2 py-1", @hero_tab == "trained" && "active"]}
                       id="trained-heroes-button"
                     >
-                      <span class="d-inline-block loading-text"><i class="fa fa-sword mr-1"></i>Trained Heroes</span>
+                      <span class="d-inline-block loading-text"><i class="ui-icon ui-sword mr-1"></i>Trained Heroes</span>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -168,7 +168,7 @@
                       class={["nav-link px-2 py-1", @hero_tab == "available" && "active"]}
                       id="available-heroes-button"
                     >
-                      <span class="d-inline-block loading-text"><i class="fa fa-dice mr-1"></i>Available Heroes</span>
+                      <span class="d-inline-block loading-text"><i class="ui-icon ui-dice mr-1"></i>Available Heroes</span>
                     </a>
                   </li>
                 </ul>

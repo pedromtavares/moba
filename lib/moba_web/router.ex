@@ -120,6 +120,9 @@ defmodule MobaWeb.Router do
     resources "/users", Admin.UserController
     resources "/skins", Admin.SkinController
 
+    get "/settings", Admin.SettingsController, :edit
+    put "/settings", Admin.SettingsController, :update
+
     live_dashboard "/dashboard", metrics: MobaWeb.Telemetry, ecto_repos: [Moba.Repo]
 
     get "/", Admin.UserController, :index

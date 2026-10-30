@@ -51,21 +51,21 @@
           navigate={preview_path(assigns, "/battles")}
           class="btn base-secondary"
           id="load-battles"
-          icon="fa fa-list-ul"
+          icon="ui-icon ui-list"
           label="Battle Log"
         />
         <.battle_nav_action
           navigate={preview_path(assigns, "/training")}
           class="btn battle-primary"
           id="load-training"
-          icon="fa fa-arrow-right"
+          icon="ui-icon ui-arrow-right"
           label="Continue training"
         />
       <% else %>
         <.battle_guest_create_action
           preview={true}
           class="btn battle-primary"
-          icon="fa fa-user-plus"
+          icon="ui-icon ui-user-plus"
           label="Create your Hero"
         />
       <% end %>

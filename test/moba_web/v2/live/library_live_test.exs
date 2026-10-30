@@ -16,7 +16,8 @@ defmodule MobaWeb.V2.LibraryLiveTest do
     assert html =~ "Frequently Asked Questions"
     assert html =~ "Training Guide"
     assert html =~ "Arena Guide"
-    assert html =~ "Contact"
+    refute has_element?(view, "#manual-navigation a[href='#about-tab'], #manual-navigation a[href='#support-tab']")
+    refute has_element?(view, "#about-tab, #support-tab")
     assert has_element?(view, "#library")
     assert has_element?(view, "#library .skill-img[title]")
     assert has_element?(view, "#library .img-border-sm[title]")

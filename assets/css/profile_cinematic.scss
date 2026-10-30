@@ -65,7 +65,7 @@
   .profile-actions .profile-action-logout:hover { border-color: #ce879a33; background: #ce879a0d; color: #e2a6b3 !important; }
   .profile-ranking-header { position: sticky; top: 0; z-index: 3; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-bottom: 1px solid #c7b17b33; background: linear-gradient(110deg, #202a35, #111b27); box-shadow: 0 4px 16px #0002; }
   .profile-ranking-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
-  .profile-ranking-title > .fa { color: #d9b878; font-size: 20px; }
+  .profile-ranking-title > .ui-icon { color: #d9b878; font-size: 20px; }
   .profile-ranking-title strong { display: block; color: #f0e4ce; font-size: 16px; font-weight: 900; line-height: 1.2; }
   .profile-ranking-title span { display: block; margin-top: 3px; color: #a8b5c5; font-size: 10px; }
   .profile-ranking-switch { display: flex; flex-shrink: 0; gap: 3px; padding: 3px; border: 1px solid #c7b17b33; border-radius: 6px; background: #08111b99; }

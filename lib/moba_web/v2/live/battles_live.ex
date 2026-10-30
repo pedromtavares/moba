@@ -200,11 +200,11 @@ defmodule MobaWeb.V2.BattlesLive do
                 </span>
               <% {:step_win, step} -> %>
                 <span class="history-step history-step-win">
-                  <i class="fa fa-check" aria-hidden="true"></i>Battle {step} cleared
+                  <i class="ui-icon ui-check" aria-hidden="true"></i>Battle {step} cleared
                 </span>
               <% {:step_loss, step} -> %>
                 <span class="history-step history-step-loss">
-                  <i class="fa fa-xmark" aria-hidden="true"></i>Battle {step} failed
+                  <i class="ui-icon ui-close" aria-hidden="true"></i>Battle {step} failed
                 </span>
             <% end %>
           <% end %>
@@ -216,7 +216,7 @@ defmodule MobaWeb.V2.BattlesLive do
             class="history-replay"
             aria-label={"Replay battle against #{opponent.name}"}
           >
-            <i class="fa fa-play" aria-hidden="true"></i>
+            <i class="ui-icon ui-play" aria-hidden="true"></i>
           </.link>
         </td>
       <% else %>
@@ -256,14 +256,14 @@ defmodule MobaWeb.V2.BattlesLive do
                 <% {:step_win, step} -> %>
                   <li class="nav-item">
                     <a href="javascript:;" class="nav-link success">
-                      <span class="number"><i class="fa fa-check" aria-hidden="true"></i></span>
+                      <span class="number"><i class="ui-icon ui-check" aria-hidden="true"></i></span>
                       <span class="d-none d-sm-inline">{step}</span>
                     </a>
                   </li>
                 <% {:step_loss, step} -> %>
                   <li class="nav-item">
                     <a href="javascript:;" class="nav-link failure">
-                      <span class="number"><i class="fa fa-times" aria-hidden="true"></i></span>
+                      <span class="number"><i class="ui-icon ui-close" aria-hidden="true"></i></span>
                       <span class="d-none d-sm-inline">{step}</span>
                     </a>
                   </li>

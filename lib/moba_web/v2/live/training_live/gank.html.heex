@@ -13,7 +13,7 @@
             phx-click="league"
             id="start-league-challenge"
           >
-            <span class="loading-text f-rpg"><i class="fa fa-trophy mr-1"></i> Begin</span>
+            <span class="loading-text f-rpg"><i class="ui-icon ui-trophy mr-1"></i> Begin</span>
           </button>
           <p class="text-muted font-italic">
             Click above to begin your <span class={"text-league-#{next}"}><%= Moba.leagues[next] %> Challenge</span>.
@@ -43,7 +43,7 @@
           phx-click="league"
           id="start-league-challenge"
         >
-          <span class="loading-text f-rpg"><i class="fa fa-trophy mr-1"></i> Boss Fight</span>
+          <span class="loading-text f-rpg"><i class="ui-icon ui-trophy mr-1"></i> Boss Fight</span>
         </button>
         <%= if boss.league_attempts == 0 do %>
           <p class="text-muted font-italic">

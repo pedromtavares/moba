@@ -13,8 +13,10 @@ import {LiveSocket} from "phoenix_live_view";
 import mobileCheck from "./mobile_check";
 import Hooks from "./hooks";
 import {initGameConfirmations, isGameTooltip, tooltipContent} from "./game_feedback";
+import {initAnalytics} from "./analytics";
 
 initGameConfirmations();
+initAnalytics();
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

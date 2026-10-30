@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :moba, :analytics_allowed, config_env() == :prod
+
 config :moba,
   ecto_repos: [Moba.Repo],
   env: Mix.env(),

@@ -61,7 +61,7 @@
                             data-target="#pve-tier-rewards"
                             id="base-rewards-btn"
                           >
-                            <i class="fa fa-crown mr-1"></i>Progression Rewards
+                            <i class="ui-icon ui-crown mr-1"></i>Progression Rewards
                           </button>
                         <% end %>
                       </div>
@@ -104,7 +104,7 @@
                   ]}
                   id="base-invoke-btn"
                 >
-                  <i class="fa fa-plus-large mr-1"></i>Train a new Hero
+                  <i class="ui-icon ui-plus mr-1"></i>Train a new Hero
                 </.link>
 
                 <%!-- Hero collection --%>
@@ -245,7 +245,7 @@
                                       phx-click="archive"
                                       phx-value-id={hero.id}
                                     >
-                                      <i class="fa fa-trash-alt mr-1"></i><span class="hero-card-delete-label">Delete</span>
+                                      <i class="ui-icon ui-trash mr-1"></i><span class="hero-card-delete-label">Delete</span>
                                     </button>
                                   <% end %>
                                   <%= if hero.finished_at do %>
@@ -253,7 +253,7 @@
                                       class="btn btn-primary hero-card-customize"
                                       navigate={preview_path(assigns, ~p"/hero/#{hero}")}
                                     >
-                                      <i class="fa fa-address-card mr-1"></i> Customize
+                                      <i class="ui-icon ui-id-card mr-1"></i> Customize
                                     </.link>
                                   <% else %>
                                     <button
@@ -264,7 +264,7 @@
                                       data-toggle="tooltip"
                                       title={"#{hero.pve_total_turns + hero.pve_current_turns} turns left"}
                                     >
-                                      <i class="fa fa-sword mr-1"></i> Continue
+                                      <i class="ui-icon ui-sword mr-1"></i> Continue
                                     </button>
                                   <% end %>
                                   <div class="btn-group hero-card-metrics">
@@ -274,7 +274,7 @@
                                       data-toggle="tooltip"
                                       title={"Total farm: #{hero.total_xp_farm + hero.total_gold_farm}. Gold farm: #{hero.total_gold_farm}. XP farm: #{hero.total_xp_farm}"}
                                     >
-                                      <i class="fa fa-crown"></i>
+                                      <i class="ui-icon ui-crown"></i>
                                       <span class="hero-card-farm-value">
                                         {GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm)}
                                       </span>
@@ -289,7 +289,7 @@
                                         data-toggle="tooltip"
                                         title="Time it took to finish Training"
                                       >
-                                        <i class="fa fa-clock-o"></i>
+                                        <i class="ui-icon ui-clock"></i>
                                         {GH.minutes_label(GH.finished_time(hero), @preview)} min
                                       </span>
                                     <% end %>
@@ -329,7 +329,7 @@
                             id={"load-all-heroes-#{@filter}"}
                           >
                             <span class="loading-text">
-                              <i class="fa fa-plus mr-1"></i>Load All
+                              <i class="ui-icon ui-plus mr-1"></i>Load All
                             </span>
                           </button>
                         </div>
@@ -373,7 +373,7 @@
                     <table class="table table-dark border margin-auto">
                       <tr>
                         <td class="text-center text-danger">
-                          <i class="fa fa-sword fa-2x"></i> <br /> Training Difficulty
+                          <i class="ui-icon ui-sword ui-2x"></i> <br /> Training Difficulty
                         </td>
                         <td class="text-left">
                           <h5>{training_difficulty_for(@current_player.pve_tier + 1)}</h5>
@@ -382,7 +382,7 @@
                       <%= if bonus = training_bonus_for(@current_player.pve_tier + 1) do %>
                         <tr>
                           <td class="text-center text-success">
-                            <i class="fa fa-sword fa-2x"></i> <br /> Training Bonus
+                            <i class="ui-icon ui-sword ui-2x"></i> <br /> Training Bonus
                           </td>
                           <td class="text-left">
                             <h5>{bonus}</h5>
@@ -391,7 +391,7 @@
                       <% end %>
                       <tr>
                         <td class="text-center text-primary">
-                          <i class="fa fa-spa fa-2x"></i> <br /> Farming per Turn
+                          <i class="ui-icon ui-lotus ui-2x"></i> <br /> Farming per Turn
                         </td>
                         <td class="text-left">
                           <h5>{GH.farming_per_turn_label(@current_player.pve_tier + 1)}</h5>
@@ -399,7 +399,7 @@
                       </tr>
                       <tr>
                         <td class="text-center text-warning">
-                          <i class="fa fa-trophy fa-2x"></i> <br /> Maximum League
+                          <i class="ui-icon ui-trophy ui-2x"></i> <br /> Maximum League
                         </td>
                         <td class="text-left">
                           <h4>{max_league_allowed_for(@current_player.pve_tier + 1)}</h4>
@@ -412,7 +412,7 @@
                             data-toggle="tooltip"
                             title="Shards are the in-game currency that you can use to unlock game content."
                           >
-                            <i class="fab fa-ethereum fa-2x"></i> <br /> Shards
+                            <i class="ui-icon ui-shard ui-2x"></i> <br /> Shards
                           </.link>
                         </td>
                         <td class="text-left">

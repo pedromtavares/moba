@@ -52,7 +52,7 @@
           navigate={preview_path(assigns, ~p"/battles")}
           class="btn btn-outline-secondary btn-lg btn-block"
           id="load-battles"
-          icon="fa fa-list-ul"
+          icon="ui-icon ui-list"
           label="View Battle Log"
         />
       </div>
@@ -61,7 +61,7 @@
           navigate={preview_path(assigns, ~p"/training")}
           class="btn btn-outline-success btn-lg btn-block"
           id="load-training"
-          icon="fa fa-sword"
+          icon="ui-icon ui-sword"
           label="Back to Training"
         />
       </div>
@@ -72,7 +72,7 @@
         <.battle_guest_create_action
           preview={Map.get(assigns, :preview, false)}
           class="btn btn-success btn-block btn-lg"
-          icon="fa fa-user-plus"
+          icon="ui-icon ui-user-plus"
           label="Create your Hero"
         />
       </div>

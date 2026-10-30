@@ -79,22 +79,22 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
 
   defp hero_stat_entries(hero, show_speed) do
     stats = [
-      {"Health", "btn btn-icon waves-effect btn-outline-dark text-danger", "fa fa-heart mr-1",
+      {"Health", "btn btn-icon waves-effect btn-outline-dark text-danger", "ui-icon ui-heart mr-1",
        hero.total_hp + hero.item_hp},
-      {"Energy", "btn btn-icon waves-effect waves-light btn-outline-dark text-info", "fa fa-bolt",
+      {"Energy", "btn btn-icon waves-effect waves-light btn-outline-dark text-info", "ui-icon ui-bolt",
        hero.total_mp + hero.item_mp},
-      {"Attack", "btn btn-icon waves-effect waves-light btn-outline-dark text-success", "fa fa-dagger",
+      {"Attack", "btn btn-icon waves-effect waves-light btn-outline-dark text-success", "ui-icon ui-dagger",
        hero.atk + hero.item_atk},
-      {"Power", "btn btn-icon waves-effect waves-light btn-outline-dark text-pink", "fa fa-galaxy",
+      {"Power", "btn btn-icon waves-effect waves-light btn-outline-dark text-pink", "ui-icon ui-vortex",
        hero.power + hero.item_power},
-      {"Armor", "btn btn-icon waves-effect waves-light btn-outline-dark text-warning", "fa fa-shield-halved",
+      {"Armor", "btn btn-icon waves-effect waves-light btn-outline-dark text-warning", "ui-icon ui-shield",
        hero.armor + hero.item_armor}
     ]
 
     if show_speed do
       stats ++
         [
-          {"Speed", "btn btn-icon waves-effect waves-light btn-outline-dark text-orange", "fa fa-running",
+          {"Speed", "btn btn-icon waves-effect waves-light btn-outline-dark text-orange", "ui-icon ui-runner",
            hero.speed + hero.item_speed}
         ]
     else
@@ -123,26 +123,26 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
   end
 
   defp damage_type_html("normal"),
-    do: "<span class='badge badge-light-success'><i class='fa fa-bahai mr-1'></i>Normal Damage</span>"
+    do: "<span class='badge badge-light-success'><i class='ui-icon ui-burst mr-1'></i>Normal Damage</span>"
 
   defp damage_type_html("pure"),
-    do: "<span class='badge badge-light-danger'><i class='fa fa-bahai mr-1'></i>Pure Damage</span>"
+    do: "<span class='badge badge-light-danger'><i class='ui-icon ui-burst mr-1'></i>Pure Damage</span>"
 
   defp damage_type_html("magic"),
-    do: "<span class='badge badge-light-purple'><i class='fa fa-bahai mr-1'></i>Magic Damage</span>"
+    do: "<span class='badge badge-light-purple'><i class='ui-icon ui-burst mr-1'></i>Magic Damage</span>"
 
   defp damage_type_html(_), do: nil
 
   defp mp_cost_badge(nil), do: ""
-  defp mp_cost_badge(cost), do: "<span class='badge badge-light-primary'><i class='fa fa-bolt mr-1'></i>#{cost}</span>"
+  defp mp_cost_badge(cost), do: "<span class='badge badge-light-primary'><i class='ui-icon ui-bolt mr-1'></i>#{cost}</span>"
 
   defp cooldown_badge(nil), do: ""
 
   defp cooldown_badge(cooldown),
-    do: "<span class='badge badge-light-warning'><i class='fa fa-clock mr-1'></i>#{cooldown}</span>"
+    do: "<span class='badge badge-light-warning'><i class='ui-icon ui-clock mr-1'></i>#{cooldown}</span>"
 
   defp passive_badge(true),
-    do: "<span class='badge badge-light-dark'><i class='fa fa-dot-circle mr-1'></i>Passive</span>"
+    do: "<span class='badge badge-light-dark'><i class='ui-icon ui-circle-dot mr-1'></i>Passive</span>"
 
   defp passive_badge(false), do: ""
 
@@ -154,22 +154,22 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
   end
 
   defp stat_badge_html(:hp, value),
-    do: "<span class='badge badge-light-danger'><i class='fa fa-heart mr-1'></i> +#{value} Health</span>"
+    do: "<span class='badge badge-light-danger'><i class='ui-icon ui-heart mr-1'></i> +#{value} Health</span>"
 
   defp stat_badge_html(:mp, value),
-    do: "<span class='badge badge-light-info'><i class='fa fa-bolt mr-1'></i> +#{value} Energy</span>"
+    do: "<span class='badge badge-light-info'><i class='ui-icon ui-bolt mr-1'></i> +#{value} Energy</span>"
 
   defp stat_badge_html(:atk, value),
-    do: "<span class='badge badge-light-success'><i class='fa fa-dagger mr-1'></i> +#{value} Attack</span>"
+    do: "<span class='badge badge-light-success'><i class='ui-icon ui-dagger mr-1'></i> +#{value} Attack</span>"
 
   defp stat_badge_html(:power, value),
-    do: "<span class='badge badge-light-pink'><i class='fa fa-galaxy mr-1'></i> +#{value} Power</span>"
+    do: "<span class='badge badge-light-pink'><i class='ui-icon ui-vortex mr-1'></i> +#{value} Power</span>"
 
   defp stat_badge_html(:armor, value),
-    do: "<span class='badge badge-light-warning'><i class='fa fa-shield-halved mr-1'></i> +#{value} Armor</span>"
+    do: "<span class='badge badge-light-warning'><i class='ui-icon ui-shield mr-1'></i> +#{value} Armor</span>"
 
   defp stat_badge_html(:speed, value),
-    do: "<span class='badge badge-light-purple'><i class='fa fa-running mr-1'></i> +#{value} Speed</span>"
+    do: "<span class='badge badge-light-purple'><i class='ui-icon ui-runner mr-1'></i> +#{value} Speed</span>"
 
   defp formatted_effect_html(effect) when is_binary(effect) do
     effect

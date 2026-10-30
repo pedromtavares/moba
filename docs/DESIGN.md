@@ -37,7 +37,7 @@ Pair color with words, icons, numbers, or state markers. Live availability and b
 
 ## 4. Make the typography readable
 
-Use Nunito for readable headings, controls, names, and numbers. Reserve the decorative `landing-rpg` face for short ceremonial labels or calls to action. Long instructions, small labels, and dense game data need the clearer face.
+Use the locally bundled Nunito faces for readable headings, controls, names, and numbers. Reserve the decorative `landing-rpg` face for short ceremonial labels or calls to action. Long instructions, small labels, and dense game data need the clearer face. Keep font licensing notices with the files and avoid hosted font kits.
 
 Build hierarchy with size, weight, spacing, and alignment. Keep explanatory copy short. Do not repeat the same status in a title, subtitle, and progress row.
 
@@ -106,5 +106,7 @@ Respect reduced-motion preferences. Decorative effects must not intercept clicks
 ## Maintaining the design
 
 Use the existing shared components and page styles before adding another visual pattern. Keep illustration assets local and reusable, and preserve their provenance where supplied. Match the product's names and mechanics to [PRODUCT.md](PRODUCT.md).
+
+Interface symbols use local generated raster pictograms from `assets/static/images/ui`, with PNG alpha masks that inherit the surrounding text color. Preserve familiar silhouettes, semantic stat colors, and loading states. Use the existing `ui-icon` classes or the shared game icon component; do not add hosted icon kits or icon fonts. Sidebar emblems remain the separate full-color raster set in `images/navigation`.
 
 Review a change in the browser at desktop and narrow widths. Verify the action it introduces, its keyboard behavior, and its effect on panel height and scrolling. Keep tests focused on meaningful interaction outcomes.

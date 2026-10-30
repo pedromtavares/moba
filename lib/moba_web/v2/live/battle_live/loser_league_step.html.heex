@@ -6,10 +6,10 @@
     >
       <span class="number">
         <%= if @hero.previous_league_step == @step do %>
-          <i class="fa fa-times"></i>
+          <i class="ui-icon ui-close"></i>
         <% else %>
           <%= if @hero.previous_league_step > @step do %>
-            <i class="fa fa-check"></i>
+            <i class="ui-icon ui-check"></i>
           <% else %>
             {@step}
           <% end %>

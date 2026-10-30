@@ -389,7 +389,7 @@
   }
   .duel-victory-seal { position: relative; display: grid; place-items: center; width: 96px; height: 96px; border: 1px solid #ebc981aa; border-radius: 50%; background: radial-gradient(circle, #dfb64f30, #0a1622c9 75%); color: #f3d28d; box-shadow: 0 0 32px #dfb64f26, inset 0 0 22px #e8bf6926; animation: duel-victory-reveal .65s ease-out both; }
   .duel-victory-seal::before { content: ''; position: absolute; inset: -7px; border: 1px solid #ebc98138; border-radius: inherit; }
-  .duel-victory-seal .fa { font-size: 40px; filter: drop-shadow(0 0 10px #eac57566); }
+  .duel-victory-seal .ui-icon { font-size: 40px; filter: drop-shadow(0 0 10px #eac57566); }
 }
 @media (max-width: 1100px) {
   .game-page #battle-page .battle-competitive-result.is-duel-result {
@@ -397,7 +397,7 @@
     .battle-competitive-actions { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; justify-content: space-between; align-items: center; }
     &.is-duel-finale[data-result=victory] { grid-template-columns: 72px minmax(0, 1fr); }
     .duel-victory-seal { width: 72px; height: 72px; }
-    .duel-victory-seal .fa { font-size: 32px; }
+    .duel-victory-seal .ui-icon { font-size: 32px; }
   }
 }
 @media (max-width: 600px) {
@@ -416,7 +416,7 @@
     &.is-duel-finale { min-height: 0; }
     &.is-duel-finale[data-result=victory] { grid-template-columns: 52px minmax(0, 1fr); min-height: 0; gap: 16px; h3 { font-size: 34px; } }
     .duel-victory-seal { width: 52px; height: 52px; }
-    .duel-victory-seal .fa { font-size: 25px; }
+    .duel-victory-seal .ui-icon { font-size: 25px; }
   }
 }
 @keyframes duel-victory-reveal {

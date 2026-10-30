@@ -22,7 +22,7 @@
       <div class="row mt-2">
         <div class="col">
           <div class="card dark-bg mb-3 text-center p-2">
-            <h1 class="text-warning f-rpg"><i class="fab fa-ethereum mr-2"></i>{@current_player.user.shard_count}</h1>
+            <h1 class="text-warning f-rpg"><i class="ui-icon ui-shard mr-2"></i>{@current_player.user.shard_count}</h1>
             <p class="text-muted">
               Unlock new avatars, skills and skins to play with by using your Shards. You can acquire Shards by ranking up in Training or by playing daily matches in the Arena.
             </p>
@@ -45,7 +45,7 @@
               aria-selected={to_string(@active_tab == "avatars")}
             >
               <span class="loading-text">
-                <i class="fa fa-users fa-2x text-success" aria-hidden="true"></i> <br :if={!@preview} />Avatars
+                <i class="ui-icon ui-users ui-2x text-success" aria-hidden="true"></i> <br :if={!@preview} />Avatars
               </span>
             </a>
           </li>
@@ -61,7 +61,7 @@
               aria-selected={to_string(@active_tab == "skills")}
             >
               <span class="loading-text">
-                <i class="fa fa-magic fa-2x text-primary" aria-hidden="true"></i> <br :if={!@preview} />Skills
+                <i class="ui-icon ui-wand ui-2x text-primary" aria-hidden="true"></i> <br :if={!@preview} />Skills
               </span>
             </a>
           </li>
@@ -77,7 +77,7 @@
               aria-selected={to_string(@active_tab == "skins")}
             >
               <span class="loading-text">
-                <i class="fa fa-palette fa-2x text-pink" aria-hidden="true"></i> <br :if={!@preview} />Skins
+                <i class="ui-icon ui-palette ui-2x text-pink" aria-hidden="true"></i> <br :if={!@preview} />Skins
               </span>
             </a>
           </li>
@@ -131,7 +131,7 @@
                   <div class="col-3">
                     <%= if @current_index > 0 do %>
                       <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="previous-skin">
-                        <i class="fa fa-chevron-left mr-1"></i> Prev
+                        <i class="ui-icon ui-chevron-left mr-1"></i> Prev
                       </a>
                     <% end %>
                   </div>
@@ -143,7 +143,7 @@
                         data-toggle="tooltip"
                         title="You already own this Skin and can select it when joining the Arena with this hero."
                       >
-                        <i class="fa fa-unlock mr-1"></i>Unlocked
+                        <i class="ui-icon ui-unlock mr-1"></i>Unlocked
                       </a>
                     <% else %>
                       <.tavern_unlock_actions
@@ -158,14 +158,14 @@
                         href="javascript:;"
                         class="btn btn-secondary no-action"
                       >
-                        <i class="fa fa-lock mr-1"></i>{unlock_error_message(@current_skin, @current_player)}
+                        <i class="ui-icon ui-lock mr-1"></i>{unlock_error_message(@current_skin, @current_player)}
                       </a>
                     <% end %>
                   </div>
                   <div class="col-3">
                     <%= if length(@current_skins) > @current_index + 1 do %>
                       <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="next-skin">
-                        Next<i class="fa fa-chevron-right ml-1"></i>
+                        Next<i class="ui-icon ui-chevron-right ml-1"></i>
                       </a>
                     <% end %>
                   </div>

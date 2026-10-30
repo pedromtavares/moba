@@ -68,7 +68,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
           </a>
         <% end %>
         <a class="btn btn-outline-dark text-white m-1" phx-click="randomize" id="randomize-button">
-          <i class="fa fa-dice mr-2" style="font-size: 1.3rem"></i>Randomize
+          <i class="ui-icon ui-dice mr-2" style="font-size: 1.3rem"></i>Randomize
         </a>
       </div>
     </div>
@@ -142,9 +142,9 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     ~H"""
     <div class="row text-center mb-3">
       <div class="col">
-        <h2><i class="fa fa-cogs mr-1"></i>Custom Build: Choose 3 Skills</h2>
+        <h2><i class="ui-icon ui-gears mr-1"></i>Custom Build: Choose 3 Skills</h2>
         <a class="btn btn-outline-dark text-white" phx-click="toggle-custom" id="back-to-builds-button">
-          <i class="fa fa-arrow-left"></i> Back to Builds
+          <i class="ui-icon ui-arrow-left"></i> Back to Builds
         </a>
       </div>
     </div>
@@ -172,11 +172,11 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 <h5 class="mt-0 mb-0">{skill.name}</h5>
                 <%= if skill.mp_cost && skill.mp_cost > 0 do %>
                   <span class="badge badge-light-primary" data-toggle="tooltip" title="Energy Cost">
-                    <i class="fa fa-bolt mr-1"></i>{skill.mp_cost}
+                    <i class="ui-icon ui-bolt mr-1"></i>{skill.mp_cost}
                   </span>
                 <% end %>
                 <%= if skill.passive do %>
-                  <span class="badge badge-light-dark"><i class="fa fa-dot-circle mr-1"></i>Passive</span>
+                  <span class="badge badge-light-dark"><i class="ui-icon ui-circle-dot mr-1"></i>Passive</span>
                 <% end %>
                 <p class="d-block d-md-none text-dark"><em>{skill.description}</em></p>
               </div>
@@ -277,7 +277,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 <%= if @custom && skill.mp_cost && skill.mp_cost > 0 do %>
                   <div>
                     <span class="badge badge-light-primary" data-toggle="tooltip" title="Energy Cost">
-                      <i class="fa fa-bolt mr-1"></i>{skill.mp_cost}
+                      <i class="ui-icon ui-bolt mr-1"></i>{skill.mp_cost}
                     </span>
                   </div>
                 <% end %>
@@ -302,7 +302,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
               <%= if @custom && !@selected_avatar.ultimate.passive do %>
                 <div>
                   <span class="badge badge-light-primary" data-toggle="tooltip" title="Energy Cost">
-                    <i class="fa fa-bolt mr-1"></i>{@selected_avatar.ultimate.mp_cost}
+                    <i class="ui-icon ui-bolt mr-1"></i>{@selected_avatar.ultimate.mp_cost}
                   </span>
                 </div>
               <% end %>
@@ -397,7 +397,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     <div class={"col-xl-#{if @selected, do: 3, else: 4} col-lg-6 col-sm-12 mb-4"} id={"avatar-#{@avatar.id}"}>
       <%= if @selected do %>
         <a class="btn btn-outline-dark text-white btn-block mb-2 btn-lg" phx-click="repick-avatar" id="repick-button">
-          <i class="fa fa-refresh mr-2"></i>Repick Avatar
+          <i class="ui-icon ui-refresh mr-2"></i>Repick Avatar
         </a>
       <% end %>
       <div class="hero-card card hero-card-avatar">
@@ -419,19 +419,19 @@ defmodule MobaWeb.V2.Components.CreateComponents do
           <%= if @selected do %>
             <div class="btn-group avatar-attributes mt-2">
               <span class="avatar-attribute btn btn-outline-dark text-danger">
-                <i class="fa fa-heart mr-1"></i>Health <br />
+                <i class="ui-icon ui-heart mr-1"></i>Health <br />
                 <strong>{@avatar.total_hp}</strong>
                 <br />
                 <small class="font-italic">{@avatar.hp_per_level} per level</small>
               </span>
               <span class="avatar-attribute btn btn-outline-dark text-info">
-                <i class="fa fa-bolt mr-1"></i>Energy <br />
+                <i class="ui-icon ui-bolt mr-1"></i>Energy <br />
                 <strong>{@avatar.total_mp}</strong>
                 <br />
                 <small class="font-italic">{@avatar.mp_per_level} per level</small>
               </span>
               <span class="avatar-attribute btn btn-outline-dark text-success">
-                <i class="fa fa-dagger mr-1"></i>Attack <br />
+                <i class="ui-icon ui-dagger mr-1"></i>Attack <br />
                 <strong>{@avatar.atk}</strong>
                 <br />
                 <small class="font-italic">{@avatar.atk_per_level} per level</small>
@@ -439,15 +439,15 @@ defmodule MobaWeb.V2.Components.CreateComponents do
             </div>
             <div class="btn-group avatar-attributes mt-1">
               <span class="avatar-attribute btn btn-outline-dark text-warning">
-                <i class="fa fa-shield-halved mr-1"></i>Armor <br />
+                <i class="ui-icon ui-shield mr-1"></i>Armor <br />
                 <strong>{@avatar.armor}</strong>
               </span>
               <span class="avatar-attribute btn btn-outline-dark text-pink">
-                <i class="fa fa-galaxy mr-1"></i>Power <br />
+                <i class="ui-icon ui-vortex mr-1"></i>Power <br />
                 <strong>{@avatar.power}</strong>
               </span>
               <span class="avatar-attribute btn btn-outline-dark text-orange">
-                <i class="fa fa-running mr-1"></i>Speed <br />
+                <i class="ui-icon ui-runner mr-1"></i>Speed <br />
                 <strong>{@avatar.speed}</strong>
               </span>
             </div>
@@ -498,7 +498,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     </div>
     <div class="row align-items-center">
       <div class="col-6 text-right border-bottom border-right text-danger font-weight-bold stat-col">
-        <i class="fa fa-dagger mr-1"></i>Offense
+        <i class="ui-icon ui-dagger mr-1"></i>Offense
       </div>
       <div class="col">
         <div class="progress progress-fixed">
@@ -510,7 +510,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     </div>
     <div class="row align-items-center">
       <div class="col-6 text-right border-bottom border-right text-warning font-weight-bold stat-col">
-        <i class="fa fa-shield-halved mr-1"></i>Defense
+        <i class="ui-icon ui-shield mr-1"></i>Defense
       </div>
       <div class="col">
         <div class="progress progress-fixed">
@@ -522,7 +522,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     </div>
     <div class="row align-items-center">
       <div class="col-6 text-right border-bottom border-right text-primary font-weight-bold stat-col">
-        <i class="fa fa-magic mr-1"></i>Magic
+        <i class="ui-icon ui-wand mr-1"></i>Magic
       </div>
       <div class="col">
         <div class="progress progress-fixed">
@@ -534,7 +534,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     </div>
     <div class="row align-items-center">
       <div class="col-6 text-right border-bottom border-right text-success font-weight-bold stat-col">
-        <i class="fa fa-running mr-1"></i>Speed
+        <i class="ui-icon ui-runner mr-1"></i>Speed
       </div>
       <div class="col">
         <div class="progress progress-fixed">

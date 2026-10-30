@@ -10,7 +10,7 @@
           title={power_description(@hero)}
           class="text-pink tooltip-mobile"
         >
-          <i class="fa fa-galaxy" aria-hidden="true"></i>{round(@hero.power)}
+          <i class="ui-icon ui-vortex" aria-hidden="true"></i>{round(@hero.power)}
         </span>
         <span
           :if={@hero.atk != @hero.base_atk}
@@ -18,7 +18,7 @@
           title={atk_description(@hero)}
           class="text-success tooltip-mobile"
         >
-          <i class="fa fa-dagger" aria-hidden="true"></i>{@hero.atk}
+          <i class="ui-icon ui-dagger" aria-hidden="true"></i>{@hero.atk}
         </span>
       <% else %>
         <span
@@ -27,7 +27,7 @@
           title={armor_description(@hero)}
           class="text-warning tooltip-mobile"
         >
-          <i class="fa fa-shield-halved" aria-hidden="true"></i>{@hero.armor}
+          <i class="ui-icon ui-shield" aria-hidden="true"></i>{@hero.armor}
         </span>
       <% end %>
     </div>

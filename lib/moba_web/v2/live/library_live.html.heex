@@ -16,7 +16,7 @@
         <a href="#manual-skills">Browse skills <span aria-hidden="true">↓</span></a>
       </nav>
     </div>
-    <a id="manual-discord" href="https://discord.gg/QNwEdPS" target="_blank" rel="noopener noreferrer" class="manual-discord"><i class="fab fa-discord" aria-hidden="true"></i><span>Join our Discord</span><span aria-hidden="true">↗</span></a>
+    <a id="manual-discord" href="https://discord.gg/QNwEdPS" target="_blank" rel="noopener noreferrer" class="manual-discord"><i class="ui-icon ui-chat-controller" aria-hidden="true"></i><span>Join our Discord</span><span aria-hidden="true">↗</span></a>
   </header>
   <div :if={!@preview} class="row mt-2">
     <div class="col">
@@ -25,7 +25,7 @@
         target="_blank"
         class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"
       >
-        <i class="fab fa-discord mr-1"></i>Join our Discord!
+        <i class="ui-icon ui-chat-controller mr-1"></i>Join our Discord!
       </a>
     </div>
   </div>
@@ -36,34 +36,22 @@
         <ul class="nav nav-pills navtab-bg manual-navigation" id="manual-navigation" aria-label="Manual sections">
           <li class="nav-item">
             <a href="#faq-tab" data-toggle="tab" class="nav-link px-3 py-2 active">
-              <span class="d-inline-block d-sm-none"><i class="fa fa-question-circle mr-1"></i>FAQ</span>
+              <span class="d-inline-block d-sm-none"><i class="ui-icon ui-question mr-1"></i>FAQ</span>
               <span class="d-none d-sm-inline-block">
-                <i class="fa fa-question-circle mr-1"></i>Frequently Asked Questions
+                <i class="ui-icon ui-question mr-1"></i>Frequently Asked Questions
               </span>
             </a>
           </li>
           <li class="nav-item">
             <a href="#training-tab" data-toggle="tab" class="nav-link px-3 py-2">
-              <span class="d-inline-block d-sm-none"><i class="fa fa-sword mr-1"></i>Training</span>
-              <span class="d-none d-sm-inline-block"><i class="fa fa-sword mr-1"></i>Training Guide</span>
+              <span class="d-inline-block d-sm-none"><i class="ui-icon ui-sword mr-1"></i>Training</span>
+              <span class="d-none d-sm-inline-block"><i class="ui-icon ui-sword mr-1"></i>Training Guide</span>
             </a>
           </li>
           <li class="nav-item">
             <a href="#arena-tab" data-toggle="tab" class="nav-link px-3 py-2">
-              <span class="d-inline-block d-sm-none"><i class="fa fa-swords mr-1"></i>Arena</span>
-              <span class="d-none d-sm-inline-block"><i class="fa fa-swords mr-1"></i>Arena Guide</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#about-tab" data-toggle="tab" class="nav-link px-3 py-2">
-              <span class="d-inline-block d-sm-none"><i class="fa fa-users mr-1"></i>About Us</span>
-              <span class="d-none d-sm-inline-block"><i class="fa fa-users mr-1"></i> About Us</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#support-tab" data-toggle="tab" class="nav-link px-3 py-2">
-              <span class="d-inline-block d-sm-none"><i class="fa fa-headset mr-1"></i>Contact</span>
-              <span class="d-none d-sm-inline-block"><i class="fa fa-headset mr-1"></i> Contact & Support</span>
+              <span class="d-inline-block d-sm-none"><i class="ui-icon ui-swords mr-1"></i>Arena</span>
+              <span class="d-none d-sm-inline-block"><i class="ui-icon ui-swords mr-1"></i>Arena Guide</span>
             </a>
           </li>
         </ul>
@@ -83,7 +71,7 @@
                   <div>
                     <div class="faq-question-q-box">Q.</div>
                     <h4 class="faq-question text-primary">
-                      What is the utility of Shards <i class="fab fa-ethereum"></i> ?
+                      What is the utility of Shards <i class="ui-icon ui-shard"></i> ?
                     </h4>
                     <p class="faq-answer mb-4">
                       Shards are the in-game currency that is used to unlock content like avatars, skills and skins in the Tavern. The best way to acquire Shards is to compete in the PvP Arena.
@@ -168,94 +156,6 @@
               </div>
             </div>
           </div>
-          <div class="tab-pane fade" id="about-tab">
-            <div class="row pt-2">
-              <div class="col-lg-6">
-                <div class="p-lg-2 text-white">
-                  <h5 class="text-danger my-2">Core</h5>
-                  <p class="mb-2">
-                    BrowserMOBA is a free-to-play community project that aims to bring part of the
-                    <a href="https://en.wikipedia.org/wiki/Multiplayer_online_battle_arena" target="blank">
-                      MOBA genre's strategic gameplay
-                    </a>
-                    to a more simplified and casual browser gaming experience. Without flashy effects or intense real-time gameplay common to MOBA games like Dota 2 or League of Legends, in BrowserMOBA you can take your time playing in short gaming sessions that you can pause whenever you like, perfect for playing while listening to a podcast or during work breaks.
-                  </p>
-                  <h5 class="text-danger my-2">Mission</h5>
-                  <p class="mb-2">
-                    Our mission is to create a community around a fun and competitive game that can be played in any device with a browser and an internet connection. We also have a commitment of keeping the game always free-to-play, with unlockable content being available by playing the game. Even though there is an in-game currency (Shards), you cannot and will not be able to purchase these with real money.
-                  </p>
-                  <h5 class="text-danger my-2">Team</h5>
-                  <p>
-                    The game is maintained by collaborators on their free time without any profit incentives, in fact, <a
-                      href="https://github.com/pedromtavares/moba"
-                      target="blank"
-                    >the project's code is open-source</a>, so anyone can create their own MOBA. If you know the beautiful programming language that is Elixir, we'd love to have you join our development effort, and if you don't, we have lots of other important things that need a hand.
-                  </p>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <div>
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How can I help the project?</h4>
-                    <p class="faq-answer mb-4">
-                      Making a game is really fun, but also really hard. We need all the help we can get, not just in programming but also in things like balancing, play testing, content development, design, marketing, community management, etc. If you've read this far and are interested in helping in any way, <a
-                        href="https://discord.gg/QNwEdPS"
-                        target="_blank"
-                      >feel free to reach us on Discord</a>, let's build this game together!
-                    </p>
-                  </div>
-
-                  <div>
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is the state of the game? Is it finished?</h4>
-                    <p class="faq-answer mb-4">
-                      The game has been under heavy development since the beginning of 2019 and is currently under Beta testing for a planned release by the middle of 2023, but development will continue well after that, we're all in this for the long haul!
-                    </p>
-                  </div>
-
-                  <div>
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">Do you own all of the content in the game?</h4>
-                    <p class="faq-answer mb-4">
-                      Definitely not. We take most of our inspiration from <a
-                        href="https://www.dota2.com/"
-                        target="_blank"
-                      >Dota 2</a>, a game we have played since its early Warcraft days in 2006. Dota was the root of all MOBAs and we love their hero and item concepts, so we've ported them to a turn-based model here. If Valve has any problems with their content being used in BrowserMOBA, please reach out to us.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="support-tab">
-            <div class="row pt-2">
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <div>
-                    <div class="faq-question-q-box"><i class="fab fa-discord"></i></div>
-                    <h4 class="faq-question text-primary">Discord</h4>
-                    <p class="faq-answer mb-4">
-                      The best way to get in touch with our team is by <a
-                        href="https://discord.gg/QNwEdPS"
-                        target="_blank"
-                      >visiting our Discord server</a>. That is where our community members hang out and can help you with any questions you may have.
-                    </p>
-                  </div>
-
-                  <div>
-                    <div class="faq-question-q-box"><i class="fa fa-envelope"></i></div>
-                    <h4 class="faq-question text-primary">E-mail</h4>
-                    <p class="faq-answer mb-4">
-                      If you prefer, you can also reach the creator of the game
-                      <a href="mailto:pedro.tavares@hey.com">by e-mail</a>
-                      as well, although he is frequently online on the Discord server above.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
           <div class="tab-pane fade" id="arena-tab">
             <div class="row pt-2">
               <div class="col-lg-6">
@@ -285,7 +185,7 @@
                     <h4 class="faq-question text-primary">What is the Season Ranking?</h4>
                     <p class="faq-answer mb-4">
                       On the Ranking section of the Profile page you can click on the
-                      <i class="fa fa-arrows-cross mr-1 text-primary"></i>
+                      <i class="ui-icon ui-shuffle mr-1 text-primary"></i>
                       icon to switch the Daily Ranking to the Season Ranking, which displays the best players of the Season, who are defined by the highest Season Score, which is calculated based on your Training Rank and Arena performance.
                       <br /><br />
                       In the Arena, when you become The Immortal your Immortal Streak increases by 1 and you must keep the title in order to further increase your Streak. Each streak will give you 100 Season Score and will likely define your spot in the Season Ranking.
@@ -333,7 +233,7 @@
   <div class="row">
     <div class="col">
       <h3 class="page-title mb-3 text-center" id="manual-avatars">
-        <i class="fa fa-users mr-2"></i>Avatars
+        <i class="ui-icon ui-users mr-2"></i>Avatars
       </h3>
     </div>
   </div>
@@ -353,35 +253,35 @@
           <div>
             <h4 class="mt-1">{avatar.name}</h4>
             <span class="game-stat btn btn-outline-dark btn-sm no-action">
-              <i class="fa fa-dice-d20 mr-1"></i>{GH.role_name(avatar.role)}
+              <i class="ui-icon ui-d20 mr-1"></i>{GH.role_name(avatar.role)}
             </span>
           </div>
           <div class="btn-group mb-1 mt-1 manual-stat-row">
             <span class="game-stat btn btn-icon waves-effect waves-light btn-outline-dark text-pink btn-sm">
               <small :if={@preview}>Power</small>
-              <i class="fa fa-galaxy mr-1"></i>{avatar.power}
+              <i class="ui-icon ui-vortex mr-1"></i>{avatar.power}
             </span>
             <span class="game-stat btn btn-icon waves-effect waves-light btn-outline-dark text-warning btn-sm">
               <small :if={@preview}>Armor</small>
-              <i class="fa fa-shield-halved mr-1"></i>{avatar.armor}
+              <i class="ui-icon ui-shield mr-1"></i>{avatar.armor}
             </span>
             <span class="game-stat btn btn-icon waves-effect waves-light btn-outline-dark text-orange btn-sm">
               <small :if={@preview}>Speed</small>
-              <i class="fa fa-running mr-1"></i>{avatar.speed}
+              <i class="ui-icon ui-runner mr-1"></i>{avatar.speed}
             </span>
           </div>
           <div class="btn-group manual-stat-row">
             <span class="game-stat btn btn-icon waves-effect btn-outline-dark text-danger btn-sm">
               <small :if={@preview}>Health / level</small>
-              <i class="fa fa-heart mr-1"></i>{avatar.total_hp} ({avatar.hp_per_level})
+              <i class="ui-icon ui-heart mr-1"></i>{avatar.total_hp} ({avatar.hp_per_level})
             </span>
             <span class="game-stat btn btn-icon waves-effect waves-light btn-outline-dark text-info btn-sm">
               <small :if={@preview}>Energy / level</small>
-              <i class="fa fa-bolt mr-1"></i>{avatar.total_mp} ({avatar.mp_per_level})
+              <i class="ui-icon ui-bolt mr-1"></i>{avatar.total_mp} ({avatar.mp_per_level})
             </span>
             <span class="game-stat btn btn-icon waves-effect waves-light btn-outline-dark text-success btn-sm">
               <small :if={@preview}>Attack / level</small>
-              <i class="fa fa-dagger mr-1"></i>{avatar.atk} ({avatar.atk_per_level})
+              <i class="ui-icon ui-dagger mr-1"></i>{avatar.atk} ({avatar.atk_per_level})
             </span>
           </div>
           <div class="row mt-1">
@@ -399,7 +299,7 @@
   <div class="row">
     <div class="col">
       <h3 class="page-title mb-3 text-center" id="manual-skills">
-        <i class="fa fa-magic mr-2"></i>Skills
+        <i class="ui-icon ui-wand mr-2"></i>Skills
       </h3>
     </div>
   </div>

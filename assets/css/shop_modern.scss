@@ -60,10 +60,10 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
   #shop .transmute > div:first-child { flex: 0 0 100%; max-width: 100%; }
   #shop .transmute > div:first-child > .row { align-items: center; flex-wrap: nowrap; justify-content: center; gap: 8px; margin: 0; }
   #shop .transmute > div:first-child > .row > div { display: flex !important; align-items: center; justify-content: center; flex: 0 0 60px; max-width: 60px; margin: 0 !important; padding: 0; }
-  #shop .transmute > div:first-child > .row > div:has(.fa-arrow-circle-right) { flex-basis: 24px; max-width: 24px; }
+  #shop .transmute > div:first-child > .row > div:has(.ui-circle-arrow-right) { flex-basis: 24px; max-width: 24px; }
   #shop .transmute > div:not(:first-child) { display: none !important; }
   #shop .transmute .item-img { width: 60px; height: 45px; }
-  #shop .transmute .fa-arrow-circle-right { color: #83bbdf; }
+  #shop .transmute .ui-circle-arrow-right { color: #83bbdf; }
 }
 
 @media (max-width: 767px) {
@@ -121,7 +121,7 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
     .game-page #shop .shop-categories .card-box > .row > .mb-2 { margin-bottom: 4px !important; }
     .game-page #shop .shop-categories .item-img { height: 26px; }
     .game-page #shop .btn, .game-page #shop .shop-item-actions .btn { min-height: 26px; padding: 4px 2px; font-size: 10px; }
-    .game-page #shop .shop-item-actions .fa-coins { display: none; }
+    .game-page #shop .shop-item-actions .ui-coins { display: none; }
     .game-page #shop .shop-item-actions { padding-top: 0; }
     .game-page #shop #inventory .inventory-item .item-img, .game-page #shop #inventory .empty-item { height: 24px; }
     .game-page #shop .transmute .item-img { height: 26px; }

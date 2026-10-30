@@ -33,8 +33,8 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
     {:ok, view, _} = live(conn, "/invoke")
     view |> element("#pick-avatar-#{avatar.id}") |> render_click()
     assert has_element?(view, "#invoke-builds")
-    assert has_element?(view, ".invoke-base-stats [data-stat=health] .fa-heart")
-    assert has_element?(view, ".invoke-attributes [data-stat=offense] .fa-fist-raised")
+    assert has_element?(view, ".invoke-base-stats [data-stat=health] .ui-heart")
+    assert has_element?(view, ".invoke-attributes [data-stat=offense] .ui-fist")
     assert has_element?(view, "#create-button[disabled]")
     assert has_element?(view, "#skill_#{avatar.ultimate.id}")
     view |> element("#pick-build-0") |> render_click()
@@ -67,18 +67,18 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
 
       assert has_element?(
                view,
-               "#pick-skill-#{skill.id} .invoke-energy[aria-label='Energy cost: #{skill.mp_cost || 0}'] .fa-bolt"
+               "#pick-skill-#{skill.id} .invoke-energy[aria-label='Energy cost: #{skill.mp_cost || 0}'] .ui-bolt"
              )
 
       assert has_element?(
                view,
-               ".invoke-loadout-slot:has(#skill_#{skill.id}) .invoke-energy[aria-label='Energy cost: #{skill.mp_cost || 0}'] .fa-bolt"
+               ".invoke-loadout-slot:has(#skill_#{skill.id}) .invoke-energy[aria-label='Energy cost: #{skill.mp_cost || 0}'] .ui-bolt"
              )
     end
 
     assert has_element?(
              view,
-             ".invoke-ultimate-slot .invoke-energy[aria-label='Energy cost: #{avatar.ultimate.mp_cost || 0}'] .fa-bolt"
+             ".invoke-ultimate-slot .invoke-energy[aria-label='Energy cost: #{avatar.ultimate.mp_cost || 0}'] .ui-bolt"
            )
 
     fourth = Enum.at(skills, 3)

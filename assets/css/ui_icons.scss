@@ -1,0 +1,113 @@
+// Original generated PNG alpha masks; no icon font or hosted kit.
+.ui-icon {
+  display: inline-block;
+  flex: none;
+  width: 1em;
+  height: 1em;
+  font-style: normal;
+  line-height: 1;
+  vertical-align: -.125em;
+}
+.ui-icon::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  // Fill the PNG's safe padding while preserving existing layout and hit areas.
+  -webkit-mask: var(--ui-icon-image) center / 120% no-repeat;
+  mask: var(--ui-icon-image) center / 120% no-repeat;
+}
+.ui-2x { font-size: 2em; }
+.ui-3x { font-size: 3em; }
+.ui-spin::before { animation: ui-icon-spin 1s linear infinite; }
+@keyframes ui-icon-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .ui-spin::before { animation: none; } }
+
+.ui-heart { --ui-icon-image: url("/images/ui/heart.png"); }
+.ui-bolt { --ui-icon-image: url("/images/ui/bolt.png"); }
+.ui-dagger { --ui-icon-image: url("/images/ui/dagger.png"); }
+.ui-shield { --ui-icon-image: url("/images/ui/shield.png"); }
+.ui-vortex { --ui-icon-image: url("/images/ui/vortex.png"); }
+.ui-runner { --ui-icon-image: url("/images/ui/runner.png"); }
+.ui-fist { --ui-icon-image: url("/images/ui/fist.png"); }
+.ui-wand { --ui-icon-image: url("/images/ui/wand.png"); }
+.ui-list { --ui-icon-image: url("/images/ui/list.png"); }
+.ui-refresh { --ui-icon-image: url("/images/ui/refresh.png"); }
+.ui-arrow-left { --ui-icon-image: url("/images/ui/arrow-left.png"); }
+.ui-arrow-right { --ui-icon-image: url("/images/ui/arrow-right.png"); }
+.ui-arrow-up { --ui-icon-image: url("/images/ui/arrow-up.png"); }
+.ui-arrow-down { --ui-icon-image: url("/images/ui/arrow-down.png"); }
+.ui-clock { --ui-icon-image: url("/images/ui/clock.png"); }
+.ui-trophy { --ui-icon-image: url("/images/ui/trophy.png"); }
+.ui-id-card { --ui-icon-image: url("/images/ui/id-card.png"); }
+.ui-contrast { --ui-icon-image: url("/images/ui/contrast.png"); }
+.ui-chevrons-up { --ui-icon-image: url("/images/ui/chevrons-up.png"); }
+.ui-chevrons-down { --ui-icon-image: url("/images/ui/chevrons-down.png"); }
+.ui-chevron-up { --ui-icon-image: url("/images/ui/chevron-up.png"); }
+.ui-chevron-left { --ui-icon-image: url("/images/ui/chevron-left.png"); }
+.ui-chevron-right { --ui-icon-image: url("/images/ui/chevron-right.png"); }
+.ui-circle-arrow-down { --ui-icon-image: url("/images/ui/circle-arrow-down.png"); }
+.ui-circle-arrow-left { --ui-icon-image: url("/images/ui/circle-arrow-left.png"); }
+.ui-circle-arrow-right { --ui-icon-image: url("/images/ui/circle-arrow-right.png"); }
+.ui-shuffle { --ui-icon-image: url("/images/ui/shuffle.png"); }
+.ui-focus { --ui-icon-image: url("/images/ui/focus.png"); }
+.ui-burst { --ui-icon-image: url("/images/ui/burst.png"); }
+.ui-grimoire { --ui-icon-image: url("/images/ui/grimoire.png"); }
+.ui-meditate { --ui-icon-image: url("/images/ui/meditate.png"); }
+.ui-target { --ui-icon-image: url("/images/ui/target.png"); }
+.ui-calendar { --ui-icon-image: url("/images/ui/calendar.png"); }
+.ui-check { --ui-icon-image: url("/images/ui/check.png"); }
+.ui-circle { --ui-icon-image: url("/images/ui/circle.png"); }
+.ui-sort { --ui-icon-image: url("/images/ui/sort.png"); }
+.ui-gears { --ui-icon-image: url("/images/ui/gears.png"); }
+.ui-coins { --ui-icon-image: url("/images/ui/coins.png"); }
+.ui-chat { --ui-icon-image: url("/images/ui/chat.png"); }
+.ui-crown { --ui-icon-image: url("/images/ui/crown.png"); }
+.ui-cube { --ui-icon-image: url("/images/ui/cube.png"); }
+.ui-gauge { --ui-icon-image: url("/images/ui/gauge.png"); }
+.ui-dice { --ui-icon-image: url("/images/ui/dice.png"); }
+.ui-d20 { --ui-icon-image: url("/images/ui/d20.png"); }
+.ui-chat-controller { --ui-icon-image: url("/images/ui/chat-controller.png"); }
+.ui-circle-dot { --ui-icon-image: url("/images/ui/circle-dot.png"); }
+.ui-edit { --ui-icon-image: url("/images/ui/edit.png"); }
+.ui-envelope { --ui-icon-image: url("/images/ui/envelope.png"); }
+.ui-eye { --ui-icon-image: url("/images/ui/eye.png"); }
+.ui-gamepad { --ui-icon-image: url("/images/ui/gamepad.png"); }
+.ui-gem { --ui-icon-image: url("/images/ui/gem.png"); }
+.ui-shard { --ui-icon-image: url("/images/ui/shard.png"); }
+.ui-globe { --ui-icon-image: url("/images/ui/globe.png"); }
+.ui-users { --ui-icon-image: url("/images/ui/users.png"); }
+.ui-hashtag { --ui-icon-image: url("/images/ui/hashtag.png"); }
+.ui-wizard-hat { --ui-icon-image: url("/images/ui/wizard-hat.png"); }
+.ui-headset { --ui-icon-image: url("/images/ui/headset.png"); }
+.ui-helmet { --ui-icon-image: url("/images/ui/helmet.png"); }
+.ui-home { --ui-icon-image: url("/images/ui/home.png"); }
+.ui-hourglass { --ui-icon-image: url("/images/ui/hourglass.png"); }
+.ui-lock { --ui-icon-image: url("/images/ui/lock.png"); }
+.ui-unlock { --ui-icon-image: url("/images/ui/unlock.png"); }
+.ui-minus { --ui-icon-image: url("/images/ui/minus.png"); }
+.ui-palette { --ui-icon-image: url("/images/ui/palette.png"); }
+.ui-phoenix { --ui-icon-image: url("/images/ui/phoenix.png"); }
+.ui-play { --ui-icon-image: url("/images/ui/play.png"); }
+.ui-plus { --ui-icon-image: url("/images/ui/plus.png"); }
+.ui-question { --ui-icon-image: url("/images/ui/question.png"); }
+.ui-recycle { --ui-icon-image: url("/images/ui/recycle.png"); }
+.ui-repeat { --ui-icon-image: url("/images/ui/repeat.png"); }
+.ui-broken-shield { --ui-icon-image: url("/images/ui/broken-shield.png"); }
+.ui-cart { --ui-icon-image: url("/images/ui/cart.png"); }
+.ui-sign-in { --ui-icon-image: url("/images/ui/sign-in.png"); }
+.ui-sign-out { --ui-icon-image: url("/images/ui/sign-out.png"); }
+.ui-skull { --ui-icon-image: url("/images/ui/skull.png"); }
+.ui-lotus { --ui-icon-image: url("/images/ui/lotus.png"); }
+.ui-spinner { --ui-icon-image: url("/images/ui/spinner.png"); }
+.ui-star { --ui-icon-image: url("/images/ui/star.png"); }
+.ui-sword { --ui-icon-image: url("/images/ui/sword.png"); }
+.ui-swords { --ui-icon-image: url("/images/ui/swords.png"); }
+.ui-close { --ui-icon-image: url("/images/ui/close.png"); }
+.ui-trash { --ui-icon-image: url("/images/ui/trash.png"); }
+.ui-shirt { --ui-icon-image: url("/images/ui/shirt.png"); }
+.ui-user { --ui-icon-image: url("/images/ui/user.png"); }
+.ui-ninja { --ui-icon-image: url("/images/ui/ninja.png"); }
+.ui-user-plus { --ui-icon-image: url("/images/ui/user-plus.png"); }
+

@@ -120,7 +120,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
           id="buy-button"
           {target_attrs(@event_target)}
         >
-          <span class="loading-text">Buy for <i class="fa fa-coins"></i> {@price}</span>
+          <span class="loading-text">Buy for <i class="ui-icon ui-coins"></i> {@price}</span>
         </button>
         <%= unless @selected_shop.rarity == "normal" do %>
           <button
@@ -129,7 +129,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
             phx-target="#shop"
             disabled={!@transmute_enabled}
           >
-            <i class="fa fa-refresh"></i> Transmute
+            <i class="ui-icon ui-refresh"></i> Transmute
           </button>
         <% end %>
       </div>

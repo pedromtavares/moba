@@ -14,7 +14,7 @@
           data-toggle="tooltip"
           title={target_rewards_tooltip(@current_hero, @target.difficulty)}
         >
-          <i class={"fa fa-crown text-#{ difficulty_color(@target.difficulty)}"}></i>
+          <i class={"ui-icon ui-crown text-#{ difficulty_color(@target.difficulty)}"}></i>
         </span>
       </h4>
     </div>
@@ -29,7 +29,7 @@
             phx-hook="Loading"
             loading="Preparing..."
           >
-            <span class="loading-text"><i class="fa-regular fa-sword mr-1"></i>Battle</span>
+            <span class="loading-text"><i class="ui-icon ui-sword mr-1"></i>Battle</span>
           </button>
         <% else %>
           <button
@@ -37,7 +37,7 @@
             data-toggle="tooltip"
             title="You do not have available turns"
           >
-            <i class="fa-regular fa-sword mr-1"></i>Battle
+            <i class="ui-icon ui-sword mr-1"></i>Battle
           </button>
         <% end %>
       </div>
@@ -51,7 +51,7 @@
         <div class="col pl-0">
           <div class="row align-items-center">
             <div class="col-6 text-right text-pink font-weight-bold no-wrap">
-              <i class="fa fa-hand-fist mr-1"></i>Offense
+              <i class="ui-icon ui-fist mr-1"></i>Offense
             </div>
             <div class="col">
               <div class="progress progress-fixed">
@@ -65,7 +65,7 @@
         <div class="col pl-0">
           <div class="row align-items-center">
             <div class="col-6 text-right text-warning font-weight-bold no-wrap">
-              <i class="fa fa-shield-halved mr-1"></i>Defense
+              <i class="ui-icon ui-shield mr-1"></i>Defense
             </div>
             <div class="col">
               <div class="progress progress-fixed">

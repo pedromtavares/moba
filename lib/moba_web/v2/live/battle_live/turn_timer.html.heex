@@ -5,7 +5,7 @@
     data-toggle="tooltip"
     title="Seconds left to act"
   >
-    <i class="fa fa-hourglass mr-1"></i><span
+    <i class="ui-icon ui-hourglass mr-1"></i><span
       phx-hook="TurnTimer"
       data-timer={if @preview, do: max(@turn_timer, 0), else: @turn_timer}
       data-hero={@hero.id}

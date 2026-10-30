@@ -48,7 +48,7 @@
   .ascent-tool { display: inline-flex; align-items: center; gap: 7px; padding: 6px 0; background: none; border: 0; color: #c1b394; font-size: 13px; cursor: pointer; transition: color .15s; }
   .ascent-tool:hover { color: #fff0cd; }
   .ascent-tool small { border: 1px solid #5b5140; border-radius: 4px; padding: 0 5px; color: #dec58d; }
-  .ascent-tool .fa, .ascent-time .fa, .ascent-challenge .fa { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
+  .ascent-tool .ui-icon, .ascent-time .ui-icon, .ascent-challenge .ui-icon { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
   .ascent-switch { margin-left: auto; color: #9ba8b5; font-size: 12px; }
   .ascent-switch > div { margin: 0 !important; }
   .ascent-switch label { display: flex; align-items: center; gap: 7px; margin: 0; cursor: pointer; }
@@ -136,7 +136,7 @@
   .ascent-rules { margin-top: 6px; font-size: 17px; }
   .ascent-challenge { min-width: 300px; padding: 18px 32px; font-size: 24px; box-shadow: 0 0 32px #b7d3e329, 0 8px 24px #0006; }
   .ascent-challenge .loading-text { justify-content: center; gap: 14px; }
-  .ascent-challenge .fa { width: 24px; height: 24px; }
+  .ascent-challenge .ui-icon { width: 24px; height: 24px; }
   .ascent-utilities { grid-row: 4; min-height: 58px; }
 }
 @media (max-width: 1000px) {

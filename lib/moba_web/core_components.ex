@@ -248,6 +248,16 @@ defmodule MobaWeb.CoreComponents do
     """
   end
 
+  attr :conn, :any, default: nil
+
+  def analytics(assigns) do
+    assigns = assign(assigns, :measurement_id, MobaWeb.Analytics.measurement_id(assigns.conn))
+
+    ~H"""
+    <meta :if={@measurement_id} name="google-analytics-id" content={@measurement_id} />
+    """
+  end
+
   attr :name, :string, required: true
   attr :class, :string, default: "size-4"
 
@@ -267,26 +277,26 @@ defmodule MobaWeb.CoreComponents do
 
   def icon(%{name: "game-" <> stat} = assigns) do
     classes = %{
-      "health" => "fa-heart",
-      "energy" => "fa-bolt",
-      "attack" => "fa-dagger",
-      "armor" => "fa-shield-halved",
-      "power" => "fa-galaxy",
-      "speed" => "fa-running",
-      "offense" => "fa-fist-raised",
-      "defense" => "fa-shield-halved",
-      "magic" => "fa-magic",
-      "battle-log" => "fa-list-ul",
-      "refresh" => "fa-refresh",
-      "back" => "fa-arrow-left",
-      "clock" => "fa-clock",
-      "trophy" => "fa-trophy"
+      "health" => "ui-heart",
+      "energy" => "ui-bolt",
+      "attack" => "ui-dagger",
+      "armor" => "ui-shield",
+      "power" => "ui-vortex",
+      "speed" => "ui-runner",
+      "offense" => "ui-fist",
+      "defense" => "ui-shield",
+      "magic" => "ui-wand",
+      "battle-log" => "ui-list",
+      "refresh" => "ui-refresh",
+      "back" => "ui-arrow-left",
+      "clock" => "ui-clock",
+      "trophy" => "ui-trophy"
     }
 
     assigns = assign(assigns, :icon_class, Map.fetch!(classes, stat))
 
     ~H"""
-    <i class={["fa", @icon_class, @class]} aria-hidden="true"></i>
+    <i class={["ui-icon", @icon_class, @class]} aria-hidden="true"></i>
     """
   end
 

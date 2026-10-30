@@ -45,21 +45,21 @@
             data-toggle="tooltip"
             title={"ATK: #{@turn_hero.atk}"}
           >
-            <i class="fa fa-dagger"></i> {@turn_hero.atk}
+            <i class="ui-icon ui-dagger"></i> {@turn_hero.atk}
           </button>
           <button
             class="btn btn-icon waves-effect waves-light btn-outline-dark text-warning"
             data-toggle="tooltip"
             title={"Armor: #{@turn_hero.armor}"}
           >
-            <i class="fa fa-shield-halved"></i> {if @turn_hero.armor < 0, do: 0, else: @turn_hero.armor}
+            <i class="ui-icon ui-shield"></i> {if @turn_hero.armor < 0, do: 0, else: @turn_hero.armor}
           </button>
           <button
             class="btn btn-icon waves-effect waves-light btn-outline-dark text-pink"
             data-toggle="tooltip"
             title={"Power: #{@turn_hero.power}"}
           >
-            <i class="fa fa-galaxy"></i> {@turn_hero.power}
+            <i class="ui-icon ui-vortex"></i> {@turn_hero.power}
           </button>
         </div>
       </div>

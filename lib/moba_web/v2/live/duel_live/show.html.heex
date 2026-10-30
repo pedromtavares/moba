@@ -40,10 +40,10 @@
                   <div>
                     <%= if @duel.winner_player do %>
                       <h1 class="text-center">
-                        <i class="fa fa-crown mr-1 text-warning"></i> Winner: {username(@duel.winner_player)}
+                        <i class="ui-icon ui-crown mr-1 text-warning"></i> Winner: {username(@duel.winner_player)}
                       </h1>
                     <% else %>
-                      <h1 class="text-center text-muted"><i class="fa fa-adjust mr-1"></i> Tie</h1>
+                      <h1 class="text-center text-muted"><i class="ui-icon ui-contrast mr-1"></i> Tie</h1>
                     <% end %>
                     <h3 :if={!casual?(@duel)} class="center">
                       <span
@@ -88,7 +88,7 @@
                 class="h3 mt-2 nav-link text-danger mb-0 text-center"
                 phx-click="rematch"
               >
-                <i class="fa fa-refresh fa-2x align-middle"></i>
+                <i class="ui-icon ui-refresh ui-2x align-middle"></i>
                 <br /> Rematch
               </a>
             </div>
@@ -115,7 +115,7 @@
                   phx-value-id={message.id}
                   class="text-left text-danger float-right small ml-3"
                 >
-                  <i class="fa fa-trash"></i>
+                  <i class="ui-icon ui-trash"></i>
                 </a>
               </div>
             </div>
@@ -174,7 +174,7 @@
                     navigate={preview_path(assigns, ~p"/battles/#{@first_battle}")}
                     class="btn btn-lg btn-block btn-warning mb-2"
                   >
-                    <i class="fa fa-eye"></i> View Battle
+                    <i class="ui-icon ui-eye"></i> View Battle
                   </.link>
                   <.turn_snapshot
                     hero={@first_battle.attacker}
@@ -199,7 +199,7 @@
                       id={"loading-battle-#{@first_battle.id}"}
                     >
                       <span class="loading-text">
-                        <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
+                        <i class="ui-icon ui-target ui-2x mr-1 mt-2"></i>
                         <strong class="font-20 d-block">Enter Battle</strong>
                       </span>
                     </.link>
@@ -219,7 +219,7 @@
                   phx-value-id={hero.id}
                   id={"pick-hero-#{hero.id}"}
                 >
-                  <span class="loading-text"><i class="fa fa-play mr-1"></i> Pick {hero.avatar.name}</span>
+                  <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Pick {hero.avatar.name}</span>
                 </button>
               </:actions>
             </.pvp_hero_card>
@@ -235,7 +235,7 @@
                   phx-value-id={hero.id}
                   id={"pick-hero-#{hero.id}"}
                 >
-                  <span class="loading-text"><i class="fa fa-play mr-1"></i> Pick {hero.avatar.name}</span>
+                  <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Pick {hero.avatar.name}</span>
                 </button>
               </:actions>
             </.pvp_hero_card>
@@ -273,7 +273,7 @@
                     navigate={preview_path(assigns, ~p"/battles/#{@last_battle}")}
                     class="btn btn-lg btn-block btn-warning mb-2"
                   >
-                    <i class="fa fa-eye"></i> View Battle
+                    <i class="ui-icon ui-eye"></i> View Battle
                   </.link>
                   <.turn_snapshot
                     hero={@last_battle.attacker}
@@ -298,7 +298,7 @@
                       id={"loading-battle-#{@last_battle.id}"}
                     >
                       <span class="loading-text">
-                        <i class="fa fa-bullseye fa-2x mr-1 mt-2"></i>
+                        <i class="ui-icon ui-target ui-2x mr-1 mt-2"></i>
                         <strong class="font-20 d-block">Enter Battle</strong>
                       </span>
                     </.link>
@@ -318,7 +318,7 @@
                   phx-value-id={hero.id}
                   id={"pick-hero-#{hero.id}"}
                 >
-                  <span class="loading-text"><i class="fa fa-play mr-1"></i> Pick {hero.avatar.name}</span>
+                  <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Pick {hero.avatar.name}</span>
                 </button>
               </:actions>
             </.pvp_hero_card>
@@ -334,7 +334,7 @@
                   phx-value-id={hero.id}
                   id={"pick-hero-#{hero.id}"}
                 >
-                  <span class="loading-text"><i class="fa fa-play mr-1"></i> Pick {hero.avatar.name}</span>
+                  <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Pick {hero.avatar.name}</span>
                 </button>
               </:actions>
             </.pvp_hero_card>

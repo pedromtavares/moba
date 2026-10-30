@@ -125,7 +125,7 @@
   .league-outcome-heading { display: contents; }
   .league-victory-seal { position: relative; display: grid; place-items: center; grid-column: 1; grid-row: 1 / 3; width: 92px; height: 92px; border: 1px solid #e1bd78aa; border-radius: 50%; background: radial-gradient(circle, #d6aa542b, #0c1624 75%); color: #f1d18e; box-shadow: inset 0 0 24px #d6b47c1a, 0 0 32px #deb56826; animation: completion-emblem .7s ease-out both; }
   .league-victory-seal::before { content: ''; position: absolute; inset: -7px; border: 1px solid #ddbd7a33; border-radius: inherit; }
-  .league-victory-seal .fa { font-size: 42px; filter: drop-shadow(0 0 12px #e1b66e66); }
+  .league-victory-seal .ui-icon { font-size: 42px; filter: drop-shadow(0 0 12px #e1b66e66); }
   .league-outcome-heading > div:not(.league-victory-seal) { grid-column: 2; grid-row: 1; }
   .league-outcome-eyebrow { margin-bottom: 5px; font-size: 10px; font-weight: 800; letter-spacing: .14em; }
   .league-outcome-heading h3 { margin: 0; color: #ffe9b9; font: 900 clamp(34px, 3.4vw, 52px)/1 'Nunito', sans-serif; letter-spacing: -.035em; text-transform: uppercase; text-shadow: 0 2px 22px #d4a04c33; }
@@ -145,7 +145,7 @@
     gap: 14px 16px;
     padding: 18px 16px;
     .league-victory-seal { grid-row: 1; width: 54px; height: 54px; }
-    .league-victory-seal .fa { font-size: 26px; }
+    .league-victory-seal .ui-icon { font-size: 26px; }
     .league-outcome-heading > div:not(.league-victory-seal) { min-width: 0; }
     .league-outcome-eyebrow { font-size: 9px; }
     .league-outcome-heading h3 { font-size: 34px; }
@@ -202,7 +202,7 @@
   .league-challenge-steps small { font-size: 10px; }
   .league-promotion-rewards { display: flex; align-items: center; gap: 28px; margin-top: 16px; padding-top: 12px; border-color: var(--promotion-glow); }
   .league-rewards-label { display: flex; align-items: center; gap: 8px; color: #b7b5ac; font-size: 12px; font-weight: 700; margin-right: auto; }
-  .league-rewards-label .fa { color: var(--promotion-color); }
+  .league-rewards-label .ui-icon { color: var(--promotion-color); }
   .league-gold-reward, .league-xp-reward { display: flex; align-items: baseline; gap: 7px; }
   .league-promotion-rewards strong { font: 900 30px/1.1 'Nunito', sans-serif; }
   .league-promotion-rewards span > span { font-size: 14px; }

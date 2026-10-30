@@ -12,7 +12,7 @@
       <h1>Community</h1>
       <p class="community-heading-description">Share your victories. Shape what comes next.</p>
     </div>
-    <a href="https://discord.gg/QNwEdPS" target="_blank" rel="noopener noreferrer" class="btn base-secondary community-discord"><i class="fab fa-discord" aria-hidden="true"></i>Join our Discord <span aria-hidden="true">↗</span></a>
+    <a href="https://discord.gg/QNwEdPS" target="_blank" rel="noopener noreferrer" class="btn base-secondary community-discord"><i class="ui-icon ui-chat-controller" aria-hidden="true"></i>Join our Discord <span aria-hidden="true">↗</span></a>
   </header>
   <div :if={!@preview} class="row mt-2">
     <div class="col">
@@ -21,7 +21,7 @@
         target="_blank"
         class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"
       >
-        <i class="fab fa-discord mr-1"></i>Join our Discord!
+        <i class="ui-icon ui-chat-controller mr-1"></i>Join our Discord!
       </a>
     </div>
   </div>
@@ -29,7 +29,7 @@
     <div class="col-lg-6">
       <div class="card mb-0 community-panel community-board" id="community-board">
         <h5 class="card-header font-17 text-white community-panel-heading">
-          <i class="fa fa-comments mr-1"></i>
+          <i class="ui-icon ui-chat mr-1"></i>
           <span class="community-panel-title">Message Board</span><span class="text-muted font-italic font-15 ml-2 community-panel-description">Bug reports or any feedback for the devs are deeply appreciated!</span>
         </h5>
         <div class="card-body">
@@ -96,7 +96,7 @@
     <div class="col-lg-6">
       <div class="card mb-0 community-panel community-announcements" id="community-announcements">
         <h5 class="card-header font-17 text-white community-panel-heading">
-          <i class="fa fa-globe mr-1"></i>
+          <i class="ui-icon ui-globe mr-1"></i>
           <span class="community-panel-title">Updates</span>
           <span class="text-muted font-italic font-15 ml-2 community-panel-description">
             Stay up to date with the latest development updates in BrowserMOBA
@@ -153,7 +153,7 @@
             aria-controls="community-online"
           >
             <span class="loading-text f-rpg">
-              <i class={"fa fa-users fa-2x text-#{if @active_tab == "online", do: "success", else: "white"}"}></i>
+              <i class={"ui-icon ui-users ui-2x text-#{if @active_tab == "online", do: "success", else: "white"}"}></i>
               <br :if={!@preview} />{if @preview, do: "Recent players", else: "RECENT PLAYERS"}
             </span>
           </a>
@@ -170,7 +170,7 @@
             aria-controls="community-pvp"
           >
             <span class="loading-text f-rpg">
-              <i class={"fa fa-trophy fa-2x text-#{if @active_tab == "pvp", do: "success", else: "white"}"}></i>
+              <i class={"ui-icon ui-trophy ui-2x text-#{if @active_tab == "pvp", do: "success", else: "white"}"}></i>
               <br :if={!@preview} />{if @preview, do: "Top players", else: "TOP PLAYERS"}
             </span>
           </a>
@@ -187,7 +187,7 @@
             aria-controls="community-pve"
           >
             <span class="loading-text f-rpg">
-              <i class={"fa fa-helmet-battle fa-2x text-#{if @active_tab == "pve", do: "success", else: "white"}"}></i>
+              <i class={"ui-icon ui-helmet ui-2x text-#{if @active_tab == "pve", do: "success", else: "white"}"}></i>
               <br :if={!@preview} />{if @preview, do: "Top heroes", else: "TOP HEROES"}
             </span>
           </a>

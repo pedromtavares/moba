@@ -238,12 +238,12 @@ defmodule MobaWeb.V2.TavernLive do
             id={"unlock-#{@resource.code}"}
           >
             <span class="loading-text">
-              <i class="fab fa-ethereum mr-1"></i>Unlock for {price_to_unlock(@resource)} Shards
+              <i class="ui-icon ui-shard mr-1"></i>Unlock for {price_to_unlock(@resource)} Shards
             </span>
           </a>
         <% else %>
           <a href="javascript:;" class="btn btn-secondary no-action">
-            <i class="fa fa-lock mr-1"></i>{unlock_error_message(@resource, @player)}
+            <i class="ui-icon ui-lock mr-1"></i>{unlock_error_message(@resource, @player)}
           </a>
         <% end %>
       </div>
@@ -267,7 +267,7 @@ defmodule MobaWeb.V2.TavernLive do
     <div class="tavern-attributes">
       <div class="row align-items-center tavern-attribute tavern-attribute-offense">
         <div class="col-6 text-right border-bottom border-right text-danger font-weight-bold stat-col">
-          <i class="fa fa-dagger mr-1"></i>Offense
+          <i class="ui-icon ui-dagger mr-1"></i>Offense
         </div>
         <div class="col">
           <div class="progress progress-fixed">
@@ -279,7 +279,7 @@ defmodule MobaWeb.V2.TavernLive do
       </div>
       <div class="row align-items-center tavern-attribute tavern-attribute-defense">
         <div class="col-6 text-right border-bottom border-right text-warning font-weight-bold stat-col">
-          <i class="fa fa-shield-halved mr-1"></i>Defense
+          <i class="ui-icon ui-shield mr-1"></i>Defense
         </div>
         <div class="col">
           <div class="progress progress-fixed">
@@ -291,7 +291,7 @@ defmodule MobaWeb.V2.TavernLive do
       </div>
       <div class="row align-items-center tavern-attribute tavern-attribute-magic">
         <div class="col-6 text-right border-bottom border-right text-primary font-weight-bold stat-col">
-          <i class="fa fa-magic mr-1"></i>Magic
+          <i class="ui-icon ui-wand mr-1"></i>Magic
         </div>
         <div class="col">
           <div class="progress progress-fixed">
@@ -303,7 +303,7 @@ defmodule MobaWeb.V2.TavernLive do
       </div>
       <div class="row align-items-center tavern-attribute tavern-attribute-speed">
         <div class="col-6 text-right border-bottom border-right text-success font-weight-bold stat-col">
-          <i class="fa fa-running mr-1"></i>Speed
+          <i class="ui-icon ui-runner mr-1"></i>Speed
         </div>
         <div class="col">
           <div class="progress progress-fixed">
@@ -354,14 +354,14 @@ defmodule MobaWeb.V2.TavernLive do
                 <%= if @featured do %>
                   <%= if assigns[:preview] do %>
                     <a id="tavern-discord-unlock" href="/auth?origin=tavern" class="tavern-discord-unlock">
-                      <i class="fab fa-discord" aria-hidden="true"></i>
+                      <i class="ui-icon ui-chat-controller" aria-hidden="true"></i>
                       <span>Unlock with Discord</span><span aria-hidden="true">↗</span>
                     </a>
                     <p class="tavern-discord-note">Free avatar · Connect your Discord account</p>
                   <% else %>
                     <div class="text-center my-2">
                       <a href="/auth?origin=tavern" class="btn btn-purple btn-lg btn-block">
-                        <i class="fab fa-discord"></i> Connect with Discord to Unlock
+                        <i class="ui-icon ui-chat-controller"></i> Connect with Discord to Unlock
                       </a>
                     </div>
                   <% end %>

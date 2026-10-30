@@ -29,7 +29,13 @@ module.exports = (env, options) => {
           test: /\.[s]?css$/,
           use: [
             MiniCssExtractPlugin.loader,
-            'css-loader',
+            {
+              loader: 'css-loader',
+              options: {
+                // CopyWebpackPlugin publishes these assets at their public URLs.
+                url: url => !url.startsWith('/images/ui/') && !url.startsWith('/fonts/nunito/')
+              }
+            },
             'sass-loader',
           ],
         },

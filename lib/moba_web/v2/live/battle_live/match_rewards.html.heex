@@ -8,7 +8,7 @@
         navigate={preview_path(assigns, ~p"/matches/#{@battle.match_id}")}
         class={if @preview, do: "btn battle-primary", else: "btn btn-outline-primary btn-lg btn-block text-white"}
         id="load-battles"
-        icon="fa fa-play"
+        icon="ui-icon ui-play"
         label="Back to Match"
       />
     </.battle_action_row>
@@ -18,7 +18,7 @@
         <.battle_guest_create_action
           preview={Map.get(assigns, :preview, false)}
           class="btn btn-danger btn-block btn-lg"
-          icon="fa fa-user-plus"
+          icon="ui-icon ui-user-plus"
           label="Create your Hero"
         />
       </div>

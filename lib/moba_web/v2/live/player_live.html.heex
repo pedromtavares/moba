@@ -48,13 +48,13 @@
           <%= if !@preview && @player.id == @current_player.id do %>
             <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">
               <.link navigate={preview_path(assigns, ~p"/users/settings")} class="text-white">
-                <i class="fa fa-edit mr-1"></i>Edit Profile
+                <i class="ui-icon ui-edit mr-1"></i>Edit Profile
               </.link>
               <.link href="/auth/discord" class="text-white">
-                <i class="fab fa-discord"></i> Connect Discord
+                <i class="ui-icon ui-chat-controller"></i> Connect Discord
               </.link>
               <.link href={preview_path(assigns, ~p"/users/log_out")} method="delete" class="text-white">
-                <i class="fa fa-sign-out-alt"></i>
+                <i class="ui-icon ui-sign-out"></i>
                 <span class="d-none d-md-inline">Log out</span>
               </.link>
             </h5>
@@ -95,7 +95,7 @@
             </div>
             <div class="col text-center">
               <strong title="Season Points" data-toggle="tooltip">
-                <i class="fa fa-arrows-to-dot text-white"></i> {@player.pvp_points} SP
+                <i class="ui-icon ui-focus text-white"></i> {@player.pvp_points} SP
               </strong>
               <span :if={@preview} class="profile-metric-label">Season points</span>
             </div>
@@ -104,7 +104,7 @@
                 title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
                 data-toggle="tooltip"
               >
-                <i class="fa fa-swords text-white"></i> {total_win_rate(@player)}
+                <i class="ui-icon ui-swords text-white"></i> {total_win_rate(@player)}
               </strong>
               <span :if={@preview} class="profile-metric-label">Win rate</span>
             </div>
@@ -113,13 +113,13 @@
                 title={"Current Immortal Streak: #{@player.current_immortal_streak}<br/>Best Immortal Streak: #{@player.best_immortal_streak}"}
                 data-toggle="tooltip"
               >
-                <i class="fa fa-trophy text-white"></i> {@player.best_immortal_streak}
+                <i class="ui-icon ui-trophy text-white"></i> {@player.best_immortal_streak}
               </strong>
               <span :if={@preview} class="profile-metric-label">Best streak</span>
             </div>
             <div class="col text-center">
               <strong title="Season Rank" data-toggle="tooltip">
-                <i class="fa-solid fa-hashtag text-white"></i> {@player.season_ranking}
+                <i class="ui-icon ui-hashtag text-white"></i> {@player.season_ranking}
               </strong>
               <span :if={@preview} class="profile-metric-label">Season rank</span>
             </div>
@@ -192,7 +192,7 @@
                             data-toggle="tooltip"
                             title={String.capitalize(match.type)}
                           >
-                            <i class="fa fa-eye"></i>
+                            <i class="ui-icon ui-eye"></i>
                           </.link>
                         </td>
                       </tr>
@@ -216,7 +216,7 @@
                     </h4>
                   </div>
                   <div class="col-1 d-flex align-items-center justify-content-center">
-                    <i class="fa fa-times"></i>
+                    <i class="ui-icon ui-close"></i>
                   </div>
                   <div class="col">
                     <h4 class="text-left">
@@ -253,7 +253,7 @@
 
                     <td>
                       <.link navigate={preview_path(assigns, ~p"/arena/#{duel}")} class="btn btn-light btn-sm game-review" aria-label={"Review duel #{duel.id}"}>
-                        <i class="fa fa-eye"></i>
+                        <i class="ui-icon ui-eye"></i>
                       </.link>
                     </td>
                   </tr>
@@ -265,13 +265,13 @@
           <div :if={!@preview || @player.id == @current_player.id} class="card-footer p-1">
             <nav :if={@preview && @player.id == @current_player.id} id="profile-actions" class="profile-actions" aria-label="Account actions">
               <.link navigate={preview_path(assigns, ~p"/users/settings")}>
-                <i class="fa fa-edit mr-1"></i>Edit Profile
+                <i class="ui-icon ui-edit mr-1"></i>Edit Profile
               </.link>
               <.link href="/auth/discord" class="profile-action-discord">
-                <i class="fab fa-discord"></i> Connect Discord
+                <i class="ui-icon ui-chat-controller"></i> Connect Discord
               </.link>
               <.link href={preview_path(assigns, ~p"/users/log_out")} method="delete" class="profile-action-logout">
-                <i class="fa fa-sign-out-alt mr-1"></i>Log out
+                <i class="ui-icon ui-sign-out mr-1"></i>Log out
               </.link>
             </nav>
             <div :if={!@preview} class="row">
@@ -334,7 +334,7 @@
                       id="loading-ranking"
                     >
                       <span class="loading-text">
-                        <i class="fa fa-arrows-cross mr-1 text-primary"></i>
+                        <i class="ui-icon ui-shuffle mr-1 text-primary"></i>
                         {if @ranking_display == "daily", do: "Daily", else: "Season"} Rank
                       </span>
                     </a>
@@ -368,7 +368,7 @@
 
                           <%= if player.ranking in [6, 7, 8, 9] do %>
                             <i
-                              class="fa fa-chevrons-up text-success text-small h4"
+                              class="ui-icon ui-chevrons-up text-success text-small h4"
                               data-toggle="tooltip"
                               title={"#{username(player)} will rank up to Immortal"}
                             >
@@ -376,7 +376,7 @@
                           <% end %>
                           <%= if player.ranking in [26, 27, 28, 29, 30] do %>
                             <i
-                              class="fa fa-chevrons-up text-success text-small h4"
+                              class="ui-icon ui-chevrons-up text-success text-small h4"
                               data-toggle="tooltip"
                               title={"#{username(player)} will rank up to Shadow"}
                             >
@@ -384,7 +384,7 @@
                           <% end %>
                           <%= if player.ranking in [21, 22, 23, 24, 25] do %>
                             <i
-                              class="fa fa-chevrons-down text-danger text-small h4"
+                              class="ui-icon ui-chevrons-down text-danger text-small h4"
                               data-toggle="tooltip"
                               title={"#{username(player)} will rank down to Pleb"}
                             >
