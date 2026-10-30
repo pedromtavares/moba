@@ -7,6 +7,8 @@ defmodule MobaWeb.V2.Components.ShopComponents do
   attr :item, :map, required: true
   attr :target, :string, default: "#shop"
 
+  attr :selected, :boolean, default: false
+
   def shop_item(assigns) do
     ~H"""
     <div class="col-4 col-md-4 mb-2 d-flex justify-content-center">
@@ -14,7 +16,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
         src={GH.image_url(@item)}
         data-toggle="tooltip"
         title={TT.item_tooltip(@item)}
-        class={"item-img code-#{@item.code} tooltip-mobile #{if @item.active, do: "active"}"}
+        class={"item-img code-#{@item.code} tooltip-mobile #{if @item.active, do: "active"} #{if @selected, do: "shop-selected"}"}
         phx-click="select-shop"
         phx-value-code={@item.code}
         phx-target={@target}
@@ -50,13 +52,15 @@ defmodule MobaWeb.V2.Components.ShopComponents do
   attr :selectable, :boolean, default: false
   attr :target, :string, default: "#shop"
 
+  attr :selected, :boolean, default: false
+
   def inventory_item(assigns) do
     ~H"""
     <div class="col-4 col-md-2 inventory-item">
       <%= if @selectable do %>
         <.shop_item_image
           item={@item}
-          class={if @item.active, do: "item-img active", else: "item-img"}
+          class={"item-img #{if @item.active, do: "active"} #{if @selected, do: "shop-selected"}"}
           click="select-inventory"
           code={@item.code}
           target={@target}
@@ -87,6 +91,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
     <div class="row selected-shop">
       <div class="col center d-flex justify-content-center">
         <.shop_item_image item={@item} />
+        <strong class="shop-selected-name d-none">{@item.name}</strong>
       </div>
     </div>
     """
@@ -103,7 +108,7 @@ defmodule MobaWeb.V2.Components.ShopComponents do
     <hr class="img-border-xs" />
     <.selected_item item={@selected_shop} />
     <hr />
-    <div class="row">
+    <div class="row shop-item-actions">
       <div class="col center">
         <button
           class="btn btn-warning buy-button"

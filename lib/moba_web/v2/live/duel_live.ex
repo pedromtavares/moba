@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.DuelLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [input: 1]
+
   embed_templates "duel_live/*"
 
   def mount(%{"id" => duel_id}, _session, socket) do
@@ -182,6 +184,46 @@ defmodule MobaWeb.V2.DuelLive do
       |> Kernel.++([current_player.id])
 
     Enum.member?(online_ids, player_id) && Enum.member?(online_ids, opponent_id)
+  end
+
+  defp picking_player(%{phase: phase} = duel) do
+    cond do
+      phase in ["player_first_pick", "player_second_pick"] -> duel.player
+      phase in ["opponent_first_pick", "opponent_second_pick"] -> duel.opponent_player
+      true -> nil
+    end
+  end
+
+  defp your_pick?(duel, player) do
+    picker = picking_player(duel)
+    picker && picker.id == player.id
+  end
+
+  defp duel_steps(duel) do
+    [
+      {"player_first_pick", username(duel.player), "First pick"},
+      {"opponent_first_pick", username(duel.opponent_player), "First pick"},
+      {"player_battle", "Battle 1", "Fight"},
+      {"opponent_second_pick", username(duel.opponent_player), "Final pick"},
+      {"player_second_pick", username(duel.player), "Final pick"},
+      {"opponent_battle", "Battle 2", "Fight"}
+    ]
+  end
+
+  defp phase_number(duel) do
+    Enum.find_index(duel_steps(duel), fn {phase, _, _} -> phase == duel.phase end) || 6
+  end
+
+  defp duel_score(battles, player_id) do
+    Enum.count(battles, &(&1 && &1.finished && &1.winner_player_id == player_id))
+  end
+
+  defp round_winner(battle, duel) do
+    cond do
+      battle.winner_player_id == duel.player_id -> username(duel.player)
+      battle.winner_player_id == duel.opponent_player_id -> username(duel.opponent_player)
+      true -> nil
+    end
   end
 
   defp parse_int(value) when is_integer(value), do: value

@@ -1,0 +1,71 @@
+.game-page #pve-progression.base-ascent {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: 22px;
+  padding: 24px 32px;
+  border: 1px solid #c7b17b44;
+  border-radius: 14px;
+  background: linear-gradient(90deg, #09121de8, #101b28a6, #09121de8), var(--base-ascent-scene) center 44% / cover !important;
+  box-shadow: inset 0 1px #f4dbab18, 0 12px 40px #0003;
+
+  .base-ascent-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .base-ascent-eyebrow { margin: 0 0 4px; color: #cbb483; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .18em; }
+  h2 { margin: 0; color: #f0e8d7; font: 900 clamp(30px, 2.8vw, 42px)/1.15 'Nunito', sans-serif; letter-spacing: -.025em; }
+  h2 > span { color: #edce8d; }
+  .base-ascent-prize { display: flex; align-items: center; gap: 9px; color: #e5c783; }
+  .base-ascent-prize > span:first-child { font-size: 25px; text-shadow: 0 0 20px #e6bf6466; }
+  .base-ascent-prize strong { font-size: 32px; font-weight: 900; }
+  .base-ascent-prize > span:last-child { color: #d9c9a5; font-size: 13px; line-height: 1.35; }
+  .base-ascent-prize small { color: #9fa9b5; font-size: 11px; }
+  .base-ascent-track { display: flex; list-style: none; margin: 20px 0 24px; padding: 0; }
+  .base-ascent-rank { position: relative; flex: 1; min-width: 0; text-align: center; }
+  .base-ascent-rank::before { content: ''; position: absolute; top: 50px; left: -50%; width: 100%; height: 2px; background: #94a4b133; z-index: -1; }
+  .base-ascent-rank:first-child::before { display: none; }
+  .base-ascent-rank.is-complete::before, .base-ascent-rank.is-current::before { background: linear-gradient(90deg, #786849, #cbb17b); }
+  .base-ascent-emblem { display: grid; place-items: center; height: 100px; }
+  .base-ascent-emblem img { width: auto; max-width: 100%; height: 48px; object-fit: contain; opacity: .4; filter: saturate(.5); transition: filter .2s, opacity .2s; }
+  .is-complete .base-ascent-emblem img { opacity: .8; filter: none; }
+  .is-current .base-ascent-emblem img { height: 78px; opacity: 1; filter: drop-shadow(0 0 16px #ecc57833); }
+  .is-next .base-ascent-emblem img { height: 96px; opacity: 1; filter: drop-shadow(0 0 22px #bdcddf55); }
+  .base-ascent-rank > strong { display: block; margin-top: 8px; color: #95a1ae; font-size: 13px; font-weight: 800; }
+  .is-current > strong { color: #efdcaf; }
+  .is-next > strong { color: #f3eee1; }
+  .base-ascent-rank > small { display: block; margin-top: 4px; color: #b4a789; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; }
+  .base-ascent-objective { display: flex; align-items: flex-end; gap: 28px; padding-top: 18px; border-top: 1px solid #cbb17b33; }
+  .base-ascent-progress { flex: 1; min-width: 0; }
+  #base-quest-description { margin: 0 0 10px; color: #d6dce2; font-size: 16px; font-weight: 650; line-height: 1.5; }
+  .base-ascent-progress-bar { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 34px; border: 1px solid #cbb17b44; border-radius: 5px; background: #050b13b3; }
+  .base-ascent-progress-fill { position: absolute; inset: 0 auto 0 0; z-index: -1; max-width: 100%; background: linear-gradient(90deg, #725a34, #b99a5a); border-right: 1px solid #f2cf86; box-shadow: 0 0 18px #e4bc5540; transition: width .5s ease; }
+  .base-ascent-progress-bar > strong { color: #f4ead3; font-size: 14px; text-shadow: 0 1px 4px #000; }
+  #base-rewards-btn { display: flex; align-items: center; justify-content: center; gap: 18px; flex-shrink: 0; min-height: 42px; padding: 10px 18px; border: 1px solid #d9bc7d88; border-radius: 6px; background: #cbb17b1a; color: #ebd2a2; font: 800 15px/1.3 'Nunito', sans-serif; letter-spacing: 0; }
+  #base-rewards-btn:hover { color: #fff0cf; background: #cbb17b33; border-color: #edce8d; }
+  #base-ascent-complete { margin: 0; padding-top: 16px; border-top: 1px solid #cbb17b33; color: #e4cea3; text-align: center; font-size: 18px; }
+}
+@media (max-width: 767px) {
+  .game-page #pve-progression.base-ascent {
+    padding: 20px 14px 16px;
+    .base-ascent-prize { gap: 5px; }
+    .base-ascent-prize strong { font-size: 24px; }
+    .base-ascent-prize > span:first-child { font-size: 18px; }
+    .base-ascent-prize > span:last-child { font-size: 11px; }
+    .base-ascent-prize small { font-size: 9px; }
+    h2 { font-size: 28px; }
+    .base-ascent-heading { gap: 12px; flex-wrap: wrap; }
+    .base-ascent-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 0; margin: 20px 0; }
+    .base-ascent-rank:nth-child(5)::before { display: none; }
+    .base-ascent-rank::before { top: 34px; }
+    .base-ascent-emblem { height: 68px; }
+    .base-ascent-emblem img { height: 36px; }
+    .is-current .base-ascent-emblem img { height: 52px; }
+    .is-next .base-ascent-emblem img { height: 64px; }
+    .base-ascent-rank > strong { font-size: 11px; margin-top: 4px; }
+    .base-ascent-rank > small { font-size: 8px; letter-spacing: 0; }
+    .base-ascent-objective { align-items: stretch; flex-direction: column; gap: 14px; padding-top: 14px; }
+    #base-quest-description { font-size: 14px; }
+    #base-rewards-btn { font-size: 14px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-page #pve-progression .base-ascent-progress-fill { transition: none; }
+}

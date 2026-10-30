@@ -5,6 +5,8 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   Replaces v1's SidebarLive with a function component using the same markup.
   """
   use Phoenix.Component
+  import MobaWeb.CoreComponents, only: [icon: 1]
+  import MobaWeb.Preview, only: [preview_path: 2]
 
   alias Moba.Admin
 
@@ -18,104 +20,130 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   # -------------------------------------------------------------------
 
   @doc """
-  Renders the navigation sidebar — exact mirror of v1's sidebar.html.heex.
+  Renders the navigation sidebar with BrowserMOBA's custom emblems.
   """
   attr :current_player, :map, required: true
   attr :sidebar_code, :string, default: nil
+  attr :preview, :boolean, default: false
 
   def sidebar(assigns) do
     ~H"""
     <div class="sidebar-nav-container">
-      <div class="sidebar-nav d-none d-md-flex">
+      <div
+        class="sidebar-nav d-none d-md-flex"
+        id={@preview && "game-sidebar"}
+        role="navigation"
+        aria-label="Main navigation"
+      >
         <.link
-          navigate={~p"/base"}
-          data-toggle="tooltip"
+          navigate={preview_path(assigns, ~p"/base")}
+          aria-label="Base"
+          data-toggle={if !@preview, do: "tooltip"}
           data-tippy-placement="right"
           data-tippy-arrow={false}
-          title="<h3 class='ml-2 mr-2'>Training</h3>"
+          title={if !@preview, do: "<h3 class='ml-2 mr-2'>Training</h3>"}
           class={sidebar_class(["training", "base"], %{sidebar_code: @sidebar_code})}
         >
-          <i class="fa-duotone fa-sword"></i>
+          <.icon name="nav-base" class="" />
+          <span :if={@preview} class="sidebar-label">Base</span>
         </.link>
         <%= if @current_player.user_id do %>
           <.link
-            navigate={~p"/arena"}
-            data-toggle="tooltip"
+            navigate={preview_path(assigns, ~p"/arena")}
+            aria-label="Arena"
+            data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
-            title="<h3 class='ml-2 mr-2'>Arena</h3>"
+            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Arena</h3>"}
             class={sidebar_class("arena", %{sidebar_code: @sidebar_code})}
           >
-            <i class="fa-duotone fa-swords"></i>
+            <.icon name="nav-arena" class="" />
+            <span :if={@preview} class="sidebar-label">Arena</span>
           </.link>
         <% else %>
           <a
             href="javascript:;"
             class="no-action"
-            data-toggle="tooltip"
+            data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
-            title="<h3 class='ml-2 mr-2'>Arena (locked)<br/><em class='font-15'>you must create an account</em></h3>"
+            title={
+              if !@preview,
+                do: "<h3 class='ml-2 mr-2'>Arena (locked)<br/><em class='font-15'>you must create an account</em></h3>"
+            }
+            aria-label="Arena locked: create an account to play"
           >
-            <i class="fa-duotone fa-swords"></i>
+            <.icon name="nav-arena" class="" />
+            <span :if={@preview} class="sidebar-label">Arena · Locked</span>
           </a>
         <% end %>
         <%= if guest?(@current_player) do %>
           <.link
-            navigate={~p"/users/register"}
-            data-toggle="tooltip"
+            navigate={preview_path(assigns, ~p"/users/register")}
+            aria-label="Create an account"
+            data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
-            title="<h3 class='ml-2 mr-2'>Create an Account</h3>"
+            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Create an Account</h3>"}
             id="create-account-link"
           >
-            <i class="fa fa-user-plus"></i>
+            <.icon name="nav-join" class="" />
+            <span :if={@preview} class="sidebar-label">Join</span>
           </.link>
         <% else %>
           <.link
-            navigate={~p"/player/#{@current_player.id}"}
-            data-toggle="tooltip"
+            navigate={preview_path(assigns, ~p"/player/#{@current_player.id}")}
+            aria-label="Profile"
+            data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
-            title="<h3 class='ml-2 mr-2'>Profile</h3>"
+            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Profile</h3>"}
             class={sidebar_class("user", %{sidebar_code: @sidebar_code})}
           >
-            <i class="fa-duotone fa-helmet-battle"></i>
+            <.icon name="nav-profile" class="" />
+            <span :if={@preview} class="sidebar-label">Profile</span>
           </.link>
           <.link
-            navigate={~p"/tavern"}
-            data-toggle="tooltip"
+            navigate={preview_path(assigns, ~p"/tavern")}
+            aria-label="Tavern"
+            data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
-            title="<h3 class='ml-2 mr-2'>Tavern</h3>"
+            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Tavern</h3>"}
             class={sidebar_class("tavern", %{sidebar_code: @sidebar_code})}
           >
-            <i class="fa-duotone fa-dungeon"></i>
+            <.icon name="nav-tavern" class="" />
+            <span :if={@preview} class="sidebar-label">Tavern</span>
           </.link>
         <% end %>
         <.link
-          navigate={~p"/community"}
-          data-toggle="tooltip"
+          navigate={preview_path(assigns, ~p"/community")}
+          aria-label="Community"
+          data-toggle={if !@preview, do: "tooltip"}
           data-tippy-placement="right"
           data-tippy-arrow={false}
-          title="<h3 class='ml-2 mr-2'>Community</h3>"
+          title={if !@preview, do: "<h3 class='ml-2 mr-2'>Community</h3>"}
           class={sidebar_class("community", %{sidebar_code: @sidebar_code})}
         >
-          <i class="fa-duotone fa-globe"></i>
+          <.icon name="nav-community" class="" />
+          <span :if={@preview} class="sidebar-label">Community</span>
         </.link>
         <.link
-          navigate={~p"/library"}
-          data-toggle="tooltip"
+          navigate={preview_path(assigns, ~p"/library")}
+          aria-label="Game Manual"
+          data-toggle={if !@preview, do: "tooltip"}
           data-tippy-placement="right"
           data-tippy-arrow={false}
-          title="<h3 class='ml-2 mr-2'>Game Manual</h3>"
+          title={if !@preview, do: "<h3 class='ml-2 mr-2'>Game Manual</h3>"}
           class={sidebar_class("library", %{sidebar_code: @sidebar_code})}
           id="game-manual"
         >
-          <i class="fa-duotone fa-book-sparkles"></i>
+          <.icon name="nav-manual" class="" />
+          <span :if={@preview} class="sidebar-label">Game Manual</span>
         </.link>
         <%= if @current_player.user && @current_player.user.is_admin do %>
-          <a href="/admin">
-            <i class="fa-duotone fa-user-shield"></i>
+          <a href="/admin" class={@preview && "sidebar-utility"} aria-label="Admin">
+            <.icon name="nav-admin" class="" />
+            <span :if={@preview} class="sidebar-label">Admin</span>
           </a>
         <% end %>
       </div>
@@ -132,6 +160,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   """
   attr :current_player, :map, default: nil
   attr :current_hero, :map, default: nil
+  attr :preview, :boolean, default: false
 
   def mobile_navigation(assigns) do
     ~H"""
@@ -143,28 +172,32 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
               <div class="row text-center game-nav no-gutters">
                 <div class="col d-flex justify-content-center">
                   <%= if @current_hero && is_nil(@current_hero.finished_at) do %>
-                    <.link navigate={~p"/training"} class="nav-link">
-                      <i class="fa fa-sword"></i>
+                    <.link navigate={preview_path(assigns, ~p"/training")} class="nav-link" aria-label="Training">
+                      <.icon name="nav-training" class="" />
                     </.link>
                   <% end %>
-                  <.link navigate={~p"/base"} class="nav-link">
-                    <i class="fa fa-home"></i>
+                  <.link navigate={preview_path(assigns, ~p"/base")} class="nav-link" aria-label="Base">
+                    <.icon name="nav-base" class="" />
                   </.link>
                   <%= if @current_player do %>
                     <%= if length(@current_player.hero_collection) > 0 do %>
-                      <.link navigate={~p"/arena"} class="nav-link">
-                        <i class="fa fa-swords"></i>
+                      <.link navigate={preview_path(assigns, ~p"/arena")} class="nav-link" aria-label="Arena">
+                        <.icon name="nav-arena" class="" />
                       </.link>
                     <% end %>
                     <%= if @current_player.user_id do %>
-                      <.link navigate={~p"/player/#{@current_player.id}"} class="nav-link">
-                        <i class="fa fa-helmet-battle"></i>
+                      <.link
+                        navigate={preview_path(assigns, ~p"/player/#{@current_player.id}")}
+                        class="nav-link"
+                        aria-label="Profile"
+                      >
+                        <.icon name="nav-profile" class="" />
                       </.link>
-                      <.link navigate={~p"/community"} class="nav-link">
-                        <i class="fa fa-globe"></i>
+                      <.link navigate={preview_path(assigns, ~p"/community")} class="nav-link" aria-label="Community">
+                        <.icon name="nav-community" class="" />
                       </.link>
-                      <.link navigate={~p"/tavern"} class="nav-link">
-                        <i class="fa fa-dungeon"></i>
+                      <.link navigate={preview_path(assigns, ~p"/tavern")} class="nav-link" aria-label="Tavern">
+                        <.icon name="nav-tavern" class="" />
                       </.link>
                     <% end %>
                   <% end %>

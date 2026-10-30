@@ -3,6 +3,7 @@ defmodule MobaWeb.V2.TrainingLive do
 
   import MobaWeb.V2.Components.HeroBarComponents
 
+  alias MobaWeb.V2.Components.TrainingComponents
   alias MobaWeb.V2.TutorialComponent
 
   embed_templates "training_live/*"
@@ -27,7 +28,7 @@ defmodule MobaWeb.V2.TrainingLive do
   def handle_event("battle", %{"id" => id}, socket) do
     with socket = TutorialComponent.next_step(socket, 2),
          battle = Game.get_target!(id) |> Game.start_pve_battle!() do
-      {:noreply, push_navigate(socket, to: ~p"/battles/#{battle.id}")}
+      {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/battles/#{battle.id}"))}
     end
   end
 
@@ -41,7 +42,7 @@ defmodule MobaWeb.V2.TrainingLive do
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
     with socket = TutorialComponent.next_step(socket, 10),
          battle = Game.start_league_battle!(hero) do
-      {:noreply, socket |> push_navigate(to: ~p"/battles/#{battle.id}")}
+      {:noreply, socket |> push_navigate(to: preview_path(socket, ~p"/battles/#{battle.id}"))}
     end
   end
 
@@ -64,7 +65,7 @@ defmodule MobaWeb.V2.TrainingLive do
          skills = Enum.map(hero.skills, &Game.get_skill_by_code!(&1.code, true, 1)) do
       Game.create_current_pve_hero!(%{name: hero.name}, player, hero.avatar, skills)
 
-      {:noreply, socket |> redirect(to: "/training")}
+      {:noreply, socket |> redirect(to: preview_path(socket, "/training"))}
     end
   end
 
@@ -122,6 +123,10 @@ defmodule MobaWeb.V2.TrainingLive do
 
   def handle_event("start-edit", _, socket) do
     {:noreply, assign(socket, editing: true)}
+  end
+
+  def handle_event("cancel-edit", _, socket) do
+    {:noreply, assign(socket, editing: false)}
   end
 
   def handle_event("finalize-edit", params, %{assigns: %{current_hero: current}} = socket) do
@@ -245,13 +250,21 @@ defmodule MobaWeb.V2.TrainingLive do
     if length(targets) > 0, do: targets, else: Game.generate_targets!(hero) |> Game.list_targets()
   end
 
+  defp display_targets(targets, true) do
+    if Enum.all?(targets, &(&1.difficulty == "strong")),
+      do: Enum.sort_by(targets, & &1.defender.level),
+      else: targets
+  end
+
+  defp display_targets(targets, _preview), do: targets
+
   defp maybe_redirect(%{assigns: %{current_hero: %{finished_at: finished_at} = hero}} = socket)
        when not is_nil(finished_at) do
-    redirect(socket, to: ~p"/hero/#{hero.id}")
+    redirect(socket, to: preview_path(socket, ~p"/hero/#{hero.id}"))
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: current_hero}} = socket) when is_nil(current_hero) do
-    redirect(socket, to: "/base")
+    redirect(socket, to: preview_path(socket, "/base"))
   end
 
   defp maybe_redirect(socket), do: socket
@@ -269,7 +282,7 @@ defmodule MobaWeb.V2.TrainingLive do
     Cachex.del(:game_cache, hero.player_id)
 
     with current_time = Timex.now(),
-         farm_rewards = farm_rewards_for(hero, "meditating"),
+         farm_rewards = farm_rewards_for(hero, if(hero.pve_state == "mining", do: "mining", else: "meditating")),
          farm_tab = current_farm_tab(hero),
          pending_battle = Engine.pending_battle(hero.id),
          targets = list_targets(hero) do
@@ -322,6 +335,9 @@ defmodule MobaWeb.V2.TrainingLive do
     end
   end
 
+  defp display_farm_tabs?(%{tutorial_step: 1}), do: false
+  defp display_farm_tabs?(%{preview: true, current_hero: %{pve_current_turns: 0}}), do: false
+
   defp display_farm_tabs?(%{current_hero: %{league_tier: tier}, current_player: player}) do
     tier != Moba.master_league_tier() && player.preferences.show_farm_tabs
   end
@@ -349,13 +365,6 @@ defmodule MobaWeb.V2.TrainingLive do
       100
     end
   end
-
-  defp elapsed_time(%{inserted_at: inserted_at}) do
-    Timex.diff(Timex.now(), inserted_at, :minutes)
-  end
-
-  defp expert_hero?(%{pve_tier: tier}) when tier >= 4, do: true
-  defp expert_hero?(_), do: false
 
   defp farming_container_background(hero, assigns) do
     if farming_progression(hero, assigns) >= 100 do
@@ -390,16 +399,6 @@ defmodule MobaWeb.V2.TrainingLive do
     Timex.shift(started, seconds: turn_seconds) |> Timex.format("{relative}", :relative) |> elem(1)
   end
 
-  defp max_available_league(%{pve_tier: pve_tier, league_attempts: attempts} = hero) do
-    max = Moba.max_available_league(pve_tier)
-
-    if max != Moba.max_league_tier() || attempts == 0 || league_success_rate(hero) >= 100 do
-      max
-    else
-      max - 1
-    end
-  end
-
   defp next_league(%{league_tier: current_tier}) do
     cond do
       current_tier + 1 >= Moba.max_league_tier() -> nil
@@ -428,10 +427,6 @@ defmodule MobaWeb.V2.TrainingLive do
 
   defp show_league_challenge?(_), do: false
 
-  defp turn_percentage(%{pve_current_turns: turns}) do
-    (5 - turns) * 100 / 5
-  end
-
   defp with_display_stats(hero, heroes) do
     minimum = minimum_stats(heroes)
     units = Game.avatar_stat_units()
@@ -457,12 +452,6 @@ defmodule MobaWeb.V2.TrainingLive do
   defp total_atk(hero), do: hero.atk + hero.item_atk
   defp total_armor(hero), do: hero.armor + hero.item_armor
   defp total_power(hero), do: hero.power + hero.item_power
-
-  defp league_success_rate(%{league_attempts: attempts, league_successes: successes}) when attempts > 0 do
-    round(successes * 100 / attempts)
-  end
-
-  defp league_success_rate(_), do: 0
 
   defp params_to_order(nil), do: []
 

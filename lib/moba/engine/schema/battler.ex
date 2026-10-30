@@ -31,6 +31,8 @@ defmodule Moba.Engine.Schema.Battler do
     field :total_mp, :integer
     field :current_hp, :integer
     field :current_mp, :integer
+    field :starting_hp, :integer
+    field :starting_mp, :integer
 
     field :damage_type, :string
 

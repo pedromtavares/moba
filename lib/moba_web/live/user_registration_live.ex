@@ -39,7 +39,7 @@ defmodule MobaWeb.UserRegistrationLive do
                   phx-submit="save"
                   phx-change="validate"
                   phx-trigger-action={@trigger_submit}
-                  action={~p"/users/log_in?_action=registered"}
+                  action={preview_path(assigns, ~p"/users/log_in?_action=registered")}
                   method="post"
                 >
                   <%= if @check_errors do %>
@@ -83,7 +83,7 @@ defmodule MobaWeb.UserRegistrationLive do
                 <div class="col-12 text-center">
                   <p class="text-muted">
                     Already have account?
-                    <.link navigate={~p"/users/log_in"} class="text-muted font-weight-medium ml-1">Sign In</.link>
+                    <.link navigate={preview_path(assigns, ~p"/users/log_in")} class="text-muted font-weight-medium ml-1">Sign In</.link>
                   </p>
                 </div>
               </div>

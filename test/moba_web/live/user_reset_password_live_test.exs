@@ -21,16 +21,14 @@ defmodule MobaWeb.UserResetPasswordLiveTest do
     test "renders reset password with valid token", %{conn: conn, token: token} do
       {:ok, _lv, html} = live(conn, ~p"/users/reset_password/#{token}")
 
-      assert html =~ "Reset Password"
+      assert html =~ "Choose a new password"
     end
 
     test "does not render reset password with invalid token", %{conn: conn} do
-      {:error, {:redirect, to}} = live(conn, ~p"/users/reset_password/invalid")
-
-      assert to == %{
-               flash: %{"error" => "Reset password link is invalid or it has expired."},
-               to: ~p"/"
-             }
+      {:ok, lv, _} = live(conn, ~p"/users/reset_password/invalid")
+      assert has_element?(lv, "#account-reset-expired")
+      assert has_element?(lv, "#request-new-reset[href='/users/reset_password']")
+      refute has_element?(lv, "#reset_password_form")
     end
 
     test "renders errors for invalid data", %{conn: conn, token: token} do
@@ -96,8 +94,8 @@ defmodule MobaWeb.UserResetPasswordLiveTest do
         )
         |> render_submit()
 
-      assert result =~ "Reset Password"
-      assert result =~ "Oops, something went wrong! Please check the errors below."
+      assert result =~ "Choose a new password"
+      assert has_element?(lv, "#reset_password_form [role=alert]", "Check the highlighted fields below.")
       assert result =~ "should be at least 6 character(s)"
       assert result =~ "does not match password"
     end
@@ -116,19 +114,15 @@ defmodule MobaWeb.UserResetPasswordLiveTest do
       assert conn.resp_body =~ "Sign In"
     end
 
-    test "redirects to registration page when the Register button is clicked", %{
-      conn: conn,
-      token: token
-    } do
-      {:ok, lv, _html} = live(conn, ~p"/users/reset_password/#{token}")
-
+    test "expired link offers password recovery", %{conn: conn} do
+      {:ok, lv, _} = live(conn, ~p"/users/reset_password/invalid")
       {:ok, conn} =
         lv
-        |> element(~s|a[href="/users/register"]|)
+        |> element("#request-new-reset")
         |> render_click()
-        |> follow_redirect(conn, ~p"/users/register")
+        |> follow_redirect(conn, ~p"/users/reset_password")
 
-      assert conn.resp_body =~ "Create an account"
+      assert conn.resp_body =~ "Recover your account"
     end
   end
 end

@@ -1,8 +1,10 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
+  hide_sidebar={@preview && @hide_sidebar}
 >
   <.show {assigns} />
 </Layouts.app>

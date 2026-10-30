@@ -1,0 +1,17 @@
+<% player_hero = player_pick(@battle, @match)
+opponent_hero = opponent_pick(@battle, @match)
+player_turn = turn_hero_for(@battle, @match.player)
+opponent_turn = turn_hero_for(@battle, @match.opponent) %>
+<.link navigate={preview_path(assigns, ~p"/battles/#{@battle}")} id={"battle-summary-#{@battle.id}"} class="match-summary-row" aria-label={"Review battle #{@index}: #{player_hero.name} vs #{opponent_hero.name}"}>
+  <span class="match-summary-index" title={"Battle #{@index}"}>{@index}</span>
+  <div class="match-summary-pair">
+    <div :for={{hero, battler} <- [{player_hero, player_turn}, {opponent_hero, opponent_turn}]} class="match-summary-hero" data-winner={to_string(hero.id == @battle.winner_id)}>
+      <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} />
+      <div class="match-summary-resources">
+        <.resource_bar tone="health" current={battler.current_hp} total={battler.total_hp} label={"#{hero.name} health"} />
+        <.resource_bar tone="energy" current={battler.current_mp} total={battler.total_mp} label={"#{hero.name} energy"} />
+      </div>
+    </div>
+  </div>
+  <span class="match-summary-review" aria-hidden="true">↗</span>
+</.link>

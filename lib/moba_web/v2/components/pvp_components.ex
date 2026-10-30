@@ -27,23 +27,23 @@ defmodule MobaWeb.V2.Components.PvpComponents do
     >
       <div class="card-header pt-0 pb-1">
         <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-          <span class="font-italic font-20 f-rpg">
+          <span class="font-italic font-20 f-rpg hero-card-rank">
             <%= if @hero.pve_ranking do %>
               {"##{@hero.pve_ranking}"}
             <% end %>
           </span>
-          <div>
+          <div class="hero-card-name">
             <.league_badge tier={@hero.league_tier} variant="legacy" />
             {@hero.name}
           </div>
-          <span class="font-15 font-italic" title={hero_stats_title(@hero)}>
+          <span class="font-15 font-italic hero-card-meta" title={hero_stats_title(@hero)}>
             Level {@hero.level} {@hero.avatar.name}
           </span>
         </h4>
       </div>
       <div class="card-body text-center"></div>
       <div class="transparent card-footer p-0 text-center">
-        <div class="row my-1">
+        <div class="row my-1 hero-card-stats">
           <div class="col justify-content-center d-flex">
             <.hero_stat_group hero={@hero} />
           </div>
@@ -55,9 +55,68 @@ defmodule MobaWeb.V2.Components.PvpComponents do
           </div>
         </div>
       </div>
-      <div :if={@actions != []} class="d-flex justify-content-between" style="background: #323b44 !important">
+      <div :if={@actions != []} class="d-flex justify-content-between hero-card-actions" style="background: #323b44">
         {render_slot(@actions)}
       </div>
+    </div>
+    """
+  end
+
+  attr :hero, :map, required: true
+  attr :position, :integer, default: nil
+  attr :picked, :boolean, default: false
+  attr :defeated, :boolean, default: false
+  slot :actions
+
+  def roster_hero(assigns) do
+    ~H"""
+    <article
+      class={["roster-hero hero-card", @picked && "roster-picked"]}
+      data-defeated={to_string(@defeated)}
+    >
+      <div class="roster-identity">
+        <span :if={@position} class="roster-position" aria-label={"Lineup position #{@position}"}>{@position}</span>
+        <img src={GH.image_url(@hero.avatar)} alt={@hero.avatar.name} class="roster-portrait" />
+        <div class="roster-name">
+          <strong>{@hero.name}</strong>
+          <span>
+            {@hero.avatar.name}<span :if={@hero.pve_ranking} class="roster-rank"> · #{@hero.pve_ranking}</span><span
+              :if={@defeated}
+              class="roster-fallen"
+            >
+               · Fallen
+            </span>
+          </span>
+        </div>
+        <span class="roster-level">Lv <strong>{@hero.level}</strong></span>
+        <.league_badge tier={@hero.league_tier} variant="legacy" />
+      </div>
+      <.hero_stat_group hero={@hero} />
+      <div class="roster-loadout">
+        <.hero_skill_strip skills={@hero.skills} container_class="skills-container" />
+        <.hero_item_strip
+          items={sort_items(@hero.items)}
+          container_class="items-container"
+          item_container_class="item-container"
+        />
+      </div>
+      <div :if={@actions != []} class="roster-actions">{render_slot(@actions)}</div>
+    </article>
+    """
+  end
+
+  attr :heroes, :list, required: true
+
+  def lineup_preview(assigns) do
+    ~H"""
+    <div class="lineup-preview">
+      <%= for index <- 0..4 do %>
+        <%= if hero = Enum.at(@heroes, index) do %>
+          <img src={GH.image_url(hero.avatar)} alt={hero.name} title={"#{index + 1}. #{hero.name} · #{hero.avatar.name}"} />
+        <% else %>
+          <span aria-label={"Empty slot #{index + 1}"}>{index + 1}</span>
+        <% end %>
+      <% end %>
     </div>
     """
   end

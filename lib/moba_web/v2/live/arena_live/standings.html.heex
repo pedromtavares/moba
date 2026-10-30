@@ -1,0 +1,20 @@
+<section id="arena-standings" class="card ranking arena-standings" aria-labelledby="arena-standings-title">
+  <header class="arena-standings-heading">
+    <h2 id="arena-standings-title">Standings</h2>
+    <div id="arena-bracket-group" class="arena-bracket-group" role="group" aria-label="Arena bracket">
+      <button :for={{label, bracket} <- [{"Plebs", "plebs"}, {"Shadows", "shadows"}, {"Immortals", "immortals"}]} id={"arena-bracket-#{bracket}"} type="button" phx-click="tiered-ranking" phx-value-type={bracket} data-bracket={bracket} aria-pressed={to_string(@ranking_tab == bracket)}>
+        {label}
+      </button>
+    </div>
+  </header>
+  <ol id="arena-standings-list" class="arena-standings-list" aria-label={"#{String.capitalize(@ranking_tab)} daily standings"}>
+    <li :for={{player, index} <- Enum.with_index(@ranking, 1)} id={"standing-player-#{player.id}"} class={player.id == @current_player.id && "is-you"}>
+      <.standing_row player={player} index={index} current_player={@current_player} preview={@preview} />
+    </li>
+  </ol>
+  <p :if={@ranking == []} id="arena-standings-empty" class="arena-standings-empty">No ranked players in this bracket yet.</p>
+  <footer :if={!ranking_inclusion?(@ranking, @current_player)} id="arena-your-standing" class="arena-your-standing">
+    <p>Your standing <span>· {String.capitalize(ranking_tab_for(@current_player))}</span></p>
+    <.standing_row player={@current_player} index={nil} current_player={@current_player} preview={@preview} />
+  </footer>
+</section>

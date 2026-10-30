@@ -6,6 +6,8 @@ defmodule Moba.Engine.Core.Turns do
     last_turn = List.last(battle.turns)
 
     {attacker, defender} = prepare_battlers(battle, last_turn, orders)
+    attacker = %{attacker | starting_hp: round(attacker.current_hp), starting_mp: round(attacker.current_mp)}
+    defender = %{defender | starting_hp: round(defender.current_hp), starting_mp: round(defender.current_mp)}
 
     %Turn{
       number: ((last_turn && last_turn.number) || 0) + 1,

@@ -1,0 +1,53 @@
+<div class="history-board">
+  <%= for {kind, title, battles} <- [{"ganks", "Battles", @pve_battles}, {"league", "League Challenge", @league_battles}] do %>
+    <section class="history-section" aria-labelledby={"history-#{kind}-title"}>
+      <header class="history-section-heading">
+        <h2 id={"history-#{kind}-title"}>{title}</h2>
+        <dl class="history-summary">
+          <%= if kind == "ganks" do %>
+            <div>
+              <dt>Wins / Losses</dt>
+              <dd>
+                <span class="history-wins">{@current_hero.wins}</span><span class="history-ratio">/</span><span class="history-losses">{@current_hero.losses}</span>
+              </dd>
+            </div>
+            <div>
+              <dt>Win rate</dt>
+              <dd>{win_rate(@current_hero)}<small>%</small></dd>
+            </div>
+          <% else %>
+            <div>
+              <dt>Attempts</dt>
+              <dd>{@current_hero.league_attempts}</dd>
+            </div>
+            <div>
+              <dt>Success rate</dt>
+              <dd>{league_success_rate(@current_hero)}<small>%</small></dd>
+            </div>
+          <% end %>
+        </dl>
+      </header>
+      <table
+        class="table battle-history-table"
+        aria-label={if kind == "ganks", do: "Training battles", else: "League Challenge battles"}
+      >
+        <thead>
+          <tr>
+            <th scope="col">Opponent</th>
+            <th scope="col">Result</th>
+            <th scope="col">{if kind == "ganks", do: "Rewards", else: "Progress / rewards"}</th>
+            <th scope="col"><span class="sr-only">Replay</span></th>
+          </tr>
+        </thead>
+        <tbody id={"history-#{kind}"}>
+          <tr :if={battles == []} id={"history-#{kind}-empty"}>
+            <td colspan="4" class="history-empty">
+              {if kind == "ganks", do: "No battles yet", else: "No challenges yet"}
+            </td>
+          </tr>
+          <.battle_row :for={battle <- battles} preview={true} battle={battle} current_hero={@current_hero} />
+        </tbody>
+      </table>
+    </section>
+  <% end %>
+</div>

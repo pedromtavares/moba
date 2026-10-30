@@ -1,99 +1,40 @@
-## Behavioral guidelines
+This is a web application written using the Phoenix web framework.
 
-**Tradeoff:** These guidelines bias toward caution over speed. For trivial tasks, use judgment.
+<!-- Based on phoenixframework/phoenix main at 1e6183e9ebab9994cf6e43d3af445f32664cc10c (2026-09-04), with project-specific scope and workflow guidance. -->
 
-## 1. Think Before Coding
+## Project guidelines
 
-**Don't assume. Don't hide confusion. Surface tradeoffs.**
+- After implementation changes, run `mix precommit` once on the completed change. Fix failures caused by the change and report unrelated failures. Reuse successful checks unless subsequent changes invalidate them. For documentation-only changes, use focused document and diff checks; do not run the mutating alias for read-only reviews.
+- Use the included `Req` library for HTTP requests instead of `:httpoison`, `:tesla`, or `:httpc`.
 
-Before implementing:
-- State your assumptions explicitly. If uncertain, ask.
-- If multiple interpretations exist, present them - don't pick silently.
-- If a simpler approach exists, say so. Push back when warranted.
-- If something is unclear, stop. Name what's confusing. Ask.
+## Working guidelines
 
-## 2. Simplicity First
+- State material assumptions. Ask when missing information changes scope, correctness, authorization, or an irreversible outcome. Resolve routine implementation choices using the existing code and user instructions.
+- Continue independent authorized work while awaiting clarification. Complete the requested implementation, relevant verification, and fixes before handing it back; do not stop at a first draft unless the user requests review at that point.
+- For multi-step tasks, give a brief plan with observable completion criteria. Read only the files and documentation needed for the task.
+- Use the simplest implementation that meets the request. Avoid speculative features, abstractions, configurability, and unrelated refactors.
+- Match existing style. Change only what the request requires; remove imports, variables, and functions made unused by your changes, and report unrelated defects without repairing them.
+- Match verification to the change. Add regression coverage for behavior changes and bug fixes where it meaningfully verifies the outcome; reuse existing coverage where sufficient.
+- Existing authorization does not expand task scope or execution permissions. Prepare a concrete, reviewable result before any required approval for an external or protected action.
 
-**Minimum code that solves the problem. Nothing speculative.**
+## Phoenix component conventions
 
-- No features beyond what was asked.
-- No abstractions for single-use code.
-- No "flexibility" or "configurability" that wasn't requested.
-- No error handling for impossible scenarios.
-- If you write 200 lines and it could be 50, rewrite it.
-
-Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
-
-## 3. Surgical Changes
-
-**Touch only what you must. Clean up only your own mess.**
-
-When editing existing code:
-- Don't "improve" adjacent code, comments, or formatting.
-- Don't refactor things that aren't broken.
-- Match existing style, even if you'd do it differently.
-- If you notice unrelated dead code, mention it - don't delete it.
-
-When your changes create orphans:
-- Remove imports/variables/functions that YOUR changes made unused.
-- Don't remove pre-existing dead code unless asked.
-
-The test: Every changed line should trace directly to the user's request.
-
-## 4. Goal-Driven Execution
-
-**Define success criteria. Loop until verified.**
-
-Transform tasks into verifiable goals:
-- "Add validation" → "Write tests for invalid inputs, then make them pass"
-- "Fix the bug" → "Write a test that reproduces it, then make it pass"
-- "Refactor X" → "Ensure tests pass before and after"
-
-For multi-step tasks, state a brief plan:
-```
-1. [Step] → verify: [check]
-2. [Step] → verify: [check]
-3. [Step] → verify: [check]
-```
-
-Strong success criteria let you loop independently. Weak criteria ("make it work") require constant clarification.
-
----
-
-**These guidelines are working if:** fewer unnecessary changes in diffs, fewer rewrites due to overcomplication, and clarifying questions come before implementation rather than after mistakes.
-
-<!-- usage-rules-start -->
-
-### Phoenix v1.8 guidelines
-
-- **Always** begin your LiveView templates with `<Layouts.app flash={@flash} ...>` which wraps all inner content
-- The `MyAppWeb.Layouts` module is aliased in the `my_app_web.ex` file, so you can use it without needing to alias it again
-- Anytime you run into errors with no `current_scope` assign:
-  - You failed to follow the Authenticated Routes guidelines, or you failed to pass `current_scope` to `<Layouts.app>`
-  - **Always** fix the `current_scope` error by moving your routes to the proper `live_session` and ensure you pass `current_scope` as needed
-- Phoenix v1.8 moved the `<.flash_group>` component to the `Layouts` module. You are **forbidden** from calling `<.flash_group>` outside of the `layouts.ex` module
-- Out of the box, `core_components.ex` imports an `<.icon name="hero-x-mark" class="w-5 h-5"/>` component for for hero icons. **Always** use the `<.icon>` component for icons, **never** use `Heroicons` modules or similar
-- **Always** use the imported `<.input>` component for form inputs from `core_components.ex` when available. `<.input>` is imported and using it will will save steps and prevent errors
-- If you override the default input classes (`<.input class="myclass px-2 py-1 rounded-lg">)`) class with your own values, no default classes are inherited, so your
-custom classes must fully style the input
+- Begin LiveView templates with `<Layouts.app flash={@flash} current_scope={@current_scope}>` to wrap their content. `Layouts` is already aliased through `BWeb`.
+- Call `<.flash_group>` only inside `layouts.ex`.
+- Use the imported `<.icon>` component for icons and `<.input>` for supported form inputs.
+- When overriding `<.input>` classes, supply the complete styling; default classes are not inherited.
 
 ### JS and CSS guidelines
 
+Apply these design defaults to newly created or explicitly redesigned UI. Preserve existing design during narrow fixes.
+
 - **Use Tailwind CSS classes and custom CSS rules** to create polished, responsive, and visually stunning interfaces.
-- Tailwindcss v4 **no longer needs a tailwind.config.js** and uses a new import syntax in `app.css`:
-
-      @import "tailwindcss" source(none);
-      @source "../css";
-      @source "../js";
-      @source "../../lib/my_app_web";
-
-- **Always use and maintain this import syntax** in the app.css file for projects generated with `phx.new`
 - **Never** use `@apply` when writing raw css
-- **Always** manually write your own tailwind-based components instead of using daisyUI for a unique, world-class design
+- Write your own tailwind-based components instead of using daisyUI for unique, world-class design
 - Out of the box **only the app.js and app.css bundles are supported**
   - You cannot reference an external vendor'd script `src` or link `href` in the layouts
   - You must import the vendor deps into app.js and app.css to use them
-  - **Never write inline <script>custom js</script> tags within templates**
+  - Keep raw inline JavaScript out of templates; use external hooks or the supported colocated hooks described below.
 
 ### UI/UX & design guidelines
 
@@ -102,174 +43,148 @@ custom classes must fully style the input
 - Ensure **clean typography, spacing, and layout balance** for a refined, premium look
 - Focus on **delightful details** like hover effects, loading states, and smooth page transitions
 
+<!-- phoenix-gen-auth-start -->
+## Authentication
+
+- **Always** handle authentication flow at the router level with proper redirects
+- **Always** be mindful of where to place routes. `phx.gen.auth` creates multiple router plugs and `live_session` scopes:
+  - A plug `:fetch_current_scope_for_user` that is included in the default browser pipeline
+  - A plug `:require_authenticated_user` that redirects to the log in page when the user is not authenticated
+  - A `live_session :current_user` scope - for routes that need the current user but don't require authentication, similar to `:fetch_current_scope_for_user`
+  - A `live_session :require_authenticated_user` scope - for routes that require authentication, similar to the plug with the same name
+  - In both cases, a `@current_scope` is assigned to the Plug connection and LiveView socket
+  - A plug `redirect_if_user_is_authenticated` that redirects to a default path in case the user is authenticated - useful for a registration page that should only be shown to unauthenticated users
+- **Always let the user know in which router scopes, `live_session`, and pipeline you are placing the route, AND SAY WHY**
+- `phx.gen.auth` assigns the `current_scope` assign - it **does not assign a `current_user` assign**
+- Always pass the assign `current_scope` to context modules as first argument. When performing queries, use `current_scope.user` to filter the query results
+- To derive/access `current_user` in templates, **always use the `@current_scope.user`**, never use **`@current_user`** in templates or LiveViews
+- **Never** duplicate `live_session` names. A `live_session :current_user` can only be defined __once__ in the router, so all routes for the `live_session :current_user`  must be grouped in a single block
+- Diagnose missing `current_scope` through the browser pipeline, mount hooks, layout assigns, and test setup. Move a route only when its existing authentication placement is incorrect; preserve the authentication requirements below.
+
+### Routes that require authentication
+
+LiveViews that require login should **always be placed inside the __existing__ `live_session :require_authenticated_user` block**:
+
+    scope "/", AppWeb do
+      pipe_through [:browser, :require_authenticated_user]
+
+      live_session :require_authenticated_user,
+        on_mount: [{BWeb.UserAuth, :require_authenticated}] do
+        # phx.gen.auth generated routes
+        live "/users/settings", UserLive.Settings, :edit
+        live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+        # our own routes that require logged in user
+        live "/", MyLiveThatRequiresAuth, :index
+      end
+    end
+
+Controller routes must be placed in a scope that sets the `:require_authenticated_user` plug:
+
+    scope "/", AppWeb do
+      pipe_through [:browser, :require_authenticated_user]
+
+      get "/", MyControllerThatRequiresAuth, :index
+    end
+
+### Routes that work with or without authentication
+
+LiveViews that can work with or without authentication, **always use the __existing__ `:current_user` scope**, ie:
+
+    scope "/", MyAppWeb do
+      pipe_through [:browser]
+
+      live_session :current_user,
+        on_mount: [{BWeb.UserAuth, :mount_current_scope}] do
+        # our own routes that work with or without authentication
+        live "/", PublicLive
+      end
+    end
+
+Controllers automatically have the `current_scope` available if they use the `:browser` pipeline.
+
+<!-- phoenix-gen-auth-end -->
+
+<!-- usage-rules-start -->
+
+<!-- phoenix:elixir-start -->
 ## Elixir guidelines
 
-- Elixir lists **do not support index based access via the access syntax**
-
-  **Never do this (invalid)**:
-
-      i = 0
-      mylist = ["blue", "green"]
-      mylist[i]
-
-  Instead, **always** use `Enum.at`, pattern matching, or `List` for index based list access, ie:
-
-      i = 0
-      mylist = ["blue", "green"]
-      Enum.at(mylist, i)
-
-- Elixir variables are immutable, but can be rebound, so for block expressions like `if`, `case`, `cond`, etc
-  you *must* bind the result of the expression to a variable if you want to use it and you CANNOT rebind the result inside the expression, ie:
-
-      # INVALID: we are rebinding inside the `if` and the result never gets assigned
-      if connected?(socket) do
-        socket = assign(socket, :val, val)
-      end
-
-      # VALID: we rebind the result of the `if` to a new variable
-      socket =
-        if connected?(socket) do
-          assign(socket, :val, val)
-        end
-
 - **Never** nest multiple modules in the same file as it can cause cyclic dependencies and compilation errors
-- **Never** use map access syntax (`changeset[:field]`) on structs as they do not implement the Access behaviour by default. For regular structs, you **must** access the fields directly, such as `my_struct.field` or use higher level APIs that are available on the struct if they exist, `Ecto.Changeset.get_field/2` for changesets
 - Elixir's standard library has everything necessary for date and time manipulation. Familiarize yourself with the common `Time`, `Date`, `DateTime`, and `Calendar` interfaces by accessing their documentation as necessary. **Never** install additional dependencies unless asked or for date/time parsing (which you can use the `date_time_parser` package)
 - Don't use `String.to_atom/1` on user input (memory leak risk)
-- Predicate function names should not start with `is_` and should end in a question mark. Names like `is_thing` should be reserved for guards
-- Elixir's builtin OTP primitives like `DynamicSupervisor` and `Registry`, require names in the child spec, such as `{DynamicSupervisor, name: MyApp.MyDynamicSup}`, then you can use `DynamicSupervisor.start_child(MyApp.MyDynamicSup, child_spec)`
 - Use `Task.async_stream(collection, callback, options)` for concurrent enumeration with back-pressure. The majority of times you will want to pass `timeout: :infinity` as option
 
 ## Mix guidelines
 
-- Read the docs and options before using tasks (by using `mix help task_name`)
+- Use `mix help <task_name|module_name|module.function>` when the task, API, or options are unfamiliar or uncertain. Reuse documentation already checked.
 - To debug test failures, run tests in a specific file with `mix test test/my_test.exs` or run all previously failed tests with `mix test --failed`
-- `mix deps.clean --all` is **almost never needed**. **Avoid** using it unless you have good reason
+
+## Test guidelines
+
+- Always use `start_supervised!/1` to start processes in tests as it guarantees cleanup between tests
+- Avoid `Process.alive?/1` to check if a process died, use `Process.monitor/1` instead
+- Avoid `Process.sleep/1` in tests, use `_ = :sys.get_state/1` to ensure the process has handled prior messages (for LiveViews, you can use `render(view)`)
 <!-- phoenix:elixir-end -->
-
-<!-- phoenix:phoenix-start -->
-## Phoenix guidelines
-
-- Remember Phoenix router `scope` blocks include an optional alias which is prefixed for all routes within the scope. **Always** be mindful of this when creating routes within a scope to avoid duplicate module prefixes.
-
-- You **never** need to create your own `alias` for route definitions! The `scope` provides the alias, ie:
-
-      scope "/admin", AppWeb.Admin do
-        pipe_through :browser
-
-        live "/users", UserLive, :index
-      end
-
-  the UserLive route would point to the `AppWeb.Admin.UserLive` module
-
-- `Phoenix.View` no longer is needed or included with Phoenix, don't use it
-<!-- phoenix:phoenix-end -->
 
 <!-- phoenix:ecto-start -->
 ## Ecto Guidelines
 
 - **Always** preload Ecto associations in queries when they'll be accessed in templates, ie a message that needs to reference the `message.user.email`
-- Remember `import Ecto.Query` and other supporting modules when you write `seeds.exs`
-- `Ecto.Schema` fields always use the `:string` type, even for `:text`, columns, ie: `field :name, :string`
-- `Ecto.Changeset.validate_number/2` **DOES NOT SUPPORT the `:allow_nil` option**. By default, Ecto validations only run if a change for the given field exists and the change value is not nil, so such as option is never needed
 - You **must** use `Ecto.Changeset.get_field(changeset, :field)` to access changeset fields
-- Fields which are set programatically, such as `user_id`, must not be listed in `cast` calls or similar for security purposes. Instead they must be explicitly set when creating the struct
+- Fields which are set programmatically, such as `user_id`, must not be listed in `cast` calls or similar for security purposes. Instead they must be explicitly set when creating the struct
+- **Always** invoke `mix ecto.gen.migration migration_name_using_underscores` when generating migration files, so the correct timestamp and conventions are applied
 <!-- phoenix:ecto-end -->
 
 <!-- phoenix:html-start -->
 ## Phoenix HTML guidelines
 
-- Phoenix templates **always** use `~H` or .html.heex files (known as HEEx), **never** use `~E`
-- **Always** use the imported `Phoenix.Component.form/1` and `Phoenix.Component.inputs_for/1` function to build forms. **Never** use `Phoenix.HTML.form_for` or `Phoenix.HTML.inputs_for` as they are outdated
-- When building forms **always** use the already imported `Phoenix.Component.to_form/2` (`assign(socket, form: to_form(...))` and `<.form for={@form} id="msg-form">`), then access those forms in the template via `@form[:field]`
-- **Always** add unique DOM IDs to key elements (like forms, buttons, etc) when writing templates, these IDs can later be used in tests (`<.form for={@form} id="product-form">`)
-- For "app wide" template imports, you can import/alias into the `my_app_web.ex`'s `html_helpers` block, so they will be available to all LiveViews, LiveComponent's, and all modules that do `use MyAppWeb, :html` (replace "my_app" by the actual app name)
-
-- Elixir supports `if/else` but **does NOT support `if/else if` or `if/elsif`. **Never use `else if` or `elseif` in Elixir**, **always** use `cond` or `case` for multiple conditionals.
-
-  **Never do this (invalid)**:
-
-      <%= if condition do %>
-        ...
-      <% else if other_condition %>
-        ...
-      <% end %>
-
-  Instead **always** do this:
-
-      <%= cond do %>
-        <% condition -> %>
-          ...
-        <% condition2 -> %>
-          ...
-        <% true -> %>
-          ...
-      <% end %>
-
-- HEEx require special tag annotation if you want to insert literal curly's like `{` or `}`. If you want to show a textual code snippet on the page in a `<pre>` or `<code>` block you *must* annotate the parent tag with `phx-no-curly-interpolation`:
-
-      <code phx-no-curly-interpolation>
-        let obj = {key: "val"}
-      </code>
-
-  Within `phx-no-curly-interpolation` annotated tags, you can use `{` and `}` without escaping them, and dynamic Elixir expressions can still be used with `<%= ... %>` syntax
-
-- HEEx class attrs support lists, but you must **always** use list `[...]` syntax. You can use the class list syntax to conditionally add classes, **always do this for multiple class values**:
-
-      <a class={[
-        "px-2 text-white",
-        @some_flag && "py-5",
-        if(@other_condition, do: "border-red-500", else: "border-blue-100"),
-        ...
-      ]}>Text</a>
-
-  and **always** wrap `if`'s inside `{...}` expressions with parens, like done above (`if(@other_condition, do: "...", else: "...")`)
-
-  and **never** do this, since it's invalid (note the missing `[` and `]`):
-
-      <a class={
-        "px-2 text-white",
-        @some_flag && "py-5"
-      }> ...
-      => Raises compile syntax error on invalid HEEx attr syntax
-
-- **Never** use `<% Enum.each %>` or non-for comprehensions for generating template content, instead **always** use `<%= for item <- @collection do %>`
-- HEEx HTML comments use `<%!-- comment --%>`. **Always** use the HEEx HTML comment syntax for template comments (`<%!-- comment --%>`)
-- HEEx allows interpolation via `{...}` and `<%= ... %>`, but the `<%= %>` **only** works within tag bodies. **Always** use the `{...}` syntax for interpolation within tag attributes, and for interpolation of values within tag bodies. **Always** interpolate block constructs (if, cond, case, for) within tag bodies using `<%= ... %>`.
-
-  **Always** do this:
-
-      <div id={@id}>
-        {@my_assign}
-        <%= if @some_block_condition do %>
-          {@another_assign}
-        <% end %>
-      </div>
-
-  and **Never** do this – the program will terminate with a syntax error:
-
-      <%!-- THIS IS INVALID NEVER EVER DO THIS --%>
-      <div id="<%= @invalid_interpolation %>">
-        {if @invalid_block_construct do}
-        {end}
-      </div>
+- Always use the imported Phoenix.Component.form/1 and Phoenix.Component.inputs_for/1 functions to build forms
+- **Always** add unique and stable DOM IDs to key elements (like forms, buttons, etc) when writing templates, these IDs can later be used in tests (`<.form for={@form} id="product-form">`)
+- For "app wide" template imports, you can import/alias into the `my_app_web.ex`'s `html_helpers` block, so they will be available to all LiveViews, LiveComponent's, and all modules that do `use MyAppWeb, :html`
+- HEEx require special tag annotation if you want to insert literal curly's like `{` or `}`. If you want to show a textual code snippet on the page in a `<pre>` or `<code>` block you *must* annotate the parent tag with `phx-no-curly-interpolation` and interpolate using the `<%= ... %>` syntax
+- Prefer to use `<%= cond do %>` in templates instead of nested if-blocks for multiple conditions
+- HEEx allows interpolation via `{...}` and `<%= ... %>`, but the `<%= %>` **only** works within tag bodies. **Always** use the `{...}` syntax for interpolation within tag attributes, and for interpolation of values within tag bodies. **Always** interpolate block constructs (if, cond, case, for) within tag bodies using `<%= ... %>`
 <!-- phoenix:html-end -->
 
 <!-- phoenix:liveview-start -->
 ## Phoenix LiveView guidelines
 
-- **Never** use the deprecated `live_redirect` and `live_patch` functions, instead **always** use the `<.link navigate={href}>` and  `<.link patch={href}>` in templates, and `push_navigate` and `push_patch` functions LiveViews
 - **Avoid LiveComponent's** unless you have a strong, specific need for them
-- LiveViews should be named like `AppWeb.WeatherLive`, with a `Live` suffix. When you go to add LiveView routes to the router, the default `:browser` scope is **already aliased** with the `AppWeb` module, so you can just do `live "/weather", WeatherLive`
-- Remember anytime you use `phx-hook="MyHook"` and that js hook manages its own DOM, you **must** also set the `phx-update="ignore"` attribute
-- **Never** write embedded `<script>` tags in HEEx. Instead always write your scripts and hooks in the `assets/js` directory and integrate them with the `assets/js/app.js` file
 
-### LiveView streams
+- When building forms **always** use the already imported `Phoenix.Component.to_form/2` (`assign(socket, form: to_form(...))` and `<.form for={@form} id="msg-form">`), then access those forms in the template via `@form[:field]`. Do not use `<.form let={f}`. Do not access changesets in templates
 
-- **Always** use LiveView streams for collections for assigning regular lists to avoid memory ballooning and runtime termination with the following operations:
+* The `to_form/2` helper can be used to convert both changesets and parameters to forms:
+
+    def handle_event("submitted", params, socket) do
+      {:noreply, assign(socket, form: to_form(params))}
+    end
+
+- If you are using `phx-hook="MyHook"` and that JS hook manages its own DOM, you **must** also set the `phx-update="ignore"` attribute
+
+- **Never** write raw embedded `<script>` tags in heex as they are incompatible with LiveView. Instead, use a colocated js hook script tag (`:type={Phoenix.LiveView.ColocatedHook}`), which are automatically bundled inside app.js and always start with `.`:
+
+    <input type="text" name="user[phone_number]" id="user-phone-number" phx-hook=".PhoneNumber" />
+    <script :type={Phoenix.LiveView.ColocatedHook} name=".PhoneNumber">
+      export default {
+        mounted() {
+          this.el.addEventListener("input", e => {
+            let match = this.el.value.replace(/\D/g, "").match(/^(\d{3})(\d{3})(\d{4})$/)
+            if(match) {
+              this.el.value = `${match[1]}-${match[2]}-${match[3]}`
+            }
+          })
+        }
+      }
+    </script>
+
+- External JS hooks (`<div id="myhook" phx-hook="MyHook">`) must be placed in `assets/js/` and passed to the LiveSocket constructor
+
+## LiveView streams
+
+- Prefer LiveView streams for large or incrementally updated rendered collections. Ordinary assigns are appropriate for small, bounded lists. Stream operations include:
   - basic append of N items - `stream(socket, :messages, [new_msg])`
   - resetting stream with new items - `stream(socket, :messages, [new_msg], reset: true)` (e.g. for filtering items)
-  - prepend to stream - `stream(socket, :messages, [new_msg], at: -1)`
+  - prepend to stream - `stream(socket, :messages, [new_msg], at: 0)`
   - deleting items - `stream_delete(socket, :messages, msg)`
 
 - When using the `stream/3` interfaces in the LiveView, the LiveView template must 1) always set `phx-update="stream"` on the parent element, with a DOM id on the parent element like `id="messages"` and 2) consume the `@streams.stream_name` collection and use the id as the DOM id for each child. For a call like `stream(socket, :messages, [new_msg])` in the LiveView, the template would be:
@@ -280,110 +195,45 @@ custom classes must fully style the input
         </div>
       </div>
 
-- LiveView streams are *not* enumerable, so you cannot use `Enum.filter/2` or `Enum.reject/2` on them. Instead, if you want to filter, prune, or refresh a list of items on the UI, you **must refetch the data and re-stream the entire stream collection, passing reset: true**:
-
-      def handle_event("filter", %{"filter" => filter}, socket) do
-        # re-fetch the messages based on the filter
-        messages = list_messages(filter)
-
-        {:noreply,
-        socket
-        |> assign(:messages_empty?, messages == [])
-        # reset the stream with the new messages
-        |> stream(:messages, messages, reset: true)}
-      end
-
-- LiveView streams *do not support counting or empty states*. If you need to display a count, you must track it using a separate assign. For empty states, you can use Tailwind classes:
+- LiveView streams are not enumerable and **do not support counting or empty states**. If you need to display a count, you must track it using a separate assign. For empty states, you can use Tailwind classes:
 
       <div id="tasks" phx-update="stream">
-        <div class="hidden only:block">No tasks yet</div>
-        <div :for={{id, task} <- @stream.tasks} id={id}>
+        <div id="tasks-empty" class="hidden only:block">No tasks yet</div>
+        <div :for={{id, task} <- @streams.tasks} id={id}>
           {task.name}
         </div>
       </div>
 
   The above only works if the empty state is the only HTML block alongside the stream for-comprehension.
 
-- **Never** use the deprecated `phx-update="append"` or `phx-update="prepend"` for collections
+- When updating an assign that should change content inside any streamed item(s), you MUST re-stream the items along with the updated assign:
+
+      def handle_event("edit_message", %{"message_id" => message_id}, socket) do
+        scope = socket.assigns.current_scope
+        message = Chat.get_message!(scope, message_id)
+        edit_form = to_form(Chat.change_message(scope, message, %{content: message.content}))
+
+        # re-insert message so @editing_message_id toggle logic takes effect for that stream item
+        {:noreply,
+         socket
+         |> stream_insert(:messages, message)
+         |> assign(:editing_message_id, String.to_integer(message_id))
+         |> assign(:edit_form, edit_form)}
+      end
 
 ### LiveView tests
 
 - `Phoenix.LiveViewTest` module and `LazyHTML` (included) for making your assertions
-- Form tests are driven by `Phoenix.LiveViewTest`'s `render_submit/2` and `render_change/2` functions
-- Come up with a step-by-step test plan that splits major test cases into small, isolated files. You may start with simpler tests that verify content exists, gradually add interaction tests
-- **Always reference the key element IDs you added in the LiveView templates in your tests** for `Phoenix.LiveViewTest` functions like `element/2`, `has_element/2`, selectors, etc
-- **Never** tests again raw HTML, **always** use `element/2`, `has_element/2`, and similar: `assert has_element?(view, "#my-form")`
-- Instead of relying on testing text content, which can change, favor testing for the presence of key elements
+- Keep tests focused on the changed behavior and follow the existing test-file organization; split cases when it improves clarity.
+- Use stable element IDs with `element/2`, `has_element?/2`, and selectors instead of raw HTML comparisons. Assert content within those elements when it is part of the required behavior.
 - Focus on testing outcomes rather than implementation details
-- Be aware that `Phoenix.Component` functions like `<.form>` might produce different HTML than expected. Test against the output HTML structure, not your mental model of what you expect it to be
+- Be aware that `Phoenix.Component` functions like `<.form>` might produce different HTML than expected, so test against the output HTML structure
 - When facing test failures with element selectors, add debug statements to print the actual HTML, but use `LazyHTML` selectors to limit the output, ie:
 
       html = render(view)
       document = LazyHTML.from_fragment(html)
       matches = LazyHTML.filter(document, "your-complex-selector")
       IO.inspect(matches, label: "Matches")
-
-### Form handling
-
-#### Creating a form from params
-
-If you want to create a form based on `handle_event` params:
-
-    def handle_event("submitted", params, socket) do
-      {:noreply, assign(socket, form: to_form(params))}
-    end
-
-When you pass a map to `to_form/1`, it assumes said map contains the form params, which are expected to have string keys.
-
-You can also specify a name to nest the params:
-
-    def handle_event("submitted", %{"user" => user_params}, socket) do
-      {:noreply, assign(socket, form: to_form(user_params, as: :user))}
-    end
-
-#### Creating a form from changesets
-
-When using changesets, the underlying data, form params, and errors are retrieved from it. The `:as` option is automatically computed too. E.g. if you have a user schema:
-
-    defmodule MyApp.Users.User do
-      use Ecto.Schema
-      ...
-    end
-
-And then you create a changeset that you pass to `to_form`:
-
-    %MyApp.Users.User{}
-    |> Ecto.Changeset.change()
-    |> to_form()
-
-Once the form is submitted, the params will be available under `%{"user" => user_params}`.
-
-In the template, the form form assign can be passed to the `<.form>` function component:
-
-    <.form for={@form} id="todo-form" phx-change="validate" phx-submit="save">
-      <.input field={@form[:field]} type="text" />
-    </.form>
-
-Always give the form an explicit, unique DOM ID, like `id="todo-form"`.
-
-#### Avoiding form errors
-
-**Always** use a form assigned via `to_form/2` in the LiveView, and the `<.input>` component in the template. In the template **always access forms this**:
-
-    <%!-- ALWAYS do this (valid) --%>
-    <.form for={@form} id="my-form">
-      <.input field={@form[:field]} type="text" />
-    </.form>
-
-And **never** do this:
-
-    <%!-- NEVER do this (invalid) --%>
-    <.form for={@changeset} id="my-form">
-      <.input field={@changeset[:field]} type="text" />
-    </.form>
-
-- You are FORBIDDEN from accessing the changeset in the template as it will cause errors
-- **Never** use `<.form let={f} ...>` in the template, instead **always use `<.form for={@form} ...>`**, then drive all form references from the form assign as in `@form[:field]`. The UI should **always** be driven by a `to_form/2` assigned in the LiveView module that is derived from a changeset
 <!-- phoenix:liveview-end -->
 
 <!-- usage-rules-end -->

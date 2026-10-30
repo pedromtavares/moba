@@ -1,0 +1,200 @@
+.game-page .squad-page {
+  --squad-line: #baa98a30;
+  --squad-gold: #e2c18c;
+  padding: 12px 0 24px;
+  font-variant-numeric: tabular-nums;
+  .squad-page-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-bottom: 18px; }
+  .squad-page-heading h1 { margin: 3px 0 0; color: #f0e6d4; font: 900 clamp(28px, 2.6vw, 40px)/1.2 'Nunito', sans-serif; }
+  .squad-eyebrow { color: #c3a775; font-size: 14px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+  .squad-heading-actions { display: flex; gap: 10px; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 9px 14px; font: 800 17px/1.3 'Nunito', sans-serif; letter-spacing: 0; border-radius: 5px; }
+  .btn:disabled { opacity: .35; cursor: default; }
+  :is(button, a, input):focus-visible { outline: 2px solid #edcc91; outline-offset: 3px; }
+  .squad-columns { display: grid; gap: 18px; align-items: start; }
+  .match-columns { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr) minmax(0, 1fr); }
+  .teams-columns { grid-template-columns: minmax(220px, .6fr) minmax(0, 1fr) minmax(0, 1fr); }
+  .squad-panel { display: flex; flex-direction: column; min-width: 0; border: 1px solid var(--squad-line); border-radius: 8px; background: #0c131ee8; overflow: hidden; }
+  .squad-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 65px; padding: 16px; border-bottom: 1px solid var(--squad-line); }
+  .squad-panel-heading h2 { margin: 0; color: #e7dfd0; font-size: 23px; font-weight: 800; overflow-wrap: anywhere; }
+  .squad-panel-heading > strong { flex-shrink: 0; color: #d8bb88; font-size: 22px; }
+  .match-enemy .squad-panel-heading > strong { color: #9fc4dd; }
+  .squad-scroll { min-height: 0; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: #b49a6b55 transparent; }
+  .squad-scroll > div + div { margin-top: 12px; }
+  .squad-scroll > .tab-pane { margin-top: 0; }
+  .squad-scroll > .hud-notice { margin: 0 0 12px; }
+  .squad-empty-slot { display: flex; align-items: center; gap: 14px; min-height: 76px; padding: 16px; border: 1px dashed #9da6b52e; border-radius: 6px; background: #ffffff02; color: #919cab; }
+  .squad-empty-slot > span { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid #b5a07730; border-radius: 50%; color: #bdab88; font-size: 19px; font-weight: 800; }
+  .squad-empty-slot > strong { font-size: 18px; font-weight: 600; }
+
+  .roster-hero { min-height: 0; position: relative; overflow: hidden; border: 1px solid #a0adc02e; border-radius: 7px; background: linear-gradient(120deg, #19222e, #0c121c); }
+  .roster-hero[data-defeated=true] .roster-portrait { filter: grayscale(1); opacity: .55; }
+  .roster-fallen { color: #d59ba4; }
+  .roster-picked { border-color: #d9b97a99; box-shadow: inset 3px 0 #d9b97a; }
+  .roster-identity { display: flex; align-items: center; gap: 10px; min-height: 76px; padding: 12px; }
+  .roster-position { flex-shrink: 0; color: #cbb58d; font-size: 23px; font-weight: 900; }
+  .roster-portrait { width: 62px; height: 48px; flex-shrink: 0; object-fit: cover; border: 1px solid #b5a07755; border-radius: 4px; }
+  .roster-name { flex: 1; min-width: 0; }
+  .roster-name > strong { display: block; color: #eee7db; font-size: 21px; font-weight: 900; line-height: 1.2; overflow-wrap: anywhere; }
+  .roster-name > span { display: block; margin-top: 3px; color: #a6b1c0; font-size: 14px; line-height: 1.3; }
+  .roster-rank { color: #cfb381; }
+  .roster-level { color: #c9bdac; font-size: 13px; white-space: nowrap; }
+  .roster-level strong { display: block; color: #ead5b2; font-size: 27px; line-height: 1; }
+  .roster-identity .league-logo { width: 27px; height: 29px; object-fit: contain; margin: 0; }
+  .roster-hero .hero-stats { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); width: 100%; margin: 0; padding: 0 8px 10px; }
+  .roster-hero .game-stat { display: flex; align-items: center; justify-content: center; gap: 4px; min-width: 0; padding: 2px; border: 0 !important; background: transparent !important; font: 800 16px/1.3 'Nunito', sans-serif; }
+  .roster-hero .game-stat i { margin: 0 !important; font-size: 12px; }
+  .roster-loadout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: stretch; gap: 10px; padding: 10px 12px; border-top: 1px solid #ffffff0c; background: #080e16a3; }
+  .roster-loadout .skills-container { min-width: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 64px)); justify-content: space-between; gap: 4px; width: 100%; height: auto; max-height: none; margin: 0 !important; }
+  .roster-loadout .items-container { min-width: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 3px; width: 100%; height: auto; padding-left: 10px; margin: 0; border-left: 1px solid var(--squad-line); }
+  .roster-loadout .item-container { max-width: none; width: 100%; height: auto; min-height: 0; max-height: none; }
+  .roster-loadout :is(.skill-img, .item-img) { display: block; width: 100%; height: 100%; max-height: none; padding: 0; margin: 0; border: 1px solid #ffffff20; border-image: none; border-radius: 3px; object-fit: cover; }
+  .roster-loadout .skill-img { height: auto; aspect-ratio: 1; }
+  .roster-loadout .item-img { height: auto; aspect-ratio: 1.35; align-self: center; }
+  .roster-actions { display: flex; align-items: center; gap: 7px; padding: 8px 12px; border-top: 1px solid #ffffff0c; }
+  .roster-actions .btn { flex: 1; min-height: 38px; padding: 7px 10px; font-size: 16px; }
+  .roster-actions .squad-order { flex: 0 0 42px; padding: 4px; border: 1px solid #baa98a40; background: #baa98a0c; color: #d7c19c; font-size: 23px; }
+  .squad-remove { border: 1px solid #d58b9533; background: #a8485b0c; color: #e2a1aa; }
+  .squad-remove:hover { color: #ffc1c8; border-color: #d58b9580; background: #a8485b26; }
+  .squad-add { border: 1px solid #80bba866; background: #28655330; color: #a7dfcb; }
+  .squad-add:hover { color: #d0f8e9; border-color: #a7dfcb; background: #28655355; }
+  .squad-selected-label { display: block; width: 100%; padding: 7px; color: #ddc28e; font-size: 16px; font-weight: 800; text-align: center; }
+
+  .lineup-preview { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .lineup-preview img, .lineup-preview > span { display: grid; place-items: center; width: 100%; aspect-ratio: 1.25; border: 1px solid #c6b38d30; border-radius: 3px; object-fit: cover; background: #080d15; color: #8c929e; font-size: 18px; }
+  .squad-team-choice { display: block; width: 100%; padding: 13px; margin-bottom: 12px; border: 1px solid #a0adc02e; border-radius: 6px; background: #151e2a; color: #e5dccc; text-align: left; transition: background 160ms ease, border-color 160ms ease; }
+  .squad-team-choice:hover { background: #1c2836; border-color: #d9b97a88; }
+  .squad-team-choice.active { border-color: #d9b97a; background: linear-gradient(120deg, #77562333, #151e2a); box-shadow: inset 3px 0 #d9b97a; }
+  .squad-team-choice:disabled { opacity: 1; }
+  .squad-team-name { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 10px; color: #efe4d0; font-size: 21px; font-weight: 800; overflow-wrap: anywhere; }
+  .squad-team-name small { color: #c3b59e; font-size: 14px; font-weight: 600; white-space: nowrap; }
+  .squad-team-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 10px; color: #a5b1bf; font-size: 13px; }
+  .squad-create-team { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-bottom: 1px solid var(--squad-line); }
+  .squad-create-team > div, .squad-create-team label { display: block; width: 100%; margin: 0; }
+  .squad-team-input { display: block; width: 100%; min-height: 44px; padding: 10px 12px; border: 1px solid #a0adc04d; border-radius: 4px; background: #080d15; color: #e9e0d1; font-size: 18px; line-height: 1.3; }
+  .squad-team-input::placeholder { color: #84909f; }
+  .team-settings { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--squad-line); }
+  .squad-defensive { display: flex; align-items: center; gap: 9px; margin: 0; color: #cbd4df; font-size: 16px; cursor: pointer; }
+  .squad-defensive input { width: 19px; height: 19px; accent-color: #c5a46c; }
+  .team-settings .btn { min-height: 36px; padding: 7px 10px; font-size: 14px; }
+  .squad-tabs { display: flex; flex-shrink: 0; padding: 8px; gap: 5px; border-bottom: 1px solid var(--squad-line); }
+  .squad-tabs button { flex: 1; min-width: 0; min-height: 45px; padding: 10px 6px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #a9b3c3; font: 800 17px/1.3 'Nunito', sans-serif; cursor: pointer; }
+  .squad-tabs button.active { border-color: #d9b97a55; background: #a47d2c1a; color: #f0d3a1; }
+  .squad-tabs button:hover { color: #f0d3a1; background: #a47d2c12; }
+  .team-library-sort { display: flex; justify-content: flex-end; padding: 0 12px; }
+  .team-library-sort .btn { color: #b7c0cc; font-size: 14px; }
+
+  .match-scoreboard { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px; padding: 16px 22px; margin-bottom: 18px; border: 1px solid var(--squad-line); border-radius: 8px; background: linear-gradient(110deg, #532c3a30, #101823e6 42%, #1e4d6530); }
+  .match-player { display: flex; align-items: center; gap: 15px; min-width: 0; color: #f2e9db; font-size: clamp(24px, 2vw, 32px); font-weight: 900; line-height: 1.25; }
+  .match-player > img { width: 62px; height: 62px; object-fit: contain; }
+  .match-player > span { min-width: 0; overflow-wrap: anywhere; }
+  .match-player small { display: block; margin-top: 4px; color: #d895a4; font-size: 15px; font-weight: 600; }
+  .match-player-opponent { flex-direction: row-reverse; text-align: right; }
+  .match-player-opponent small { color: #99bfd9; }
+  .match-score { text-align: center; }
+  .match-score strong { display: flex; justify-content: center; align-items: center; gap: 18px; color: #eadbc1; font-size: 46px; line-height: 1.1; }
+  .match-score strong span { color: #687485; font-size: 25px; }
+  .match-score > span { display: block; color: #9ba7b7; font-size: 14px; margin-top: 4px; }
+  .match-command { padding: 20px; border-bottom: 1px solid var(--squad-line); background: linear-gradient(120deg, #b98b3f10, transparent); }
+  .match-pick-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .match-command h2 { margin: 0; color: #f0e4ce; font-size: 27px; font-weight: 900; }
+  .match-command .hud-notice-counter { color: #e9c992; font-size: 32px; white-space: nowrap; }
+  .match-command .hud-notice-counter small { font-size: 18px; color: #939dac; }
+  .match-pick-progress { display: flex; gap: 6px; margin: 14px 0; }
+  .match-pick-progress > span { flex: 1; height: 7px; border-radius: 2px; background: #ffffff12; }
+  .match-pick-progress > span[data-filled=true] { background: #d8b879; box-shadow: 0 0 8px #d8b87926; }
+  .match-command .btn { width: 100%; margin-top: 4px; min-height: 50px; font-size: 20px; }
+  .match-command .hud-notice { padding: 0; border: 0; margin: 0; background: transparent; }
+  .match-playback-status > span:last-child { display: block; margin-top: 8px; color: #a3adbb; font-size: 16px; }
+  .match-playback-status h2 { margin-top: 5px; }
+  .match-command[data-complete=true] { box-shadow: inset 3px 0 #d8b879; }
+  .match-picker { display: flex; flex-direction: column; min-height: 0; }
+  .match-picker .tab-pane { display: none; }
+  .match-picker .tab-pane.active { display: block; }
+  .match-picker .tab-pane > div + div { margin-top: 12px; }
+  .match-battle { display: block; margin-bottom: 14px; padding: 16px; border: 1px solid #a0adc040; border-radius: 6px; background: #141e2c; color: #e2dccf; transition: border-color 160ms ease; }
+  .match-battle:hover { color: #e2dccf; border-color: #d8b87999; }
+  .match-battle-heading { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--squad-line); font-size: 17px; }
+  .match-battle-heading > span { color: #d6bc8e; text-align: right; }
+  .match-battle-units { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .match-battle-unit { display: grid; grid-template-rows: minmax(44px, 1fr) auto auto; }
+  .match-battle-hero { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; flex-wrap: wrap; }
+  .match-battle-hero img { width: 44px; height: 35px; border-radius: 3px; object-fit: cover; }
+  .match-battle-hero strong { color: #e3dccc; font-size: 18px; overflow-wrap: anywhere; }
+  .match-battle-hero > span { color: #a39196; font-size: 13px; }
+  .match-battle-unit[data-dead=true] img { filter: grayscale(1); opacity: .6; }
+  .battle-resource-bar { margin-top: 7px; }
+  .resource-gauge { position: relative; height: 28px; overflow: hidden; border: 1px solid #ffffff26; border-radius: 3px; background: #080d16; }
+  .resource-retained { position: absolute; inset: 0 auto 0 0; background: #b34f65; }
+  .energy .resource-retained { background: #35779c; }
+  .resource-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 17px; font-weight: 800; line-height: 1; white-space: nowrap; text-shadow: 0 1px 3px #000, 0 0 5px #000; }
+  .resource-value small { margin-left: 3px; color: #e1e5eb; font-size: .8em; font-weight: 600; }
+}
+
+@media (min-width: 1200px) {
+  .game-page .squad-page {
+    .teams-columns > .squad-panel { max-height: calc(100dvh - 145px); }
+    &[data-editing-hero=true] .teams-columns > .squad-panel { max-height: calc(100dvh - 145px - 191px); }
+    .match-columns > .squad-panel { max-height: calc(100dvh - 270px); }
+  }
+}
+@media (max-width: 1199px) {
+  .game-page .squad-page {
+    .teams-columns { grid-template-columns: 240px minmax(0, 1fr); }
+    .team-library { grid-column: 1 / -1; }
+    .team-library > .squad-scroll { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .team-library .squad-scroll > div { margin: 0; }
+    .match-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .match-center { grid-column: 1 / -1; grid-row: 1; }
+    .match-picker > .squad-scroll { max-height: 600px; }
+    .match-picker .tab-pane.active { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+    .match-picker .tab-pane > div + div { margin: 0; }
+    .squad-panel { max-height: none; }
+    .match-enemy { grid-column: 2; }
+    .match-battles { max-height: 700px; }
+    &[data-editing-hero=true] { padding-bottom: 200px; }
+  }
+}
+@media (max-width: 767px) {
+  .game-page .squad-page {
+    padding-top: 8px;
+    .squad-page-heading { align-items: flex-start; gap: 12px; }
+    .squad-page-heading h1 { font-size: 28px; }
+    .squad-eyebrow { font-size: 11px; }
+    .squad-page-heading .btn { min-height: 40px; padding: 8px 10px; font-size: 14px; }
+    .squad-heading-actions { flex-direction: column; }
+    .squad-columns, .teams-columns { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+    .team-library, .match-center, .match-enemy { grid-column: 1; }
+    .saved-teams > .squad-scroll { max-height: 300px; }
+    .team-lineup > .squad-scroll, .team-library > .squad-scroll { max-height: 65dvh; }
+    .match-lineup { grid-row: auto; }
+    .team-library > .squad-scroll, .match-picker .tab-pane.active { display: block; }
+    .team-library .squad-scroll > div + div, .match-picker .tab-pane > div + div { margin-top: 12px; }
+    .squad-panel-heading { min-height: 56px; padding: 14px; }
+    .squad-panel-heading h2 { font-size: 22px; }
+    .match-scoreboard { padding: 12px; gap: 10px; }
+    .match-player { gap: 7px; font-size: 20px; }
+    .match-player > img { display: none; }
+    .match-player small { font-size: 12px; }
+    .match-score strong { gap: 8px; font-size: 30px; }
+    .match-score > span { max-width: 78px; font-size: 11px; }
+    .roster-identity { gap: 9px; padding: 10px; }
+    .roster-portrait { width: 54px; height: 43px; }
+    .roster-name > strong { font-size: 20px; }
+    .roster-name > span { font-size: 13px; }
+    .roster-identity .league-logo { width: 23px; }
+    .roster-hero .game-stat { font-size: 15px; }
+    .roster-hero .game-stat i { font-size: 11px; }
+    .roster-actions { gap: 5px; padding: 8px; }
+    .roster-actions .btn { font-size: 14px; padding: 7px; }
+    .roster-actions .squad-order { flex-basis: 36px; }
+    .match-command { padding: 16px; }
+    .match-command h2 { font-size: 25px; }
+    .match-battle { padding: 12px; }
+    .match-battle-units { gap: 10px; }
+    .match-battle-hero strong { font-size: 16px; }
+    .resource-value { font-size: 16px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-page .squad-page :is(.squad-team-choice, .match-battle) { transition: none; }
+}

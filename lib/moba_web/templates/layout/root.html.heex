@@ -5,7 +5,15 @@
     <%= if is_nil(assigns[:current_player]) && is_nil(assigns[:current_user]) do %>
       <%= render("_guest_navigation.html", assigns) %>
     <% else %>
-      <%= render("_mobile_navigation.html", assigns) %>
+      <%= if assigns[:preview] do %>
+        <MobaWeb.V2.Components.LayoutComponents.mobile_navigation
+          current_player={assigns[:current_player]}
+          current_hero={assigns[:current_hero]}
+          preview
+        />
+      <% else %>
+        <%= render("_mobile_navigation.html", assigns) %>
+      <% end %>
     <% end %>
     <div class="wrapper" id="main-wrapper">
       <div class="container-fluid">

@@ -17,7 +17,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
 
   test "connected mount", %{conn: conn, battle: battle, attacker: attacker} do
     {:ok, view, html} = live(conn, "/battles/#{battle.id}")
-    assert html =~ "Click to select a skill"
+    assert html =~ "Make your first move"
     assert has_element?(view, ~s|#battle-page[phx-hook="BattleContinueHotkey"]|)
     assert has_element?(view, ".hero-card .text-danger[title='Health']")
     assert has_element?(view, ".hero-card .text-orange[title='Speed']")
@@ -55,8 +55,64 @@ defmodule MobaWeb.V2.BattleLiveTest do
     finished = Engine.get_battle!(battle.id)
     assert finished.finished
     assert finished.type == "league"
-    assert rewards_html =~ "GG! You have beaten the League Challenge and are now in a higher league!"
+    assert has_element?(view, "#league-challenge-result.is-promoted")
+    assert has_element?(view, "#league-challenge-result h3", "Promoted to Silver")
     refute rewards_html =~ "Proceed to Battle"
+  end
+
+  test "preview league victory marks the cleared battle and continues to the next one", %{conn: conn} do
+    attacker = create_base_hero(%{league_tier: 0, league_step: 1}, create_player!(), strong_avatar())
+    battle = attacker |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
+    assert battle.winner_id == attacker.id
+    conn = init_test_session(conn, player_id: attacker.player_id)
+    {:ok, view, _} = live(conn, "/battles/#{battle.id}")
+
+    assert has_element?(view, "#league-challenge-result.is-stage-victory h3", "Victory")
+    assert has_element?(view, "#league-challenge-result .league-stage-cleared", "Battle 1 cleared")
+    refute has_element?(view, "#league-challenge-result .league-outcome-description")
+    assert has_element?(view, "#league-challenge-step-1[data-state=complete]", "Cleared")
+    assert has_element?(view, "#league-challenge-step-2[data-state=next][aria-current=step]", "Up next")
+    refute has_element?(view, "#league-challenge-step-3")
+    view |> element("#league-next-battle") |> render_click()
+    assert_patch(view, "/battles/#{Engine.latest_battle(attacker.id).id}")
+
+    Game.update_hero!(Game.get_hero!(attacker.id), %{league_step: 0})
+    {:ok, archive, _} = live(conn, "/battles/#{battle.id}")
+    refute has_element?(archive, "#league-next-battle")
+    refute has_element?(archive, "#league-challenge-result [aria-current=step]")
+    assert has_element?(archive, "#load-training[href='/training']")
+  end
+
+  test "preview league promotion shows rewards and returns to training", %{conn: conn} do
+    attacker = create_base_hero(%{league_tier: 0, league_step: 2}, create_player!(), strong_avatar())
+    battle = attacker |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
+    assert battle.winner_id == attacker.id
+    conn = init_test_session(conn, player_id: attacker.player_id)
+    {:ok, view, _} = live(conn, "/battles/#{battle.id}")
+
+    assert has_element?(view, "#league-challenge-result h3", "Promoted to Silver")
+    assert has_element?(view, "#league-challenge-result.is-promoted[data-league='1']")
+    assert has_element?(view, "#league-promoted-emblem[src='/images/league/1.png']")
+    assert has_element?(view, "#league-challenge-step-2[data-state=complete]")
+    assert has_element?(view, "#league-promotion-rewards .league-gold-reward")
+    assert has_element?(view, "#league-promotion-rewards .league-xp-reward")
+    assert has_element?(view, "#load-training[href='/training']")
+    refute has_element?(view, "#league-next-battle")
+  end
+
+  test "preview league defeat marks the failed step", %{conn: conn} do
+    attacker = create_base_hero(%{league_tier: 1, league_step: 2, current_hp: 1}, create_player!(), weak_avatar())
+    battle = attacker |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
+    assert battle.winner_id != attacker.id
+    conn = init_test_session(conn, player_id: attacker.player_id)
+    {:ok, view, _} = live(conn, "/battles/#{battle.id}")
+
+    assert has_element?(view, "#league-challenge-result[data-result=defeat] h3", "Challenge lost")
+    assert has_element?(view, "#league-challenge-step-1[data-state=complete]")
+    assert has_element?(view, "#league-challenge-step-2[data-state=failed]", "Failed")
+    assert has_element?(view, "#league-challenge-step-3[data-state=pending]")
+    assert has_element?(view, "#load-training[href='/training']")
+    refute has_element?(view, "#league-next-battle")
   end
 
   test "guest player ranking up after the first league challenge advances the tutorial", %{conn: conn} do
@@ -101,7 +157,6 @@ defmodule MobaWeb.V2.BattleLiveTest do
       |> init_test_session(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
-
     assert has_element?(view, ~s|#battle-over-duel[href="/arena/#{duel.id}"]|)
     assert has_element?(view, ~s|#load-battles[href="/arena/#{duel.id}"]|)
   end
@@ -139,7 +194,6 @@ defmodule MobaWeb.V2.BattleLiveTest do
       |> init_test_session(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
-
     assert has_element?(view, ~s|#load-battles[href="/matches/#{match.id}"]|)
   end
 

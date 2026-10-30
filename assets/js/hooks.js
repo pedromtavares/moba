@@ -1,6 +1,7 @@
 import $ from 'jquery';
 import swal from 'sweetalert';
 import Tutorial from './tutorial.js';
+import ModernTutorial from './tutorial_modern.js';
 
 let Hooks = {};
 
@@ -8,7 +9,14 @@ Hooks.TutorialStep = {
   mounted(){
     const step = $(this.el).data('step');
 
-    Tutorial.start(this, step);
+    if (this.el.dataset.preview === 'true') {
+      ModernTutorial.start(this, step);
+    } else {
+      Tutorial.start(this, step);
+    }
+  },
+  destroyed(){
+    ModernTutorial.stop(this);
   }
 }
 
@@ -79,6 +87,39 @@ Hooks.ScrollToTarget = {
   }
 }
 
+Hooks.BattleTurnScroll = {
+  mounted(){
+    this.scrollToTurns();
+  },
+  updated(){
+    this.scrollToTurns();
+  },
+  destroyed(){
+    cancelAnimationFrame(this.scrollFrame);
+  },
+  scrollToTurns(){
+    cancelAnimationFrame(this.scrollFrame);
+    this.scrollFrame = requestAnimationFrame(() => {
+      const first = document.querySelector(this.el.getAttribute("phx-target-element"));
+      const last = document.getElementById(`turn-${this.el.dataset.lastTurn}`);
+      if (!first || !last) return;
+
+      const firstPanel = first.querySelector(".combat-turn-panel").getBoundingClientRect();
+      const lastPanel = last.querySelector(".combat-turn-panel").getBoundingClientRect();
+      const start = Math.min(firstPanel.top, lastPanel.top);
+      const end = Math.max(firstPanel.bottom, lastPanel.bottom);
+      const bar = document.getElementById("battle-bar");
+      const visibleBottom = bar ? Math.min(window.innerHeight, bar.getBoundingClientRect().top) : window.innerHeight;
+      const margin = 16;
+      // Keep both turns in view when they fit; otherwise prioritize the final response above the HUD.
+      const top = end - start <= visibleBottom - margin * 2
+        ? window.scrollY + start - margin
+        : window.scrollY + end - visibleBottom + margin;
+      window.scrollTo({top: Math.max(0, top), behavior: "auto"});
+    });
+  }
+}
+
 Hooks.ToggleDisplay = {
   mounted(){
     let el = this.el;
@@ -136,11 +177,20 @@ Hooks.InstaSkill = {
     let name = $(el).attr("data-name");
     el.addEventListener("click", e => {
       $(".skill-img").removeClass("current-skill");
+      $(".skill-img[role='button']").attr("aria-pressed", "false");
       $(el).addClass("current-skill");
+      if (el.getAttribute("role") === "button") el.setAttribute("aria-pressed", "true");
       $("#active-skill-name").text(name);
       $("#attack-button").attr("data-skill", id);
       e.stopPropagation();
     })
+    el.addEventListener("keydown", event => {
+      if (el.getAttribute("role") === "button" && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        event.stopPropagation();
+        el.click();
+      }
+    });
   }
 }
 
@@ -153,16 +203,26 @@ Hooks.InstaItem = {
     el.addEventListener("click", e => {
       if ($(el).hasClass("current-item")){
         $(el).removeClass("current-item");
+        if (el.getAttribute("role") === "button") el.setAttribute("aria-pressed", "false");
         $("#active-item-name").text("");
         $("#attack-button").attr("data-item", "");
       }else{
         $(".item-img").removeClass("current-item");
+        $(".item-img[role='button']").attr("aria-pressed", "false");
         $(el).addClass("current-item");
+        if (el.getAttribute("role") === "button") el.setAttribute("aria-pressed", "true");
         $("#active-item-name").text("and "+name);
         $("#attack-button").attr("data-item", id);
       }
       e.stopPropagation();
     })
+    el.addEventListener("keydown", event => {
+      if (el.getAttribute("role") === "button" && (event.key === "Enter" || event.key === " ")) {
+        event.preventDefault();
+        event.stopPropagation();
+        el.click();
+      }
+    });
   }
 }
 
@@ -221,6 +281,29 @@ Hooks.BattleContinueHotkey = {
   }
 }
 
+Hooks.FarmClaimHotkey = {
+  mounted(){
+    this.onKeyDown = (event) => {
+      if (event.code !== "Space" || event.defaultPrevented || event.repeat || event.isComposing ||
+          event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+      if (event.target.closest("input, textarea, select, button, a, [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
+      if (this.el.disabled || !this.el.getClientRects().length) return;
+
+      const dialogOpen = Array.from(document.querySelectorAll("[role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
+        .some(element => element.getClientRects().length);
+      if (dialogOpen) return;
+
+      event.preventDefault();
+      this.el.click();
+    };
+    window.addEventListener("keydown", this.onKeyDown);
+  },
+  destroyed(){
+    window.removeEventListener("keydown", this.onKeyDown);
+  }
+}
+
 Hooks.ResetOnSubmit = {
   mounted(){
     this.el.addEventListener("submit", () => {
@@ -259,8 +342,8 @@ Hooks.ShareBattle = {
     this.el.addEventListener("click", e => {
       const el = document.createElement('textarea');
       el.value = button.attr('data-link');
-      button.text("Battle link copied to clipboard!")
-      button.css("margin-right", "-40px");
+      button.text(button.attr('data-copy-label') || "Battle link copied to clipboard!");
+      if (!button.attr('data-copy-label')) button.css("margin-right", "-40px");
       el.setAttribute('readonly', '');
       el.style.position = 'absolute';
       el.style.left = '-9999px';
@@ -275,12 +358,72 @@ Hooks.ShareBattle = {
 
 Hooks.ExpandEffects = {
   mounted(){
-    let el = this.el;
-    let turn = $(el).data('turn');
-    el.addEventListener("click", e => {
-      $("#turn-"+turn).find(".descriptions").addClass("active");
-      $(el).closest(".contracted-effects").remove();
-    })
+    const el = this.el;
+    el.addEventListener("click", () => {
+      if (el.hasAttribute("aria-controls")) {
+        const expanded = el.getAttribute("aria-expanded") !== "true";
+        document.getElementById(el.getAttribute("aria-controls")).classList.toggle("active", expanded);
+        el.setAttribute("aria-expanded", String(expanded));
+        el.querySelector(".effect-toggle-label").textContent = expanded ? "Hide details" : "Details";
+        el.querySelector("i").className = expanded ? "fa fa-minus" : "fa fa-plus";
+      } else {
+        $("#turn-" + el.dataset.turn).find(".descriptions").addClass("active");
+        $(el).closest(".contracted-effects").remove();
+      }
+    });
+  }
+}
+
+Hooks.HeroReviewViewport = {
+  mounted(){
+    this.resizeReview = () => this.fitReview();
+    this.reviewObserver = new ResizeObserver(this.resizeReview);
+    const navigation = document.getElementById("topnav");
+    if (navigation) this.reviewObserver.observe(navigation);
+    window.addEventListener("resize", this.resizeReview);
+    this.fitReview();
+  },
+  updated(){
+    this.fitReview();
+  },
+  destroyed(){
+    cancelAnimationFrame(this.reviewFrame);
+    this.reviewObserver.disconnect();
+    window.removeEventListener("resize", this.resizeReview);
+  },
+  fitReview(){
+    cancelAnimationFrame(this.reviewFrame);
+    const hud = document.getElementById("hero-bar");
+    if (hud !== this.reviewHud) {
+      if (this.reviewHud) this.reviewObserver.unobserve(this.reviewHud);
+      this.reviewHud = hud;
+      if (hud) this.reviewObserver.observe(hud);
+    }
+    const hudHeight = hud?.getBoundingClientRect().height || 0;
+    const top = this.el.getBoundingClientRect().top + window.scrollY;
+    const height = window.innerHeight - top - hudHeight - 24;
+    this.el.style.setProperty("--hero-review-hud-height", `${Math.ceil(hudHeight)}px`);
+    this.el.style.setProperty("--hero-review-height", `${Math.floor(height)}px`);
+    this.el.dataset.viewportFit = String(window.innerWidth > 1100 && height >= 480);
+    this.reviewFrame = requestAnimationFrame(() => {
+      const overview = this.el.querySelector(".hero-detail-overview");
+      if (overview && overview.scrollHeight > overview.clientHeight + 1) {
+        this.el.dataset.viewportFit = "false";
+      }
+    });
+  }
+}
+
+Hooks.ShopViewport = {
+  mounted(){
+    if (!this.el.closest(".game-page")) return;
+    this.shopViewportObserver = new ResizeObserver(() => {
+      this.el.style.setProperty("--shop-hud-height", `${Math.ceil(this.el.getBoundingClientRect().height)}px`);
+    });
+    this.shopViewportObserver.observe(this.el);
+  },
+  destroyed(){
+    if (this.shopViewportObserver) this.shopViewportObserver.disconnect();
   }
 }
 
@@ -323,6 +466,39 @@ Hooks.DuelChallenger = {
   },
   destroyed() {
     swal.close();
+  }
+}
+
+Hooks.DuelChallengeDialog = {
+  mounted(){
+    this.previousFocus = document.activeElement;
+    this.dialog = this.el.querySelector('[role="dialog"]');
+    this.dialog.focus();
+    this.trapFocus = event => {
+      const buttons = [...this.dialog.querySelectorAll('button:not(:disabled)')];
+      if (event.key === "Escape") {
+        event.preventDefault();
+        this.el.querySelector('#duel-challenge-close, #duel-challenge-decline')?.click();
+      } else if (event.key === "Tab") {
+        const first = buttons[0];
+        const last = buttons[buttons.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === this.dialog)) {
+          event.preventDefault();
+          last?.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === this.dialog)) {
+          event.preventDefault();
+          first?.focus();
+        }
+      }
+    };
+    document.addEventListener("keydown", this.trapFocus);
+  },
+  updated(){
+    if (!this.dialog.contains(document.activeElement)) this.dialog.focus();
+  },
+  destroyed(){
+    document.removeEventListener("keydown", this.trapFocus);
+    if (this.previousFocus?.isConnected) this.previousFocus.focus();
   }
 }
 

@@ -1,3 +1,6 @@
+<%= if assigns[:preview] do %>
+  <.farm_activity activity="mining" current_hero={@current_hero} selected_turns={@selected_turns} current_time={@current_time} farm_rewards={@farm_rewards} />
+<% else %>
 <style>
   .mining-bg::after {
     content: "";
@@ -93,3 +96,4 @@
     </div>
   </div>
 </div>
+<% end %>

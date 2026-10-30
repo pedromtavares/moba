@@ -10,7 +10,7 @@ defmodule MobaWeb.V2.CommunityLive do
       if connected?(socket) do
         MobaWeb.subscribe(channel)
         MobaWeb.subscribe("stats")
-        load_rankings(socket)
+        tick_user(socket, socket.assigns.current_user)
       else
         socket
       end
@@ -23,11 +23,11 @@ defmodule MobaWeb.V2.CommunityLive do
   end
 
   def handle_event("show-pvp", _, socket) do
-    {:noreply, assign(socket, active_tab: "pvp")}
+    {:noreply, socket |> load_ranking("pvp") |> assign(active_tab: "pvp")}
   end
 
   def handle_event("show-pve", _, socket) do
-    {:noreply, assign(socket, active_tab: "pve")}
+    {:noreply, socket |> load_ranking("pve") |> assign(active_tab: "pve")}
   end
 
   def handle_event("create-message", params, %{assigns: %{current_player: %{user: user} = player}} = socket) do
@@ -117,16 +117,16 @@ defmodule MobaWeb.V2.CommunityLive do
       <.link
         class="hero-card card mb-3"
         style={"background-image: url(#{GH.background_url(@player.top_hero)})"}
-        navigate={~p"/player/#{@player.id}"}
+        navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
       >
         <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
           <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-            <span class="font-italic f-rpg" style="font-size: 30px;">##{@player.season_ranking}</span>
-            <div class="f-rpg">
+            <span class="font-italic f-rpg hero-card-rank" style="font-size: 30px;">#{@player.season_ranking}</span>
+            <div class="f-rpg hero-card-name">
               <img src={"/images/pve/#{@player.pve_tier}.png"} style="max-height: 40px" />
               {@player.user.username}
             </div>
-            <div class="btn-group">
+            <div class="btn-group hero-card-summary">
               <div
                 class="f-rpg text-white"
                 data-toggle="tooltip"
@@ -141,21 +141,21 @@ defmodule MobaWeb.V2.CommunityLive do
         <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
         <div class="card-footer transparent p-1" style="background:rgba(0,0,0,0.8)">
           <div class="row">
-            <div class="col justify-content-center d-flex">
+            <div class="col justify-content-center d-flex hero-card-stats">
               <div class="btn-group hero-stats">
-                <button class="btn btn-icon btn-outline-dark text-info" data-toggle="tooltip" title="Season Points">
-                  <i class="fa fa-arrows-to-dot"></i> {@player.pvp_points}
-                </button>
-                <button class="btn btn-icon btn-outline-dark text-danger" data-toggle="tooltip" title="Total Arena Win Rate">
-                  <i class="fa fa-swords mr-1"></i> {player_total_win_rate(@player)}
-                </button>
-                <button
-                  class="btn btn-icon btn-outline-dark text-warning"
-                  data-toggle="tooltip"
+                <.hero_stat_button tone="info" icon="fa fa-arrows-to-dot" title="Season Points" value={@player.pvp_points} />
+                <.hero_stat_button
+                  tone="danger"
+                  icon="fa fa-swords"
+                  title="Total Arena Win Rate"
+                  value={player_total_win_rate(@player)}
+                />
+                <.hero_stat_button
+                  tone="warning"
+                  icon="fa fa-trophy"
                   title="Best Immortal Streak"
-                >
-                  <i class="fa fa-trophy"></i> {@player.best_immortal_streak}
-                </button>
+                  value={@player.best_immortal_streak}
+                />
               </div>
             </div>
           </div>
@@ -171,39 +171,41 @@ defmodule MobaWeb.V2.CommunityLive do
       <.link
         class="hero-card card mb-3"
         style={"background-image: url(#{GH.background_url(@hero)})"}
-        navigate={~p"/hero/#{@hero}"}
+        navigate={preview_path(assigns, ~p"/hero/#{@hero}")}
       >
         <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
           <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-            <span class="font-italic f-rpg" style="font-size: 30px;">#{@hero.pve_ranking}</span>
-            <div data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
+            <span class="font-italic f-rpg hero-card-rank" style="font-size: 30px;">#{@hero.pve_ranking}</span>
+            <div class="hero-card-name" data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
               <img src={"/images/pve/#{@hero.player.pve_tier}.png"} style="max-height: 40px" />
               {@hero.name}
             </div>
-            <div class="btn-group">
-              <button
-                class="btn btn-icon btn-outline-light text-white"
+            <div class="btn-group hero-card-summary">
+              <span
+                tabindex="0"
+                class="game-stat btn btn-icon btn-outline-light text-white"
                 data-toggle="tooltip"
                 title={"Total farm: #{@hero.total_xp_farm + @hero.total_gold_farm}. Gold farm: #{@hero.total_gold_farm}. XP farm: #{@hero.total_xp_farm}<br/>"}
               >
                 <i class="fa fa-crown"></i>
                 {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
-              </button>
-              <button
-                class="btn btn-icon btn-outline-light text-white"
+              </span>
+              <span
+                tabindex="0"
+                class="game-stat btn btn-icon btn-outline-light text-white"
                 data-toggle="tooltip"
                 title="Time it took to finish Training"
               >
                 <i class="fa fa-clock-o"></i>
-                {GH.finished_time(@hero)} min
-              </button>
+                {GH.minutes_label(GH.finished_time(@hero), @preview)} min
+              </span>
             </div>
           </h4>
         </div>
         <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
         <div class="card-footer transparent p-1">
           <div class="row">
-            <div class="col justify-content-center d-flex">
+            <div class="col justify-content-center d-flex hero-card-stats">
               <.hero_stat_group hero={@hero} />
             </div>
           </div>
@@ -289,7 +291,10 @@ defmodule MobaWeb.V2.CommunityLive do
   defp player_row(assigns) do
     ~H"""
     <tr id={"user-#{@player.id}"} style={if @current, do: "background: rgba(255,255,255, 0.02)"}>
-      <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/player/#{@player.id}")}>
+      <td
+        class="text-center cursor-pointer border"
+        phx-click={JS.navigate(preview_path(assigns, ~p"/player/#{@player.id}"))}
+      >
         <span
           class="text-white"
           data-toggle={if @is_admin, do: "tooltip"}
@@ -310,7 +315,10 @@ defmodule MobaWeb.V2.CommunityLive do
           <.status_pill player={@player} />
         </span>
       </td>
-      <td class="text-center cursor-pointer border" phx-click={JS.navigate(~p"/player/#{@player.id}")}>
+      <td
+        class="text-center cursor-pointer border"
+        phx-click={JS.navigate(preview_path(assigns, ~p"/player/#{@player.id}"))}
+      >
         <h2 class="f-rpg text-danger">
           <%= if @player.ranking do %>
             #{@player.ranking}
@@ -324,7 +332,7 @@ defmodule MobaWeb.V2.CommunityLive do
         <div class="d-flex justify-content-start">
           <%= for hero <- @player.latest_heroes do %>
             <div class="col-2">
-              <.link navigate={~p"/hero/#{hero}"}>
+              <.link navigate={preview_path(assigns, ~p"/hero/#{hero}")}>
                 <img
                   src={GH.image_url(hero.avatar)}
                   style={"width: 100px; #{if Game.max_farm?(hero), do: "border: 1px solid red; border-radius:2px"}"}
@@ -345,7 +353,7 @@ defmodule MobaWeb.V2.CommunityLive do
                     data-toggle={if @is_admin, do: "tooltip"}
                     title={if @is_admin, do: hero.finished_at |> Timex.format("{relative}", :relative) |> elem(1)}
                   >
-                    Trained in {GH.finished_time(hero)} min
+                    Trained in {GH.minutes_label(GH.finished_time(hero), @preview)} min
                   </span>
                 <% else %>
                   <span class="text-center text-muted">{hero.pve_total_turns} turns left</span>
@@ -431,12 +439,15 @@ defmodule MobaWeb.V2.CommunityLive do
 
   defp player_season_score(player), do: 100 * player.best_immortal_streak + 100 * player.pve_tier + player.pvp_points
 
-  defp load_rankings(socket) do
-    assign(socket,
-      pvp_ranking: Moba.season_ranking() |> Enum.filter(& &1.top_hero) |> Enum.take(30),
-      pve_ranking: Moba.pve_ranking() |> Enum.take(30)
-    )
+  defp load_ranking(%{assigns: %{pvp_ranking: nil}} = socket, "pvp") do
+    assign(socket, pvp_ranking: Moba.season_ranking() |> Enum.filter(& &1.top_hero) |> Enum.take(30))
   end
+
+  defp load_ranking(%{assigns: %{pve_ranking: nil}} = socket, "pve") do
+    assign(socket, pve_ranking: Moba.pve_ranking() |> Enum.take(30))
+  end
+
+  defp load_ranking(socket, _), do: socket
 
   defp player_shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
   defp player_shadow_rank(%{pvp_tier: tier}), do: tier
@@ -461,15 +472,14 @@ defmodule MobaWeb.V2.CommunityLive do
       active_tab: "online",
       form: to_form(Accounts.change_message()),
       channel: channel,
-      pve_ranking: [],
+      pve_ranking: nil,
       messages: messages,
       sidebar_code: channel,
       updates: updates,
-      pvp_ranking: [],
+      pvp_ranking: nil,
       current_user: user,
       notifications: 0
     )
-    |> tick_user(user)
     |> stats_assigns()
   end
 

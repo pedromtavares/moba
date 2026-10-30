@@ -13,7 +13,7 @@
       {assigns[:page_title] || "Free Strategy Game"}
     </.live_title>
     <link rel="stylesheet" href={~p"/css/app.css"} />
-    <link rel="shortcut icon" href={assigns[:favicon] || ~p"/images/favicon.png"} />
+    <link rel="icon" type="image/png" href={assigns[:favicon] || ~p"/images/favicon.png?v=helmet-wide"} />
     <link rel="stylesheet" href="https://use.typekit.net/juc8mry.css" />
     <script src="https://kit.fontawesome.com/26d6de301e.js">
     </script>
@@ -21,11 +21,11 @@
   <body>
     <%= if is_nil(assigns[:current_user]) &&
             (is_nil(assigns[:current_player]) || is_nil(assigns[:current_player].user_id)) do %>
-      <header id="topnav">
+      <header id="topnav" class="guest-topbar">
         <div class="topbar-menu py-2">
           <div class="container-fluid text-right">
             <div id="inner-navigation">
-              <.link href={~p"/users/log_in"} class="h4 text-white mr-2">
+              <.link href={preview_path(assigns, ~p"/users/log_in")} class="h4 text-white mr-2">
                 <i class="fa fa-sign-in mr-1"></i> Already registered? Sign in
               </.link>
             </div>
@@ -33,7 +33,11 @@
         </div>
       </header>
     <% else %>
-      <.mobile_navigation current_player={@current_player} current_hero={assigns[:current_hero]} />
+      <.mobile_navigation
+        current_player={@current_player}
+        current_hero={assigns[:current_hero]}
+        preview={assigns[:preview] || false}
+      />
     <% end %>
     <div class="wrapper" id="main-wrapper">
       <div class="container-fluid">

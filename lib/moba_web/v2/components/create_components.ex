@@ -1,11 +1,15 @@
 defmodule MobaWeb.V2.Components.CreateComponents do
   use Phoenix.Component
+  import MobaWeb.Preview, only: [preview_path: 2]
 
   import MobaWeb.V2.Components.GameComponents, only: [league_badge: 1]
+  import MobaWeb.CoreComponents, only: [input: 1, icon: 1]
 
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
+
+  embed_templates "create_components/*"
 
   attr :avatars, :list, required: true
   attr :all_avatars, :list, required: true
@@ -90,6 +94,8 @@ defmodule MobaWeb.V2.Components.CreateComponents do
   attr :selected_skills, :list, required: true
   attr :skills, :list, required: true
 
+  attr :preview, :boolean, default: false
+
   def selected_avatar_panel(assigns) do
     ~H"""
     <div class="row mt-3" phx-hook="ScrollToTop" id="scroll-to-top">
@@ -114,6 +120,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
           />
 
           <.create_submit_panel
+            preview={@preview}
             current_player={@current_player}
             custom={@custom}
             error={@error}
@@ -315,6 +322,8 @@ defmodule MobaWeb.V2.Components.CreateComponents do
   attr :selected_build_index, :integer, default: nil
   attr :selected_skills, :list, required: true
 
+  attr :preview, :boolean, default: false
+
   def create_submit_panel(assigns) do
     ~H"""
     <%= if Enum.count(@selected_skills) == 3 do %>
@@ -358,7 +367,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
           </div>
         <% end %>
       <% else %>
-        <.form for={%{}} action="/start" method="post">
+        <.form for={%{}} action={preview_path(assigns, "/start")} method="post">
           <input type="hidden" name="avatar" value={@selected_avatar.id} />
           <%= for skill <- @selected_skills do %>
             <input type="hidden" name="skills[]" value={skill.id} />
@@ -391,7 +400,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
           <i class="fa fa-refresh mr-2"></i>Repick Avatar
         </a>
       <% end %>
-      <div class="hero-card card">
+      <div class="hero-card card hero-card-avatar">
         <div class="card-body text-center p-0" style={"background-image: url(#{GH.background_url(@avatar)})"}>
           <div class="name">
             <h3 class="m-0 text-center p-2 text-white f-rpg">{@avatar.name}</h3>
@@ -408,39 +417,39 @@ defmodule MobaWeb.V2.Components.CreateComponents do
         <div class="transparent card-footer text-center">
           <.avatar_stats avatar={@avatar} avatars={@avatars} />
           <%= if @selected do %>
-            <div class="btn-group mt-2">
-              <button class="btn btn-outline-dark text-danger">
+            <div class="btn-group avatar-attributes mt-2">
+              <span class="avatar-attribute btn btn-outline-dark text-danger">
                 <i class="fa fa-heart mr-1"></i>Health <br />
                 <strong>{@avatar.total_hp}</strong>
                 <br />
                 <small class="font-italic">{@avatar.hp_per_level} per level</small>
-              </button>
-              <button class="btn btn-outline-dark text-info">
+              </span>
+              <span class="avatar-attribute btn btn-outline-dark text-info">
                 <i class="fa fa-bolt mr-1"></i>Energy <br />
                 <strong>{@avatar.total_mp}</strong>
                 <br />
                 <small class="font-italic">{@avatar.mp_per_level} per level</small>
-              </button>
-              <button class="btn btn-outline-dark text-success">
+              </span>
+              <span class="avatar-attribute btn btn-outline-dark text-success">
                 <i class="fa fa-dagger mr-1"></i>Attack <br />
                 <strong>{@avatar.atk}</strong>
                 <br />
                 <small class="font-italic">{@avatar.atk_per_level} per level</small>
-              </button>
+              </span>
             </div>
-            <div class="btn-group mt-1">
-              <button class="btn btn-outline-dark text-warning">
+            <div class="btn-group avatar-attributes mt-1">
+              <span class="avatar-attribute btn btn-outline-dark text-warning">
                 <i class="fa fa-shield-halved mr-1"></i>Armor <br />
                 <strong>{@avatar.armor}</strong>
-              </button>
-              <button class="btn btn-outline-dark text-pink">
+              </span>
+              <span class="avatar-attribute btn btn-outline-dark text-pink">
                 <i class="fa fa-galaxy mr-1"></i>Power <br />
                 <strong>{@avatar.power}</strong>
-              </button>
-              <button class="btn btn-outline-dark text-orange">
+              </span>
+              <span class="avatar-attribute btn btn-outline-dark text-orange">
                 <i class="fa fa-running mr-1"></i>Speed <br />
                 <strong>{@avatar.speed}</strong>
-              </button>
+              </span>
             </div>
           <% end %>
           <div class="row mt-3">
@@ -538,6 +547,108 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     """
   end
 
+  attr :avatar, :map, required: true
+  attr :avatars, :list, required: true
+  attr :selected, :boolean, default: false
+
+  defp invoke_avatar(assigns) do
+    ~H"""
+    <article class="invoke-avatar" id={"avatar-#{@avatar.id}"}>
+      <div class="invoke-avatar-art" style={"background-image: url(#{GH.background_url(@avatar)})"}>
+        <h2>{@avatar.name}</h2>
+        <div class="invoke-ultimate" tabindex="0" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
+          <img src={GH.image_url(@avatar.ultimate)} alt="" />
+          <div><small>Ultimate</small><strong>{@avatar.ultimate.name}</strong></div>
+        </div>
+      </div>
+      <div class="invoke-avatar-info">
+        <div class="invoke-role">
+          <img src={"/images/#{@avatar.role}_icon.png"} alt="" />
+          <div><strong>{role(@avatar)}</strong><span>{role_description(@avatar)}</span></div>
+        </div>
+        <div class="invoke-attributes">
+          <div
+            :for={{stat, label} <- [offense: "Offense", defense: "Defense", magic: "Magic", speed: "Speed"]}
+            data-stat={stat}
+          >
+            <strong><.icon name={"game-#{stat}"} class="invoke-stat-icon" />{label}</strong>
+            <div
+              class="invoke-meter"
+              role="meter"
+              aria-label={label}
+              aria-valuemin="0"
+              aria-valuemax="100"
+              aria-valuenow={round(display_percentage(stat, @avatar, @avatars))}
+            >
+              <span style={"width:#{display_percentage(stat, @avatar, @avatars)}%"}></span>
+            </div>
+          </div>
+        </div>
+        <dl :if={@selected} class="invoke-base-stats">
+          <div
+            :for={
+              {stat, label, value, gain} <- [
+                {:health, "Health", @avatar.total_hp, @avatar.hp_per_level},
+                {:energy, "Energy", @avatar.total_mp, @avatar.mp_per_level},
+                {:attack, "Attack", @avatar.atk, @avatar.atk_per_level},
+                {:armor, "Armor", @avatar.armor, nil},
+                {:power, "Power", @avatar.power, nil},
+                {:speed, "Speed", @avatar.speed, nil}
+              ]
+            }
+            data-stat={stat}
+          >
+            <dt><.icon name={"game-#{stat}"} class="invoke-stat-icon" />{label}</dt>
+            <dd>{value}</dd>
+            <small :if={gain}>+{gain} / level</small>
+          </div>
+        </dl>
+        <p class="invoke-gameplay">{@avatar.description}</p>
+        <button
+          :if={!@selected}
+          type="button"
+          id={"pick-avatar-#{@avatar.id}"}
+          class="invoke-primary"
+          phx-click="pick-avatar"
+          phx-value-id={@avatar.id}
+        >
+          Choose {@avatar.name} <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </article>
+    """
+  end
+
+  attr :skill, :map, required: true
+
+  defp invoke_energy(assigns) do
+    ~H"""
+    <span class="invoke-energy" aria-label={"Energy cost: #{@skill.mp_cost || 0}"}>
+      <.icon name="game-energy" class="invoke-stat-icon" />{@skill.mp_cost || 0}
+    </span>
+    """
+  end
+
+  defp invoke_name(assigns) do
+    assigns = assign(assigns, form: to_form(%{"name" => assigns.name}))
+
+    ~H"""
+    <.form for={@form} id="invoke-name-form" phx-change="validate">
+      <.input
+        field={@form[:name]}
+        label="Hero name"
+        type="text"
+        minlength="3"
+        maxlength="15"
+        class="invoke-name-input"
+        phx-debounce="250"
+        aria-describedby={@error && "invoke-name-error"}
+      />
+      <p :if={@error} id="invoke-name-error" role="alert">{@error}</p>
+    </.form>
+    """
+  end
+
   defp roles, do: ["tank", "bruiser", "nuker", "carry", "support"]
 
   defp build_title(_, selected_skills, nil) when length(selected_skills) > 0, do: "Custom Build"
@@ -549,6 +660,11 @@ defmodule MobaWeb.V2.Components.CreateComponents do
   end
 
   defp builds_for(role), do: Game.skill_builds_for(role)
+
+  defp invoke_build_art(title) do
+    slug = title |> String.downcase() |> String.replace(" ", "-")
+    "/images/builds/#{slug}.jpg"
+  end
 
   defp role(%{role: role}) when not is_nil(role), do: String.capitalize(role)
   defp role(_), do: ""

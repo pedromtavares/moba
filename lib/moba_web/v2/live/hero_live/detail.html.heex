@@ -1,0 +1,140 @@
+<div id="hero-detail" class="hero-detail">
+  <div class="hero-detail-overview">
+    <article class="hero-card card hero-detail-card" id="hero-detail-card" aria-labelledby="hero-detail-name">
+      <div class="card-header">
+        <div class="hero-detail-identity">
+          <div>
+            <h2 id="hero-detail-name">{@hero.name}</h2>
+            <span class="hero-detail-avatar-name">{@hero.avatar.name}</span>
+          </div>
+          <div class="hero-detail-level"><span>Level</span><strong>{@hero.level}</strong></div>
+        </div>
+      </div>
+      <div class="card-body">
+        <img src={GH.background_url(@hero)} alt={@hero.avatar.name} />
+      </div>
+      <div class="card-footer">
+        <div id="hero-detail-stats" class="hero-detail-stats"><.hero_stats_buttons hero={@hero} /></div>
+        <div class="row">
+          <div class="col-12 hero-detail-loadout" id="hero-detail-loadout">
+            <.hero_skill_strip skills={@hero.skills} id_prefix="skill" id_suffix={@hero.id} />
+            <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
+          </div>
+        </div>
+        <nav :if={@hero.player.user_id || @hero.player_id == @current_player.id} class="hero-detail-actions" aria-label="Hero actions">
+          <.link :if={@hero.player.user_id} id="hero-detail-player" navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}>
+            Player profile <span aria-hidden="true">→</span>
+          </.link>
+          <button
+            :if={@hero.player_id == @current_player.id}
+            id="customize-hero"
+            type="button"
+            phx-click="toggle-customize"
+            aria-expanded={to_string(@show_hud)}
+            aria-controls="hero-bar"
+          >
+            {if @show_hud, do: "Close customization", else: "Customize hero"}
+          </button>
+          <%= if @hero.player_id == @current_player.id && @skin_selection do %>
+            <div class="hero-detail-skins" id="hero-detail-skins">
+              <button
+                :if={has_previous_skin?(@skin_selection)}
+                id="hero-previous-skin"
+                type="button"
+                phx-click="set-skin"
+                phx-value-skin-code={previous_skin_for(@skin_selection)}
+                aria-label="Previous skin"
+              >
+                ←
+              </button>
+              <.link id="hero-view-skins" navigate={preview_path(assigns, ~p"/tavern?#{%{avatar: @hero.avatar.code}}")}>
+                View skins
+              </.link>
+              <button
+                :if={has_next_skin?(@skin_selection)}
+                id="hero-next-skin"
+                type="button"
+                phx-click="set-skin"
+                phx-value-skin-code={next_skin_for(@skin_selection)}
+                aria-label="Next skin"
+              >
+                →
+              </button>
+            </div>
+          <% end %>
+        </nav>
+      </div>
+    </article>
+  </div>
+
+  <section id="hero-detail-performance" class="hero-detail-performance" aria-labelledby="hero-league-title">
+    <div class="hero-detail-section-heading">
+      <h2 id="hero-league-title">{Moba.leagues()[@hero.league_tier]}</h2>
+      <span id="hero-training-status" data-finished={to_string(!is_nil(@hero.finished_at))}>
+        {if @hero.finished_at, do: "Complete", else: "In training"}
+      </span>
+    </div>
+    <ol class="hero-league-path" aria-label="League progression">
+      <li
+        :for={{tier, name} <- Enum.sort(Moba.leagues())}
+        class={tier_class(tier, @hero.league_tier)}
+        aria-current={if tier == @hero.league_tier, do: "step"}
+        title={name}
+      >
+        <img src={"/images/league/#{tier}.png"} alt={name} />
+      </li>
+    </ol>
+    <dl class="hero-detail-metrics">
+      <div>
+        <dt>Total farm</dt>
+        <dd class="hero-farm-total" title={@hero.total_xp_farm + @hero.total_gold_farm}>
+          {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
+        </dd>
+      </div>
+      <div>
+        <dt>XP farm</dt>
+        <dd class="hero-farm-xp" title={@hero.total_xp_farm}>{GH.farming_amount_label(@hero.total_xp_farm)}</dd>
+      </div>
+      <div>
+        <dt>Gold farm</dt>
+        <dd class="hero-farm-gold" title={@hero.total_gold_farm}>{GH.farming_amount_label(@hero.total_gold_farm)}</dd>
+      </div>
+      <div id="hero-detail-duration">
+        <%= if @hero.finished_at do %>
+          <dt>Training time</dt>
+          <dd>{GH.minutes_label(GH.finished_time(@hero), true)} <small>min</small></dd>
+        <% else %>
+          <dt>Turns left</dt>
+          <dd>{@hero.pve_total_turns + @hero.pve_current_turns}</dd>
+        <% end %>
+      </div>
+    </dl>
+  </section>
+
+  <section id="hero-leaderboard" class="hero-leaderboard" aria-label="Training leaderboard">
+    <div id="ranking-card" class="hero-ranking-scroll" tabindex="0" role="region" aria-label="Training leaderboard">
+      <table class="hero-ranking-table">
+        <thead>
+          <tr>
+            <th scope="col">Rank</th>
+            <th scope="col">Hero</th>
+            <th scope="col">Farm</th>
+            <th scope="col">Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          <.ranking_entry
+            :for={hero <- @ranking}
+            hero={hero}
+            selected={hero.id == @hero.id}
+            scroll={hero.id == @hero.id}
+            preview={@preview}
+          />
+        </tbody>
+        <tfoot :if={!in_ranking?(@ranking, @hero)}>
+          <.ranking_entry hero={@hero} selected={true} scroll={false} preview={@preview} />
+        </tfoot>
+      </table>
+    </div>
+  </section>
+</div>

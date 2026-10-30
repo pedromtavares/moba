@@ -1,11 +1,20 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
   <div class="community">
-  <div class="row mt-2">
+  <header :if={@preview} id="community-heading" class="community-heading" style="--community-scene: url(/images/tutorial/hall-of-legends.jpg)">
+    <div class="community-heading-copy">
+      <p class="community-eyebrow">The gathering hall</p>
+      <h1>Community</h1>
+      <p class="community-heading-description">Share your victories. Shape what comes next.</p>
+    </div>
+    <a href="https://discord.gg/QNwEdPS" target="_blank" rel="noopener noreferrer" class="btn base-secondary community-discord"><i class="fab fa-discord" aria-hidden="true"></i>Join our Discord <span aria-hidden="true">↗</span></a>
+  </header>
+  <div :if={!@preview} class="row mt-2">
     <div class="col">
       <a
         href="https://discord.gg/QNwEdPS"
@@ -16,32 +25,33 @@
       </a>
     </div>
   </div>
-  <div class="row mt-2">
+  <div class="row mt-2 community-hub">
     <div class="col-lg-6">
-      <div class="card mb-0">
-        <h5 class="card-header font-17 text-white">
+      <div class="card mb-0 community-panel community-board" id="community-board">
+        <h5 class="card-header font-17 text-white community-panel-heading">
           <i class="fa fa-comments mr-1"></i>
-          Message Board<span class="text-muted font-italic font-15 ml-2">Bug reports or any feedback for the devs are deeply appreciated!</span>
+          <span class="community-panel-title">Message Board</span><span class="text-muted font-italic font-15 ml-2 community-panel-description">Bug reports or any feedback for the devs are deeply appreciated!</span>
         </h5>
         <div class="card-body">
-          <div class="inbox-widget messages">
+          <div class="inbox-widget messages" id="community-messages">
+            <div :if={@preview && @messages == []} class="community-empty">The message board is quiet. Share your feedback or ask a question below.</div>
             <%= for message <- @messages do %>
-              <div class="inbox-item">
+              <div class="inbox-item" id={"community-message-#{message.id}"}>
                 <div class="inbox-item-img">
                   <img src={"/images/pve/#{message.tier}.png"} />
                 </div>
                 <p class="inbox-item-author">
                   <.link
-                    navigate={~p"/player/#{message.user_id}"}
+                    navigate={preview_path(assigns, ~p"/player/#{message.user_id}")}
                     class={if(message.is_admin, do: "text-danger", else: "text-dark")}
                   >
                     {message.author}
                   </.link>
                   <%= if message.is_admin do %>
-                    <small class="text-danger">(admin)</small>
+                    <small class="text-danger community-admin">(admin)</small>
                   <% end %>
                 </p>
-                <p class="inbox-item-text">{formatted_body(message)}</p>
+                <div class="inbox-item-text">{formatted_body(message)}</div>
                 <p class="inbox-item-date">
                   <%= if @is_admin do %>
                     <a
@@ -58,11 +68,13 @@
             <% end %>
           </div>
           <%= unless @current_player.status == "silenced" do %>
-            <hr class="my-2" />
-            <.form for={@form} phx-submit="create-message" id="community-message-form" class="form-horizontal">
+            <hr :if={!@preview} class="my-2" />
+            <.form for={@form} phx-submit="create-message" id="community-message-form" class="form-horizontal community-composer">
+              <div class="community-compose-field">
+              <label :if={@preview} for="community-message-body">Share a message</label>
               <input
                 type="text"
-                id={@form[:body].id}
+                id="community-message-body"
                 name={@form[:body].name}
                 class="form-control"
                 placeholder={
@@ -74,24 +86,27 @@
                 minlength="2"
                 disabled={is_nil(@current_player.user)}
               />
+              </div>
+              <button :if={@preview} type="submit" class="btn base-secondary" disabled={is_nil(@current_player.user)} phx-disable-with="Sending…">Send</button>
             </.form>
           <% end %>
         </div>
       </div>
     </div>
     <div class="col-lg-6">
-      <div class="card mb-0">
-        <h5 class="card-header font-17 text-white">
+      <div class="card mb-0 community-panel community-announcements" id="community-announcements">
+        <h5 class="card-header font-17 text-white community-panel-heading">
           <i class="fa fa-globe mr-1"></i>
-          Updates
-          <span class="text-muted font-italic font-15 ml-2">
+          <span class="community-panel-title">Updates</span>
+          <span class="text-muted font-italic font-15 ml-2 community-panel-description">
             Stay up to date with the latest development updates in BrowserMOBA
           </span>
         </h5>
         <div class="card-body updates">
-          <ul class="list-unstyled timeline-sm">
+          <div :if={@preview && @updates == []} class="community-empty">No development updates yet.</div>
+          <ul class="list-unstyled timeline-sm" id="community-updates">
             <%= for update <- @updates do %>
-              <li class="timeline-sm-item">
+              <li class="timeline-sm-item" id={"community-update-#{update.id}"}>
                 <%= if @is_admin do %>
                   <a
                     href="javascript:void(0)"
@@ -103,27 +118,29 @@
                   </a>
                 <% end %>
                 <h5 class="mt-0 mb-1">{update.title}</h5>
-                <p class="text-muted mt-2">{formatted_body(update)}</p>
+                <div class="text-muted mt-2 community-update-body">{formatted_body(update)}</div>
               </li>
             <% end %>
           </ul>
           <%= if @is_admin do %>
             <hr />
             <.form for={@form} phx-submit="create-update" id="community-update-form" class="form-horizontal">
-              <input type="text" id={@form[:title].id} name={@form[:title].name} class="form-control" />
+              <label :if={@preview} for="community-update-title">Update title</label>
+              <input type="text" id="community-update-title" name={@form[:title].name} class="form-control" />
               <br />
-              <textarea id={@form[:body].id} name={@form[:body].name} class="form-control" rows="10"></textarea>
+              <label :if={@preview} for="community-update-body">Announcement</label>
+              <textarea id="community-update-body" name={@form[:body].name} class="form-control" rows="10"></textarea>
               <br />
-              <button type="submit" class="btn btn-primary btn-sm">Submit</button>
+              <button type="submit" class={["btn", if(@preview, do: "base-secondary", else: "btn-primary btn-sm")]}>Submit</button>
             </.form>
           <% end %>
         </div>
       </div>
     </div>
   </div>
-  <div class="row mt-3">
+  <div class="row mt-3 community-rankings">
     <div class="col text-center">
-      <ul class="nav nav-tabs nav-bordered nav-justified">
+      <ul class="nav nav-tabs nav-bordered nav-justified community-tabs" role="tablist" aria-label="Community rankings">
         <li class="nav-item">
           <a
             href="javascript:;"
@@ -131,10 +148,13 @@
             phx-click="show-online"
             phx-hook={if @active_tab != "online", do: "Loading"}
             id="show-online-link"
+            role="tab"
+            aria-selected={to_string(@active_tab == "online")}
+            aria-controls="community-online"
           >
             <span class="loading-text f-rpg">
               <i class={"fa fa-users fa-2x text-#{if @active_tab == "online", do: "success", else: "white"}"}></i>
-              <br />RECENT PLAYERS
+              <br :if={!@preview} />{if @preview, do: "Recent players", else: "RECENT PLAYERS"}
             </span>
           </a>
         </li>
@@ -145,10 +165,13 @@
             phx-click="show-pvp"
             phx-hook={if @active_tab != "pvp", do: "Loading"}
             id="show-pvp-link"
+            role="tab"
+            aria-selected={to_string(@active_tab == "pvp")}
+            aria-controls="community-pvp"
           >
             <span class="loading-text f-rpg">
               <i class={"fa fa-trophy fa-2x text-#{if @active_tab == "pvp", do: "success", else: "white"}"}></i>
-              <br />TOP PLAYERS
+              <br :if={!@preview} />{if @preview, do: "Top players", else: "TOP PLAYERS"}
             </span>
           </a>
         </li>
@@ -159,15 +182,18 @@
             phx-click="show-pve"
             phx-hook={if @active_tab != "pve", do: "Loading"}
             id="show-pve-link"
+            role="tab"
+            aria-selected={to_string(@active_tab == "pve")}
+            aria-controls="community-pve"
           >
             <span class="loading-text f-rpg">
               <i class={"fa fa-helmet-battle fa-2x text-#{if @active_tab == "pve", do: "success", else: "white"}"}></i>
-              <br />TOP HEROES
+              <br :if={!@preview} />{if @preview, do: "Top heroes", else: "TOP HEROES"}
             </span>
           </a>
         </li>
       </ul>
-      <div class={"mt-2 mb-2 #{unless @active_tab == "online", do: "d-none"}"}>
+      <div :if={@active_tab == "online"} class="mt-2 mb-2" id="community-online" role="tabpanel" aria-labelledby="show-online-link">
         <div :if={@is_admin} class="row mt-3">
           <div class="col-xl-3 col-md-6">
             <div class="widget-simple text-center card-box" phx-click="user-filter">
@@ -232,7 +258,7 @@
                   </th>
                 </tr>
                 <%= for player <- @players do %>
-                  <.player_row player={player} is_admin={@is_admin} current={player.id == @current_player.id} />
+                  <.player_row preview={Map.get(assigns, :preview, false)} player={player} is_admin={@is_admin} current={player.id == @current_player.id} />
                 <% end %>
               </tbody>
             </table>
@@ -376,7 +402,7 @@
               <%= for duel <- @duels do %>
                 <tr>
                   <td>
-                    <h5><.link navigate={~p"/arena/#{duel}"}>Duel {duel.id}</.link></h5>
+                    <h5><.link navigate={preview_path(assigns, ~p"/arena/#{duel}")}>Duel {duel.id}</.link></h5>
                   </td>
                   <td>
                     {duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)}
@@ -437,17 +463,17 @@
           </div>
         </div>
       </div>
-      <div class={"mt-1 mb-1 #{unless @active_tab == "pvp", do: "d-none"}"}>
+      <div :if={@active_tab == "pvp"} class="mt-1 mb-1" id="community-pvp" role="tabpanel" aria-labelledby="show-pvp-link">
         <div class="row">
           <%= for player <- @pvp_ranking do %>
-            <.player_card player={player} />
+            <.player_card preview={Map.get(assigns, :preview, false)} player={player} />
           <% end %>
         </div>
       </div>
-      <div class={"mt-1 mb-1 #{unless @active_tab == "pve", do: "d-none"}"}>
+      <div :if={@active_tab == "pve"} class="mt-1 mb-1" id="community-pve" role="tabpanel" aria-labelledby="show-pve-link">
         <div class="row">
           <%= for hero <- @pve_ranking do %>
-            <.pve_hero_card hero={hero} />
+            <.pve_hero_card preview={Map.get(assigns, :preview, false)} hero={hero} />
           <% end %>
         </div>
       </div>

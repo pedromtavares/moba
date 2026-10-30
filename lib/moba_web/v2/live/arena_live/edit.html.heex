@@ -1,187 +1,230 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-  <div class="arena arena-edit mt-2">
-    <div class="row">
-      <div class="col">
-        <div class="card main-card" id="teams-container" style={if @hero, do: "height: 80vh", else: "height: 85vh"}>
-          <.form for={@team_form} id="arena-team-form" phx-submit="new-team">
-            <div class="d-flex">
-              <input
-                type="text"
-                name={@team_form[:name].name}
-                value={@team_form[:name].value}
-                maxlength="20"
-                class="form-control w-50"
-                placeholder="Team name"
-                required
-              />
-              <button class="btn btn-primary w-50" id="create-team-button">
-                <span class="loading-text"><i class="fa fa-plus"></i> Create Team</span>
-              </button>
+  <%= if @preview do %>
+    <.teams_modern {assigns} />
+  <% else %>
+    <div class="arena arena-edit mt-2">
+      <div class="row">
+        <div class="col">
+          <div class="card main-card" id="teams-container" style={if @hero, do: "height: 80vh", else: "height: 85vh"}>
+            <.form for={@team_form} id="arena-team-form" phx-submit="new-team">
+              <div class="d-flex">
+                <input
+                  type="text"
+                  name={@team_form[:name].name}
+                  value={@team_form[:name].value}
+                  maxlength="20"
+                  class="form-control w-50"
+                  placeholder="Team name"
+                  required
+                />
+                <button class="btn btn-primary w-50" id="create-team-button">
+                  <span class="loading-text"><i class="fa fa-plus"></i> Create Team</span>
+                </button>
+              </div>
+            </.form>
+            <.hud_notice
+              :if={@preview && @teams == []}
+              id="arena-no-teams"
+              title="No teams yet"
+              description="Name your first team above."
+            />
+            <div class="overflow">
+              <table class="table table-dark text-center m-0 mt-2 table-sm">
+                <%= for team <- @teams do %>
+                  <tr
+                    class={["action-cursor", @selected_team && @selected_team.id == team.id && "selected-team"]}
+                    phx-click="select-team"
+                    phx-value-id={team.id}
+                    id={"team-row-#{team.id}"}
+                  >
+                    <td class="py-3" style="width: 30%">
+                      <h5 class="m-0"><span class="loading-text">{team.name}</span></h5>
+                    </td>
+                    <td style="width: 1%">
+                      <i :if={team.defensive} class="fa fa-shield-halved"></i>
+                    </td>
+                    <td>
+                      <div :for={pick <- team.picks} class="avatar-container">
+                        <img src={GH.image_url(pick.avatar)} class="avatar img-border" />
+                      </div>
+                    </td>
+                    <td style="width: 1%">{team.used_count}</td>
+                  </tr>
+                <% end %>
+              </table>
             </div>
-          </.form>
-          <div class="overflow">
-            <table class="table table-dark text-center m-0 mt-2 table-sm">
-              <%= for team <- @teams do %>
-                <tr
-                  class={["action-cursor", @selected_team && @selected_team.id == team.id && "selected-team"]}
-                  phx-click="select-team"
-                  phx-value-id={team.id}
-                  id={"team-row-#{team.id}"}
-                >
-                  <td class="py-3" style="width: 30%">
-                    <h5 class="m-0"><span class="loading-text">{team.name}</span></h5>
-                  </td>
-                  <td style="width: 1%">
-                    <i :if={team.defensive} class="fa fa-shield-halved"></i>
-                  </td>
-                  <td>
-                    <div :for={pick <- team.picks} class="avatar-container">
-                      <img src={GH.image_url(pick.avatar)} class="avatar img-border" />
-                    </div>
-                  </td>
-                  <td style="width: 1%">{team.used_count}</td>
-                </tr>
-              <% end %>
-            </table>
           </div>
         </div>
-      </div>
-      <div class="col">
-        <div class="card main-card" id="current-team-container" phx-hook="EqualHeight" phx-target="#teams-container">
-          <%= if @selected_team do %>
-            <div class="d-flex justify-content-around">
-              <button
-                class="btn btn-danger btn-sm my-1"
-                data-confirm="Are you sure?"
-                phx-click="remove-team"
-                id="remove-selected-team"
-              >
-                <span class="loading-text"><i class="fa fa-trash"></i> Remove</span>
-              </button>
-              <h3 class="text-center">{@selected_team.name}</h3>
-              <div class="custom-control custom-switch mt-2">
-                <input
-                  type="checkbox"
-                  class="custom-control-input"
-                  id="toggle-defensive"
-                  phx-click="toggle-defensive"
-                  checked={@selected_team.defensive}
-                />
-                <label class="custom-control-label" for="toggle-defensive">Defensive</label>
+        <div class="col">
+          <div class="card main-card" id="current-team-container" phx-hook="EqualHeight" phx-target="#teams-container">
+            <%= if @selected_team do %>
+              <div class="d-flex justify-content-around">
+                <button
+                  class="btn btn-danger btn-sm my-1"
+                  data-confirm="Are you sure?"
+                  phx-click="remove-team"
+                  id="remove-selected-team"
+                >
+                  <span class="loading-text"><i class="fa fa-trash"></i> Remove</span>
+                </button>
+                <h3 class="text-center">{@selected_team.name}</h3>
+                <div class="custom-control custom-switch mt-2">
+                  <input
+                    type="checkbox"
+                    class="custom-control-input"
+                    id="toggle-defensive"
+                    phx-click="toggle-defensive"
+                    checked={@selected_team.defensive}
+                  />
+                  <label class="custom-control-label" for="toggle-defensive">Defensive</label>
+                </div>
               </div>
+              <hr />
+              <.hud_notice
+                :if={@preview && @selected_team.picks == []}
+                id="arena-team-empty"
+                title="Choose your lineup"
+                description="Add up to 5 heroes from your collection."
+              />
+              <div class="overflow">
+                <div class="row">
+                  <div :for={pick <- @selected_team.picks} class="col-md-12 mt-1" id={"team-hero-#{pick.id}"}>
+                    <.pvp_hero_card hero={pick}>
+                      <:actions>
+                        <button
+                          class="btn btn-sm btn-block btn-secondary m-0 mr-1"
+                          phx-click="move-up"
+                          phx-value-id={pick.id}
+                          id={"move-up-#{pick.id}"}
+                        >
+                          <span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span>
+                        </button>
+                        <button
+                          class="btn btn-sm btn-block btn-secondary m-0 mx-1"
+                          phx-click="move-down"
+                          phx-value-id={pick.id}
+                          id={"move-down-#{pick.id}"}
+                        >
+                          <span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span>
+                        </button>
+                        <button
+                          :if={@selected_team.player_id == pick.player_id}
+                          class="btn btn-sm btn-block btn-warning m-0 mr-1"
+                          phx-click="edit-hero"
+                          phx-value-id={pick.id}
+                          id={"edit-hero-#{pick.id}"}
+                        >
+                          <span class="loading-text"><i class="fa fa-edit"></i> Edit</span>
+                        </button>
+                        <button
+                          class="btn btn-sm btn-block btn-danger m-0 ml-1"
+                          phx-click="remove-hero"
+                          phx-value-id={pick.id}
+                          id={"remove-hero-#{pick.id}"}
+                        >
+                          <span class="loading-text"><i class="fa fa-times"></i> Remove</span>
+                        </button>
+                      </:actions>
+                    </.pvp_hero_card>
+                  </div>
+                </div>
+              </div>
+            <% else %>
+              <.hud_notice
+                :if={@preview}
+                id="arena-no-selected-team"
+                title="Build your lineup"
+                description="Create a team, then add your heroes."
+              />
+            <% end %>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card main-card" id="heroes-container" phx-hook="EqualHeight" phx-target="#teams-container">
+            <div class="d-flex justify-content-around">
+              <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-around">
+                <li class="nav-item">
+                  <a
+                    href="javascript:;"
+                    phx-click="hero-list"
+                    phx-value-type="trained"
+                    class={["nav-link px-2 py-1", @heroes_tab == "trained" && "active"]}
+                    id="trained-heroes-button"
+                  >
+                    <span class="d-inline-block loading-text">Trained Heroes</span>
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a
+                    href="javascript:;"
+                    phx-click="hero-list"
+                    phx-value-type="available"
+                    class={["nav-link px-2 py-1", @heroes_tab == "available" && "active"]}
+                    id="available-heroes-button"
+                  >
+                    <span class="d-inline-block loading-text">Available Heroes</span>
+                  </a>
+                </li>
+              </ul>
+              <a :if={@heroes_tab == "trained"} href="javascript:;" class="h5 mt-2" phx-click="sort" id="hero-sort">
+                <i class="fa fa-circle-sort mt-1"></i> Sorted by {if @sort == :recent, do: "Recent", else: "Rank"}
+              </a>
             </div>
             <hr />
+            <.hud_notice
+              :if={@preview && @heroes == []}
+              id="arena-no-heroes"
+              title={if @heroes_tab == "trained", do: "No trained heroes yet", else: "No available heroes"}
+              description={if @heroes_tab == "trained", do: "Heroes that reach Platinum League appear here."}
+            >
+              <:actions :if={@heroes_tab == "trained"}>
+                <button
+                  type="button"
+                  class="btn base-secondary"
+                  phx-click="hero-list"
+                  phx-value-type="available"
+                  id="arena-browse-available"
+                >
+                  Available heroes <span aria-hidden="true">→</span>
+                </button>
+              </:actions>
+            </.hud_notice>
             <div class="overflow">
               <div class="row">
-                <div :for={pick <- @selected_team.picks} class="col-md-12 mt-1" id={"team-hero-#{pick.id}"}>
-                  <.pvp_hero_card hero={pick}>
+                <div :for={hero <- @heroes} class="col-md-12 mt-1" id={"available-hero-#{hero.id}"}>
+                  <.pvp_hero_card hero={hero}>
                     <:actions>
                       <button
-                        class="btn btn-sm btn-block btn-secondary m-0 mr-1"
-                        phx-click="move-up"
-                        phx-value-id={pick.id}
-                        id={"move-up-#{pick.id}"}
+                        :if={
+                          @selected_team && !Enum.member?(@selected_team.pick_ids, hero.id) &&
+                            length(@selected_team.picks) < 5
+                        }
+                        class="btn btn-block btn-success m-0 mr-1"
+                        phx-click="add-hero"
+                        phx-value-id={hero.id}
+                        id={"add-button-#{hero.id}"}
                       >
-                        <span class="loading-text"><i class="fa fa-arrow-up"></i> Move Up</span>
-                      </button>
-                      <button
-                        class="btn btn-sm btn-block btn-secondary m-0 mx-1"
-                        phx-click="move-down"
-                        phx-value-id={pick.id}
-                        id={"move-down-#{pick.id}"}
-                      >
-                        <span class="loading-text"><i class="fa fa-arrow-down"></i> Move Down</span>
-                      </button>
-                      <button
-                        :if={@selected_team.player_id == pick.player_id}
-                        class="btn btn-sm btn-block btn-warning m-0 mr-1"
-                        phx-click="edit-hero"
-                        phx-value-id={pick.id}
-                        id={"edit-hero-#{pick.id}"}
-                      >
-                        <span class="loading-text"><i class="fa fa-edit"></i> Edit</span>
-                      </button>
-                      <button
-                        class="btn btn-sm btn-block btn-danger m-0 ml-1"
-                        phx-click="remove-hero"
-                        phx-value-id={pick.id}
-                        id={"remove-hero-#{pick.id}"}
-                      >
-                        <span class="loading-text"><i class="fa fa-times"></i> Remove</span>
+                        <span class="loading-text"><i class="fa fa-arrow-left"></i> Add</span>
                       </button>
                     </:actions>
                   </.pvp_hero_card>
                 </div>
               </div>
             </div>
-          <% end %>
-        </div>
-      </div>
-      <div class="col">
-        <div class="card main-card" id="heroes-container" phx-hook="EqualHeight" phx-target="#teams-container">
-          <div class="d-flex justify-content-around">
-            <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-around">
-              <li class="nav-item">
-                <a
-                  href="javascript:;"
-                  phx-click="hero-list"
-                  phx-value-type="trained"
-                  class={["nav-link px-2 py-1", @heroes_tab == "trained" && "active"]}
-                  id="trained-heroes-button"
-                >
-                  <span class="d-inline-block loading-text">Trained Heroes</span>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a
-                  href="javascript:;"
-                  phx-click="hero-list"
-                  phx-value-type="available"
-                  class={["nav-link px-2 py-1", @heroes_tab == "available" && "active"]}
-                  id="available-heroes-button"
-                >
-                  <span class="d-inline-block loading-text">Available Heroes</span>
-                </a>
-              </li>
-            </ul>
-            <a :if={@heroes_tab == "trained"} href="javascript:;" class="h5 mt-2" phx-click="sort" id="hero-sort">
-              <i class="fa fa-circle-sort mt-1"></i> Sorted by {if @sort == :recent, do: "Recent", else: "Rank"}
-            </a>
-          </div>
-          <hr />
-          <div class="overflow">
-            <div class="row">
-              <div :for={hero <- @heroes} class="col-md-12 mt-1" id={"available-hero-#{hero.id}"}>
-                <.pvp_hero_card hero={hero}>
-                  <:actions>
-                    <button
-                      :if={
-                        @selected_team && !Enum.member?(@selected_team.pick_ids, hero.id) &&
-                          length(@selected_team.picks) < 5
-                      }
-                      class="btn btn-block btn-success m-0 mr-1"
-                      phx-click="add-hero"
-                      phx-value-id={hero.id}
-                      id={"add-button-#{hero.id}"}
-                    >
-                      <span class="loading-text"><i class="fa fa-arrow-left"></i> Add</span>
-                    </button>
-                  </:actions>
-                </.pvp_hero_card>
-              </div>
-            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  <% end %>
   <.hero_bar
     :if={@hero}
+    preview={@preview}
     current_hero={@hero}
     editing={@editing}
     show_build={@show_build}

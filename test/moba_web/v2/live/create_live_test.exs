@@ -19,9 +19,9 @@ defmodule MobaWeb.V2.CreateLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, html} = live(conn, "/invoke")
+      {:ok, view, _html} = live(conn, "/invoke")
 
-      assert html =~ "Pick your"
+      assert has_element?(view, "#invoke-modern #invoke-avatars")
       assert has_element?(view, "#randomize-button")
     end
   end
@@ -39,8 +39,8 @@ defmodule MobaWeb.V2.CreateLiveTest do
 
       avatar = Game.list_creation_avatars(Accounts.unlocked_codes_for(hero.player.user)) |> List.first()
 
-      html = render_click(view, "pick-avatar", %{"id" => avatar.id})
-      assert html =~ "Pick a Skill Build"
+      render_click(view, "pick-avatar", %{"id" => avatar.id})
+      assert has_element?(view, "#invoke-builds")
       assert has_element?(view, "#custom-build-button")
 
       html = render_click(view, "pick-build", %{"number" => "0"})

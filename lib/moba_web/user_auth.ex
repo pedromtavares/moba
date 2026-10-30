@@ -33,7 +33,7 @@ defmodule MobaWeb.UserAuth do
     |> renew_session()
     |> put_token_in_session(token)
     |> maybe_write_remember_me_cookie(token, params)
-    |> redirect(to: user_return_to || signed_in_path(conn))
+    |> redirect(to: preview_path(conn, user_return_to || signed_in_path(conn)))
   end
 
   defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}) do
@@ -86,7 +86,7 @@ defmodule MobaWeb.UserAuth do
     |> renew_session()
     |> delete_session(:player_id)
     |> delete_resp_cookie(@remember_me_cookie)
-    |> redirect(to: ~p"/")
+    |> redirect(to: preview_path(conn, ~p"/"))
   end
 
   @doc """
@@ -161,7 +161,7 @@ defmodule MobaWeb.UserAuth do
       socket =
         socket
         |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
-        |> Phoenix.LiveView.redirect(to: ~p"/users/log_in")
+        |> Phoenix.LiveView.redirect(to: preview_path(socket, ~p"/users/log_in"))
 
       {:halt, socket}
     end
@@ -211,7 +211,7 @@ defmodule MobaWeb.UserAuth do
       conn
       |> put_flash(:error, "You must log in to access this page.")
       |> maybe_store_return_to()
-      |> redirect(to: ~p"/users/log_in")
+      |> redirect(to: preview_path(conn, ~p"/users/log_in"))
       |> halt()
     end
   end
@@ -228,5 +228,5 @@ defmodule MobaWeb.UserAuth do
 
   defp maybe_store_return_to(conn), do: conn
 
-  defp signed_in_path(_conn), do: ~p"/base"
+  defp signed_in_path(context), do: preview_path(context, ~p"/base")
 end

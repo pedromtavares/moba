@@ -17,13 +17,13 @@ defmodule MobaWeb.GameController do
 
     cond do
       player && player.tutorial_step == 30 ->
-        redirect(conn, to: ~p"/arena")
+        redirect(conn, to: preview_path(conn, ~p"/arena"))
 
       hero && is_nil(hero.finished_at) ->
-        redirect(conn, to: ~p"/training")
+        redirect(conn, to: preview_path(conn, ~p"/training"))
 
       player ->
-        redirect(conn, to: ~p"/base")
+        redirect(conn, to: preview_path(conn, ~p"/base"))
 
       true ->
         counts = %{
@@ -34,6 +34,7 @@ defmodule MobaWeb.GameController do
 
         conn
         |> assign(:counts, counts)
+        |> assign(:preview, true)
         |> assign(
           :landing_background,
           Moba.Image.url({%{file_name: "home-heroes-v5.png", updated_at: nil}, %{code: "landing"}})
@@ -46,10 +47,16 @@ defmodule MobaWeb.GameController do
     end
   end
 
+  def redirect_preview(conn, _params) do
+    path = preview_path(conn, conn.request_path)
+    path = if conn.query_string == "", do: path, else: path <> "?" <> conn.query_string
+    conn |> put_status(:moved_permanently) |> redirect(to: path)
+  end
+
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
     cond do
       get_session(conn, :player_id) || conn.assigns.current_user ->
-        redirect(conn, to: ~p"/")
+        redirect(conn, to: preview_path(conn, ~p"/"))
 
       session_key = get_session(conn, :cache_key) ->
         avatar = Game.get_avatar!(selected_avatar)
@@ -57,7 +64,7 @@ defmodule MobaWeb.GameController do
         player = Game.start_guest!(session_key, avatar, skills)
 
         if player.user_id do
-          redirect(conn, to: ~p"/users/log_in")
+          redirect(conn, to: preview_path(conn, ~p"/users/log_in"))
         else
           path =
             if player.current_pve_hero && is_nil(player.current_pve_hero.finished_at),
@@ -66,11 +73,11 @@ defmodule MobaWeb.GameController do
 
           conn
           |> put_session(:player_id, player.id)
-          |> redirect(to: path)
+          |> redirect(to: preview_path(conn, path))
         end
 
       true ->
-        redirect(conn, to: ~p"/start")
+        redirect(conn, to: preview_path(conn, ~p"/start"))
     end
   end
 

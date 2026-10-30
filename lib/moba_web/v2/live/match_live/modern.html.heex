@@ -1,0 +1,173 @@
+<% picking? = is_nil(@match.phase) && !@starting
+owner? = @current_player.id == @match.player_id
+complete? = @match.phase in ["finished", "scored"] && @tick >= length(@battles)
+revealed = Enum.take(@battles, @tick) %>
+<div id="match-hud" class="matches squad-page match-modern" data-playback={to_string(!picking?)}>
+  <header class="match-scoreboard" data-complete={to_string(complete?)}>
+    <div class="match-player-side">
+      <.link navigate={preview_path(assigns, ~p"/player/#{@match.player}")} class="match-player" id="player-card">
+        <img src={"/images/pve/#{@match.player.pve_tier}.png"} alt="" />
+        <span>{username(@match.player)}<small>{if owner?, do: "Your lineup", else: "Challenger"}</small></span>
+      </.link>
+    </div>
+    <div class="match-score" aria-label="Heroes defeated">
+      <span class="squad-eyebrow">Arena · 5v5</span>
+      <strong>
+        {Enum.count(revealed, &(&1.winner_player_id == @match.player_id))}<span>—</span>{Enum.count(
+          revealed,
+          &(&1.winner_player_id == @match.opponent_id)
+        )}
+      </strong>
+      <span>{if picking?, do: "Picking heroes", else: "Heroes defeated"}</span>
+    </div>
+    <div class="match-player-side match-opponent-side">
+      <.link navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")} class="match-player match-player-opponent">
+        <img src={"/images/pve/#{@match.opponent.pve_tier}.png"} alt="" />
+        <span>{username(@match.opponent)}<small>Opponent</small></span>
+      </.link>
+    </div>
+  </header>
+  <div class="squad-columns match-columns">
+    <section class="squad-panel match-lineup" aria-labelledby="match-your-lineup">
+      <div class="squad-panel-heading">
+        <h2 id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</h2>
+        <strong>{length(@picked_heroes)} / 5</strong>
+      </div>
+      <div class="squad-scroll lineup-list">
+        <%= for position <- 1..5 do %>
+          <%= if hero = Enum.at(@picked_heroes, position - 1) do %>
+            <div id={"hero-#{hero.id}"}>
+              <.roster_hero hero={hero} position={position} defeated={eliminated?(hero, @match.player, revealed)}>
+                <:actions :if={picking? && owner?}>
+                  <button
+                    type="button"
+                    class="btn squad-order"
+                    phx-click="move-up"
+                    phx-value-id={hero.id}
+                    id={"move-up-#{hero.id}"}
+                    disabled={position == 1}
+                    aria-label={"Move #{hero.name} up"}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    class="btn squad-order"
+                    phx-click="move-down"
+                    phx-value-id={hero.id}
+                    id={"move-down-#{hero.id}"}
+                    disabled={position == length(@picked_heroes)}
+                    aria-label={"Move #{hero.name} down"}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    type="button"
+                    class="btn squad-remove"
+                    phx-click="unpick-hero"
+                    phx-value-id={hero.id}
+                    id={"lineup-unpick-#{hero.id}"}
+                  >
+                    Remove
+                  </button>
+                </:actions>
+              </.roster_hero>
+            </div>
+          <% else %>
+            <div class="squad-empty-slot" id={"match-empty-slot-#{position}"}>
+              <span>{position}</span><strong>Open slot</strong>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </section>
+    <section class="squad-panel match-center" aria-label={if picking?, do: "Choose heroes", else: "Match battles"}>
+      <div id="winner-card" class="match-command" data-complete={to_string(complete?)}>
+        <%= cond do %>
+          <% picking? && owner? -> %>
+            <div id="match-pick-status">
+              <div class="match-pick-heading">
+                <h2 id="match-pick-status-title">
+                  {if length(@picked_heroes) >= 5, do: "Lineup ready", else: "Choose your lineup"}
+                </h2>
+                <strong class="hud-notice-counter">{length(@picked_heroes)}<small> / 5</small></strong>
+              </div>
+              <div class="match-pick-progress" aria-label={"#{length(@picked_heroes)} of 5 heroes selected"}>
+                <span :for={slot <- 1..5} data-filled={to_string(slot <= length(@picked_heroes))}></span>
+              </div>
+              <button
+                :if={length(@picked_heroes) >= 5}
+                type="button"
+                class="btn battle-primary"
+                phx-click="start"
+                phx-disable-with="Starting…"
+                id="start-match-button"
+              >
+                Start match →
+              </button>
+              <button
+                :if={length(@picked_heroes) < 5 && @latest_match}
+                type="button"
+                class="btn base-secondary"
+                phx-click="repeat"
+                id="repeat-match-lineup"
+              >
+                Use last lineup
+              </button>
+            </div>
+          <% picking? -> %>
+            <.hud_notice
+              id="match-pick-status"
+              title="Choosing heroes"
+              description={"#{username(@match.player)} is picking their lineup."}
+            />
+          <% true -> %>
+            <div id="match-playback-status" class="match-playback-status">
+              <span class="squad-eyebrow">
+                {if complete?, do: "Match complete", else: "Battle #{min(length(revealed) + 1, 9)}"}
+              </span>
+              <h2>
+                {if complete? && @match.winner,
+                  do: "#{username(@match.winner)} wins",
+                  else: if(complete?, do: "Match drawn", else: "Match in progress")}
+              </h2>
+              <span>{length(revealed)} {if length(revealed) == 1, do: "battle", else: "battles"} resolved</span>
+              <button id="match-details-toggle" type="button" phx-click="toggle-battle-details" class="btn base-secondary" aria-pressed={to_string(@show_battle_details)}>
+                {if @show_battle_details, do: "Summary", else: "Battle details"}
+              </button>
+            </div>
+        <% end %>
+      </div>
+      <%= if picking? && owner? do %>
+        <.hero_picker {assigns} />
+      <% else %>
+        <div id="match-battles" class={["squad-scroll match-battles", !@show_battle_details && "match-summary-list"]} style={"--match-battle-rows: #{max(length(@battles), 1)}"}>
+          <.hud_notice
+            :if={revealed == [] && !picking?}
+            id="match-resolving"
+            title="Heroes entering battle"
+            description="The first result will appear here."
+          />
+          <%= for {battle, index} <- Enum.with_index(revealed, 1) do %>
+            <%= if @show_battle_details do %>
+              <.match_battle battle={battle} match={@match} index={index} preview={@preview} />
+            <% else %>
+              <.match_summary battle={battle} match={@match} index={index} preview={@preview} />
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </section>
+    <section class="squad-panel match-lineup match-enemy" aria-labelledby="match-opponent-lineup">
+      <div class="squad-panel-heading">
+        <h2 id="match-opponent-lineup">Opponent lineup</h2>
+        <strong>{length(@match.opponent_picks)} / 5</strong>
+      </div>
+      <div class="squad-scroll lineup-list" id="opponent-heroes-container">
+        <div :for={{hero, index} <- Enum.with_index(@match.opponent_picks, 1)} id={"opponent-hero-#{hero.id}"}>
+          <.roster_hero hero={hero} position={index} defeated={eliminated?(hero, @match.opponent, revealed)} />
+        </div>
+      </div>
+    </section>
+  </div>
+</div>

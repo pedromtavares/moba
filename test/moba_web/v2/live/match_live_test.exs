@@ -37,8 +37,8 @@ defmodule MobaWeb.V2.MatchLiveTest do
     first_hero = List.first(player_heroes)
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
-    assert has_element?(view, ~s|#winner-card[phx-hook="EqualHeight"][phx-target="#player-card"]|)
-    assert has_element?(view, ~s|#picks-card[phx-hook="EqualHeight"][phx-target="#opponent-heroes-container"]|)
+    assert has_element?(view, "#match-hud #winner-card.match-command")
+    assert has_element?(view, "#picks-card.match-picker")
     refute has_element?(view, ".stats-footer")
     render_click(view, "hero-tab", %{"type" => "trained"})
     render_click(view, "pick-hero", %{"id" => first_hero.id})
@@ -79,9 +79,9 @@ defmodule MobaWeb.V2.MatchLiveTest do
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 
     assert has_element?(view, "#pick-team-#{team.id}")
-    teams_html = view |> element("#teams-heroes") |> render()
-
-    assert length(Regex.scan(~r/class="avatar-container mr-1"/, teams_html)) == 5
+    for hero <- player_heroes do
+      assert has_element?(view, "#pick-team-#{team.id} img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(hero.avatar)}']")
+    end
   end
 
   test "renders battle reviews from player and opponent pick perspective", %{conn: conn} do
@@ -121,6 +121,8 @@ defmodule MobaWeb.V2.MatchLiveTest do
       conn
       |> init_test_session(player_id: player.id)
 
+    Matches.update!(match, %{phase: "scored", winner_id: battle.winner_player_id})
+
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 
     player_avatar = MobaWeb.V2.Components.GameHelpers.image_url(player_hero.avatar)
@@ -128,16 +130,16 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     assert has_element?(
              view,
-             ~s|#battle-review-#{battle.id} > .row > .col:first-child img[src="#{player_avatar}"]|
+             ~s|#battle-summary-#{battle.id} .match-summary-hero:first-child img[src="#{player_avatar}"]|
            )
 
     assert has_element?(
              view,
-             ~s|#battle-review-#{battle.id} > .row > .col:last-child img[src="#{opponent_avatar}"]|
+             ~s|#battle-summary-#{battle.id} .match-summary-hero:last-child img[src="#{opponent_avatar}"]|
            )
   end
 
-  test "arena tutorial finishes from the match page", %{conn: conn} do
+  test "match page completes retired arena lessons automatically", %{conn: conn} do
     player = create_player!(%{pvp_tier: 1, tutorial_step: 31})
     opponent = create_player!(%{pvp_tier: 1})
     skills = base_skills()
@@ -169,11 +171,11 @@ defmodule MobaWeb.V2.MatchLiveTest do
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 
     assert has_element?(view, "#picks-card")
-    assert has_element?(view, "#tutorial-step-31[data-step='31']")
+    refute has_element?(view, "[phx-hook=TutorialStep]")
 
     render_click(view, "finish-tutorial", %{})
 
     assert Game.get_player!(player.id).tutorial_step == 39
-    assert has_element?(view, "#tutorial-step-39[data-step='39']")
+    refute has_element?(view, "[phx-hook=TutorialStep]")
   end
 end

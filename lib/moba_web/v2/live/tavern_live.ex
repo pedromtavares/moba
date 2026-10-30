@@ -48,17 +48,41 @@ defmodule MobaWeb.V2.TavernLive do
 
   def handle_event("unlock-avatar", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     resource = Game.get_avatar_by_code!(code)
-    {:noreply, assign(socket, current_player: create_unlock!(player, resource))}
+    player = create_unlock!(player, resource)
+    socket = assign(socket, current_player: player)
+
+    socket =
+      if socket.assigns.preview && unlocked?(resource, player),
+        do: put_flash(socket, :info, "#{resource.name} unlocked. It's now in your collection."),
+        else: socket
+
+    {:noreply, socket}
   end
 
   def handle_event("unlock-skill", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     resource = Game.get_current_skill!(code, 1)
-    {:noreply, assign(socket, current_player: create_unlock!(player, resource))}
+    player = create_unlock!(player, resource)
+    socket = assign(socket, current_player: player)
+
+    socket =
+      if socket.assigns.preview && unlocked?(resource, player),
+        do: put_flash(socket, :info, "#{resource.name} unlocked. It's now in your collection."),
+        else: socket
+
+    {:noreply, socket}
   end
 
   def handle_event("unlock-skin", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     resource = Game.get_skin_by_code!(code)
-    {:noreply, assign(socket, current_player: create_unlock!(player, resource))}
+    player = create_unlock!(player, resource)
+    socket = assign(socket, current_player: player)
+
+    socket =
+      if socket.assigns.preview && unlocked?(resource, player),
+        do: put_flash(socket, :info, "#{resource.name} unlocked. It's now in your collection."),
+        else: socket
+
+    {:noreply, socket}
   end
 
   defp create_unlock!(%{user: user} = player, resource) do
@@ -174,32 +198,62 @@ defmodule MobaWeb.V2.TavernLive do
 
   defp tavern_unlock_actions(assigns) do
     ~H"""
-    <div class="text-center my-2">
-      <%= if can_unlock?(@resource, @player) do %>
-        <a
-          href="javascript:;"
-          class="btn btn-outline-warning btn-lg"
-          phx-click={@action}
-          phx-value-code={@resource.code}
-          phx-hook="Loading"
-          id={"unlock-#{@resource.code}"}
-        >
-          <span class="loading-text">
-            <i class="fab fa-ethereum mr-1"></i>Unlock for {price_to_unlock(@resource)} Shards
-          </span>
-        </a>
-      <% else %>
-        <a href="javascript:;" class="btn btn-secondary no-action">
-          <i class="fa fa-lock mr-1"></i>{unlock_error_message(@resource, @player)}
-        </a>
-      <% end %>
-    </div>
+    <%= if assigns[:preview] do %>
+      <div class="tavern-unlock" data-available={to_string(!!can_unlock?(@resource, @player))}>
+        <%= if can_unlock?(@resource, @player) do %>
+          <button
+            type="button"
+            class="btn tavern-unlock-button"
+            phx-click={@action}
+            phx-value-code={@resource.code}
+            phx-disable-with="Unlocking…"
+            id={"unlock-#{@resource.code}"}
+          >
+            <span>Unlock</span>
+            <span class="tavern-unlock-cost">◆ {price_to_unlock(@resource)} <small>Shards</small></span>
+          </button>
+        <% else %>
+          <button type="button" class="btn tavern-unlock-button" disabled>
+            <span>Locked</span>
+            <span class="tavern-unlock-cost">◆ {price_to_unlock(@resource)} <small>Shards</small></span>
+          </button>
+          <p class="tavern-unlock-requirement">
+            <%= if has_enough_shards?(@resource, @player) do %>
+              {unlock_error_message(@resource, @player)}
+            <% else %>
+              {price_to_unlock(@resource) - @player.user.shard_count} more Shards needed
+            <% end %>
+          </p>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="text-center my-2">
+        <%= if can_unlock?(@resource, @player) do %>
+          <a
+            href="javascript:;"
+            class="btn btn-outline-warning btn-lg"
+            phx-click={@action}
+            phx-value-code={@resource.code}
+            phx-hook="Loading"
+            id={"unlock-#{@resource.code}"}
+          >
+            <span class="loading-text">
+              <i class="fab fa-ethereum mr-1"></i>Unlock for {price_to_unlock(@resource)} Shards
+            </span>
+          </a>
+        <% else %>
+          <a href="javascript:;" class="btn btn-secondary no-action">
+            <i class="fa fa-lock mr-1"></i>{unlock_error_message(@resource, @player)}
+          </a>
+        <% end %>
+      </div>
+    <% end %>
     """
   end
 
   defp tavern_avatar_stats(assigns) do
     ~H"""
-    <div class="row align-items-center">
+    <div class="row align-items-center tavern-role">
       <div class="col text-center font-weight-bold border-bottom">
         <h4 class="m-0">
           <img src={"/images/#{@avatar.role}_icon.png"} style="width: 30px" class="text-center mr-1" />{role(@avatar)}
@@ -210,50 +264,52 @@ defmodule MobaWeb.V2.TavernLive do
         </h4>
       </div>
     </div>
-    <div class="row align-items-center">
-      <div class="col-6 text-right border-bottom border-right text-danger font-weight-bold stat-col">
-        <i class="fa fa-dagger mr-1"></i>Offense
-      </div>
-      <div class="col">
-        <div class="progress progress-fixed">
-          <div style={"width:#{display_percentage(:offense, @avatar, @avatars)}%"} class="progress-bar bg-danger">
-            <span></span>
+    <div class="tavern-attributes">
+      <div class="row align-items-center tavern-attribute tavern-attribute-offense">
+        <div class="col-6 text-right border-bottom border-right text-danger font-weight-bold stat-col">
+          <i class="fa fa-dagger mr-1"></i>Offense
+        </div>
+        <div class="col">
+          <div class="progress progress-fixed">
+            <div style={"width:#{display_percentage(:offense, @avatar, @avatars)}%"} class="progress-bar bg-danger">
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row align-items-center">
-      <div class="col-6 text-right border-bottom border-right text-warning font-weight-bold stat-col">
-        <i class="fa fa-shield-halved mr-1"></i>Defense
-      </div>
-      <div class="col">
-        <div class="progress progress-fixed">
-          <div style={"width:#{display_percentage(:defense, @avatar, @avatars)}%"} class="progress-bar bg-warning">
-            <span></span>
+      <div class="row align-items-center tavern-attribute tavern-attribute-defense">
+        <div class="col-6 text-right border-bottom border-right text-warning font-weight-bold stat-col">
+          <i class="fa fa-shield-halved mr-1"></i>Defense
+        </div>
+        <div class="col">
+          <div class="progress progress-fixed">
+            <div style={"width:#{display_percentage(:defense, @avatar, @avatars)}%"} class="progress-bar bg-warning">
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row align-items-center">
-      <div class="col-6 text-right border-bottom border-right text-primary font-weight-bold stat-col">
-        <i class="fa fa-magic mr-1"></i>Magic
-      </div>
-      <div class="col">
-        <div class="progress progress-fixed">
-          <div style={"width:#{display_percentage(:magic, @avatar, @avatars)}%"} class="progress-bar bg-primary">
-            <span></span>
+      <div class="row align-items-center tavern-attribute tavern-attribute-magic">
+        <div class="col-6 text-right border-bottom border-right text-primary font-weight-bold stat-col">
+          <i class="fa fa-magic mr-1"></i>Magic
+        </div>
+        <div class="col">
+          <div class="progress progress-fixed">
+            <div style={"width:#{display_percentage(:magic, @avatar, @avatars)}%"} class="progress-bar bg-primary">
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row align-items-center">
-      <div class="col-6 text-right border-bottom border-right text-success font-weight-bold stat-col">
-        <i class="fa fa-running mr-1"></i>Speed
-      </div>
-      <div class="col">
-        <div class="progress progress-fixed">
-          <div style={"width:#{display_percentage(:speed, @avatar, @avatars)}%"} class="progress-bar bg-success">
-            <span></span>
+      <div class="row align-items-center tavern-attribute tavern-attribute-speed">
+        <div class="col-6 text-right border-bottom border-right text-success font-weight-bold stat-col">
+          <i class="fa fa-running mr-1"></i>Speed
+        </div>
+        <div class="col">
+          <div class="progress progress-fixed">
+            <div style={"width:#{display_percentage(:speed, @avatar, @avatars)}%"} class="progress-bar bg-success">
+              <span></span>
+            </div>
           </div>
         </div>
       </div>
@@ -265,8 +321,8 @@ defmodule MobaWeb.V2.TavernLive do
     assigns = assign_new(assigns, :featured, fn -> false end)
 
     ~H"""
-    <div class="col-xl-4 col-lg-6 col-sm-12 mb-2" id={"avatar-#{@avatar.id}"}>
-      <div class="hero-card card ribbon-box">
+    <div class="col-xl-4 col-lg-6 col-sm-12 mb-2 tavern-hero-column" id={"avatar-#{@avatar.id}"}>
+      <div class="hero-card card ribbon-box hero-card-avatar tavern-hero-card">
         <%= if @featured do %>
           <div class="ribbon-two ribbon-two-purple"><span>Free</span></div>
         <% else %>
@@ -278,9 +334,9 @@ defmodule MobaWeb.V2.TavernLive do
           <div class="name">
             <h3 class="m-0 text-center p-2 text-white f-rpg">{@avatar.name}</h3>
           </div>
-          <div class="ultimate" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
+          <div class="ultimate" tabindex="0" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
             <h4 class="mt-0">Ultimate</h4>
-            <img src={GH.image_url(@avatar.ultimate)} style="width: 70px" class="img-border-sm" />
+            <img src={GH.image_url(@avatar.ultimate)} alt={@avatar.ultimate.name} style="width: 70px" class="img-border-sm" />
             <h5 class="mb-0">{@avatar.ultimate.name}</h5>
             <small><em>(mouse over for info)</em></small>
           </div>
@@ -288,23 +344,38 @@ defmodule MobaWeb.V2.TavernLive do
 
         <div class="transparent card-footer text-center">
           <.tavern_avatar_stats avatar={@avatar} avatars={@avatars} />
-          <div class="row mt-3">
+          <div class="row mt-3 tavern-gameplay">
             <div class="col">
               <h4 class="mt-0 d-none d-lg-block">Gameplay</h4>
               <div class="description">
                 <em>{@avatar.description}</em>
               </div>
-              <%= if @featured do %>
-                <div class="text-center my-2">
-                  <a href="/auth?origin=tavern" class="btn btn-purple btn-lg btn-block">
-                    <i class="fab fa-discord"></i> Connect with Discord to Unlock
-                  </a>
-                </div>
-              <% else %>
-                <%= unless unlocked?(@avatar, @player) do %>
-                  <.tavern_unlock_actions resource={@avatar} player={@player} action="unlock-avatar" />
+              <div :if={@featured || !unlocked?(@avatar, @player)} class="tavern-card-action">
+                <%= if @featured do %>
+                  <%= if assigns[:preview] do %>
+                    <a id="tavern-discord-unlock" href="/auth?origin=tavern" class="tavern-discord-unlock">
+                      <i class="fab fa-discord" aria-hidden="true"></i>
+                      <span>Unlock with Discord</span><span aria-hidden="true">↗</span>
+                    </a>
+                    <p class="tavern-discord-note">Free avatar · Connect your Discord account</p>
+                  <% else %>
+                    <div class="text-center my-2">
+                      <a href="/auth?origin=tavern" class="btn btn-purple btn-lg btn-block">
+                        <i class="fab fa-discord"></i> Connect with Discord to Unlock
+                      </a>
+                    </div>
+                  <% end %>
+                <% else %>
+                  <%= unless unlocked?(@avatar, @player) do %>
+                    <.tavern_unlock_actions
+                      preview={assigns[:preview]}
+                      resource={@avatar}
+                      player={@player}
+                      action="unlock-avatar"
+                    />
+                  <% end %>
                 <% end %>
-              <% end %>
+              </div>
             </div>
           </div>
         </div>
@@ -315,29 +386,52 @@ defmodule MobaWeb.V2.TavernLive do
 
   defp tavern_skill_card(assigns) do
     ~H"""
-    <div class="col-12 col-md-6 col-lg-4 col-xl-3" id={"skill-#{@skill.id}"}>
-      <div class="card ribbon-box">
-        <%= if unlocked?(@skill, @player) do %>
-          <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
-        <% end %>
-        <div class="card-body text-center">
-          <img
-            src={GH.image_url(@skill)}
-            class={["skill-img img-border", @skill.passive && "passive"]}
-            data-toggle="tooltip"
-            title={TT.skill_tooltip(@skill)}
-          />
-          <br />
-          <h3 class="f-rpg">
-            {@skill.name}<br />
-            <small class="font-italic text-muted">(mouse over image for info)</small>
-          </h3>
-        </div>
-        <%= unless unlocked?(@skill, @player) do %>
-          <.tavern_unlock_actions resource={@skill} player={@player} action="unlock-skill" />
-        <% end %>
+    <%= if assigns[:preview] do %>
+      <div class="col-12 col-md-6 col-lg-4 tavern-skill-column" id={"skill-#{@skill.id}"}>
+        <article class="tavern-skill-card" data-unlocked={to_string(unlocked?(@skill, @player))}>
+          <header>
+            <img src={GH.image_url(@skill)} alt="" />
+            <div>
+              <span class="tavern-eyebrow">{if @skill.passive, do: "Passive", else: "Active skill"}</span>
+              <h2>{@skill.name}</h2>
+            </div>
+            <span :if={unlocked?(@skill, @player)} class="tavern-owned">Owned ✓</span>
+          </header>
+          <p class="tavern-skill-description">{@skill.description}</p>
+          <details class="tavern-skill-details" id={"skill-details-#{@skill.id}"}>
+            <summary>Skill details <span aria-hidden="true">+</span></summary>
+            <div class="tavern-skill-readout">{Phoenix.HTML.raw(TT.skill_details(@skill))}</div>
+          </details>
+          <footer :if={!unlocked?(@skill, @player)}>
+            <.tavern_unlock_actions preview={true} resource={@skill} player={@player} action="unlock-skill" />
+          </footer>
+        </article>
       </div>
-    </div>
+    <% else %>
+      <div class="col-12 col-md-6 col-lg-4 col-xl-3" id={"skill-#{@skill.id}"}>
+        <div class="card ribbon-box">
+          <%= if unlocked?(@skill, @player) do %>
+            <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
+          <% end %>
+          <div class="card-body text-center">
+            <img
+              src={GH.image_url(@skill)}
+              class={["skill-img img-border", @skill.passive && "passive"]}
+              data-toggle="tooltip"
+              title={TT.skill_tooltip(@skill)}
+            />
+            <br />
+            <h3 class="f-rpg">
+              {@skill.name}<br />
+              <small class="font-italic text-muted">(mouse over image for info)</small>
+            </h3>
+          </div>
+          <%= unless unlocked?(@skill, @player) do %>
+            <.tavern_unlock_actions resource={@skill} player={@player} action="unlock-skill" />
+          <% end %>
+        </div>
+      </div>
+    <% end %>
     """
   end
 end

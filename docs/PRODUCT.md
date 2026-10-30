@@ -1,20 +1,38 @@
 # BrowserMOBA Product Doc
 
+Last checked against the repository on 2026-10-29. This document describes the current game. Visual and interaction principles are in [design.md](design.md).
 
 ## Overview
 
 BrowserMOBA is a free-to-play, open-source turn-based RPG that brings MOBA-style strategic gameplay to casual browser gaming. Players train heroes through PvE leagues, then compete in async PvP matches and real-time duels.
 
+### Content Snapshot
+
+Counts come from [`priv/repo/seed_catalog.json`](../priv/repo/seed_catalog.json), the fresh-install catalog. Count enabled playable resources by distinct code, rather than counting level variants or generated balance versions.
+
+| Content | Current catalog |
+|---------|-----------------|
+| Playable avatars | 24 across 5 roles; 10 base avatars and 14 unlockable avatars |
+| Selectable normal skills | 24; 12 base skills and 12 unlockable skills |
+| Avatar ultimates | 24; one predefined ultimate per playable avatar |
+| Items | 30: 6 Normal, 6 Rare, 9 Epic, 9 Legendary |
+| Cosmetic skins | 48: one Master and one Grandmaster skin for each playable avatar |
+| Training leagues | 7, Bronze through Grandmaster |
+| Account ranks | 8, Initiate through Invoker |
+| Arena brackets | 3: Plebs, Shadows, Immortals |
+
+The catalog also includes the non-playable Boss avatar and four disabled boss skills. The 196 skill records include all skill levels and those boss skills; they are not 196 distinct player abilities. The 48 enabled player abilities are 24 selectable normal skills plus 24 avatar ultimates.
+
 ### Design Philosophy
 
 - **Simple mechanics, deep strategy**: The game optimizes for straightforward rules with emergent complexity
-- **Casual sessions**: 5-10 minute training runs, playable on any device with a browser
+- **Casual sessions**: Turn-based training and async competition, playable in short browser sessions
 - **Async competition**: Players compete against historical opponents—past top players' heroes remain in the game forever
 - **No pay-to-win**: All content unlockable through gameplay, no real-money purchases
 
 ### Core Game Loop
 
-1. **Create Hero**: Choose avatar (20 available) + 3 skills
+1. **Create Hero**: Choose an unlocked avatar from the 24-avatar roster + 3 normal skills; its ultimate is automatic
 2. **Train (PvE)**: Battle through 7 leagues using limited turns, buy items, level skills
 3. **Complete Training**: Defeat Roshan boss to reach Grandmaster league
 4. **Compete (PvP)**: Use trained heroes in 5v5 matches and 1v1 duels
@@ -26,7 +44,7 @@ BrowserMOBA is a free-to-play, open-source turn-based RPG that brings MOBA-style
 
 ### 1.1 Avatars
 
-20 avatars across 5 roles, each with distinct stat profiles:
+24 playable avatars across 5 roles, each with distinct stat profiles:
 
 | Role | Identity | Stat Focus |
 |------|----------|------------|
@@ -45,11 +63,12 @@ See `lib/moba/game/avatars.ex` for the unit calculation: `avatar_stat_units()` a
 - **Per-level scaling**: HP/level, MP/level, ATK/level (varies by role)
 - **Ultimate skill**: Each avatar has a predefined ultimate ability
 
-**Unlocking**: Some avatars require shards to unlock. Base avatars (no `level_requirement`) are available to new players. See `AvatarQuery.base_current()`.
+**Unlocking**: 10 base avatars (no `level_requirement`) are available to new players. The other 14 are unlockable. The Tavern features Tinker as a free unlock through Discord connection; standard avatar unlocks cost 150 shards. See `AvatarQuery.base_current()`, `Accounts.Unlocks`, and `AuthController.callback/2`.
 
 ### 1.2 Skills
 
-Heroes have exactly 4 skills:
+The playable catalog contains 24 normal skills and 24 avatar ultimates. Heroes have exactly 4 skills:
+
 - **3 chosen skills**: Selected during hero creation from available pool
 - **1 ultimate**: Automatically assigned based on avatar
 
@@ -75,9 +94,11 @@ Heroes have exactly 4 skills:
 
 See `lib/moba/game/skills.ex` → `can_level_skill?/2`.
 
-**Unlocking**: Some skills require shards. Base skills (no `level_requirement`) available to new players.
+**Unlocking**: 12 normal skills are available by default; the other 12 cost 100 shards each. Avatar ultimates are assigned with the avatar, rather than selected from the normal skill pool.
 
 ### 1.3 Items
+
+30 enabled items across four rarity tiers: 6 Normal, 6 Rare, 9 Epic, and 9 Legendary. The in-game place to buy and transmute hero items is called the **Shop**; account unlocks live in the **Tavern**.
 
 **Inventory**: Maximum 6 items per hero
 
@@ -582,6 +603,8 @@ Three-tier hierarchy:
 | 6 | Grandmaster | 20 avatars on Grandmaster |
 | 7 | Invoker | 20 avatars on Grandmaster with 60K farm |
 
+**Collection vs. progression goals**: The collection covers all 24 playable avatars. Master, Grandmaster, and Invoker still require 20 distinct qualifying avatars, not all 24. Invoker qualification is based on Grandmaster league and at least 60K total farm for each distinct avatar code; the quest does not separately test a no-deaths flag.
+
 **Cumulative Tracking**: Completing a higher tier (e.g., Master) also counts toward lower tier requirements (e.g., Platinum+).
 
 ### 5.3 Quest Rewards
@@ -590,7 +613,7 @@ Each tier advancement grants rewards (see `lib/moba/game/quests.ex`):
 
 | Tier | Shards | Bonus |
 |------|--------|-------|
-| 1 (Novice) | 200 | +1,000 starting gold |
+| 1 (Novice) | 200 | Starting gold increases to 2,000 |
 | 2 (Adept) | 300 | — |
 | 3 (Veteran) | 400 | — |
 | 4 (Expert) | 500 | 5 target refreshes |
@@ -661,7 +684,7 @@ Permanent unlock store using shards.
 **Skill Unlocks**: 100 shards
 - Unlocks skill for hero creation
 
-**Skin Unlocks**: 
+**Skin Unlocks** (48 in the current catalog; two per playable avatar):
 - 500 shards (requires owning avatar at Master league)
 - 1,000 shards (requires owning avatar at Grandmaster league)
 
@@ -800,6 +823,51 @@ Players can farm unlimited season points via async 1v1 duels:
 
 ---
 
+## Player Experience
+
+The cinematic redesign is the default on the canonical game and account routes. Existing `/new/...` bookmarks permanently redirect to the matching canonical URL, preserving query parameters and confirmation/reset tokens. Navigation and forms use the canonical paths.
+
+| Screen | Route | Current experience |
+|--------|-------|--------------------|
+| First hero | `/start` | Avatar role filters, random pick, preset or custom skill builds, guest creation |
+| Invoke | `/invoke` | Collection context, avatar selection, reusable build artwork, selected loadout |
+| Base | `/base` | Account-rank journey, progression rewards, finished/in-progress heroes, full roster collection |
+| Training | `/training` | League ascent, battle/meditation/mining tabs, Shop, league and Roshan challenges |
+| Battle history / replay | `/battles`, `/battles/:id` | Compact history, readable turn resources and effects, contextual outcome and continuation |
+| Arena | `/arena` | 5v5 entry and daily progress, recent matches, bracket standings, Live PvP, duel history |
+| Team builder | `/arena/edit` | Saved teams, ordered lineup, hero collection, inline hero editing |
+| Match / duel | `/matches/:id`, `/arena/:id` | Match summaries and battle details; duel picks, timers, chat for live duels, rewards and replays |
+| Player profile | `/player/:player_id`, `/user/:id` | Full-width featured-hero banner, player metrics, battle history, daily/season standings, collection |
+| Hero | `/hero/:id` | Hero art, loadout, stats, league progress, farm/time metrics, training leaderboard |
+| Tavern | `/tavern` | Avatar, skill, and skin unlocks; shard balance, costs and availability; featured Discord unlock |
+| Community / Game Manual | `/community`, `/library` | Message board, updates and player lists; illustrated game reference |
+| Account | `/users/...` | Matching sign-in, registration, recovery, confirmation, and settings screens |
+
+### Tutorial and Training
+
+- The guided tutorial covers **Training** and **Base**. The former Arena tutorial is retired; returning players on those old lessons advance past them without starting matchmaking.
+- Tutorial steps point at the target or control needed for the action. Shop purchase and transmutation steps retain precise interaction anchors.
+- League challenges replace farming controls when no turns remain. Stage wins show the cleared battle and the next step; promotions show the earned league and rewards.
+- Roshan's panel shows health and attempt state, including the final-attempt recovery information.
+- Meditation and mining show progress and a Claim XP / Claim Gold action. A visible **Space** hint appears when the claim is ready. The shortcut ignores typing, other interactive controls, and open dialogs; Attack has no global Space shortcut.
+
+### Arena and Match Playback
+
+- Arena standings use a **Plebs / Shadows / Immortals** button group. The player's own standing remains visible when browsing another bracket.
+- **Live PvP** has its own subsection with a prominent availability switch and live opponents to challenge. **Duel history** is separate and shows completed results and replays. **Play a Season Duel** remains a distinct async action in the Arena header.
+- Pending matches and duels have explicit resume actions. Daily-limit and empty-roster states explain the next available action.
+- 5v5 playback keeps the score and central battle summary visible while team lineups scroll independently. Summary rows show each hero's portrait, health, and energy. **Battle details** restores the fuller battle cards; individual battles link to their replay.
+
+### Profiles, Collections, and Customization
+
+- Profiles pair a full-width cinematic banner with battle history, leaderboard, and collection columns. Selecting a collection hero updates the banner's featured hero and loadout.
+- The collection has a slot for each of the 24 playable avatars. Rank badges and selection states communicate progress without requiring 24 full hero cards.
+- Battle history has a full-width **Matches / Duels** switch. The leaderboard has **Daily / Season** controls and an independently scrolling list.
+- Hero pages hide the editing HUD by default. Owners, including guest owners, can select **Customize hero** to load it. **Close customization** hides the HUD and closes the Shop and unsaved order-editing state. Other players see the hero's public details without the customization control.
+- The desktop sidebar remains a fixed icon rail: a glow marks the active route, titles appear beneath icons on hover or keyboard focus, and reserved label space prevents items from moving.
+
+---
+
 ## 10. Technical Notes
 
 ### 10.1 Key Files
@@ -896,12 +964,12 @@ All values from `lib/moba/constants.ex`:
 
 ## Appendix B: Avatar Reference
 
-20 avatars with role distribution:
+24 playable avatars with role distribution (Boss excluded):
 
 | Role | Avatars |
 |------|---------|
 | Tank | Abaddon, Doom, Dragon Knight |
-| Bruiser | Tusk, Sven, Axe |
-| Carry | Troll Warlord, Templar Assassin, Sniper, Weaver, Juggernaut, Phantom Assassin |
-| Nuker | Lina, Puck, Pugna, Rubick, Techies, Tinker |
+| Bruiser | Axe, Bloodseeker, Sven, Tusk |
+| Carry | Anti-Mage, Juggernaut, Phantom Assassin, Sniper, Templar Assassin, Terrorblade, Troll Warlord, Weaver |
+| Nuker | Leshrac, Lina, Puck, Pugna, Rubick, Techies, Tinker |
 | Support | Dazzle, Omniknight |

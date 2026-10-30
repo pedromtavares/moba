@@ -1,24 +1,39 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
   <div class="tavern" id="tavern">
-    <div class="row mt-2">
-      <div class="col">
-        <div class="card dark-bg mb-3 text-center p-2">
-          <h1 class="text-warning f-rpg"><i class="fab fa-ethereum mr-2"></i>{@current_player.user.shard_count}</h1>
-          <p class="text-muted">
-            Unlock new avatars, skills and skins to play with by using your Shards. You can acquire Shards by ranking up in Training or by playing daily matches in the Arena.
-          </p>
+    <%= if @preview do %>
+      <header class="tavern-heading" id="tavern-heading" style="--tavern-scene: url(/images/tutorial/hall-of-legends.jpg)">
+        <div>
+          <span class="tavern-eyebrow">Your collection</span>
+          <h1>Tavern</h1>
+          <p class="tavern-heading-description">New avatars. New abilities. New possibilities.</p>
+        </div>
+        <div class="tavern-balance" id="tavern-shards">
+          <strong>◆ {@current_player.user.shard_count}</strong><span>Shards available</span>
+        </div>
+        <p class="tavern-heading-guide">Earn Shards in Training and the Arena.<br />Unlock avatars, skills, and skins below.</p>
+      </header>
+    <% else %>
+      <div class="row mt-2">
+        <div class="col">
+          <div class="card dark-bg mb-3 text-center p-2">
+            <h1 class="text-warning f-rpg"><i class="fab fa-ethereum mr-2"></i>{@current_player.user.shard_count}</h1>
+            <p class="text-muted">
+              Unlock new avatars, skills and skins to play with by using your Shards. You can acquire Shards by ranking up in Training or by playing daily matches in the Arena.
+            </p>
+          </div>
         </div>
       </div>
-    </div>
+    <% end %>
 
     <div class="row">
       <div class="col">
-        <ul class="nav nav-tabs nav-bordered nav-justified">
+        <ul class="nav nav-tabs nav-bordered nav-justified tavern-nav" role="tablist" aria-label="Tavern collection">
           <li class="nav-item">
             <a
               href="javascript:;"
@@ -26,8 +41,12 @@
               phx-click="show-avatars"
               phx-hook="Loading"
               id="show-avatars-link"
+              role="tab"
+              aria-selected={to_string(@active_tab == "avatars")}
             >
-              <span class="loading-text"><i class="fa fa-users fa-2x text-success"></i> <br />Avatars</span>
+              <span class="loading-text">
+                <i class="fa fa-users fa-2x text-success" aria-hidden="true"></i> <br :if={!@preview} />Avatars
+              </span>
             </a>
           </li>
 
@@ -38,8 +57,12 @@
               phx-click="show-skills"
               phx-hook="Loading"
               id="show-skills-link"
+              role="tab"
+              aria-selected={to_string(@active_tab == "skills")}
             >
-              <span class="loading-text"><i class="fa fa-magic fa-2x text-primary"></i> <br />Skills</span>
+              <span class="loading-text">
+                <i class="fa fa-magic fa-2x text-primary" aria-hidden="true"></i> <br :if={!@preview} />Skills
+              </span>
             </a>
           </li>
 
@@ -50,8 +73,12 @@
               phx-click="show-skins"
               phx-hook="Loading"
               id="show-skins-link"
+              role="tab"
+              aria-selected={to_string(@active_tab == "skins")}
             >
-              <span class="loading-text"><i class="fa fa-palette fa-2x text-pink"></i> <br />Skins</span>
+              <span class="loading-text">
+                <i class="fa fa-palette fa-2x text-pink" aria-hidden="true"></i> <br :if={!@preview} />Skins
+              </span>
             </a>
           </li>
         </ul>
@@ -67,21 +94,28 @@
         :if={@featured_avatar}
         avatar={@featured_avatar}
         avatars={@all_avatars}
+        preview={@preview}
         player={@current_player}
         featured
       />
-      <.tavern_avatar_card :for={avatar <- @avatars} avatar={avatar} avatars={@all_avatars} player={@current_player} />
+      <.tavern_avatar_card
+        :for={avatar <- @avatars}
+        preview={@preview}
+        avatar={avatar}
+        avatars={@all_avatars}
+        player={@current_player}
+      />
     </div>
 
     <div class={"row #{unless @active_tab == "skills", do: "d-none"} mt-2"}>
-      <.tavern_skill_card :for={skill <- @skills} skill={skill} player={@current_player} />
+      <.tavern_skill_card :for={skill <- @skills} preview={@preview} skill={skill} player={@current_player} />
     </div>
 
     <%= if @current_skin do %>
       <div class={"#{unless @active_tab == "skins", do: "d-none"} mt-2"}>
         <div class="row">
           <div class="col-xl-5 col-lg-7 col-12 margin-auto">
-            <div class="card hero-card">
+            <div class="card hero-card hero-card-skin">
               <div class="card-header p-0">
                 <div class="name d-flex justify-content-between align-items-center">
                   <img src={"/images/league/#{@current_skin.league_tier}.png"} style="height: 40px;" class="px-3" />
@@ -113,12 +147,17 @@
                       </a>
                     <% else %>
                       <.tavern_unlock_actions
-                        :if={can_unlock?(@current_skin, @current_player)}
+                        :if={@preview || can_unlock?(@current_skin, @current_player)}
+                        preview={@preview}
                         resource={@current_skin}
                         player={@current_player}
                         action="unlock-skin"
                       />
-                      <a :if={!can_unlock?(@current_skin, @current_player)} href="javascript:;" class="btn btn-secondary no-action">
+                      <a
+                        :if={!@preview && !can_unlock?(@current_skin, @current_player)}
+                        href="javascript:;"
+                        class="btn btn-secondary no-action"
+                      >
                         <i class="fa fa-lock mr-1"></i>{unlock_error_message(@current_skin, @current_player)}
                       </a>
                     <% end %>

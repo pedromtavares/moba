@@ -33,9 +33,10 @@ defmodule MobaWeb.V2.HeroLiveTest do
 
       {:ok, view, html} = live(conn, "/hero/#{hero.id}")
 
-      assert html =~ "View Skins"
-      assert has_element?(view, "#hero-bar")
-      assert has_element?(view, "#toggle-shop")
+      assert html =~ "View skins"
+      assert has_element?(view, "#customize-hero[aria-expanded=false]")
+      refute has_element?(view, "#hero-bar")
+      refute has_element?(view, "#toggle-shop")
     end
 
     test "non-owner does not see editable hero bar", %{conn: conn} do
@@ -80,6 +81,7 @@ defmodule MobaWeb.V2.HeroLiveTest do
       |> put_session(:player_id, hero.player_id)
 
     {:ok, view, _html} = live(conn, "/hero/#{hero.id}")
+    view |> element("#customize-hero") |> render_click()
 
     view
     |> element("#hero-bar #edit-button")

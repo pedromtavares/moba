@@ -1,23 +1,30 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
   <div class="training">
-    <%= if @pending_battle do %>
-      <.pending_battle battle={@pending_battle} />
-    <% else %>
-      <div class="row mt-2 training-header">
-        <div class="col">
-        <.header current_hero={@current_hero} current_player={@current_player} />
-        </div>
+    <div :if={@preview || !@pending_battle} class="row mt-2 training-header">
+      <div class="col">
+        <TrainingComponents.training_header
+          battle_pending={!!@pending_battle}
+          show_controls={!@preview || (!@pending_battle && !dead?(@current_hero))}
+          preview={Map.get(assigns, :preview, false)}
+          current_hero={@current_hero}
+          current_player={@current_player}
+        />
       </div>
+    </div>
 
+    <%= if @pending_battle do %>
+      <.pending_battle preview={Map.get(assigns, :preview, false)} battle={@pending_battle} />
+    <% else %>
       <%= if dead?(@current_hero) do %>
         <div class="row">
           <div class="col">
-            <.dead current_hero={@current_hero} />
+            <.dead preview={Map.get(assigns, :preview, false)} current_hero={@current_hero} />
           </div>
         </div>
       <% else %>
@@ -29,9 +36,10 @@
           </div>
         <% end %>
 
-        <%= case @farm_tab do %>
+        <%= case if(@preview && @current_hero.pve_current_turns == 0, do: current_farm_tab(@current_hero), else: @farm_tab) do %>
           <% "meditation" -> %>
             <.meditation
+              preview={@preview}
               current_hero={@current_hero}
               selected_turns={@selected_turns}
               current_time={@current_time}
@@ -39,19 +47,21 @@
             />
           <% "mine" -> %>
             <.mine
+              preview={@preview}
               current_hero={@current_hero}
               selected_turns={@selected_turns}
               current_time={@current_time}
               farm_rewards={@farm_rewards}
             />
           <% _ -> %>
-            <.gank current_hero={@current_hero} targets={@targets} />
+            <.gank preview={@preview} current_hero={@current_hero} targets={@targets} />
         <% end %>
       <% end %>
     <% end %>
   </div>
 
   <.hero_bar
+    preview={@preview}
     current_hero={@current_hero}
     show_build={@show_build}
     show_shop={@show_shop}
@@ -59,5 +69,5 @@
     tutorial_step={@tutorial_step}
   />
 
-  <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} id="tutorial-step" />
+  <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} preview={@preview} id="tutorial-step" />
 </Layouts.app>

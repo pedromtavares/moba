@@ -91,8 +91,10 @@ defmodule MobaWeb.Router do
   scope "/", MobaWeb.V2 do
     pipe_through [:browser, :ensure_start_cache_key]
 
-    live_session :v2_guest_create, root_layout: {MobaWeb.V2.Layouts, :root} do
-      live "/start", CreateLive
+    live_session :v2_guest_create,
+      session: %{"preview" => true},
+      root_layout: {MobaWeb.V2.Layouts, :root} do
+      live "/start", CreateLive, :start
     end
   end
 
@@ -102,17 +104,19 @@ defmodule MobaWeb.Router do
     post "/start", GameController, :create
   end
 
-  # V2 routes — separate live_session, separate layout, separate asset pipeline
+  # The cinematic design is the default on canonical game routes.
   scope "/", MobaWeb.V2 do
     pipe_through [:browser, :player_protected]
 
     live_session :v2_game,
+      session: %{"preview" => true},
       on_mount: [
         MobaWeb.V2.Hooks.RequireAuth,
         MobaWeb.V2.Hooks.LoadGameState
       ],
       root_layout: {MobaWeb.V2.Layouts, :root} do
       live "/base", DashboardLive
+
       live "/invoke", CreateLive
       live "/training", TrainingLive
       live "/battles", BattlesLive
@@ -128,6 +132,16 @@ defmodule MobaWeb.Router do
       live "/hero/:id", HeroLive
       live "/tavern", TavernLive
     end
+  end
+
+  # Keep bookmarked preview URLs and forms working after the rollout.
+  scope "/new", MobaWeb do
+    pipe_through [:browser]
+    get "/", GameController, :redirect_preview
+    get "/*path", GameController, :redirect_preview
+    post "/start", GameController, :create
+    post "/users/log_in", UserSessionController, :create
+    delete "/users/log_out", UserSessionController, :delete
   end
 
   scope "/admin", MobaWeb do
@@ -150,8 +164,9 @@ defmodule MobaWeb.Router do
     pipe_through [:browser, :redirect_if_user_is_authenticated]
 
     live_session :redirect_if_user_is_authenticated,
+      session: %{"preview" => true},
       root_layout: {MobaWeb.LayoutView, :root},
-      on_mount: [{MobaWeb.UserAuth, :redirect_if_user_is_authenticated}] do
+      on_mount: [{MobaWeb.Preview, :default}, {MobaWeb.UserAuth, :redirect_if_user_is_authenticated}] do
       live "/users/register", UserRegistrationLive, :new
       live "/users/log_in", UserLoginLive, :new
       live "/users/reset_password", UserForgotPasswordLive, :new
@@ -165,8 +180,9 @@ defmodule MobaWeb.Router do
     pipe_through [:browser, :require_authenticated_user]
 
     live_session :require_authenticated_user,
+      session: %{"preview" => true},
       root_layout: {MobaWeb.LayoutView, :root},
-      on_mount: [{MobaWeb.UserAuth, :ensure_authenticated}] do
+      on_mount: [{MobaWeb.Preview, :default}, {MobaWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
     end
@@ -178,7 +194,9 @@ defmodule MobaWeb.Router do
     delete "/users/log_out", UserSessionController, :delete
 
     live_session :current_user,
-      on_mount: [{MobaWeb.UserAuth, :mount_current_user}] do
+      session: %{"preview" => true},
+      root_layout: {MobaWeb.LayoutView, :root},
+      on_mount: [{MobaWeb.Preview, :default}, {MobaWeb.UserAuth, :mount_current_user}] do
       live "/users/confirm/:token", UserConfirmationLive, :edit
       live "/users/confirm", UserConfirmationInstructionsLive, :new
     end

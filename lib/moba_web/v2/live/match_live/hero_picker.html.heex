@@ -1,0 +1,97 @@
+<div id="picks-card" class="match-picker">
+  <nav class="squad-tabs" aria-label="Hero source">
+    <button
+      :for={{type, label} <- [{"teams", "Teams"}, {"trained", "Trained"}, {"available", "Available"}]}
+      type="button"
+      phx-click="hero-tab"
+      phx-value-type={type}
+      id={"#{type}-heroes-button"}
+      class={@hero_tab == type && "active"}
+      aria-pressed={to_string(@hero_tab == type)}
+    >
+      {label}
+    </button>
+  </nav>
+  <div class="squad-scroll">
+    <div id="teams-heroes" class={["tab-pane", @hero_tab == "teams" && "active show"]}>
+      <.hud_notice
+        :if={@teams == []}
+        id="match-no-teams"
+        title="No saved teams"
+        description="Pick heroes individually or build a team."
+      >
+        <:actions>
+          <.link navigate={preview_path(assigns, ~p"/arena/edit")} class="btn base-secondary">Manage teams →</.link>
+        </:actions>
+      </.hud_notice>
+      <%= for team <- @teams do %>
+        <% selected? = Enum.map(@picked_heroes, & &1.id) == Enum.take(team.pick_ids, 5) %>
+        <button
+          type="button"
+          id={"pick-team-#{team.id}"}
+          phx-click="pick-team"
+          phx-value-id={team.id}
+          class={["squad-team-choice", selected? && "active"]}
+          disabled={selected?}
+        >
+          <span class="squad-team-name">
+            {team.name}<small>{if selected?, do: "Selected ✓", else: "Use team →"}</small>
+          </span>
+          <.lineup_preview heroes={team.picks} />
+        </button>
+      <% end %>
+    </div>
+    <%= for {type, heroes} <- [{"trained", @trained_heroes}, {"available", @generated_heroes}] do %>
+      <div id={"#{type}-heroes"} class={["tab-pane", @hero_tab == type && "active show"]}>
+        <.hud_notice
+          :if={heroes == []}
+          id={if type == "trained", do: "match-no-trained-heroes", else: "match-no-available-heroes"}
+          title={if type == "trained", do: "No trained heroes yet", else: "No available heroes"}
+        >
+          <:actions :if={type == "trained"}>
+            <button
+              type="button"
+              class="btn base-secondary"
+              phx-click="hero-tab"
+              phx-value-type="available"
+              id="match-browse-available"
+            >
+              Available heroes →
+            </button>
+          </:actions>
+        </.hud_notice>
+        <%= for hero <- heroes do %>
+          <% picked? = Enum.any?(@picked_heroes, &(&1.id == hero.id)) %>
+          <div id={if type == "trained", do: "available-hero-#{hero.id}", else: "generated-hero-#{hero.id}"}>
+            <.roster_hero hero={hero} picked={picked?}>
+              <:actions>
+                <%= if picked? do %>
+                  <button
+                    type="button"
+                    class="btn base-secondary"
+                    phx-click="unpick-hero"
+                    phx-value-id={hero.id}
+                    id={"unpick-hero-#{hero.id}-#{type}"}
+                  >
+                    Selected ✓ · Remove
+                  </button>
+                <% else %>
+                  <button
+                    type="button"
+                    class="btn squad-add"
+                    phx-click="pick-hero"
+                    phx-value-id={hero.id}
+                    id={"pick-hero-#{hero.id}-#{type}"}
+                    disabled={length(@picked_heroes) >= 5}
+                  >
+                    Add to lineup +
+                  </button>
+                <% end %>
+              </:actions>
+            </.roster_hero>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

@@ -1,14 +1,16 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
   <div class="user-profile">
-    <div class="row mt-2">
-      <div class="col-md-6 col-xl-4">
-        <div class="collection-container">
-          <.featured_hero_card :if={@featured} hero={@featured} />
+    <.cinematic_header :if={@preview} {assigns} />
+    <div class="row mt-2 profile-board">
+      <div class="col-md-6 col-xl-4 profile-collection-column">
+        <div class="collection-container" id="profile-collection">
+          <.featured_hero_card preview={Map.get(assigns, :preview, false)} :if={@featured && !@preview} hero={@featured} />
           <div class="card collection mb-0">
             <div class="card-body pb-1 d-flex">
               <div class="row">
@@ -41,23 +43,23 @@
           </div>
         </div>
       </div>
-      <div class="col-md-6 col-xl-4">
+      <div class="col-md-6 col-xl-4 profile-record-column">
         <div class="card" phx-hook="EqualHeight" phx-target=".collection-container" id="user-profile">
-          <%= if @player.id == @current_player.id do %>
+          <%= if !@preview && @player.id == @current_player.id do %>
             <h5 class="card-header font-17 text-white d-flex justify-content-between py-2">
-              <.link navigate={~p"/users/settings"} class="text-white">
+              <.link navigate={preview_path(assigns, ~p"/users/settings")} class="text-white">
                 <i class="fa fa-edit mr-1"></i>Edit Profile
               </.link>
               <.link href="/auth/discord" class="text-white">
                 <i class="fab fa-discord"></i> Connect Discord
               </.link>
-              <.link href={~p"/users/log_out"} method="delete" class="text-white">
+              <.link href={preview_path(assigns, ~p"/users/log_out")} method="delete" class="text-white">
                 <i class="fa fa-sign-out-alt"></i>
                 <span class="d-none d-md-inline">Log out</span>
               </.link>
             </h5>
           <% end %>
-          <div class="card-body p-2 text-center">
+          <div :if={!@preview} class="card-body p-2 text-center">
             <img
               src={"/images/pve/#{@player.pve_tier}.png"}
               class={"pvp-rank big-rank-shadow-#{shadow_rank(@player)}"}
@@ -79,11 +81,23 @@
             </h2>
           </div>
           <hr />
-          <div class="row no-gutters py-1">
+          <div :if={!@preview} class="row no-gutters py-1 profile-metrics">
+            <div :if={@preview} class="col text-center" id="profile-registration-age">
+              <% {age, unit} = registration_age(@player) %>
+              <strong>{age} <span class="profile-age-unit">{unit}</span></strong>
+              <span class="profile-metric-label">
+                <%= cond do %>
+                  <% @player.bot_options -> %>A.I. Player
+                  <% @player.user -> %>Registered
+                  <% true -> %>Joined
+                <% end %>
+              </span>
+            </div>
             <div class="col text-center">
               <strong title="Season Points" data-toggle="tooltip">
                 <i class="fa fa-arrows-to-dot text-white"></i> {@player.pvp_points} SP
               </strong>
+              <span :if={@preview} class="profile-metric-label">Season points</span>
             </div>
             <div class="col text-center">
               <strong
@@ -92,6 +106,7 @@
               >
                 <i class="fa fa-swords text-white"></i> {total_win_rate(@player)}
               </strong>
+              <span :if={@preview} class="profile-metric-label">Win rate</span>
             </div>
             <div class="col text-center">
               <strong
@@ -100,19 +115,21 @@
               >
                 <i class="fa fa-trophy text-white"></i> {@player.best_immortal_streak}
               </strong>
+              <span :if={@preview} class="profile-metric-label">Best streak</span>
             </div>
             <div class="col text-center">
               <strong title="Season Rank" data-toggle="tooltip">
                 <i class="fa-solid fa-hashtag text-white"></i> {@player.season_ranking}
               </strong>
+              <span :if={@preview} class="profile-metric-label">Season rank</span>
             </div>
           </div>
           <%= if length(@duels) > 0 do %>
             <hr />
             <div class="row">
               <div class="col d-flex justify-content-center">
-                <div class="pt-2 pb-2">
-                  <div class="btn-group">
+                <div class="pt-2 pb-2 profile-history-switcher">
+                  <div class="btn-group profile-history-tabs">
                     <%= if @filter == "matches" do %>
                       <button type="button" class="btn btn-sm btn-secondary no-action">
                         <span class="loading-text">Matches</span>
@@ -149,15 +166,16 @@
           <%= if @filter == "matches" do %>
             <div class="row">
               <div class="col">
-                <div class="transparent p-0 matches">
-                  <table class="table table-dark text-center table-sm m-0">
+                <div class="transparent p-0 matches profile-history">
+                  <table class="table table-dark text-center table-sm m-0 history-table" id="profile-matches-table">
                     <%= for match <- @matches do %>
                       <tr>
                         <td class="text-center" width="33%">
                           <span class="opponent">
-                            <.link navigate={~p"/player/#{match.opponent_id}"}>
+                            <.link navigate={preview_path(assigns, ~p"/player/#{match.opponent_id}")}>
                               {username(match.opponent)}
                             </.link>
+                            <small :if={@preview} class="history-detail">{String.capitalize(match.type)} match</small>
                           </span>
                         </td>
 
@@ -168,8 +186,9 @@
 
                         <td class="text-center" width="33%">
                           <.link
-                            navigate={~p"/matches/#{match}"}
-                            class="btn btn-light btn-sm"
+                            navigate={preview_path(assigns, ~p"/matches/#{match}")}
+                            class="btn btn-light btn-sm game-review"
+                            aria-label={"Review match #{match.id}"}
                             data-toggle="tooltip"
                             title={String.capitalize(match.type)}
                           >
@@ -211,13 +230,13 @@
               </div>
             <% end %>
 
-            <div class="transparent p-0 duels">
-              <table class="table table-dark text-center table-sm m-0">
+            <div class="transparent p-0 duels profile-history">
+              <table class="table table-dark text-center table-sm m-0 history-table" id="profile-duels-table">
                 <%= for duel <- @duels do %>
                   <tr>
                     <td class="text-center">
                       <span class="opponent">
-                        <.link navigate={~p"/player/#{opponent_for(duel, @player).id}"}>
+                        <.link navigate={preview_path(assigns, ~p"/player/#{opponent_for(duel, @player).id}")}>
                           {duel |> opponent_for(@player) |> username()}
                         </.link>
                       </span>
@@ -233,7 +252,7 @@
                     </td>
 
                     <td>
-                      <.link navigate={~p"/arena/#{duel}"} class="btn btn-light btn-sm">
+                      <.link navigate={preview_path(assigns, ~p"/arena/#{duel}")} class="btn btn-light btn-sm game-review" aria-label={"Review duel #{duel.id}"}>
                         <i class="fa fa-eye"></i>
                       </.link>
                     </td>
@@ -243,8 +262,19 @@
             </div>
           <% end %>
 
-          <div class="card-footer p-1">
-            <div class="row">
+          <div :if={!@preview || @player.id == @current_player.id} class="card-footer p-1">
+            <nav :if={@preview && @player.id == @current_player.id} id="profile-actions" class="profile-actions" aria-label="Account actions">
+              <.link navigate={preview_path(assigns, ~p"/users/settings")}>
+                <i class="fa fa-edit mr-1"></i>Edit Profile
+              </.link>
+              <.link href="/auth/discord" class="profile-action-discord">
+                <i class="fab fa-discord"></i> Connect Discord
+              </.link>
+              <.link href={preview_path(assigns, ~p"/users/log_out")} method="delete" class="profile-action-logout">
+                <i class="fa fa-sign-out-alt mr-1"></i>Log out
+              </.link>
+            </nav>
+            <div :if={!@preview} class="row">
               <div class="col text-center">
                 <span class="font-italic text-dark">
                   {registered_label(@player)}
@@ -254,11 +284,44 @@
           </div>
         </div>
       </div>
-      <div class="col-md-12 col-xl-4">
+      <div class="col-md-12 col-xl-4 profile-ranking-column">
         <div class="card ranking" phx-hook="EqualHeight" phx-target=".collection-container" id="user-ranking">
           <div class="card-body" id="ranking-card">
-            <table class="table table-dark text-center m-0 table-sm">
-              <thead>
+            <div :if={@preview} id="profile-ranking-header" class="profile-ranking-header">
+              <div class="profile-ranking-title">
+                <.icon name="game-trophy" />
+                <div>
+                  <strong>Leaderboard</strong>
+                  <span>{if @ranking_display == "daily", do: "Daily wins", else: "Season score"}</span>
+                </div>
+              </div>
+              <div class="profile-ranking-switch" role="group" aria-label="Leaderboard period">
+                <button
+                  :for={period <- ["daily", "season"]}
+                  id={"profile-ranking-#{period}"}
+                  type="button"
+                  phx-click="switch-ranking"
+                  disabled={@ranking_display == period}
+                  aria-pressed={to_string(@ranking_display == period)}
+                >
+                  {String.capitalize(period)}
+                </button>
+              </div>
+            </div>
+            <table class="table table-dark text-center m-0 table-sm ranking-table" id="profile-ranking-table">
+              <colgroup :if={@preview}>
+                <col class="profile-rank-column" />
+                <col />
+                <col class="profile-score-column" />
+              </colgroup>
+              <thead :if={@preview} class="sr-only">
+                <tr>
+                  <th scope="col">Rank</th>
+                  <th scope="col">Player</th>
+                  <th scope="col">{if @ranking_display == "daily", do: "Daily wins", else: "Season score"}</th>
+                </tr>
+              </thead>
+              <thead :if={!@preview}>
                 <tr>
                   <th>
                     <a
@@ -296,6 +359,7 @@
                     phx-hook={if player.id == @player.id, do: "HalfScroll"}
                     phx-container="#user-ranking"
                     class={if player.id == @player.id, do: "selected-player"}
+                    data-bracket={if @preview, do: arena_bracket(player)}
                   >
                     <td>
                       <h1 class="f-rpg">
@@ -333,7 +397,7 @@
                     </td>
                     <td>
                       <.link
-                        navigate={~p"/player/#{player.id}"}
+                        navigate={preview_path(assigns, ~p"/player/#{player.id}")}
                         title={"#{player.pvp_points} Season Points"}
                         data-toggle="tooltip"
                       >
@@ -346,6 +410,7 @@
                             <img src={player.user.discord.avatar} class="mini-discord-avatar" />
                           <% end %>
                           {username(player)}
+                          <span :if={@preview} class="profile-ranking-bracket">{arena_bracket(player)}</span>
                         </h5>
                       </.link>
                     </td>

@@ -1,5 +1,6 @@
 defmodule MobaWeb.V2.Components.BattleComponents do
   use Phoenix.Component
+  import MobaWeb.Preview, only: [preview_path: 2]
   import Moba.Utils, only: [username: 1]
 
   alias Moba.Game
@@ -8,12 +9,76 @@ defmodule MobaWeb.V2.Components.BattleComponents do
 
   @effect_pattern ~r/\[(armor|damage|power|hp|mp|status|speed)\](.+?)\[\/\1\]/
 
+  @doc "Returns bounded, proportional segments for a resource before and after a turn."
+  def resource_segments(previous, current, total) do
+    total = max(total, 0)
+    current = current |> max(0) |> min(total)
+    previous = (previous || current) |> max(0) |> min(total)
+    retained = min(previous, current)
+    change = current - previous
+    percentage = fn value -> if total > 0, do: value * 100 / total, else: 0 end
+
+    %{
+      current: current,
+      previous: previous,
+      total: total,
+      change: change,
+      retained_percentage: percentage.(retained),
+      change_percentage: percentage.(abs(change))
+    }
+  end
+
+  attr :current, :integer, required: true
+  attr :previous, :integer, default: nil
+  attr :total, :integer, required: true
+  attr :tone, :string, values: ~w(health energy), required: true
+  attr :label, :string, required: true
+  attr :title, :string, default: nil
+
+  def resource_bar(assigns) do
+    assigns = assign(assigns, :segments, resource_segments(assigns.previous, assigns.current, assigns.total))
+
+    ~H"""
+    <div
+      class={["battle-resource-bar", @tone]}
+      data-before={@segments.previous}
+      data-current={@segments.current}
+      data-change={@segments.change}
+    >
+      <div
+        class="resource-gauge"
+        role="progressbar"
+        aria-label={@label}
+        aria-valuemin="0"
+        aria-valuemax={max(@segments.total, 1)}
+        aria-valuenow={@segments.current}
+        data-toggle={if @title, do: "tooltip"}
+        title={@title}
+      >
+        <span class="resource-retained" style={"width:#{@segments.retained_percentage}%"}></span>
+        <span
+          :if={@segments.change != 0}
+          class={["resource-segment", if(@segments.change > 0, do: "resource-gained", else: "resource-lost")]}
+          style={"left:#{@segments.retained_percentage}%;width:#{@segments.change_percentage}%"}
+        >
+        </span>
+        <strong class="resource-value">{@segments.current}<small> / {@segments.total}</small></strong>
+      </div>
+      <strong
+        :if={@segments.change != 0}
+        class={["resource-change", if(@segments.change > 0, do: "resource-gain", else: "resource-loss")]}
+      >
+        {if @segments.change > 0, do: "+"}{@segments.change}
+      </strong>
+    </div>
+    """
+  end
+
   attr :resource, :map, required: true
   attr :title, :string, default: nil
   attr :id, :string, default: nil
   attr :class, :string, required: true
-  attr :rest, :global,
-    include: ~w(
+  attr :rest, :global, include: ~w(
       phx-click
       phx-value-id
       phx-hook
@@ -46,6 +111,7 @@ defmodule MobaWeb.V2.Components.BattleComponents do
 
   attr :resource, :map, required: true
   attr :battler, :map, required: true
+  attr :preview, :boolean, default: false
 
   def resource_status_badge(assigns) do
     ~H"""
@@ -59,10 +125,10 @@ defmodule MobaWeb.V2.Components.BattleComponents do
           <i class="fa fa-clock"></i> {cooldown}
         </span>
       <% true -> %>
-        <span class="badge badge-pill badge-danger passive">
+        <span :if={!@preview} class="badge badge-pill badge-danger passive">
           <i class="fa fa-times"></i>
         </span>
-      <% end %>
+    <% end %>
     """
   end
 
@@ -118,7 +184,7 @@ defmodule MobaWeb.V2.Components.BattleComponents do
           {@title}
           <%= if @inner_block != [] do %>
             <br />
-            <small><%= render_slot(@inner_block) %></small>
+            <small>{render_slot(@inner_block)}</small>
           <% end %>
         </h3>
       </div>
@@ -167,7 +233,7 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   def battle_action_row(assigns) do
     ~H"""
     <div class={@class}>
-      <%= render_slot(@inner_block) %>
+      {render_slot(@inner_block)}
     </div>
     """
   end
@@ -218,9 +284,11 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   attr :label, :string, required: true
   attr :icon, :string, required: true
 
+  attr :preview, :boolean, default: false
+
   def battle_guest_create_action(assigns) do
     ~H"""
-    <a href="/start" class={@class}><i class={@icon}></i> {@label}</a>
+    <a href={preview_path(assigns, "/start")} class={@class}><i class={@icon}></i> {@label}</a>
     """
   end
 
@@ -254,6 +322,8 @@ defmodule MobaWeb.V2.Components.BattleComponents do
 
   attr :battle, :map, required: true
 
+  attr :preview, :boolean, default: false
+
   def battle_over_action(assigns) do
     ~H"""
     <div class="row">
@@ -261,28 +331,28 @@ defmodule MobaWeb.V2.Components.BattleComponents do
         <%= case @battle.type do %>
           <% "pve" -> %>
             <.battle_nav_action
-              navigate="/training"
-              class="btn btn-danger width-lg text-white"
+              navigate={preview_path(assigns, "/training")}
+              class={if @preview, do: "btn base-secondary", else: "btn btn-danger width-lg text-white"}
               id="battle-over-training"
               icon=""
-              label="Battle Over!"
+              label={if @preview, do: "Return to training", else: "Battle Over!"}
             />
           <% "league" -> %>
             <.battle_event_action
               id="league-battle-over"
               click="next-battle"
               value_id={@battle.id}
-              class="btn btn-danger width-lg text-white"
+              class={if @preview, do: "btn base-secondary", else: "btn btn-danger width-lg text-white"}
               icon=""
-              label="Battle Over!"
+              label={if @preview, do: "Continue challenge", else: "Battle Over!"}
             />
           <% "duel" -> %>
             <.battle_nav_action
-              navigate={"/arena/#{@battle.duel_id}"}
-              class="btn btn-danger width-lg text-white"
+              navigate={preview_path(assigns, "/arena/#{@battle.duel_id}")}
+              class={if @preview, do: "btn base-secondary", else: "btn btn-danger width-lg text-white"}
               id="battle-over-duel"
               icon=""
-              label="Battle Over!"
+              label={if @preview, do: "Return to duel", else: "Battle Over!"}
             />
           <% _ -> %>
             <span></span>
@@ -293,18 +363,22 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   end
 
   attr :battle, :map, required: true
+  attr :preview, :boolean, default: false
 
   def share_battle_action(assigns) do
     ~H"""
     <div class="row mt-5">
       <div class="text-center col-12">
         <button
-          class="btn btn-primary width-lg text-white"
+          class={if @preview, do: "btn battle-share", else: "btn btn-primary width-lg text-white"}
           data-link={"https://browsermoba.com/battles/#{@battle.id}"}
+          data-copy-label={if @preview, do: "Link copied!"}
           phx-hook="ShareBattle"
+          phx-update={if @preview, do: "ignore"}
           id="share-battle"
+          aria-live={if @preview, do: "polite"}
         >
-          Share this Battle
+          {if @preview, do: "Copy replay link", else: "Share this Battle"}
         </button>
       </div>
     </div>

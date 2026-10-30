@@ -12,8 +12,9 @@ defmodule MobaWeb.V2.CreateLive do
   def mount(_params, _session, socket) do
     {:ok, socket_init(assign(socket, current_hero: nil, current_player: nil))}
   end
+
   def handle_event("filter", %{"role" => role}, %{assigns: %{all_avatars: all_avatars, filter: filter}} = socket) do
-    filter = if filter == role, do: nil, else: role
+    filter = if filter == role || role == "", do: nil, else: role
     avatars = if filter, do: Enum.filter(all_avatars, &(&1.role == role)), else: all_avatars
     {:noreply, assign(socket, filter: filter, avatars: avatars)}
   end
@@ -26,7 +27,8 @@ defmodule MobaWeb.V2.CreateLive do
      assign(socket,
        selected_avatar: avatar,
        selected_skills: [],
-       selected_build_index: nil
+       selected_build_index: nil,
+       error: nil
      )
      |> set_name(avatar)}
   end
@@ -67,7 +69,10 @@ defmodule MobaWeb.V2.CreateLive do
   def handle_event("randomize", _, %{assigns: %{cache_key: cache_key, avatars: avatars}} = socket) do
     selected_avatar = avatars |> Enum.shuffle() |> List.first()
     put_cache(cache_key, selected_avatar, [], nil)
-    {:noreply, assign(socket, selected_avatar: selected_avatar, selected_skills: []) |> set_name(selected_avatar)}
+
+    {:noreply,
+     assign(socket, selected_avatar: selected_avatar, selected_skills: [], selected_build_index: nil, error: nil)
+     |> set_name(selected_avatar)}
   end
 
   def handle_event(
@@ -79,7 +84,7 @@ defmodule MobaWeb.V2.CreateLive do
     skills = selected_skills |> Enum.map(& &1.id) |> Game.list_chosen_skills()
     hero_name = hero_name(player, avatar, name, socket)
     Game.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
-    {:noreply, socket |> redirect(to: "/training")}
+    {:noreply, socket |> redirect(to: preview_path(socket, "/training"))}
   end
 
   def handle_event("validate", %{"name" => name}, socket) do

@@ -1,30 +1,36 @@
 <Layouts.app
+  preview={@preview}
   flash={@flash}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
   <div id="create-new">
-    <%= unless @selected_avatar do %>
-      <.avatar_picker
-        avatars={@avatars}
-        all_avatars={@all_avatars}
-        blank_collection={Map.get(assigns, :blank_collection, [])}
-        current_player={@current_player}
-        filter={@filter}
-      />
+    <%= if @preview do %>
+      {invoke_modern(assigns)}
     <% else %>
-      <.selected_avatar_panel
-        all_avatars={@all_avatars}
-        current_player={@current_player}
-        custom={@custom}
-        error={@error}
-        name={@name}
-        selected_avatar={@selected_avatar}
-        selected_build_index={@selected_build_index}
-        selected_skills={@selected_skills}
-        skills={@skills}
-      />
+      <%= unless @selected_avatar do %>
+        <.avatar_picker
+          avatars={@avatars}
+          all_avatars={@all_avatars}
+          blank_collection={Map.get(assigns, :blank_collection, [])}
+          current_player={@current_player}
+          filter={@filter}
+        />
+      <% else %>
+        <.selected_avatar_panel
+          preview={@preview}
+          all_avatars={@all_avatars}
+          current_player={@current_player}
+          custom={@custom}
+          error={@error}
+          name={@name}
+          selected_avatar={@selected_avatar}
+          selected_build_index={@selected_build_index}
+          selected_skills={@selected_skills}
+          skills={@skills}
+        />
+      <% end %>
     <% end %>
   </div>
 </Layouts.app>

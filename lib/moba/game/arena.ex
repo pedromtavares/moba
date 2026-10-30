@@ -17,7 +17,9 @@ defmodule Moba.Game.Arena do
       Players.set_player_available!(duel.opponent_player)
     end
 
-    Duels.finish!(duel, score)
+    updated = Duels.finish!(duel, score)
+    MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
+    updated
   end
 
   def continue_duel!(duel, hero) do

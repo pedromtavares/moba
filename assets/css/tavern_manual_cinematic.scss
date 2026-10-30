@@ -1,0 +1,71 @@
+.game-page {
+  #tavern-heading, #manual-heading {
+    position: relative;
+    isolation: isolate;
+    min-height: 250px;
+    overflow: hidden;
+    margin: 12px 0 22px;
+    padding: 32px 34px;
+    border: 1px solid #c7b17b55;
+    border-radius: 14px;
+    box-shadow: inset 0 1px #f4dbab26, 0 12px 40px #0003;
+  }
+  #tavern-heading { grid-template-columns: minmax(0, 1fr) auto max-content; background: linear-gradient(90deg, #0b111deb, #0b111d60 50%, #0b111dbf), var(--tavern-scene) center 52% / cover; }
+  #manual-heading { align-items: flex-end; background: linear-gradient(90deg, #08111eed, #08111e80 50%, #08111e55), var(--manual-scene) center 48% / cover; }
+  #tavern-heading h1, #manual-heading h1 { margin: 0; color: #f5edda; font: 900 clamp(38px, 4vw, 60px)/1.05 'Nunito', sans-serif; letter-spacing: -.035em; text-shadow: 0 3px 24px #0009; }
+  #tavern-heading .tavern-eyebrow, .manual-eyebrow { display: block; margin: 0 0 9px; color: #e0c68d; font-size: 11px; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; }
+  .tavern-heading-description, .manual-heading-description { max-width: 36ch; margin: 12px 0 0; color: #cbd2dc; font-size: 16px; line-height: 1.5; }
+  #tavern-shards { min-width: 170px; padding: 22px 26px; border: 1px solid #d3b47566; border-radius: 10px; background: linear-gradient(145deg, #4d3d24d9, #0d1721ed); box-shadow: inset 0 1px #f5dca229, 0 0 40px #ceaa4e14; }
+  #tavern-shards strong { color: #f1d18d; font-size: 42px; font-weight: 900; text-shadow: 0 0 24px #dfbb5f33; }
+  #tavern-shards > span { display: block; margin-top: 7px; color: #d3c6aa; font-size: 12px; }
+  .tavern-heading-guide { justify-self: end; margin: 0; padding-left: 20px; border-left: 1px solid #d3b47555; color: #c1c9d3; font-size: 13px; line-height: 1.8; }
+  .tavern .tavern-nav { max-width: 700px; padding: 5px; gap: 5px; border: 1px solid #bda77b33; border-radius: 9px; background: #0a1421b3; }
+  .tavern .tavern-nav .nav-link { margin: 0; padding: 13px 12px; border: 1px solid transparent !important; border-radius: 5px; font-weight: 800; }
+  .tavern .tavern-nav .nav-link.active { border-color: #c7b17b66 !important; background: linear-gradient(120deg, #cbb17b23, #cbb17b09) !important; color: #f0d7a6; }
+  #library { max-width: none; }
+  #manual-heading nav { margin-top: 20px; gap: 10px; }
+  #manual-heading nav a { display: inline-flex; align-items: center; gap: 16px; padding: 8px 12px; border: 1px solid #b5c3d53d; border-radius: 5px; background: #0a1421b3; color: #dce4ed; font-size: 12px; font-weight: 800; transition: border-color .18s, background .18s; }
+  #manual-heading nav a:hover { border-color: #dfc28a99; background: #354453a3; }
+  .manual-discord, .tavern-discord-unlock { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 50px; padding: 12px 16px; border: 1px solid #a99de377; border-radius: 6px; background: linear-gradient(115deg, #464373cc, #252940ed); color: #eceaff; font: 800 14px/1.4 'Nunito', sans-serif; box-shadow: inset 0 1px #e0dbff1a; transition: background .18s, border-color .18s; }
+  .manual-discord { flex-shrink: 0; }
+  .manual-discord > i, .tavern-discord-unlock > i { flex-shrink: 0; font-size: 23px; color: #c3baf5; }
+  .manual-discord > span:last-child, .tavern-discord-unlock > span:last-child { margin-left: auto; color: #bfb4ee; font-size: 20px; }
+  .manual-discord:hover, .tavern-discord-unlock:hover { color: #fff; border-color: #d4c7ff; background: linear-gradient(115deg, #5a548ccc, #343957ed); }
+  .tavern-discord-note { margin: 10px 0 0; color: #a8a7be; font-size: 12px; line-height: 1.5; text-align: center; }
+  #tavern .tavern-unlock .tavern-unlock-button { justify-content: space-between; gap: 12px; min-height: 50px; padding: 8px 10px 8px 16px; border: 1px solid #c6a77980; background: linear-gradient(110deg, #68502455, #31271b); font-size: 15px; font-weight: 800; }
+  .tavern-unlock-cost { display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; border: 1px solid #d6b47c33; border-radius: 4px; background: #070d1659; color: #efd097; font-size: 16px; white-space: nowrap; }
+  .tavern-unlock-cost small { color: #b7ab93; font-size: 11px; font-weight: 600; }
+  #tavern .tavern-unlock .tavern-unlock-button:disabled { opacity: 1; border-color: #8f9aaa3d; background: #ffffff03; color: #9ca9b9; cursor: not-allowed; }
+  .tavern-unlock[data-available=false] .tavern-unlock-cost { border-color: #bdab8633; color: #c8b389; }
+  .tavern .tavern-unlock-requirement { margin: 9px 0 0; color: #a9b5c5; font-size: 12px; line-height: 1.5; }
+  .tavern .hero-card-skin .card-footer > .row:first-child { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tavern .hero-card-skin .card-footer .col-6 { grid-column: 1 / -1; grid-row: 1; }
+  .tavern .hero-card-skin .card-footer .col-3 { grid-row: 2; }
+  .manual-discord:focus-visible, .tavern-discord-unlock:focus-visible, .tavern-unlock-button:focus-visible { outline: 2px solid #e6c58e; outline-offset: 3px; }
+  #library > .row > .col-12 > .card-box { padding: 20px 24px 28px; border: 1px solid #bda77b33; border-radius: 12px; background: linear-gradient(145deg, #192432c7, #0a111cef 70%) !important; }
+  #library .manual-navigation { gap: 4px; padding-bottom: 14px; }
+  #library .manual-navigation .nav-link { padding: 10px 14px !important; border: 1px solid transparent; border-radius: 5px; font-size: 13px; font-weight: 800; }
+  #library .manual-navigation .nav-link.active { border-color: #c7b17b55; background: #c7b17b1a !important; color: #e6cb94; }
+  #library .select-avatar > .card-box { border: 1px solid #bda77b33; border-radius: 8px; background: linear-gradient(145deg, #19243280, #0a111ce0) !important; }
+}
+@media (max-width: 991px) {
+  .game-page {
+    #tavern-heading, #manual-heading { padding: 26px; }
+    #tavern-heading { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 16px; }
+    .tavern-heading-guide { font-size: 12px; padding-left: 12px; }
+    #tavern-shards { min-width: 140px; padding: 20px 16px; }
+  }
+}
+@media (max-width: 767px) {
+  .game-page {
+    #tavern-heading, #manual-heading { min-height: 0; padding: 24px 20px; }
+    #tavern-heading { grid-template-columns: minmax(0, 1fr); gap: 22px; text-align: center; }
+    #tavern-shards { grid-column: 1; width: 100%; max-width: 240px; }
+    #tavern-shards strong { font-size: 36px; }
+    .tavern-heading-guide { justify-self: center; padding: 0; border: 0; }
+    #manual-heading { align-items: stretch; gap: 24px; }
+    #manual-heading nav { gap: 8px; }
+    #manual-heading nav a { gap: 10px; }
+    #library > .row > .col-12 > .card-box { padding: 16px; }
+  }
+}

@@ -1,0 +1,102 @@
+<article
+  class={[
+    "timeline-item combat-turn turn",
+    if(@is_attacker, do: "timeline-item-left timeline-attacker", else: "timeline-defender")
+  ]}
+  id={"turn-#{@turn.number}"}
+  aria-labelledby={"turn-title-#{@turn.number}"}
+>
+  <div class="timeline-desk">
+    <div class="timeline-box card-box combat-turn-panel">
+      <span class={if @is_attacker, do: "arrow-alt", else: "arrow"} aria-hidden="true"></span>
+      <span class="timeline-icon">{@turn.number}</span>
+      <span class="combat-mobile-turn">Turn {@turn.number}</span>
+      <header class="combat-turn-heading">
+        <div class="combat-turn-artwork">
+          <%= if @turn.attacker.stunned do %>
+            <.battle_status_icon
+              code="stunned"
+              title={"#{@turn.attacker.name} is stunned and cannot attack."}
+              class="skill-img img-border"
+            />
+          <% else %>
+            <.battle_resource_image
+              resource={@turn.skill}
+              class="skill-img img-border tooltip-mobile"
+              title={turn_skill_description(@turn)}
+            />
+          <% end %>
+          <div class="combat-turn-status">
+            <.battle_status_icon
+              :if={@turn.attacker.silenced}
+              code="silenced"
+              title="Silenced · cannot cast spells"
+              class="skill-img tooltip-mobile"
+            />
+            <.battle_status_icon
+              :if={@turn.attacker.disarmed}
+              code="disarmed"
+              title="Disarmed · cannot deal physical damage"
+              class="skill-img tooltip-mobile"
+            />
+            <.battle_resource_image
+              :if={@turn.item}
+              resource={@turn.item}
+              title={turn_item_description(@turn)}
+              class="skill-img tooltip-mobile activated-item"
+            />
+          </div>
+        </div>
+        <h3 id={"turn-title-#{@turn.number}"}>
+          <span class="combat-turn-actor">{@turn.attacker.name}</span>
+          <%= if @turn.attacker.stunned do %>
+            is stunned · cannot attack
+          <% else %>
+            used {skill_name(@turn.skill)}
+          <% end %>
+        </h3>
+      </header>
+      <% descriptions = effect_descriptions(@turn)
+      {first, tail} = List.pop_at(descriptions, 0) %>
+      <div class="combat-turn-events">
+        <.first_description
+          :if={first}
+          preview={true}
+          turn={@turn}
+          resource={first && elem(first, 0)}
+          effect={first && elem(first, 1)}
+          descriptions={tail}
+        />
+        <div class="descriptions" id={"turn-effects-#{@turn.number}"} phx-update="ignore">
+          <.description :for={{resource, effect} <- tail} turn={@turn} resource={resource} effect={effect} />
+        </div>
+      </div>
+      <div class="combat-turn-readouts">
+        <.effects
+          preview={true}
+          previous_hero={
+            last_hero_for(
+              if(@is_attacker, do: %{id: @turn.attacker.hero_id}, else: %{id: @turn.defender.hero_id}),
+              @previous_turn
+            )
+          }
+          debug={@debug}
+          is_attacker={@is_attacker}
+          hero={if(@is_attacker, do: @turn.attacker, else: @turn.defender)}
+        />
+        <.effects
+          preview={true}
+          previous_hero={
+            last_hero_for(
+              if(@is_attacker, do: %{id: @turn.defender.hero_id}, else: %{id: @turn.attacker.hero_id}),
+              @previous_turn
+            )
+          }
+          debug={@debug}
+          is_attacker={!@is_attacker}
+          hero={if(@is_attacker, do: @turn.defender, else: @turn.attacker)}
+        />
+      </div>
+    </div>
+  </div>
+</article>

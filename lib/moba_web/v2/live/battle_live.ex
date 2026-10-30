@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.BattleLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
   alias MobaWeb.V2.TutorialComponent
   alias Moba.Game
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
@@ -56,9 +58,9 @@ defmodule MobaWeb.V2.BattleLive do
     latest = Engine.latest_battle(battle.attacker.id)
 
     if latest.type == "league" && latest.id != String.to_integer(id) do
-      {:noreply, push_patch(socket, to: ~p"/battles/#{latest.id}")}
+      {:noreply, push_patch(socket, to: preview_path(socket, ~p"/battles/#{latest.id}"))}
     else
-      {:noreply, push_navigate(socket, to: ~p"/training")}
+      {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/training"))}
     end
   end
 
@@ -82,6 +84,7 @@ defmodule MobaWeb.V2.BattleLive do
     |> assign(
       action_turn_number: nil,
       battle: battle,
+      initial_turn: if(socket.assigns.preview, do: initial_turn(battle)),
       debug: Map.get(params, "debug"),
       hide_sidebar: !battle.finished,
       sidebar_code: "training",
@@ -127,9 +130,13 @@ defmodule MobaWeb.V2.BattleLive do
   defp turn_assigns(socket, battle, turn, turn_number) do
     last_turn = List.last(battle.turns)
 
+    battle =
+      if battle.finished && battle.type == "duel", do: %{battle | duel: Game.get_duel!(battle.duel_id)}, else: battle
+
     assign(socket,
       action_turn_number: turn_number,
       battle: battle,
+      initial_turn: if(socket.assigns.preview, do: initial_turn(battle)),
       last_turn: last_turn,
       snapshot: battle.attacker_snapshot,
       skill: preselected_skill(turn.attacker, turn),
@@ -188,6 +195,24 @@ defmodule MobaWeb.V2.BattleLive do
   defp item_name(%{name: name}), do: "and #{name}"
   defp item_name(item), do: "and #{item["name"]}"
 
+  defp competitive_result(battle, player) do
+    final? = final_duel_battle?(battle)
+    winner_player_id = if final?, do: battle.duel.winner_player_id, else: battle.winner_player_id
+
+    cond do
+      is_nil(battle.winner_id) || (final? && is_nil(winner_player_id)) -> "draw"
+      is_nil(player) -> "complete"
+      player.id not in [battle.attacker_player_id, battle.defender_player_id] -> "complete"
+      winner_player_id == player.id -> "victory"
+      true -> "defeat"
+    end
+  end
+
+  defp final_duel_battle?(%{type: "duel", duel: %{phase: "finished"} = duel} = battle),
+    do: battle.attacker_player_id == duel.opponent_player_id
+
+  defp final_duel_battle?(_), do: false
+
   defp battle_result(%{type: "pve"} = battle) do
     cond do
       is_nil(battle.winner_id) -> "Draw! Both survived."
@@ -235,6 +260,58 @@ defmodule MobaWeb.V2.BattleLive do
   end
 
   defp xp_to_next_level(hero), do: Game.xp_to_next_hero_level(hero.level + 1)
+
+  defp initial_turn(%{turns: []}), do: nil
+
+  defp initial_turn(battle) do
+    first = hd(battle.turns)
+
+    initial = %{
+      attacker: starting_battler(first.attacker),
+      defender: starting_battler(first.defender)
+    }
+
+    # Older match turns predate stored starting resources; recover the winner's
+    # carried-over health and energy from the preceding match battle.
+    if battle.type == "match" && is_nil(first.attacker.starting_hp) do
+      previous =
+        battle.match_id
+        |> Engine.list_match_battles()
+        |> Enum.filter(&(&1.id < battle.id && &1.winner_id == battle.attacker_id))
+        |> List.last()
+
+      if previous do
+        winner = last_hero_for(battle.attacker, List.last(previous.turns))
+        key = if initial.attacker.hero_id == battle.attacker_id, do: :attacker, else: :defender
+
+        Map.update!(
+          initial,
+          key,
+          &%{
+            &1
+            | current_hp: round(winner.current_hp + winner.total_hp * 0.2),
+              current_mp: round(winner.current_mp + winner.total_mp * 0.2)
+          }
+        )
+      else
+        initial
+      end
+    else
+      initial
+    end
+  end
+
+  defp starting_battler(hero) do
+    %{hero | current_hp: hero.starting_hp || hero.total_hp, current_mp: hero.starting_mp || hero.total_mp}
+  end
+
+  defp previous_resource(hero, previous_hero, :health) do
+    hero.starting_hp || (previous_hero && previous_hero.current_hp) || hero.total_hp
+  end
+
+  defp previous_resource(hero, previous_hero, :energy) do
+    hero.starting_mp || (previous_hero && previous_hero.current_mp) || hero.total_mp
+  end
 
   defp current_hp(hero), do: hero.current_hp - hero.hp_regen
 

@@ -1,14 +1,31 @@
-<div class="row mt-5">
-  <div class="col">
-    <div class="card-box text-center m-5">
-      <h2>You have a pending battle, please finish it by clicking below:</h2>
-      <div class="row">
-        <div class="col-6 margin-auto">
-          <.link navigate={~p"/battles/#{@battle.id}"} class="btn btn-primary btn-block btn-lg m-1 mt-3">
-            <i class="fa fa-sword"></i> Finish Battle
-          </.link>
+<%= if @preview do %>
+  <section id="pending-battle" class="pending-battle" aria-labelledby="pending-battle-title">
+    <h2 id="pending-battle-title"><span class="pending-battle-status" aria-hidden="true"></span>Battle in progress</h2>
+    <p>Finish your current battle to resume training.</p>
+    <.link
+      id="resume-pending-battle"
+      navigate={preview_path(assigns, ~p"/battles/#{@battle.id}")}
+      class="btn battle-primary"
+    >
+      Resume battle <span aria-hidden="true">→</span>
+    </.link>
+  </section>
+<% else %>
+  <div class="row mt-5">
+    <div class="col">
+      <div class="card-box text-center m-5">
+        <h2>You have a pending battle, please finish it by clicking below:</h2>
+        <div class="row">
+          <div class="col-6 margin-auto">
+            <.link
+              navigate={preview_path(assigns, ~p"/battles/#{@battle.id}")}
+              class="btn btn-primary btn-block btn-lg m-1 mt-3"
+            >
+              <i class="fa fa-sword"></i> Finish Battle
+            </.link>
+          </div>
         </div>
       </div>
     </div>
   </div>
-</div>
+<% end %>

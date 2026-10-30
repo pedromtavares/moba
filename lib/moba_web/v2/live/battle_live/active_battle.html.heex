@@ -1,7 +1,11 @@
-<div class="row">
-  <div class="col col-md-6">
+<div class="row battle-actions">
+  <div class={[
+    "col col-md-6 battle-action-side",
+    @preview && !active_attacker?(@battle, @last_turn, @current_player) && "battle-passive-side"
+  ]}>
     <%= if active_attacker?(@battle, @last_turn, @current_player) do %>
       <.active_turn
+        preview={@preview}
         battle={@battle}
         last_turn={@last_turn}
         current_player={@current_player}
@@ -12,6 +16,7 @@
       />
     <% else %>
       <.passive_turn
+        preview={@preview}
         battle={@battle}
         last_turn={@last_turn}
         current_player={@current_player}
@@ -22,9 +27,16 @@
       />
     <% end %>
   </div>
-  <div class="col-6 battle-border-left d-none d-md-block">
+  <div class={[
+    "col-6 battle-border-left battle-action-side",
+    if(@preview,
+      do: !active_defender?(@battle, @last_turn, @current_player) && "battle-passive-side",
+      else: "d-none d-md-block"
+    )
+  ]}>
     <%= if active_defender?(@battle, @last_turn, @current_player) do %>
       <.active_turn
+        preview={@preview}
         battle={@battle}
         last_turn={@last_turn}
         current_player={@current_player}
@@ -35,6 +47,7 @@
       />
     <% else %>
       <.passive_turn
+        preview={@preview}
         battle={@battle}
         last_turn={@last_turn}
         current_player={@current_player}

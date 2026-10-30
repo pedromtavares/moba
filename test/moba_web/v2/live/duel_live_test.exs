@@ -16,17 +16,17 @@ defmodule MobaWeb.V2.DuelLiveTest do
       conn
       |> init_test_session(player_id: player.id)
 
-    {:ok, view, html} = live(conn, "/arena/#{duel.id}")
-    assert html =~ "turn to pick"
+    {:ok, view, _html} = live(conn, "/arena/#{duel.id}")
+    assert has_element?(view, "#duel-status[data-your-turn=true]", "Your pick")
 
     assert has_element?(view, "[id^=hero_]")
     assert has_element?(view, "#battle-bar")
-    assert has_element?(view, ".hero-card .league-logo")
+    assert has_element?(view, "#duel-hero-selection .league-logo")
     assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
     refute has_element?(view, ".duel-pending-battle-card")
   end
 
-  test "pending duel battle uses the legacy enter battle button styling", %{conn: conn} do
+  test "pending duel battle offers the redesigned enter battle action", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
     skills = base_skills()
@@ -49,7 +49,7 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     assert has_element?(
              view,
-             ~s|#loading-battle-#{battle.id}.btn.btn-outline-danger.btn-block.btn-lg.pt-5[phx-hook="Loading"][data-loading="Entering..."]|
+             ~s|#loading-battle-#{battle.id}.battle-primary[phx-hook="Loading"][href="/battles/#{battle.id}"]|
            )
   end
 
@@ -80,11 +80,13 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     duel = Game.get_duel!(duel.id)
 
-    {:ok, view, html} = live(conn, "/arena/#{duel.id}")
+    {:ok, view, _html} = live(conn, "/arena/#{duel.id}")
 
-    assert html =~ "Winner:"
-    assert html =~ "#{duel.player.user.username}: +5 SP"
-    assert html =~ "#{duel.opponent_player.user.username}: -5 SP"
+    assert has_element?(view, "#duel-status h1", "#{duel.winner_player.user.username} wins")
+    assert has_element?(view, "#duel-rewards > span:first-child", duel.player.user.username)
+    assert has_element?(view, "#duel-rewards > span:first-child strong", "+5 SP")
+    assert has_element?(view, "#duel-rewards > span:last-child", duel.opponent_player.user.username)
+    assert has_element?(view, "#duel-rewards > span:last-child strong", "-5 SP")
     refute has_element?(view, "#battle-bar")
   end
 

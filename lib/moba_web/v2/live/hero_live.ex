@@ -1,7 +1,11 @@
 defmodule MobaWeb.V2.HeroLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.V2.Components.ProgressionComponents
+
   import MobaWeb.V2.Components.HeroBarComponents
+
+  embed_templates "hero_live/*"
 
   def mount(_params, _session, socket) do
     {:ok, socket_init(socket)}
@@ -18,10 +22,17 @@ defmodule MobaWeb.V2.HeroLive do
 
     {:noreply,
      socket
-     |> assign(hero: hero, ranking: ranking)
+     |> assign(hero: hero, ranking: ranking, show_hud: false, editing: false, show_build: false, show_shop: false)
      |> owner_assigns()
      |> quest_assigns()}
   end
+
+  def handle_event("toggle-customize", _, %{assigns: %{hero: hero, current_player: player}} = socket)
+      when hero.player_id == player.id do
+    {:noreply, assign(socket, show_hud: !socket.assigns.show_hud, editing: false, show_build: false, show_shop: false)}
+  end
+
+  def handle_event("toggle-customize", _, socket), do: {:noreply, socket}
 
   def handle_event(
         "set-skin",
@@ -56,6 +67,10 @@ defmodule MobaWeb.V2.HeroLive do
 
   def handle_event("start-edit", _, socket) do
     {:noreply, assign(socket, editing: true)}
+  end
+
+  def handle_event("cancel-edit", _, socket) do
+    {:noreply, assign(socket, editing: false)}
   end
 
   def handle_event("finalize-edit", params, %{assigns: %{hero: current}} = socket) do

@@ -1,13 +1,16 @@
 <div class="col-xl-4 col-md-6 col-12">
-  <div class="hero-card card" style={"background-image: url(#{GH.background_url(@target.defender.avatar)}"}>
+  <div
+    class="hero-card card training-target"
+    style={"background-image: url(#{GH.background_url(@target.defender.avatar)})"}
+  >
     <div class="card-header pt-0 pb-1">
       <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
-        <strong class={"font-italic text-center text-#{difficulty_color(@target.difficulty)}"}>
-          Level {@target.defender.level}
+        <strong class={"target-level font-italic text-center text-#{difficulty_color(@target.difficulty)}"}>
+          <span class="target-level-label">Level</span> <span class="target-level-value">{@target.defender.level}</span>
         </strong>
-        <div>{@target.defender.avatar.name}</div>
+        <div class="target-name">{@target.defender.avatar.name}</div>
         <span
-          class="font-20 font-italic text-warning tooltip-cursor"
+          class="font-20 font-italic text-warning tooltip-cursor target-rewards"
           data-toggle="tooltip"
           title={target_rewards_tooltip(@current_hero, @target.difficulty)}
         >
@@ -22,7 +25,7 @@
             phx-click="battle"
             id={"gank-#{@target.id}"}
             phx-value-id={@target.id}
-            class={"battle-button btn btn-lg btn-icon loading-text dark-button btn-#{difficulty_color(@target.difficulty)}"}
+            class={"battle-button target-battle btn btn-lg btn-icon loading-text dark-button btn-#{difficulty_color(@target.difficulty)}"}
             phx-hook="Loading"
             loading="Preparing..."
           >
@@ -30,7 +33,7 @@
           </button>
         <% else %>
           <button
-            class={"battle-button btn btn-icon btn-lg waves-effect btn-#{difficulty_color(@target.difficulty)} disabled f-rpg"}
+            class={"battle-button target-battle btn btn-icon btn-lg waves-effect btn-#{difficulty_color(@target.difficulty)} disabled f-rpg"}
             data-toggle="tooltip"
             title="You do not have available turns"
           >
@@ -41,7 +44,7 @@
     </div>
     <div class="transparent card-footer p-0">
       <div
-        class="row align-items-center d-flex ml-1 mt-1 mr-1"
+        class="row align-items-center d-flex ml-1 mt-1 mr-1 target-performance"
         data-toggle="tooltip"
         title={TT.hero_stats_tooltip(@target.defender, false)}
       >
@@ -75,7 +78,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-12 mt-1">
+        <div class="col-12 mt-1 target-loadout">
           <.hero_skill_strip
             skills={@target.defender.skills}
             id_prefix="skill"

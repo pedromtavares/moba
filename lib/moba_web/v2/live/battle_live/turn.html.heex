@@ -1,78 +1,86 @@
-<article
-  class={"timeline-item #{if @is_attacker, do: "timeline-item-left timeline-attacker", else: "timeline-defender"} turn"}
-  id={"turn-#{@turn.number}"}
->
-  <div class="timeline-desk">
-    <div class="timeline-box card-box p-1">
-      <span class={if @is_attacker, do: "arrow-alt", else: "arrow"}></span>
-      <span class="timeline-icon">{@turn.number}</span>
-      <div class="col-12 d-block d-md-none" style="margin-top: -0.5rem">
-        <div class="text-center">
-          <span class="badge badge-pill text-white text-center turn-badge">Turn #{@turn.number}</span>
+<%= if @preview do %>
+  <.turn_modern previous_turn={@previous_turn} turn={@turn} is_attacker={@is_attacker} debug={@debug} />
+<% else %>
+  <article
+    class={"timeline-item #{if @is_attacker, do: "timeline-item-left timeline-attacker", else: "timeline-defender"} turn"}
+    id={"turn-#{@turn.number}"}
+  >
+    <div class="timeline-desk">
+      <div class="timeline-box card-box p-1">
+        <span class={if @is_attacker, do: "arrow-alt", else: "arrow"}></span>
+        <span class="timeline-icon">{@turn.number}</span>
+        <div class="col-12 d-block d-md-none" style="margin-top: -0.5rem">
+          <div class="text-center">
+            <span class="badge badge-pill text-white text-center turn-badge">Turn #{@turn.number}</span>
+          </div>
         </div>
-      </div>
-      <h3 class="center text-white">
-        <%= if @turn.attacker.stunned do %>
-          <.battle_status_icon code="stunned" title={"#{@turn.attacker.name} is stunned and cannot attack."} class="skill-img img-border" />
-          <br />
-          {@turn.attacker.name} is stunned and cannot attack.
-        <% else %>
-          <.battle_resource_image
-            resource={@turn.skill}
-            class="skill-img img-border tooltip-mobile"
-            title={turn_skill_description(@turn)}
-          />
-          <%= if @turn.attacker.silenced do %>
+        <h3 class="center text-white">
+          <%= if @turn.attacker.stunned do %>
             <.battle_status_icon
-              code="silenced"
-              title={"#{@turn.attacker.name} is silenced this turn and cannot cast spells."}
-              class="skill-img silenced img-border-xs"
+              code="stunned"
+              title={"#{@turn.attacker.name} is stunned and cannot attack."}
+              class="skill-img img-border"
             />
-          <% end %>
-          <%= if @turn.attacker.disarmed do %>
-            <.battle_status_icon
-              code="disarmed"
-              title={"#{@turn.attacker.name} is disarmed and cannot deal physical damage."}
-              class="skill-img silenced img-border-xs"
-            />
-          <% end %>
-          <%= if @turn.item do %>
+            <br />
+            {@turn.attacker.name} is stunned and cannot attack.
+          <% else %>
             <.battle_resource_image
-              resource={@turn.item}
-              title={turn_item_description(@turn)}
-              class="skill-img tooltip-mobile img-border-sm activated-item mb-3"
+              resource={@turn.skill}
+              class="skill-img img-border tooltip-mobile"
+              title={turn_skill_description(@turn)}
             />
+            <%= if @turn.attacker.silenced do %>
+              <.battle_status_icon
+                code="silenced"
+                title={"#{@turn.attacker.name} is silenced this turn and cannot cast spells."}
+                class="skill-img silenced img-border-xs"
+              />
+            <% end %>
+            <%= if @turn.attacker.disarmed do %>
+              <.battle_status_icon
+                code="disarmed"
+                title={"#{@turn.attacker.name} is disarmed and cannot deal physical damage."}
+                class="skill-img silenced img-border-xs"
+              />
+            <% end %>
+            <%= if @turn.item do %>
+              <.battle_resource_image
+                resource={@turn.item}
+                title={turn_item_description(@turn)}
+                class="skill-img tooltip-mobile img-border-sm activated-item mb-3"
+              />
+            <% end %>
+            <br />
+            {@turn.attacker.name} used {skill_name(@turn.skill)}
           <% end %>
-          <br />
-          {@turn.attacker.name} used {skill_name(@turn.skill)}
+        </h3>
+        <% descriptions = effect_descriptions(@turn) %>
+        <% {first, tail} = List.pop_at(descriptions, 0) %>
+        <%= if first do %>
+          <.first_description
+            turn={@turn}
+            resource={elem(first, 0)}
+            effect={elem(first, 1)}
+            descriptions={descriptions -- [first]}
+          />
+          <div class="descriptions">
+            <.description :for={{resource, effect} <- tail} turn={@turn} resource={resource} effect={effect} />
+          </div>
         <% end %>
-      </h3>
-      <% descriptions = effect_descriptions(@turn) %>
-      <% {first, tail} = List.pop_at(descriptions, 0) %>
-      <%= if first do %>
-        <.first_description
-          turn={@turn}
-          resource={elem(first, 0)}
-          effect={elem(first, 1)}
-          descriptions={descriptions -- [first]}
-        />
-        <div class="descriptions">
-          <.description :for={{resource, effect} <- tail} turn={@turn} resource={resource} effect={effect} />
+        <div style="height: 10px;" class="d-none d-md-block">&nbsp;</div>
+        <div class="row no-gutters">
+          <.effects
+            debug={@debug}
+            is_attacker={@is_attacker}
+            hero={if(@is_attacker, do: @turn.attacker, else: @turn.defender)}
+          />
+          <.effects
+            debug={@debug}
+            is_attacker={!@is_attacker}
+            hero={if(@is_attacker, do: @turn.defender, else: @turn.attacker)}
+          />
         </div>
-      <% end %>
-      <div style="height: 10px;" class="d-none d-md-block">&nbsp;</div>
-      <div class="row no-gutters">
-        <.effects
-          debug={@debug}
-          is_attacker={@is_attacker}
-          hero={if(@is_attacker, do: @turn.attacker, else: @turn.defender)}
-        />
-        <.effects
-          debug={@debug}
-          is_attacker={!@is_attacker}
-          hero={if(@is_attacker, do: @turn.defender, else: @turn.attacker)}
-        />
       </div>
     </div>
-  </div>
-</article>
+  </article>
+<% end %>

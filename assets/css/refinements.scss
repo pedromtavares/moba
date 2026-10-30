@@ -1,0 +1,531 @@
+.game-page {
+  /* Values are information, not actions. Keep their semantic colors and tooltips. */
+  .game-stat, .avatar-attribute {
+    min-height: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    transform: none !important;
+    font-family: 'Nunito', sans-serif !important;
+    letter-spacing: 0 !important;
+    text-shadow: none !important;
+    cursor: default !important;
+    transition: none;
+  }
+
+  .game-stat { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 6px 10px; font-size: 13px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+  .game-stat i { font-size: 13px; opacity: .85; }
+  .game-stat .stat-value { color: #e3dfd7; font-weight: 700; }
+  .game-stat:focus-visible { outline: 1px solid #d6b47c; outline-offset: 2px; }
+  #hero-bar .stats-group { display: flex; width: 100%; justify-content: space-between; padding-top: 6px; }
+  #hero-bar .game-stat { padding: 6px 7px; }
+  #hero-bar .stats-group .game-stat + .game-stat { border-left: 1px solid #baa98a20 !important; }
+  .avatar-attributes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 8px; margin: 16px 0 0 !important; }
+  .avatar-attribute { display: block; padding: 12px 4px; font-size: 12px; line-height: 1.6; border-top: 1px solid var(--base-line) !important; }
+  .avatar-attribute i { font-size: 14px; margin-bottom: 6px; }
+  .avatar-attribute strong { display: inline-block; color: #eee6d6; font-size: 24px; line-height: 1.4; font-variant-numeric: tabular-nums; }
+  .avatar-attribute small { display: inline-block; font-size: 10px; color: #a5a4a2; font-style: normal !important; white-space: nowrap; }
+
+  /* A compact collection navigation with a single accent for the current section. */
+  .tavern-nav { max-width: 700px; margin: 0 auto 24px; gap: 12px; }
+  .tavern .tavern-nav .nav-link { padding: 18px 12px; font-size: 15px; font-weight: 600; letter-spacing: .01em; }
+  .tavern-nav .loading-text { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+  .tavern .tavern-nav .nav-link i { color: #8f96a4 !important; font-size: 18px; transition: color 180ms ease, filter 180ms ease; }
+  .tavern .tavern-nav .nav-link:hover i, .tavern .tavern-nav .nav-link.active i { color: #dfbf88 !important; filter: drop-shadow(0 0 8px #d6ad6a33); }
+  .tavern > .row:first-child p { max-width: 760px; margin: 12px auto 20px; line-height: 1.7; }
+
+  /* The reward belongs beside the action; the button has one clear purpose. */
+  .arena-progress-label { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; color: #a9a59b; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+  .arena-progress-label strong { color: #e9dfcd; font-size: 18px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+  .arena-progress-label strong span { color: #8d9099; font-size: 13px; font-weight: 400; }
+  #daily-progression { height: 50px !important; border: 1px solid #c6a77938; border-radius: 4px; background: #baa98a0d; box-shadow: inset 0 1px 8px #00000066; }
+  #daily-progression .manual-bar { background: linear-gradient(90deg, #8d6939, #d6b47c) !important; box-shadow: 0 0 12px #d6ad6a33; }
+  #daily-progression .auto-bar { background: #75879d80 !important; }
+  .arena-progress-legend { display: flex; gap: 18px; margin-top: 10px; color: #92969e; font-size: 11px; }
+  .arena-progress-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; }
+  .legend-dot.manual { background: #d6b47c; }
+  .legend-dot.automatic { background: #75879d; }
+  #enter-arena-button { display: flex; align-items: center; justify-content: center; width: 100%; max-width: 320px; min-height: 76px; padding: 18px 20px; font-size: 19px; line-height: 1; }
+  #enter-arena-button .loading-text { display: inline-flex; align-items: center; justify-content: center; gap: 12px; }
+  #enter-arena-button .fa-2x { font-size: 26px; }
+  .arena-entry-reward { display: flex; justify-content: center; align-items: center; gap: 10px; margin: 12px 0 0; font-size: 11px; color: #999b9e; }
+  .arena-entry-reward strong { color: #cdb88f; font-size: 14px; }
+  .arena-entry-reward i { color: #d6b47c; margin-right: 3px; }
+  #pvp-progression .info-box { padding: 12px 18px; margin: 0; }
+  #pvp-progression .info-box .f-rpg { font-family: 'Nunito', sans-serif; font-size: 24px; font-weight: 700; letter-spacing: -.03em; }
+  #pvp-progression .info-box small { font-size: 13px; line-height: 1.5; display: inline-block; margin-top: 8px; white-space: nowrap; }
+  .arena-section-heading { min-height: 56px; margin-bottom: 16px !important; align-items: center; }
+  .arena .arena-section-heading { justify-content: space-between !important; gap: 12px; margin-top: 0 !important; }
+  .arena-section-heading h2 { margin: 0; color: #e9dfcd; font-size: 20px; font-weight: 600; }
+  .arena-section-heading .arena-action { min-height: 46px; padding: 12px 20px; font-family: 'Nunito', sans-serif; font-size: 15px; letter-spacing: .01em; }
+  .arena-board { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; margin-left: 0; margin-right: 0; }
+  .arena-board > .col { padding: 0; min-width: 0; }
+  .arena-board .ranking > .nav { min-height: 56px; align-items: center; margin-bottom: 16px !important; }
+  .arena .arena-board #matchmaking-container, .arena .arena-board #pvp_duels { height: auto !important; }
+  .arena .arena-history { max-height: 60vh; }
+  .arena-overview .history-table .history-detail { margin-top: 5px; text-align: left; font-size: 12px; color: #969da9; }
+
+  /* Clear columns and compact player identities replace oversized, centered cells. */
+  .history-table { width: 100%; border-collapse: separate; border-spacing: 0; font-variant-numeric: tabular-nums; }
+  .history-table thead th { padding: 16px 10px; background: transparent !important; font-size: 13px; letter-spacing: .01em; color: #bcb5a8; font-weight: 600; border-top: 0; border-bottom: 1px solid var(--base-line); text-align: left; }
+  .history-table td { padding: 15px 10px !important; border-top: 0; border-bottom: 1px solid #baa98a14; vertical-align: middle; text-align: left !important; }
+  .history-table tbody tr:hover { background: #c6a77906; }
+  .history-table td:first-child h3 { font-family: 'Nunito', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: #8f96a4; line-height: 1.4; max-width: 45px; }
+  .history-table td.table-player-cell { display: table-cell !important; }
+  .history-table td.table-player-cell > img { width: 26px; height: 26px; object-fit: contain; margin-right: 8px !important; }
+  .history-table td.table-player-cell > div { display: inline-block; width: auto !important; max-width: calc(100% - 38px); vertical-align: middle; }
+  .history-table h4, .history-table h5 { font-family: 'Nunito', sans-serif; font-size: 13px; font-weight: 600; line-height: 1.4; margin: 0 !important; }
+  .history-table td a:not(.btn) { color: #e1d9c9; font-weight: 600; font-size: 13px; overflow-wrap: anywhere; }
+  .history-table td h5.text-success { color: #91cfb5 !important; }
+  .history-table td h5.text-muted { color: #c39799 !important; }
+  .history-table td:nth-last-child(2) { width: 112px !important; }
+  .history-table .badge { display: block; background: transparent; padding: 3px 0 0; border-radius: 0; font-size: 10px; font-weight: 400; line-height: 1.5; white-space: nowrap; }
+  .history-table .game-review { display: inline-flex; align-items: center; justify-content: center; min-height: 30px; width: 30px; padding: 0 !important; border: 1px solid #baa98a26; background: transparent; box-shadow: none; font-size: 12px; }
+  .history-table td:last-child, .history-table th:last-child { text-align: right !important; }
+  #arena-duels-table td:last-child { white-space: nowrap; }
+  #arena-duels-table td:last-child .badge { display: inline-block; max-width: 65px; font-size: 9px; vertical-align: middle; margin-right: 3px; }
+  #arena-duels-table .game-review { margin-left: 2px !important; }
+  .profile-history { background: transparent; padding: 0; height: auto; max-height: 48vh; }
+  .profile-history .history-table td { width: auto !important; padding: 20px 14px !important; }
+  .profile-history .history-table td:first-child { width: 44% !important; }
+  .profile-history .history-table :is(h5, a:not(.btn)) { font-size: 18px; }
+  .profile-history .history-table .badge { font-size: 12px; padding-top: 5px; }
+  .profile-history .game-review { width: 40px; min-height: 40px; font-size: 15px; border-radius: 5px; }
+  .history-detail { display: block; margin-top: 5px; color: #969da9; font-size: 12px; }
+  .profile-history-tabs { gap: 20px; }
+  .profile-history-tabs .btn { min-height: 44px; padding: 12px 0; border: 0; border-radius: 0 !important; border-bottom: 2px solid transparent; background: transparent; box-shadow: none; font-family: 'Nunito', sans-serif; font-size: 16px; letter-spacing: 0; }
+  .profile-history-tabs .no-action { border-bottom-color: #d6b47c; color: #e6ceaa; }
+  :is(.arena, .user-profile) .ranking .ranking-table :is(thead, tfoot) th { padding: 16px 14px; background: #0c111af5; border-color: var(--base-line); font-size: 13px; font-weight: 600; letter-spacing: .01em; text-align: left; white-space: nowrap; }
+  :is(.arena, .user-profile) .ranking .ranking-table th:last-child { text-align: right; }
+  .ranking-table td { padding: 14px 10px; height: 64px; border-top: 0; border-bottom: 1px solid #baa98a14; }
+  .ranking-table tbody tr:hover { background: #c6a77906; }
+  .ranking-table td:first-child { width: 55px; }
+  .ranking-table td:last-child { width: 86px; text-align: right; }
+  .ranking-table th:last-child { text-align: right; }
+  .ranking-table :is(h1, h3, h4, h5) { margin: 0 !important; font-family: 'Nunito', sans-serif; font-size: 14px; line-height: 1.4; text-shadow: none; }
+  .ranking-table h1 { font-size: 16px; color: #bcb2a0; font-variant-numeric: tabular-nums; }
+  .ranking-table h3 { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .ranking-table td:nth-child(2) { text-align: left; }
+  .ranking-table td:nth-child(2) > a { display: flex; align-items: center; gap: 10px; }
+  .ranking-table .pvp-rank { width: 30px; height: 30px !important; max-height: 30px !important; margin: 0 !important; object-fit: contain; filter: none; }
+  .ranking-table .mini-discord-avatar { width: 16px; height: 16px; border-radius: 50%; }
+  .ranking-table tr.selected-player { background: #c6a7790c !important; box-shadow: inset 2px 0 #d6b47c; }
+  .ranking-table #loading-ranking { color: #d6b47c !important; }
+
+  .user-profile #user-profile { height: auto !important; }
+  .profile-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 4px 12px; font-size: 15px; }
+  .profile-actions a { color: #bcb5a8 !important; transition: color 180ms ease; }
+  .profile-actions a:hover { color: #f0d7aa !important; }
+  .user-profile .profile-metrics { margin: 8px 0; padding: 16px 0 !important; border-bottom: 1px solid var(--base-line); }
+  .profile-metrics > .col + .col { border-left: 1px solid var(--base-line); }
+  .profile-metrics strong { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .profile-age-unit { font-size: 13px; font-weight: 400; color: #bcb5a8; }
+  .profile-metrics strong i { font-size: 14px; color: #d6b47c !important; margin-right: 4px; }
+  .profile-metric-label { display: block; margin-top: 6px; color: #a5a4a2; font-size: 12px; }
+  .user-profile #user-profile > hr { display: none; }
+  .user-profile #user-profile > .card-footer { padding-top: 16px !important; margin-top: 24px; }
+  .user-profile .ranking-table td { height: 76px; padding: 16px 14px; }
+  .user-profile .ranking-table { table-layout: fixed; }
+  .user-profile .ranking-table th:first-child { width: 110px; }
+  .user-profile .ranking-table th:last-child { width: 105px; }
+  .user-profile .ranking-table td:nth-child(2) > a, .user-profile .ranking-table h5 { min-width: 0; }
+  .user-profile .ranking-table h5 { overflow-wrap: anywhere; }
+  .user-profile .ranking-table .pvp-rank { flex-shrink: 0; }
+  .user-profile .ranking-table td:first-child { width: 110px; text-align: left; }
+  .user-profile #loading-ranking .loading-text { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; font-size: 13px; }
+  .user-profile #loading-ranking i { color: #d6b47c !important; font-size: 12px; margin-right: 0 !important; }
+  .user-profile .ranking .ranking-table thead th { font-size: 14px; }
+  .user-profile .ranking-table :is(h4, h5) { font-size: 18px; }
+  .user-profile .ranking-table :is(h1, h3) { font-size: 26px; }
+  .user-profile .ranking-table h1 { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .user-profile .ranking-table h1 i { margin: 0; font-size: 12px; }
+  .user-profile .ranking-table .pvp-rank { width: 38px; height: 38px !important; max-height: 38px !important; }
+
+  .arena-overview .history-table thead th { font-size: 13px; }
+  .arena-overview .history-table td { padding: 18px 10px !important; }
+  .arena-overview .history-table td:first-child h3 { font-size: 11px; max-width: 64px; }
+  .arena-overview .history-table h4, .arena-overview .history-table h5,
+  .arena-overview .history-table td a:not(.btn) { font-size: 16px; }
+  .arena-overview .history-table .badge { font-size: 11px; }
+  .arena-overview .history-table td.table-player-cell > img { width: 36px; height: 36px; }
+  .arena-overview .history-table td.table-player-cell > div { max-width: calc(100% - 46px); }
+  .arena-overview .history-table .game-review { width: 36px; min-height: 36px; font-size: 14px; }
+  .arena-overview .ranking-table td { height: 82px; }
+  .arena-overview .ranking-table :is(h4, h5) { font-size: 16px; }
+  .arena-overview .ranking-table :is(h1, h3) { font-size: 24px; }
+  .arena-overview .ranking-table .pvp-rank { width: 40px; height: 40px !important; max-height: 40px !important; }
+
+  /* Reading surfaces use body type, shorter lines, and clear question hierarchy. */
+  #library { max-width: 1400px; margin: 0 auto; }
+  .manual-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 36px 24px 24px; }
+  .manual-heading h1 { font-size: clamp(26px, 3vw, 36px); font-weight: 600; letter-spacing: -.03em; color: #e9dfcd; margin: 0; }
+  .manual-heading nav { display: flex; align-items: center; flex-wrap: wrap; gap: 20px; }
+  .manual-heading a { color: #c5b89f; font-size: 14px; }
+  .manual-heading a:hover { color: #fff1d9; }
+  .manual-heading .base-secondary { padding: 10px 16px; font-family: 'Nunito', sans-serif; font-size: 14px; letter-spacing: 0; }
+  #library > .row:first-of-type .btn-purple { max-width: 240px; margin: 12px 24px 24px !important; font-size: 13px; min-height: 38px; }
+  #library .manual-navigation { gap: 4px 16px; padding: 0 0 14px; border-bottom: 1px solid var(--base-line); }
+  #library .manual-navigation .nav-link { font-family: 'Nunito', sans-serif; font-size: 15px; padding: 14px 4px !important; }
+  #library > .row > .col-12 > .card-box { padding: 20px 24px 32px; }
+  #library .tab-content { padding: 32px 0 0; }
+  #library .tab-pane .p-lg-2 { padding: 0 20px 0 0 !important; }
+  #library .tab-pane .mt-5 { margin-top: 0 !important; }
+  #library .faq-question-q-box { display: none; }
+  #library .faq-question { margin: 0 0 12px; padding: 0; color: #e4d7c2 !important; font-size: 20px; font-weight: 600; line-height: 1.5; }
+  #library .faq-answer, #library .tab-pane p { margin-left: 0; padding: 0; max-width: 67ch; font-size: 16px; line-height: 1.85; color: #b9bdc5; }
+  #library .tab-pane div:has(> .faq-question) { padding: 0 0 20px; margin-bottom: 26px; border-bottom: 1px solid #baa98a14; }
+  #library .tab-pane a:not(.nav-link) { color: #d6b47c; text-decoration: underline; text-underline-offset: 3px; }
+  #library .page-title { padding: 28px 0 8px; color: #e0d3bc; font-size: 22px; font-weight: 600; }
+  #library .select-avatar { padding-top: 16px; padding-bottom: 16px; }
+  #library .select-avatar > .card-box { padding: 24px 16px; }
+  #library .select-avatar h4 { margin: 14px 0 4px !important; font-size: 20px; color: #e9dfcd; }
+  #library .manual-stat-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 8px; margin: 12px 0 !important; }
+  #library .manual-stat-row .game-stat { display: block; padding: 8px 0; font-size: 15px; white-space: nowrap; border-top: 1px solid var(--base-line) !important; }
+  #library .manual-stat-row small { display: block; color: #a5a4a2; font-size: 11px; margin-bottom: 8px; }
+  #library .page-title { scroll-margin-top: 24px; }
+
+  .community-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 32px 0; }
+  .community-heading h1 { margin: 0; color: #e9dfcd; font-size: 36px; font-weight: 600; letter-spacing: -.03em; }
+  .community-heading .base-secondary, .community-composer .base-secondary,
+  #community-update-form .base-secondary { padding: 12px 18px; font-family: 'Nunito', sans-serif; font-size: 15px; letter-spacing: 0; }
+  .community-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; margin: 0 0 32px !important; }
+  .community-hub > .col-lg-6 { width: auto; max-width: none; padding: 0; min-width: 0; }
+  .community .community-panel { height: clamp(460px, 56vh, 600px); display: flex; flex-direction: column; border-bottom: 1px solid var(--base-line); }
+  .community .community-panel-heading { display: grid; grid-template-columns: 24px 1fr; column-gap: 12px; row-gap: 8px; margin: 0; padding: 0 0 20px !important; border-bottom: 1px solid var(--base-line); }
+  .community-panel-heading > i { align-self: center; color: #d6b47c; font-size: 20px; }
+  .community-panel-title { color: #e9dfcd; font-size: 24px; line-height: 1.3; font-weight: 600; }
+  .community .community-panel-description { grid-column: 2; margin: 0 !important; font-style: normal !important; font-size: 14px; font-weight: 400; line-height: 1.65; max-width: 60ch; }
+  .community-panel > .card-body { flex: 1; min-height: 0; padding: 0 !important; }
+  .community-board > .card-body { display: flex; flex-direction: column; }
+  .community .messages { flex: 1; min-height: 0; height: auto; padding-right: 12px; }
+  .community .messages .inbox-item { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 6px 14px; padding: 18px 0; border-bottom: 1px solid #baa98a14; overflow: visible; }
+  .community .messages .inbox-item:last-child { border-bottom: 0; }
+  .community .messages .inbox-item-img { grid-column: 1; grid-row: 1 / span 2; float: none; width: auto; margin: 0; }
+  .community .messages .inbox-item-img img { width: 36px; height: 36px; object-fit: contain; }
+  .community .messages .inbox-item-author { grid-column: 2; grid-row: 1; line-height: 1.4; font-size: 16px; }
+  .community .messages .inbox-item-author a { color: #e2d9c9 !important; font-weight: 700; }
+  .community .messages .inbox-item-author a:hover { color: #f0d7aa !important; }
+  .community .community-admin { margin-left: 6px; color: #c7ae80 !important; font-size: 11px; font-weight: 400; }
+  .community .messages .inbox-item-text { grid-column: 2 / -1; color: #c4c6cb; font-size: 15px; line-height: 1.65; overflow-wrap: anywhere; }
+  .community .messages .inbox-item-date { grid-column: 3; grid-row: 1; position: static; margin: 0; line-height: 1.4; }
+  .community .inbox-item-date a, .community .timeline-sm-item > a { color: #b38288 !important; margin: 0 !important; font-size: 12px; }
+  .community .inbox-item-date a:hover, .community .timeline-sm-item > a:hover { color: #e3a6ae !important; }
+  .community-composer { display: flex; align-items: flex-end; gap: 12px; padding: 18px 0; border-top: 1px solid var(--base-line); }
+  .community-compose-field { flex: 1; min-width: 0; }
+  .community-compose-field label, #community-update-form label { display: block; margin: 0 0 8px; color: #bcb5a8; font-size: 13px; font-weight: 600; }
+  .community-composer .form-control { min-height: 46px; font-size: 14px; }
+  .community-composer .base-secondary { min-height: 46px; }
+  .community .updates { height: auto; min-height: 0; padding-right: 12px !important; }
+  .community .timeline-sm { margin: 0; padding: 0; }
+  .community .timeline-sm-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; margin: 0; padding: 24px 0; border-left: 0; border-bottom: 1px solid #baa98a14; }
+  .community .timeline-sm-item::before, .community .timeline-sm-item::after { display: none; }
+  .community .timeline-sm-item > h5 { grid-column: 1; grid-row: 1; margin: 0 !important; color: #e7dcc7; font-size: 20px; line-height: 1.4; font-weight: 600; }
+  .community .timeline-sm-item > a { grid-column: 2; grid-row: 1; align-self: start; }
+  .community .community-update-body { grid-column: 1 / -1; margin: 0 !important; color: #b9bdc5 !important; font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
+  .community-update-body p { margin: 0 0 16px; max-width: 70ch; }
+  .community-update-body p:last-child { margin-bottom: 0; }
+  .community-update-body a, .community .inbox-item-text a { color: #d6b47c !important; text-decoration: underline; text-underline-offset: 3px; }
+  .community-empty { padding: 36px 12px; color: #969da9; font-size: 15px; line-height: 1.7; }
+  #community-update-form { padding: 8px 0 24px; }
+  #community-update-form .form-control { font-size: 15px; }
+  .community .community-tabs { gap: 24px; margin: 0 0 24px; }
+  .community .community-tabs .nav-link { margin: 0; padding: 18px 12px; line-height: 1.4; }
+  .community-tabs .loading-text { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0; text-transform: capitalize; }
+  .community .community-tabs .nav-link i { color: #8f96a4 !important; font-size: 18px; transition: color 180ms ease, filter 180ms ease; }
+  .community .community-tabs .nav-link.active i, .community .community-tabs .nav-link:hover i { color: #dfbf88 !important; filter: drop-shadow(0 0 8px #d6ad6a33); }
+}
+
+@media (min-width: 1200px) {
+  .game-page .user-profile {
+    height: calc(100dvh - 24px);
+    > .row { height: 100%; }
+    > .row > [class*="col-"] { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    .collection-container, #user-profile, #user-ranking { height: 100% !important; min-height: 0; max-height: none; margin-bottom: 0; padding-bottom: 12px; }
+    .collection-container { display: flex; flex-direction: column; }
+    .collection-container > [id^="hero_"] { flex: 0 0 auto; }
+    .collection-container .hero-card { min-height: 0; height: clamp(240px, 39vh, 370px); }
+    .collection { flex: 1; min-height: 0; height: auto; }
+    .collection .card-body { min-height: 0; padding: 12px 0 !important; }
+    .collection .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); gap: 8px; width: 100%; margin: 0; }
+    .collection .row > .col-3 { display: flex; justify-content: center; align-items: center; min-height: 0; padding: 0; width: auto; max-width: none; }
+    .collection .avatar-container { height: 100%; display: inline-flex; align-items: center; }
+    .collection .avatar { width: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
+    .collection .league-logo { position: absolute; bottom: 0; left: calc(50% - 12px); margin: 0; }
+    #user-profile { display: flex; flex-direction: column; }
+    #user-profile > .card-body, #user-profile > .row { flex: 0 0 auto; }
+    #user-profile > .row:has(.profile-history) { flex: 1; min-height: 0; }
+    #user-profile > .row:has(.profile-history) > .col { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    .profile-history { flex: 1; min-height: 0; height: auto; max-height: none; overflow: auto; }
+    #user-profile > .card-footer { flex: 0 0 auto; padding-top: 12px !important; margin-top: 12px; }
+    #user-ranking { overflow: auto; }
+  }
+
+  .game-page .arena-overview {
+    height: calc(100dvh - var(--game-topbar-height, 0px) - 24px);
+    > .row { height: 100%; }
+    > .row > .col { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+    > .row > .col > .row:first-child:not(.arena-board) { flex: 0 0 auto; }
+    .arena-board { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); overflow: hidden; }
+    .arena-board > .col { height: 100%; min-height: 0; }
+    .arena-board :is(#matchmaking-container, #pvp_duels, .ranking) { height: 100% !important; max-height: none; margin-bottom: 0; padding-bottom: 12px; border-bottom: 1px solid var(--base-line); display: flex; flex-direction: column; }
+    .arena-board .card-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+    .arena-board .arena-history { flex: 1; min-height: 0; max-height: none; overflow: auto; }
+    .arena-board .ranking > .card-body { overflow: auto; }
+    .arena-board .ranking .nav { flex: 0 0 auto; margin-top: 0 !important; }
+  }
+}
+
+@media (min-width: 1200px) and (max-width: 1499px) {
+  .game-page .profile-metrics strong { font-size: 20px; white-space: nowrap; }
+  .game-page .profile-metrics strong i { font-size: 12px; margin-right: 2px; }
+}
+
+@media (min-width: 1200px) and (max-height: 850px) {
+  .game-page .user-profile {
+    #user-profile > .card-body > .pvp-rank { max-height: 90px; }
+    #user-profile > .card-body h2 { font-size: 28px; margin: 10px 0 0; }
+    .profile-metrics { padding: 10px 0 !important; margin: 4px 0; }
+    .profile-history-tabs .btn { min-height: 38px; padding-top: 9px; padding-bottom: 9px; }
+    .profile-history .history-table td { padding-top: 18px !important; padding-bottom: 18px !important; }
+  }
+}
+
+@media (max-width: 1199px) {
+  .game-page .arena-board { grid-template-columns: minmax(0, 1fr); }
+  .game-page .arena-board > .col { width: 100%; max-width: 100%; }
+  .game-page .arena .arena-history { max-height: 420px; }
+}
+
+@media (max-width: 991px) {
+  .game-page .community-hub { grid-template-columns: minmax(0, 1fr); gap: 32px; }
+  .game-page .community .community-panel { height: 500px; }
+}
+
+@media (max-width: 767px) {
+  .game-page {
+    .community-heading { padding: 24px 0; gap: 12px; }
+    .community-heading h1 { font-size: 28px; }
+    .community-heading .base-secondary { font-size: 13px; padding: 10px 12px; }
+    .community .community-panel-heading { grid-template-columns: 20px 1fr; column-gap: 10px; }
+    .community-panel-title { font-size: 22px; }
+    .community-composer { gap: 8px; }
+    .community-composer .base-secondary { padding: 12px; }
+    .community .messages .inbox-item { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px 10px; }
+    .community .messages .inbox-item-img img { width: 28px; height: 28px; }
+    .community .community-tabs { gap: 0; }
+    .community .community-tabs .nav-link { display: flex; align-items: center; justify-content: center; height: 64px; padding: 12px 6px; }
+    .community-tabs .loading-text { font-size: 13px; gap: 6px; }
+    .community .community-tabs .nav-link i { font-size: 15px; }
+    .tavern-nav { gap: 0; margin-bottom: 16px; }
+    .tavern .tavern-nav .nav-link { padding: 14px 6px; font-size: 13px; }
+    .tavern-nav .loading-text { gap: 7px; }
+    .tavern .tavern-nav .nav-link i { font-size: 15px; }
+    #pvp-progression .card-body { padding: 20px 8px 0; }
+    #pvp-progression .info-box { padding: 10px 6px; }
+    #pvp-progression .info-box small { font-size: 10px; }
+    .arena-board { gap: 24px; }
+    .arena-board > .col { margin-bottom: 0 !important; }
+    .history-table td { padding: 14px 7px !important; }
+    .history-table td.table-player-cell > img { width: 22px; height: 22px; margin-right: 5px !important; }
+    .history-table td.table-player-cell > div { max-width: calc(100% - 30px); }
+    .history-table .badge { font-size: 10px; }
+    .manual-heading { padding: 24px 12px 8px; }
+    .manual-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
+    .manual-heading nav { gap: 16px; }
+    #library > .row > .col-12 > .card-box { padding: 12px; }
+    #library .manual-navigation { gap: 0 14px; flex-wrap: wrap; }
+    #library .tab-pane .p-lg-2 { padding: 0 !important; }
+    #library .faq-question { font-size: 17px; }
+    #library .faq-answer, #library .tab-pane p { font-size: 16px; line-height: 1.85; }
+    .avatar-attributes { gap: 4px; }
+    .avatar-attribute strong { font-size: 22px; }
+  }
+}
+
+@media (max-width: 767px) {
+  .game-page .profile-actions { gap: 8px; font-size: 13px; }
+}
+
+.game-page {
+  #battle-bar:has(.league-outcome) { background: #0c111af5; border-top: 1px solid #baa98a40; border-image: none; box-shadow: 0 -12px 40px #00000033; backdrop-filter: blur(16px); }
+  #battle-bar .battle-border-left:has(.league-outcome) { border-left: 1px solid var(--base-line); border-right: 1px solid var(--base-line); border-image: none; }
+  .league-outcome { padding: 24px 16px; text-align: left; }
+  .league-outcome-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+  .league-outcome-eyebrow { margin: 0 0 6px; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: #c9ad7b; }
+  .league-outcome-heading h3 { margin: 0 0 8px; font-size: 26px; line-height: 1.25; letter-spacing: -.02em; color: #e9dfcd; }
+  .league-outcome-description { margin: 0; font-size: 13px; line-height: 1.6; color: #a9afb9; }
+  .league-outcome[data-result="defeat"] h3 { color: #d3a3a4; }
+  .league-outcome :is(.league-continue, .league-return) { display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex-shrink: 0; min-height: 50px; padding: 12px 20px; font-size: 15px; line-height: 1.4; white-space: nowrap; }
+  .league-challenge-steps { display: flex; gap: 16px; list-style: none; margin: 22px 0 0; padding: 0; }
+  .league-challenge-steps li { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; padding-top: 12px; border-top: 2px solid #baa98a26; color: #777e8b; }
+  .league-step-marker { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 28px; height: 28px; border: 1px solid currentColor; border-radius: 50%; font-size: 13px; font-weight: 700; }
+  .league-challenge-steps strong { display: block; font-size: 13px; font-weight: 600; }
+  .league-challenge-steps small { display: block; margin-top: 3px; font-size: 11px; }
+  .league-challenge-steps [data-state="complete"] { border-color: #599e85; color: #92cbb5; }
+  .league-challenge-steps [data-state="next"] { border-color: #d6b47c; color: #f0d7aa; }
+  .league-challenge-steps [data-state="next"] .league-step-marker { background: #c9a2631a; box-shadow: 0 0 16px #d6ad6a20; }
+  .league-challenge-steps [data-state="failed"] { border-color: #b27076; color: #d3a3a4; }
+  .league-promotion-rewards { display: flex; align-items: center; flex-wrap: wrap; gap: 24px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--base-line); font-size: 16px; font-weight: 600; }
+  .league-promotion-ranks { display: flex; align-items: center; gap: 12px; color: #8f96a4; }
+  .league-promotion-ranks img { width: 36px; height: 36px; object-fit: contain; }
+  .league-gold-reward { color: #dfbf88; }
+  .league-xp-reward { color: #8bbfcb; }
+}
+
+@media (max-width: 767px) {
+  .game-page .league-outcome { padding: 18px 0; }
+  .game-page .league-outcome-heading { gap: 16px; flex-wrap: wrap; }
+  .game-page .league-outcome-heading h3 { font-size: 22px; }
+  .game-page .league-outcome :is(.league-continue, .league-return) { width: 100%; }
+  .game-page .league-challenge-steps { gap: 8px; margin-top: 18px; }
+  .game-page .league-challenge-steps li { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .game-page .league-challenge-steps strong { font-size: 11px; }
+  .game-page .league-challenge-steps small { font-size: 10px; }
+}
+
+.game-page {
+  #battle-bar .battle-stat-group { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; margin: 10px 0 !important; }
+  #battle-bar .battle-stat-group .game-stat { display: grid; grid-template-columns: auto auto; align-content: center; gap: 3px 7px; padding: 4px 6px; }
+  #battle-bar .battle-stat-group .game-stat + .game-stat { border-left: 1px solid var(--base-line) !important; }
+  #battle-bar .battle-stat-group .stat-value { font-size: 18px; line-height: 1.4; }
+  #battle-bar .battle-stat-group .stat-label { grid-column: 1 / -1; color: #969da9; font-size: 11px; font-weight: 400; }
+  #battle-bar .battle-hero-readout .progress { border: 0; border-radius: 2px; box-shadow: none; background: #ffffff0a; }
+  #battle-bar .battle-hero-readout .progress:has(.bg-dark) { background: transparent; }
+  #battle-bar .battle-hero-readout .progress .bg-dark { background: transparent !important; color: #969da9; font-size: 11px; letter-spacing: .06em; }
+}
+
+body:has(.game-page) .tippy-box .game-stat { display: inline-flex; align-items: center; gap: 6px; min-height: 0; padding: 6px 8px; border: 0; border-radius: 0; background: transparent !important; box-shadow: none; transform: none; font-family: 'Nunito', sans-serif; font-size: 13px; letter-spacing: 0; text-shadow: none; cursor: default; }
+body:has(.game-page) .tippy-box .game-stat .stat-value { color: #e3dfd7; font-weight: 600; }
+
+.game-page {
+  .death-panel { display: grid; grid-template-columns: minmax(240px, .9fr) minmax(0, 1.6fr); gap: 32px 48px; width: 100%; max-width: 1120px; margin: 32px auto; padding: 24px 12px; }
+  .death-overview { position: relative; align-self: center; }
+  .death-emblem { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 68px; height: 68px; margin-bottom: 20px; color: #c99893; font-size: 36px; }
+  .death-emblem::before { content: ''; position: absolute; inset: -24px; background: radial-gradient(circle, #963b3b26, transparent 70%); pointer-events: none; }
+  .death-eyebrow { margin: 0 0 10px; color: #bd8b86; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+  .death-overview h2 { margin: 0 0 14px; color: #e8ddd1; font-size: 36px; line-height: 1.15; letter-spacing: -.03em; }
+  .death-description { max-width: 36ch; margin: 0; color: #a9afb9; font-size: 15px; line-height: 1.75; }
+  .death-buybacks { align-self: center; padding-left: 40px; border-left: 1px solid var(--base-line); }
+  .death-option { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 16px; padding: 24px 0; }
+  .death-option + .death-option { border-top: 1px solid var(--base-line); }
+  .death-currency { display: flex; align-items: center; gap: 12px; }
+  .death-currency > i { width: 24px; text-align: center; font-size: 22px; }
+  .death-currency h3, .death-alternatives h3 { margin: 0 0 6px; color: #ded5c6; font-size: 17px; font-weight: 600; letter-spacing: 0; }
+  .death-currency p, .death-alternatives p { margin: 0; color: #969da9; font-size: 12px; line-height: 1.6; }
+  .death-price { min-width: 52px; text-align: center; font-size: 26px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .death-price small { display: block; margin-top: 4px; font-size: 11px; font-weight: 400; }
+  .death-gold { color: #dfbf88; }
+  .death-shards { color: #8bbfcb; }
+  .death-panel .btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 18px; font-size: 14px; line-height: 1.4; white-space: nowrap; }
+  .death-panel .base-secondary { font-family: 'Nunito', sans-serif; letter-spacing: 0; background: linear-gradient(135deg, #222c39cc, #111820e6 60%, #292a2ccc) !important; }
+  .death-panel .base-secondary:hover { background: linear-gradient(135deg, #2c3744e6, #19212bee 60%, #35322ccc) !important; }
+  .death-option .btn { min-width: 138px; }
+  .death-buyback-help { grid-column: 1 / -1; margin: 0; color: #c49a91; font-size: 12px; line-height: 1.7; }
+  .death-alternatives { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding-top: 24px; border-top: 1px solid var(--base-line); }
+  .death-alternative { text-align: center; }
+  .death-alternative small { display: block; margin-top: 9px; color: #969da9; font-size: 11px; }
+}
+
+@media (max-width: 991px) {
+  .game-page .death-panel { grid-template-columns: minmax(0, 1fr); gap: 24px; margin-top: 16px; }
+  .game-page .death-overview { text-align: center; }
+  .game-page .death-description { margin: 0 auto; }
+  .game-page .death-emblem { margin-bottom: 10px; }
+  .game-page .death-overview h2 { font-size: 30px; }
+  .game-page .death-buybacks { padding-left: 0; border-left: 0; }
+}
+
+@media (max-width: 575px) {
+  .game-page .death-panel { padding: 16px 0; }
+  .game-page .death-option { grid-template-columns: minmax(0, 1fr) auto; gap: 16px; padding: 20px 0; }
+  .game-page .death-option .btn { grid-column: 1 / -1; width: 100%; }
+  .game-page .death-alternatives { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px 12px; }
+  .game-page .death-alternatives > div:first-child { grid-column: 1 / -1; }
+  .game-page .death-alternative .btn { width: 100%; padding: 12px; }
+}
+
+.game-page .training-header {
+  .training-tools { gap: 16px; flex-wrap: wrap; margin-top: 16px !important; }
+  .training-tool-actions { display: flex; gap: 8px; }
+  .training-tool-actions .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 10px 12px; font-family: 'Nunito', sans-serif; font-size: 13px; letter-spacing: 0; }
+  .training-tool-actions .btn br { display: none; }
+  .training-tool-actions .btn i { font-size: 16px; }
+  .training-tools .pve-info { margin: 0; padding: 8px 10px; border: 0; font-size: 20px; line-height: 1.2; }
+  .training-tools .pve-info + .pve-info { border-left: 1px solid var(--base-line); }
+  .training-tools .pve-info .f-rpg { font-family: 'Nunito', sans-serif; }
+  .training-tools .pve-info small { display: inline-block; margin-top: 4px; font-size: 11px; }
+}
+
+.game-page .training .training-target {
+  height: 300px;
+  .gank-button { position: absolute; right: 14px; bottom: 12px; border: 0; background: transparent; }
+  .target-battle { display: inline-flex; align-items: center; justify-content: center; width: 110px; min-width: 110px; min-height: 60px; padding: 14px 6px; border-radius: 6px; border-image: none; font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0; line-height: 1.2; white-space: nowrap; }
+  .target-battle .loading-text { display: inline-flex; align-items: center; gap: 6px; }
+  .target-battle .loading-text i { margin-right: 0 !important; }
+  .target-battle:focus-visible { outline: 2px solid #f0d7aa; outline-offset: 3px; }
+  .target-performance { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 0 !important; padding: 11px 12px 3px; }
+  .target-performance > .col { padding: 0; }
+  .target-performance .row { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; margin: 0; }
+  .target-performance .row > div { width: auto; max-width: none; padding: 0; text-align: left !important; font-size: 16px; }
+  .target-performance .progress { height: 10px; border: 0; border-radius: 3px; background: #ffffff12; box-shadow: none; }
+  .target-performance .progress-bar { border-radius: inherit; }
+}
+
+@media (min-width: 992px) and (max-height: 850px) {
+  .game-page .death-panel { gap: 16px 32px; margin: 8px auto; padding: 12px; }
+  .game-page .death-emblem { width: 40px; height: 40px; margin-bottom: 10px; font-size: 28px; }
+  .game-page .death-overview h2 { font-size: 30px; }
+  .game-page .death-option { padding: 14px 0; }
+  .game-page .death-alternatives { padding-top: 16px; }
+}
+
+@media (max-width: 767px) {
+  .game-page .training-header {
+    .card-body { padding: 12px !important; }
+    .card-body > .row { display: grid !important; grid-template-columns: 60px minmax(0, 1fr) 60px; gap: 16px 10px; margin: 0 !important; }
+    .pve-tier-container { padding: 0; width: auto; max-width: none; }
+    .pve-tier-container h5 { font-size: 10px; line-height: 1.4; }
+    .league-logo { max-width: 50px; height: auto !important; max-height: 64px; }
+    #current-training-rank { grid-column: 1; grid-row: 2; }
+    .pve-tier-container:last-child { grid-column: 3; grid-row: 2; }
+    .col-8 { display: contents; }
+    .col-8 > h4 { grid-column: 1 / -1; font-size: 14px; line-height: 1.5; }
+    .col-8 > .progress { position: relative; grid-column: 2; grid-row: 2; align-self: center; margin: 0 !important; }
+    .col-8 > .progress h5 { top: 0; left: 0; margin-top: 0 !important; line-height: 50px; }
+    .training-tools { grid-column: 1 / -1; gap: 16px 8px; margin-top: 0 !important; }
+    .training-tool-actions { width: 100%; }
+    .training-tools .pve-info { padding: 4px 7px; font-size: 17px; }
+    .training-tools .pve-info small { font-size: 9px; }
+    .game-switch { padding-left: 50px; }
+    .game-switch .custom-control-label { font-size: 11px; }
+    .game-switch .custom-control-label::before { left: -50px; }
+    .game-switch .custom-control-label::after { left: -46px; }
+  }
+}
+
+.game-page .pending-battle {
+  max-width: 760px;
+  margin: 64px auto;
+  padding: 48px 20px;
+  text-align: center;
+  background: radial-gradient(ellipse at center, #9b44300d, transparent 70%);
+
+  h2 { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0; color: #ece3d5; font-size: clamp(28px, 3vw, 36px); font-weight: 800; letter-spacing: -.025em; line-height: 1.3; }
+  .pending-battle-status { flex: 0 0 9px; height: 9px; border-radius: 50%; background: #ddb47a; box-shadow: 0 0 0 5px #ddb47a0d, 0 0 22px #ddb47a66; }
+  p { margin: 14px 0 28px; color: #aeb3bd; font-size: 18px; line-height: 1.6; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 24px; min-width: 220px; padding: 14px 22px; border-radius: 5px; font: 800 18px/1.4 'Nunito', sans-serif; letter-spacing: 0; }
+  .btn > span { transition: transform 160ms ease; }
+  .btn:hover > span { transform: translateX(3px); }
+  .btn:focus-visible { outline: 2px solid #e0bd81; outline-offset: 4px; }
+}
+
+@media (max-width: 767px) {
+  .game-page .pending-battle { margin: 24px auto; padding: 32px 12px; }
+  .game-page .pending-battle p { font-size: 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page .pending-battle .btn > span { transition: none; }
+}

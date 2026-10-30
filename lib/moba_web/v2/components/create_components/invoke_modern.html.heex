@@ -1,0 +1,249 @@
+<section
+  id="invoke-modern"
+  class="invoke-modern"
+  data-step={if @selected_avatar, do: "build", else: "avatar"}
+  aria-label={if @selected_avatar, do: "Build your #{@selected_avatar.name}", else: "Invoke a hero"}
+>
+  <%= if is_nil(@selected_avatar) do %>
+    <header :if={@live_action == :start} class="invoke-start-header" id="invoke-start-header">
+      <h1>Pick your Avatar</h1>
+      <p>Choose an Avatar, then pick three skills. Filter by role below or try a random pick.</p>
+    </header>
+    <section
+      :if={@live_action != :start}
+      class="invoke-collection"
+      id="invoke-collection"
+      aria-labelledby="invoke-collection-title"
+    >
+      <header class="invoke-collection-heading">
+        <h2 id="invoke-collection-title">Your collection</h2>
+        <span><strong>{if @current_player, do: length(@current_player.hero_collection), else: 0}</strong> trained</span>
+      </header>
+      <div class="invoke-collection-grid">
+        <div
+          :for={hero <- if(@current_player, do: @current_player.hero_collection, else: [])}
+          class="invoke-collection-hero"
+          data-toggle="tooltip"
+          tabindex="0"
+          title={hero["avatar"]["name"]}
+        >
+          <img src={GH.image_url(hero["avatar"])} alt={hero["avatar"]["name"]} />
+          <.league_badge tier={hero["tier"]} variant="legacy" />
+        </div>
+        <div
+          :for={avatar <- Map.get(assigns, :blank_collection, @all_avatars)}
+          class="invoke-collection-hero is-untrained"
+          data-toggle="tooltip"
+          tabindex="0"
+          title={"#{avatar.name} · Untrained"}
+        >
+          <img src={GH.image_url(avatar)} alt={"#{avatar.name} · Untrained"} />
+        </div>
+      </div>
+    </section>
+
+    <nav class="invoke-filters" aria-label="Avatar role">
+      <button
+        id="invoke-filter-all"
+        type="button"
+        phx-click="filter"
+        phx-value-role=""
+        aria-pressed={to_string(is_nil(@filter))}
+      >
+        All Avatars
+      </button>
+      <button
+        :for={role <- roles()}
+        id={"invoke-filter-#{role}"}
+        type="button"
+        phx-click="filter"
+        phx-value-role={role}
+        aria-pressed={to_string(@filter == role)}
+      >
+        <img src={"/images/#{role}_icon.png"} alt="" />{String.capitalize(role)}
+      </button>
+      <button id="randomize-button" type="button" phx-click="randomize" class="invoke-random">↻ Randomize</button>
+    </nav>
+
+    <div class="invoke-avatar-grid" id="invoke-avatars">
+      <.invoke_avatar
+        :for={avatar <- Enum.sort_by(Enum.uniq(@avatars), & &1.name)}
+        avatar={avatar}
+        avatars={@all_avatars}
+      />
+    </div>
+  <% else %>
+    <div class="invoke-builder" id="scroll-to-top" phx-hook="ScrollToTop">
+      <aside class="invoke-overview">
+        <button class="invoke-secondary" type="button" phx-click="repick-avatar" id="repick-button">
+          ← Change Avatar
+        </button>
+        <.invoke_avatar avatar={@selected_avatar} avatars={@all_avatars} selected={true} />
+      </aside>
+      <div class="invoke-build-panel">
+        <header class="invoke-section-heading">
+          <h2>{if @custom, do: "Choose 3 skills", else: "Choose your build"}</h2>
+          <button
+            :if={!@custom}
+            class="invoke-secondary"
+            type="button"
+            phx-click="toggle-custom"
+            id="custom-build-button"
+          >
+            Custom build →
+          </button>
+          <button
+            :if={@custom}
+            class="invoke-secondary"
+            type="button"
+            phx-click="toggle-custom"
+            id="back-to-builds-button"
+          >
+            ← Preset builds
+          </button>
+        </header>
+
+        <%= if @custom do %>
+          <div class="invoke-custom-grid" id="invoke-custom-skills">
+            <button
+              :for={skill <- @skills}
+              type="button"
+              id={"pick-skill-#{skill.id}"}
+              class="invoke-skill-choice"
+              phx-click="pick-skill"
+              phx-value-id={skill.id}
+              aria-pressed={to_string(Enum.member?(@selected_skills, skill))}
+              aria-disabled={to_string(length(@selected_skills) == 3 && !Enum.member?(@selected_skills, skill))}
+            >
+              <span class="invoke-skill-image" data-toggle="tooltip" title={TT.skill_tooltip(skill)}>
+                <img src={GH.image_url(skill)} alt="" />
+                <span :if={Enum.member?(@selected_skills, skill)} class="invoke-check" aria-hidden="true">✓</span>
+                <span :if={skill.passive} class="invoke-passive-dot" title="Passive" aria-label="Passive">◆</span>
+              </span>
+              <strong>{skill.name}</strong>
+              <.invoke_energy skill={skill} />
+            </button>
+          </div>
+        <% else %>
+          <div class="invoke-builds" id="invoke-builds">
+            <article
+              :for={{build, index} <- Enum.with_index(builds_for(@selected_avatar.role))}
+              class="invoke-build"
+              id={"invoke-build-#{index}"}
+              data-selected={to_string(@selected_build_index == index)}
+              data-preset={index}
+            >
+              <div
+                class="invoke-build-art"
+                style={"background-image: url(#{invoke_build_art(elem(build, 1))})"}
+              >
+                <span class="invoke-build-number">0{index + 1}</span>
+                <span :if={@selected_build_index == index} class="invoke-build-selected">✓ Equipped</span>
+                <h3>{elem(build, 1)}</h3>
+              </div>
+              <div class="invoke-build-skills">
+                <div :for={skill <- elem(build, 0)}>
+                  <img
+                    src={GH.image_url(skill)}
+                    alt={skill.name}
+                    tabindex="0"
+                    data-toggle="tooltip"
+                    title={TT.skill_tooltip(skill)}
+                    id={"skill_build_#{skill.id}_#{index}"}
+                  />
+                  <strong>{skill.name}</strong>
+                  <.invoke_energy skill={skill} />
+                </div>
+              </div>
+              <button
+                type="button"
+                id={"pick-build-#{index}"}
+                phx-click="pick-build"
+                phx-value-number={index}
+                aria-pressed={to_string(@selected_build_index == index)}
+                class="invoke-build-pick"
+              >
+                {if @selected_build_index == index, do: "✓ Selected", else: "Equip build"}
+                <span :if={@selected_build_index != index} aria-hidden="true">→</span>
+              </button>
+            </article>
+          </div>
+        <% end %>
+
+        <section id="create-bar" class="invoke-loadout" aria-label="Selected skill build">
+          <header>
+            <h2>{build_title(@selected_avatar, @selected_skills, @selected_build_index)}</h2>
+            <strong>{length(@selected_skills)}<small> / 3</small></strong>
+          </header>
+          <div class="invoke-loadout-skills">
+            <div :for={skill <- @selected_skills} class="invoke-loadout-slot">
+              <button
+                :if={@custom}
+                type="button"
+                phx-click="pick-skill"
+                phx-value-id={skill.id}
+                id={"skill_#{skill.id}"}
+                aria-label={"Remove #{skill.name}"}
+              >
+                <img src={GH.image_url(skill)} alt={skill.name} data-toggle="tooltip" title={TT.skill_tooltip(skill)} />
+                <span class="invoke-remove" aria-hidden="true">×</span>
+              </button>
+              <img
+                :if={!@custom}
+                src={GH.image_url(skill)}
+                alt={skill.name}
+                id={"skill_#{skill.id}"}
+                tabindex="0"
+                data-toggle="tooltip"
+                title={TT.skill_tooltip(skill)}
+              />
+              <strong>{skill.name}</strong>
+              <.invoke_energy skill={skill} />
+            </div>
+            <div :for={_ <- List.duplicate(nil, max(3 - length(@selected_skills), 0))} class="invoke-loadout-slot">
+              <span class="invoke-empty" aria-label="Empty skill slot">＋</span><span class="invoke-empty-label">Choose a skill</span>
+            </div>
+            <div class="invoke-loadout-slot invoke-ultimate-slot">
+              <img
+                src={GH.image_url(@selected_avatar.ultimate)}
+                alt={@selected_avatar.ultimate.name}
+                id={"skill_#{@selected_avatar.ultimate.id}"}
+                tabindex="0"
+                data-toggle="tooltip"
+                title={TT.skill_tooltip(@selected_avatar.ultimate)}
+              />
+              <strong>{@selected_avatar.ultimate.name}</strong>
+              <span class="invoke-ultimate-meta">
+                <small>Ultimate</small> <.invoke_energy skill={@selected_avatar.ultimate} />
+              </span>
+            </div>
+          </div>
+        </section>
+
+        <div class="invoke-launch">
+          <%= if @current_player && Map.get(@current_player, :id) do %>
+            <.invoke_name :if={@current_player.user_id} name={@name} error={@error} />
+            <button
+              type="button"
+              id="create-button"
+              class="invoke-primary"
+              phx-click="create"
+              phx-disable-with="Invoking…"
+              disabled={length(@selected_skills) != 3 || !is_nil(@error)}
+            >
+              Invoke {@name || @selected_avatar.name} <span aria-hidden="true">→</span>
+            </button>
+          <% else %>
+            <.form for={to_form(%{})} id="invoke-guest-form" action={preview_path(assigns, "/start")} method="post">
+              <input type="hidden" name="avatar" value={@selected_avatar.id} />
+              <input :for={skill <- @selected_skills} type="hidden" name="skills[]" value={skill.id} />
+              <button type="submit" id="create-button" class="invoke-primary" disabled={length(@selected_skills) != 3}>
+                Invoke {@selected_avatar.name} <span aria-hidden="true">→</span>
+              </button>
+            </.form>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</section>

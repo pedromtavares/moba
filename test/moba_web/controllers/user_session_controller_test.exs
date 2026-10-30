@@ -117,4 +117,15 @@ defmodule MobaWeb.UserSessionControllerTest do
       assert Phoenix.Flash.get(conn.assigns.flash, :info) =~ "Logged out successfully"
     end
   end
+
+  test "already-open preview account forms return to canonical routes", %{conn: conn, user: user} do
+    response =
+      conn
+      |> init_test_session(user_return_to: "/new/users/settings?tab=password")
+      |> post("/new/users/log_in", %{"user" => %{"email" => user.email, "password" => valid_user_password()}})
+
+    assert redirected_to(response) == "/users/settings?tab=password"
+    assert get_session(response, :user_token)
+    assert response |> recycle() |> delete("/new/users/log_out") |> redirected_to() == "/"
+  end
 end

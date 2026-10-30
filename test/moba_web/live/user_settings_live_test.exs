@@ -12,8 +12,8 @@ defmodule MobaWeb.UserSettingsLiveTest do
         |> log_in_user(user_fixture())
         |> live(~p"/users/settings")
 
-      assert html =~ "Edit Profile"
-      assert html =~ "E-mail"
+      assert html =~ "Account settings"
+      assert html =~ "Email address"
     end
 
     test "redirects if user is not logged in", %{conn: conn} do

@@ -9,7 +9,7 @@ defmodule MobaWeb.V2.MatchLive do
   @max_tick 15
 
   def mount(%{"id" => match_id}, _session, socket) do
-    socket = socket_init(match_id, @max_tick, socket)
+    socket = socket_init(match_id, @max_tick, socket) |> TutorialComponent.skip_arena()
 
     if connected?(socket) do
       MobaWeb.subscribe(socket.assigns.channel)
@@ -20,6 +20,10 @@ defmodule MobaWeb.V2.MatchLive do
 
   def handle_event("hero-tab", %{"type" => tab}, socket) do
     {:noreply, assign(socket, hero_tab: tab)}
+  end
+
+  def handle_event("toggle-battle-details", _, socket) do
+    {:noreply, assign(socket, show_battle_details: !socket.assigns.show_battle_details)}
   end
 
   def handle_event("repeat", _, %{assigns: %{latest_match: match}} = socket) when not is_nil(match) do
@@ -52,11 +56,13 @@ defmodule MobaWeb.V2.MatchLive do
     {:noreply, move(String.to_integer(id), 1, socket)}
   end
 
+  def handle_event("start", _, %{assigns: %{preview: true, starting: true}} = socket), do: {:noreply, socket}
+
   def handle_event("start", _, %{assigns: %{match: match, picked_heroes: picked_heroes}} = socket) do
     ids = picked_heroes |> Enum.take(5) |> Enum.map(& &1.id)
     Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.continue_match!(match, ids) end)
     schedule_tick()
-    {:noreply, assign(socket, tick: 0)}
+    {:noreply, assign(socket, tick: 0, starting: socket.assigns.preview)}
   end
 
   def handle_event("finish-tutorial", _, socket) do
@@ -82,7 +88,7 @@ defmodule MobaWeb.V2.MatchLive do
 
   def handle_info({:DOWN, _ref, _, _, _reason}, %{assigns: %{match: match}} = socket) do
     match = Game.reset_match!(match)
-    {:noreply, socket_init(match.id, @max_tick, socket)}
+    {:noreply, socket_init(match.id, @max_tick, assign(socket, starting: false))}
   end
 
   def handle_info({ref, match}, socket) do
@@ -113,6 +119,8 @@ defmodule MobaWeb.V2.MatchLive do
       hero_tab: hero_tab,
       latest_match: latest_match,
       teams: teams,
+      starting: Map.get(socket.assigns, :starting, false) && is_nil(match.phase),
+      show_battle_details: Map.get(socket.assigns, :show_battle_details, false),
       hide_footer: true
     )
   end
@@ -136,6 +144,13 @@ defmodule MobaWeb.V2.MatchLive do
   end
 
   defp schedule_tick, do: Process.send_after(self(), :tick, @tick_timeout)
+
+  defp eliminated?(hero, player, battles) do
+    Enum.any?(battles, fn battle ->
+      battler = turn_hero_for(battle, player)
+      battler.hero_id == hero.id && battler.current_hp <= 0
+    end)
+  end
 
   defp player_pick(
          %{

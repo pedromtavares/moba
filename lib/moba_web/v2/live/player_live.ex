@@ -1,5 +1,8 @@
 defmodule MobaWeb.V2.PlayerLive do
   use MobaWeb, :v2_live_view
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
+  embed_templates "player_live/*"
 
   def mount(_params, _session, socket) do
     {:ok, socket}
@@ -95,6 +98,19 @@ defmodule MobaWeb.V2.PlayerLive do
   defp opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
   defp opponent_for(duel, _), do: duel.player
 
+  defp registration_age(player) do
+    time = if player.user, do: player.user.inserted_at, else: player.inserted_at
+    now = Timex.now()
+
+    Enum.find_value([years: "year", months: "month", days: "day", hours: "hour", minutes: "minute"], fn {unit, label} ->
+      age = max(Timex.diff(now, time, unit), 0)
+
+      if age > 0 || unit == :minutes do
+        {age, if(age == 1, do: label, else: label <> "s")}
+      end
+    end)
+  end
+
   defp registered_label(player) do
     time = if player.user, do: player.user.inserted_at, else: player.inserted_at
     formatted = time |> Timex.format("{relative}", :relative) |> elem(1)
@@ -113,6 +129,10 @@ defmodule MobaWeb.V2.PlayerLive do
   defp shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
   defp shadow_rank(%{pvp_tier: tier}), do: tier
 
+  defp arena_bracket(%{pvp_tier: 2}), do: "Immortals"
+  defp arena_bracket(%{pvp_tier: 1}), do: "Shadows"
+  defp arena_bracket(_), do: "Plebs"
+
   defp total_win_rate(%{total_matches: matches, total_wins: wins}) when matches > 0 do
     "#{round(wins / matches * 100)}%"
   end
@@ -125,20 +145,20 @@ defmodule MobaWeb.V2.PlayerLive do
       <.link
         class="hero-card card mb-0"
         style={"background-image: url(#{GH.background_url(@hero)})"}
-        navigate={~p"/hero/#{@hero}"}
+        navigate={preview_path(assigns, ~p"/hero/#{@hero}")}
       >
         <h4 class="card-header text-white d-flex justify-content-between align-items-center mb-0 py-2">
-          <span class="font-italic f-rpg font-16">
+          <span class="font-italic f-rpg font-16 hero-card-rank">
             <%= if @hero.pve_ranking do %>
               #{@hero.pve_ranking}
             <% end %>
           </span>
-          <div class="font-15">
+          <div class="font-15 hero-card-name">
             <.league_badge tier={@hero.league_tier} variant="legacy" />
             {@hero.name}
           </div>
           <span
-            class="font-15 font-italic"
+            class="font-15 font-italic hero-card-meta"
             data-toggle="tooltip"
             title={TT.hero_stats_tooltip(@hero, true)}
           >

@@ -134,6 +134,9 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def finished_time(%{finished_at: nil}), do: nil
   def finished_time(hero), do: Timex.diff(hero.finished_at, hero.inserted_at, :minutes)
 
+  def minutes_label(minutes, true) when is_integer(minutes) and minutes > 99, do: "99+"
+  def minutes_label(minutes, _preview), do: minutes
+
   def league_name(tier) when is_integer(tier), do: Map.get(@league_names, tier, "Unknown")
   def league_name(_), do: "Unknown"
 

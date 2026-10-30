@@ -1,0 +1,251 @@
+<div id="duel-page" class="duel duel-modern" data-phase={@duel.phase}>
+  <header class="duel-scoreboard">
+    <div class="duel-contestant">
+      <img src={"/images/pve/#{@duel.player.pve_tier}.png"} alt={"Training tier #{@duel.player.pve_tier}"} />
+      <div>
+        <.link navigate={preview_path(assigns, ~p"/player/#{@duel.player}")}>{username(@duel.player)}</.link>
+        <span>{if @duel.player_id == @current_player.id, do: "You", else: "Challenger"}</span>
+      </div>
+    </div>
+    <div class="duel-score">
+      <span>{if @duel.auto, do: "Season duel", else: "Live duel"}</span>
+      <strong>
+        {duel_score([@first_battle, @last_battle], @duel.player_id)}<small>:</small>{duel_score(
+          [@first_battle, @last_battle],
+          @duel.opponent_player_id
+        )}
+      </strong>
+      <span :if={casual?(@duel)} class="duel-casual">Casual</span>
+      <span :if={!@duel.auto} class="duel-head-to-head" title="All-time head-to-head">
+        Record {@duel.player.duel_score["#{@duel.opponent_player_id}"] || 0} – {@duel.opponent_player.duel_score[
+          "#{@duel.player_id}"
+        ] || 0}
+      </span>
+    </div>
+    <div class="duel-contestant duel-contestant-opponent">
+      <img
+        src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"}
+        alt={"Training tier #{@duel.opponent_player.pve_tier}"}
+      />
+      <div>
+        <.link navigate={preview_path(assigns, ~p"/player/#{@duel.opponent_player}")}>
+          {username(@duel.opponent_player)}
+        </.link>
+        <span>{if @duel.opponent_player_id == @current_player.id, do: "You", else: "Opponent"}</span>
+      </div>
+    </div>
+  </header>
+
+  <div class={["duel-command-row", @duel.auto && "duel-solo-command"]}>
+    <section
+      id="duel-status"
+      class="duel-status"
+      data-your-turn={to_string(your_pick?(@duel, @current_player) == true)}
+      aria-live="polite"
+    >
+      <%= cond do %>
+        <% duel_finished?(@duel) -> %>
+          <div class="duel-status-copy">
+            <span class="duel-eyebrow">Duel complete</span>
+            <h1>
+              <%= if @duel.winner_player do %>
+                {username(@duel.winner_player)} wins
+              <% else %>
+                Duel drawn
+              <% end %>
+            </h1>
+            <div :if={!casual?(@duel)} id="duel-rewards" class="duel-rewards">
+              <span class={if @duel.rewards.attacker_pvp_points > 0, do: "duel-points-gain"}>
+                {username(@duel.player)}
+                <strong>
+                  {if @duel.rewards.attacker_pvp_points > 0, do: "+"}{@duel.rewards.attacker_pvp_points} SP
+                </strong>
+              </span>
+              <span class={if @duel.rewards.defender_pvp_points > 0, do: "duel-points-gain"}>
+                {username(@duel.opponent_player)}
+                <strong>
+                  {if @duel.rewards.defender_pvp_points > 0, do: "+"}{@duel.rewards.defender_pvp_points} SP
+                </strong>
+              </span>
+            </div>
+          </div>
+          <div class="duel-result-actions">
+            <button
+              :if={show_rematch?(assigns)}
+              id="duel-rematch"
+              type="button"
+              class="btn battle-primary"
+              phx-click="rematch"
+            >
+              Rematch
+            </button>
+            <.link id="duel-return-arena" navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">
+              Return to Arena
+            </.link>
+          </div>
+        <% show_timer?(@duel) -> %>
+          <div class="duel-status-copy">
+            <span class="duel-eyebrow">
+              {if @duel.phase in ["player_first_pick", "opponent_first_pick"], do: "Battle 1", else: "Battle 2"}
+            </span>
+            <h1>
+              {if your_pick?(@duel, @current_player),
+                do: "Your pick",
+                else: "#{username(picking_player(@duel))} is picking"}
+            </h1>
+            <p>{if your_pick?(@duel, @current_player), do: "Choose your hero below", else: "Waiting for their hero"}</p>
+          </div>
+          <div
+            id="duel-pick-timer"
+            class="duel-countdown"
+            data-urgent={to_string(pick_timer(@duel, @current_time) <= 10)}
+            role="timer"
+            aria-label="Time left to pick"
+          >
+            <strong>{max(pick_timer(@duel, @current_time), 0)}</strong><span>seconds</span>
+          </div>
+        <% true -> %>
+          <div class="duel-status-copy">
+            <span class="duel-eyebrow">{if @duel.phase == "player_battle", do: "Battle 1", else: "Battle 2"}</span>
+            <h1>Heroes locked in</h1>
+            <p>Ready to fight</p>
+          </div>
+          <% battle = if @duel.phase == "player_battle", do: @first_battle, else: @last_battle %>
+          <.link
+            :if={battle}
+            id="duel-enter-battle"
+            navigate={preview_path(assigns, ~p"/battles/#{battle}")}
+            class="btn battle-primary"
+          >
+            Enter Battle <span aria-hidden="true">→</span>
+          </.link>
+      <% end %>
+    </section>
+
+    <aside :if={!@duel.auto} class="duel-chat" aria-label="Duel chat">
+      <div id="duel-messages" class="duel-messages">
+        <p :if={@messages == []} class="duel-chat-empty">Duel chat</p>
+        <div :for={message <- @messages} id={"duel-message-#{message.id}"} class="duel-message">
+          <img src={"/images/pve/#{message.tier}.png"} alt="" />
+          <p><strong>{message.author}</strong> {message.body}</p>
+          <time title={to_string(message.inserted_at)}>
+            {Timex.format(message.inserted_at, "{relative}", :relative) |> elem(1)}
+          </time>
+          <button
+            :if={@current_player.user.is_admin}
+            type="button"
+            phx-click="delete-message"
+            phx-value-id={message.id}
+            aria-label="Delete message"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+      <.form for={@message_form} id="duel-message-form" phx-submit="create-message" phx-hook="ResetOnSubmit">
+        <.input
+          field={@message_form[:body]}
+          id={"duel-message-body-#{@message_form_nonce}"}
+          type="text"
+          class="duel-chat-input"
+          placeholder="Message your opponent…"
+          maxlength="200"
+          minlength="2"
+          aria-label="Message your opponent"
+        />
+      </.form>
+    </aside>
+  </div>
+
+  <div class="duel-rounds">
+    <%= for {number, player_hero, opponent_hero, battle} <- [
+      {1, @duel.player_first_pick, @duel.opponent_first_pick, @first_battle},
+      {2, @duel.player_second_pick, @duel.opponent_second_pick, @last_battle}
+    ], (number == 1 && (player_hero || opponent_hero || battle)) || (number == 2 && @first_battle && @first_battle.finished) do %>
+      <section id={"duel-round-#{number}"} class="duel-round" aria-label={"Battle #{number}"}>
+        <div class="duel-round-heading">
+          <h2>Battle {number}</h2>
+          <span>
+            {if battle && battle.finished,
+              do: "Complete",
+              else: "#{if number == 1, do: username(@duel.player), else: username(@duel.opponent_player)} picks first"}
+          </span>
+        </div>
+        <div class="duel-round-grid">
+          <.pick_slot
+            hero={player_hero}
+            player={@duel.player}
+            active={
+              picking_player(@duel) == @duel.player &&
+                ((number == 1 && @duel.phase == "player_first_pick") ||
+                   (number == 2 && @duel.phase == "player_second_pick"))
+            }
+          />
+          <%= if battle do %>
+            <.round_battle battle={battle} duel={@duel} preview={@preview} />
+          <% else %>
+            <div class="duel-versus" aria-hidden="true">VS</div>
+          <% end %>
+          <.pick_slot
+            hero={opponent_hero}
+            player={@duel.opponent_player}
+            active={
+              picking_player(@duel) == @duel.opponent_player &&
+                ((number == 1 && @duel.phase == "opponent_first_pick") ||
+                   (number == 2 && @duel.phase == "opponent_second_pick"))
+            }
+          />
+        </div>
+      </section>
+    <% end %>
+  </div>
+
+  <section
+    :if={your_pick?(@duel, @current_player)}
+    id="duel-hero-selection"
+    class="duel-hero-selection"
+    aria-labelledby="duel-selection-title"
+  >
+    <h2 id="duel-selection-title">
+      Choose your {if @duel.phase in ["player_first_pick", "opponent_first_pick"], do: "first", else: "final"} hero
+    </h2>
+    <p :if={@heroes == []} class="duel-empty-collection">No heroes available for this pick.</p>
+    <div class="duel-hero-grid">
+      <div :for={hero <- @heroes} id={"hero_#{hero.id}"}>
+        <.pvp_hero_card hero={hero}>
+          <:actions>
+            <button
+              type="button"
+              class="btn btn-primary"
+              phx-click="pick"
+              phx-value-id={hero.id}
+              id={"pick-hero-#{hero.id}"}
+              phx-disable-with="Picking…"
+            >
+              Pick {hero.avatar.name}
+            </button>
+          </:actions>
+        </.pvp_hero_card>
+      </div>
+    </div>
+  </section>
+
+  <nav :if={!duel_finished?(@duel)} id="battle-bar" class="duel-phase-bar" aria-label="Duel progress">
+    <ol>
+      <li
+        :for={{{phase, player, label}, index} <- Enum.with_index(duel_steps(@duel))}
+        data-state={
+          cond do
+            index < phase_number(@duel) -> "complete"
+            phase == @duel.phase -> "active"
+            true -> "pending"
+          end
+        }
+        aria-current={phase == @duel.phase && "step"}
+      >
+        <span class="duel-step-number">{index + 1}</span>
+        <div><strong>{player}</strong><span>{label}</span></div>
+      </li>
+    </ol>
+  </nav>
+</div>

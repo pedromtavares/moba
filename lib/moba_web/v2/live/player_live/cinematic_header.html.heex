@@ -1,0 +1,100 @@
+<header
+  id="profile-cinematic"
+  class="profile-cinematic"
+  style={"--profile-scene: url(#{if @featured, do: GH.background_url(@featured), else: "/images/tutorial/hall-of-legends.jpg"})"}
+>
+  <div class="profile-cinematic-identity">
+    <img
+      src={"/images/pve/#{@player.pve_tier}.png"}
+      class={"profile-crest big-rank-shadow-#{shadow_rank(@player)}"}
+      alt={Moba.pve_tiers()[@player.pve_tier]}
+    />
+    <div>
+      <p class="profile-eyebrow">Player profile</p>
+      <h1>
+        <img :if={@player.user.discord.id} src={@player.user.discord.avatar} class="discord-avatar" alt="" />
+        {username(@player)}
+      </h1>
+      <p class="profile-rank-title">
+        {Moba.pve_tiers()[@player.pve_tier]} <span>·</span>
+        <%= cond do %>
+          <% @player.pvp_tier == 2 && @player.ranking == 1 -> %>
+            The Immortal
+          <% @player.pvp_tier == 2 -> %>
+            Immortals Arena
+          <% @player.pvp_tier == 1 -> %>
+            Shadows Arena
+          <% true -> %>
+            Plebs Arena
+        <% end %>
+      </p>
+    </div>
+  </div>
+  <div :if={@featured} id={"hero_#{@featured.id}"} class="profile-featured">
+    <.link
+      id="profile-featured-link"
+      navigate={preview_path(assigns, ~p"/hero/#{@featured}")}
+      class="profile-featured-heading"
+    >
+      <.league_badge tier={@featured.league_tier} variant="legacy" />
+      <div>
+        <strong>{@featured.name}</strong>
+        <span data-toggle="tooltip" title={TT.hero_stats_tooltip(@featured, true)}>
+          Level {@featured.level} · {@featured.avatar.name}
+        </span>
+      </div>
+      <span :if={@featured.pve_ranking} class="profile-featured-rank">#{@featured.pve_ranking}</span>
+      <span aria-hidden="true">↗</span>
+    </.link>
+    <div class="profile-featured-loadout">
+      <.hero_skill_strip skills={@featured.skills} container_class="skills-container" id_prefix="skill" id_suffix={@featured.id} />
+      <.hero_item_strip items={Game.sort_items(@featured.items)} container_class="items-container" item_container_class="item-container" id_prefix="item" id_suffix={@featured.id} />
+    </div>
+  </div>
+  <div class="row no-gutters py-1 profile-metrics">
+    <div :if={@preview} class="col text-center" id="profile-registration-age">
+      <% {age, unit} = registration_age(@player) %>
+      <strong>{age} <span class="profile-age-unit">{unit}</span></strong>
+      <span class="profile-metric-label">
+        <%= cond do %>
+          <% @player.bot_options -> %>
+            A.I. Player
+          <% @player.user -> %>
+            Registered
+          <% true -> %>
+            Joined
+        <% end %>
+      </span>
+    </div>
+    <div class="col text-center">
+      <strong title="Season Points" data-toggle="tooltip">
+        <i class="fa fa-arrows-to-dot text-white"></i> {@player.pvp_points} SP
+      </strong>
+      <span :if={@preview} class="profile-metric-label">Season points</span>
+    </div>
+    <div class="col text-center">
+      <strong
+        title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
+        data-toggle="tooltip"
+      >
+        <i class="fa fa-swords text-white"></i> {total_win_rate(@player)}
+      </strong>
+      <span :if={@preview} class="profile-metric-label">Win rate</span>
+    </div>
+    <div class="col text-center">
+      <strong
+        title={"Current Immortal Streak: #{@player.current_immortal_streak}<br/>Best Immortal Streak: #{@player.best_immortal_streak}"}
+        data-toggle="tooltip"
+      >
+        <i class="fa fa-trophy text-white"></i> {@player.best_immortal_streak}
+      </strong>
+      <span :if={@preview} class="profile-metric-label">Best streak</span>
+    </div>
+    <div class="col text-center">
+      <strong title="Season Rank" data-toggle="tooltip">
+        <i class="fa-solid fa-hashtag text-white"></i> {@player.season_ranking}
+      </strong>
+      <span :if={@preview} class="profile-metric-label">Season rank</span>
+    </div>
+  </div>
+</header>

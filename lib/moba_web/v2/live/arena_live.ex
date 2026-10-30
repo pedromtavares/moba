@@ -1,6 +1,7 @@
 defmodule MobaWeb.V2.ArenaLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [input: 1, icon: 1]
   import MobaWeb.V2.Components.HeroBarComponents
 
   alias MobaWeb.Presence
@@ -14,6 +15,7 @@ defmodule MobaWeb.V2.ArenaLive do
       |> assign(sidebar_code: "arena", tutorial_step: player.tutorial_step)
       |> assign(team_form: to_form(%{"name" => ""}, as: :team))
       |> assign(hero: nil, editing: false, show_build: false, show_shop: false)
+      |> TutorialComponent.skip_arena()
 
     if connected?(socket) do
       TutorialComponent.subscribe(player.id)
@@ -59,7 +61,7 @@ defmodule MobaWeb.V2.ArenaLive do
     match = if pending, do: pending, else: Game.manual_matchmaking!(player)
 
     if match do
-      {:noreply, push_navigate(socket, to: ~p"/matches/#{match.id}")}
+      {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/matches/#{match.id}"))}
     else
       {:noreply, socket |> assign(current_player: Game.get_player!(player.id)) |> assign_index()}
     end
@@ -70,7 +72,7 @@ defmodule MobaWeb.V2.ArenaLive do
     duel = opponent && Game.create_duel!(player, opponent, true)
 
     if duel do
-      {:noreply, push_navigate(socket, to: ~p"/arena/#{duel.id}")}
+      {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/arena/#{duel.id}"))}
     else
       {:noreply, socket}
     end
@@ -86,6 +88,10 @@ defmodule MobaWeb.V2.ArenaLive do
       end
 
     {:noreply, assign(socket, current_player: player, duel_opponents: duel_opponents, current_time: Timex.now())}
+  end
+
+  def handle_event("finish-tutorial", _, %{assigns: %{preview: true}} = socket) do
+    {:noreply, TutorialComponent.finish_arena(socket)}
   end
 
   def handle_event("finish-tutorial", _, socket) do
@@ -180,6 +186,10 @@ defmodule MobaWeb.V2.ArenaLive do
 
   def handle_event("start-edit", _, socket), do: {:noreply, socket}
 
+  def handle_event("cancel-edit", _, socket) do
+    {:noreply, assign(socket, editing: false)}
+  end
+
   def handle_event("finalize-edit", params, %{assigns: %{hero: current, current_player: player}} = socket)
       when not is_nil(current) do
     hero =
@@ -213,7 +223,8 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, assign(socket, show_shop: false)}
   end
 
-  def handle_event("level", _, %{assigns: %{hero: current, current_player: player}} = socket) when not is_nil(current) do
+  def handle_event("level", _, %{assigns: %{hero: current, current_player: player}} = socket)
+      when not is_nil(current) do
     hero =
       if Application.get_env(:moba, :env) == :dev do
         Game.level_cheat(current)
@@ -297,6 +308,8 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, socket |> assign(current_player: player, ranking: ranking) |> assign_index()}
   end
 
+  def handle_info(%{event: "presence_diff"}, socket), do: {:noreply, socket}
+
   def render(%{live_action: :edit} = assigns), do: edit(assigns)
   def render(assigns), do: index(assigns)
 
@@ -358,7 +371,7 @@ defmodule MobaWeb.V2.ArenaLive do
   end
 
   defp maybe_redirect_guest(%{assigns: %{current_player: %{user_id: nil}}} = socket) do
-    redirect(socket, to: ~p"/users/register")
+    redirect(socket, to: preview_path(socket, ~p"/users/register"))
   end
 
   defp maybe_redirect_guest(socket), do: socket
@@ -512,6 +525,16 @@ defmodule MobaWeb.V2.ArenaLive do
     |> then(&"A new fight begins #{&1}")
   end
 
+  defp daily_reset_label do
+    reset_at = Moba.current_season().last_pvp_update_at |> Timex.shift(days: 1) |> Timex.to_datetime()
+
+    if DateTime.compare(reset_at, DateTime.utc_now()) == :gt do
+      "Resets #{Timex.format!(reset_at, "{relative}", :relative)}"
+    else
+      "Daily reset pending"
+    end
+  end
+
   defp tier_buff_pct(%{current_immortal_streak: streak}) when streak > 0 do
     Float.round(streak * Moba.immortal_streak_multiplier() * 100, 1)
   end
@@ -567,6 +590,17 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
   defp opponent_for(duel, _player), do: duel.player
+
+  defp duel_resume_phase(%{phase: phase}) do
+    %{
+      "player_first_pick" => "First picks",
+      "opponent_first_pick" => "First picks",
+      "player_battle" => "Battle 1",
+      "opponent_second_pick" => "Final picks",
+      "player_second_pick" => "Final picks",
+      "opponent_battle" => "Battle 2"
+    }[phase]
+  end
 
   defp ranking_inclusion?(ranking, player), do: Enum.any?(ranking, &(&1.id == player.id))
 end

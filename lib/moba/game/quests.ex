@@ -45,7 +45,7 @@ defmodule Moba.Game.Quests do
     },
     5 => %{
       title: "Master",
-      description: "Finish training with all Avatars on the Master League or above",
+      description: "Finish training with 20 different Avatars on the Master League or above",
       training_bonus: "Ability to refresh Targets up to 10 times",
       prize: 1000,
       goal: 20,
@@ -53,7 +53,7 @@ defmodule Moba.Game.Quests do
     },
     6 => %{
       title: "Grandmaster",
-      description: "Finish training with all Avatars on the Grandmaster League",
+      description: "Finish training with 20 different Avatars on the Grandmaster League",
       training_bonus: "Ability to refresh Targets up to 15 times",
       prize: 2500,
       goal: 20,
@@ -61,7 +61,8 @@ defmodule Moba.Game.Quests do
     },
     7 => %{
       title: "Invoker",
-      description: "Finish training with all avatars in the Grandmaster League with a perfect 60K of total farm",
+      description:
+        "Finish training with 20 different Avatars in the Grandmaster League with a perfect 60K of total farm each",
       difficulty: "9 Hard targets",
       max_league: "Grandmaster League",
       prize: 5000,
@@ -90,7 +91,11 @@ defmodule Moba.Game.Quests do
       |> track(:season_codes, avatar_code, true)
       |> track(:master_codes, avatar_code, league_tier >= Moba.master_league_tier())
       |> track(:grandmaster_codes, avatar_code, league_tier >= Moba.max_league_tier())
-      |> track(:invoker_codes, avatar_code, hero.total_xp_farm + hero.total_gold_farm >= Moba.max_total_farm())
+      |> track(
+        :invoker_codes,
+        avatar_code,
+        league_tier >= Moba.max_league_tier() && hero.total_xp_farm + hero.total_gold_farm >= Moba.max_total_farm()
+      )
       |> maybe_complete(player)
 
     if updates[:shard_prize], do: Moba.reward_shards!(player, updates[:shard_prize])

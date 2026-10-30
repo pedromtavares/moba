@@ -9,6 +9,24 @@ defmodule MobaWeb.V2.Components.GameComponents do
   alias MobaWeb.V2.Components.GameHelpers, as: GH
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
+  attr :id, :string, required: true
+  attr :title, :string, required: true
+  attr :description, :string, default: nil
+  attr :tone, :string, default: "neutral", values: ~w(neutral active)
+  slot :inner_block
+  slot :actions
+
+  def hud_notice(assigns) do
+    ~H"""
+    <section id={@id} class="hud-notice" data-tone={@tone} aria-labelledby={"#{@id}-title"}>
+      <h3 id={"#{@id}-title"}>{@title}</h3>
+      {render_slot(@inner_block)}
+      <p :if={@description}>{@description}</p>
+      <div :if={@actions != []} class="hud-notice-actions">{render_slot(@actions)}</div>
+    </section>
+    """
+  end
+
   # -------------------------------------------------------------------
   # Skill Icon
   # -------------------------------------------------------------------
@@ -41,7 +59,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
         :if={@show_level && @skill.level}
         class="absolute -bottom-px -right-px bg-surface text-[9px] text-gold font-bold w-3.5 h-3.5 flex items-center justify-center rounded-full border border-surface-border"
       >
-        <%= @skill.level %>
+        {@skill.level}
       </span>
     </div>
     """
@@ -156,29 +174,31 @@ defmodule MobaWeb.V2.Components.GameComponents do
   end
 
   @doc """
-  Renders one Bootstrap hero stat button.
+  Renders a display-only hero stat with its tooltip.
   """
   attr :icon, :string, required: true
   attr :value, :any, required: true
   attr :variant, :string, default: "default"
   attr :title, :string, required: true
   attr :tone, :string, required: true
+  attr :label, :string, default: nil
 
   def hero_stat_button(assigns) do
     ~H"""
-    <button
-      class={hero_stat_button_class(@variant, @tone)}
+    <span
+      class={["game-stat", hero_stat_button_class(@variant, @tone)]}
       data-toggle="tooltip"
       title={@title}
-      type={button_type(@variant)}
+      tabindex="0"
     >
-      <i class={@icon}></i> {@value}
-    </button>
+      <i class={@icon} aria-hidden="true"></i> <span class="stat-value">{@value}</span>
+      <small :if={@label} class="stat-label">{@label}</small>
+    </span>
     """
   end
 
   @doc """
-  Renders the standard six-stat hero button group.
+  Renders the standard six-stat hero readout.
   """
   attr :hero, :map, required: true
   attr :tooltip_mode, :string, default: "simple"
@@ -300,7 +320,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
           class={[league_badge_size(@size), @img_class]}
           loading="lazy"
         />
-        <span :if={@show_name} class="text-xs text-faction-text-muted"><%= GH.league_name(@tier) %></span>
+        <span :if={@show_name} class="text-xs text-faction-text-muted">{GH.league_name(@tier)}</span>
       </div>
     <% end %>
     """
@@ -339,9 +359,6 @@ defmodule MobaWeb.V2.Components.GameComponents do
 
   defp hero_stat_button_class(_, "danger"), do: "btn btn-icon waves-effect btn-outline-dark text-danger"
   defp hero_stat_button_class(_, tone), do: "btn btn-icon waves-effect waves-light btn-outline-dark #{tone_class(tone)}"
-
-  defp button_type("hero_bar"), do: "button"
-  defp button_type(_), do: nil
 
   defp tone_class("danger"), do: "text-danger"
   defp tone_class("info"), do: "text-info"

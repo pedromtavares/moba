@@ -48,7 +48,7 @@ defmodule Moba.Admin.Matches do
         total: length(matches)
       }
     else
-      %{}
+      %{skills: %{}, avatars: %{}, items: %{}, winrate: 0.0, total: 0}
     end
   end
 

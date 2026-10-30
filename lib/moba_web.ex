@@ -77,7 +77,8 @@ defmodule MobaWeb do
 
   def v2_live_view do
     quote do
-      use Phoenix.LiveView
+      use Phoenix.LiveView, layout: {MobaWeb.V2.Layouts, :live}
+      on_mount {MobaWeb.Preview, :default}
 
       alias Moba.{Game, Accounts, Engine, Utils}
 
@@ -190,6 +191,8 @@ defmodule MobaWeb do
 
   def verified_routes do
     quote do
+      import MobaWeb.Preview, only: [preview_path: 2]
+
       use Phoenix.VerifiedRoutes,
         endpoint: MobaWeb.Endpoint,
         router: MobaWeb.Router,

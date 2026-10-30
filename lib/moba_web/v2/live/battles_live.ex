@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.BattlesLive do
   use MobaWeb, :v2_live_view
 
+  alias MobaWeb.V2.Components.TrainingComponents
+
   embed_templates "battles_live/*"
 
   def mount(_, _, socket) do
@@ -8,11 +10,11 @@ defmodule MobaWeb.V2.BattlesLive do
   end
 
   def handle_event("redirect", %{"id" => id}, socket) do
-    {:noreply, push_navigate(socket, to: ~p"/battles/#{id}")}
+    {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/battles/#{id}"))}
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: nil}} = socket) do
-    redirect(socket, to: "/base")
+    redirect(socket, to: preview_path(socket, "/base"))
   end
 
   defp maybe_redirect(socket), do: socket
@@ -138,6 +140,7 @@ defmodule MobaWeb.V2.BattlesLive do
 
   attr :battle, :map, required: true
   attr :current_hero, :map, required: true
+  attr :preview, :boolean, default: false
 
   defp battle_row(assigns) do
     ~H"""
@@ -145,68 +148,133 @@ defmodule MobaWeb.V2.BattlesLive do
     <% difficulty = difficulty_badge(@battle.difficulty) %>
     <% rewards = @battle.rewards && reward_badges(@battle, @current_hero.id) %>
     <% league_result = league_step_result(@battle, @current_hero.id) %>
+    <% result = result_badge_label(@battle, @current_hero.id) %>
+    <% opponent_snapshot =
+      if @battle.attacker_id == @current_hero.id, do: @battle.defender_snapshot, else: @battle.attacker_snapshot %>
 
     <tr
       id={"battle-#{@battle.id}"}
       class="battle-row"
-      phx-click="redirect"
-      phx-value-id={@battle.id}
-      phx-hook="Loading"
+      phx-click={if !@preview, do: "redirect"}
+      phx-value-id={if !@preview, do: @battle.id}
+      phx-hook={if !@preview, do: "Loading"}
     >
-      <td>
-        <span class={result_badge_class(@battle, @current_hero.id)}>
-          {result_badge_label(@battle, @current_hero.id)}
-        </span>
-      </td>
-      <td>
-        <img src={GH.image_url(opponent.avatar)} class="avatar img-border-xs" />
-        <br />
-        <span class="text-dark font-italic">{opponent.name}</span>
-      </td>
-      <td>
-        <%= if difficulty do %>
-          <span class={elem(difficulty, 1)}>{elem(difficulty, 0)}</span>
-          <br />
-        <% end %>
-        <%= if rewards do %>
-          <div>
-            <%= if rewards.xp > 0 do %>
-              <span class="badge badge-light-info">{rewards.xp} XP</span>
-            <% end %>
-            <%= if rewards.gold > 0 do %>
-              <span class="badge badge-light-warning">{rewards.gold}g</span>
-            <% end %>
-            <%= if rewards.pvp_points do %>
-              <span class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Points</span>
-            <% end %>
+      <%= if @preview do %>
+        <td class="history-opponent-cell">
+          <.link navigate={preview_path(assigns, ~p"/battles/#{@battle.id}")} class="history-opponent">
+            <img src={GH.image_url(opponent.avatar)} alt={opponent.avatar.name} />
+            <span>
+              <strong>{opponent.name}</strong>
+              <small>
+                Lv {(opponent_snapshot && opponent_snapshot.level) || opponent.level}<span :if={
+                  opponent.name != opponent.avatar.name
+                }> · {opponent.avatar.name}</span>
+              </small>
+              <span class="history-time">{relative_time(@battle)}</span>
+            </span>
+          </.link>
+        </td>
+        <td class="history-result">
+          <span class="history-outcome" data-result={result}>{result}</span>
+          <small :if={difficulty} class={"history-difficulty difficulty-#{@battle.difficulty}"}>
+            {elem(difficulty, 0)}
+          </small>
+        </td>
+        <td class="history-reward-cell">
+          <div :if={rewards} class="history-rewards">
+            <span :if={rewards.xp > 0} class="history-xp">+{rewards.xp} XP</span>
+            <span :if={rewards.gold > 0} class="history-gold">+{rewards.gold}g</span>
+            <span :if={rewards.pvp_points} class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Points</span>
           </div>
-        <% end %>
-        <%= if league_result do %>
-          <ul class="nav nav-pills nav-justified form-wizard-header flex-center">
+          <span
+            :if={!league_result && (!rewards || (rewards.xp == 0 && rewards.gold == 0 && is_nil(rewards.pvp_points)))}
+            class="history-no-reward"
+          >
+            —
+          </span>
+          <%= if league_result do %>
             <%= case league_result do %>
               <% {:rank, tier} -> %>
-                <img src={"/images/league/#{tier}.png"} class="mr-1 league-rank" />
+                <span class="history-promotion">
+                  <img src={"/images/league/#{tier}.png"} alt={Moba.leagues()[tier]} /> Promoted · {GH.league_name(tier)}
+                </span>
               <% {:step_win, step} -> %>
-                <li class="nav-item">
-                  <a href="javascript:;" class="nav-link success">
-                    <span class="number"><i class="fa fa-check" aria-hidden="true"></i></span>
-                    <span class="d-none d-sm-inline">{step}</span>
-                  </a>
-                </li>
+                <span class="history-step history-step-win">
+                  <i class="fa fa-check" aria-hidden="true"></i>Battle {step} cleared
+                </span>
               <% {:step_loss, step} -> %>
-                <li class="nav-item">
-                  <a href="javascript:;" class="nav-link failure">
-                    <span class="number"><i class="fa fa-times" aria-hidden="true"></i></span>
-                    <span class="d-none d-sm-inline">{step}</span>
-                  </a>
-                </li>
+                <span class="history-step history-step-loss">
+                  <i class="fa fa-xmark" aria-hidden="true"></i>Battle {step} failed
+                </span>
             <% end %>
-          </ul>
-        <% end %>
-      </td>
-      <td>
-        <span class="loading-text">{relative_time(@battle)}</span>
-      </td>
+          <% end %>
+        </td>
+        <td class="history-open">
+          <.link
+            id={"replay-battle-#{@battle.id}"}
+            navigate={preview_path(assigns, ~p"/battles/#{@battle.id}")}
+            class="history-replay"
+            aria-label={"Replay battle against #{opponent.name}"}
+          >
+            <i class="fa fa-play" aria-hidden="true"></i>
+          </.link>
+        </td>
+      <% else %>
+        <td>
+          <span class={result_badge_class(@battle, @current_hero.id)}>
+            {result_badge_label(@battle, @current_hero.id)}
+          </span>
+        </td>
+        <td>
+          <img src={GH.image_url(opponent.avatar)} class="avatar img-border-xs" />
+          <br />
+          <span class="text-dark font-italic">{opponent.name}</span>
+        </td>
+        <td>
+          <%= if difficulty do %>
+            <span class={elem(difficulty, 1)}>{elem(difficulty, 0)}</span>
+            <br />
+          <% end %>
+          <%= if rewards do %>
+            <div>
+              <%= if rewards.xp > 0 do %>
+                <span class="badge badge-light-info">{rewards.xp} XP</span>
+              <% end %>
+              <%= if rewards.gold > 0 do %>
+                <span class="badge badge-light-warning">{rewards.gold}g</span>
+              <% end %>
+              <%= if rewards.pvp_points do %>
+                <span class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Points</span>
+              <% end %>
+            </div>
+          <% end %>
+          <%= if league_result do %>
+            <ul class="nav nav-pills nav-justified form-wizard-header flex-center">
+              <%= case league_result do %>
+                <% {:rank, tier} -> %>
+                  <img src={"/images/league/#{tier}.png"} class="mr-1 league-rank" />
+                <% {:step_win, step} -> %>
+                  <li class="nav-item">
+                    <a href="javascript:;" class="nav-link success">
+                      <span class="number"><i class="fa fa-check" aria-hidden="true"></i></span>
+                      <span class="d-none d-sm-inline">{step}</span>
+                    </a>
+                  </li>
+                <% {:step_loss, step} -> %>
+                  <li class="nav-item">
+                    <a href="javascript:;" class="nav-link failure">
+                      <span class="number"><i class="fa fa-times" aria-hidden="true"></i></span>
+                      <span class="d-none d-sm-inline">{step}</span>
+                    </a>
+                  </li>
+              <% end %>
+            </ul>
+          <% end %>
+        </td>
+        <td>
+          <span class="loading-text">{relative_time(@battle)}</span>
+        </td>
+      <% end %>
     </tr>
     """
   end

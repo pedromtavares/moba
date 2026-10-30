@@ -1,8 +1,8 @@
 <div class="shop" id="shop">
-  <div id="close-button" phx-click="close-shop" class="text-white" {target_attrs(@event_target)}>
+  <button type="button" aria-label="Close shop" id="close-button" phx-click="close-shop" class="text-white" {target_attrs(@event_target)}>
     <i class="fa fa-times fa-3x"></i>
-  </div>
-  <div class="row">
+  </button>
+  <div class="row shop-header">
     <div class="col-sm-12 text-center">
       <h2 class="page-title mb-3 mt-3">
         <i class="fa fa-shopping-cart"></i> Shop <br />
@@ -11,7 +11,7 @@
     </div>
   </div>
 
-  <div class="row">
+  <div class="row shop-categories">
     <div class="col-12 col-md-6 col-lg-6 col-xl-3 text-center">
       <div class="card-box normal-items">
         <h3 class="page-title center">
@@ -23,7 +23,7 @@
         </h3>
         <div class="row">
           <%= for item <- normals(@items) do %>
-            <.shop_item item={item} />
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "normal" do %>
@@ -51,7 +51,7 @@
         </h3>
         <div class="row">
           <%= for item <- rares(@items) do %>
-            <.shop_item item={item} />
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "rare" do %>
@@ -79,7 +79,7 @@
         </h3>
         <div class="row">
           <%= for item <- epics(@items) do %>
-            <.shop_item item={item} />
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "epic" do %>
@@ -107,7 +107,7 @@
         </h3>
         <div class="row">
           <%= for item <- legendaries(@items) do %>
-            <.shop_item item={item} />
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
           <% end %>
         </div>
         <%= if @selected_shop && @selected_shop.rarity == "legendary" do %>
@@ -123,7 +123,7 @@
     </div>
   </div>
 
-  <div class="row text-center">
+  <div class="row text-center shop-inventory-row">
     <div class="col-12 col-xl-6 offset-xl-3 offset-xs-0 offset-sm-0 offset-md-0 offset-lg-0" id="inventory">
       <div class="card-box">
         <h3 class="page-title center">
@@ -138,13 +138,20 @@
         </h3>
         <div class="row">
           <%= for item <- @current_hero.items do %>
-            <.inventory_item item={item} selectable={can_select_inventory(item, @transmute, @recipe)} />
+            <.inventory_item
+              item={item}
+              selected={(@selected_inventory && @selected_inventory.code == item.code) || false}
+              selectable={can_select_inventory(item, @transmute, @recipe)}
+            />
           <% end %>
           <%= if length(@current_hero.items) < 6 do %>
             <%= for _ <- (length(@current_hero.items)..5) do %>
               <div class="d-none d-md-block col-md-2">
                 <div class="item-container float-left">
-                  <.shop_empty_item_slot class="item-img empty-item d-flex justify-content-center align-items-center" icon_class="fa fa-cube fa-2x" />
+                  <.shop_empty_item_slot
+                    class="item-img empty-item d-flex justify-content-center align-items-center"
+                    icon_class="fa fa-cube fa-2x"
+                  />
                 </div>
               </div>
             <% end %>
@@ -210,7 +217,9 @@
                   <input type="hidden" name="transmute_code" value={@transmute.code} />
                   <input :for={item <- @recipe} type="hidden" name="recipe_codes[]" value={item.code} />
                   <button
-                    class={if proper_recipe(@recipe, @transmute), do: "btn btn-primary", else: "btn btn-primary disabled"}
+                    class={
+                      if proper_recipe(@recipe, @transmute), do: "btn btn-primary", else: "btn btn-primary disabled"
+                    }
                     phx-hook="Loading"
                     loading="Transmuting..."
                     id="finish-transmute"

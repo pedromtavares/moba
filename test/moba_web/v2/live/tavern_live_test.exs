@@ -14,7 +14,7 @@ defmodule MobaWeb.V2.TavernLiveTest do
       {:ok, view, html} = live(conn, "/tavern")
 
       assert html =~ "Skins"
-      assert html =~ "Unlock new avatars, skills and skins"
+      assert has_element?(view, "#tavern-heading")
       assert has_element?(view, "#show-avatars-link")
       assert has_element?(view, "#show-skills-link")
       assert has_element?(view, "#show-skins-link")
@@ -32,8 +32,8 @@ defmodule MobaWeb.V2.TavernLiveTest do
 
       {:ok, view, _html} = live(conn, "/tavern")
 
-      html = render_click(view, "show-skills")
-      assert html =~ "mouse over image for info"
+      render_click(view, "show-skills")
+      assert has_element?(view, "#show-skills-link.active")
 
       render_click(view, "show-skins")
       html = render_click(view, "set-avatar", %{"code" => "phantom_assassin"})

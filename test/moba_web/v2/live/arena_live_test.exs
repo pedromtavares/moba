@@ -3,7 +3,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
   import Phoenix.LiveViewTest
 
-  test "renders arena index and edit routes under /v2", %{conn: conn} do
+  test "renders canonical arena and team editor routes", %{conn: conn} do
     hero = create_base_hero()
 
     conn =
@@ -18,8 +18,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     {:ok, edit_view, _html} = live(conn, "/arena/edit")
     assert has_element?(edit_view, "#arena-team-form")
-    assert has_element?(edit_view, ~s|#current-team-container[phx-hook="EqualHeight"][phx-target="#teams-container"]|)
-    assert has_element?(edit_view, ~s|#heroes-container[phx-hook="EqualHeight"][phx-target="#teams-container"]|)
+    assert has_element?(edit_view, "#teams-hud #current-team-container.squad-panel")
+    assert has_element?(edit_view, "#teams-hud #heroes-container.squad-panel")
   end
 
   test "creates a team from the v2 edit screen", %{conn: conn} do
@@ -59,9 +59,9 @@ defmodule MobaWeb.V2.ArenaLiveTest do
       |> init_test_session(player_id: hero.player_id)
 
     {:ok, view, _html} = live(conn, "/arena/edit")
-    team_row_html = view |> element("#team-row-#{team.id}") |> render()
-
-    assert length(Regex.scan(~r/class="avatar-container"/, team_row_html)) == 5
+    for pick <- team.picks do
+      assert has_element?(view, "#team-row-#{team.id} img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(pick.avatar)}']")
+    end
   end
 
   test "edits a team hero inline from the arena screen", %{conn: conn} do
@@ -81,7 +81,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     assert has_element?(view, "#hero-bar")
     assert has_element?(view, "#edit-button")
-    assert has_element?(view, ".xp-bar")
+    assert has_element?(view, ".hud-experience")
     assert has_element?(view, "#toggle-shop")
 
     view
@@ -98,7 +98,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     assert has_element?(view, "#shop-modal.d-block")
   end
 
-  test "starts the arena tutorial when the player is on step 29", %{conn: conn} do
+  test "skips the retired arena tutorial when the player is on step 29", %{conn: conn} do
     hero = create_base_hero()
     player = Game.update_tutorial_step!(hero.player, 29)
 
@@ -108,7 +108,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     {:ok, view, _html} = live(conn, "/arena")
 
-    assert has_element?(view, "#tutorial-step-30[data-step='30']")
+    refute has_element?(view, "[phx-hook=TutorialStep]")
+    assert Game.get_player!(player.id).tutorial_step == 39
   end
 
   test "arena tutorial keeps the v1 anchor targets", %{conn: conn} do

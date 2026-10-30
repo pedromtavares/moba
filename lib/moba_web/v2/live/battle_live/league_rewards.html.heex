@@ -1,57 +1,60 @@
-<.battle_result_header title={battle_result(@battle, @snapshot)} class="col center victory-title margin-auto mt-2" />
+<%= if @preview do %>
+  <.league_challenge {assigns} />
+<% else %>
+  <.battle_result_header title={battle_result(@battle, @snapshot)} class="col center victory-title margin-auto mt-2" />
 
-<%= if @battle.winner && @battle.winner_id == @battle.attacker_id do %>
-  <%= if @snapshot.league_step == 0 do %>
-    <div class="row">
-      <div class="col center">
-        <ul class="nav nav-pills navtab-bg flex-center promotion">
-          <li class="nav-item">
-            <a href="javascript:;" class="nav-link">
-              <img src={"/images/league/#{@snapshot.league_tier - 1}.png"} class="mr-1 league-rank" />
-              <span class="d-none d-md-inline-block">{Moba.leagues()[@snapshot.league_tier - 1]}</span>
-            </a>
-          </li>
-          <li class="nav-item"><i class="fa fa-arrow-right mr-1 ml-1"></i></li>
-          <li class="nav-item">
-            <a href="javascript:;" class="nav-link">
-              <img src={"/images/league/#{@snapshot.league_tier}.png"} class="mr-1 league-rank" />
-              <span class="d-none d-md-inline-block">{Moba.leagues()[@snapshot.league_tier]}</span>
-            </a>
-          </li>
-          <li class="nav-item ml-4">
-            <div class="ribbon-box reward-box">
-              <div class="ribbon ribbon-warning float-left shape">+{league_bonus(@snapshot)}g</div>
-            </div>
-          </li>
-          <li class="nav-item ml-4">
-            <div class="ribbon-box reward-box">
-              <div class="ribbon ribbon-primary float-left shape">+{league_bonus(@snapshot)} XP</div>
-            </div>
-          </li>
-        </ul>
+  <%= if @battle.winner && @battle.winner_id == @battle.attacker_id do %>
+    <%= if @snapshot.league_step == 0 do %>
+      <div class="row">
+        <div class="col center">
+          <ul class="nav nav-pills navtab-bg flex-center promotion">
+            <li class="nav-item">
+              <a href="javascript:;" class="nav-link">
+                <img src={"/images/league/#{@snapshot.league_tier - 1}.png"} class="mr-1 league-rank" />
+                <span class="d-none d-md-inline-block">{Moba.leagues()[@snapshot.league_tier - 1]}</span>
+              </a>
+            </li>
+            <li class="nav-item"><i class="fa fa-arrow-right mr-1 ml-1"></i></li>
+            <li class="nav-item">
+              <a href="javascript:;" class="nav-link">
+                <img src={"/images/league/#{@snapshot.league_tier}.png"} class="mr-1 league-rank" />
+                <span class="d-none d-md-inline-block">{Moba.leagues()[@snapshot.league_tier]}</span>
+              </a>
+            </li>
+            <li class="nav-item ml-4">
+              <div class="ribbon-box reward-box">
+                <div class="ribbon ribbon-warning float-left shape">+{league_bonus(@snapshot)}g</div>
+              </div>
+            </li>
+            <li class="nav-item ml-4">
+              <div class="ribbon-box reward-box">
+                <div class="ribbon ribbon-primary float-left shape">+{league_bonus(@snapshot)} XP</div>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-    </div>
+    <% else %>
+      <div class="row">
+        <div class="col center">
+          <ul class="nav nav-pills nav-justified form-wizard-header d-none d-md-flex">
+            <.league_step hero={@snapshot} step={1} label="Easiest" variant="winner" />
+            <.league_step hero={@snapshot} step={2} label="Easy" variant="winner" />
+            <.league_step hero={@snapshot} step={3} label="Medium" variant="winner" />
+            <.league_step hero={@snapshot} step={4} label="Hard" variant="winner" />
+            <.league_step hero={@snapshot} step={5} label="Hardest" variant="winner" />
+          </ul>
+          <%= unless @battle.attacker.league_step == 0 do %>
+            <a href="javascript:;" phx-click="next-battle" phx-value-id={@battle.id} class="btn btn-primary mt-2">
+              <i class="fa fa-arrow-right mr-1"></i> Proceed to Battle #{@snapshot.league_step}
+            </a>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
   <% else %>
     <div class="row">
       <div class="col center">
-        <ul class="nav nav-pills nav-justified form-wizard-header d-none d-md-flex">
-          <.league_step hero={@snapshot} step={1} label="Easiest" variant="winner" />
-          <.league_step hero={@snapshot} step={2} label="Easy" variant="winner" />
-          <.league_step hero={@snapshot} step={3} label="Medium" variant="winner" />
-          <.league_step hero={@snapshot} step={4} label="Hard" variant="winner" />
-          <.league_step hero={@snapshot} step={5} label="Hardest" variant="winner" />
-        </ul>
-        <%= unless @battle.attacker.league_step == 0 do %>
-          <a href="javascript:;" phx-click="next-battle" phx-value-id={@battle.id} class="btn btn-primary mt-2">
-            <i class="fa fa-arrow-right mr-1"></i> Proceed to Battle #{@snapshot.league_step}
-          </a>
-        <% end %>
-      </div>
-    </div>
-  <% end %>
-<% else %>
-  <div class="row">
-    <div class="col center">
         <%= if Game.master_league?(@snapshot) do %>
           <div class="mt-2"></div>
         <% else %>
@@ -63,31 +66,33 @@
             <.league_step hero={@snapshot} step={5} label="Hardest" variant="loser" />
           </ul>
         <% end %>
+      </div>
     </div>
-  </div>
-<% end %>
-<%= if @current_player do %>
-  <%= if Game.master_league?(@snapshot) || @snapshot.league_step == 0 || @battle.attacker.league_step == 0 do %>
-    <.battle_action_row class="row battle-border-top pt-1 mt-2">
+  <% end %>
+  <%= if @current_player do %>
+    <%= if Game.master_league?(@snapshot) || @snapshot.league_step == 0 || @battle.attacker.league_step == 0 do %>
+      <.battle_action_row class="row battle-border-top pt-1 mt-2">
+        <div class="col">
+          <.battle_nav_action
+            navigate={preview_path(assigns, ~p"/training")}
+            class="btn btn-outline-info btn-lg btn-block"
+            id="load-training"
+            icon="fa fa-play"
+            label="Continue"
+          />
+        </div>
+      </.battle_action_row>
+    <% end %>
+  <% else %>
+    <.battle_action_row>
       <div class="col">
-        <.battle_nav_action
-          navigate={~p"/training"}
-          class="btn btn-outline-info btn-lg btn-block"
-          id="load-training"
-          icon="fa fa-play"
-          label="Continue"
+        <.battle_guest_create_action
+          preview={Map.get(assigns, :preview, false)}
+          class="btn btn-primary btn-block btn-lg"
+          icon="fa fa-user-plus"
+          label="Create your Hero"
         />
       </div>
     </.battle_action_row>
   <% end %>
-<% else %>
-  <.battle_action_row>
-    <div class="col">
-      <.battle_guest_create_action
-        class="btn btn-primary btn-block btn-lg"
-        icon="fa fa-user-plus"
-        label="Create your Hero"
-      />
-    </div>
-  </.battle_action_row>
 <% end %>

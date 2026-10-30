@@ -32,7 +32,7 @@ defmodule MobaWeb.UserLoginLive do
                   <p class="alert alert-danger" role="alert">{error}</p>
                 <% end %>
 
-                <.form for={@form} id="login_form" action={~p"/users/log_in"} phx-update="ignore">
+                <.form for={@form} id="login_form" action={preview_path(assigns, ~p"/users/log_in")} phx-update="ignore">
                   <div class="form-group">
                     <label>E-mail</label>
                     <input type="email" id={@form[:email].id} name={@form[:email].name} value={@form[:email].value} class="form-control" required />
@@ -47,7 +47,7 @@ defmodule MobaWeb.UserLoginLive do
                 </.form>
 
                 <p class="text-center mt-4 mb-0">
-                  <.link href={~p"/users/reset_password"} class="text-muted ml-1">Forgot your password?</.link>
+                  <.link href={preview_path(assigns, ~p"/users/reset_password")} class="text-muted ml-1">Forgot your password?</.link>
                 </p>
               </div>
             </div>

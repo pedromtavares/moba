@@ -33,7 +33,10 @@ defmodule MobaWeb.CoreComponents do
       {@rest}
     >
       <div class="flex-1 min-w-0">
-        <p :if={@title} class={["font-semibold text-sm", @kind == :info && "text-blue-600", @kind == :error && "text-red-600"]}>
+        <p
+          :if={@title}
+          class={["font-semibold text-sm", @kind == :info && "text-blue-600", @kind == :error && "text-red-600"]}
+        >
           {@title}
         </p>
         <p class="text-sm break-words">{msg}</p>
@@ -108,8 +111,7 @@ defmodule MobaWeb.CoreComponents do
     values: ~w(checkbox color date datetime-local email file month number password
                search select tel text textarea time url week)
 
-  attr :field, Phoenix.HTML.FormField,
-    doc: "a form field struct retrieved from the form, for example: @form[:email]"
+  attr :field, Phoenix.HTML.FormField, doc: "a form field struct retrieved from the form, for example: @form[:email]"
 
   attr :errors, :list, default: []
   attr :checked, :boolean, doc: "the checked flag for checkbox inputs"
@@ -119,8 +121,7 @@ defmodule MobaWeb.CoreComponents do
   attr :class, :string, default: nil, doc: "the input class to use over defaults"
   attr :error_class, :string, default: nil, doc: "the input error class to use over defaults"
 
-  attr :rest, :global,
-    include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
+  attr :rest, :global, include: ~w(accept autocomplete capture cols disabled form list max maxlength min minlength
                 multiple pattern placeholder readonly required rows size step)
 
   def input(%{field: %HTML.FormField{} = field} = assigns) do
@@ -168,7 +169,10 @@ defmodule MobaWeb.CoreComponents do
         <select
           id={@id}
           name={@name}
-          class={[@class || "w-full border border-zinc-300 rounded-md py-2 px-3 text-sm", @errors != [] && (@error_class || "border-red-500")]}
+          class={[
+            @class || "w-full border border-zinc-300 rounded-md py-2 px-3 text-sm",
+            @errors != [] && (@error_class || "border-red-500")
+          ]}
           multiple={@multiple}
           {@rest}
         >
@@ -194,7 +198,7 @@ defmodule MobaWeb.CoreComponents do
             @errors != [] && (@error_class || "border-red-500")
           ]}
           {@rest}
-          >{Form.normalize_value("textarea", @value)}</textarea>
+        >{Form.normalize_value("textarea", @value)}</textarea>
       </label>
       <.error :for={msg <- @errors}>{msg}</.error>
     </div>
@@ -253,13 +257,45 @@ defmodule MobaWeb.CoreComponents do
     """
   end
 
+  def icon(%{name: "nav-" <> name} = assigns) do
+    assigns = assign(assigns, :image, "/images/navigation/#{name}.webp")
+
+    ~H"""
+    <img class={["nav-emblem", @class]} src={@image} width="64" height="64" alt="" aria-hidden="true" />
+    """
+  end
+
+  def icon(%{name: "game-" <> stat} = assigns) do
+    classes = %{
+      "health" => "fa-heart",
+      "energy" => "fa-bolt",
+      "attack" => "fa-dagger",
+      "armor" => "fa-shield-halved",
+      "power" => "fa-galaxy",
+      "speed" => "fa-running",
+      "offense" => "fa-fist-raised",
+      "defense" => "fa-shield-halved",
+      "magic" => "fa-magic",
+      "battle-log" => "fa-list-ul",
+      "refresh" => "fa-refresh",
+      "back" => "fa-arrow-left",
+      "clock" => "fa-clock",
+      "trophy" => "fa-trophy"
+    }
+
+    assigns = assign(assigns, :icon_class, Map.fetch!(classes, stat))
+
+    ~H"""
+    <i class={["fa", @icon_class, @class]} aria-hidden="true"></i>
+    """
+  end
+
   def show(js \\ %JS{}, selector) do
     JS.show(js,
       to: selector,
       time: 300,
       transition:
-        {"transition-all ease-out duration-300",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
+        {"transition-all ease-out duration-300", "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95",
          "opacity-100 translate-y-0 sm:scale-100"}
     )
   end

@@ -15,6 +15,7 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   attr :show_build, :boolean, required: true
   attr :show_shop, :boolean, required: true
   attr :tutorial_step, :integer, required: true
+  attr :preview, :boolean, default: false
   attr :event_target, :any, default: nil
 
   def hero_bar(assigns) do
@@ -26,6 +27,29 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   def hero_bar_stats(assigns) do
     ~H"""
     <.hero_stat_group hero={@current_hero} tooltip_mode="detailed" variant="hero_bar" />
+    """
+  end
+
+  attr :hero, :map, required: true
+  attr :compact, :boolean, default: false
+
+  def hud_experience(assigns) do
+    assigns = assign(assigns, :percentage, assigns.hero |> xp_percentage() |> max(0) |> min(100))
+
+    ~H"""
+    <div
+      class={["hud-experience", @compact && "hud-experience-compact"]}
+      role="progressbar"
+      aria-label={"Level #{@hero.level} experience"}
+      aria-valuemin="0"
+      aria-valuemax={xp_to_next_level(@hero)}
+      aria-valuenow={@hero.experience}
+      title={"Experience: #{@hero.experience}/#{xp_to_next_level(@hero)}"}
+    >
+      <div class="hud-experience-fill" style={"width:#{@percentage}%"} aria-hidden="true"></div>
+      <span class="hud-level">Level <strong>{@hero.level}</strong></span>
+      <span :if={!@compact} class="hud-experience-value">{@hero.experience} / {xp_to_next_level(@hero)} XP</span>
+    </div>
     """
   end
 

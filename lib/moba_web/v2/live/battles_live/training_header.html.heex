@@ -30,7 +30,7 @@
         </div>
         <div class="mt-4 d-flex justify-content-between align-items-center">
           <div>
-            <.link navigate={~p"/training"} class="btn btn-light">
+            <.link navigate={preview_path(assigns, ~p"/training")} class="btn btn-light">
               <i class="fa fa-sword mr-1 fa-2x"></i> <br />Return to Training
             </.link>
           </div>
@@ -38,7 +38,7 @@
           <div class="d-flex justify-content-center">
             <%= if expert_hero?(@current_hero) do %>
               <h3 class="pve-info text-success" data-toggle="tooltip" title="Time since creation">
-                <span class="f-rpg">{elapsed_time(@current_hero)}</span>
+                <span class="f-rpg">{GH.minutes_label(elapsed_time(@current_hero), @preview)}</span>
                 <br />
                 <small class="text-muted">min</small>
               </h3>

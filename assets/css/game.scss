@@ -1,0 +1,165 @@
+/* Page content stays open; portraits, hero cards and dialogs keep their frames. */
+.game-page {
+  * { scrollbar-width: thin; scrollbar-color: #695d4b #0c111a; }
+  .card:not(.hero-card), .card-box:not(.hero-card),
+  .dark-bg:not(.hero-card):not(.btn), .dark-bg-lighter:not(.hero-card), .darker:not(.btn) {
+    background: transparent !important;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .card:not(.hero-card) > .card-header, .card:not(.hero-card) > .card-footer {
+    background: transparent;
+    border-color: var(--base-line);
+    border-radius: 0;
+  }
+
+  .card:not(.hero-card) > .card-header { padding-top: 16px; padding-bottom: 16px; }
+  .card:not(.hero-card) > .card-body { background-color: transparent; }
+  .card-box:not(.hero-card), #pvp-progression { border-bottom: 1px solid var(--base-line); }
+  hr, .border, .border-left, .border-right, .border-top, .border-bottom { border-color: var(--base-line) !important; }
+
+  .hero-card {
+    border: 1px solid #baa98a40 !important;
+    border-image: none;
+    border-radius: 6px;
+    box-shadow: 0 4px 16px #00000033;
+    transition: border-color 220ms ease, box-shadow 220ms ease;
+  }
+
+  .hero-card:hover, .hero-card:focus-within { border-color: #d6b47c99 !important; box-shadow: 0 0 20px #c6a77914, 0 8px 24px #00000055; }
+  .hero-card > .card-header { background: linear-gradient(180deg, #10151ff5, #10151fcc); border-bottom: 1px solid var(--base-line); border-radius: 5px 5px 0 0; }
+  .hero-card > .card-footer { background: #0c111aeb !important; border-top: 1px solid var(--base-line); border-radius: 0 0 5px 5px; }
+  .hero-card .card-body { border-radius: 5px 5px 0 0; }
+  .hero-card .name, .hero-card .card-body .name { background: #10151fe6; border-bottom: 1px solid var(--base-line); }
+  .hero-card .ultimate, .hero-card .card-body .ultimate { background: #0c111aeb; border: 1px solid var(--base-line); border-radius: 4px 0 0 4px; }
+  .hero-card .skill-img, .hero-card .item-img, .hero-card .items-container { border-color: #222833; }
+
+  .nav-tabs, .nav-bordered { border-bottom: 1px solid var(--base-line) !important; }
+  .nav-tabs .nav-link, .nav-pills .nav-link {
+    color: #bcb5a8;
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 2px solid transparent !important;
+    border-radius: 0;
+    transition: color 180ms ease, border-color 180ms ease, text-shadow 180ms ease;
+  }
+
+  .nav-tabs .nav-link:hover, .nav-pills .nav-link:hover { color: #fff1d9; text-shadow: 0 0 16px #d6ad6a33; }
+  .nav-tabs .nav-link.active, .nav-pills .nav-link.active { color: #f0d7aa; border-bottom-color: #d6b47c !important; }
+  .nav-tabs .nav-link:focus-visible, .nav-pills .nav-link:focus-visible { outline: 2px solid #e6c58e; outline-offset: 3px; }
+
+  .btn-sm { min-height: 32px; padding: 5px 10px; font-size: 12px; letter-spacing: .02em; }
+  .btn-xs { min-height: 26px; padding: 3px 7px; font-size: 11px; letter-spacing: 0; }
+  .btn-icon { font-family: 'Nunito', sans-serif; letter-spacing: 0; }
+  .btn.disabled, .btn:disabled { opacity: .45; box-shadow: none; cursor: default; }
+  .btn.phx-click-loading, .btn.phx-submit-loading { opacity: .7; cursor: wait; }
+  .btn-success, .btn-outline-success { color: #94d7bd; background: #1f645638 !important; border-color: #6db89b55; }
+  .btn-success:hover, .btn-outline-success:hover { color: #c0f2da; background: #26775b66 !important; box-shadow: 0 0 16px #6db89b20; }
+  .btn-primary, .btn-outline-primary { color: #a7cfeb; background: #345f8233 !important; border-color: #79adce55; }
+  .btn-primary:hover, .btn-outline-primary:hover { color: #d6ecff; background: #345f8266 !important; box-shadow: 0 0 16px #79adce20; }
+  .btn-danger, .btn-outline-danger { color: #db8d94; background: #7e35401f !important; border-color: #ab626c55; }
+  .btn-danger:hover, .btn-outline-danger:hover { color: #ffd4d8; background: #7e354066 !important; border-color: #db8d9499; }
+  .btn-warning, .btn-outline-warning { color: #e4c48e; background: #a8803b1f !important; border-color: #c6a77966; }
+  .btn-warning:hover, .btn-outline-warning:hover { color: #fff1d9; background: #a8803b40 !important; box-shadow: 0 0 16px #d6ad6a20; }
+  .btn-purple { color: #d0bce5; background: #674c8033; border-color: #9e80ba66; }
+  .btn-purple:hover { color: #eadbfc; background: #674c8055; box-shadow: 0 0 18px #9e80ba26; }
+
+  .battle-primary, #attack-button, .base-invoke, #create-button, #enter-arena-button, .target-battle, .hero-card-controls .hero-card-resume, .farm-start, .league-continue, .death-revive, .account-pages button[type="submit"] {
+    min-height: 52px;
+    border: 1px solid #d4af798c;
+    background: linear-gradient(135deg, #74282acc, #a63735bf 55%, #642126cc) !important;
+    color: #fff1d9 !important;
+    box-shadow: inset 0 1px #e8c58b40, 0 0 24px #b6413526;
+    font-family: "landing-rpg", Georgia, serif;
+    letter-spacing: .05em;
+    text-shadow: 0 2px 4px #00000080;
+    animation: none;
+  }
+
+  .battle-primary:hover, #attack-button:hover, .base-invoke:hover, #create-button:hover, #enter-arena-button:hover, .target-battle:hover, .hero-card-controls .hero-card-resume:hover, .farm-start:hover, .league-continue:hover, .death-revive:hover, .account-pages button[type="submit"]:hover {
+    border-color: #e9c995;
+    background: linear-gradient(135deg, #8a3031e6, #b5413dd9 55%, #74262ae6) !important;
+    box-shadow: inset 0 1px #e8c58b73, 0 0 22px #e46a5059, 0 0 46px #b6413533;
+  }
+
+  .btn.active, .current-featured img { border-color: #d6b47c !important; box-shadow: 0 0 12px #d6ad6a26; }
+  .training .farm-tabs .nav-link { border: 0 !important; border-bottom: 2px solid transparent !important; }
+  .training .farm-tabs .nav-link.active { border-bottom-color: #d6b47c !important; }
+  .training .gank-button { background: #0c111acc; border: 1px solid var(--base-line); border-radius: 4px; }
+  .training .farming-bg { border: 0; border-top: 1px solid var(--base-line); }
+  .form-control, .custom-select, input[type="text"], input[type="email"], input[type="password"], textarea, select {
+    background-color: #0c111bd9;
+    border: 1px solid #baa98a40;
+    border-radius: 4px;
+    color: #e9dfcd;
+    box-shadow: inset 0 1px 5px #00000033;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+  .form-control:focus, .custom-select:focus, input:focus, textarea:focus, select:focus { background-color: #111925; border-color: #d6b47c99; color: #fff1d9; box-shadow: 0 0 0 3px #d6ad6a14; }
+  input::placeholder, textarea::placeholder { color: #8d9099; }
+  label { color: #cfc5b3; }
+  .table, .table-dark { background: transparent; color: #d8d2c7; }
+  .table th, .table td, .table thead th, .inbox-item { border-color: var(--base-line); }
+  .table thead th { color: #d6b47c; background: #c6a77908; }
+  .ranking .table thead th, .user-profile .table thead th { background: #c6a7790d; }
+  .progress { background: #05090fa6; border: 1px solid #c6a77938; border-radius: 4px; box-shadow: inset 0 2px 8px #00000055; }
+  .table-hover tbody tr:hover, .inbox-item:hover { background: #c6a77908; }
+  .table .btn { white-space: nowrap; }
+  .text-muted { color: #a5a4a2 !important; }
+  .text-dark { color: #bcb5a8 !important; }
+  .info-box { border: 0 !important; border-right: 1px solid var(--base-line) !important; }
+  .info-box:last-child { border-right: 0 !important; }
+  #hero-bar, #shop { background: #0c111af5 !important; border-image: none; border-color: #baa98a55; box-shadow: 0 -6px 30px #00000040; }
+  #hero-bar { border-top: 1px solid #baa98a55; }
+  #shop .card-box { border: 0; }
+  .modal-content .table { background: transparent; }
+  .account-pages { margin-top: clamp(24px, 8vh, 88px) !important; padding-top: 24px; }
+  .account-pages h3 { font-family: "landing-rpg", Georgia, serif; color: #e9d4af; letter-spacing: .05em; }
+  .account-pages a { color: #d6b47c; }
+  .account-pages .form-group { margin-bottom: 20px; }
+  .account-pages .alert { border-radius: 4px; background: #0c111acc; }
+  input:-webkit-autofill { -webkit-text-fill-color: #e9dfcd; box-shadow: inset 0 0 0 1000px #111925; caret-color: #e9dfcd; }
+  .game-account { max-width: 480px; margin: 0 auto; padding: 32px 24px; }
+  .game-account input { width: 100%; min-height: 42px; padding: 8px 12px; }
+  .game-account form > div { margin-top: 20px; }
+  .game-account button { padding: 12px 20px; border: 1px solid #c6a77966; border-radius: 4px; background: #222c39cc; color: #dfcfb2; }
+}
+
+body:has(.game-page .account-pages)::before { display: none; }
+
+body:has(.game-page .dashboard) #topnav a[href$="/base"],
+body:has(.game-page .training) #topnav a[href$="/training"],
+body:has(.game-page .arena, .game-page .duel, .game-page .matches) #topnav a[href$="/arena"],
+body:has(.game-page .user-profile) #topnav a[href*="/player/"],
+body:has(.game-page .community) #topnav a[href$="/community"],
+body:has(.game-page .tavern) #topnav a[href$="/tavern"] {
+  color: #e6c58e;
+  box-shadow: inset 0 -2px #d6ad6a;
+}
+
+@media (max-width: 767px) {
+  .game-page {
+    .nav-tabs .nav-link { padding: 10px 6px; font-size: 13px; }
+    .nav-tabs .nav-link .fa-2x { font-size: 1.4em; }
+    .account-pages { padding-top: 20px; }
+    #hero-bar .btn { min-height: 30px; }
+    .table .btn { padding-left: 6px; padding-right: 6px; }
+    #pvp-progression .mt-4.d-flex { flex-direction: column; gap: 20px; }
+    #pvp-progression .mt-4.d-flex > .col { flex: 0 0 auto; width: 100%; max-width: 100%; padding: 0; }
+    #pvp-progression #enter-arena-button { width: 100%; max-width: 320px; font-size: 17px; }
+    #pvp-progression .info-box { flex: 1; padding: 12px 8px; font-size: 22px; }
+    #pvp-progression .info-box small { font-size: 12px; }
+    .arena > .row > .col > .row > .col { flex: 0 0 100%; max-width: 100%; min-width: 0; margin-bottom: 20px; }
+    .arena .history .btn { min-height: 34px; padding: 6px 12px; font-size: 14px; }
+    #create-new .collection { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+    #create-new .collection > .row { flex: 0 0 100%; max-width: 100%; margin: 0; }
+    #create-new .collection > .avatar-container { width: calc(25% - 8px) !important; height: auto !important; min-height: 55px; margin: 0 !important; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page *, .game-page *::before, .game-page *::after { animation: none !important; transition: none !important; }
+}

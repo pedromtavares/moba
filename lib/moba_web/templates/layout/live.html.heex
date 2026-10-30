@@ -1,43 +1,46 @@
-<%= if non_guest?(assigns), do: live_render(@socket, MobaWeb.V1.CurrentPlayerLive, id: "current-player") %>
+<div class={assigns[:preview] && "game-page"} id={assigns[:preview] && "game-page"}>
+  <MobaWeb.V2.Layouts.atmosphere :if={assigns[:preview]} />
+  {if non_guest?(assigns), do: live_render(@socket, MobaWeb.V1.CurrentPlayerLive, id: "current-player")}
 
-<%= if show_sidebar?(assigns) do %>
-  <div class="row">
-    <%= live_render(@socket, MobaWeb.V1.SidebarLive,
-      session: %{"sidebar_code" => assigns[:sidebar_code], "notifications" => assigns[:notifications]},
-      id: "sidebar-view"
-    ) %>
-    <div class="col">
-      <%= @inner_content %>
-      <div :if={show_footer?(assigns)} class="row stats-footer">
-        <% stats = footer_stats() %>
-        <div class="col">
-          <div class="card dark-bg-lighter mb-0">
-            <div class="card-body pb-3 pt-3">
-              <div class="row justify-content-center">
-                <div class="col text-center">
-                  <h5><i class="fa fa-swords mr-1"></i><%= stats.matches %> matches</h5>
-                </div>
-                <div class="col text-center">
-                  <h5><i class="fa fa-users mr-1"></i><%= stats.active %> players</h5>
-                </div>
+  <%= if show_sidebar?(assigns) do %>
+    <div class="row">
+      {live_render(@socket, MobaWeb.V1.SidebarLive,
+        session: %{"sidebar_code" => assigns[:sidebar_code], "notifications" => assigns[:notifications]},
+        id: "sidebar-view"
+      )}
+      <div class="col">
+        {@inner_content}
+        <div :if={show_footer?(assigns)} class="row stats-footer">
+          <% stats = footer_stats() %>
+          <div class="col">
+            <div class="card dark-bg-lighter mb-0">
+              <div class="card-body pb-3 pt-3">
+                <div class="row justify-content-center">
+                  <div class="col text-center">
+                    <h5><i class="fa fa-swords mr-1"></i>{stats.matches} matches</h5>
+                  </div>
+                  <div class="col text-center">
+                    <h5><i class="fa fa-users mr-1"></i>{stats.active} players</h5>
+                  </div>
 
-                <div class="col text-center">
-                  <h5><i class="fa fa-helmet-battle mr-1"></i><%= stats.heroes %> trained</h5>
-                </div>
-                <div class="col text-center">
-                  <h5>
-                    <img src="/images/league/5.png" class="mr-1" /><%= stats.masters %> masters
-                  </h5>
-                </div>
-                <div class="col text-center">
-                  <h5>
-                    <img src="/images/league/6.png" class="mr-1" /><%= stats.grandmasters %> grandmasters
-                  </h5>
-                </div>
-                <div class="col text-center">
-                  <h5>
-                    <img src="/images/league/6.png" class="mr-1 undefeated" /><%= stats.undefeated %> undefeated
-                  </h5>
+                  <div class="col text-center">
+                    <h5><i class="fa fa-helmet-battle mr-1"></i>{stats.heroes} trained</h5>
+                  </div>
+                  <div class="col text-center">
+                    <h5>
+                      <img src="/images/league/5.png" class="mr-1" />{stats.masters} masters
+                    </h5>
+                  </div>
+                  <div class="col text-center">
+                    <h5>
+                      <img src="/images/league/6.png" class="mr-1" />{stats.grandmasters} grandmasters
+                    </h5>
+                  </div>
+                  <div class="col text-center">
+                    <h5>
+                      <img src="/images/league/6.png" class="mr-1 undefeated" />{stats.undefeated} undefeated
+                    </h5>
+                  </div>
                 </div>
               </div>
             </div>
@@ -45,7 +48,9 @@
         </div>
       </div>
     </div>
-  </div>
-<% else %>
-  <%= @inner_content %>
-<% end %>
+  <% else %>
+    {@inner_content}
+  <% end %>
+</div>
+
+<MobaWeb.V2.Layouts.feedback :if={assigns[:preview]} flash={@flash} />

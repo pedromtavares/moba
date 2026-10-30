@@ -1,0 +1,225 @@
+<div id="teams-hud" class="arena arena-edit squad-page teams-modern" data-editing-hero={to_string(!is_nil(@hero))}>
+  <header class="squad-page-heading">
+    <div>
+      <span class="squad-eyebrow">Arena · Lineup builder</span>
+      <h1>Your teams</h1>
+    </div>
+    <.link navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">Return to arena →</.link>
+  </header>
+  <div class="squad-columns teams-columns">
+    <section class="squad-panel saved-teams" id="teams-container" aria-labelledby="saved-teams-title">
+      <div class="squad-panel-heading">
+        <h2 id="saved-teams-title">Saved teams</h2>
+        <strong>{length(@teams)}</strong>
+      </div>
+      <.form for={@team_form} id="arena-team-form" phx-submit="new-team" class="squad-create-team">
+        <.input
+          field={@team_form[:name]}
+          type="text"
+          id="team-name"
+          maxlength="20"
+          class="squad-team-input"
+          placeholder="Team name"
+          aria-label="Team name"
+          required
+        />
+        <button type="submit" class="btn base-secondary" id="create-team-button">Create team +</button>
+      </.form>
+      <div class="squad-scroll">
+        <.hud_notice
+          :if={@teams == []}
+          id="arena-no-teams"
+          title="No teams yet"
+          description="Name your first team above."
+        />
+        <button
+          :for={team <- @teams}
+          type="button"
+          id={"team-row-#{team.id}"}
+          class={["squad-team-choice", @selected_team && @selected_team.id == team.id && "active"]}
+          phx-click="select-team"
+          phx-value-id={team.id}
+          aria-pressed={to_string((@selected_team && @selected_team.id == team.id) || false)}
+        >
+          <span class="squad-team-name">{team.name}<small>{length(team.picks)} / 5</small></span>
+          <.lineup_preview heroes={team.picks} />
+          <span class="squad-team-meta">
+            <span>{if team.defensive, do: "◆ Defensive", else: "Offensive"}</span><span>{team.used_count} uses</span>
+          </span>
+        </button>
+      </div>
+    </section>
+    <section class="squad-panel team-lineup" id="current-team-container" aria-labelledby="current-team-title">
+      <%= if @selected_team do %>
+        <div class="squad-panel-heading">
+          <h2 id="current-team-title">{@selected_team.name}</h2>
+          <strong>{length(@selected_team.picks)} / 5</strong>
+        </div>
+        <div class="team-settings">
+          <label class="squad-defensive" for="toggle-defensive">
+            <input
+              type="checkbox"
+              id="toggle-defensive"
+              phx-click="toggle-defensive"
+              checked={@selected_team.defensive}
+            /><span>Defensive lineup</span>
+          </label>
+          <button
+            type="button"
+            class="btn squad-remove"
+            id="remove-selected-team"
+            phx-click="remove-team"
+            data-confirm={"Delete #{@selected_team.name}? Its saved lineup will be removed. Your heroes will stay in your collection."}
+            data-confirm-title="Delete team?"
+            data-confirm-accept="Delete team"
+          >
+            Delete team
+          </button>
+        </div>
+        <div class="squad-scroll lineup-list">
+          <.hud_notice
+            :if={@selected_team.picks == []}
+            id="arena-team-empty"
+            title="Choose your lineup"
+            description="Add up to 5 heroes from your collection."
+          />
+          <%= for position <- 1..5 do %>
+            <%= if pick = Enum.at(@selected_team.picks, position - 1) do %>
+              <div id={"team-hero-#{pick.id}"}>
+                <.roster_hero hero={pick} position={position}>
+                  <:actions>
+                    <button
+                      type="button"
+                      class="btn squad-order"
+                      phx-click="move-up"
+                      phx-value-id={pick.id}
+                      id={"move-up-#{pick.id}"}
+                      disabled={position == 1}
+                      aria-label={"Move #{pick.name} up"}
+                    >
+                      ↑
+                    </button>
+                    <button
+                      type="button"
+                      class="btn squad-order"
+                      phx-click="move-down"
+                      phx-value-id={pick.id}
+                      id={"move-down-#{pick.id}"}
+                      disabled={position == length(@selected_team.picks)}
+                      aria-label={"Move #{pick.name} down"}
+                    >
+                      ↓
+                    </button>
+                    <button
+                      :if={@selected_team.player_id == pick.player_id}
+                      type="button"
+                      class="btn base-secondary"
+                      phx-click="edit-hero"
+                      phx-value-id={pick.id}
+                      id={"edit-hero-#{pick.id}"}
+                    >
+                      Edit hero
+                    </button>
+                    <button
+                      type="button"
+                      class="btn squad-remove"
+                      phx-click="remove-hero"
+                      phx-value-id={pick.id}
+                      id={"remove-hero-#{pick.id}"}
+                    >
+                      Remove
+                    </button>
+                  </:actions>
+                </.roster_hero>
+              </div>
+            <% else %>
+              <div class="squad-empty-slot" id={"team-empty-slot-#{position}"}>
+                <span>{position}</span><strong>Open slot</strong>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="squad-panel-heading">
+          <h2 id="current-team-title">Your lineup</h2>
+          <strong>0 / 5</strong>
+        </div>
+        <.hud_notice
+          id="arena-no-selected-team"
+          title="Build your lineup"
+          description="Create a team, then add your heroes."
+        />
+      <% end %>
+    </section>
+    <section class="squad-panel team-library" id="heroes-container" aria-labelledby="team-library-title">
+      <div class="squad-panel-heading">
+        <h2 id="team-library-title">Hero collection</h2>
+        <strong>{length(@heroes)}</strong>
+      </div>
+      <nav class="squad-tabs" aria-label="Hero source">
+        <button
+          :for={{type, label} <- [{"trained", "Trained heroes"}, {"available", "Available heroes"}]}
+          type="button"
+          id={"#{type}-heroes-button"}
+          phx-click="hero-list"
+          phx-value-type={type}
+          class={@heroes_tab == type && "active"}
+          aria-pressed={to_string(@heroes_tab == type)}
+        >
+          {label}
+        </button>
+      </nav>
+      <div :if={@heroes_tab == "trained"} class="team-library-sort">
+        <button type="button" class="btn" phx-click="sort" id="hero-sort">
+          Sorted by {if @sort == :recent, do: "Recent", else: "Rank"} ↕
+        </button>
+      </div>
+      <div class="squad-scroll">
+        <.hud_notice
+          :if={@heroes == []}
+          id="arena-no-heroes"
+          title={if @heroes_tab == "trained", do: "No trained heroes yet", else: "No available heroes"}
+          description={if @heroes_tab == "trained", do: "Heroes that reach Platinum League appear here."}
+        >
+          <:actions :if={@heroes_tab == "trained"}>
+            <button
+              type="button"
+              class="btn base-secondary"
+              phx-click="hero-list"
+              phx-value-type="available"
+              id="arena-browse-available"
+            >
+              Available heroes →
+            </button>
+          </:actions>
+        </.hud_notice>
+        <%= for hero <- @heroes do %>
+          <% picked? = @selected_team && hero.id in @selected_team.pick_ids %>
+          <div id={"available-hero-#{hero.id}"}>
+            <.roster_hero hero={hero} picked={picked? || false}>
+              <:actions>
+                <%= cond do %>
+                  <% picked? -> %>
+                    <span class="squad-selected-label">In lineup ✓</span>
+                  <% @selected_team -> %>
+                    <button
+                      type="button"
+                      class="btn squad-add"
+                      phx-click="add-hero"
+                      phx-value-id={hero.id}
+                      id={"add-button-#{hero.id}"}
+                      disabled={length(@selected_team.picks) >= 5}
+                    >
+                      {if length(@selected_team.picks) >= 5, do: "Lineup full", else: "Add to lineup +"}
+                    </button>
+                  <% true -> %>
+                    <span class="squad-selected-label">Create a team to add heroes</span>
+                <% end %>
+              </:actions>
+            </.roster_hero>
+          </div>
+        <% end %>
+      </div>
+    </section>
+  </div>
+</div>

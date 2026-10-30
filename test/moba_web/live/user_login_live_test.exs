@@ -68,7 +68,7 @@ defmodule MobaWeb.UserLoginLiveTest do
         |> render_click()
         |> follow_redirect(conn, ~p"/users/reset_password")
 
-      assert conn.resp_body =~ "Forgot your password?"
+      assert conn.resp_body =~ "Recover your account"
     end
   end
 end

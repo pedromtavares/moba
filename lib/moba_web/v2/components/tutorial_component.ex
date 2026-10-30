@@ -28,14 +28,28 @@ defmodule MobaWeb.V2.TutorialComponent do
   def set_step(socket, _), do: socket
 
   def finish_training(socket), do: set_step(socket, @final_training_step)
+  def finish_base(%{assigns: %{preview: true}} = socket), do: finish_arena(socket)
   def finish_base(socket), do: set_step(socket, @final_base_step)
   def finish_arena(socket), do: set_step(socket, @final_arena_step)
+
+  def skip_arena(%{assigns: %{preview: true, tutorial_step: step}} = socket)
+      when step >= @final_base_step and step < @final_arena_step,
+      do: finish_arena(socket)
+
+  def skip_arena(socket), do: socket
 
   attr :step, :integer, required: true
 
   def render(assigns) do
     ~H"""
-    <div phx-hook="TutorialStep" data-step={@step} id={"tutorial-step-#{@step}"}></div>
+    <div
+      phx-hook="TutorialStep"
+      phx-update="ignore"
+      data-step={@step}
+      data-preview={to_string(Map.get(assigns, :preview, false))}
+      id={"tutorial-step-#{@step}"}
+    >
+    </div>
     """
   end
 end

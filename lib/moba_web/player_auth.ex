@@ -22,7 +22,7 @@ defmodule MobaWeb.PlayerAuth do
         assign(conn, :current_player, player)
 
       true ->
-        conn |> redirect(to: "/start") |> halt()
+        conn |> redirect(to: MobaWeb.Preview.preview_path(conn, "/start")) |> halt()
     end
   end
 end

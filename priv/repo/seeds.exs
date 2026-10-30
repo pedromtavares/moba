@@ -32,6 +32,10 @@ catalog =
   |> File.read!()
   |> Jason.decode!()
 
+if Enum.any?([User, Item, Skill, Avatar, Skin], &Repo.exists?/1) do
+  raise "Seeds require an empty, migrated database. Use mix ecto.migrate for an existing installation."
+end
+
 Repo.transaction(fn ->
   %User{is_admin: true, shard_count: 10000}
   |> User.changeset(%{
@@ -76,5 +80,4 @@ Conductor.regenerate_resources!()
 Conductor.pvp_tick!()
 Conductor.season_tick!()
 
-(Enum.to_list(0..10) ++ Enum.to_list(17..22))
-|> Conductor.regenerate_bots!()
+Conductor.regenerate_bots!()

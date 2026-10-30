@@ -53,4 +53,33 @@ defmodule MobaWeb.GameControllerTest do
     assert "/training" = redirected_to(conn, 302)
     assert get_session(conn, :player_id)
   end
+
+  test "preview bookmarks redirect permanently and preserve queries and tokens", %{conn: conn} do
+    for path <- [
+          "",
+          "/",
+          "/base",
+          "/start",
+          "/arena/edit",
+          "/battles/42",
+          "/matches/42",
+          "/users/reset_password/token",
+          "/users/settings/confirm_email/token"
+        ] do
+      destination = if path in ["", "/"], do: "/", else: path
+      response = get(conn, "/new" <> path <> "?source=bookmark&tab=skins")
+      assert redirected_to(response, 301) == destination <> "?source=bookmark&tab=skins"
+    end
+  end
+
+  test "an already-open preview guest form creates a hero on the canonical routes", %{conn: conn} do
+    response =
+      conn
+      |> get("/start")
+      |> recycle()
+      |> post("/new/start", %{"skills" => Enum.map(base_skills(), & &1.id), "avatar" => base_avatar().id})
+
+    assert redirected_to(response) == "/training"
+    assert get_session(response, :player_id)
+  end
 end

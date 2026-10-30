@@ -1,0 +1,186 @@
+.game-page .training-ascent {
+  --ascent-accent: #b8c6d0;
+  --ascent-goal: #91d9f6;
+  &[data-goal="5"] { --ascent-goal: #56e7ee; }
+  &[data-goal="6"] { --ascent-goal: #f2b461; }
+  &[data-league="2"] { --ascent-accent: #edc46d; }
+  &[data-league="3"] { --ascent-accent: #e1e6f3; }
+  &[data-league="4"] { --ascent-accent: #91d9f6; }
+  &[data-league="5"] { --ascent-accent: #56e7ee; }
+  &[data-league="6"] { --ascent-accent: #f2b461; }
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  margin-bottom: 18px;
+  padding: 20px 28px 0;
+  border: 1px solid rgba(209, 183, 129, .24);
+  border-radius: 16px;
+  background: linear-gradient(90deg, rgba(8, 16, 24, .94), rgba(9, 16, 25, .76), rgba(8, 14, 22, .94)), var(--ascent-scene) center 55% / cover;
+  box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 36px rgba(0,0,0,.15);
+
+  .ascent-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .ascent-eyebrow { color: #baa77d; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  h2 { margin: 2px 0 0; font-size: 30px; font-weight: 850; line-height: 1.15; color: #efe7d6; }
+  h2 > span { color: var(--ascent-goal); }
+  .ascent-objective { display: flex; align-items: center; gap: 24px; }
+  #training-ascent-status { margin: 0; color: #e7e2d6; font-size: 19px; font-weight: 750; }
+  .ascent-rules { margin: 3px 0 0; color: #9cabb9; font-size: 13px; }
+  .ascent-track { list-style: none; display: flex; align-items: flex-start; margin: 12px 0 10px; padding: 0; }
+  .ascent-rank { position: relative; flex: 1; text-align: center; min-width: 0; }
+  .ascent-rank::before { content: ''; position: absolute; top: 38px; left: -50%; width: 100%; height: 2px; background: rgba(173,190,205,.19); z-index: -1; }
+  .ascent-rank:first-child::before { display: none; }
+  .ascent-rank.is-complete::before, .ascent-rank.is-current::before { background: linear-gradient(90deg, #8b7957, #d2bc86); }
+  .ascent-emblem { display: flex; align-items: center; justify-content: center; height: 76px; }
+  .ascent-rank .league-logo { height: 54px; width: auto; opacity: .4; filter: saturate(.55); transition: opacity .2s, filter .2s; }
+  .ascent-rank.is-current .league-logo { height: 76px; opacity: 1; filter: drop-shadow(0 0 14px rgba(232,196,126,.24)); }
+  .ascent-rank.is-next .league-logo { height: 64px; opacity: 1; filter: drop-shadow(0 0 12px rgba(148,203,235,.3)); }
+  .ascent-rank.is-complete .league-logo { opacity: .8; filter: none; }
+  .ascent-rank-name { display: block; margin-top: 4px; color: #8f9aa7; font-size: 13px; font-weight: 800; }
+  .is-current .ascent-rank-name { color: #f0dcaf; }
+  .is-next .ascent-rank-name { color: var(--ascent-accent); }
+  .ascent-rank-caption { display: block; color: #a99d82; font-size: 10px; margin-top: 3px; letter-spacing: .08em; text-transform: uppercase; }
+  .ascent-turns { display: flex; align-items: center; justify-content: center; gap: 4px; height: 18px; margin-top: 2px; }
+  .ascent-pip { width: 15px; height: 5px; border: 1px solid rgba(191,204,217,.4); border-radius: 2px; background: rgba(7,12,18,.8); transform: skewX(-18deg); }
+  .ascent-pip.is-spent { background: var(--ascent-accent); border-color: var(--ascent-accent); box-shadow: 0 0 7px rgba(148,203,235,.25); }
+  .ascent-turns small { margin-left: 4px; color: #b6c3d0; font-size: 10px; }
+  .ascent-utilities { display: flex; gap: 18px; align-items: center; min-height: 49px; border-top: 1px solid rgba(201,185,149,.18); }
+  .ascent-actions, .ascent-farm { display: flex; align-items: center; gap: 20px; }
+  .ascent-tool { display: inline-flex; align-items: center; gap: 7px; padding: 6px 0; background: none; border: 0; color: #c1b394; font-size: 13px; cursor: pointer; transition: color .15s; }
+  .ascent-tool:hover { color: #fff0cd; }
+  .ascent-tool small { border: 1px solid #5b5140; border-radius: 4px; padding: 0 5px; color: #dec58d; }
+  .ascent-tool .fa, .ascent-time .fa, .ascent-challenge .fa { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
+  .ascent-switch { margin-left: auto; color: #9ba8b5; font-size: 12px; }
+  .ascent-switch > div { margin: 0 !important; }
+  .ascent-switch label { display: flex; align-items: center; gap: 7px; margin: 0; cursor: pointer; }
+  .ascent-checkbox { accent-color: #d4b676; cursor: pointer; }
+  .ascent-farm { margin-left: auto; font-size: 12px; color: #97a5b4; white-space: nowrap; }
+  .ascent-farm strong { font-size: 20px; font-weight: 850; margin-right: 4px; }
+  .ascent-xp strong { color: #88cadf; }
+  .ascent-gold strong { color: #e6bd71; }
+  .ascent-time { display: flex; align-items: center; gap: 5px; }
+  .ascent-time strong { font-size: 15px; color: #88bfae; }
+  .ascent-challenge { border: 1px solid var(--ascent-accent); border-radius: 8px; padding: 12px 22px; color: #0b1822; background: var(--ascent-accent); font-size: 17px; font-weight: 850; cursor: pointer; transition: filter .18s, transform .18s; }
+  .ascent-challenge:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .ascent-challenge .loading-text { display: flex; align-items: center; gap: 9px; }
+  &.is-ready #training-ascent-status { color: var(--ascent-accent); }
+  &.is-ready::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1; background: linear-gradient(110deg, transparent 35%, rgba(163,220,247,.12) 49%, transparent 63%); animation: ascent-unlock 1.4s ease-out both; }
+}
+@keyframes ascent-unlock { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
+@media (max-width: 1000px) {
+  .game-page .training-ascent {
+    padding: 16px 18px 0;
+    h2 { font-size: 26px; }
+    #training-ascent-status { font-size: 16px; }
+    .ascent-actions, .ascent-farm { gap: 12px; }
+    .ascent-utilities { flex-wrap: wrap; gap: 8px 16px; padding: 8px 0; }
+  }
+}
+@media (max-width: 640px) {
+  .game-page .training-ascent {
+    padding: 14px 12px 0;
+    .ascent-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+    .ascent-objective { width: 100%; justify-content: space-between; gap: 10px; }
+    .ascent-eyebrow { font-size: 10px; }
+    h2 { font-size: 25px; }
+    #training-ascent-status { font-size: 14px; }
+    .ascent-rules { font-size: 11px; }
+    .ascent-challenge { padding: 10px; font-size: 13px; }
+    .ascent-challenge .loading-text { gap: 4px; }
+    .ascent-emblem { height: 56px; }
+    .ascent-rank .league-logo { height: 32px; }
+    .ascent-rank.is-current .league-logo { height: 52px; }
+    .ascent-rank.is-next .league-logo { height: 44px; }
+    .ascent-rank::before { top: 28px; }
+    .ascent-rank-name { font-size: 9px; }
+    .ascent-rank-caption { font-size: 7px; letter-spacing: 0; }
+    .ascent-pip { width: 6px; height: 4px; }
+    .ascent-turns { gap: 2px; }
+    .ascent-turns small { display: none; }
+    .ascent-tool { font-size: 11px; }
+    .ascent-farm { width: 100%; justify-content: flex-end; }
+    .ascent-farm strong { font-size: 17px; }
+    .ascent-switch { font-size: 10px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-page .training-ascent.is-ready::after { animation: none; display: none; }
+}
+
+.game-page .training-ascent.is-challenge-stage {
+  display: grid;
+  grid-template-rows: auto minmax(180px, 1fr) auto auto;
+  min-height: 540px;
+  height: calc(100svh - 280px);
+  padding: 36px 48px 0;
+  margin-bottom: 0;
+  background: radial-gradient(ellipse at 50% 38%, transparent, rgba(5, 11, 19, .65)), linear-gradient(180deg, rgba(7, 14, 23, .48), rgba(7, 14, 23, .25) 40%, #080f19f5 87%), var(--ascent-scene) center / cover;
+  border-color: #b8c6d055;
+
+  .ascent-heading { display: contents; }
+  .ascent-heading > div:first-child { grid-row: 1; text-align: center; }
+  .ascent-eyebrow { font-size: 12px; letter-spacing: .24em; }
+  h2 { margin-top: 8px; font-size: clamp(38px, 4vw, 64px); text-shadow: 0 4px 24px #0009; }
+  .ascent-track { grid-row: 2; align-self: center; width: 100%; max-width: 1200px; margin: 24px auto; }
+  .ascent-emblem { height: 154px; }
+  .ascent-rank::before { top: 77px; height: 3px; }
+  .ascent-rank .league-logo { height: 82px; opacity: .55; }
+  .ascent-rank.is-current .league-logo { height: 116px; opacity: 1; }
+  .ascent-rank.is-next .league-logo { height: 150px; opacity: 1; filter: drop-shadow(0 0 28px #b5d6ee66) drop-shadow(0 8px 18px #0008); }
+  .ascent-rank-name { margin-top: 10px; font-size: 18px; text-shadow: 0 2px 8px #000; }
+  .ascent-rank-caption { font-size: 11px; margin-top: 6px; }
+  .ascent-turns { margin-top: 6px; gap: 5px; }
+  .ascent-pip { width: 19px; height: 6px; }
+  .ascent-turns small { font-size: 12px; }
+  .ascent-objective { grid-row: 3; flex-direction: column; gap: 18px; text-align: center; padding: 0 0 30px; }
+  #training-ascent-status { font-size: clamp(24px, 2.5vw, 36px); font-weight: 850; }
+  .ascent-rules { margin-top: 6px; font-size: 17px; }
+  .ascent-challenge { min-width: 300px; padding: 18px 32px; font-size: 24px; box-shadow: 0 0 32px #b7d3e329, 0 8px 24px #0006; }
+  .ascent-challenge .loading-text { justify-content: center; gap: 14px; }
+  .ascent-challenge .fa { width: 24px; height: 24px; }
+  .ascent-utilities { grid-row: 4; min-height: 58px; }
+}
+@media (max-width: 1000px) {
+  .game-page .training-ascent.is-challenge-stage {
+    padding: 28px 20px 0;
+    .ascent-emblem { height: 120px; }
+    .ascent-rank::before { top: 60px; }
+    .ascent-rank .league-logo { height: 60px; }
+    .ascent-rank.is-current .league-logo { height: 90px; }
+    .ascent-rank.is-next .league-logo { height: 116px; }
+    .ascent-rank-name { font-size: 13px; }
+  }
+}
+@media (max-width: 640px) {
+  .game-page .training-ascent.is-challenge-stage {
+    height: calc(100svh - 190px);
+    min-height: 500px;
+    padding: 28px 12px 0;
+    grid-template-rows: auto minmax(130px, 1fr) auto auto;
+    h2 { font-size: 36px; }
+    .ascent-eyebrow { font-size: 10px; }
+    .ascent-track { margin: 20px auto; }
+    .ascent-emblem { height: 76px; }
+    .ascent-rank::before { top: 38px; }
+    .ascent-rank .league-logo { height: 38px; }
+    .ascent-rank.is-current .league-logo { height: 54px; }
+    .ascent-rank.is-next .league-logo { height: 74px; }
+    .ascent-rank-name { font-size: 10px; }
+    .ascent-rank-caption { font-size: 8px; }
+    .ascent-pip { width: 7px; height: 5px; }
+    .ascent-turns { gap: 3px; }
+    .ascent-objective { gap: 20px; padding-bottom: 28px; }
+    #training-ascent-status { font-size: 23px; }
+    .ascent-rules { font-size: 14px; }
+    .ascent-challenge { min-width: 0; width: 100%; max-width: 320px; font-size: 21px; padding: 17px 20px; }
+    .ascent-utilities { gap: 6px; }
+  }
+}
+@media (max-width: 640px) {
+  .game-page .training:has(.is-challenge-stage) { margin-bottom: 110px; }
+  .game-page .training-ascent.is-challenge-stage[data-goal="6"] {
+    .ascent-rank .league-logo { height: 32px; }
+    .ascent-rank.is-current .league-logo { height: 48px; }
+    .ascent-rank.is-next .league-logo { height: 64px; }
+    .ascent-rank-name { font-size: 9px; }
+  }
+}

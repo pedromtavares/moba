@@ -1,0 +1,157 @@
+.game-page #hero-bar {
+  padding: 11px 0;
+  background: linear-gradient(180deg, #111b27f5, #0b111afc) !important;
+
+  .hero-hud-row { align-items: center; }
+  .hud-identity .row { margin-top: 0 !important; }
+  .hud-identity .avatar {
+    width: 132px;
+    max-width: 100%;
+    margin: 0;
+    border: 1px solid #bba47b66;
+    border-image: none;
+    border-radius: 7px;
+    box-shadow: 0 5px 16px #0006;
+  }
+  .hero-name { color: #eee7d9; font-size: 22px; font-weight: 800; }
+  .hud-progress .flex-column { gap: 16px; }
+  #current-hero-stats .stats-group { padding: 0; }
+  #current-hero-stats .game-stat { padding: 6px 9px; font-size: 17px; }
+  #current-hero-stats .game-stat i { font-size: 16px; opacity: 1; }
+
+  .hud-experience {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    isolation: isolate;
+    overflow: hidden;
+    height: 52px;
+    padding: 0 16px;
+    border: 1px solid #88bccc55;
+    border-radius: 7px;
+    background: #080e16;
+    box-shadow: inset 0 2px 8px #0006;
+    font-variant-numeric: tabular-nums;
+  }
+  .hud-experience-fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    z-index: -1;
+    max-width: 100%;
+    background: linear-gradient(90deg, #254658, #508399);
+    border-right: 2px solid #b4e2ed;
+    box-shadow: 4px 0 15px #88cadd33;
+    transition: width 450ms ease;
+  }
+  .hud-level { color: #eff7fa; font-size: 17px; font-weight: 700; white-space: nowrap; }
+  .hud-level strong { margin-left: 4px; font-size: 26px; font-weight: 900; }
+  .hud-experience-value { color: #d3e1e7; font-size: 14px; font-weight: 700; text-shadow: 0 1px 3px #000; }
+
+  .hud-build .skills-container { display: flex; gap: 8px; width: 100%; max-width: 392px; margin: 0 auto !important; }
+  .hud-build .skill-container { float: none; flex: 1; min-width: 0; position: relative; }
+  .hud-build .skill-img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    margin: 0;
+    border: 2px solid #67758688;
+    border-image: none;
+    border-radius: 6px;
+    box-shadow: 0 3px 10px #0005;
+  }
+  .hud-upgrade { display: block; position: relative; border-radius: 6px; }
+  .hud-upgrade:focus-visible { outline: 2px solid #ffe1a2; outline-offset: 4px; }
+  .hud-upgrade .can-level { border-color: #f0c575 !important; animation: hud-upgrade-glow 2s ease-in-out infinite; }
+  .hud-upgrade:hover .skill-img { filter: brightness(1.18); }
+  .hud-upgrade-plus {
+    position: absolute;
+    right: -5px;
+    top: -7px;
+    display: grid;
+    place-items: center;
+    width: 27px;
+    height: 27px;
+    border: 1px solid #ffe0a3;
+    border-radius: 6px;
+    background: #e9b85f;
+    color: #241b0d;
+    font-size: 25px;
+    line-height: 1;
+    font-weight: 900;
+    box-shadow: 0 2px 8px #0009;
+  }
+  .hud-build .skill-levels { display: flex; justify-content: center; gap: 4px; margin-top: 7px; }
+  .hud-build .skill-levels i { color: #45505f; font-size: 8px; }
+  .hud-build .skill-levels .text-warning { color: #f1c579 !important; filter: drop-shadow(0 0 3px #efbb5455); }
+  .hud-build .hud-build-actions { margin-top: 8px !important; }
+  .hud-build .hud-build-actions > .col { display: flex; justify-content: center; align-items: center; }
+  .hud-build #cancel-orders-button { min-height: 32px; font-family: 'Nunito', sans-serif; }
+  .hud-build #edit-button { margin: 0; display: inline-flex; align-items: center; padding: 5px 12px !important; border: 1px solid #d6b47c44; border-radius: 5px; background: #d6b47c12; font-size: 13px; }
+  .hud-build #edit-button:hover { background: #d6b47c28; }
+  .hud-skill-points { display: inline-flex; align-items: center; gap: 9px; margin-top: 3px; color: #f6d28d; font-size: 15px; font-weight: 800; }
+  .hud-skill-points strong { padding: 2px 8px; border: 1px solid #e5b85e77; border-radius: 5px; background: #e5b85e22; font-size: 19px; }
+
+  .hud-inventory h3 { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 23px; }
+  .toggle-shop { border-color: #d3a54e88 !important; border-radius: 5px; padding: 6px 9px; font-size: 14px; letter-spacing: .04em; }
+  .toggle-shop.active-shop { background: #f0bf62; color: #241b0d !important; box-shadow: 0 0 15px #e5b85533; }
+  .hud-inventory .inventory { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; width: 100%; max-width: 224px; margin-top: 7px; }
+  .hud-inventory .item-container { float: none !important; width: auto; position: relative; }
+  .hud-inventory .item-img {
+    float: none;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    margin: 0;
+    border: 1px solid #8594a077 !important;
+    border-image: none;
+    border-radius: 4px;
+  }
+  .hud-inventory .item-container.passive img { border: 1px solid #8594a077 !important; }
+  .hud-inventory .empty-item { border: 1px dashed #61708455 !important; background: #080e16; box-shadow: none; }
+  .hud-build .skill-container .form-group,
+  .hud-inventory .item-container .form-group { position: absolute; right: 4px; bottom: 4px; margin: 0; }
+  .hud-build .custom-select, .hud-inventory .custom-select { width: 42px; height: 29px; padding: 2px 7px; border-color: #d6b47c77; background-color: #192331; color: #f1d5a7; }
+
+  @media (min-width: 1200px) {
+    height: 171px;
+    > .container-fluid { padding: 0 24px; height: 100%; }
+    > .container-fluid > form, .hero-hud-row { height: 100%; }
+    .hero-hud-row { display: grid; grid-template-columns: 150px minmax(280px, 1fr) minmax(320px, .85fr) 224px; gap: 28px; margin: 0; }
+    .hero-hud-row > div { width: auto; max-width: none; padding: 0; }
+    .hud-inventory { border-left: 1px solid #baa98a26; padding-left: 20px !important; width: 244px !important; margin-left: -20px; }
+  }
+  @media (min-width: 768px) and (max-width: 1199px) {
+    .hud-identity .avatar { width: 110px; }
+    .hud-build .skills-container { gap: 5px; }
+    #current-hero-stats .game-stat { font-size: 14px; padding: 5px; gap: 5px; }
+    .hud-experience { padding: 0 10px; }
+    .hud-experience-value { font-size: 12px; }
+    #small-shop { bottom: 7px; font-size: 19px; }
+  }
+  @media (max-width: 767px) {
+    padding: 9px 0;
+    .hud-progress { display: none; }
+    .hud-experience-compact { height: 38px; padding: 0 12px; }
+    .hud-level { font-size: 14px; }
+    .hud-level strong { font-size: 22px; }
+    .mobile-nav-buttons { margin-top: 7px; }
+    .mobile-nav-buttons .btn { border-radius: 5px !important; }
+    .hud-build .skills-container { max-width: 340px; }
+    .hud-build { padding-top: 3px; }
+    .hud-skill-points { font-size: 14px; }
+  }
+}
+
+@keyframes hud-upgrade-glow {
+  0%, 100% { box-shadow: 0 0 0 1px #e7bd7444, 0 0 10px #e7bd7422; }
+  50% { box-shadow: 0 0 0 1px #e7bd7499, 0 0 18px #e7bd7466; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page #hero-bar .hud-upgrade .can-level { animation: none; }
+  .game-page #hero-bar .hud-experience-fill { transition: none; }
+}

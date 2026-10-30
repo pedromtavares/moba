@@ -1,7 +1,11 @@
 defmodule MobaWeb.V2.DashboardLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.V2.Components.ProgressionComponents
+
   alias MobaWeb.V2.TutorialComponent
+
+  embed_templates "dashboard_live/*"
 
   @base_hero_count Moba.base_hero_count()
 
@@ -58,7 +62,7 @@ defmodule MobaWeb.V2.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> redirect(to: "/training")}
+       |> redirect(to: preview_path(socket, "/training"))}
     else
       {:noreply, socket}
     end

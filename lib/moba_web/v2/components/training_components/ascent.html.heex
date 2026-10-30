@@ -1,0 +1,119 @@
+<section
+  id="training-ascent"
+  style="--ascent-scene: url(/images/tutorial/arena-of-ascension.jpg)"
+  class={["training-ascent", @challenge_ready && "is-ready", @challenge_stage && "is-challenge-stage"]}
+  data-league={@next}
+  data-goal={@goal}
+  aria-labelledby="training-ascent-title"
+>
+  <div class="ascent-heading">
+    <div>
+      <span class="ascent-eyebrow">Training · League ascent</span>
+      <h2 id="training-ascent-title">Road to <span>{short_league(@goal)}</span></h2>
+    </div>
+    <div id={if @challenge_ready, do: "league-challenge-intro"} class="ascent-objective">
+      <div>
+        <p id="training-ascent-status" role="status">{ascent_status(@current_hero, @next, @goal, @battle_pending)}</p>
+        <p :if={@challenge_ready} class="ascent-rules">
+          Win <strong>{Moba.Game.max_league_step_for(@current_hero.league_tier)} battles</strong> in a row to rank up.
+        </p>
+        <p
+          :if={!@battle_pending && @current_hero.pve_state == "alive" && @current_hero.pve_current_turns > 0}
+          class="ascent-rules"
+        >
+          Battle, meditate or mine to advance.
+        </p>
+      </div>
+      <button
+        :if={@challenge_ready && @show_controls && !@history}
+        id="start-league-challenge"
+        class="ascent-challenge"
+        phx-click="league"
+        phx-hook="Loading"
+        loading="Starting..."
+      >
+        <span class="loading-text">
+          <.icon name="game-trophy" /> Challenge {short_league(@next)} <span aria-hidden="true">→</span>
+        </span>
+      </button>
+    </div>
+  </div>
+  <ol class="ascent-track" aria-label="League progression">
+    <li
+      :for={tier <- 0..@goal}
+      id={if tier == @current_hero.league_tier, do: "current-training-rank"}
+      class={[
+        "ascent-rank",
+        tier < @current_hero.league_tier && "is-complete",
+        tier == @current_hero.league_tier && "is-current",
+        tier == @next && tier > @current_hero.league_tier && "is-next"
+      ]}
+      aria-current={if tier == @current_hero.league_tier, do: "step"}
+    >
+      <div class="ascent-emblem"><.league_badge tier={tier} variant="legacy" /></div>
+      <span class="ascent-rank-name">{short_league(tier)}</span>
+      <span :if={tier == @current_hero.league_tier} class="ascent-rank-caption">Current league</span>
+      <div
+        :if={tier == @next && tier > @current_hero.league_tier}
+        class="ascent-turns"
+        role="img"
+        aria-label={"#{@spent_turns} of 5 turns spent"}
+        title={"#{@current_hero.pve_current_turns} turns available · #{@current_hero.pve_current_turns + @current_hero.pve_total_turns} total turns left"}
+      >
+        <span :for={turn <- 1..5} class={["ascent-pip", turn <= @spent_turns && "is-spent"]}></span>
+        <small>{@spent_turns}/5</small>
+      </div>
+    </li>
+  </ol>
+  <div class="ascent-utilities">
+    <div class="ascent-actions">
+      <.link
+        :if={@history}
+        id="history-return-training"
+        navigate={preview_path(assigns, "/training")}
+        class="ascent-tool"
+      >
+        <.icon name="game-back" /> Return to Training
+      </.link>
+      <.link :if={!@history} id="training-battle-log" navigate={preview_path(assigns, "/battles")} class="ascent-tool">
+        <.icon name="game-battle-log" /> Battle Log
+      </.link>
+      <button
+        :if={@show_controls && @current_hero.pve_current_turns > 0 && @current_hero.refresh_targets_count > 0}
+        id="training-refresh-targets"
+        class="ascent-tool"
+        phx-click="refresh-targets"
+        title={"#{@current_hero.refresh_targets_count} refreshes remaining"}
+      >
+        <.icon name="game-refresh" /> Refresh Targets <small>{@current_hero.refresh_targets_count}</small>
+      </button>
+    </div>
+    <div
+      :if={@show_controls && expert_hero?(@current_hero) && @current_hero.pve_current_turns > 0}
+      class="ascent-switch"
+    >
+      <.input
+        type="checkbox"
+        name="show-farm-tabs"
+        value={@current_player.preferences.show_farm_tabs}
+        role="switch"
+        class="ascent-checkbox"
+        id="show-farm-tabs"
+        phx-click="show-farm-tabs"
+        checked={@current_player.preferences.show_farm_tabs}
+        label="Show farm tabs"
+      />
+    </div>
+    <div class="ascent-farm">
+      <span :if={expert_hero?(@current_hero)} class="ascent-time" title="Time since creation">
+        <.icon name="game-clock" /><strong>{GH.minutes_label(elapsed_time(@current_hero), @preview)}</strong> min
+      </span>
+      <span class="ascent-xp" title={@current_hero.total_xp_farm}>
+        <strong>{GH.farming_amount_label(@current_hero.total_xp_farm)}</strong> XP farm
+      </span>
+      <span class="ascent-gold" title={@current_hero.total_gold_farm}>
+        <strong>{GH.farming_amount_label(@current_hero.total_gold_farm)}</strong> Gold farm
+      </span>
+    </div>
+  </div>
+</section>

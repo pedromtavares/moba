@@ -48,3 +48,6 @@ npm-debug.log
 .DS_Store
 
 moba.code-workspace
+
+# Local planning documents.
+/plans/

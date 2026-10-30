@@ -1,0 +1,177 @@
+.game-page .user-profile {
+  #profile-cinematic {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 360px);
+    align-items: center;
+    gap: 0 24px;
+    flex-shrink: 0;
+    overflow: hidden;
+    margin: 12px 0 18px;
+    padding: 24px 30px 0;
+    border: 1px solid #c7b17b55;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #0a1321 8%, #0a1321ed 36%, #0a13214d 75%, #0a132180), var(--profile-scene) right 35% / auto 220% no-repeat #0c1421;
+    box-shadow: inset 0 1px #f4dbab26, 0 12px 40px #0003;
+  }
+  .profile-cinematic-identity { display: flex; align-items: center; gap: 22px; min-width: 0; margin-bottom: 20px; }
+  .profile-crest { flex-shrink: 0; width: 86px; height: 86px; object-fit: contain; }
+  .profile-eyebrow { margin: 0 0 6px; color: #e0c68d; font-size: 10px; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; }
+  .profile-cinematic h1 { display: flex; align-items: center; gap: 12px; margin: 0; color: #f5edda; font: 900 clamp(34px, 3.5vw, 52px)/1.1 'Nunito', sans-serif; letter-spacing: -.035em; text-shadow: 0 3px 24px #0009; overflow-wrap: anywhere; }
+  .profile-rank-title { margin: 8px 0 0; color: #d2c09b; font-size: 13px; line-height: 1.4; }
+  .profile-rank-title > span { margin: 0 6px; color: #8291a5; }
+  .profile-featured { min-width: 0; margin-bottom: 20px; padding: 12px; border: 1px solid #d2b57b55; border-radius: 8px; background: linear-gradient(120deg, #0a1421e6, #0a1421b3); box-shadow: 0 6px 24px #0004; }
+  .profile-featured-heading { display: flex; align-items: center; gap: 10px; min-width: 0; color: #eee1c7; }
+  .profile-featured-heading > .league-logo { flex-shrink: 0; width: 32px; height: 36px; object-fit: contain; }
+  .profile-featured-heading > div { flex: 1; min-width: 0; }
+  .profile-featured-heading strong { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 18px; font-weight: 900; line-height: 1.2; }
+  .profile-featured-heading div > span { display: block; margin-top: 4px; color: #b6c2d2; font-size: 11px; }
+  .profile-featured-heading:hover { color: #ffe3ad; }
+  .profile-featured-rank { color: #dfc18b; font-size: 14px; font-weight: 800; }
+  .profile-featured-loadout { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: stretch; gap: 10px; margin-top: 12px; }
+  .profile-featured-loadout:not(:has(.items-container)) { grid-template-columns: minmax(0, 1fr); }
+  .profile-featured-loadout .skills-container { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; width: 100%; max-width: 240px; margin: 0; }
+  .profile-featured-loadout .items-container { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 3px; width: 100%; margin: 0; padding-left: 10px; border-left: 1px solid #baa98a40; }
+  .profile-featured-loadout .item-container { width: 100%; }
+  .profile-featured-loadout :is(.skill-img, .item-img) { display: block; width: 100%; height: 100%; min-width: 0; margin: 0; object-fit: cover; border: 1px solid #9faec344; border-radius: 3px; }
+  .profile-featured-loadout .skill-img { aspect-ratio: 1; }
+  #profile-cinematic .profile-metrics { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(5, minmax(0, 1fr)); margin: 0; padding: 16px 0 !important; border-top: 1px solid #ccb07c44; border-bottom: 0; }
+  #profile-cinematic .profile-metrics > .col { min-width: 0; padding: 0 12px; }
+  #profile-cinematic .profile-metrics strong { color: #ead2a1; font-size: 25px; font-weight: 900; }
+  #profile-cinematic .profile-metrics i { color: #bda779 !important; font-size: 13px; }
+  #profile-cinematic .profile-metric-label { margin-top: 4px; color: #b8c1ce; font-size: 11px; }
+  #profile-cinematic .profile-age-unit { color: #c7c6c5; font-size: 12px; }
+  .profile-board { margin-left: 0; margin-right: 0; gap: 20px; }
+  .profile-board > [class*="col-"] { padding: 0; min-width: 0; }
+  .profile-board .collection-container, .profile-board #user-profile, .profile-board #user-ranking { border: 1px solid #bda77b33; border-radius: 12px; background: linear-gradient(145deg, #192432c7, #0a111cef 70%) !important; box-shadow: inset 0 1px #e2d1ab0d; overflow: hidden; }
+  .profile-board #user-ranking { overflow: auto; overscroll-behavior: contain; }
+  .profile-board .collection-container { padding-top: 12px; }
+  .profile-board .collection { padding: 10px 12px 0; border: 0; }
+  #user-profile > .row:has(.profile-history-tabs) { flex-shrink: 0; }
+  .profile-history-switcher { width: 100%; padding: 12px !important; }
+  .profile-history-tabs { display: flex; width: 100%; gap: 5px; padding: 4px; border: 1px solid #c7b17b33; border-radius: 7px; background: #08111b80; }
+  .profile-history-tabs .btn { flex: 1; min-height: 34px; padding: 7px 16px; border: 1px solid transparent; border-radius: 4px !important; font-size: 13px; font-weight: 800; }
+  .profile-history-tabs .no-action { border-color: #c7b17b55; background: #c7b17b1a; }
+  #user-profile > .card-footer { padding: 10px !important; border-top: 1px solid #baa98a30; background: linear-gradient(110deg, #17212b99, #0a111c); }
+  .profile-actions { display: grid; grid-template-columns: 1fr 1.3fr auto; gap: 6px; padding: 0; font-size: 11px; }
+  .profile-actions a { display: flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 6px 8px; border: 1px solid #c7b17b26; border-radius: 6px; background: linear-gradient(140deg, #c7b17b0d, #c7b17b03); color: #ddd2be !important; font-weight: 700; white-space: nowrap; transition: border-color .18s, background .18s, color .18s; }
+  .profile-actions a > i { margin: 0 !important; color: #cbb98f; font-size: 14px; }
+  .profile-actions a:hover { border-color: #d9bb7e77; background: #c7b17b14; color: #fff0d3 !important; }
+  .profile-actions a:focus-visible { outline: 2px solid #dfc18b; outline-offset: 2px; }
+  .profile-actions .profile-action-discord { border-color: #9394dd44; background: linear-gradient(120deg, #7378d51a, #7378d508); color: #c7c9ed !important; }
+  .profile-action-discord > i { color: #a5a9ed !important; }
+  .profile-actions .profile-action-discord:hover { border-color: #a5a9ed88; background: #7378d524; color: #e4e5ff !important; }
+  .profile-actions .profile-action-logout { padding-left: 10px; padding-right: 10px; border-color: transparent; background: transparent; color: #8f9aab !important; font-weight: 600; }
+  .profile-actions .profile-action-logout > i { color: inherit; }
+  .profile-actions .profile-action-logout:hover { border-color: #ce879a33; background: #ce879a0d; color: #e2a6b3 !important; }
+  .profile-ranking-header { position: sticky; top: 0; z-index: 3; display: flex; flex-direction: row-reverse; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-bottom: 1px solid #c7b17b33; background: linear-gradient(110deg, #202a35, #111b27); box-shadow: 0 4px 16px #0002; }
+  .profile-ranking-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .profile-ranking-title > .fa { color: #d9b878; font-size: 20px; }
+  .profile-ranking-title strong { display: block; color: #f0e4ce; font-size: 16px; font-weight: 900; line-height: 1.2; }
+  .profile-ranking-title span { display: block; margin-top: 3px; color: #a8b5c5; font-size: 10px; }
+  .profile-ranking-switch { display: flex; flex-shrink: 0; gap: 3px; padding: 3px; border: 1px solid #c7b17b33; border-radius: 6px; background: #08111b99; }
+  .profile-ranking-switch button { padding: 7px 11px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #acb8c8; font: 800 11px 'Nunito', sans-serif; cursor: pointer; transition: color .15s, background .15s; }
+  .profile-ranking-switch button:hover { color: #f4dfb4; background: #c7b17b0d; }
+  .profile-ranking-switch button[aria-pressed="true"] { border-color: #d1b57c55; background: #c7b17b24; color: #f4dfb4; cursor: default; }
+  .profile-ranking-switch button:focus-visible { outline: 2px solid #dfc18b; outline-offset: 2px; }
+  .profile-rank-column { width: 110px; }
+  .profile-score-column { width: 105px; }
+  #profile-ranking-table :is(td, th):last-child { text-align: center; }
+  #profile-ranking-table tr[data-bracket] { --bracket-color: #929eaf; }
+  #profile-ranking-table tr[data-bracket="Shadows"] { --bracket-color: #c4acee; background: linear-gradient(90deg, #9470cc18, #9470cc03); }
+  #profile-ranking-table tr[data-bracket="Immortals"] { --bracket-color: #efd096; background: linear-gradient(90deg, #d6ad5f20, #d6ad5f04); }
+  #profile-ranking-table tr[data-bracket]:not([data-bracket="Plebs"]) h1 { color: var(--bracket-color); }
+  #profile-ranking-table tr[data-bracket="Shadows"] .pvp-rank { filter: drop-shadow(0 0 5px #a080dc66); }
+  #profile-ranking-table tr[data-bracket="Immortals"] .pvp-rank { filter: drop-shadow(0 0 6px #e6bc7066); }
+  #profile-ranking-table .profile-ranking-bracket { display: block; margin-top: 3px; color: var(--bracket-color); font-size: 9px; font-weight: 800; line-height: 1.3; letter-spacing: .1em; text-transform: uppercase; }
+}
+@media (min-width: 1200px) {
+  .game-page .user-profile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, .918fr) minmax(0, 1.082fr);
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 18px 20px;
+    height: calc(100dvh - var(--game-topbar-height, 0px) - 24px);
+    padding-top: 12px;
+    #profile-cinematic { grid-column: 1 / -1; grid-row: 1; grid-template-columns: subgrid; column-gap: 20px; margin: 0; padding: 24px 0 0; }
+    .profile-cinematic-identity { grid-column: 1 / 3; grid-row: 1; margin-left: 30px; margin-right: 20px; }
+    #profile-cinematic .profile-metrics { grid-column: 1 / 3; grid-row: 2; margin-left: 30px; }
+    .profile-featured { grid-column: 3; grid-row: 1 / 3; align-self: end; margin: 0 14px 12px; padding: 8px; }
+    .profile-featured-loadout { margin-top: 8px; }
+    .profile-featured-loadout .skills-container { max-width: none; }
+    > .profile-board { display: contents; }
+    > .profile-board > [class*="col-"] { width: auto; max-width: none; height: 100%; min-height: 0; }
+    .profile-record-column { grid-column: 1; grid-row: 2; }
+    .profile-ranking-column { grid-column: 2; grid-row: 2; }
+    .profile-collection-column { grid-column: 3; grid-row: 2; }
+    #profile-collection { padding: 18px 14px; }
+    #profile-collection .collection { padding: 0; height: 100%; }
+    #profile-collection .card-body { padding: 0 !important; }
+    .collection .row { height: 100%; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: repeat(6, minmax(0, 1fr)); gap: 12px; }
+    .collection .row > .col-3 { padding: 0 0 16px; }
+    .collection .row > .col-3 > a { display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; min-height: 0; }
+    .collection .avatar { max-height: 100%; width: 100%; height: 100%; object-fit: cover; border-radius: 5px; }
+    .collection .avatar-container { width: 100%; height: auto; aspect-ratio: 1.25; max-height: 100%; }
+    .collection .league-logo { width: 28px; height: 32px; }
+    #user-profile > .row:has(.profile-history-tabs) { flex: 0 0 auto; }
+    #user-profile > .profile-history { flex: 1; min-height: 0; max-height: none; overflow: auto; }
+  }
+}
+@media (min-width: 1200px) and (max-width: 1400px) {
+  .game-page .user-profile {
+    .ranking-table th:first-child, .ranking-table td:first-child { width: 90px; }
+    .ranking-table th:last-child, .ranking-table td:last-child { width: 85px; }
+    .profile-rank-column { width: 90px; }
+    .profile-score-column { width: 85px; }
+    .ranking-table :is(th, td) { padding-left: 10px; padding-right: 10px; }
+    .profile-ranking-header { padding: 12px 10px; gap: 8px; }
+    .profile-ranking-title { gap: 7px; }
+    .profile-ranking-title strong { font-size: 14px; }
+    .profile-ranking-switch button { padding: 7px 9px; }
+  }
+}
+@media (min-width: 1200px) and (max-height: 850px) {
+  .game-page .user-profile {
+    #profile-cinematic { padding-top: 16px; }
+    .profile-cinematic-identity { gap: 16px; margin-bottom: 14px; }
+    .profile-crest { width: 64px; height: 64px; }
+    .profile-cinematic h1 { font-size: 38px; }
+    .profile-rank-title { margin-top: 5px; font-size: 12px; }
+    #profile-cinematic .profile-metrics { padding: 10px 0 !important; }
+    #profile-cinematic .profile-metrics strong { font-size: 22px; }
+  }
+}
+@media (max-width: 1199px) {
+  .game-page .user-profile {
+    .profile-board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .profile-board > [class*="col-"] { width: auto; max-width: none; }
+    .profile-collection-column { grid-column: 1 / -1; grid-row: 2; }
+    .profile-record-column { grid-column: 1; grid-row: 1; }
+    .profile-ranking-column { grid-column: 2; grid-row: 1; }
+    .profile-board #user-ranking { max-height: 65vh; }
+    .profile-history { max-height: 50vh; }
+  }
+}
+@media (max-width: 767px) {
+  .game-page .user-profile {
+    #profile-cinematic { grid-template-columns: minmax(0, 1fr); padding: 22px 18px 0; background-position: center, 65% 20%; }
+    .profile-featured { margin-bottom: 18px; }
+    .profile-cinematic-identity { gap: 14px; margin-bottom: 20px; }
+    .profile-crest { width: 58px; height: 68px; }
+    .profile-cinematic-identity > div { min-width: 0; }
+    .profile-cinematic h1 { font-size: 32px; }
+    .profile-cinematic .discord-avatar { width: 26px; }
+    .profile-rank-title { font-size: 11px; }
+    #profile-cinematic .profile-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 0; }
+    #profile-cinematic .profile-metrics > .col { padding: 0 5px; }
+    #profile-cinematic .profile-metrics > .col:nth-child(4) { border-left: 0; }
+    #profile-cinematic .profile-metrics strong { font-size: 21px; }
+    #profile-cinematic .profile-metric-label { font-size: 10px; }
+    .profile-board { grid-template-columns: minmax(0, 1fr); }
+    .profile-collection-column { grid-column: 1; grid-row: 1; }
+    .profile-record-column { grid-column: 1; grid-row: 2; }
+    .profile-ranking-column { grid-column: 1; grid-row: 3; }
+    .profile-board .collection .card-body { padding-top: 0; }
+    .profile-board #user-profile { padding-bottom: 0; }
+    .profile-board .collection .row > .col-3 { padding-left: 6px; padding-right: 6px; }
+  }
+}
