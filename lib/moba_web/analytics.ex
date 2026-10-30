@@ -14,7 +14,7 @@ defmodule MobaWeb.Analytics do
   def measurement_id(_), do: nil
 
   defp excluded_path?(path) do
-    Enum.any?(["/admin", "/dev", "/users", "/auth"], fn prefix ->
+    Enum.any?(["/admin", "/dev", "/users", "/auth", "/return"], fn prefix ->
       path == prefix || String.starts_with?(path, prefix <> "/")
     end)
   end

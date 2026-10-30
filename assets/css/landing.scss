@@ -170,3 +170,32 @@
 @media (prefers-reduced-motion: reduce) {
   .landing-entrance { transition: none; }
 }
+
+.return-page .landing::after {
+  background: linear-gradient(180deg, #050a1114 20%, #050a1159 46%, #050a11 78%);
+}
+.return-page .return-content {
+  justify-content: flex-end;
+  padding: 38vh 24px 7vh;
+}
+.return-welcome {
+  width: 100%;
+  max-width: 560px;
+  text-align: center;
+  font-family: "Nunito", Arial, sans-serif;
+  text-shadow: 0 2px 16px #000;
+}
+.return-eyebrow { margin: 0 0 14px; color: #d9b774; font-size: 13px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; }
+.return-welcome h1 { margin: 0 0 12px; color: #f4ead6; font-size: clamp(30px, 3.5vw, 48px); font-weight: 800; overflow-wrap: anywhere; }
+.return-welcome #return-description { margin: 0 0 28px; color: #c3cbd5; font-size: 18px; line-height: 1.6; }
+.return-welcome form { margin: 0; }
+.return-welcome .landing-entrance { margin: 0 auto; font-family: "landing-rpg", Georgia, serif; cursor: pointer; }
+.return-welcome .landing-entrance:disabled { opacity: .55; cursor: wait; }
+.return-welcome [hidden] { display: none; }
+.return-status { margin: 16px 0 0; color: #aab6c5; font-size: 14px; line-height: 1.5; }
+.return-status a { color: #d9b774; }
+@media (max-width: 767px), (max-width: 1024px) and (orientation: portrait) {
+  .return-page .return-content { padding: 40vh 20px calc(36px + env(safe-area-inset-bottom)); }
+  .return-page .landing::after { background: linear-gradient(180deg, #050a1126 20%, #050a1173 45%, #050a11 78%); }
+  .return-welcome #return-description { font-size: 16px; }
+}

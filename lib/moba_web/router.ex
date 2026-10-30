@@ -163,6 +163,11 @@ defmodule MobaWeb.Router do
 
     delete "/users/log_out", UserSessionController, :delete
 
+    # Invitations must be openable while signed out; only POST redeems the token.
+    get "/return", ReturnController, :show
+    post "/return/check", ReturnController, :check
+    post "/return", ReturnController, :enter
+
     live_session :current_user,
       session: %{"preview" => true},
       root_layout: {MobaWeb.LayoutView, :root},

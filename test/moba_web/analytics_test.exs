@@ -23,7 +23,15 @@ defmodule MobaWeb.AnalyticsTest do
     assert MobaWeb.Analytics.measurement_id(page) == "G-TEST123456"
     assert render_component(&CoreComponents.analytics/1, conn: page) =~ "G-TEST123456"
 
-    for path <- ["/admin", "/admin/settings", "/dev/mailbox", "/users/log_in", "/auth/discord"] do
+    for path <- [
+          "/admin",
+          "/admin/settings",
+          "/dev/mailbox",
+          "/users/log_in",
+          "/auth/discord",
+          "/return",
+          "/return/check"
+        ] do
       assert MobaWeb.Analytics.measurement_id(%{page | request_path: path}) == nil
     end
 
@@ -45,5 +53,6 @@ defmodule MobaWeb.AnalyticsTest do
     player_conn = conn |> log_in_user(user) |> put_session(:player_id, hero.player_id)
     assert get(player_conn, "/base") |> html_response(200) =~ ~s(name="google-analytics-id" content="G-TEST123456")
     refute get(player_conn, "/admin/settings") |> html_response(200) =~ ~s(name="google-analytics-id")
+    refute get(conn, "/return") |> html_response(200) =~ ~s(name="google-analytics-id")
   end
 end

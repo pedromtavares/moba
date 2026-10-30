@@ -63,7 +63,7 @@ defmodule MobaWeb.Endpoint do
     pass: ["*/*"],
     json_decoder: Phoenix.json_library()
 
-  plug Sentry.PlugContext
+  plug Sentry.PlugContext, body_scrubber: {MobaWeb.SentryScrubber, :body}
 
   plug Plug.MethodOverride
   plug Plug.Head

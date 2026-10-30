@@ -14,9 +14,11 @@ import mobileCheck from "./mobile_check";
 import Hooks from "./hooks";
 import {initGameConfirmations, isGameTooltip, tooltipContent} from "./game_feedback";
 import {initAnalytics} from "./analytics";
+import {initReturnInvitation} from "./return_invitation";
 
 initGameConfirmations();
 initAnalytics();
+initReturnInvitation();
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

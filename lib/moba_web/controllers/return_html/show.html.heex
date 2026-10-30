@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  {MobaWeb.LayoutView.render("_head.html", conn: @conn, current_hero: nil, page_title: @page_title)}
+  <body class="landing-page return-page">
+    <main id="return-page" class="landing" aria-labelledby="return-heading">
+      <picture class="landing-artwork" aria-hidden="true">
+        <source
+          media="(max-width: 767px), (max-width: 1024px) and (orientation: portrait)"
+          srcset={~p"/images/landing/home-heroes-mobile-v1.webp"}
+        />
+        <img src={~p"/images/landing/home-heroes-v5.png"} width="1672" height="941" alt="" fetchpriority="high" />
+      </picture>
+      <div class="landing-content return-content">
+        <section id="return-welcome" class="return-welcome" aria-live="polite">
+          <p class="return-eyebrow">Browser MOBA Reborn</p>
+          <h1 id="return-heading">
+            {if @invalid_invitation, do: "Your invitation has expired.", else: "Welcome back."}
+          </h1>
+          <p id="return-description">
+            {if @invalid_invitation,
+              do: "Sign in to return to your heroes.",
+              else: "Your next winning build starts here."}
+          </p>
+          <.form
+            for={@form}
+            id="return-invitation-form"
+            action={~p"/return"}
+            data-invalid={to_string(@invalid_invitation)}
+            data-check-url={~p"/return/check"}
+            hidden={@invalid_invitation}
+          >
+            <input id="return-token" type="hidden" name="token" value="" autocomplete="off" />
+            <button id="return-enter" type="submit" class="landing-entrance" disabled>Enter Game</button>
+          </.form>
+          <a id="return-login" href={~p"/users/log_in"} class="landing-entrance" hidden={!@invalid_invitation}>
+            Sign in
+          </a>
+          <p id="return-status" class="return-status" hidden={@invalid_invitation}>Preparing your invitation…</p>
+          <noscript>
+            <p class="return-status">
+              Enable JavaScript to use your invitation, or <a href={~p"/users/log_in"}>sign in</a>.
+            </p>
+          </noscript>
+        </section>
+      </div>
+    </main>
+    {csrf_meta_tag()}
+    <script defer src={~p"/js/app.js"}>
+    </script>
+  </body>
+</html>
