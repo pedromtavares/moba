@@ -167,7 +167,7 @@
   .community-guest-card { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #bda77b2e; border-radius: 6px; background: linear-gradient(135deg, #172332b0, #09111bd9); }
   .community-guest-card[data-current=true] { border-color: #cdb68188; }
   .community-guest-card > header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 4px; padding: 7px 6px; }
-  .community-guest-card > header > strong { color: #ded8cc; font-size: 10px; font-weight: 800; }
+  .community-guest-card > header > strong { flex-shrink: 0; white-space: nowrap; color: #ded8cc; font-size: 10px; font-weight: 800; }
   .community-guest-card > header small { margin-left: 4px; color: #7f8ea1; font-size: 8px; font-weight: 600; }
   .community-guest-level { display: inline-flex; align-items: center; gap: 3px; color: #e2c78e; font-size: 10px; font-weight: 800; }
   .community-guest-level img { width: 16px; height: 16px; object-fit: contain; }

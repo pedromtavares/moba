@@ -45,6 +45,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
            )
 
     assert has_element?(view, "#picks-card.match-picker")
+    refute has_element?(view, "#match-return-to-arena")
     refute has_element?(view, ".stats-footer")
     render_click(view, "hero-tab", %{"type" => "trained"})
     render_click(view, "pick-hero", %{"id" => first_hero.id})
@@ -147,6 +148,14 @@ defmodule MobaWeb.V2.MatchLiveTest do
              view,
              ~s|#battle-summary-#{battle.id} .match-summary-hero:last-child img[src="#{opponent_avatar}"]|
            )
+
+    assert has_element?(view, ".match-center #match-battles + #match-return-to-arena[href='/arena']", "Return to arena")
+
+    view |> element("#match-details-toggle") |> render_click()
+    assert has_element?(view, ".match-center #match-return-to-arena[href='/arena']")
+
+    view |> element("#match-return-to-arena") |> render_click()
+    assert_redirect(view, "/arena")
   end
 
   test "match page completes retired arena lessons automatically", %{conn: conn} do

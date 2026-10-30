@@ -161,6 +161,14 @@ revealed = Enum.take(@battles, @tick) %>
             <% end %>
           <% end %>
         </div>
+        <.link
+          :if={complete?}
+          id="match-return-to-arena"
+          navigate={preview_path(assigns, ~p"/arena")}
+          class="btn base-secondary match-return-to-arena"
+        >
+          Return to arena <span aria-hidden="true">→</span>
+        </.link>
       <% end %>
     </section>
     <section class="squad-panel match-lineup match-enemy" aria-labelledby="match-opponent-lineup">
