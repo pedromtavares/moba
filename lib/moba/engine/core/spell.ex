@@ -16,7 +16,7 @@ defmodule Moba.Engine.Core.Spell do
   alias Moba.{Game, Engine}
   alias Game.Schema.{Skill, Item}
   alias Engine.Core
-  alias Core.{Effect, Helper, Processor}
+  alias Core.{BuffPause, Effect, Helper, Processor}
 
   def apply(turn, options \\ %{}) do
     effects_for(turn, options)
@@ -27,6 +27,24 @@ defmodule Moba.Engine.Core.Spell do
   end
 
   # ACTIVES
+
+  defp effects_for(%{resource: %Skill{code: "chakra_magic"}} = turn, _options) do
+    turn |> Effect.dispel_debuffs(turn.resource.level) |> Effect.mp_regen_by_base_amount() |> Effect.reduce_cooldowns()
+  end
+
+  defp effects_for(%{resource: %Skill{code: "purifying_flames", buff: true}} = turn, _options) do
+    Effect.hp_regen_by_base_amount(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "purifying_flames"}} = turn, _options) do
+    turn |> Effect.base_damage() |> Effect.grant_opponent_buff()
+  end
+
+  defp effects_for(%{resource: %Skill{code: "fortunes_end", attacker_debuff: true}} = turn, _options), do: turn
+
+  defp effects_for(%{resource: %Skill{code: "fortunes_end"}} = turn, _options) do
+    turn |> Effect.pause_opponent_buffs() |> Effect.base_damage()
+  end
 
   defp effects_for(%{resource: %Skill{code: "blade_fury"}, attacker: %{double_skill: nil}} = turn, _options) do
     turn
@@ -219,6 +237,47 @@ defmodule Moba.Engine.Core.Spell do
 
   # ULTIMATES
 
+  defp effects_for(%{resource: %Skill{code: "sunder", final: true}} = turn, _options) do
+    Effect.steal_hp(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "sunder"}} = turn, _options) do
+    Effect.add_to_final(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "mana_void", final: true}} = turn, _options) do
+    Effect.restore_and_drain_mp(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "mana_void"}} = turn, _options) do
+    turn |> Effect.base_damage() |> Effect.add_to_final()
+  end
+
+  defp effects_for(%{resource: %Skill{code: "pulse_nova", final: true}} = turn, _options) do
+    Effect.pulse_nova_damage(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "pulse_nova"}, attacker: %{pulse_nova: nil}} = turn, _options) do
+    turn = Effect.start_pulse_nova(turn)
+    if BuffPause.paused?(turn.attacker), do: turn, else: Effect.add_to_final(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "pulse_nova"}} = turn, _options) do
+    turn
+  end
+
+  defp effects_for(%{resource: %Skill{code: "rupture", final: true}} = turn, _options) do
+    Effect.reflect_damage(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "rupture", attacker_debuff: true}} = turn, _options) do
+    Effect.add_to_final(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "rupture"}} = turn, _options) do
+    turn |> Effect.base_damage() |> Effect.add_attacker_debuff()
+  end
+
   defp effects_for(%{resource: %Skill{code: "assassinate"}, attacker: %{double_skill: nil}} = turn, _options) do
     turn
     |> Effect.add_double_skill()
@@ -377,7 +436,8 @@ defmodule Moba.Engine.Core.Spell do
     mp_needed = last_skill && last_skill.mp_cost + resource.mp_cost
 
     if last_skill && last_skill.code != "rearm" && turn.attacker.current_mp >= mp_needed do
-      turn = Processor.cast_skill(turn, last_skill)
+      # Consume this history before copying: Spell Steal can lead back to Rearm.
+      turn = %{turn | attacker: %{turn.attacker | last_skill: nil}} |> Processor.cast_skill(last_skill)
 
       %{turn | resource: resource, skill: resource}
       |> Effect.attacker_bonus(last_skill.name)
@@ -499,7 +559,7 @@ defmodule Moba.Engine.Core.Spell do
   # ULTIMATES
 
   defp effects_for(%{resource: %Skill{code: "battle_trance", final: true}} = turn, _options) do
-    result = turn.defender.current_hp - Helper.calculate_final_defender_damage(turn.attacker, turn.defender)
+    result = Helper.calculate_final_hp(turn.defender)
 
     if result / turn.defender.total_hp * 100 <= turn.resource.base_amount do
       turn
@@ -602,6 +662,30 @@ defmodule Moba.Engine.Core.Spell do
 
   # EPIC
 
+  defp effects_for(%{resource: %Item{code: "bloodstone", final: true}} = turn, _options) do
+    Effect.steal_healing(turn)
+  end
+
+  defp effects_for(%{resource: %Item{code: "bloodstone", attacker_debuff: true}} = turn, _options) do
+    Effect.add_to_final(turn, :healing_steal)
+  end
+
+  defp effects_for(%{resource: %Item{code: "bloodstone"}} = turn, %{active: true}) do
+    Effect.add_attacker_debuff(turn)
+  end
+
+  defp effects_for(%{resource: %Item{code: "octarine_core"}} = turn, _options) do
+    Effect.reduce_cooldowns(turn)
+  end
+
+  defp effects_for(%{resource: %Item{code: "soul_booster"}} = turn, %{active: true}) do
+    Effect.mp_regen_by_base_amount(turn)
+  end
+
+  defp effects_for(%{resource: %Item{code: "soul_booster"}} = turn, %{is_attacking: true}) do
+    Effect.mp_regen_by_extra_amount(turn)
+  end
+
   defp effects_for(%{resource: %Item{code: "assault_cuirass"}} = turn, %{is_attacking: true}) do
     turn
     |> Effect.pierce_turn_armor()
@@ -648,9 +732,12 @@ defmodule Moba.Engine.Core.Spell do
     |> Effect.add_attacker_debuff()
   end
 
+  defp effects_for(%{resource: %Item{code: "silver_edge", final: true}} = turn, _options) do
+    Effect.cut_hp_regen(turn)
+  end
+
   defp effects_for(%{resource: %Item{code: "silver_edge", attacker_debuff: true}} = turn, _options) do
-    turn
-    |> Effect.cut_hp_regen()
+    Effect.add_to_final(turn, :healing_reduction)
   end
 
   defp effects_for(%{resource: %Item{code: "daedalus"}} = turn, %{is_attacking: true}) do

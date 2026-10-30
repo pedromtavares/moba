@@ -1,0 +1,74 @@
+<section
+  class="battle-outcome"
+  id="battle-outcome"
+  data-level-up={to_string(@snapshot.leveled_up)}
+  data-result={
+    cond do
+      is_nil(@battle.winner_id) -> "draw"
+      @battle.winner_id == @battle.attacker_id -> "victory"
+      true -> "defeat"
+    end
+  }
+>
+  <div class="battle-outcome-heading">
+    <div>
+      <h3>{battle_result(@battle)}</h3>
+    </div>
+    <div class="battle-earned"><.pve_reward_badges battle={@battle} /></div>
+  </div>
+  <% snapshot_level = @snapshot.level || @battle.attacker.level || 1 %>
+  <div class="battle-experience" id="battle-experience">
+    <span>Level {if @snapshot.leveled_up, do: snapshot_level - 1, else: snapshot_level}</span>
+    <div class="progress" aria-label="Experience gained">
+      <div
+        style={"width:#{max(0, min(100, hero_xp_percentage(@battle)))}%"}
+        class="progress-bar battle-experience-before"
+      >
+      </div>
+      <div
+        :if={@battle.rewards.total_xp > 0}
+        style={"width:#{max(0, min(100, battle_xp_percentage(@battle)))}%"}
+        class="progress-bar battle-experience-earned"
+      >
+      </div>
+    </div>
+    <strong>Level {if @snapshot.leveled_up, do: snapshot_level, else: snapshot_level + 1}</strong>
+  </div>
+  <div class="battle-result-footer">
+    <div
+      :if={@snapshot.leveled_up}
+      id="battle-level-up"
+      class="battle-level-up"
+      role="status"
+      aria-label={"Level up! You reached level #{snapshot_level}"}
+    >
+      <strong class="battle-level-number">{snapshot_level}</strong>
+      <span>Level up!</span>
+    </div>
+    <div class="battle-result-actions">
+      <%= if @current_player do %>
+        <.battle_nav_action
+          navigate={preview_path(assigns, "/battles")}
+          class="btn base-secondary"
+          id="load-battles"
+          icon="fa fa-list-ul"
+          label="Battle Log"
+        />
+        <.battle_nav_action
+          navigate={preview_path(assigns, "/training")}
+          class="btn battle-primary"
+          id="load-training"
+          icon="fa fa-arrow-right"
+          label="Continue training"
+        />
+      <% else %>
+        <.battle_guest_create_action
+          preview={true}
+          class="btn battle-primary"
+          icon="fa fa-user-plus"
+          label="Create your Hero"
+        />
+      <% end %>
+    </div>
+  </div>
+</section>

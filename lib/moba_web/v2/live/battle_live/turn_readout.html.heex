@@ -1,0 +1,54 @@
+<div class="combat-unit">
+  <div class="combat-unit-heading">
+    <img src={GH.image_url(@hero)} alt="" />
+    <strong>{@hero.name}</strong>
+    <div class="combat-unit-modifiers">
+      <%= if @is_attacker do %>
+        <span
+          :if={@hero.power != 0}
+          data-toggle="tooltip"
+          title={power_description(@hero)}
+          class="text-pink tooltip-mobile"
+        >
+          <i class="fa fa-galaxy" aria-hidden="true"></i>{round(@hero.power)}
+        </span>
+        <span
+          :if={@hero.atk != @hero.base_atk}
+          data-toggle="tooltip"
+          title={atk_description(@hero)}
+          class="text-success tooltip-mobile"
+        >
+          <i class="fa fa-dagger" aria-hidden="true"></i>{@hero.atk}
+        </span>
+      <% else %>
+        <span
+          :if={@hero.armor != 0}
+          data-toggle="tooltip"
+          title={armor_description(@hero)}
+          class="text-warning tooltip-mobile"
+        >
+          <i class="fa fa-shield-halved" aria-hidden="true"></i>{@hero.armor}
+        </span>
+      <% end %>
+    </div>
+  </div>
+  <.resource_bar
+    tone="health"
+    label="Health"
+    current={@hero.current_hp}
+    previous={previous_resource(@hero, @previous_hero, :health)}
+    total={@hero.total_hp}
+    title={hp_description(@hero)}
+  />
+  <.resource_bar
+    tone="energy"
+    label="Energy"
+    current={@hero.current_mp}
+    previous={previous_resource(@hero, @previous_hero, :energy)}
+    total={@hero.total_mp}
+    title={mp_description(@hero)}
+  />
+  <%= if @debug do %>
+    <div :for={effect <- @hero.effects} class="debug">{effect["resource"]} · {effect["key"]}: {effect["value"]}</div>
+  <% end %>
+</div>

@@ -1,0 +1,140 @@
+<% mining? = @activity == "mining"
+title = if mining?, do: "Mining", else: "Meditation"
+resource = if mining?, do: "Gold", else: "XP"
+active? = @current_hero.pve_state == @activity
+progress = farming_progression(@current_hero, assigns) |> max(0) |> min(100)
+turns = if active?, do: @current_hero.pve_farming_turns, else: @selected_turns
+seconds = turns * Moba.seconds_per_turn()
+duration = if seconds < 60, do: "#{seconds}s", else: "#{div(seconds, 60)}m #{rem(seconds, 60)}s" %>
+<section id="farm-activity" class="farm-activity" data-activity={@activity}>
+  <div class="farm-scene">
+    <img
+      src={
+        if mining?, do: "/images/training/mining-dark-fantasy.png", else: "/images/training/meditation-dark-fantasy.png"
+      }
+      alt={
+        if mining?,
+          do: "Lantern-lit gold veins in an ancient underground mine",
+          else: "A moonlit reflecting pool in a quiet forest sanctuary"
+      }
+    />
+    <div class="farm-scene-caption">
+      <p class="farm-eyebrow">Training · {resource}</p>
+      <h2>{title}</h2>
+      <p class="farm-description">
+        {if mining?,
+          do: "Venture into the depths and gather gold for your next upgrade.",
+          else: "Find stillness in the sanctuary and gather experience for the battles ahead."}
+      </p>
+    </div>
+  </div>
+  <div class="farm-controls">
+    <%= if active? do %>
+      <p class="farm-status" id="farm-status">
+        <span aria-hidden="true"></span>
+        {if progress >= 100, do: "Ready to collect", else: "In progress"}
+      </p>
+      <dl class="farm-estimate">
+        <div>
+          <dt>Expected {resource}</dt>
+          <dd>{farming_reward(@current_hero, turns)}</dd>
+        </div>
+        <div>
+          <dt>Turns spent</dt>
+          <dd>{turns}</dd>
+        </div>
+      </dl>
+      <div
+        class="farm-progress"
+        role="progressbar"
+        aria-label={"#{title} progress"}
+        aria-valuenow={round(progress)}
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <span style={"width: #{progress}%"}></span>
+      </div>
+      <%= if progress >= 100 do %>
+        <p class="farm-timing">{title} complete. Your reward is ready.</p>
+        <button
+          type="button"
+          id="farm-claim-button"
+          class="btn farm-start"
+          phx-hook="FarmClaimHotkey"
+          phx-click="finish-farming"
+          phx-disable-with="Collecting…"
+          aria-keyshortcuts="Space"
+        >
+          Claim {resource} <kbd class="farm-claim-hotkey" aria-hidden="true">SPACE</kbd>
+        </button>
+      <% else %>
+        <p class="farm-timing">Ends {farming_time_left(@current_hero, assigns)}</p>
+      <% end %>
+    <% else %>
+      <%= if @current_hero.pve_current_turns > 0 do %>
+        <div id="farm-turns-picker">
+          <div class="farm-turns-label">
+            <span id="farm-turns-label">Turns to spend</span>
+            <small>{@current_hero.pve_current_turns} available</small>
+          </div>
+          <div class="farm-turn-choices" role="group" aria-labelledby="farm-turns-label">
+            <button
+              :for={count <- 1..@current_hero.pve_current_turns}
+              type="button"
+              id={"farm-turn-#{count}"}
+              class="farm-turn-choice"
+              aria-label={"Spend #{count} turn#{if count != 1, do: "s"}"}
+              aria-pressed={to_string(@selected_turns == count)}
+              phx-click="select-turns"
+              phx-value-turns={count}
+            >
+              {count}
+            </button>
+          </div>
+        </div>
+        <dl class="farm-estimate">
+          <div>
+            <dt>Expected {resource}</dt>
+            <dd id="farm-expected-reward">{farming_reward(@current_hero, @selected_turns)}</dd>
+          </div>
+          <div>
+            <dt>Duration</dt>
+            <dd class="farm-duration" id="farm-duration">{duration}</dd>
+          </div>
+        </dl>
+        <button
+          type="button"
+          id="farm-start-button"
+          class="btn farm-start"
+          phx-click="start-farming"
+          phx-value-state={@activity}
+          disabled={@selected_turns < 1}
+          phx-disable-with="Starting…"
+        >
+          {if mining?, do: "Mine", else: "Meditate"} for {@selected_turns} turn{if @selected_turns != 1, do: "s"}
+        </button>
+      <% else %>
+        <p class="farm-status" id="farm-status">No available turns</p>
+      <% end %>
+    <% end %>
+  </div>
+</section>
+<section :if={@farm_rewards != [] && progress >= 100} class="farm-session-history" aria-label={"#{title} history"}>
+  <h3>Recent sessions</h3>
+  <table class="table" id="farm-history-table">
+    <thead>
+      <tr>
+        <th scope="col">History</th>
+        <th scope="col">Turns</th>
+        <th scope="col">{resource}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr :for={farm <- @farm_rewards}>
+        <td>{Timex.format!(farm.started_at, "{relative}", :relative)}</td>
+        <td>{farm.turns}</td>
+        <td>{farm.amount}</td>
+      </tr>
+    </tbody>
+  </table>
+</section>

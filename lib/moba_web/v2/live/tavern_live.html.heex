@@ -1,0 +1,202 @@
+<Layouts.app
+  preview={@preview}
+  flash={@flash}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
+  <div class="tavern" id="tavern">
+    <%= if @preview do %>
+      <header class="tavern-heading" id="tavern-heading" style="--tavern-scene: url(/images/tutorial/hall-of-legends.jpg)">
+        <div>
+          <span class="tavern-eyebrow">Your collection</span>
+          <h1>Tavern</h1>
+          <p class="tavern-heading-description">New avatars. New abilities. New possibilities.</p>
+        </div>
+        <div class="tavern-balance" id="tavern-shards">
+          <strong>◆ {@current_player.user.shard_count}</strong><span>Shards available</span>
+        </div>
+        <p class="tavern-heading-guide">Earn Shards in Training and the Arena.<br />Unlock avatars, skills, and skins below.</p>
+      </header>
+    <% else %>
+      <div class="row mt-2">
+        <div class="col">
+          <div class="card dark-bg mb-3 text-center p-2">
+            <h1 class="text-warning f-rpg"><i class="fab fa-ethereum mr-2"></i>{@current_player.user.shard_count}</h1>
+            <p class="text-muted">
+              Unlock new avatars, skills and skins to play with by using your Shards. You can acquire Shards by ranking up in Training or by playing daily matches in the Arena.
+            </p>
+          </div>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="row">
+      <div class="col">
+        <ul class="nav nav-tabs nav-bordered nav-justified tavern-nav" role="tablist" aria-label="Tavern collection">
+          <li class="nav-item">
+            <a
+              href="javascript:;"
+              class={"h5 mt-0 nav-link #{if @active_tab == "avatars", do: "active"}"}
+              phx-click="show-avatars"
+              phx-hook="Loading"
+              id="show-avatars-link"
+              role="tab"
+              aria-selected={to_string(@active_tab == "avatars")}
+            >
+              <span class="loading-text">
+                <i class="fa fa-users fa-2x text-success" aria-hidden="true"></i> <br :if={!@preview} />Avatars
+              </span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="javascript:;"
+              class={"h5 mt-0 nav-link #{if @active_tab == "skills", do: "active"}"}
+              phx-click="show-skills"
+              phx-hook="Loading"
+              id="show-skills-link"
+              role="tab"
+              aria-selected={to_string(@active_tab == "skills")}
+            >
+              <span class="loading-text">
+                <i class="fa fa-magic fa-2x text-primary" aria-hidden="true"></i> <br :if={!@preview} />Skills
+              </span>
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              href="javascript:;"
+              class={"h5 mt-0 nav-link #{if @active_tab == "skins", do: "active"}"}
+              phx-click="show-skins"
+              phx-hook="Loading"
+              id="show-skins-link"
+              role="tab"
+              aria-selected={to_string(@active_tab == "skins")}
+            >
+              <span class="loading-text">
+                <i class="fa fa-palette fa-2x text-pink" aria-hidden="true"></i> <br :if={!@preview} />Skins
+              </span>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <%= if @featured_avatar do %>
+      <div class="row d-flex justify-content-center mt-2"></div>
+    <% end %>
+
+    <div class={"row #{unless @active_tab == "avatars", do: "d-none"} mt-2"}>
+      <.tavern_avatar_card
+        :if={@featured_avatar}
+        avatar={@featured_avatar}
+        avatars={@all_avatars}
+        preview={@preview}
+        player={@current_player}
+        featured
+      />
+      <.tavern_avatar_card
+        :for={avatar <- @avatars}
+        preview={@preview}
+        avatar={avatar}
+        avatars={@all_avatars}
+        player={@current_player}
+      />
+    </div>
+
+    <div class={"row #{unless @active_tab == "skills", do: "d-none"} mt-2"}>
+      <.tavern_skill_card :for={skill <- @skills} preview={@preview} skill={skill} player={@current_player} />
+    </div>
+
+    <%= if @current_skin do %>
+      <div class={"#{unless @active_tab == "skins", do: "d-none"} mt-2"}>
+        <div class="row">
+          <div class="col-xl-5 col-lg-7 col-12 margin-auto">
+            <div class="card hero-card hero-card-skin">
+              <div class="card-header p-0">
+                <div class="name d-flex justify-content-between align-items-center">
+                  <img src={"/images/league/#{@current_skin.league_tier}.png"} style="height: 40px;" class="px-3" />
+                  <h3 class="m-0 text-center p-2 text-white f-rpg">{@current_skin.name}</h3>
+                  <a href={@current_skin.author_link} target="_blank" class="font-italic float-right text-white px-1">
+                    by {@current_skin.author_name}
+                  </a>
+                </div>
+              </div>
+              <div class="card-body" style={"background-image: url(#{GH.background_url(@current_skin)})"}></div>
+              <div class="transparent card-footer text-center">
+                <div class="row">
+                  <div class="col-3">
+                    <%= if @current_index > 0 do %>
+                      <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="previous-skin">
+                        <i class="fa fa-chevron-left mr-1"></i> Prev
+                      </a>
+                    <% end %>
+                  </div>
+                  <div class="col-6">
+                    <%= if unlocked?(@current_skin, @current_player) do %>
+                      <a
+                        href="javascript:;"
+                        class="btn btn-outline-secondary no-action btn-rounded"
+                        data-toggle="tooltip"
+                        title="You already own this Skin and can select it when joining the Arena with this hero."
+                      >
+                        <i class="fa fa-unlock mr-1"></i>Unlocked
+                      </a>
+                    <% else %>
+                      <.tavern_unlock_actions
+                        :if={@preview || can_unlock?(@current_skin, @current_player)}
+                        preview={@preview}
+                        resource={@current_skin}
+                        player={@current_player}
+                        action="unlock-skin"
+                      />
+                      <a
+                        :if={!@preview && !can_unlock?(@current_skin, @current_player)}
+                        href="javascript:;"
+                        class="btn btn-secondary no-action"
+                      >
+                        <i class="fa fa-lock mr-1"></i>{unlock_error_message(@current_skin, @current_player)}
+                      </a>
+                    <% end %>
+                  </div>
+                  <div class="col-3">
+                    <%= if length(@current_skins) > @current_index + 1 do %>
+                      <a href="javascript:;" class="btn btn-secondary btn-block" phx-click="next-skin">
+                        Next<i class="fa fa-chevron-right ml-1"></i>
+                      </a>
+                    <% end %>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="card">
+            <div class="col-12">
+              <%= for avatar <- @all_avatars do %>
+                <a
+                  class="avatar-container m-1"
+                  href="javascript:;"
+                  data-toggle="tooltip"
+                  title={avatar.name}
+                  phx-click="set-avatar"
+                  phx-value-code={avatar.code}
+                >
+                  <img
+                    src={GH.image_url(avatar)}
+                    class={"avatar img-border #{if @current_avatar && @current_avatar.id == avatar.id, do: "current"}"}
+                  />
+                </a>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</Layouts.app>

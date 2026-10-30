@@ -1,0 +1,83 @@
+.game-page .tavern {
+  .tavern-hero-column { display: flex; margin-bottom: 24px !important; }
+
+  .tavern-hero-card {
+    flex: 1;
+    min-width: 0;
+
+    > .card-body { flex: 0 0 auto; height: 300px; min-height: 0; background-size: cover; background-position: center; }
+    .name { padding: 18px 18px 40px; }
+    .name h3 { font-size: 24px; letter-spacing: -.02em; }
+    .ribbon-two { top: 19px; right: 18px; }
+    .ribbon-two-secondary span { color: #a0d3bc; border-color: #7cbf9f4d; background: #10251fe6; }
+
+    .ultimate {
+      display: grid;
+      grid-template-columns: 48px minmax(0, 1fr);
+      grid-template-rows: repeat(3, auto);
+      align-items: center;
+      gap: 1px 12px;
+      left: 16px;
+      right: 16px;
+      bottom: 16px;
+      max-width: none;
+      padding: 12px !important;
+      text-align: left;
+      background: #0b1019eb !important;
+      border-color: #baa98a40;
+      box-shadow: 0 4px 20px #00000033;
+      transition: border-color 180ms ease, background 180ms ease;
+    }
+
+    .ultimate img { grid-column: 1; grid-row: 1 / 4; width: 48px !important; height: 48px; margin: 0; object-fit: cover; border: 1px solid #d6b47c66; }
+    .ultimate h4 { grid-column: 2; grid-row: 1; margin: 0; color: #d6b47c; font-size: 10px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .ultimate h5 { grid-column: 2; grid-row: 2; margin: 0; color: #eee8dc; font-size: 15px; font-weight: 700; line-height: 1.4; }
+    .ultimate small { grid-column: 2; grid-row: 3; color: #9aa3b0; font-size: 10px; }
+    .ultimate em { font-style: normal; }
+    .ultimate:hover, .ultimate:focus-visible { outline: none; border-color: #d6b47c99; background: #101923f5 !important; }
+
+    > .card-footer { display: flex; flex: 1; flex-direction: column; padding: 20px !important; text-align: left !important; }
+    .tavern-role > .col { padding: 0; border: 0 !important; }
+    .tavern-role h4 { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 4px 10px; align-items: center; color: #e5dfd2; font-size: 17px; line-height: 1.4; text-align: left; }
+    .tavern-role img { grid-column: 1; grid-row: 1; width: 26px !important; margin: 0 !important; }
+    .tavern-role br { display: none; }
+    .tavern-role small { grid-column: 2; grid-row: 2; margin: 0 !important; color: #aab0bb; font-size: 12px; font-style: normal !important; line-height: 1.5; font-weight: 400; }
+
+    .tavern-attributes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; padding: 22px 0; border-bottom: 1px solid #baa98a20; }
+    .tavern-attribute { display: block; margin: 0; }
+    .tavern-attribute-offense { --attribute-color: #e18da5; }
+    .tavern-attribute-defense { --attribute-color: #dfbd7e; }
+    .tavern-attribute-magic { --attribute-color: #8bbbd8; }
+    .tavern-attribute-speed { --attribute-color: #7fc7b4; }
+    .tavern-attribute > div { width: auto; max-width: none; padding: 0; border: 0 !important; }
+    .tavern-attribute .stat-col { margin-bottom: 8px; color: #c9ced7 !important; text-align: left !important; font-size: 13px; font-weight: 600 !important; }
+    .tavern-attribute .stat-col i { width: 17px; color: var(--attribute-color); text-align: center; }
+    .tavern-attribute .progress { height: 5px; background: #ffffff0d; }
+    .tavern-attribute .progress-bar { background: var(--attribute-color) !important; }
+
+    .tavern-gameplay { flex: 1; padding-top: 18px; }
+    .tavern-gameplay > .col { display: flex; flex-direction: column; padding: 0; }
+    .tavern-gameplay h4 { display: block !important; margin: 0 0 8px; color: #d6b47c; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+    .description { min-height: 44px; padding-bottom: 4px; color: #b7bdc8; font-size: 14px; line-height: 1.65; }
+    .description em { font-style: normal; }
+    .tavern-card-action { margin-top: auto; padding-top: 18px; }
+    .tavern-card-action .my-2 { margin: 0 !important; }
+    .tavern-card-action .btn { display: flex; align-items: center; justify-content: center; width: 100%; min-height: 42px; padding: 11px 14px; font-family: 'Nunito', sans-serif; font-size: 13px; letter-spacing: 0; line-height: 1.4; }
+    .tavern-card-action .btn-outline-warning { color: #edd3a4; border-color: #c6a77966; background: linear-gradient(135deg, #46351fcc, #251f18) !important; box-shadow: inset 0 1px #f0d7aa14; }
+    .tavern-card-action .btn-outline-warning:hover { color: #fff0cf; border-color: #d6b47c; background: linear-gradient(135deg, #59432ae6, #34291d) !important; box-shadow: 0 0 18px #d6ad6a20; }
+    .tavern-card-action .no-action { color: #9ca4b1; border: 1px solid #ffffff12; background: #ffffff03 !important; box-shadow: none; text-shadow: none; transform: none; }
+    .tavern-card-action .btn-purple { color: #d6cce9; border-color: #a99ac955; background: #43345666; }
+  }
+}
+
+@media (max-width: 575px) {
+  .game-page .tavern .tavern-hero-card {
+    > .card-body { height: 280px; }
+    > .card-footer { padding: 18px !important; }
+    .tavern-attributes { gap: 18px; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page .tavern .tavern-hero-card .ultimate { transition: none; }
+}

@@ -1,0 +1,32 @@
+.game-page {
+  .user-profile .collection, .dashboard .collection {
+    .avatar-container { display: inline-block; position: relative; height: auto; line-height: 0; }
+    .avatar-container > .avatar { display: block; }
+    .avatar-container > .league-logo {
+      position: absolute;
+      top: 100%;
+      bottom: auto;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 32px;
+      max-width: none;
+      margin: 0;
+      object-fit: contain;
+      z-index: 1;
+      filter: drop-shadow(0 2px 3px #0009);
+    }
+    .avatar:hover { transform: none; }
+  }
+  .user-profile .collection .row > .col-3 { padding-bottom: 16px; }
+  .dashboard .collection .avatar-container { margin-bottom: 20px !important; }
+  @media (min-width: 1200px) {
+    .dashboard .collection { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 14px; width: 100%; max-width: 1560px; padding: 0 24px 20px; }
+    .dashboard .collection .avatar-container { width: 100% !important; height: auto !important; min-width: 0; margin: 0 !important; }
+    .dashboard .collection .avatar { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; }
+  }
+  @media (max-width: 1199px) {
+    .user-profile .collection { height: auto; }
+    .user-profile .collection .row { row-gap: 8px; }
+  }
+}

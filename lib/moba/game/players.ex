@@ -70,10 +70,14 @@ defmodule Moba.Game.Players do
   def season_ranking(limit) do
     players = PlayerQuery.season_ranked(limit) |> Repo.all()
 
-    Enum.map(players, fn player ->
-      top_ranked = HeroQuery.top_ranked_for_player(player.id) |> Repo.all() |> List.first()
-      Map.put(player, :top_hero, top_ranked)
-    end)
+    top_heroes =
+      players
+      |> Enum.map(& &1.id)
+      |> HeroQuery.top_ranked_for_players()
+      |> Repo.all()
+      |> Map.new(&{&1.player_id, &1})
+
+    Enum.map(players, &Map.put(&1, :top_hero, Map.get(top_heroes, &1.id)))
   end
 
   def set_player_available!(player), do: update_player!(player, %{status: "available"})

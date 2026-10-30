@@ -6,6 +6,8 @@ defmodule Moba.Engine.Core.Turns do
     last_turn = List.last(battle.turns)
 
     {attacker, defender} = prepare_battlers(battle, last_turn, orders)
+    attacker = %{attacker | starting_hp: round(attacker.current_hp), starting_mp: round(attacker.current_mp)}
+    defender = %{defender | starting_hp: round(defender.current_hp), starting_mp: round(defender.current_mp)}
 
     %Turn{
       number: ((last_turn && last_turn.number) || 0) + 1,
@@ -109,9 +111,10 @@ defmodule Moba.Engine.Core.Turns do
         skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
         item_order: codes_to_resources(hero.item_order, items),
         last_skill: load_resource(battler.last_skill_code, skills),
-        double_skill: load_resource(battler.double_skill_code, skills),
-        delayed_skill: load_resource(battler.delayed_skill_code, skills),
-        permanent_skill: load_resource(battler.permanent_skill_code, skills),
+        double_skill: load_resource(battler.double_skill_code, battler.double_skill_level, skills),
+        delayed_skill: load_resource(battler.delayed_skill_code, battler.delayed_skill_level, skills),
+        permanent_skill: load_resource(battler.permanent_skill_code, battler.permanent_skill_level, skills),
+        pulse_nova: load_resource(battler.pulse_nova_code, battler.pulse_nova_level),
         buffs: load_buffs(battler.buffs),
         debuffs: load_buffs(battler.debuffs),
         defender_buffs: load_buffs(battler.defender_buffs),
@@ -160,6 +163,12 @@ defmodule Moba.Engine.Core.Turns do
   end
 
   defp load_resource(code, level), do: Moba.load_resource(code, level)
+
+  defp load_resource(nil, _level, _skills), do: nil
+
+  defp load_resource(code, level, skills) do
+    Enum.find(skills, &(&1.code == code && (is_nil(level) || &1.level == level))) || load_resource(code, level)
+  end
 
   defp prepare_battlers(battle, last_turn, orders) do
     if last_turn do
@@ -231,8 +240,13 @@ defmodule Moba.Engine.Core.Turns do
     %{
       battler
       | double_skill_code: serialized_resource(battler, :double_skill),
+        double_skill_level: battler.double_skill && battler.double_skill.level,
+        pulse_nova_code: serialized_resource(battler, :pulse_nova),
+        pulse_nova_level: battler.pulse_nova && battler.pulse_nova.level,
         delayed_skill_code: serialized_resource(battler, :delayed_skill),
+        delayed_skill_level: battler.delayed_skill && battler.delayed_skill.level,
         permanent_skill_code: serialized_resource(battler, :permanent_skill),
+        permanent_skill_level: battler.permanent_skill && battler.permanent_skill.level,
         last_skill_code: serialized_resource(battler, :last_skill),
         buffs: serialized_buffs(battler, :buffs),
         debuffs: serialized_buffs(battler, :debuffs),

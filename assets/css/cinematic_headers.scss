@@ -1,0 +1,42 @@
+@media (min-width: 768px) {
+  .game-page {
+    --cinematic-header-height: 242px;
+
+    .user-profile #profile-cinematic,
+    .community #community-heading,
+    #tavern-heading,
+    #manual-heading {
+      height: var(--cinematic-header-height);
+      min-height: var(--cinematic-header-height);
+      box-sizing: border-box;
+    }
+
+    #tavern-heading, #manual-heading { padding-top: 28px; padding-bottom: 28px; }
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .game-page {
+    --cinematic-header-height: 272px;
+
+    .user-profile #profile-cinematic { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .user-profile .profile-cinematic-identity { gap: 14px; }
+    .user-profile .profile-crest { width: 64px; height: 64px; }
+    .user-profile #profile-cinematic .profile-metrics { padding-top: 12px !important; padding-bottom: 12px !important; }
+    .user-profile #profile-cinematic .profile-metrics strong { font-size: 22px; }
+  }
+}
+
+@media (min-width: 1200px) and (max-height: 850px) {
+  .game-page {
+    --cinematic-header-height: 192px;
+
+    .community #community-heading,
+    #tavern-heading,
+    #manual-heading { padding-top: 18px; padding-bottom: 18px; }
+
+    #community-heading h1, #tavern-heading h1, #manual-heading h1 { font-size: 42px; }
+    .tavern-heading-description, .manual-heading-description { margin-top: 8px; font-size: 14px; }
+    #manual-heading nav { margin-top: 12px; }
+  }
+}

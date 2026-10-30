@@ -1,0 +1,76 @@
+.game-page .community {
+  #community-heading {
+    position: relative;
+    isolation: isolate;
+    min-height: 230px;
+    align-items: flex-end;
+    overflow: hidden;
+    margin: 12px 0 22px;
+    padding: 30px 34px;
+    border: 1px solid #c7b17b55;
+    border-radius: 14px;
+    background: linear-gradient(90deg, #08111ef2, #08111e80 48%, #08111e26 72%, #08111e9c), var(--community-scene) center 48% / cover;
+    box-shadow: inset 0 1px #f4dbab26, 0 12px 40px #0003;
+  }
+  .community-eyebrow { margin: 0 0 8px; color: #e0c68d; font-size: 11px; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; }
+  #community-heading h1 { color: #f5edda; font-size: clamp(38px, 4vw, 60px); font-weight: 900; line-height: 1.05; letter-spacing: -.035em; text-shadow: 0 3px 24px #0009; }
+  .community-heading-description { margin: 12px 0 0; color: #c9d1d9; font-size: 16px; line-height: 1.5; }
+  #community-heading .community-discord { display: inline-flex; align-items: center; justify-content: center; gap: 12px; flex-shrink: 0; min-height: 46px; border: 1px solid #dec18b88; background: #101924e8; color: #ecd4a3; font-weight: 800; box-shadow: 0 4px 18px #0004; transition: background .2s, border-color .2s; }
+  #community-heading .community-discord:hover { background: #303021; border-color: #efd39a; color: #fff0d0; }
+  .community-discord > i { font-size: 20px; }
+  .community-discord > span { margin-left: 12px; }
+
+  .community-hub { gap: 22px; margin-bottom: 24px !important; }
+  #community-board.community-panel, #community-announcements.community-panel {
+    height: clamp(440px, 50vh, 540px);
+    overflow: hidden;
+    padding: 22px 24px 0;
+    border: 1px solid #bda77b33 !important;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #192432c7, #0a111cef 70%) !important;
+    box-shadow: inset 0 1px #e2d1ab0d;
+  }
+  .community-panel-heading { grid-template-columns: 32px 1fr; column-gap: 12px; row-gap: 4px; }
+  .community-panel-heading > i { grid-row: 1 / 3; display: grid; place-items: center; width: 32px; height: 38px; margin: 0 !important; color: #dfc28c; }
+  .community-panel-title { font-size: 23px; font-weight: 800; }
+  .community-panel-description { color: #9faab8 !important; font-size: 13px; }
+  .community-board .messages { padding-top: 4px; }
+  .community-composer { padding-bottom: 20px; }
+  .community-composer .form-control { border-color: #bba57540; background: #07101bc2; border-radius: 6px; }
+  .community-composer .form-control:focus { border-color: #d6b47c; box-shadow: 0 0 0 2px #d6b47c19; }
+  .community-composer .base-secondary { border-radius: 6px; }
+  #community-announcements .updates { padding-right: 10px !important; }
+  .timeline-sm-item > h5 { padding-left: 13px; border-left: 2px solid #d9bc7b; }
+
+  .community-rankings { margin: 0 -10px; }
+  .community-tabs { padding: 6px; gap: 6px; border: 1px solid #c7b17b33; border-radius: 9px; background: #0b1421b3; }
+  .community-tabs .nav-item { min-width: 0; }
+  .community-tabs .nav-link { border: 1px solid transparent !important; border-radius: 5px; transition: background .2s, color .2s; }
+  .community-tabs .nav-link:hover { background: #cbb17b0d !important; }
+  .community-tabs .nav-link.active { background: linear-gradient(120deg, #cbb17b23, #cbb17b09) !important; border-color: #c7b17b55 !important; color: #f0d7a6 !important; }
+  .community-tabs .loading-text { font-weight: 800; }
+  .ranking { background: #09121b80; }
+  .ranking > tbody > tr:first-child { background: #cbb17b0a; }
+  .ranking > tbody > tr:first-child > th { padding-top: 16px; padding-bottom: 16px; color: #c8baa0; font: 800 11px/1.5 'Nunito', sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+}
+
+@media (max-width: 991px) {
+  .game-page .community {
+    #community-heading { min-height: 220px; padding: 26px; }
+    .community-hub { gap: 18px; }
+    #community-board.community-panel, #community-announcements.community-panel { height: 460px; }
+  }
+}
+@media (max-width: 767px) {
+  .game-page .community {
+    #community-heading { min-height: 280px; flex-direction: column; align-items: flex-start; justify-content: flex-end; gap: 20px; padding: 24px 20px; background-position: center, 60% center; }
+    #community-heading h1 { font-size: 40px; }
+    .community-heading-description { max-width: 25ch; font-size: 14px; }
+    #community-heading .community-discord { font-size: 14px; padding: 10px 14px; }
+    #community-board.community-panel, #community-announcements.community-panel { padding: 18px 16px 0; }
+    .community-panel-title { font-size: 21px; }
+    .community-composer { padding-bottom: 16px; }
+    .community-tabs { padding: 4px; }
+    .community-tabs .loading-text { gap: 6px; font-size: 12px; }
+  }
+}

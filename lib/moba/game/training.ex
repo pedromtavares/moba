@@ -4,9 +4,39 @@ defmodule Moba.Game.Training do
   """
   alias Moba.{Engine, Game, Repo, Utils}
   alias Game.{Avatars, Heroes, Leagues, Players, Quests, Skills, Targets}
+  alias Game.Schema.Player
+  import Ecto.Query, only: [from: 2]
+
+  @doc "Creates a guest and their first hero once per browser start session."
+  def start_guest!(session_key, avatar, skills) when is_binary(session_key) do
+    {:ok, player} =
+      Repo.transaction(fn ->
+        inserted =
+          %Player{}
+          |> Player.changeset(%{})
+          |> Ecto.Changeset.put_change(:guest_session_key, session_key)
+          |> Repo.insert!(on_conflict: :nothing, conflict_target: :guest_session_key)
+
+        player = Repo.get_by!(Player, guest_session_key: session_key)
+
+        # A conflicting insert has no generated ID. It waits for the first
+        # transaction to finish, then reuses that player without creating a hero.
+        if inserted.id do
+          create_current_pve_hero!(%{name: avatar.name}, player, avatar, skills)
+        end
+
+        Players.get_player!(player.id)
+      end)
+
+    player
+  end
 
   def archive_hero!(%{player: player} = hero) do
-    if player.current_pve_hero_id == hero.id, do: Players.set_current_pve_hero!(player, nil)
+    Repo.update_all(
+      from(p in Player, where: p.id == ^player.id and p.current_pve_hero_id == ^hero.id),
+      set: [current_pve_hero_id: nil]
+    )
+
     unless hero.finished_at, do: Players.add_total_farm!(hero)
     update_hero!(hero, %{archived_at: DateTime.utc_now()})
   end
@@ -16,8 +46,20 @@ defmodule Moba.Game.Training do
   end
 
   def create_current_pve_hero!(attrs, player, avatar, skills) do
-    hero = create_hero!(attrs, player, avatar, skills)
-    Players.set_current_pve_hero!(player, hero.id)
+    {:ok, hero} =
+      Repo.transaction(fn ->
+        stored = Repo.one!(from p in Player, where: p.id == ^player.id, lock: "FOR UPDATE")
+
+        if stored.current_pve_hero_id && stored.current_pve_hero_id != player.current_pve_hero_id do
+          # Another request already invoked a hero from this player's snapshot.
+          Game.get_hero!(stored.current_pve_hero_id)
+        else
+          hero = create_hero!(attrs, stored, avatar, skills)
+          Players.set_current_pve_hero!(stored, hero.id)
+          hero
+        end
+      end)
+
     hero
   end
 

@@ -420,11 +420,12 @@
   .skill-container{
     width: 65px;
     height: 65px;
+    position: relative;
 
     .mp-cost{
-      position: relative;
-      bottom: 22px;
-      left: 42px;
+      position: absolute;
+      right: 0;
+      bottom: 0;
     }
 
     .cooldown{
@@ -442,9 +443,10 @@
     }
 
     .hotkey{
-      position: relative;
-      bottom: 60px;
-      right: 23px;
+      position: absolute;
+      top: 0;
+      left: 3px;
+      line-height: 1;
       font-size: 0.8rem;
       background: rgba(0, 0, 0, 0.8);
       padding: 0.4rem;
@@ -453,9 +455,21 @@
     }
   }
 
+  .pulse-nova-running .skill-img{
+    border-color: #3bafda;
+    box-shadow: 0 0 10px rgba(59, 175, 218, 0.4);
+  }
+
+  .pulse-nova-status{
+    font-size: 10px;
+    padding: 3px 4px;
+    pointer-events: none;
+  }
+
   .item-container{
     width: 60px;
     height: 47px;
+    position: relative;
 
     .mp-cost{
       position: relative;
@@ -486,6 +500,15 @@
       padding: 0.3rem;
       border-radius: 1rem;
       font-size: 0.8rem;
+    }
+
+    .item-hotkey{
+      position: absolute;
+      top: -4px;
+      left: 2px;
+      right: auto;
+      bottom: auto;
+      line-height: 1;
     }
   }
 
@@ -521,12 +544,6 @@
       width: 55px;
       height: 55px;
       margin-right: 5px;
-
-      .mp-cost{
-        position: relative;
-        bottom: 17px !important;
-        left: 32px !important;
-      }
 
       .cooldown{
         left: 8px !important;
@@ -568,12 +585,6 @@
       width: 50px;
       height: 50px;
       margin-right: 2px;
-
-      .mp-cost{
-        position: relative;
-        bottom: 17px !important;
-        left: 32px !important;
-      }
 
       .cooldown{
         left: 8px !important;

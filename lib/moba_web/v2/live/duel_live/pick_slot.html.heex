@@ -1,0 +1,12 @@
+<div class="duel-pick-slot" data-active={to_string(@active)}>
+  <div class="duel-pick-owner">
+    {username(@player)}<span>{if @hero, do: "Locked in", else: "#{if @active, do: "Picking", else: "Awaiting pick"}"}</span>
+  </div>
+  <%= if @hero do %>
+    <.pvp_hero_card hero={@hero} picked={true} />
+  <% else %>
+    <div class="duel-empty-pick">
+      <span aria-hidden="true">{if @active, do: "+", else: "?"}</span><strong>{if @active, do: "Choosing a hero", else: "Hero not selected"}</strong>
+    </div>
+  <% end %>
+</div>

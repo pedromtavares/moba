@@ -1,6 +1,6 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <%= link("New Item", to: Routes.item_path(@conn, :new)) %>
+    <%= link("New Item", to: ~p"/admin/items/new") %>
   </div>
 </section>
 <section id="torch-index-content">
@@ -126,7 +126,7 @@
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: Routes.item_path(@conn, :index)) %>
+        <%= link("Clear Filters", to: ~p"/admin/items") %>
       <% end %>
     </section>
 
@@ -169,8 +169,8 @@
                 <td><%= item.enabled %></td>
 
                 <td class="torch-actions">
-                  <span><%= link("Show", to: Routes.item_path(@conn, :show, item)) %></span>
-                  <span><%= link("Edit", to: Routes.item_path(@conn, :edit, item)) %></span>
+                  <span><%= link("Show", to: ~p"/admin/items/#{item}") %></span>
+                  <span><%= link("Edit", to: ~p"/admin/items/#{item}/edit") %></span>
                 </td>
               </tr>
             <% end %>

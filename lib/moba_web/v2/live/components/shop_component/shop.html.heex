@@ -1,0 +1,240 @@
+<div class="shop" id="shop">
+  <button type="button" aria-label="Close shop" id="close-button" phx-click="close-shop" class="text-white" {target_attrs(@event_target)}>
+    <i class="fa fa-times fa-3x"></i>
+  </button>
+  <div class="row shop-header">
+    <div class="col-sm-12 text-center">
+      <h2 class="page-title mb-3 mt-3">
+        <i class="fa fa-shopping-cart"></i> Shop <br />
+        <small><em>Click on an item to buy or transmute</em></small>
+      </h2>
+    </div>
+  </div>
+
+  <div class="row shop-categories">
+    <div class="col-12 col-md-6 col-lg-6 col-xl-3 text-center">
+      <div class="card-box normal-items">
+        <h3 class="page-title center">
+          <span class="text-dark">Normal Items</span>
+          <br />
+          <small>
+            <em><span class="text-warning"><i class="fa fa-coins"></i> {Moba.normal_items_price()}</span></em>
+          </small>
+        </h3>
+        <div class="row">
+          <%= for item <- normals(@items) do %>
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
+          <% end %>
+        </div>
+        <%= if @selected_shop && @selected_shop.rarity == "normal" do %>
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
+        <% end %>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-6 col-xl-3 text-center">
+      <div class="card-box rare-items">
+        <h3 class="page-title center">
+          <span class="text-primary">Rare Items</span>
+          <br />
+          <small>
+            <em>
+              <span class="text-warning"><i class="fa fa-coins"></i> {Moba.rare_items_price()}</span>
+              or <span class="text-dark">3 Normal</span>
+            </em>
+          </small>
+        </h3>
+        <div class="row">
+          <%= for item <- rares(@items) do %>
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
+          <% end %>
+        </div>
+        <%= if @selected_shop && @selected_shop.rarity == "rare" do %>
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
+        <% end %>
+      </div>
+    </div>
+    <div class="col-xl-3 col-12 col-md-6 col-lg-6 text-center">
+      <div class="card-box epic-items">
+        <h3 class="page-title center">
+          <span class="text-purple">Epic Items</span>
+          <br />
+          <small>
+            <em>
+              <span class="text-warning"><i class="fa fa-coins"></i> {Moba.epic_items_price()}</span>
+              or <span class="text-primary">2 Rare</span>
+            </em>
+          </small>
+        </h3>
+        <div class="row">
+          <%= for item <- epics(@items) do %>
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
+          <% end %>
+        </div>
+        <%= if @selected_shop && @selected_shop.rarity == "epic" do %>
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
+        <% end %>
+      </div>
+    </div>
+    <div class="col-xl-3 col-12 col-md-6 col-lg-6 text-center">
+      <div class="card-box legendary-items">
+        <h3 class="page-title center">
+          <span class="text-danger">Legendary Items</span>
+          <br />
+          <small>
+            <em>
+              <span class="text-warning"><i class="fa fa-coins"></i> {Moba.legendary_items_price()}</span>
+              or <span class="text-purple">2 Epic</span>
+            </em>
+          </small>
+        </h3>
+        <div class="row">
+          <%= for item <- legendaries(@items) do %>
+            <.shop_item item={item} selected={(@selected_shop && @selected_shop.code == item.code) || false} />
+          <% end %>
+        </div>
+        <%= if @selected_shop && @selected_shop.rarity == "legendary" do %>
+          <.shop_actions
+            selected_shop={@selected_shop}
+            buy_enabled={can_buy?(@current_hero, @selected_shop)}
+            transmute_enabled={can_transmute?(@current_hero, @selected_shop)}
+            price={price(@selected_shop)}
+            event_target={@event_target}
+          />
+        <% end %>
+      </div>
+    </div>
+  </div>
+
+  <div class="row text-center shop-inventory-row">
+    <div class="col-12 col-xl-6 offset-xl-3 offset-xs-0 offset-sm-0 offset-md-0 offset-lg-0" id="inventory">
+      <div class="card-box">
+        <h3 class="page-title center">
+          Your Inventory <br />
+          <%= if @transmute do %>
+            <small id="transmute-instructions">
+              <em class="text-warning">{transmute_instructions_for(@transmute)}</em>
+            </small>
+          <% else %>
+            <small><em>Click on an item to sell</em></small>
+          <% end %>
+        </h3>
+        <div class="row">
+          <%= for item <- @current_hero.items do %>
+            <.inventory_item
+              item={item}
+              selected={(@selected_inventory && @selected_inventory.code == item.code) || false}
+              selectable={can_select_inventory(item, @transmute, @recipe)}
+            />
+          <% end %>
+          <%= if length(@current_hero.items) < 6 do %>
+            <%= for _ <- (length(@current_hero.items)..5) do %>
+              <div class="d-none d-md-block col-md-2">
+                <div class="item-container float-left">
+                  <.shop_empty_item_slot
+                    class="item-img empty-item d-flex justify-content-center align-items-center"
+                    icon_class="fa fa-cube fa-2x"
+                  />
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+        <%= if @selected_inventory do %>
+          <hr />
+          <.selected_item item={@selected_inventory} />
+          <hr />
+          <div class="row">
+            <div class="col center">
+              <button
+                class="btn btn-danger"
+                phx-click="sell"
+                phx-value-code={@selected_inventory.code}
+                id={"sell-#{@selected_inventory.id}"}
+                {target_attrs(@event_target)}
+              >
+                <i class="fa fa-coins"></i> Sell for {sell_price(@current_hero, @selected_inventory)}
+              </button>
+            </div>
+          </div>
+        <% end %>
+        <%= if @transmute do %>
+          <hr />
+          <div class="row transmute">
+            <div class="col-12 col-md-8 center margin-auto">
+              <div class="row">
+                <%= for item <- @recipe do %>
+                  <.recipe_item item={item} />
+                <% end %>
+                <%= if length(@recipe) < ingredients_count_for(@transmute) do %>
+                  <%= for _ <- 1..(ingredients_count_for(@transmute) - length(@recipe)) do %>
+                    <div class="col-4 col-md-2 item-container">
+                      <.shop_empty_item_slot />
+                    </div>
+                  <% end %>
+                <% end %>
+                <div class="col-md-2 d-none d-md-block mt-2">
+                  <i class="fa fa-2x fa-arrow-circle-right"></i>
+                </div>
+                <div class="col-md-3 d-none d-md-block">
+                  <.transmute_result item={@transmute} />
+                </div>
+              </div>
+            </div>
+            <div class="col-12 d-block d-md-none">
+              <div class="col-3 margin-auto mb-1 mt-1">
+                <i class="fa fa-2x fa-arrow-circle-down"></i>
+              </div>
+            </div>
+            <div class="col-12 d-block d-md-none">
+              <div class="col-3 margin-auto">
+                <.transmute_result item={@transmute} />
+              </div>
+            </div>
+          </div>
+          <hr />
+          <div class="row">
+            <div class="col center">
+              <div class="center">
+                <form class="d-inline-block" phx-submit="finish-transmute" {target_attrs(@event_target)}>
+                  <input type="hidden" name="transmute_code" value={@transmute.code} />
+                  <input :for={item <- @recipe} type="hidden" name="recipe_codes[]" value={item.code} />
+                  <button
+                    class={
+                      if proper_recipe(@recipe, @transmute), do: "btn btn-primary", else: "btn btn-primary disabled"
+                    }
+                    phx-hook="Loading"
+                    loading="Transmuting..."
+                    id="finish-transmute"
+                  >
+                    <span class="loading-text"><i class="fa fa-refresh mr-1"></i>Transmute</span>
+                  </button>
+                </form>
+                <button class="btn btn-danger" phx-click="cancel-transmute" id="cancel-transmute" phx-target="#shop">
+                  <i class="fa fa-times"></i> Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

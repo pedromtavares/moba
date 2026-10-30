@@ -38,8 +38,7 @@ const Tutorial = {
   tourSteps: function (tour, step, hookInstance) {
     switch (step) {
       case 1:
-        $(".meditation-tab").hide() &&
-          $(".mine-tab").hide() && 
+        $(".farm-tabs").hide() &&
           $(".targets")[0] && 
           tour.addStep({
             id: 'first-tutorial-first-step',
@@ -218,7 +217,7 @@ const Tutorial = {
       case 21:
         tour.addStep({
           id: 'twenty-first-tutorial-first-step',
-          text: "<p class='text-center'>This is your Hero collection.<br/><br/> You progress through the game by training with all of the Avatars below to reach the Invoker rank, which the ultimate game objective.<br/><br/> Each Avatar has a specific playstyle and Training gets harder (and more fun!) as you rank up.</p>",
+          text: "<p class='text-center'>This is your Hero collection.<br/><br/> Reach the Invoker rank by finishing training with 20 different Avatars in the Grandmaster League with 60K Total Farm each. This is the ultimate game objective.<br/><br/> Each Avatar has a specific playstyle and Training gets harder (and more fun!) as you rank up.</p>",
           attachTo: {
             element: '#hero-list-container',
             on: 'top'

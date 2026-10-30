@@ -1,7 +1,7 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <%= link("Edit", to: Routes.skill_path(@conn, :edit, @skill), class: "torch-button") %>
-    <%= link("Back", to: Routes.skill_path(@conn, :index), class: "torch-button") %>
+    <%= link("Edit", to: ~p"/admin/skills/#{@skill}/edit", class: "torch-button") %>
+    <%= link("Back", to: ~p"/admin/skills", class: "torch-button") %>
   </div>
 </section>
 

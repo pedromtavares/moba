@@ -14,7 +14,7 @@ defmodule MobaWeb.Admin.UserController do
       error ->
         conn
         |> put_flash(:error, "There was an error rendering Users. #{inspect(error)}")
-        |> redirect(to: Routes.user_path(conn, :index))
+        |> redirect(to: ~p"/admin/users")
     end
   end
 
@@ -28,7 +28,7 @@ defmodule MobaWeb.Admin.UserController do
       {:ok, user} ->
         conn
         |> put_flash(:info, "User created successfully.")
-        |> redirect(to: Routes.user_path(conn, :show, user))
+        |> redirect(to: ~p"/admin/users/#{user}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "new.html", changeset: changeset)
@@ -53,7 +53,7 @@ defmodule MobaWeb.Admin.UserController do
       {:ok, user} ->
         conn
         |> put_flash(:info, "User updated successfully.")
-        |> redirect(to: Routes.user_path(conn, :show, user))
+        |> redirect(to: ~p"/admin/users/#{user}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", user: user, changeset: changeset)
@@ -66,6 +66,6 @@ defmodule MobaWeb.Admin.UserController do
 
     conn
     |> put_flash(:info, "User deleted successfully.")
-    |> redirect(to: Routes.user_path(conn, :index))
+    |> redirect(to: ~p"/admin/users")
   end
 end

@@ -1,0 +1,75 @@
+<% next = next_pve_tier(@current_player) %>
+<section
+  id="pve-progression"
+  class="base-ascent"
+  style="--base-ascent-scene: url(/images/tutorial/hall-of-legends.jpg)"
+  aria-labelledby="base-ascent-title"
+>
+  <div class="base-ascent-heading">
+    <div>
+      <p class="base-ascent-eyebrow">{if next, do: "Your legacy", else: "Legacy complete"}</p>
+      <h2 id="base-ascent-title">
+        <%= if next do %>
+          Path to <span>Invoker</span>
+        <% else %>
+          <span>Invoker</span>
+        <% end %>
+      </h2>
+    </div>
+    <div :if={next} class="base-ascent-prize">
+      <span aria-hidden="true">◆</span>
+      <strong>+{Game.get_quest(next).prize}</strong>
+      <span>Shards<br /><small>on rank up</small></span>
+    </div>
+  </div>
+  <ol class="base-ascent-track" aria-label="Player rank progression">
+    <li
+      :for={tier <- 0..Moba.max_pve_tier()}
+      id={"base-rank-#{tier}"}
+      class={[
+        "base-ascent-rank",
+        tier < @current_player.pve_tier && "is-complete",
+        tier == @current_player.pve_tier && "is-current",
+        tier == next && "is-next"
+      ]}
+      aria-current={if tier == @current_player.pve_tier, do: "step"}
+    >
+      <div class="base-ascent-emblem">
+        <img src={"/images/pve/#{tier}.png"} alt={Moba.pve_tiers()[tier]} />
+      </div>
+      <strong>{Moba.pve_tiers()[tier]}</strong>
+      <small :if={tier == @current_player.pve_tier}>Current rank</small>
+      <small :if={tier == next}>Next rank</small>
+    </li>
+  </ol>
+  <div :if={next} class="base-ascent-objective">
+    <div class="base-ascent-progress">
+      <p id="base-quest-description">{current_quest_description(@current_player)}</p>
+      <div
+        id="base-rank-progress"
+        class="base-ascent-progress-bar"
+        role="progressbar"
+        aria-labelledby="base-quest-description"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow={quest_progression_pct(@current_player)}
+        aria-valuetext={quest_progression_label(@current_player)}
+        title={quest_avatars_title(@current_player)}
+      >
+        <span class="base-ascent-progress-fill" style={"width: #{quest_progression_pct(@current_player)}%"}></span>
+        <strong>{quest_progression_label(@current_player)}</strong>
+      </div>
+    </div>
+    <button
+      :if={@current_player.pvp_tier != Moba.max_pvp_tier()}
+      id="base-rewards-btn"
+      type="button"
+      class="btn base-ascent-rewards"
+      data-toggle="modal"
+      data-target="#pve-tier-rewards"
+    >
+      Progression rewards <span aria-hidden="true">→</span>
+    </button>
+  </div>
+  <p :if={!next} id="base-ascent-complete">The highest rank is yours.</p>
+</section>

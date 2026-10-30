@@ -1,0 +1,15 @@
+<.link navigate={preview_path(assigns, ~p"/player/#{@player.id}")} class="arena-standing-row" aria-current={if @player.id == @current_player.id, do: "true"} title={"#{@player.pvp_points} Season Points"}>
+  <span class="arena-standing-position">
+    <%= if @player.ranking || @index do %>
+      <small>#</small>{@player.ranking || @index}
+    <% else %>
+      <span aria-label="Unranked">—</span>
+    <% end %>
+  </span>
+  <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" class="arena-standing-emblem" />
+  <span class="arena-standing-identity">
+    <strong>{username(@player)} <small :if={@player.id == @current_player.id}>You</small></strong>
+    <span>{@player.daily_matches} {if @player.daily_matches == 1, do: "match", else: "matches"} played</span>
+  </span>
+  <span class="arena-standing-score"><strong>{@player.daily_wins}</strong><span>{if @player.daily_wins == 1, do: "daily win", else: "daily wins"}</span></span>
+</.link>

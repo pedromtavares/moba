@@ -1,6 +1,6 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <%= link("New Skin", to: Routes.skin_path(@conn, :new)) %>
+    <%= link("New Skin", to: ~p"/admin/skins/new") %>
   </div>
 </section>
 <section id="torch-index-content">
@@ -33,7 +33,7 @@
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: Routes.skin_path(@conn, :index)) %>
+        <%= link("Clear Filters", to: ~p"/admin/skins") %>
       <% end %>
     </section>
 
@@ -68,8 +68,8 @@
                 <td><img src={"/images/league/#{skin.league_tier}.png"} style="max-width: 50px;" /></td>
 
                 <td class="torch-actions">
-                  <span><%= link("Show", to: Routes.skin_path(@conn, :show, skin)) %></span>
-                  <span><%= link("Edit", to: Routes.skin_path(@conn, :edit, skin)) %></span>
+                  <span><%= link("Show", to: ~p"/admin/skins/#{skin}") %></span>
+                  <span><%= link("Edit", to: ~p"/admin/skins/#{skin}/edit") %></span>
                 </td>
               </tr>
             <% end %>

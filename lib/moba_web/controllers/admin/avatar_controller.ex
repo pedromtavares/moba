@@ -14,7 +14,7 @@ defmodule MobaWeb.Admin.AvatarController do
       error ->
         conn
         |> put_flash(:error, "There was an error rendering Avatars. #{inspect(error)}")
-        |> redirect(to: Routes.avatar_path(conn, :index))
+        |> redirect(to: ~p"/admin/avatars")
     end
   end
 
@@ -28,7 +28,7 @@ defmodule MobaWeb.Admin.AvatarController do
 
     conn
     |> put_flash(:info, "Avatar created successfully.")
-    |> redirect(to: Routes.avatar_path(conn, :show, avatar))
+    |> redirect(to: ~p"/admin/avatars/#{avatar}")
   end
 
   def show(conn, %{"id" => id}) do
@@ -49,7 +49,7 @@ defmodule MobaWeb.Admin.AvatarController do
       {:ok, avatar} ->
         conn
         |> put_flash(:info, "Avatar updated successfully.")
-        |> redirect(to: Routes.avatar_path(conn, :show, avatar))
+        |> redirect(to: ~p"/admin/avatars/#{avatar}")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         render(conn, "edit.html", avatar: avatar, changeset: changeset)
@@ -62,6 +62,6 @@ defmodule MobaWeb.Admin.AvatarController do
 
     conn
     |> put_flash(:info, "Avatar deleted successfully.")
-    |> redirect(to: Routes.avatar_path(conn, :index))
+    |> redirect(to: ~p"/admin/avatars")
   end
 end

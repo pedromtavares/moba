@@ -1,0 +1,27 @@
+<%= if @preview do %>
+  <.competitive_result_panel {assigns} />
+<% else %>
+  <.battle_result_header title={battle_result(@battle)} />
+  <%= if @current_player do %>
+    <.battle_action_row class="pt-1 mt-1">
+      <.battle_nav_action
+        navigate={preview_path(assigns, ~p"/matches/#{@battle.match_id}")}
+        class={if @preview, do: "btn battle-primary", else: "btn btn-outline-primary btn-lg btn-block text-white"}
+        id="load-battles"
+        icon="fa fa-play"
+        label="Back to Match"
+      />
+    </.battle_action_row>
+  <% else %>
+    <.battle_action_row>
+      <div class="col">
+        <.battle_guest_create_action
+          preview={Map.get(assigns, :preview, false)}
+          class="btn btn-danger btn-block btn-lg"
+          icon="fa fa-user-plus"
+          label="Create your Hero"
+        />
+      </div>
+    </.battle_action_row>
+  <% end %>
+<% end %>

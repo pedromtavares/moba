@@ -26,9 +26,15 @@ config :waffle,
   storage: Waffle.Storage.S3,
   bucket: {:system, "S3_BUCKET"}
 
-config :moba, MobaWeb.PowMailer,
-  adapter: Bamboo.SendGridAdapter,
+config :moba, Moba.Mailer,
+  adapter: Swoosh.Adapters.Sendgrid,
   api_key: System.get_env("SENDGRID_KEY")
+
+# Configures Swoosh API Client
+config :swoosh, api_client: Swoosh.ApiClient.Req
+
+# Disable Swoosh Local Memory Storage
+config :swoosh, local: false
 
 config :sentry,
   dsn: System.get_env("SENTRY_DSN"),
@@ -73,18 +79,3 @@ config :sentry,
 #   force_ssl: [rewrite_on: [:x_forwarded_proto]]
 #
 # Check `Plug.SSL` for all available options in `force_ssl`.
-
-# ## Using releases (distillery)
-#
-# If you are doing OTP releases, you need to instruct Phoenix
-# to start the server for all endpoints:
-#
-#     config :phoenix, :serve_endpoints, true
-#
-# Alternatively, you can configure exactly which server to
-# start per endpoint:
-#
-#     config :moba, MobaWeb.Endpoint, server: true
-#
-# Note you can't rely on `System.get_env/1` when using releases.
-# See the releases documentation accordingly.

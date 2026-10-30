@@ -1,0 +1,79 @@
+<Layouts.app flash={@flash}>
+  <div
+    :if={@challenge}
+    id="duel-challenge-overlay"
+    class="duel-challenge-overlay"
+    phx-hook="DuelChallengeDialog"
+    data-state={@state}
+  >
+    <section
+      class="duel-challenge-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="duel-challenge-title"
+      aria-describedby="duel-challenge-description"
+      tabindex="-1"
+    >
+      <div class="duel-challenge-heading">
+        <span>Live duel</span>
+        <span
+          :if={@state == "pending"}
+          class="duel-challenge-clock"
+          role="timer"
+          aria-label="Time to respond"
+          data-urgent={to_string(@seconds <= 10)}
+        >
+          {@seconds}<small>s</small>
+        </span>
+      </div>
+      <h2 id="duel-challenge-title">
+        {case @state do
+          "declined" -> "Challenge declined"
+          "expired" -> "Time’s up"
+          _ -> if @challenge.outgoing, do: "Challenge sent", else: "You’ve been challenged"
+        end}
+      </h2>
+      <div class="duel-challenge-opponent">
+        <img src={"/images/pve/#{@challenge.other.pve_tier}.png"} alt={"Training tier #{@challenge.other.pve_tier}"} />
+        <div><strong>{username(@challenge.other)}</strong><span>{@challenge.other.pvp_points} SP</span></div>
+      </div>
+      <p id="duel-challenge-description">
+        {case @state do
+          "declined" ->
+            "#{username(@challenge.other)} declined your duel."
+
+          "expired" ->
+            "This challenge has expired."
+
+          _ ->
+            if @challenge.outgoing,
+              do: "Waiting for their response…",
+              else: "Two battles. Your heroes. Take the challenge?"
+        end}
+      </p>
+      <div :if={@state == "pending"} class="duel-challenge-time-track" aria-hidden="true">
+        <span style={"width:#{@seconds / 30 * 100}%"}></span>
+      </div>
+      <div class="duel-challenge-actions">
+        <%= if @state == "pending" && !@challenge.outgoing do %>
+          <button id="duel-challenge-decline" type="button" class="btn duel-challenge-secondary" phx-click="reject">
+            Decline
+          </button>
+          <button
+            id="duel-challenge-accept"
+            type="button"
+            class="btn duel-challenge-primary"
+            phx-click="accept"
+            phx-disable-with="Joining…"
+          >
+            Accept duel <span aria-hidden="true">→</span>
+          </button>
+        <% else %>
+          <button id="duel-challenge-close" type="button" class="btn duel-challenge-secondary" phx-click="close">
+            Close
+          </button>
+        <% end %>
+      </div>
+    </section>
+  </div>
+</Layouts.app>

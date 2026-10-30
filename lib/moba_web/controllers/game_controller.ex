@@ -17,13 +17,13 @@ defmodule MobaWeb.GameController do
 
     cond do
       player && player.tutorial_step == 30 ->
-        redirect(conn, to: ~p"/arena")
+        redirect(conn, to: preview_path(conn, ~p"/arena"))
 
       hero && is_nil(hero.finished_at) ->
-        redirect(conn, to: ~p"/training")
+        redirect(conn, to: preview_path(conn, ~p"/training"))
 
       player ->
-        redirect(conn, to: ~p"/base")
+        redirect(conn, to: preview_path(conn, ~p"/base"))
 
       true ->
         counts = %{
@@ -34,33 +34,51 @@ defmodule MobaWeb.GameController do
 
         conn
         |> assign(:counts, counts)
+        |> assign(:preview, true)
+        |> assign(
+          :landing_background,
+          Moba.Image.url({%{file_name: "home-heroes-v5.png", updated_at: nil}, %{code: "landing"}})
+        )
+        |> assign(
+          :landing_mobile_background,
+          Moba.Image.url({%{file_name: "home-heroes-mobile-v1.webp", updated_at: nil}, %{code: "landing"}})
+        )
         |> render(:homepage, layout: false)
     end
   end
 
-  def start(conn, _params) do
-    conn =
-      if get_session(conn, :cache_key) do
-        conn
-      else
-        put_session(conn, :cache_key, UUID.uuid1())
-      end
-
-    live_render(conn, MobaWeb.CreateLive,
-      session: %{"token" => get_csrf_token(), "cache_key" => get_session(conn, :cache_key)}
-    )
+  def redirect_preview(conn, _params) do
+    path = preview_path(conn, conn.request_path)
+    path = if conn.query_string == "", do: path, else: path <> "?" <> conn.query_string
+    conn |> put_status(:moved_permanently) |> redirect(to: path)
   end
 
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do
-    player = Game.create_player!(%{})
-    avatar = Game.get_avatar!(selected_avatar)
-    skills = Game.list_chosen_skills(selected_skills)
+    cond do
+      get_session(conn, :player_id) || conn.assigns.current_user ->
+        redirect(conn, to: preview_path(conn, ~p"/"))
 
-    Game.create_current_pve_hero!(%{name: avatar.name}, player, avatar, skills)
+      session_key = get_session(conn, :cache_key) ->
+        avatar = Game.get_avatar!(selected_avatar)
+        skills = Game.list_chosen_skills(selected_skills)
+        player = Game.start_guest!(session_key, avatar, skills)
 
-    conn
-    |> put_session(:player_id, player.id)
-    |> redirect(to: ~p"/training")
+        if player.user_id do
+          redirect(conn, to: preview_path(conn, ~p"/users/log_in"))
+        else
+          path =
+            if player.current_pve_hero && is_nil(player.current_pve_hero.finished_at),
+              do: ~p"/training",
+              else: ~p"/base"
+
+          conn
+          |> put_session(:player_id, player.id)
+          |> redirect(to: preview_path(conn, path))
+        end
+
+      true ->
+        redirect(conn, to: preview_path(conn, ~p"/start"))
+    end
   end
 
   defp format_number(n) do

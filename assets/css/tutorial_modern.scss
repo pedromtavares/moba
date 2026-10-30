@@ -1,0 +1,119 @@
+body.tutorial-active .shepherd-modal-overlay-container { z-index: 12000; }
+body.tutorial-active .shepherd-modal-is-visible { opacity: .78; }
+
+.shepherd-element.tutorial-hud {
+  --guide-gold: #e7c384;
+  z-index: 12001;
+  width: 420px;
+  max-width: calc(100vw - 32px);
+  border-radius: 12px;
+  background: #0b131f;
+  color: #eee5d2;
+  box-shadow: 0 20px 90px #000a, 0 0 35px #bd8c3220;
+  font: 17px/1.55 'Nunito', sans-serif;
+
+  .shepherd-content { position: relative; overflow: hidden; border: 1px solid #c6a36899; border-radius: inherit; background: linear-gradient(145deg, #1b2838, #0a111b 75%); box-shadow: inset 0 1px #fce3ab26; }
+  .shepherd-header { position: absolute; z-index: 2; top: 10px; right: 12px; float: none; display: flex; padding: 0; background: transparent !important; }
+  .shepherd-title { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .shepherd-cancel-icon { display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 1px solid #bba17766; border-radius: 5px; background: #09101bc9; color: #cfc3ac; font-size: 27px; line-height: 1; }
+  .shepherd-cancel-icon:hover { color: #fff1d3; border-color: var(--guide-gold); }
+  .shepherd-text { padding: 0; color: inherit; font-size: inherit; }
+  .tutorial-body { position: relative; padding: 26px 26px 0; }
+  .tutorial-chapters { display: flex; gap: 14px; padding-right: 18px; margin-bottom: 26px; font-size: 11px; font-weight: 800; letter-spacing: .03em; color: #68798b; }
+  .tutorial-chapters span { display: flex; gap: 4px; align-items: center; white-space: nowrap; padding-bottom: 7px; border-bottom: 2px solid #52607540; }
+  .tutorial-chapters b { font-weight: 900; }
+  .tutorial-chapters .is-current { color: var(--guide-gold); border-color: var(--guide-gold); }
+  .tutorial-chapters .is-complete { color: #87bdac; border-color: #87bdac66; }
+  .tutorial-eyebrow { margin: 0 0 8px; color: var(--guide-gold); font-size: 12px; font-weight: 900; text-transform: uppercase; letter-spacing: .13em; }
+  h2 { margin: 0 0 14px; color: #fff0d4; font: 900 30px/1.12 'Nunito', sans-serif; letter-spacing: -.025em; text-wrap: balance; }
+  .tutorial-lead { margin: 0; color: #bdc9d8; font-size: 17px; line-height: 1.65; }
+  .tutorial-facts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 22px; padding: 18px 0 6px; border-top: 1px solid #c6a36833; }
+  .tutorial-facts > div:only-child { grid-column: 1 / -1; }
+  .tutorial-facts strong { display: block; color: var(--guide-gold); font-size: 28px; font-weight: 900; line-height: 1.2; }
+  .tutorial-facts [data-tone=blue] strong { color: #89c9e3; }
+  .tutorial-facts span { display: block; margin-top: 5px; color: #aebdcd; font-size: 13px; }
+  .tutorial-hint { padding: 12px 14px; margin: 18px 0 0; border-left: 2px solid var(--guide-gold); background: #dab5680d; color: #e4cfa9; font-size: 15px; }
+  .tutorial-rank { display: block; width: 90px; height: 100px; margin: 20px auto 0; object-fit: contain; filter: drop-shadow(0 0 18px #9cdbff44); }
+  .shepherd-footer { position: relative; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 24px 26px 26px; border-radius: 0; }
+  .shepherd-button { display: inline-flex; justify-content: center; align-items: center; flex: 1 1 100%; min-height: 50px; margin: 0; padding: 11px 17px; border: 1px solid #dfb875; border-radius: 6px; background: linear-gradient(115deg, #644728, #a47636); box-shadow: inset 0 1px #ffedc23b, 0 4px 20px #ac792629; color: #fff0d5; font: 900 17px/1.3 'Nunito', sans-serif; transition: border-color 150ms ease, background 150ms ease, box-shadow 150ms ease; }
+  .shepherd-button:not(.shepherd-button-secondary) { order: -1; }
+  .shepherd-button:not(.shepherd-button-secondary):hover { background: linear-gradient(115deg, #7d5830, #b88b46); border-color: #ffe2a9; box-shadow: inset 0 1px #ffedc255, 0 4px 24px #ac792644; color: #fff6e4; }
+  .shepherd-button-secondary { flex: 1 1 auto; min-height: 30px; padding: 3px 8px; border: 0; background: transparent; color: #8d9caf; box-shadow: none; font-size: 13px; font-weight: 700; }
+  .shepherd-button-secondary:hover { background: transparent; color: #d3c5ad; }
+  button:focus-visible { outline: 2px solid #ffe2a9; outline-offset: 4px; }
+  .shepherd-arrow::before { background: #172332 !important; }
+}
+
+.shepherd-element.tutorial-cinematic {
+  width: 1040px;
+  max-width: calc(100vw - 48px);
+
+  .shepherd-content { min-height: 560px; display: flex; flex-direction: column; }
+  .tutorial-art { position: absolute; inset: 0; background-size: cover; background-position: center; animation: tutorial-reveal 600ms ease-out both; }
+  .tutorial-art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, #070e19fa 0%, #080f1aed 35%, #09132180 65%, #09132115), linear-gradient(0deg, #080f1acd, transparent 50%); }
+  .tutorial-body { max-width: 65%; padding: 42px 44px 0; }
+  .tutorial-chapters { gap: 22px; margin-bottom: 38px; font-size: 12px; }
+  h2 { font-size: clamp(36px, 4vw, 52px); margin-bottom: 20px; }
+  .tutorial-lead { color: #c4d0de; font-size: 19px; }
+  .tutorial-goals { display: grid; gap: 14px; padding: 22px 0 0; margin: 0; list-style: none; }
+  .tutorial-goals li { display: flex; align-items: flex-start; gap: 14px; }
+  .tutorial-goals > li > span { display: grid; place-items: center; flex-shrink: 0; width: 31px; height: 31px; border: 1px solid #d6b37066; border-radius: 5px; color: var(--guide-gold); background: #d6b3700c; font-size: 12px; font-weight: 900; }
+  .tutorial-goals strong { color: #ebd6ad; font-size: 17px; font-weight: 900; }
+  .tutorial-goals p { margin: 1px 0 0; color: #9eafc2; font-size: 14px; line-height: 1.45; }
+  .shepherd-footer { max-width: 65%; width: 100%; margin-top: auto; padding: 26px 44px 30px; }
+  .shepherd-button { flex-basis: auto; }
+  .shepherd-button-secondary { flex: 0 0 auto; order: 0; }
+}
+
+.game-page .tutorial-focus { outline: 2px solid #edcc8b; outline-offset: 6px; box-shadow: 0 0 0 5px #e6bd6f18, 0 0 30px #e6bd6f30; }
+.game-page:has(#tutorial-step-3[data-preview=true]) .normal-items .buy-button:not(:disabled),
+.game-page:has(#tutorial-step-6[data-preview=true]) .normal-items .buy-button:not(:disabled),
+.game-page:has(#tutorial-step-7[data-preview=true]) .rare-items .transmute-button:not(:disabled),
+.game-page:has(#tutorial-step-8[data-preview=true]) #finish-transmute:not(.disabled) {
+  outline: 2px solid #f2cf8a;
+  outline-offset: 4px;
+  box-shadow: 0 0 22px #e6bd6f55;
+}
+.shepherd-element.tutorial-shop-guide {
+  width: 360px;
+  .tutorial-body { padding: 22px 22px 0; }
+  .tutorial-chapters { margin-bottom: 20px; }
+  h2 { font-size: 27px; }
+  .tutorial-lead { font-size: 16px; line-height: 1.55; }
+  .tutorial-shop-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
+  .tutorial-shop-items > div { text-align: center; }
+  .tutorial-shop-items img { display: block; width: 64px; height: 48px; object-fit: cover; border: 1px solid #c6a36877; border-radius: 4px; margin: 0 auto 5px; }
+  .tutorial-shop-items strong { color: #e6d2ab; font-size: 13px; }
+  .shepherd-footer { padding: 12px 22px 16px; }
+  .shepherd-arrow::before { background: #e7c384 !important; }
+}
+@keyframes tutorial-reveal { from { opacity: .3; } to { opacity: 1; } }
+
+@media (max-width: 767px) {
+  .shepherd-element.tutorial-hud {
+    max-height: calc(100dvh - 24px);
+    .shepherd-content { max-height: calc(100dvh - 24px); overflow-y: auto; }
+    .tutorial-body { padding: 22px 20px 0; }
+    .tutorial-chapters { gap: 10px; margin-bottom: 18px; font-size: 10px; }
+    h2 { font-size: 27px; }
+    .tutorial-lead { font-size: 16px; line-height: 1.5; }
+    .shepherd-footer { padding: 20px; gap: 9px; }
+  }
+  .shepherd-element.tutorial-cinematic {
+    width: calc(100vw - 24px);
+    max-width: calc(100vw - 24px);
+    .shepherd-content { min-height: 0; padding-top: 135px; }
+    .tutorial-art { background-position: 65% top; background-size: auto 360px; background-repeat: no-repeat; }
+    .tutorial-art::after { background: linear-gradient(0deg, #08101b 20%, #08101bfa 54%, transparent 100%); }
+    .tutorial-body, .shepherd-footer { max-width: none; }
+    .tutorial-body { padding: 22px 22px 0; }
+    h2 { font-size: 34px; }
+    .tutorial-goals { padding-top: 18px; gap: 12px; }
+    .shepherd-footer { padding: 22px; }
+    .shepherd-button { flex-basis: 100%; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shepherd-element.tutorial-hud, .shepherd-element.tutorial-hud * { animation: none; transition: none; scroll-behavior: auto; }
+}

@@ -1,0 +1,79 @@
+<section class="battle-passive-turn" aria-label={"#{@hero.name} actions"}>
+  <div class="row mt-2">
+    <div class="col center">
+      <%= if @preview do %>
+        <div class="battle-waiting" id={"battle-status-#{@hero.id}"}>
+          <%= cond do %>
+            <% @last_turn && @last_turn.attacker.hero_id == @hero.id -> %>
+              Used {skill_name(@last_turn.skill)} {item_name(@last_turn.item)}
+            <% @turn.attacker.hero_id == @hero.id -> %>
+              Choosing an action…
+            <% true -> %>
+              Waiting to act
+          <% end %>
+        </div>
+      <% else %>
+        <%= if @last_turn && @last_turn.skill do %>
+          <%= if @last_turn.attacker.hero_id == @hero.id do %>
+            <div class={if @preview, do: "battle-waiting", else: "btn btn-outline-danger"}>
+              Attacked with {skill_name(@last_turn.skill)} {item_name(@last_turn.item)}
+            </div>
+          <% else %>
+            <div class={if @preview, do: "battle-waiting", else: "btn btn-outline-danger"}>Thinking...</div>
+          <% end %>
+        <% end %>
+      <% end %>
+      <.turn_timer preview={@preview} battle={@battle} last_turn={@last_turn} hero={@hero} turn_timer={@turn_timer} />
+    </div>
+  </div>
+  <div class="row mb-1">
+    <div class="col mt-1">
+      <div class="skills-container">
+        <div :if={!@preview} class="img-container mr-4 float-left inactive">
+          <.battle_status_icon
+            code="basic_attack"
+            title={TT.basic_attack_tooltip()}
+            class={"skill-img #{if @last_turn && @last_turn.skill && @last_turn.skill.code == "basic_attack", do: "last-skill"}"}
+          />
+        </div>
+        <%= for skill <- @hero.skills do %>
+          <div class="img-container float-left inactive skill-container">
+            <.battle_resource_image
+              resource={skill}
+              class={"skill-img #{if @last_turn && @last_turn.skill && @last_turn.skill.id == skill.id, do: "last-skill"}"}
+            />
+            <.resource_status_badge preview={@preview} resource={skill} battler={@turn.defender} />
+          </div>
+        <% end %>
+        <div :if={@preview} class="img-container basic-attack inactive">
+          <.battle_status_icon
+            code="basic_attack"
+            title={TT.basic_attack_tooltip()}
+            class={"skill-img #{if @last_turn && @last_turn.skill && @last_turn.skill.code == "basic_attack", do: "last-skill"}"}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div class="items-container">
+        <%= for item <- @hero.items do %>
+          <div class="img-container float-left inactive">
+            <.battle_resource_image
+              resource={item}
+              class={"item-img #{if @last_turn && @last_turn.item == item, do: "last-item"}"}
+            />
+          </div>
+        <% end %>
+        <%= if Enum.count(@hero.items) < 6 do %>
+          <%= for _ <- (Enum.count(@hero.items)..5) do %>
+            <div class="img-container item-container float-left">
+              <.empty_item_slot />
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+  </div>
+</section>

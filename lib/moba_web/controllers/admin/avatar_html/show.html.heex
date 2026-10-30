@@ -1,7 +1,7 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <%= link("Edit", to: Routes.avatar_path(@conn, :edit, @avatar), class: "torch-button") %>
-    <%= link("Back", to: Routes.avatar_path(@conn, :index), class: "torch-button") %>
+    <%= link("Edit", to: ~p"/admin/avatars/#{@avatar}/edit", class: "torch-button") %>
+    <%= link("Back", to: ~p"/admin/avatars", class: "torch-button") %>
   </div>
 </section>
 

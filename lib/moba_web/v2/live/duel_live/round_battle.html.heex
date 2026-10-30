@@ -1,0 +1,43 @@
+<div class="duel-round-battle" data-finished={@battle.finished}>
+  <%= if @battle.finished do %>
+    <% winner = round_winner(@battle, @duel) %>
+    <h3>{if winner, do: "#{winner} wins", else: "Draw"}</h3>
+    <div :for={hero <- [@battle.attacker, @battle.defender]} class="duel-survivor">
+      <% snapshot = battle_turn_hero(@battle, hero.id) %>
+      <div class="duel-survivor-heading">
+        <img src={GH.image_url(hero.avatar)} alt="" /><strong>{hero.name}</strong><span :if={snapshot.current_hp <= 0}>Defeated</span>
+      </div>
+      <.resource_bar
+        tone="health"
+        label={"#{hero.name} health"}
+        current={snapshot.current_hp}
+        total={snapshot.total_hp}
+      />
+      <.resource_bar
+        tone="energy"
+        label={"#{hero.name} energy"}
+        current={snapshot.current_mp}
+        total={snapshot.total_mp}
+      />
+    </div>
+    <.link
+      navigate={preview_path(assigns, ~p"/battles/#{@battle}")}
+      class="btn base-secondary"
+      id={"duel-review-battle-#{@battle.id}"}
+    >
+      View Battle <span aria-hidden="true">→</span>
+    </.link>
+  <% else %>
+    <span class="duel-eyebrow">Both heroes ready</span>
+    <h3>Let them fight</h3>
+    <.link
+      navigate={preview_path(assigns, ~p"/battles/#{@battle}")}
+      class="btn battle-primary"
+      id={"loading-battle-#{@battle.id}"}
+      phx-hook="Loading"
+      data-loading="Entering…"
+    >
+      <span class="loading-text">Enter Battle →</span>
+    </.link>
+  <% end %>
+</div>

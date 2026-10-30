@@ -1,0 +1,81 @@
+<%= if @preview do %>
+  <.pve_result {assigns} />
+<% else %>
+  <.battle_result_header title={battle_result(@battle)} class="col center victory-title margin-auto">
+    <.pve_reward_badges battle={@battle} />
+  </.battle_result_header>
+
+  <div class="row">
+    <% snapshot_level = @snapshot.level || @battle.attacker.level || 1 %>
+    <div class="d-none d-md-block col-2"></div>
+    <div class="col-12 col-md-8 center">
+      <div class="float-left center level-bubble">
+        <ul class="pagination pagination-rounded mb-0">
+          <li class="page-item">
+            <div class="page-link hero-level bg-white">
+              {if @snapshot.leveled_up, do: snapshot_level - 1, else: snapshot_level}
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div class="progress progress-fixed victory-xp-bar">
+        <div style={"width:#{hero_xp_percentage(@battle)}%; min-width: 0% !important"} class="progress-bar bg-white">
+        </div>
+        <%= if @battle.rewards.total_xp > 0 do %>
+          <div style={"width:#{battle_xp_percentage(@battle)}%"} class="progress-bar">
+            <span>&nbsp;&nbsp;+{@battle.rewards.total_xp} XP&nbsp;&nbsp;</span>
+          </div>
+        <% end %>
+      </div>
+      <div class="float-left center level-bubble">
+        <ul class="pagination pagination-rounded mb-0">
+          <li class="page-item">
+            <div class={"page-link hero-next-level #{if @snapshot.leveled_up, do: "hero-leveled"}"}>
+              {if @snapshot.leveled_up, do: snapshot_level, else: snapshot_level + 1}
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="d-none d-md-block col-2">
+      <div class="ribbon-box leveled">
+        <%= if @snapshot.leveled_up do %>
+          <div class="ribbon ribbon-primary float-left shape">Level Up!</div>
+        <% end %>
+      </div>
+    </div>
+  </div>
+  <%= if @current_player do %>
+    <.battle_action_row>
+      <div class="col-4">
+        <.battle_nav_action
+          navigate={preview_path(assigns, ~p"/battles")}
+          class="btn btn-outline-secondary btn-lg btn-block"
+          id="load-battles"
+          icon="fa fa-list-ul"
+          label="View Battle Log"
+        />
+      </div>
+      <div class="col">
+        <.battle_nav_action
+          navigate={preview_path(assigns, ~p"/training")}
+          class="btn btn-outline-success btn-lg btn-block"
+          id="load-training"
+          icon="fa fa-sword"
+          label="Back to Training"
+        />
+      </div>
+    </.battle_action_row>
+  <% else %>
+    <.battle_action_row>
+      <div class="col">
+        <.battle_guest_create_action
+          preview={Map.get(assigns, :preview, false)}
+          class="btn btn-success btn-block btn-lg"
+          icon="fa fa-user-plus"
+          label="Create your Hero"
+        />
+      </div>
+    </.battle_action_row>
+  <% end %>
+<% end %>

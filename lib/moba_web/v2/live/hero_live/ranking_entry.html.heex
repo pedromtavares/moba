@@ -1,0 +1,35 @@
+<tr
+  id={"ranking-#{@hero.id}"}
+  data-current={to_string(@selected)}
+  phx-container="#ranking-card"
+  phx-hook={if @scroll, do: "HalfScroll"}
+>
+  <td class="hero-ranking-position">
+    <%= if @hero.pve_ranking do %>
+      <span>#{@hero.pve_ranking}</span>
+    <% else %>
+      <span class="hero-ranking-unranked" aria-label="Unranked">—</span>
+    <% end %>
+  </td>
+  <td>
+    <.link
+      navigate={preview_path(assigns, ~p"/hero/#{@hero}")}
+      class="hero-ranking-identity"
+      aria-current={if @selected, do: "page"}
+    >
+      <img src={GH.image_url(@hero.avatar)} alt="" loading="lazy" />
+      <div><strong>{@hero.name}</strong><small>{@hero.avatar.name}</small></div>
+    </.link>
+  </td>
+  <td class="hero-ranking-farm" title={@hero.total_xp_farm + @hero.total_gold_farm}>
+    <img src={"/images/league/#{@hero.league_tier}.png"} alt={Moba.leagues()[@hero.league_tier]} />
+    <strong>{GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}</strong>
+  </td>
+  <td class="hero-ranking-time">
+    <%= if @hero.finished_at do %>
+      <strong>{GH.minutes_label(GH.finished_time(@hero), true)}</strong><small>min</small>
+    <% else %>
+      <span>In training</span>
+    <% end %>
+  </td>
+</tr>

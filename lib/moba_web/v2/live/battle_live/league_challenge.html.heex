@@ -1,0 +1,143 @@
+<% won? = @battle.winner_id == @battle.attacker_id
+promoted? = won? && @snapshot.league_step == 0
+stage_victory? = won? && !promoted?
+challenge_tier = if promoted?, do: @snapshot.league_tier - 1, else: @snapshot.league_tier
+step_count = Game.max_league_step_for(challenge_tier)
+current_step = if won?, do: @snapshot.league_step, else: @snapshot.previous_league_step
+completed = if promoted?, do: step_count, else: max(current_step - 1, 0)
+next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
+<section
+  id="league-challenge-result"
+  class={["league-outcome", promoted? && "is-promoted", stage_victory? && "is-stage-victory"]}
+  data-result={if won?, do: "victory", else: "defeat"}
+  data-league={if promoted?, do: @snapshot.league_tier}
+  style={
+    cond do
+      promoted? -> "--promotion-scene: url(/images/tutorial/arena-of-ascension.jpg)"
+      stage_victory? -> "--victory-scene: url(/images/tutorial/arena-of-ascension.jpg)"
+      true -> nil
+    end
+  }
+>
+  <div class="league-outcome-heading">
+    <div :if={stage_victory?} class="league-victory-seal" aria-hidden="true">
+      <.icon name="game-trophy" />
+    </div>
+    <div :if={promoted?} class="league-promotion-ranks" aria-label="League promotion">
+      <img
+        class="league-previous-rank"
+        src={"/images/league/#{challenge_tier}.png"}
+        alt={Moba.leagues()[challenge_tier]}
+      />
+      <span aria-hidden="true">→</span>
+      <img
+        id="league-promoted-emblem"
+        src={"/images/league/#{@snapshot.league_tier}.png"}
+        alt={Moba.leagues()[@snapshot.league_tier]}
+      />
+    </div>
+    <div>
+      <p class="league-outcome-eyebrow">
+        {if promoted?, do: "League Challenge · Complete", else: "#{Moba.leagues()[challenge_tier]} · League Challenge"}
+      </p>
+      <h3>
+        <%= cond do %>
+          <% promoted? -> %>
+            Promoted to <span class="league-promotion-name">{Moba.leagues()[@snapshot.league_tier]}</span>
+          <% won? -> %>
+            Victory
+          <% Game.master_league?(@snapshot) -> %>
+            Defeated by Roshan
+          <% true -> %>
+            Challenge lost
+        <% end %>
+      </h3>
+      <p :if={stage_victory?} class="league-stage-cleared">Battle {completed} cleared</p>
+      <p :if={!stage_victory?} class="league-outcome-description">
+        <%= cond do %>
+          <% promoted? && @snapshot.league_tier == Moba.max_league_tier() -> %>
+            You have beaten the game and reached the Grandmaster League.
+          <% promoted? -> %>
+            All {step_count} battles cleared. Your new league awaits.
+          <% true -> %>
+            {battle_result(@battle, @snapshot)}
+        <% end %>
+      </p>
+    </div>
+    <%= cond do %>
+      <% next_battle? -> %>
+        <button
+          type="button"
+          id="league-next-battle"
+          class="btn league-continue"
+          phx-click="next-battle"
+          phx-value-id={@battle.id}
+          phx-disable-with="Loading…"
+        >
+          Battle {current_step} <span aria-hidden="true">→</span>
+        </button>
+      <% @current_player -> %>
+        <.link
+          id="load-training"
+          navigate={preview_path(assigns, ~p"/training")}
+          class="btn base-secondary league-return"
+        >
+          Continue training <span aria-hidden="true">→</span>
+        </.link>
+      <% true -> %>
+        <.battle_guest_create_action
+          preview={true}
+          class="btn league-continue"
+          icon="fa fa-user-plus"
+          label="Create your Hero"
+        />
+    <% end %>
+  </div>
+  <ol
+    :if={challenge_tier != Moba.master_league_tier()}
+    class="league-challenge-steps"
+    aria-label="League Challenge progress"
+  >
+    <%= for {label, step} <- Enum.with_index(["Easiest", "Easy", "Medium", "Hard", "Hardest"], 1), step <= step_count do %>
+      <% state =
+        cond do
+          step <= completed -> "complete"
+          !won? && step == current_step -> "failed"
+          next_battle? && step == current_step -> "next"
+          true -> "pending"
+        end %>
+      <li id={"league-challenge-step-#{step}"} data-state={state} aria-current={state == "next" && "step"}>
+        <span class="league-step-marker" aria-hidden="true">
+          <%= case state do %>
+            <% "complete" -> %>
+              ✓
+            <% "failed" -> %>
+              ×
+            <% _ -> %>
+              {step}
+          <% end %>
+        </span>
+        <span>
+          <strong>{label}</strong>
+          <small class={stage_victory? && "sr-only"}>
+            {case state do
+              "complete" -> "Cleared"
+              "failed" -> "Failed"
+              "next" -> "Up next"
+              _ -> "Pending"
+            end}
+          </small>
+        </span>
+      </li>
+    <% end %>
+  </ol>
+  <div :if={promoted?} id="league-promotion-rewards" class="league-promotion-rewards">
+    <span class="league-rewards-label"><.icon name="game-trophy" /> Promotion rewards</span>
+    <span class="league-gold-reward">
+      <strong>+{league_bonus(@snapshot)}</strong> <span>Gold</span>
+    </span>
+    <span class="league-xp-reward">
+      <strong>+{league_bonus(@snapshot)}</strong> <span>XP</span>
+    </span>
+  </div>
+</section>

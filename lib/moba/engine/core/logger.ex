@@ -11,6 +11,8 @@ defmodule Moba.Engine.Core.Logger do
    - [status]this text will turn grey, used for status changes like stuns[/status]
   """
 
+  alias Moba.Engine.Core.{Buff, BuffPause}
+
   @skipped_effects ["last_skill", "current_mp", "double_skill", "damage_type", "buffs", "debuffs"]
   @skipped_resources ["stunned"]
 
@@ -18,8 +20,12 @@ defmodule Moba.Engine.Core.Logger do
   Groups effects from both the attacker and defender and properly lists them according to their priority
   """
   def descriptions_for(turn) do
-    attacker_effects = Enum.map(turn.attacker.effects, fn effect -> Map.put(effect, "hero", turn.attacker.name) end)
-    defender_effects = Enum.map(turn.defender.effects, fn effect -> Map.put(effect, "hero", turn.defender.name) end)
+    attacker_effects =
+      Enum.map(logged_effects(turn.attacker), fn effect -> Map.put(effect, "hero", turn.attacker.name) end)
+
+    defender_effects =
+      Enum.map(logged_effects(turn.defender), fn effect -> Map.put(effect, "hero", turn.defender.name) end)
+
     heroes = %{attacker: turn.attacker.name, defender: turn.defender.name}
 
     (attacker_effects ++ defender_effects)
@@ -28,7 +34,119 @@ defmodule Moba.Engine.Core.Logger do
     |> Enum.sort_by(fn effect -> effect["priority"] end)
     |> grouped_effects()
     # |> IO.inspect()
-    |> Enum.map(fn {key, val} -> {key, description_for(key, val, heroes)} end)
+    |> Enum.map(fn {key, val} -> {key, describe_resource(key, val, heroes)} end)
+  end
+
+  defp logged_effects(battler) do
+    # Older saved turns predate per-effect pause metadata. Project their saved buff
+    # state at read time; never rewrite battle history or infer over explicit metadata.
+    legacy = !Enum.any?(battler.effects, &Map.has_key?(&1, "paused"))
+
+    was_paused =
+      legacy &&
+        (map_size(battler.paused_bonuses) > 0 ||
+           Enum.any?(battler.attacker_debuffs, &(Buff.code(&1) == "fortunes_end")))
+
+    effects =
+      battler.effects
+      |> Enum.reject(&Map.get(&1, "resumed", false))
+      |> Enum.map(fn effect ->
+        paused = Map.get(effect, "paused", was_paused && BuffPause.deferred_effect?(effect["key"], effect["value"]))
+
+        if paused do
+          %{effect | "key" => "buff_paused", "value" => effect["resource_name"] || resource_label(effect["resource"])}
+        else
+          effect
+        end
+      end)
+
+    if was_paused do
+      buffs = battler.buffs ++ battler.defender_buffs
+      codes = Enum.map(buffs, &Buff.code/1) ++ List.wrap(battler.pulse_nova_code)
+
+      effects ++
+        Enum.map(Enum.uniq(codes), fn code ->
+          %{"key" => "buff_paused", "value" => resource_label(code), "resource" => code, "priority" => 3}
+        end)
+    else
+      effects
+    end
+  end
+
+  defp resource_label(code), do: code |> String.split("_") |> Enum.map_join(" ", &String.capitalize/1)
+
+  defp describe_resource(code, effects, heroes) do
+    {resumed, effects} = Map.pop(effects, "buffs_resumed")
+    {paused, effects} = Map.pop(effects, "buff_paused")
+
+    description =
+      cond do
+        paused -> describe_paused_effects(paused, effects)
+        map_size(effects) > 0 -> description_for(code, effects, heroes)
+        true -> nil
+      end
+
+    resumed =
+      resumed &&
+        Enum.map_join(List.wrap(resumed), "; ", fn {_, hero} ->
+          "#{hero}'s [status]buffs resumed[/status]"
+        end)
+
+    [description, resumed] |> Enum.reject(&is_nil/1) |> Enum.join("; ")
+  end
+
+  defp describe_paused_effects(paused, effects) do
+    [{name, _} | _] = List.wrap(paused)
+
+    applied =
+      effects
+      |> Enum.sort_by(fn {key, _} -> key end)
+      |> Enum.flat_map(fn {key, values} -> Enum.map(List.wrap(values), &describe_applied_effect(key, &1)) end)
+      |> Enum.reject(&is_nil/1)
+
+    deferred = Enum.map(List.wrap(paused), fn {_, hero} -> "#{hero}'s buff is [status]paused[/status]" end)
+    "#{name}: " <> Enum.join(applied ++ deferred, "; ")
+  end
+
+  defp describe_applied_effect("damage", {amount, hero}), do: "dealt [damage]#{amount} damage[/damage] to #{hero}"
+
+  defp describe_applied_effect("hp_regen", {amount, hero}) when amount >= 0,
+    do: "restored [hp]#{amount} Health[/hp] to #{hero}"
+
+  defp describe_applied_effect("hp_regen", {amount, hero}),
+    do: "reduced #{hero}'s healing by [hp]#{-amount}[/hp]"
+
+  defp describe_applied_effect("mp_regen", {amount, hero}), do: "restored [mp]#{amount} Energy[/mp] to #{hero}"
+  defp describe_applied_effect("mp_burn", {amount, hero}), do: "drained [mp]#{amount} Energy[/mp] from #{hero}"
+
+  defp describe_applied_effect(key, {true, hero}) when key in ["stunned", "silenced", "disarmed"],
+    do: "#{hero} is [status]#{key}[/status]"
+
+  defp describe_applied_effect(key, {amount, hero}) when key in ["battle_armor", "turn_armor", "next_armor"],
+    do: describe_stat(amount, hero, "armor", "Armor")
+
+  defp describe_applied_effect(key, {amount, hero})
+       when key in [
+              "battle_power",
+              "turn_power",
+              "next_power",
+              "battle_power_normal",
+              "turn_power_normal",
+              "next_power_normal",
+              "battle_power_magic",
+              "turn_power_magic",
+              "next_power_magic"
+            ],
+       do: describe_stat(amount, hero, "power", "Power")
+
+  defp describe_applied_effect("bonus", {skill, hero}), do: "#{hero} used [status]#{skill}[/status]"
+
+  defp describe_applied_effect("turn_atk", {amount, hero}), do: describe_stat(amount, hero, "hp", "Attack")
+  defp describe_applied_effect(_key, _value), do: nil
+
+  defp describe_stat(amount, hero, tag, name) do
+    verb = if amount < 0, do: "lost", else: "gained"
+    "#{hero} #{verb} [#{tag}]#{abs(amount)} #{name}[/#{tag}]"
   end
 
   defp grouped_effects(effects) do
@@ -78,6 +196,92 @@ defmodule Moba.Engine.Core.Logger do
   defp sum_value(_, value), do: value
 
   # ------------------------------------------ DESCRIPTIONS
+
+  defp description_for("sunder", %{"hp_regen" => {hp, hero}}, heroes) do
+    "#{hero} stole [hp]#{hp} Health[/hp] from #{opponent_for(hero, heroes)}"
+  end
+
+  defp description_for(
+         "mana_void",
+         %{"damage" => {damage, target}, "mp_regen" => {mp, hero}, "mp_burn" => {drained, _}},
+         _
+       ) do
+    "#{hero} dealt [damage]#{damage} magic damage[/damage] to #{target}, restored [mp]#{mp} Energy[/mp] and drained [mp]#{drained} Energy[/mp] from the opponent"
+  end
+
+  defp description_for(
+         "chakra_magic",
+         %{"mp_regen" => {mp, hero}, "extra" => {turns, _}, "attacker_debuffs" => {count, _}},
+         _
+       ) do
+    noun = if count == 1, do: "debuff", else: "debuffs"
+
+    "#{hero} removed [status]#{count} #{noun}[/status], restored [mp]#{mp} Energy[/mp] and reduced all running cooldowns by [status]#{turns} turns[/status]"
+  end
+
+  defp description_for("chakra_magic", %{"mp_regen" => {mp, hero}, "extra" => {turns, _}}, _) do
+    "#{hero} restored [mp]#{mp} Energy[/mp] and reduced all running cooldowns by [status]#{turns} turns[/status]"
+  end
+
+  defp description_for("purifying_flames", %{"hp_regen" => {hp, hero}}, _) do
+    "Purifying Flames restored [hp]#{hp} Health[/hp] to #{hero}"
+  end
+
+  defp description_for("purifying_flames", %{"damage" => {damage, hero}}, _) do
+    "Purifying Flames dealt [damage]#{damage} damage[/damage] to #{hero}, who will heal on their next three turns"
+  end
+
+  defp description_for("fortunes_end", %{"damage" => {damage, hero}}, _) do
+    "Fortune's End paused #{hero}'s buffs for two turns and dealt [damage]#{damage} damage[/damage]"
+  end
+
+  defp description_for("pulse_nova", %{"damage" => {damage, hero}}, _) do
+    "Pulse Nova dealt [damage]#{damage} magic damage[/damage] to #{hero}"
+  end
+
+  defp description_for("pulse_nova", %{"pulse_nova" => {state, hero}}, _) do
+    if state == "pulse_nova",
+      do: "#{hero} activated [status]Pulse Nova[/status]",
+      else: "#{hero}'s [status]Pulse Nova[/status] ended because there was not enough Energy for another pulse"
+  end
+
+  defp description_for("rupture", %{"damage" => damage, "attacker_debuffs" => {_, target}}, _) do
+    Enum.map_join(List.wrap(damage), "; ", fn
+      {amount, ^target} ->
+        "Rupture dealt [damage]#{amount} magic damage[/damage] to #{target}, who will receive reflected damage for three turns"
+
+      {amount, hero} ->
+        "#{hero} received [damage]#{amount} reflected damage[/damage]"
+    end)
+  end
+
+  defp description_for("rupture", %{"damage" => {damage, hero}}, _) do
+    "#{hero} received [damage]#{damage} reflected damage[/damage]"
+  end
+
+  defp description_for("rupture", %{"attacker_debuffs" => {_, hero}}, _) do
+    "#{hero} is [status]ruptured[/status] and will receive reflected damage for three turns"
+  end
+
+  defp description_for("octarine_core", %{"extra" => {turns, hero}}, _) do
+    "#{hero} reduced all running cooldowns by [status]#{turns} turns[/status]"
+  end
+
+  defp description_for("soul_booster", %{"mp_regen" => {mp, hero}}, _) do
+    "Soul Booster restored [mp]#{mp} Energy[/mp] to #{hero}"
+  end
+
+  defp description_for("bloodstone", %{"attacker_debuffs" => {_, victim}, "extra" => {healed, hero}}, _) do
+    "#{victim} was affected by Bloodstone; #{hero} stole [hp]#{healed} Health[/hp] from enemy healing"
+  end
+
+  defp description_for("bloodstone", %{"extra" => {healed, hero}}, _) do
+    "#{hero} stole [hp]#{healed} Health[/hp] from enemy healing"
+  end
+
+  defp description_for("bloodstone", %{"attacker_debuffs" => {_, hero}}, _) do
+    "#{hero} is affected by Bloodstone and will have [hp]healing stolen[/hp] for their next two turns"
+  end
 
   defp description_for("blade_fury", %{"damage" => {damage, defender}, "next_armor" => {armor, attacker}}, _) do
     "#{attacker} is spinning furiously, increasing [armor]Armor by #{armor}[/armor] and dealing [damage]#{damage} damage[/damage] to #{defender}"
@@ -323,8 +527,8 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} has been psyqued, taking [damage]#{damage} damage[/damage], losing [armor]#{armor * -1} armor[/armor] and [hp]#{atk * -1} Attack[/hp]"
   end
 
-  defp description_for("rearm", %{"damage" => {damage, defender}, "spell_count" => {_, attacker}}, _) do
-    "#{attacker} has no skill to reuse, dealing [damage]#{damage} damage[/damage] to #{defender}"
+  defp description_for("rearm", %{"damage" => {damage, defender}}, heroes) do
+    "#{opponent_for(defender, heroes)} has no skill to reuse, dealing [damage]#{damage} damage[/damage] to #{defender}"
   end
 
   defp description_for("rearm", %{"bonus" => {skill, attacker}, "turn_power" => {power, _attacker}}, _) do
@@ -496,6 +700,10 @@ defmodule Moba.Engine.Core.Logger do
   end
 
   # EXTRAS
+
+  defp description_for(_, %{"charging" => {state, hero}}, _) when state in [false, "false"] do
+    "#{hero}'s skill was [status]interrupted[/status]"
+  end
 
   defp description_for("disarmed", %{"extra" => {_, hero}}, _) do
     "#{hero} is [status]disarmed[/status] and cannot deal physical damage"

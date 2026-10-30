@@ -1,0 +1,206 @@
+<div id="battle-page" phx-hook="BattleContinueHotkey" data-finished={to_string(@battle.finished)}>
+  <%= if @action_turn_number && (@preview || !@battle.finished) do %>
+    <div
+      id="scroll-to-turn"
+      phx-hook={if @preview, do: "BattleTurnScroll", else: "ScrollToTarget"}
+      phx-target-element={"#turn-#{@action_turn_number}"}
+      data-last-turn={if @preview, do: @last_turn.number}
+    />
+  <% end %>
+
+  <div id="hero-battle" class="battle mt-3">
+    <div class="row battle-matchup">
+      <div class="col-12 col-md-5 battle-contender">
+        <.hero
+          preview={@preview}
+          hero={@battle.attacker}
+          last_hero={last_hero_for(@battle.attacker, @last_turn)}
+          battle={@battle}
+          snapshot={@snapshot}
+        />
+      </div>
+      <div class="col-12 col-md-2 text-center versus-box">
+        <h1 class="f-rpg">VS</h1>
+        <%= if @battle.finished && !@preview do %>
+          <p>
+            <strong>Battle #{@battle.id}</strong>
+            <br />
+            <span class="text-dark"><em>{Timex.format!(@battle.inserted_at, "{relative}", :relative)}</em></span>
+          </p>
+        <% end %>
+      </div>
+      <div class="col-12 col-md-5 battle-contender">
+        <.hero
+          preview={@preview}
+          hero={@battle.defender}
+          last_hero={last_hero_for(@battle.defender, @last_turn)}
+          battle={@battle}
+          snapshot={@battle.defender_snapshot}
+        />
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+        <%= if length(@battle.turns) > 0 do %>
+          <div class="timeline mt-3 mb-0" dir="ltr">
+            <div class="text-center battle-initiated">
+              <h2 :if={@preview} id="battle-initiated" phx-hook="Scroll">
+                {case @battle.type do
+                  "league" -> "League battle"
+                  "duel" -> "Arena duel"
+                  "match" -> "Season match"
+                  _ -> "Training battle"
+                end} initiated by {@battle.initiator.name}
+              </h2>
+              <div
+                :if={!@preview}
+                class={"btn btn-lg btn-outline-#{if @battle.initiator_id == @battle.attacker_id, do: "danger", else: "primary"} width-lg"}
+                phx-hook="Scroll"
+                id="battle-initiated"
+              >
+                Battle initiated by {@battle.initiator.name}
+              </div>
+            </div>
+            <.turn
+              :for={{turn, previous_turn} <- Enum.zip(@battle.turns, [@initial_turn | @battle.turns])}
+              previous_turn={previous_turn}
+              preview={@preview}
+              turn={turn}
+              is_attacker={
+                if @preview,
+                  do: turn.attacker.hero_id == @battle.attacker_id,
+                  else: turn.attacker.player_id == @battle.attacker_player_id
+              }
+              debug={@debug}
+            />
+            <div class="clearfix"></div>
+            <%= if @battle.finished do %>
+              <%= if @preview do %>
+                <section id="battle-timeline-end" class="battle-timeline-end" aria-labelledby="battle-end-title">
+                  <span class="battle-end-marker" aria-hidden="true">✓</span>
+                  <h2 id="battle-end-title">Battle complete</h2>
+                  <div class="battle-end-actions">
+                    <.battle_over_action preview={true} battle={@battle} />
+                    <.share_battle_action preview={true} battle={@battle} />
+                  </div>
+                </section>
+              <% else %>
+                <.battle_over_action battle={@battle} />
+                <.share_battle_action battle={@battle} />
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <%= if @preview do %>
+            <% your_turn? =
+              active_attacker?(@battle, @last_turn, @current_player) ||
+                active_defender?(@battle, @last_turn, @current_player)
+
+            participant? =
+              @current_player &&
+                (current_attacker?(@battle, @current_player.id) || current_defender?(@battle, @current_player.id)) %>
+            <section
+              id="battle-ready"
+              class="battle-opening"
+              data-state={if your_turn?, do: "ready", else: "waiting"}
+              aria-labelledby="battle-ready-title"
+            >
+              <span class="battle-opening-marker" aria-hidden="true">{if your_turn?, do: "⚔", else: "…"}</span>
+              <h2 id="battle-ready-title">
+                {if your_turn?, do: "Make your first move", else: "Waiting for #{@battle.initiator.name}"}
+              </h2>
+              <p>
+                {cond do
+                  your_turn? -> "Select a skill below, then attack."
+                  participant? -> "Your opponent moves first."
+                  true -> "The battle will appear here when it starts."
+                end}
+              </p>
+            </section>
+          <% else %>
+            <%= if active_attacker?(@battle, @last_turn, @current_player) do %>
+              <div class="text-center mt-5 battle-empty" id="battle-ready">
+                <h3 class="mt-5">
+                  Click to select a skill on the battle bar below and then click the Attack button to start the battle!
+                </h3>
+              </div>
+            <% end %>
+          <% end %>
+        <% end %>
+      </div>
+    </div>
+    <div class="clearfix">&nbsp;</div>
+  </div>
+
+  <div id="battle-bar">
+    <div class="container-fluid">
+      <div class="row">
+        <.turn_hero
+          preview={@preview}
+          battle={@battle}
+          turn={@turn}
+          hero={@battle.attacker}
+          turn_hero={
+            if(@turn.attacker.player_id == @battle.attacker_player_id, do: @turn.attacker, else: @turn.defender)
+          }
+        />
+
+        <div class="col-12 col-xl-8 battle-border-left battle-border-right battle-command">
+          <%= if @battle.finished do %>
+            <%= case @battle.type do %>
+              <% "pve" -> %>
+                <.pve_rewards
+                  preview={Map.get(assigns, :preview, false)}
+                  battle={@battle}
+                  snapshot={@snapshot}
+                  current_player={@current_player}
+                />
+              <% "league" -> %>
+                <.league_rewards
+                  preview={Map.get(assigns, :preview, false)}
+                  battle={@battle}
+                  snapshot={@snapshot}
+                  current_player={@current_player}
+                />
+              <% "duel" -> %>
+                <.duel_rewards
+                  preview={Map.get(assigns, :preview, false)}
+                  battle={@battle}
+                  current_player={@current_player}
+                />
+              <% "match" -> %>
+                <.match_rewards
+                  preview={Map.get(assigns, :preview, false)}
+                  battle={@battle}
+                  current_player={@current_player}
+                />
+              <% _ -> %>
+                <div></div>
+            <% end %>
+          <% else %>
+            <.active_battle
+              preview={@preview}
+              battle={@battle}
+              last_turn={@last_turn}
+              current_player={@current_player}
+              turn={@turn}
+              skill={@skill}
+              turn_timer={@turn_timer}
+            />
+          <% end %>
+        </div>
+
+        <.turn_hero
+          preview={@preview}
+          battle={@battle}
+          turn={@turn}
+          hero={@battle.defender}
+          turn_hero={
+            if(@turn.attacker.player_id == @battle.attacker_player_id, do: @turn.defender, else: @turn.attacker)
+          }
+        />
+      </div>
+    </div>
+  </div>
+</div>

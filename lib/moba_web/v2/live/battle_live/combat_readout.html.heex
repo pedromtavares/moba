@@ -1,0 +1,42 @@
+<div
+  class="battle-hero-readout combat-readout"
+  id={"combat-hero-#{@hero.id}"}
+  data-dead={to_string(@turn_hero.current_hp <= 0)}
+>
+  <div class="combat-readout-identity">
+    <img src={GH.image_url(@hero.avatar)} alt={@hero.avatar.name} />
+    <div>
+      <strong>{@hero.name}</strong><small>{if @turn_hero.current_hp <= 0, do: "Fallen", else: @hero.avatar.name}</small>
+    </div>
+  </div>
+  <.resource_bar tone="health" label="Health" current={@turn_hero.current_hp} total={@turn_hero.total_hp} />
+  <.resource_bar
+    tone="energy"
+    label="Energy"
+    current={if @turn_hero.current_hp > 0, do: @turn_hero.current_mp, else: 0}
+    total={@turn_hero.total_mp}
+  />
+  <div class="battle-stat-group">
+    <.hero_stat_button
+      tone="success"
+      icon="fa fa-dagger"
+      title={"ATK: #{@turn_hero.atk}"}
+      value={@turn_hero.atk}
+      label="Attack"
+    />
+    <.hero_stat_button
+      tone="warning"
+      icon="fa fa-shield-halved"
+      title={"Armor: #{@turn_hero.armor}"}
+      value={max(@turn_hero.armor, 0)}
+      label="Armor"
+    />
+    <.hero_stat_button
+      tone="pink"
+      icon="fa fa-galaxy"
+      title={"Power: #{@turn_hero.power}"}
+      value={@turn_hero.power}
+      label="Power"
+    />
+  </div>
+</div>

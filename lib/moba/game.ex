@@ -84,6 +84,8 @@ defmodule Moba.Game do
 
   defdelegate create_current_pve_hero!(attrs, player, avatar, skills), to: Training
 
+  defdelegate start_guest!(session_key, avatar, skills), to: Training
+
   defdelegate create_hero!(attrs, player, avatar, skills), to: Training
 
   defdelegate finish_pve!(hero), to: Training

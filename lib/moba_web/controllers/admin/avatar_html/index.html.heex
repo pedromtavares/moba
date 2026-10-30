@@ -1,6 +1,6 @@
 <section id="torch-toolbar">
   <div class="torch-container">
-    <%= link("New Avatar", to: Routes.avatar_path(@conn, :new)) %>
+    <%= link("New Avatar", to: ~p"/admin/avatars/new") %>
   </div>
 </section>
 <section id="torch-index-content">
@@ -86,7 +86,7 @@
         </div>
 
         <button type="submit" class="torch-button">Search</button>
-        <%= link("Clear Filters", to: Routes.avatar_path(@conn, :index)) %>
+        <%= link("Clear Filters", to: ~p"/admin/avatars") %>
       <% end %>
     </section>
 
@@ -125,8 +125,8 @@
                 <td><%= avatar.level_requirement %></td>
 
                 <td class="torch-actions">
-                  <span><%= link("Show", to: Routes.avatar_path(@conn, :show, avatar)) %></span>
-                  <span><%= link("Edit", to: Routes.avatar_path(@conn, :edit, avatar)) %></span>
+                  <span><%= link("Show", to: ~p"/admin/avatars/#{avatar}") %></span>
+                  <span><%= link("Edit", to: ~p"/admin/avatars/#{avatar}/edit") %></span>
                 </td>
               </tr>
             <% end %>

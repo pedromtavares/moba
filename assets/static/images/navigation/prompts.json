@@ -1,0 +1,43 @@
+{
+  "generator": "OpenAI built-in image_gen",
+  "style_reference": "Approved Vanguard Helmet (favicon.png)",
+  "brief": "Cinematic fantasy UI emblems; broad sculpted gold and ivory planes, burgundy secondary surfaces, navy recesses, restrained upper-left lighting, clear silhouettes at 48–56 CSS pixels, transparent background, no text or surrounding frames.",
+  "subjects": [
+    {
+      "key": "profile",
+      "subject": "The approved Vanguard Helmet favicon."
+    },
+    {
+      "key": "arena",
+      "subject": "The approved companion ivory/gold crossed fantasy swords with burgundy handles and a central ruby."
+    },
+    {
+      "key": "base",
+      "subject": "A compact fortified hero citadel: three chunky crenellated towers, central tower tallest, one large dark doorway, ivory stone face planes and antique-gold architectural edges. A tiny broad burgundy banner hangs beneath the central battlement. Bold recognizable castle silhouette. No stairs, landscape, sky, surrounding shield, or pedestal."
+    },
+    {
+      "key": "training",
+      "subject": "A single vertical broadsword with a large ivory blade, a chunky antique-gold wing-shaped crossguard, short burgundy grip, and a small faceted gold pommel. Two simple gold upward chevrons flank the lower blade to suggest training and growth. One cohesive compact emblem, no background or surrounding shield."
+    },
+    {
+      "key": "tavern",
+      "subject": "A single heroic tavern tankard: broad ivory metal cup with thick antique-gold rim and base, a large angular gold handle on the right, one broad burgundy inset panel bearing a simple gold diamond. A small ivory curl of steam, not foam. Compact and elegant fantasy waystation/sanctuary emblem. No table, room, pedestal, surrounding shield or badge."
+    },
+    {
+      "key": "community",
+      "subject": "A compact guild-banner emblem: one large central burgundy pennant with antique-gold trim and an ivory diamond crest, two shorter ivory-and-gold pennants beside it, all three flags slightly overlapping as one cohesive emblem. Short sturdy gold spearhead finials. Conveys people rallying together. Bold clean silhouette, no poles extending far down, no surrounding shield, circle or backdrop."
+    },
+    {
+      "key": "manual",
+      "subject": "One open fantasy grimoire, viewed straight on, with large ivory pages, chunky antique-gold book edges and spine, a thick burgundy cover visible below, and a single small gold diamond hovering just over the book's center. The page spread makes a clear readable open-book silhouette. No lettering, lines of print, runes, tiny symbols, quill, table, pedestal or surrounding badge."
+    },
+    {
+      "key": "admin",
+      "subject": "A single angular warden's shield, antique-gold broad rim, warm-ivory center face, deep burgundy recessed side facets. In the center a single broad dark-navy keyhole cutout. A short simple gold three-point crown is integrated into its top edge. This is an authority/guardian emblem, not another helmet. No surrounding badge, weapons, scene or pedestal."
+    },
+    {
+      "key": "join",
+      "subject": "A single summoning crystal emblem for joining the game: a large warm-ivory and pale-gold faceted diamond crystal, held by a compact deep-burgundy and antique-gold two-prong cradle at its lower sides. A broad solid gold plus sign, clearly legible, is attached at the crystal's upper-right side. One cohesive compact silhouette, no ring, rune circle, surrounding shield, pedestal or scenery."
+    }
+  ]
+}

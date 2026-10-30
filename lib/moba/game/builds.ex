@@ -253,6 +253,66 @@ defmodule Moba.Game.Builds do
 
   # HEROES
 
+  defp lists_for(code) when code == "anti_mage" do
+    [
+      {
+        ["mana_void", "blink_strike", "feast", "jinada"],
+        ["arcane_boots", "diffusal_blade", "assault_cuirass", "silver_edge", "satanic", "daedalus"],
+        "Energy-stealing carry"
+      },
+      {
+        ["mana_void", "fortunes_end", "purifying_flames", "chakra_magic"],
+        ["maelstrom", "soul_booster", "heavens_halberd", "boots_of_travel", "linkens_sphere", "scythe_of_vyse"],
+        "Energy-fueled caster"
+      }
+    ]
+  end
+
+  defp lists_for(code) when code == "bloodseeker" do
+    [
+      {
+        ["rupture", "decay", "feast", "jinada"],
+        ["vanguard", "bloodstone", "assault_cuirass", "linkens_sphere", "satanic", "daedalus"],
+        "Reflecting bruiser"
+      },
+      {
+        ["rupture", "empower", "fortunes_end", "chakra_magic"],
+        ["arcane_boots", "heavens_halberd", "octarine_core", "boots_of_travel", "shivas_guard", "scythe_of_vyse"],
+        "Sustained spell reflection"
+      }
+    ]
+  end
+
+  defp lists_for(code) when code == "leshrac" do
+    [
+      {
+        ["pulse_nova", "chakra_magic", "death_pulse", "fiery_soul"],
+        ["arcane_boots", "soul_booster", "octarine_core", "boots_of_travel", "shivas_guard", "linkens_sphere"],
+        "Sustained Pulse Nova"
+      },
+      {
+        ["pulse_nova", "empower", "feast", "jinada"],
+        ["maelstrom", "soul_booster", "bloodstone", "assault_cuirass", "satanic", "daedalus"],
+        "Pulse Nova hybrid carry"
+      }
+    ]
+  end
+
+  defp lists_for(code) when code == "terrorblade" do
+    [
+      {
+        ["empower", "sunder", "fury_swipes", "jinada"],
+        ["maelstrom", "bloodstone", "octarine_core", "satanic", "linkens_sphere", "daedalus"],
+        "Health-stealing carry"
+      },
+      {
+        ["maledict", "sunder", "purifying_flames", "chakra_magic"],
+        ["arcane_boots", "soul_booster", "octarine_core", "boots_of_travel", "shivas_guard", "scythe_of_vyse"],
+        "Health-stealing caster"
+      }
+    ]
+  end
+
   defp lists_for(code) when code == "abaddon" do
     [
       {
@@ -352,7 +412,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["maledict", "laguna_blade", "phase_shift", "fiery_soul"],
-        ["vanguard", "boots_of_travel", "orchid_malevolence", "silver_edge", "daedalus", "linkens_sphere"],
+        ["vanguard", "boots_of_travel", "octarine_core", "silver_edge", "daedalus", "linkens_sphere"],
         ""
       }
     ]
@@ -367,7 +427,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["decay", "feast", "jinada"],
-        ["tranquil_boots", "diffusal_blade", "silver_edge", "orchid_malevolence", "satanic", "daedalus"],
+        ["tranquil_boots", "bloodstone", "silver_edge", "orchid_malevolence", "satanic", "daedalus"],
         "mantwi"
       }
     ]
@@ -397,7 +457,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["life_drain", "illuminate", "mana_shield", "fiery_soul"],
-        ["maelstrom", "heavens_halberd", "linkens_sphere", "satanic", "dagon5", "shivas_guard"],
+        ["maelstrom", "octarine_core", "linkens_sphere", "satanic", "dagon5", "shivas_guard"],
         "PDK"
       }
     ]
@@ -427,7 +487,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["spell_steal", "maledict", "lightning_bolt", "counter_helix"],
-        ["vanguard", "dagon", "satanic", "linkens_sphere", "shivas_guard", "daedalus"],
+        ["soul_booster", "dagon", "satanic", "linkens_sphere", "shivas_guard", "daedalus"],
         "Asura"
       }
     ]
@@ -472,7 +532,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["remote_mines", "lightning_bolt", "mana_burn", "phase_shift"],
-        ["vanguard", "boots_of_travel", "dagon5", "linkens_sphere", "scythe_of_vyse", "orchid_malevolence"],
+        ["soul_booster", "boots_of_travel", "dagon5", "linkens_sphere", "scythe_of_vyse", "orchid_malevolence"],
         "Balanced Nuker build: damage, regeneration and disable."
       }
     ]
@@ -517,7 +577,7 @@ defmodule Moba.Game.Builds do
       },
       {
         ["feast", "jinada", "phase_shift"],
-        ["shadow_blade", "boots_of_travel", "assault_cuirass", "satanic", "shivas_guard", "daedalus"],
+        ["shadow_blade", "boots_of_travel", "bloodstone", "satanic", "shivas_guard", "daedalus"],
         "ererer"
       }
     ]

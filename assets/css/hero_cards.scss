@@ -1,0 +1,125 @@
+/* The same portrait and loadout treatment across /new card variants. */
+.game-page .hero-card.card {
+  background-clip: padding-box;
+  border-radius: 8px;
+  overflow: hidden;
+  isolation: isolate;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(180deg, #060a1233, transparent 45%, #060a1266);
+    pointer-events: none;
+    transition: opacity 220ms ease;
+  }
+
+  &:hover::before, &:focus-within::before { opacity: .45; }
+  > .card-header { position: absolute; inset: 0 0 auto; z-index: 2; padding: 14px 14px 30px !important; border: 0; background: linear-gradient(180deg, #060a12e6, #060a1280 60%, transparent) !important; }
+  > .card-header h4, > h4.card-header { justify-content: flex-start !important; flex-wrap: wrap; gap: 8px 10px; text-shadow: 0 2px 8px #000; }
+  .hero-card-name, .target-name { order: -1; display: inline-flex; align-items: center; gap: 7px; min-width: 0; color: #f1f1ef; font-family: 'Nunito', sans-serif; font-size: 21px !important; font-weight: 800; overflow-wrap: anywhere; }
+  .hero-card-name .league-logo, .hero-card-name > img { width: auto; max-width: 30px; height: 26px !important; margin: 0; object-fit: contain; }
+  .hero-card-name > span { font-size: inherit !important; }
+  .hero-card-meta, .card-header strong { padding: 4px 7px; border: 1px solid #ffffff26; border-radius: 4px; background: #080c1473; color: #c2c5cc; font-family: 'Nunito', sans-serif; font-size: 11px !important; font-style: normal !important; line-height: 1.4; }
+  .card-header strong { white-space: nowrap; }
+  .hero-card-rank { order: 2; margin-left: auto; color: #dfbf88; font-family: 'Nunito', sans-serif; font-size: 15px !important; font-style: normal !important; font-weight: 800; }
+  .hero-card-detail { order: 3; color: #c2c5cc; font-family: 'Nunito', sans-serif; font-size: 12px !important; font-style: normal !important; }
+  .target-rewards { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; margin-left: auto; border: 1px solid #ffffff26; border-radius: 50%; background: #080c1480; font-size: 15px; flex-shrink: 0; }
+  .hero-card-summary { order: 3; display: flex; flex-wrap: wrap; gap: 8px; width: 100%; }
+  .hero-card-summary .game-stat { padding: 3px 0; font-size: 12px; }
+  > .card-body { position: relative; min-height: 130px; background-image: linear-gradient(0deg, #080c1373, transparent 55%); }
+  > .card-body > img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  > .card-footer { flex-shrink: 0; background: #0b1019 !important; border-top: 1px solid #baa98a20; border-radius: 0; }
+  &:has(.skills-container) > .card-footer { padding: 0 !important; }
+  .card-footer > .row { margin: 0 !important; }
+  .hero-card-stats { padding: 8px 10px 0; }
+  .hero-card-stats .game-stat { padding: 5px 7px; }
+  .hero-card-stats .hero-stats { flex-wrap: wrap; justify-content: center; }
+
+  .col-12:has(> .skills-container) { display: grid !important; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); gap: 8px; margin: 0 !important; padding: 9px; }
+  .col-12:has(> .skills-container):not(:has(> .items-container)) { grid-template-columns: minmax(0, 1fr); }
+  .skills-container { display: grid !important; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; width: 100%; max-width: 400px; height: auto; max-height: none; margin: 0 auto; float: none; }
+  .col-12:has(> .items-container) > .skills-container { max-width: none; }
+  .items-container { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 3px; width: auto; max-width: none; margin: 0; padding-left: 8px; border: 0; border-left: 1px solid #baa98a30; float: none !important; }
+  .item-container { width: 100%; max-width: none; max-height: none; }
+  .skill-img, .item-img { display: block; width: 100%; max-width: none; height: 100%; min-width: 0; margin: 0; object-fit: cover; border: 1px solid #ffffff1a !important; border-image: none; border-radius: 3px; transition: filter 180ms ease, border-color 180ms ease; }
+  .skill-img { aspect-ratio: 1; }
+  .skill-img:hover, .item-img:hover { border-color: #d6b47c99 !important; filter: brightness(1.15); }
+
+  > .hero-card-actions { gap: 6px; padding: 8px; border-top: 1px solid #baa98a20; background: #0b1019 !important; }
+  > .hero-card-actions:not(:has(.btn)) { display: none !important; }
+  .hero-card-actions .btn, .hero-card-controls .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 7px 10px; font-family: 'Nunito', sans-serif; font-size: 12px; letter-spacing: 0; line-height: 1.4; }
+  .hero-card-actions .btn { flex: 1; margin: 0 !important; }
+  .hero-card-controls { display: grid !important; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 12px 12px 4px; }
+  .hero-card-controls .hero-card-resume, .hero-card-controls .hero-card-customize { grid-column: 1; grid-row: 1; min-height: 38px; padding: 9px 14px; font-size: 13px; font-weight: 800; }
+  .hero-card-controls .hero-card-delete { grid-column: 2; grid-row: 1; width: 34px; min-height: 34px; padding: 0; border: 0; background: transparent !important; color: #8f929d; box-shadow: none; }
+  .hero-card-controls .hero-card-delete i { margin: 0 !important; }
+  .hero-card-delete-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .hero-card-controls .hero-card-delete:hover { color: #f0a0ab; background: #c95b701a !important; box-shadow: none; }
+  .hero-card-metrics { grid-column: 3; grid-row: 1; display: flex; align-items: center; justify-content: flex-end; gap: 10px; min-width: 0; }
+  .hero-card-controls .game-stat { padding: 4px 6px; font-size: 12px; }
+  .hero-card-metrics .game-stat { flex: 0 0 auto; }
+  .hero-card-controls .hero-card-farm { display: grid; grid-template-columns: auto auto; gap: 1px 6px; padding: 0; color: #dfbf88; }
+  .hero-card-farm-value { font-size: 16px; font-weight: 800; line-height: 1.3; }
+  .hero-card-metric-label { grid-column: 1 / -1; color: #959ca9; font-size: 10px; line-height: 1.3; text-align: right; }
+  .hero-card-controls .hero-card-duration { flex: 0 0 auto; gap: 5px; padding: 4px 0 4px 10px; border-left: 1px solid #baa98a30 !important; white-space: nowrap; }
+  &.picked-hero-card { border-color: #e6c58e !important; box-shadow: 0 0 0 1px #d6b47c66, 0 0 20px #d6ad6a26; }
+}
+
+.game-page .hero-card-avatar.card {
+  > .card-body { min-height: 400px; }
+  .card-body .name { position: absolute; inset: 0 0 auto; padding: 14px 18px 30px; border: 0; background: linear-gradient(180deg, #060a12e6, #060a1280 60%, transparent) !important; }
+  .name h3 { padding: 0 !important; text-align: left !important; font-family: 'Nunito', sans-serif; font-size: 23px; font-weight: 800; text-shadow: 0 2px 8px #000; }
+  &:has(> .ribbon-two) .name { padding-right: 100px; }
+  .ultimate { position: absolute; right: 12px; bottom: 12px; margin: 0 !important; padding: 10px !important; max-width: 180px; border: 1px solid #baa98a40; border-radius: 6px; background: #0b1019eb !important; }
+  .ultimate h4, .ultimate h5 { margin: 0 0 6px; font-family: 'Nunito', sans-serif; font-size: 12px; }
+  .ultimate img { width: 56px !important; margin-bottom: 6px; border-image: none; border-radius: 4px; }
+  .ultimate small { font-size: 10px; }
+  .ribbon-two { position: absolute; top: 14px; right: 14px; left: auto; z-index: 3; width: auto; height: auto; overflow: visible; }
+  .ribbon-two span { position: static; display: block; width: auto; padding: 5px 8px; border: 1px solid #d6b47c66; border-radius: 4px; background: #302716e6; color: #e6c58e; box-shadow: none; transform: none; font-family: 'Nunito', sans-serif; font-size: 11px; line-height: 1.3; }
+  .ribbon-two-secondary span { border-color: #a6b5c04d; background: #17212be6; color: #b6c7d3; }
+  .ribbon-two span::before, .ribbon-two span::after { display: none; }
+  .card-footer .progress { height: 5px; border: 0; border-radius: 3px; background: #ffffff12; box-shadow: none; }
+  .card-footer .progress-bar { border-radius: inherit; }
+}
+
+.game-page .hero-card-skin.card {
+  > .card-body { min-height: 400px; }
+  .card-header .name { flex-wrap: wrap; justify-content: flex-start !important; gap: 6px; border: 0; background: transparent; }
+  .card-header .name > img { height: 28px !important; padding: 0 !important; }
+  .card-header h3 { padding: 0 !important; font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 800; }
+  .card-header .name > a { font-size: 12px; margin-left: auto; }
+  > .card-footer { padding: 10px; }
+  .card-footer > .row:first-child { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); gap: 6px; }
+  .card-footer > .row:first-child > div { width: auto; max-width: none; padding: 0; }
+  .card-footer .btn { min-height: 38px; padding: 8px; font-family: 'Nunito', sans-serif; font-size: 12px; letter-spacing: 0; }
+}
+
+.game-page .matches .picked-hero .hero-card.card > .card-body { min-height: 100px; }
+.game-page .duel .hero-card.card > .card-body { min-height: 200px; }
+.game-page .arena-edit .overflow > .row { margin-right: 0; margin-left: 0; }
+
+.game-page .training-target.card {
+  > .card-header { padding-bottom: 16px !important; }
+  > .card-header h4 { flex-wrap: nowrap; }
+  .target-name { flex: 1; }
+  .card-header .target-level { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; gap: 2px; min-width: 60px; padding: 6px 10px; border-color: currentColor; border-radius: 6px; background: #080d16eb; box-shadow: 0 4px 16px #00000055, inset 0 1px #ffffff0d; }
+  .target-rewards { width: 40px; height: 40px; border-color: #baa98a55; background: #080d16eb; font-size: 20px !important; }
+  .target-level-label { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; line-height: 1; }
+  .target-level-value { font-size: 30px; font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; text-shadow: 0 2px 6px #00000080; }
+}
+
+@media (max-width: 575px) {
+  .game-page .hero-card.card {
+    .hero-card-name { font-size: 19px !important; }
+    .hero-card-stats .game-stat { gap: 4px; padding: 5px; font-size: 12px; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page .hero-card.card,
+  .game-page .hero-card.card::before,
+  .game-page .hero-card.card .skill-img,
+  .game-page .hero-card.card .item-img { transition: none; }
+}

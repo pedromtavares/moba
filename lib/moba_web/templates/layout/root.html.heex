@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%= render("_head.html", assigns) %>
+  {render("_head.html", assigns)}
   <body>
     <%= if is_nil(assigns[:current_player]) && is_nil(assigns[:current_user]) do %>
-      <%= render("_guest_navigation.html", assigns) %>
+      {render("_guest_navigation.html", assigns)}
     <% else %>
-      <%= render("_mobile_navigation.html", assigns) %>
+      <MobaWeb.V2.Components.LayoutComponents.mobile_navigation
+        current_player={assigns[:current_player]}
+        current_hero={assigns[:current_hero]}
+        preview
+      />
     <% end %>
     <div class="wrapper" id="main-wrapper">
       <div class="container-fluid">
-        <%= @inner_content %>
+        {@inner_content}
       </div>
     </div>
-    <%= csrf_meta_tag() %>
-    <script type="text/javascript" src={Routes.static_path(@conn, "/js/app.js")}>
+    {csrf_meta_tag()}
+    <script type="text/javascript" src={~p"/js/app.js"}>
     </script>
   </body>
 </html>

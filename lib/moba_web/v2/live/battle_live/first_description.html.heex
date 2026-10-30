@@ -1,0 +1,52 @@
+<div class="row">
+  <div class="col">
+    <div class="notification mt-0 mb-2 darker">
+      <div class="center">
+        <.effect_text effect={@effect} />
+      </div>
+      <%= if length(@descriptions) > 0 do %>
+        <div class="contracted-effects text-center">
+          <hr class="my-2" />
+          <%= for {resource, effect} <- @descriptions do %>
+            <img
+              class="img-border-xs"
+              src={effect_image(resource)}
+              data-toggle="tooltip"
+              title={TT.formatted_effect_tooltip(effect)}
+            />
+          <% end %>
+          <div class="show-all-effects center float-right">
+            <button
+              :if={assigns[:preview]}
+              type="button"
+              class="battle-expand badge badge-pill badge-dark center text-white"
+              id={"show-effects-for-#{@turn.number}"}
+              phx-hook="ExpandEffects"
+              phx-update="ignore"
+              aria-controls={if assigns[:preview], do: "turn-effects-#{@turn.number}"}
+              aria-expanded="false"
+              style="cursor:pointer"
+              data-turn={@turn.number}
+              data-toggle="tooltip"
+              title="Expand all effects"
+            >
+              <i class="fa fa-plus" aria-hidden="true"></i><span :if={assigns[:preview]} class="effect-toggle-label">Details</span>
+            </button>
+            <span
+              :if={!assigns[:preview]}
+              class="badge badge-pill badge-dark center text-white"
+              id={"show-effects-for-#{@turn.number}"}
+              phx-hook="ExpandEffects"
+              style="cursor:pointer"
+              data-turn={@turn.number}
+              data-toggle="tooltip"
+              title="Expand all effects"
+            >
+              <i class="fa fa-plus"></i>
+            </span>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

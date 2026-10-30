@@ -1,0 +1,109 @@
+<% duel? = @battle.type == "duel"
+final? = final_duel_battle?(@battle)
+result = competitive_result(@battle, @current_player)
+winner = if @battle.winner_id == @battle.attacker_id, do: @battle.attacker, else: @battle.defender %>
+<section
+  id="battle-competitive-result"
+  class={["battle-competitive-result", duel? && "is-duel-result", final? && "is-duel-finale"]}
+  data-result={result}
+  data-stage={if duel?, do: if(final?, do: "final", else: "round")}
+  style={if duel? && @battle.winner_id, do: "--duel-result-art: url(#{GH.background_url(winner)})"}
+  aria-labelledby="battle-result-title"
+>
+  <div :if={final? && result == "victory"} class="duel-victory-seal" aria-hidden="true">
+    <.icon name="game-trophy" />
+  </div>
+  <div class="battle-result-identity">
+    <img :if={@battle.winner_id} src={GH.image_url(winner.avatar)} alt="" />
+    <div>
+      <span class="battle-result-context">
+        <%= if duel? do %>
+          {if @battle.duel.auto, do: "Season duel", else: "Live duel"} · {cond do
+            final? -> "Complete"
+            @battle.attacker_player_id == @battle.duel.player_id -> "Battle 1 of 2"
+            true -> "Battle 2 of 2"
+          end}
+        <% else %>
+          Season match
+        <% end %>
+      </span>
+      <h3 id="battle-result-title">
+        {case {final?, result} do
+          {true, "victory"} -> "Duel victory"
+          {true, "defeat"} -> "Duel defeat"
+          {true, "draw"} -> "Duel drawn"
+          {true, _} -> "Duel complete"
+          {_, "victory"} -> "Victory"
+          {_, "defeat"} -> "Defeat"
+          {_, "draw"} -> "Draw"
+          _ -> "Battle complete"
+        end}
+      </h3>
+      <p>
+        {cond do
+          final? && is_nil(@battle.duel.winner_player_id) ->
+            "No overall winner"
+
+          final? ->
+            player =
+              if @battle.duel.winner_player_id == @battle.duel.player_id,
+                do: @battle.duel.player,
+                else: @battle.duel.opponent_player
+
+            "#{username(player)} wins both battles"
+
+          @battle.winner_id ->
+            "#{winner.name} wins"
+
+          true ->
+            "Both heroes survived"
+        end}
+      </p>
+    </div>
+  </div>
+  <div class="battle-competitive-actions">
+    <div :if={final? && @battle.duel.rewards} class="battle-competitive-rewards">
+      <div
+        :for={
+          {player, points} <- [
+            {@battle.duel.player, @battle.duel.rewards.attacker_pvp_points},
+            {@battle.duel.opponent_player, @battle.duel.rewards.defender_pvp_points}
+          ]
+        }
+        :if={points != 0}
+        class="duel-result-points"
+        data-gain={to_string(points > 0)}
+      >
+        <span>{username(player)}</span>
+        <strong>{if points > 0, do: "+"}{points}</strong>
+        <small>Season points</small>
+      </div>
+    </div>
+    <%= if @current_player do %>
+      <.battle_nav_action
+        navigate={
+          preview_path(
+            assigns,
+            if(@battle.type == "duel", do: "/arena/#{@battle.duel_id}", else: "/matches/#{@battle.match_id}")
+          )
+        }
+        class="btn battle-primary"
+        id="load-battles"
+        label={
+          cond do
+            final? -> "View duel result →"
+            duel? -> "Continue duel →"
+            true -> "Back to match →"
+          end
+        }
+      />
+    <% else %>
+      <.battle_guest_create_action
+        preview={true}
+        class="btn battle-primary"
+        icon="fa fa-user-plus"
+        label="Create your Hero"
+      />
+    <% end %>
+  </div>
+</section>

@@ -25,11 +25,15 @@ defmodule MobaWeb do
     Phoenix.PubSub.broadcast(Moba.PubSub, channel, {event, payload})
   end
 
+  def broadcast_from(from, channel, event, payload) do
+    Phoenix.PubSub.broadcast_from(Moba.PubSub, from, channel, {event, payload})
+  end
+
   def static_paths, do: ~w(assets css fonts images resources js favicon.ico robots.txt ads.txt .well-known)
 
   def router do
     quote do
-      use Phoenix.Router
+      use Phoenix.Router, helpers: false
 
       # Import common connection and controller functions to use in pipelines
       import Plug.Conn
@@ -47,14 +51,11 @@ defmodule MobaWeb do
   def controller do
     quote do
       use Phoenix.Controller,
-        formats: [:html, :json],
-        layouts: [html: MobaWeb.Layouts]
+        formats: [:html, :json]
 
       import Plug.Conn
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
       import Phoenix.LiveView.Controller, only: [live_render: 3, live_render: 2]
-
-      alias MobaWeb.Router.Helpers, as: Routes
 
       unquote(verified_routes())
     end
@@ -66,11 +67,24 @@ defmodule MobaWeb do
 
       alias Moba.{Game, Accounts, Engine, Utils}
 
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
 
       unquote(html_helpers())
 
       defguard is_connected?(socket) when socket.transport_pid != nil
+    end
+  end
+
+  def v2_live_view do
+    quote do
+      use Phoenix.LiveView, layout: {MobaWeb.V2.Layouts, :live}
+      on_mount {MobaWeb.Preview, :default}
+
+      alias Moba.{Game, Accounts, Engine, Utils}
+
+      use Gettext, backend: MobaWeb.Gettext
+
+      unquote(v2_html_helpers())
     end
   end
 
@@ -79,6 +93,14 @@ defmodule MobaWeb do
       use Phoenix.LiveComponent
 
       unquote(html_helpers())
+    end
+  end
+
+  def v2_live_component do
+    quote do
+      use Phoenix.LiveComponent
+
+      unquote(v2_html_helpers())
     end
   end
 
@@ -118,21 +140,44 @@ defmodule MobaWeb do
     end
   end
 
+  defp v2_html_helpers do
+    quote do
+      import Phoenix.HTML
+
+      use Gettext, backend: MobaWeb.Gettext
+
+      alias MobaWeb.V2.Layouts
+      import MobaWeb.V2.Components.CreateComponents
+      import MobaWeb.V2.Components.BattleComponents
+      import MobaWeb.V2.Components.GameComponents
+      import MobaWeb.V2.Components.LayoutComponents
+      import MobaWeb.V2.Components.PvpComponents
+      import MobaWeb.V2.Components.ShopComponents
+
+      alias MobaWeb.V2.Components.GameHelpers, as: GH
+      alias MobaWeb.V2.Components.TooltipComponents, as: TT
+
+      alias Phoenix.LiveView.JS
+
+      alias Moba.{Game, Accounts, Engine, Utils}
+
+      import Moba.Utils
+
+      unquote(verified_routes())
+    end
+  end
+
   defp html_helpers do
     quote do
-      # HTML escaping functionality
       import Phoenix.HTML
-      # Core UI components and translation
-      import MobaWeb.Gettext
+      use Gettext, backend: MobaWeb.Gettext
+      import MobaWeb.CoreComponents
 
       alias MobaWeb.ErrorHelpers
 
-      # Shortcut for generating JS commands
       alias Phoenix.LiveView.JS
 
       use PhoenixHTMLHelpers
-
-      alias MobaWeb.Router.Helpers, as: Routes
 
       alias MobaWeb.GameHelpers, as: GH
 
@@ -146,6 +191,8 @@ defmodule MobaWeb do
 
   def verified_routes do
     quote do
+      import MobaWeb.Preview, only: [preview_path: 2]
+
       use Phoenix.VerifiedRoutes,
         endpoint: MobaWeb.Endpoint,
         router: MobaWeb.Router,

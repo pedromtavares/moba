@@ -12,6 +12,9 @@ import {Socket} from "phoenix";
 import {LiveSocket} from "phoenix_live_view";
 import mobileCheck from "./mobile_check";
 import Hooks from "./hooks";
+import {initGameConfirmations, isGameTooltip, tooltipContent} from "./game_feedback";
+
+initGameConfirmations();
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
@@ -69,15 +72,36 @@ $(document).on('phx:update', event => {
 });
 
 function initTooltips(){
-  tippy('[data-toggle="tooltip"]', {
+  const targets = Array.from(document.querySelectorAll('[data-toggle="tooltip"]')).filter(reference => {
+    if (!reference._tippy) return true;
+
+    const title = reference.getAttribute('title');
+    if (title !== null) {
+      reference._tippy.setContent(tooltipContent(reference, title));
+      reference.removeAttribute('title');
+    }
+    return false;
+  });
+
+  tippy(targets, {
     onShow(instance) {
+      if (isGameTooltip(instance.reference)) return true;
       let showMobile = $(instance.reference).hasClass("tooltip-mobile");
       return showMobile || !mobileCheck(); // cancels tooltip if on mobile
     },
     content(reference) {
       const title = reference.getAttribute('title');
       reference.removeAttribute('title');
-      return title;
+      if (isGameTooltip(reference) && reference.matches('img') && !reference.hasAttribute('tabindex')) {
+        reference.setAttribute('tabindex', '0');
+      }
+      return tooltipContent(reference, title);
+    },
+    onCreate(instance) {
+      if (isGameTooltip(instance.reference)) {
+        const artwork = instance.reference.hasAttribute('data-tooltip-artwork');
+        instance.setProps({theme: artwork ? 'game game-artwork' : 'game', maxWidth: artwork ? 'none' : 420});
+      }
     },
     arrow: true,
     allowHTML: true,

@@ -1,0 +1,29 @@
+<% player_hero = player_pick(@battle, @match)
+opponent_hero = opponent_pick(@battle, @match)
+player_turn = turn_hero_for(@battle, @match.player)
+opponent_turn = turn_hero_for(@battle, @match.opponent) %>
+<.link
+  navigate={preview_path(assigns, ~p"/battles/#{@battle}")}
+  id={"battle-review-#{@battle.id}"}
+  class="match-battle"
+  aria-label={"Review battle #{@index}: #{player_hero.name} vs #{opponent_hero.name}"}
+>
+  <div class="match-battle-heading">
+    <strong>Battle {@index}</strong><span>{if @battle.winner_id, do: "#{if @battle.winner_id == player_hero.id, do: player_hero.name, else: opponent_hero.name} wins", else: "Draw"}<span aria-hidden="true"> ↗</span></span>
+  </div>
+  <div class="match-battle-units">
+    <div
+      :for={{hero, battler} <- [{player_hero, player_turn}, {opponent_hero, opponent_turn}]}
+      class="match-battle-unit"
+      data-dead={to_string(battler.current_hp <= 0)}
+    >
+      <div class="match-battle-hero">
+        <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} /><strong>{hero.name}</strong><span :if={
+          battler.current_hp <= 0
+        }>Fallen</span>
+      </div>
+      <.resource_bar tone="health" current={battler.current_hp} total={battler.total_hp} label={"#{hero.name} health"} />
+      <.resource_bar tone="energy" current={battler.current_mp} total={battler.total_mp} label={"#{hero.name} energy"} />
+    </div>
+  </div>
+</.link>

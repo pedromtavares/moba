@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-  <%= render("_head.html",
+  {render("_head.html",
     conn: @conn,
     current_hero: nil,
-    page_title: "Admin - Browser MOBA",
-    favicon: Routes.static_path(@conn, "/images/league/6.png")
-  ) %>
+    page_title: "Admin - Browser MOBA"
+  )}
   <body>
     <header id="topnav" class="d-none d-md-block">
       <div class="topbar-menu">
@@ -73,13 +72,13 @@
       <div class="container-fluid clean-container">
         <div class="row">
           <div class="col">
-            <%= @inner_content %>
+            {@inner_content}
           </div>
         </div>
       </div>
     </div>
-    <%= csrf_meta_tag() %>
-    <script type="text/javascript" src={Routes.static_path(@conn, "/js/app.js")}>
+    {csrf_meta_tag()}
+    <script type="text/javascript" src={~p"/js/app.js"}>
     </script>
   </body>
 </html>

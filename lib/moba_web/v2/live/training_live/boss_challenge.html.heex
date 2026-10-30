@@ -1,0 +1,60 @@
+<% health = resource_segments(nil, @boss.total_hp, @boss.avatar.total_hp) %>
+<section
+  id="roshan-challenge"
+  class="roshan-challenge"
+  data-attempt={@boss.league_attempts + 1}
+  aria-labelledby="roshan-title"
+>
+  <div class="roshan-portrait" style={"background-image: url(#{GH.background_url(@boss.avatar)})"}>
+    <span class="roshan-level">Level <strong>{@boss.level}</strong></span>
+    <div class="roshan-health">
+      <div class="roshan-health-caption">
+        <span>Health</span><strong>{health.current} <small>/ {health.total}</small></strong>
+      </div>
+      <div
+        id="roshan-health"
+        class="roshan-health-gauge"
+        role="progressbar"
+        aria-label="Roshan health"
+        aria-valuemin="0"
+        aria-valuemax={max(health.total, 1)}
+        aria-valuenow={health.current}
+      >
+        <span style={"width:#{health.retained_percentage}%"}></span>
+      </div>
+    </div>
+  </div>
+  <div class="roshan-briefing">
+    <header class="roshan-heading">
+      <div>
+        <p class="roshan-eyebrow">Final challenge</p>
+        <h2 id="roshan-title">{@boss.name}</h2>
+      </div>
+      <span class="roshan-attempt">Attempt {@boss.league_attempts + 1} / 2</span>
+    </header>
+    <.hero_skill_strip
+      skills={@boss.skills}
+      container_class="roshan-abilities"
+      image_class="roshan-ability tooltip-mobile"
+      id_prefix="roshan-skill"
+      id_suffix={@boss.id}
+    />
+    <p class="roshan-mechanic">His armor and power grow every turn. End the fight quickly.</p>
+    <p :if={@boss.league_attempts > 0} id="roshan-recovery" class="roshan-recovery">
+      Regenerated {trunc(Moba.boss_regeneration_multiplier() * @boss.avatar.total_hp)} HP. This is your final attempt.
+    </p>
+    <div class="roshan-promotion">
+      <img src="/images/league/6.png" alt="" />
+      <div><span>Win to reach</span><strong>{Moba.leagues()[6]}</strong></div>
+    </div>
+    <button
+      id="start-league-challenge"
+      class="btn battle-primary roshan-begin"
+      phx-hook="Loading"
+      loading="Preparing..."
+      phx-click="league"
+    >
+      <span class="loading-text">Fight Roshan <span aria-hidden="true">→</span></span>
+    </button>
+  </div>
+</section>

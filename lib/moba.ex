@@ -37,6 +37,26 @@ defmodule Moba do
   def load_resource(code, nil), do: load_resource(code)
   def load_resource(code, level), do: Enum.find(cached_resources(), &(&1.code == code && &1.level == level))
 
+  def after_registration(user, player_id) do
+    Accounts.update_user!(user, %{community_seen_at: DateTime.utc_now()})
+
+    if player_id do
+      player =
+        player_id
+        |> Game.get_player!()
+        |> Game.update_player!(%{user_id: user.id})
+        |> Map.put(:user, user)
+
+      Game.update_hero!(player.current_pve_hero, %{name: user.username})
+
+      if player.pve_tier > 0 do
+        reward_shards!(player, Game.get_quest(1).prize)
+      end
+    end
+
+    update_pvp_rankings()
+  end
+
   def player_for(%{id: user_id}) do
     with existing when existing != nil <- Game.get_player_from_user!(user_id) do
       existing
@@ -100,8 +120,13 @@ defmodule Moba do
 
   defp cached_ranking(key, fetch_fn) do
     case Cachex.get(:game_cache, key) do
-      {:ok, nil} -> fetch_fn.()
-      {:ok, ranking} -> ranking
+      {:ok, nil} ->
+        ranking = fetch_fn.()
+        Cachex.put(:game_cache, key, ranking)
+        ranking
+
+      {:ok, ranking} ->
+        ranking
     end
   end
 

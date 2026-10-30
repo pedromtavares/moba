@@ -1,0 +1,22 @@
+<section id="arena-live-opponents" class="arena-live-opponents" aria-label="Available live opponents">
+  <p :if={@duel_opponents == []} class="arena-live-opponents-empty">No live opponents right now.</p>
+  <ul :if={@duel_opponents != []} class="arena-live-opponents-list">
+    <li :for={player <- @duel_opponents} id={"duel-player-#{player.id}"}>
+      <% ready? = can_be_challenged?(@current_player, @current_time) && can_be_challenged?(player, @current_time) %>
+      <.link navigate={preview_path(assigns, ~p"/player/#{player.id}")} class="arena-live-opponent-identity">
+        <img src={"/images/pve/#{player.pve_tier}.png"} alt="" />
+        <span>
+          <strong>{player.user.username}</strong>
+          <small class="arena-live-opponent-meta">
+            <span>{player.pvp_points} SP</span>
+            <span class="arena-live-opponent-activity">Active {player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)}</span>
+          </small>
+        </span>
+      </.link>
+      <button id={"#{if ready?, do: "can", else: "cannot"}-duel-#{player.id}"} type="button" class="arena-live-challenge" phx-click="challenge" phx-value-id={player.id} disabled={!ready?} aria-label={if ready?, do: "Challenge #{player.user.username} to a live duel", else: "Challenge cooldown for #{player.user.username}"}>
+        <.icon name={if ready?, do: "game-attack", else: "game-clock"} />
+        {if ready?, do: "Challenge", else: "Cooldown"}
+      </button>
+    </li>
+  </ul>
+</section>

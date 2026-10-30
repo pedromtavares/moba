@@ -15,6 +15,7 @@ defmodule Moba.Game.Schema.Player do
 
   schema "players" do
     field :status, :string
+    field :guest_session_key, :string
     field :tutorial_step, :integer
     field :ranking, :integer
     field :season_ranking, :integer

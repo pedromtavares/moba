@@ -15,6 +15,25 @@
 @import "./community.scss";
 @import "./matches.scss";
 @import "./shared.scss";
+@import "./landing.scss";
+@import "./base.scss";
+@import "./game.scss";
+@import "./refinements.scss";
+@import "./farming.scss";
+@import "./hero_cards.scss";
+@import "./tavern_cards.scss";
+@import "./history.scss";
+@import "./combat.scss";
+@import "./shop_modern.scss";
+@import "./progression.scss";
+@import "./hero_detail.scss";
+@import "./hero_hud.scss";
+@import "./duel_modern.scss";
+@import "./hud_states.scss";
+@import "./squads.scss";
+@import "./final_polish.scss";
+@import "./invoke_modern.scss";
+@import "./collection_badges.scss";
 
 @import "../node_modules/shepherd.js/dist/css/shepherd.css";
 @import '../node_modules/tippy.js/dist/tippy.css';
@@ -720,3 +739,14 @@ b, strong {
 .cursor-pointer{
   cursor: pointer;
 }
+
+@import "./tutorial_modern.scss";
+@import "./training_ascent.scss";
+@import "./base_ascent.scss";
+@import "./community_cinematic.scss";
+@import "./arena_cinematic.scss";
+@import "./match_playback.scss";
+@import "./tavern_manual_cinematic.scss";
+@import "./profile_cinematic.scss";
+@import "./cinematic_headers.scss";
+@import "./sidebar_cinematic.scss";

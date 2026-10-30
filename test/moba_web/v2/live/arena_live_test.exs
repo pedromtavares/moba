@@ -1,0 +1,133 @@
+defmodule MobaWeb.V2.ArenaLiveTest do
+  use MobaWeb.ConnCase
+
+  import Phoenix.LiveViewTest
+
+  test "renders canonical arena and team editor routes", %{conn: conn} do
+    hero = create_base_hero()
+
+    conn =
+      conn
+      |> init_test_session(player_id: hero.player_id)
+
+    {:ok, arena_view, arena_html} = live(conn, "/arena")
+    assert arena_html =~ "Enter the Arena"
+    assert arena_html =~ "Edit Teams"
+    assert has_element?(arena_view, ~s|#matchmaking-container[phx-hook="EqualHeight"][phx-target=".arena .ranking"]|)
+    assert has_element?(arena_view, ~s|#pvp_duels[phx-hook="EqualHeight"][phx-target=".arena .ranking"]|)
+
+    {:ok, edit_view, _html} = live(conn, "/arena/edit")
+    assert has_element?(edit_view, "#arena-team-form")
+    assert has_element?(edit_view, "#teams-hud #current-team-container.squad-panel")
+    assert has_element?(edit_view, "#teams-hud #heroes-container.squad-panel")
+  end
+
+  test "creates a team from the v2 edit screen", %{conn: conn} do
+    hero = create_base_hero()
+
+    conn =
+      conn
+      |> init_test_session(player_id: hero.player_id)
+
+    {:ok, view, _html} = live(conn, "/arena/edit")
+
+    html =
+      view
+      |> form("#arena-team-form", %{"team" => %{"name" => "Five Stack"}})
+      |> render_submit()
+
+    assert html =~ "Five Stack"
+  end
+
+  test "renders team row avatars inline on arena edit", %{conn: conn} do
+    hero = create_base_hero()
+
+    extra_heroes =
+      for index <- 1..4 do
+        Game.create_hero!(%{name: "Extra #{index}"}, hero.player, strong_avatar(), base_skills())
+      end
+
+    team =
+      Game.create_team!(%{
+        name: "Inline",
+        player_id: hero.player_id,
+        pick_ids: [hero.id | Enum.map(extra_heroes, & &1.id)]
+      })
+
+    conn =
+      conn
+      |> init_test_session(player_id: hero.player_id)
+
+    {:ok, view, _html} = live(conn, "/arena/edit")
+    for pick <- team.picks do
+      assert has_element?(view, "#team-row-#{team.id} img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(pick.avatar)}']")
+    end
+  end
+
+  test "edits a team hero inline from the arena screen", %{conn: conn} do
+    hero = create_base_hero()
+    team = Game.create_team!(%{name: "Inline", player_id: hero.player_id, pick_ids: [hero.id]})
+
+    conn =
+      conn
+      |> init_test_session(player_id: hero.player_id)
+
+    {:ok, view, _html} = live(conn, "/arena/edit")
+
+    render_click(view, "select-team", %{"id" => "#{team.id}"})
+    refute has_element?(view, "#hero-bar")
+
+    render_click(view, "edit-hero", %{"id" => "#{hero.id}"})
+
+    assert has_element?(view, "#hero-bar")
+    assert has_element?(view, "#edit-button")
+    assert has_element?(view, ".hud-experience")
+    assert has_element?(view, "#toggle-shop")
+
+    view
+    |> element("#hero-bar #edit-button")
+    |> render_click()
+
+    assert has_element?(view, "#hero-bar #save-button")
+    assert has_element?(view, "#hero-bar select[name='skill_order[decay]']")
+
+    view
+    |> element("#hero-bar #toggle-shop")
+    |> render_click()
+
+    assert has_element?(view, "#shop-modal.d-block")
+  end
+
+  test "skips the retired arena tutorial when the player is on step 29", %{conn: conn} do
+    hero = create_base_hero()
+    player = Game.update_tutorial_step!(hero.player, 29)
+
+    conn =
+      conn
+      |> init_test_session(player_id: player.id)
+
+    {:ok, view, _html} = live(conn, "/arena")
+
+    refute has_element?(view, "[phx-hook=TutorialStep]")
+    assert Game.get_player!(player.id).tutorial_step == 39
+  end
+
+  test "arena tutorial keeps the v1 anchor targets", %{conn: conn} do
+    hero = create_base_hero()
+    player =
+      hero.player
+      |> Game.update_collection!([%{id: hero.id}])
+      |> Game.update_tutorial_step!(29)
+
+    conn =
+      conn
+      |> init_test_session(player_id: player.id)
+
+    {:ok, view, _html} = live(conn, "/arena")
+
+    assert has_element?(view, "#pvp-progression")
+    assert has_element?(view, "#daily-progression")
+    assert has_element?(view, "#current-pvp-tier")
+    assert has_element?(view, "#game-manual")
+  end
+end

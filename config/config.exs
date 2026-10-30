@@ -10,13 +10,15 @@ import Config
 config :moba,
   ecto_repos: [Moba.Repo],
   env: Mix.env(),
-  admin_refresh_seconds: System.get_env("ADMIN_REFRESH_SECONDS") || "1000000000"
+  admin_refresh_seconds: System.get_env("ADMIN_REFRESH_SECONDS") || "1000000000",
+  generators: [timestamp_type: :utc_datetime]
 
 # Configures the endpoint
 config :moba, MobaWeb.Endpoint,
+  adapter: Bandit.PhoenixAdapter,
   url: [host: "localhost"],
   secret_key_base: "alj84Hk7zalGeRCGYyMcQCZh9LQcTVls6lEG/lXXgC7xC9c3HsFjSrAFd0MMhDxO2",
-  render_errors: [view: MobaWeb.ErrorView, accepts: ~w(html json)],
+  render_errors: [formats: [html: MobaWeb.ErrorView, json: MobaWeb.ErrorView], layout: false],
   pubsub_server: Moba.PubSub,
   live_view: [
     signing_salt: "0rCmKQt21BmJfTqBwGVEaIm/AY2dnbry"
@@ -38,21 +40,7 @@ config :torch,
   otp_app: :moba,
   template_format: "eex"
 
-config :moba, :pow,
-  user: Moba.Accounts.Schema.User,
-  repo: Moba.Repo,
-  web_module: MobaWeb,
-  extensions: [PowResetPassword, PowPersistentSession],
-  # extensions: [PowResetPassword, PowEmailConfirmation],
-  controller_callbacks: MobaWeb.PowControllerCallbacks,
-  mailer_backend: MobaWeb.PowMailer,
-  web_mailer_module: MobaWeb,
-  routes_backend: MobaWeb.PowRoutes,
-  cache_store_backend: Pow.Postgres.Store
-
-config :pow, Pow.Postgres.Store, repo: Moba.Repo
-
-config :moba, MobaWeb.PowMailer, adapter: Bamboo.LocalAdapter
+config :moba, Moba.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configures Elixir's Logger
 config :logger, :console,
@@ -64,4 +52,4 @@ config :phoenix, :json_library, Jason
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
-import_config "#{Mix.env()}.exs"
+import_config "#{config_env()}.exs"

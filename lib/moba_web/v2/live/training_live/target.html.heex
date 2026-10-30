@@ -1,0 +1,96 @@
+<div class="col-xl-4 col-md-6 col-12">
+  <div
+    class="hero-card card training-target"
+    style={"background-image: url(#{GH.background_url(@target.defender.avatar)})"}
+  >
+    <div class="card-header pt-0 pb-1">
+      <h4 class="font-17 text-white d-flex justify-content-between align-items-center mb-0">
+        <strong class={"target-level font-italic text-center text-#{difficulty_color(@target.difficulty)}"}>
+          <span class="target-level-label">Level</span> <span class="target-level-value">{@target.defender.level}</span>
+        </strong>
+        <div class="target-name">{@target.defender.avatar.name}</div>
+        <span
+          class="font-20 font-italic text-warning tooltip-cursor target-rewards"
+          data-toggle="tooltip"
+          title={target_rewards_tooltip(@current_hero, @target.difficulty)}
+        >
+          <i class={"fa fa-crown text-#{ difficulty_color(@target.difficulty)}"}></i>
+        </span>
+      </h4>
+    </div>
+    <div class="card-body p-0 d-flex align-items-center justify-content-center">
+      <div class="gank-button">
+        <%= if @current_hero.pve_current_turns > 0 do %>
+          <button
+            phx-click="battle"
+            id={"gank-#{@target.id}"}
+            phx-value-id={@target.id}
+            class={"battle-button target-battle btn btn-lg btn-icon loading-text dark-button btn-#{difficulty_color(@target.difficulty)}"}
+            phx-hook="Loading"
+            loading="Preparing..."
+          >
+            <span class="loading-text"><i class="fa-regular fa-sword mr-1"></i>Battle</span>
+          </button>
+        <% else %>
+          <button
+            class={"battle-button target-battle btn btn-icon btn-lg waves-effect btn-#{difficulty_color(@target.difficulty)} disabled f-rpg"}
+            data-toggle="tooltip"
+            title="You do not have available turns"
+          >
+            <i class="fa-regular fa-sword mr-1"></i>Battle
+          </button>
+        <% end %>
+      </div>
+    </div>
+    <div class="transparent card-footer p-0">
+      <div
+        class="row align-items-center d-flex ml-1 mt-1 mr-1 target-performance"
+        data-toggle="tooltip"
+        title={TT.hero_stats_tooltip(@target.defender, false)}
+      >
+        <div class="col pl-0">
+          <div class="row align-items-center">
+            <div class="col-6 text-right text-pink font-weight-bold no-wrap">
+              <i class="fa fa-hand-fist mr-1"></i>Offense
+            </div>
+            <div class="col">
+              <div class="progress progress-fixed">
+                <div style={"width:#{display_offense_percentage(@target, @targets)}%"} class="progress-bar bg-pink">
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col pl-0">
+          <div class="row align-items-center">
+            <div class="col-6 text-right text-warning font-weight-bold no-wrap">
+              <i class="fa fa-shield-halved mr-1"></i>Defense
+            </div>
+            <div class="col">
+              <div class="progress progress-fixed">
+                <div style={"width:#{display_defense_percentage(@target, @targets)}%"} class="progress-bar bg-warning">
+                  <span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mt-1 target-loadout">
+          <.hero_skill_strip
+            skills={@target.defender.skills}
+            id_prefix="skill"
+            id_suffix={@target.defender.id}
+          />
+          <.hero_item_strip
+            items={Game.sort_items(@target.defender.items)}
+            id_prefix="item"
+            id_suffix={@target.defender.id}
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

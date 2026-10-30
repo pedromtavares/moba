@@ -6,7 +6,7 @@ defmodule MobaWeb.PlayerAuth do
   end
 
   def call(conn, _) do
-    current_user = Pow.Plug.current_user(conn)
+    current_user = conn.assigns[:current_user]
     player_id = get_session(conn, :player_id)
     player = player_id && Moba.Game.get_player!(player_id)
 
@@ -22,7 +22,7 @@ defmodule MobaWeb.PlayerAuth do
         assign(conn, :current_player, player)
 
       true ->
-        redirect(conn, to: "/start")
+        conn |> redirect(to: MobaWeb.Preview.preview_path(conn, "/start")) |> halt()
     end
   end
 end
