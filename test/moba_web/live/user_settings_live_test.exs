@@ -5,6 +5,11 @@ defmodule MobaWeb.UserSettingsLiveTest do
   import Phoenix.LiveViewTest
   import Moba.AccountsFixtures
 
+  setup do
+    mail_sender_fixture()
+    :ok
+  end
+
   describe "Settings page" do
     test "renders settings page", %{conn: conn} do
       {:ok, _lv, html} =

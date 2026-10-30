@@ -1,3 +1,35 @@
+<style phx-no-curly-interpolation>
+  #torch-form.site-settings-form {
+    flex-direction: column;
+    max-width: 800px;
+  }
+  #torch-form.site-settings-form .torch-form-group-input {
+    display: block;
+  }
+  #torch-form.site-settings-form .torch-form-group label {
+    display: block;
+    margin-right: 0;
+    text-align: left;
+  }
+  #torch-form.site-settings-form input[type="text"],
+  #torch-form.site-settings-form input[type="email"] {
+    appearance: none;
+    box-sizing: border-box;
+    display: block;
+    width: 100%;
+    margin-top: 8px;
+    padding: 10px;
+    border: 1px solid #d5d5d5;
+    background: #fff;
+    color: #666;
+    font: 14px Helvetica, Arial, sans-serif;
+  }
+  #torch-form.site-settings-form input:focus-visible {
+    outline: 2px solid #ca4742;
+    outline-offset: 2px;
+  }
+</style>
+
 <section id="torch-toolbar">
   <div class="torch-container">
     <.link href={~p"/admin"} class="torch-button">Back to admin</.link>
@@ -9,7 +41,13 @@
     <header class="header">
       <h3>Site settings</h3>
     </header>
-    <.form for={@form} action={~p"/admin/settings"} method="put" id="torch-form">
+    <.form
+      for={@form}
+      action={~p"/admin/settings"}
+      method="put"
+      id="torch-form"
+      class="site-settings-form"
+    >
       <fieldset class="torch-panel" style="max-width: 760px; line-height: 1.6;">
         <legend><span>Google Analytics</span></legend>
         <p style="margin-bottom: 20px;">
@@ -50,12 +88,46 @@
             In your GA4 web stream, enable Enhanced measurement → Page views → Page changes based on browser history events.
           </p>
         </details>
-        <div class="torch-submit-form">
-          <button id="save-analytics-settings" type="submit" class="torch-submit-button">
-            Save analytics settings
-          </button>
-        </div>
       </fieldset>
+      <fieldset class="torch-panel" style="max-width: 760px; line-height: 1.6; margin-top: 24px;">
+        <legend><span>Email sender</span></legend>
+        <p style="margin-bottom: 20px;">
+          Use an address on your verified Resend domain. Changes apply to the next email sent.
+        </p>
+        <div class="torch-form-group">
+          <div class="torch-form-group-input">
+            <.input
+              field={@form[:mail_from]}
+              type="email"
+              label="Sender email"
+              class="mail-from"
+              placeholder="noreply@yourdomain.com"
+              maxlength="254"
+              aria-describedby="mail-from-help"
+            />
+          </div>
+        </div>
+        <div class="torch-form-group">
+          <div class="torch-form-group-input">
+            <.input
+              field={@form[:mail_from_name]}
+              type="text"
+              label="Sender name"
+              class="mail-from-name"
+              maxlength="100"
+              required
+            />
+          </div>
+        </div>
+        <p id="mail-from-help" style="margin: 8px 0 20px; color: #666;">
+          Leaving the sender email blank disables account emails.
+        </p>
+      </fieldset>
+      <div class="torch-submit-form" style="max-width: 760px; margin-top: 24px;">
+        <button id="save-site-settings" type="submit" class="torch-submit-button">
+          Save settings
+        </button>
+      </div>
     </.form>
   </div>
 </section>

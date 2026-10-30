@@ -1,6 +1,17 @@
 import Config
 
 if config_env() == :prod do
+  resend_key =
+    System.get_env("RESEND_KEY") ||
+      raise """
+      environment variable RESEND_KEY is missing.
+      Set it to your Resend API key.
+      """
+
+  config :moba, Moba.Mailer,
+    adapter: Swoosh.Adapters.Resend,
+    api_key: resend_key
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

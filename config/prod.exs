@@ -26,10 +26,6 @@ config :waffle,
   storage: Waffle.Storage.S3,
   bucket: {:system, "S3_BUCKET"}
 
-config :moba, Moba.Mailer,
-  adapter: Swoosh.Adapters.Sendgrid,
-  api_key: System.get_env("SENDGRID_KEY")
-
 # Configures Swoosh API Client
 config :swoosh, api_client: Swoosh.ApiClient.Req
 

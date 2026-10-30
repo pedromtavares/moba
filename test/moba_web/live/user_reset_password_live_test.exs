@@ -7,6 +7,7 @@ defmodule MobaWeb.UserResetPasswordLiveTest do
   alias Moba.Accounts
 
   setup do
+    mail_sender_fixture()
     user = user_fixture()
 
     token =

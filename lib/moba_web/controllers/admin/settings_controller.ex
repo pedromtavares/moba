@@ -13,7 +13,7 @@ defmodule MobaWeb.Admin.SettingsController do
   def update(conn, %{"settings" => params}) do
     case SiteSettings.update(conn.assigns.current_user, params) do
       {:ok, _settings} ->
-        conn |> put_flash(:info, "Analytics settings saved.") |> redirect(to: ~p"/admin/settings")
+        conn |> put_flash(:info, "Site settings saved.") |> redirect(to: ~p"/admin/settings")
 
       {:error, %Ecto.Changeset{} = changeset} ->
         conn |> put_status(:unprocessable_entity) |> render(:edit, form: to_form(changeset, as: :settings))

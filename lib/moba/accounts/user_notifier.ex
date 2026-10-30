@@ -1,19 +1,19 @@
 defmodule Moba.Accounts.UserNotifier do
-  import Swoosh.Email
-
+  alias Moba.Emails.UserEmail
   alias Moba.Mailer
+  alias Moba.SiteSettings
 
-  # Delivers the email using the application mailer.
-  defp deliver(recipient, subject, body) do
-    email =
-      new()
-      |> to(recipient)
-      |> from({"Browser MOBA", "browsermoba@gmail.com"})
-      |> subject(subject)
-      |> text_body(body)
+  defp deliver(user, url, kind) do
+    case SiteSettings.get() do
+      %{mail_from: address, mail_from_name: name} when is_binary(address) and address != "" ->
+        email = UserEmail.build(user, url, kind, {name, address})
 
-    with {:ok, _metadata} <- Mailer.deliver(email) do
-      {:ok, email}
+        with {:ok, _metadata} <- Mailer.deliver(email) do
+          {:ok, email}
+        end
+
+      _ ->
+        {:error, :mail_sender_not_configured}
     end
   end
 
@@ -21,59 +21,20 @@ defmodule Moba.Accounts.UserNotifier do
   Deliver instructions to confirm account.
   """
   def deliver_confirmation_instructions(user, url) do
-    deliver(user.email, "Confirmation instructions", """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can confirm your account by visiting the URL below:
-
-    #{url}
-
-    If you didn't create an account with us, please ignore this.
-
-    ==============================
-    """)
+    deliver(user, url, :confirmation)
   end
 
   @doc """
   Deliver instructions to reset a user password.
   """
   def deliver_reset_password_instructions(user, url) do
-    deliver(user.email, "Reset password instructions", """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can reset your password by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    deliver(user, url, :reset_password)
   end
 
   @doc """
   Deliver instructions to update a user email.
   """
   def deliver_update_email_instructions(user, url) do
-    deliver(user.email, "Update email instructions", """
-
-    ==============================
-
-    Hi #{user.email},
-
-    You can change your email by visiting the URL below:
-
-    #{url}
-
-    If you didn't request this change, please ignore this.
-
-    ==============================
-    """)
+    deliver(user, url, :update_email)
   end
 end

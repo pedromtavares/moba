@@ -7,6 +7,12 @@ defmodule Moba.AccountsFixtures do
   def unique_user_email, do: "user#{System.unique_integer()}@example.com"
   def valid_user_password, do: "hello world!"
 
+  def mail_sender_fixture do
+    Moba.SiteSettings.get()
+    |> Ecto.Changeset.change(mail_from: "noreply@example.com", mail_from_name: "Browser MOBA")
+    |> Moba.Repo.update!()
+  end
+
   def valid_user_attributes(attrs \\ %{}) do
     Enum.into(attrs, %{
       email: unique_user_email(),

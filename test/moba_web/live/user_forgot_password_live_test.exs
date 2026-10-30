@@ -29,6 +29,7 @@ defmodule MobaWeb.UserForgotPasswordLiveTest do
 
   describe "Reset link" do
     setup do
+      mail_sender_fixture()
       %{user: user_fixture()}
     end
 

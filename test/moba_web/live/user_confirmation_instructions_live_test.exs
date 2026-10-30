@@ -8,6 +8,7 @@ defmodule MobaWeb.UserConfirmationInstructionsLiveTest do
   alias Moba.Repo
 
   setup do
+    mail_sender_fixture()
     %{user: user_fixture()}
   end
 

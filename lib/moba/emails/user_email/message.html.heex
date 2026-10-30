@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>{@subject}</title>
+  </head>
+  <body style="margin:0;padding:0;width:100%;background-color:#080c13;color:#f4ead6;font-family:Arial,Helvetica,sans-serif;-webkit-text-size-adjust:100%;">
+    <div style="display:none;font-size:1px;line-height:1px;color:#080c13;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+      {@message} This link expires in {@expiry}.
+    </div>
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#080c13">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <!-- The fixed-width wrapper keeps classic Outlook within the reading column. -->
+          <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0"><tr><td><![endif]-->
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;">
+            <tr>
+              <td style="padding:0 8px 24px;">
+                <table role="presentation" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td width="52" style="vertical-align:middle;">
+                      <img src="cid:browsermoba-helmet" width="44" height="44" alt="" style="display:block;border:0;" />
+                    </td>
+                    <td style="color:#d6b47c;font-size:15px;font-weight:bold;letter-spacing:3px;vertical-align:middle;">
+                      BROWSER MOBA
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                bgcolor="#101925"
+                style="background-color:#101925;background-image:linear-gradient(135deg,#182332 0%,#101925 65%,#21181d 100%);border:1px solid #413b30;border-top:3px solid #d6b47c;border-radius:12px;"
+              >
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                  <tr>
+                    <td style="padding:36px 28px 0;color:#d6b47c;font-size:11px;font-weight:bold;letter-spacing:2px;line-height:18px;">
+                      {@chapter}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:12px 28px 24px;">
+                      <h1 style="margin:0;color:#f4ead6;font-family:Georgia,'Times New Roman',serif;font-size:38px;font-weight:bold;line-height:1.15;letter-spacing:-1px;">
+                        {@title}
+                      </h1>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 28px;color:#c2cad5;font-size:16px;line-height:26px;overflow-wrap:anywhere;word-break:break-word;">
+                      <p style="margin:0 0 8px;color:#f4ead6;">Hi {@name},</p>
+                      <p style="margin:0;">{@message}</p>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:28px 28px 0;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td
+                            align="center"
+                            bgcolor="#782e30"
+                            style="background-color:#782e30;border:1px solid #bc955c;border-radius:6px;mso-padding-alt:18px 24px;"
+                          >
+                            <a
+                              id="email-action"
+                              href={@url}
+                              style="display:block;padding:18px 24px;color:#fff1d7;font-size:17px;font-weight:bold;line-height:22px;text-align:center;text-decoration:none;"
+                            >
+                              {@action} <span aria-hidden="true">&nbsp; →</span>
+                            </a>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td align="center" style="padding:12px 28px 32px;color:#aeb9c8;font-size:12px;line-height:20px;">
+                      This link expires in {@expiry}.
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:0 28px;">
+                      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                        <tr>
+                          <td style="padding:22px 0 28px;border-top:1px solid #343b44;color:#aeb9c8;font-size:12px;line-height:20px;">
+                            <p style="margin:0 0 8px;">Button not working? Copy this link into your browser:</p>
+                            <p style="margin:0;word-break:break-all;overflow-wrap:anywhere;">
+                              <a
+                                id="email-fallback-link"
+                                href={@url}
+                                style="color:#d6b47c;text-decoration:underline;word-break:break-all;overflow-wrap:anywhere;"
+                              >
+                                {@url}
+                              </a>
+                            </p>
+                          </td>
+                        </tr>
+                      </table>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 28px 0;color:#a1acbd;font-size:12px;line-height:20px;">
+                <p style="margin:0;">{@notice}</p>
+                <p style="margin:16px 0 0;color:#d6b47c;">Browser MOBA · Forge your legend.</p>
+              </td>
+            </tr>
+          </table>
+          <!--[if mso]></td></tr></table><![endif]-->
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

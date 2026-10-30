@@ -2,6 +2,7 @@ defmodule Moba.AccountsTest do
   use Moba.DataCase, async: true
 
   setup do
+    Moba.AccountsFixtures.mail_sender_fixture()
     %{user: create_user()}
   end
 

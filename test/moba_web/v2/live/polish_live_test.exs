@@ -3,6 +3,11 @@ defmodule MobaWeb.V2.PolishLiveTest do
   import Phoenix.LiveViewTest
   import Moba.AccountsFixtures
 
+  setup do
+    mail_sender_fixture()
+    :ok
+  end
+
   test "skill unlocks show requirements, then ownership and updated balance", %{conn: conn} do
     hero = create_base_hero()
     skill = Game.get_skill_by_code!("decay", false, 5)
