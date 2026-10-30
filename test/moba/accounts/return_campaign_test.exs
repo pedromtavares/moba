@@ -21,18 +21,16 @@ defmodule Moba.Accounts.ReturnCampaignTest do
     assert second_id == second.id
   end
 
-  test "excludes admins, guests, bots, nonpositive scores, and suppressed addresses" do
-    admin = user_fixture() |> Ecto.Changeset.change(is_admin: true) |> Repo.update!()
+  test "excludes guests, bots, nonpositive scores, and suppressed addresses" do
     bot_user = user_fixture()
     zero = user_fixture()
     blocked = user_fixture()
-    create_player!(%{pvp_points: 10}, admin)
     create_player!(%{pvp_points: 10}, bot_user, "bot")
     create_player!(%{pvp_points: 0}, zero)
     create_player!(%{pvp_points: 20}, blocked)
     Game.create_player!(%{pvp_points: 100})
 
-    ids = [admin.id, bot_user.id, zero.id, blocked.id]
+    ids = [bot_user.id, zero.id, blocked.id]
 
     assert ReturnCampaign.audience(exclude_emails: [" #{String.upcase(blocked.email)} "])
            |> Enum.all?(&(&1.user_id not in ids))
@@ -97,11 +95,11 @@ defmodule Moba.Accounts.ReturnCampaignTest do
     assert :error = ReturnCampaign.redeem(token)
   end
 
-  test "does not grant admin access if an invitee is promoted after issuance" do
+  test "redemption uses the account’s current role" do
     %{user: user, token: token} = invitation()
     user |> Ecto.Changeset.change(is_admin: true) |> Repo.update!()
-    assert :error = ReturnCampaign.preview(token)
-    assert :error = ReturnCampaign.redeem(token)
+    assert {:ok, %{is_admin: true}} = ReturnCampaign.preview(token)
+    assert {:ok, %{user: %{is_admin: true}}} = ReturnCampaign.redeem(token)
   end
 
   test "rejects malformed input and other email-token contexts" do
@@ -113,6 +111,33 @@ defmodule Moba.Accounts.ReturnCampaignTest do
       assert :error = ReturnCampaign.preview(invalid)
       assert :error = ReturnCampaign.redeem(invalid)
     end
+  end
+
+  test "admins use the same scoped export, 30-day token, and single-use redemption as other users" do
+    user = user_fixture() |> Ecto.Changeset.change(is_admin: true) |> Repo.update!()
+    player = create_player!(%{pvp_points: 10}, user)
+    other = user_fixture()
+    create_player!(%{pvp_points: 100}, other)
+    assert Enum.any?(ReturnCampaign.audience(), &(&1.user_id == user.id))
+    assert [%{user_id: selected_id}] = ReturnCampaign.audience(user_ids: [user.id])
+    assert selected_id == user.id
+    path = output_path()
+
+    assert {:ok, %{count: 1, tokens_issued: true}} =
+             ReturnCampaign.prepare(path, issue_tokens: true, user_ids: [user.id])
+
+    payload = path |> File.read!() |> Jason.decode!()
+    assert payload["campaign"] == "reborn_2026_10"
+    [contact] = payload["contacts"]
+    assert contact["user_id"] == user.id
+    token = contact["return_url"] |> URI.parse() |> Map.fetch!(:fragment) |> URI.decode_query() |> Map.fetch!("token")
+    valid = NaiveDateTime.utc_now() |> NaiveDateTime.add(-29 * 86_400) |> NaiveDateTime.truncate(:second)
+    Repo.update_all(from(t in UserToken, where: t.user_id == ^user.id), set: [inserted_at: valid])
+    assert {:ok, %{id: id, is_admin: true}} = ReturnCampaign.preview(token)
+    assert id == user.id
+    assert {:ok, %{user: %{id: ^id, is_admin: true}, player_id: player_id}} = ReturnCampaign.redeem(token)
+    assert player_id == player.id
+    assert :error = ReturnCampaign.redeem(token)
   end
 
   defp invitation do

@@ -4,6 +4,7 @@ defmodule Moba.Accounts.ReturnCampaign do
 
   On a running release, `prepare(path)` exports a read-only audience preview.
   `prepare(path, issue_tokens: true)` also creates the 30-day invitations.
+  Pass `user_ids: [id]` to prepare the same invitation for a selected account.
   The output contains private account data; only the summary is returned to the caller.
   """
 
@@ -21,7 +22,7 @@ defmodule Moba.Accounts.ReturnCampaign do
     players =
       from p in Player,
         join: u in assoc(p, :user),
-        where: is_nil(p.bot_options) and not coalesce(u.is_admin, false),
+        where: is_nil(p.bot_options),
         where: not is_nil(u.email) and fragment("btrim(?) <> ''", u.email),
         where: fragment("lower(btrim(?))", u.email) not in ^excluded,
         select: %{
@@ -33,6 +34,12 @@ defmodule Moba.Accounts.ReturnCampaign do
           score: 100 * coalesce(p.best_immortal_streak, 0) + 100 * coalesce(p.pve_tier, 0) + coalesce(p.pvp_points, 0),
           wins: coalesce(p.total_wins, 0)
         }
+
+    players =
+      case Keyword.get(opts, :user_ids) do
+        nil -> players
+        ids -> where(players, [p, u], u.id in ^ids)
+      end
 
     by_user =
       from p in subquery(players),
@@ -140,7 +147,7 @@ defmodule Moba.Accounts.ReturnCampaign do
 
     Enum.map(audience, fn contact ->
       user = Map.fetch!(by_id, contact.user_id)
-      if user.is_admin or user.email != contact.email, do: Repo.rollback(:audience_changed)
+      if user.email != contact.email, do: Repo.rollback(:audience_changed)
       {encoded, invitation} = UserToken.build_email_token(user, context_for(user))
       Repo.insert!(invitation)
       Map.put(contact, :return_url, MobaWeb.Endpoint.url() <> "/return#token=" <> encoded)
@@ -156,7 +163,6 @@ defmodule Moba.Accounts.ReturnCampaign do
           join: u in assoc(t, :user),
           where: t.token == ^hash and like(t.context, ^(@context <> "%")),
           where: t.inserted_at > ago(@validity_days, "day") and t.sent_to == u.email,
-          where: not coalesce(u.is_admin, false),
           select: {t, u}
 
       _ ->
@@ -166,7 +172,7 @@ defmodule Moba.Accounts.ReturnCampaign do
 
   defp token_query(_), do: nil
 
-  # Credential binding also invalidates invitations changed through legacy/admin paths.
+  # Credential binding invalidates invitations whenever the email or password changes.
   defp context_for(user) do
     credentials = :erlang.term_to_binary({user.email, user.hashed_password, user.password_hash})
     @context <> Base.url_encode64(:crypto.hash(:sha256, credentials), padding: false)

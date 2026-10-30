@@ -4,8 +4,9 @@ defmodule MobaWeb.ReturnControllerTest do
   import Moba.AccountsFixtures
   alias Moba.{Accounts.ReturnCampaign, Accounts.UserToken, Repo}
 
-  setup do
+  setup context do
     user = user_fixture()
+    user = if context[:admin], do: user |> Ecto.Changeset.change(is_admin: true) |> Repo.update!(), else: user
     player = create_player!(%{pvp_points: 10}, user)
     path = Path.join(System.tmp_dir!(), "moba-return-#{System.unique_integer([:positive])}.json")
     on_exit(fn -> File.rm(path) end)
@@ -89,5 +90,23 @@ defmodule MobaWeb.ReturnControllerTest do
 
     assert Phoenix.Logger.filter_values(%{"token" => token}) == %{"token" => "[FILTERED]"}
     assert Repo.get_by(UserToken, token: token) == nil
+  end
+
+  @tag admin: true
+  test "admins redeem the same campaign invitation through the same endpoints", %{
+    conn: conn,
+    user: user,
+    player: player,
+    token: token
+  } do
+    assert user.is_admin
+    assert post(conn, ~p"/return/check", %{token: token}) |> json_response(200) == %{"username" => user.username}
+    response = post(conn, ~p"/return", %{token: token})
+    assert redirected_to(response) == ~p"/base"
+    assert get_session(response, :player_id) == player.id
+    logged_in = Accounts.get_user_by_session_token(get_session(response, :user_token))
+    assert logged_in.id == user.id
+    assert logged_in.is_admin
+    assert :error = ReturnCampaign.redeem(token)
   end
 end
