@@ -16,6 +16,22 @@ defmodule Moba.Engine.Battles do
 
   def get_battle!(id), do: Repo.get!(load(), id) |> load_resources()
 
+  def get_battle(id) when is_binary(id) do
+    case Integer.parse(id) do
+      {id, ""} -> get_battle(id)
+      _ -> nil
+    end
+  end
+
+  def get_battle(id) when is_integer(id) and id > 0 and id <= 9_223_372_036_854_775_807 do
+    case Repo.get(load(), id) do
+      nil -> nil
+      battle -> load_resources(battle)
+    end
+  end
+
+  def get_battle(_id), do: nil
+
   def update_battle!(battle, attrs) do
     battle
     |> Battle.changeset(attrs)

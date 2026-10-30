@@ -14,54 +14,64 @@ defmodule MobaWeb.V2.BattleLive do
   end
 
   def handle_params(params, _uri, socket) do
-    socket = battle_assigns(params, socket)
+    with_battle(socket, params["id"], fn battle ->
+      socket = battle_assigns(battle, params, socket)
 
-    if connected?(socket) do
-      MobaWeb.subscribe("battle-#{params["id"]}")
-    end
+      if connected?(socket) do
+        MobaWeb.subscribe("battle-#{battle.id}")
+      end
 
-    {:noreply, socket}
+      socket
+    end)
   end
+
+  def handle_event(event, _, %{assigns: %{battle: nil}} = socket)
+      when event in ["next-turn", "check-timer", "next-battle", "pick-skill"],
+      do: {:noreply, socket}
 
   def handle_event(
         "next-turn",
         %{"skill_id" => skill_id, "item_id" => item_id, "hero_id" => hero_id},
         %{assigns: %{battle: %{id: battle_id}}} = socket
       ) do
-    battle = Engine.get_battle!(battle_id)
-    skill = skill_id != "" && Game.get_skill!(skill_id)
-    item = item_id != "" && Game.get_item!(item_id)
-    last_turn = List.last(battle.turns)
-    valid_attacker? = is_nil(last_turn) || last_turn.defender.hero_id == String.to_integer(hero_id)
+    with_battle(socket, battle_id, fn battle ->
+      skill = skill_id != "" && Game.get_skill!(skill_id)
+      item = item_id != "" && Game.get_item!(item_id)
+      last_turn = List.last(battle.turns)
+      valid_attacker? = is_nil(last_turn) || last_turn.defender.hero_id == String.to_integer(hero_id)
 
-    if valid_attacker? do
-      socket = next_turn(socket, battle, %{skill: skill, item: item}, last_turn)
-      {:noreply, check_tutorial(socket, socket.assigns.battle)}
-    else
-      {:noreply, socket}
-    end
+      if valid_attacker? do
+        socket = next_turn(socket, battle, %{skill: skill, item: item}, last_turn)
+        check_tutorial(socket, socket.assigns.battle)
+      else
+        socket
+      end
+    end)
   end
 
   def handle_event("check-timer", _, %{assigns: %{battle: %{id: id}}} = socket) do
-    battle = Engine.get_battle!(id)
-    last_turn = List.last(battle.turns)
-    timer = turn_timer(last_turn, battle)
+    with_battle(socket, id, fn battle ->
+      last_turn = List.last(battle.turns)
+      timer = turn_timer(last_turn, battle)
 
-    if timer < 0 do
-      {:noreply, next_turn(socket, battle, %{auto: true}, last_turn)}
-    else
-      {:noreply, socket}
-    end
+      if timer < 0 do
+        next_turn(socket, battle, %{auto: true}, last_turn)
+      else
+        socket
+      end
+    end)
   end
 
-  def handle_event("next-battle", %{"id" => id}, %{assigns: %{battle: battle}} = socket) do
-    latest = Engine.latest_battle(battle.attacker.id)
+  def handle_event("next-battle", _, %{assigns: %{battle: %{id: battle_id}}} = socket) do
+    with_battle(socket, battle_id, fn battle ->
+      case Engine.latest_battle(battle.attacker_id) do
+        %{type: "league", id: latest_id} when latest_id != battle.id ->
+          push_patch(socket, to: preview_path(socket, ~p"/battles/#{latest_id}"))
 
-    if latest.type == "league" && latest.id != String.to_integer(id) do
-      {:noreply, push_patch(socket, to: preview_path(socket, ~p"/battles/#{latest.id}"))}
-    else
-      {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/training"))}
-    end
+        _ ->
+          push_navigate(socket, to: preview_path(socket, ~p"/training"))
+      end
+    end)
   end
 
   def handle_event("pick-skill", %{"id" => id}, socket) do
@@ -69,14 +79,27 @@ defmodule MobaWeb.V2.BattleLive do
     {:noreply, assign(socket, skill: skill)}
   end
 
-  def handle_info({:turn, %{battle_id: battle_id, turn_number: turn_number}}, socket) do
-    battle = Engine.get_battle!(battle_id)
-    turn = Engine.build_turn(battle)
-    {:noreply, turn_assigns(socket, battle, turn, turn_number)}
+  def handle_info(
+        {:turn, %{battle_id: battle_id, turn_number: turn_number}},
+        %{assigns: %{battle: %{id: current_id}}} = socket
+      )
+      when battle_id == current_id do
+    with_battle(socket, battle_id, fn battle ->
+      turn = Engine.build_turn(battle)
+      turn_assigns(socket, battle, turn, turn_number)
+    end)
   end
 
-  defp battle_assigns(params, socket) do
-    battle = Engine.get_battle!(params["id"])
+  def handle_info({:turn, _}, socket), do: {:noreply, socket}
+
+  defp with_battle(socket, id, callback) do
+    case Engine.get_battle(id) do
+      nil -> {:noreply, assign(socket, battle: nil, hide_sidebar: false, sidebar_code: "training")}
+      battle -> {:noreply, callback.(battle)}
+    end
+  end
+
+  defp battle_assigns(battle, params, socket) do
     last_turn = List.last(battle.turns)
     turn = Engine.build_turn(battle)
 

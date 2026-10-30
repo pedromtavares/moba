@@ -21,6 +21,8 @@ defmodule Moba.Engine do
 
   defdelegate get_battle!(id), to: Battles
 
+  defdelegate get_battle(id), to: Battles
+
   defdelegate last_duel_battle(duel), to: Battles
 
   defdelegate latest_battle(hero_id), to: Battles

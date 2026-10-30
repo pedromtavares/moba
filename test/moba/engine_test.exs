@@ -20,6 +20,23 @@ defmodule Moba.EngineTest do
   end
 
   describe "battles" do
+    test "optional battle lookup loads existing battles and returns nil for missing or invalid IDs", %{
+      strong_hero: attacker,
+      alternate_hero: defender
+    } do
+      battle = create_basic_battle(attacker, defender)
+      assert Engine.get_battle("#{battle.id}") == Engine.get_battle!(battle.id)
+
+      Repo.delete!(battle)
+      assert Engine.get_battle(battle.id) == nil
+
+      for id <- [nil, "invalid", "1invalid", "", 0, -1, "9223372036854775808"] do
+        assert Engine.get_battle(id) == nil
+      end
+
+      assert_raise Ecto.NoResultsError, fn -> Engine.get_battle!(battle.id) end
+    end
+
     test "#update_battle!", %{strong_hero: attacker, alternate_hero: defender} do
       battle = create_basic_battle(attacker, defender) |> Engine.update_battle!(%{difficulty: "test"})
       assert battle.difficulty == "test"

@@ -15,7 +15,7 @@ config :logger, level: :info
 config :moba, MobaWeb.Endpoint,
   load_from_system_env: true,
   http: [port: {:system, "PORT"}],
-  url: [host: "browsermoba.com", port: 80],
+  url: [scheme: "https", host: "browsermoba.com", port: 443],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 config :ex_aws,

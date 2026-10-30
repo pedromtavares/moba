@@ -15,6 +15,69 @@ defmodule MobaWeb.V2.BattleLiveTest do
     %{conn: conn, battle: battle, attacker: attacker}
   end
 
+  test "missing and invalid battle links show a return path", %{conn: conn, battle: battle} do
+    Moba.Repo.delete!(battle)
+
+    for id <- ["#{battle.id}", "not-a-battle", "-1", "9223372036854775808"] do
+      {:ok, view, _html} = live(conn, "/battles/#{id}")
+      assert has_element?(view, "#battle-unavailable-title", "This battle is no longer available.")
+      assert has_element?(view, "#battle-unavailable-return[href='/battles']", "Back to battles")
+      refute has_element?(view, "#battle-page, #attack-button, #turn-timer")
+    end
+  end
+
+  test "anonymous visitors still follow the existing authentication redirect", %{battle: battle} do
+    conn = Phoenix.ConnTest.build_conn() |> get("/battles/#{battle.id}")
+    assert redirected_to(conn) == "/start"
+  end
+
+  for event <- ["next-turn", "check-timer", "next-battle"] do
+    test "#{event} handles a battle removed while the page is open", %{conn: conn, battle: battle, attacker: attacker} do
+      {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
+      Moba.Repo.delete!(battle)
+
+      render_click(view, unquote(event), %{
+        "id" => "#{battle.id}",
+        "hero_id" => "#{attacker.id}",
+        "skill_id" => "",
+        "item_id" => ""
+      })
+
+      assert has_element?(view, "#battle-unavailable")
+      refute has_element?(view, "#battle-page, #attack-button")
+
+      # A timer event already in flight must not restart or crash the missing battle.
+      render_click(view, "check-timer", %{})
+      assert has_element?(view, "#battle-unavailable")
+    end
+  end
+
+  test "live turn notifications handle deleted battles and ignore later stale notifications", %{
+    conn: conn,
+    battle: battle
+  } do
+    {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
+    Moba.Repo.delete!(battle)
+
+    send(view.pid, {:turn, %{battle_id: battle.id, turn_number: 1}})
+    assert has_element?(view, "#battle-unavailable")
+
+    send(view.pid, {:turn, %{battle_id: battle.id, turn_number: 2}})
+    assert has_element?(view, "#battle-unavailable")
+  end
+
+  test "patching from a missing record back to a battle restores the battle view", %{conn: conn, battle: battle} do
+    {:ok, view, _html} = live(conn, "/battles/not-a-battle")
+    render_patch(view, "/battles/#{battle.id}")
+    assert has_element?(view, "#battle-page")
+    refute has_element?(view, "#battle-unavailable")
+
+    render_patch(view, "/battles/not-a-battle")
+    send(view.pid, {:turn, %{battle_id: battle.id, turn_number: 1}})
+    assert has_element?(view, "#battle-unavailable")
+    refute has_element?(view, "#battle-page")
+  end
+
   test "connected mount", %{conn: conn, battle: battle, attacker: attacker} do
     {:ok, view, html} = live(conn, "/battles/#{battle.id}")
     assert html =~ "Make your first move"

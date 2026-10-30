@@ -45,6 +45,36 @@ defmodule Moba.MailerTest do
              Moba.Mailer.deliver(email, adapter: Swoosh.Adapters.Resend, api_key: "re_test_key")
   end
 
+  test "production account links use HTTPS without an explicit port" do
+    config = Config.Reader.read!("config/prod.exs", env: :prod)
+    url = config[:moba][MobaWeb.Endpoint][:url]
+    uri = %URI{scheme: url[:scheme], host: url[:host], port: url[:port]}
+
+    for {kind, path} <- [
+          {:reset_password, "/users/reset_password/example-token"},
+          {:confirmation, "/users/confirm/example-token"},
+          {:update_email, "/users/settings/confirm_email/example-token"}
+        ] do
+      link = Phoenix.VerifiedRoutes.unverified_url(uri, path)
+      assert link == "https://browsermoba.com" <> path
+
+      email =
+        Moba.Emails.UserEmail.build(
+          %{email: "hero@example.com", username: "Hero"},
+          link,
+          kind,
+          {"My MOBA", "noreply@example.com"}
+        )
+
+      assert email.text_body =~ link
+
+      assert email.html_body
+             |> LazyHTML.from_document()
+             |> LazyHTML.query("#email-action")
+             |> LazyHTML.attribute("href") == [link]
+    end
+  end
+
   test "production loads Resend credentials at runtime and requires RESEND_KEY" do
     variables = ["RESEND_KEY", "DATABASE_URL", "SECRET_KEY_BASE"]
     previous = Map.new(variables, &{&1, System.get_env(&1)})

@@ -426,3 +426,21 @@
 @media (prefers-reduced-motion: reduce) {
   .game-page #battle-page .duel-victory-seal { animation: none; }
 }
+
+.game-page .battle-unavailable {
+  width: 100%;
+  max-width: 720px;
+  margin: clamp(32px, 9vh, 110px) auto;
+  padding: clamp(28px, 5vw, 56px);
+  border: 1px solid #c6a77940;
+  border-top: 2px solid #d6b47c;
+  border-radius: 16px;
+  background: radial-gradient(ellipse at top, #c6a7790d, transparent 70%), linear-gradient(135deg, #162231, #0b111b);
+  text-align: center;
+
+  .battle-unavailable-icon { color: #d6b47c; font-size: 40px; }
+  .battle-unavailable-label { margin: 20px 0 12px; color: #d6b47c; font-size: 12px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase; }
+  h1 { margin: 0 auto 16px; color: #f4ead6; font-size: clamp(26px, 3vw, 38px); font-weight: 900; line-height: 1.2; text-wrap: balance; }
+  p { color: #adb8c8; font-size: 17px; }
+  .btn { display: inline-flex; align-items: center; gap: 10px; margin-top: 12px; padding: 14px 22px; }
+}

@@ -6,5 +6,17 @@
   sidebar_code={@sidebar_code}
   hide_sidebar={@preview && @hide_sidebar}
 >
-  <.show {assigns} />
+  <%= if @battle do %>
+    <.show {assigns} />
+  <% else %>
+    <section id="battle-unavailable" class="battle-unavailable" role="status" aria-labelledby="battle-unavailable-title">
+      <.icon name="game-clock" class="battle-unavailable-icon" />
+      <p class="battle-unavailable-label">Battle record</p>
+      <h1 id="battle-unavailable-title">This battle is no longer available.</h1>
+      <p>It may have expired or been removed.</p>
+      <.link id="battle-unavailable-return" navigate={preview_path(assigns, ~p"/battles")} class="btn btn-secondary">
+        <.icon name="game-back" /> Back to battles
+      </.link>
+    </section>
+  <% end %>
 </Layouts.app>
