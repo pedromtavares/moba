@@ -26,18 +26,21 @@ defmodule MobaWeb.V2.ArenaLive do
     {:ok, socket}
   end
 
-  def handle_params(_params, _uri, socket) do
+  def handle_params(params, _uri, socket) do
     socket =
       socket
       |> maybe_redirect_guest()
-      |> apply_action(socket.assigns.live_action)
+      |> apply_action(socket.assigns.live_action, params)
 
     {:noreply, socket}
   end
 
-  def handle_event("tiered-ranking", %{"type" => ranking_tab}, socket) do
-    ranking = tiered_ranking(%{pvp_tier: pvp_tier_for(ranking_tab)})
-    {:noreply, assign(socket, ranking: ranking, ranking_tab: ranking_tab)}
+  def handle_event("standings-tab", %{"type" => mode}, socket) when mode in ["5v5", "1v1"] do
+    {:noreply, assign(socket, ranking: ranking_for(mode), ranking_tab: mode)}
+  end
+
+  def handle_event("history-tab", %{"type" => tab}, socket) when tab in ["matches", "duels"] do
+    {:noreply, assign(socket, history_tab: tab)}
   end
 
   def handle_event("toggle-auto-matchmaking", params, %{assigns: %{current_player: player}} = socket) do
@@ -67,9 +70,9 @@ defmodule MobaWeb.V2.ArenaLive do
     end
   end
 
-  def handle_event("season-duel", _, %{assigns: %{current_player: player}} = socket) do
-    opponent = Game.duel_opponent(player)
-    duel = opponent && Game.create_duel!(player, opponent, true)
+  def handle_event("season-duel", _, %{assigns: %{current_player: player, pending_duel: pending}} = socket) do
+    opponent = if !pending, do: Game.duel_opponent(player)
+    duel = pending || (opponent && Game.create_duel!(player, opponent, true))
 
     if duel do
       {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/arena/#{duel.id}"))}
@@ -77,6 +80,9 @@ defmodule MobaWeb.V2.ArenaLive do
       {:noreply, socket}
     end
   end
+
+  def handle_event("set-status", _, %{assigns: %{pending_duel: pending}} = socket) when not is_nil(pending),
+    do: {:noreply, socket}
 
   def handle_event("set-status", params, %{assigns: %{current_player: player}} = socket) do
     {player, duel_opponents} =
@@ -302,10 +308,9 @@ defmodule MobaWeb.V2.ArenaLive do
     end
   end
 
-  def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}, ranking_tab: ranking_tab}} = socket) do
+  def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}}} = socket) do
     player = Game.get_player!(id)
-    ranking = tiered_ranking(%{pvp_tier: pvp_tier_for(ranking_tab)})
-    {:noreply, socket |> assign(current_player: player, ranking: ranking) |> assign_index()}
+    {:noreply, socket |> assign(current_player: player) |> assign_index()}
   end
 
   def handle_info(%{event: "presence_diff"}, socket), do: {:noreply, socket}
@@ -313,21 +318,24 @@ defmodule MobaWeb.V2.ArenaLive do
   def render(%{live_action: :edit} = assigns), do: edit(assigns)
   def render(assigns), do: index(assigns)
 
-  defp apply_action(socket, :edit), do: assign_edit(socket)
-  defp apply_action(socket, _), do: assign_index(socket)
+  defp apply_action(socket, :edit, params), do: assign_edit(socket, params)
+  defp apply_action(socket, _, _params), do: assign_index(socket)
 
   defp assign_index(%{assigns: %{current_player: player}} = socket) do
     current_time = Timex.now()
     duels = Game.list_duels(player)
     duel_opponents = opponents_from_presence(player)
-    pending_duel = Enum.find(duels, &(&1.phase != "finished"))
-    ranking = tiered_ranking(player)
-    ranking_tab = ranking_tab_for(player)
+    pending_duel = Game.Duels.pending_duel(player)
+    ranking_tab = Map.get(socket.assigns, :ranking_tab, "5v5")
+    ranking = ranking_for(ranking_tab)
 
     socket
+    |> assign_new(:history_tab, fn -> "matches" end)
     |> assign(
       current_time: current_time,
       duels: duels,
+      finished_duels: Enum.filter(duels, &(&1.phase == "finished")),
+      reward_games: Game.Arena.daily_reward_games(player),
       duel_opponents: duel_opponents,
       pending_duel: pending_duel,
       last_presence_update: Timex.now(),
@@ -338,10 +346,19 @@ defmodule MobaWeb.V2.ArenaLive do
     |> TutorialComponent.next_step(30)
   end
 
-  defp assign_edit(%{assigns: %{current_player: player}} = socket) do
+  defp assign_edit(%{assigns: %{current_player: player}} = socket, params) do
     teams = Game.list_teams(player)
     heroes_tab = "trained"
     trained_heroes = Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking)
+
+    return_match_id =
+      case Integer.parse(params["match_id"] || "") do
+        {id, ""} when id > 0 ->
+          Game.Matches.match_id_for_player(player, id) || Game.Matches.match_id_for_player(player)
+
+        _ ->
+          Game.Matches.match_id_for_player(player)
+      end
 
     assign(socket,
       hero: nil,
@@ -351,6 +368,7 @@ defmodule MobaWeb.V2.ArenaLive do
       teams: teams,
       sort: :rank,
       selected_team: List.first(teams),
+      return_match_id: return_match_id,
       team_form: socket.assigns.team_form
     )
   end
@@ -358,7 +376,7 @@ defmodule MobaWeb.V2.ArenaLive do
   defp list_matches(%{assigns: %{current_player: player}} = socket) do
     all_matches = Game.list_matches(player)
     matches = Enum.filter(all_matches, &(&1.phase == "scored"))
-    pending_match = Enum.find(all_matches, &(&1.phase != "scored"))
+    pending_match = Game.Matches.pending_match(player)
     manual_matches = Enum.filter(all_matches, &(&1.type == "manual"))
     auto_matches = Enum.filter(all_matches, &(&1.type == "auto"))
 
@@ -389,18 +407,32 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp opponents_from_presence(_), do: []
 
-  defp tiered_ranking(%{pvp_tier: tier}) do
-    Moba.daily_ranking()
-    |> Enum.filter(&(&1.pvp_tier == tier))
+  defp ranking_for("5v5"), do: Moba.daily_ranking()
+  defp ranking_for("1v1"), do: Game.season_points_ranking(Moba.daily_ranking_limit())
+
+  defp arena_bracket(%{pvp_tier: 2}), do: "Immortals"
+  defp arena_bracket(%{pvp_tier: 1}), do: "Shadows"
+  defp arena_bracket(_), do: "Plebs"
+
+  defp arena_movement(%{pvp_tier: 1, ranking: rank}, _) when rank in 6..9, do: {:up, "Immortals"}
+  defp arena_movement(%{pvp_tier: 0, ranking: rank}, _) when rank in 26..31, do: {:up, "Shadows"}
+  defp arena_movement(%{pvp_tier: 1, ranking: rank}, _) when rank in 20..25, do: {:down, "Plebs"}
+
+  defp arena_movement(%{pvp_tier: 2, id: id, ranking: rank}, ranking) when is_integer(rank) do
+    leader =
+      ranking
+      |> Enum.filter(&(&1.pvp_tier == 2))
+      |> Enum.max_by(&{&1.daily_wins, &1.pvp_points}, fn -> nil end)
+
+    cond do
+      is_nil(leader) -> nil
+      leader.id != id -> {:down, "Shadows"}
+      rank != 1 -> {:up, "The Immortal"}
+      true -> nil
+    end
   end
 
-  defp pvp_tier_for("immortals"), do: 2
-  defp pvp_tier_for("shadows"), do: 1
-  defp pvp_tier_for(_), do: 0
-
-  defp ranking_tab_for(%{pvp_tier: 2}), do: "immortals"
-  defp ranking_tab_for(%{pvp_tier: 1}), do: "shadows"
-  defp ranking_tab_for(_), do: "plebs"
+  defp arena_movement(_, _), do: nil
 
   defp heroes_for(%{assigns: %{trained_heroes: trained_heroes}}, "trained")
        when is_list(trained_heroes),
@@ -574,33 +606,15 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp rewards_badge(points), do: %{class: "badge badge-pill badge-light-dark", label: "#{points} Season Points"}
 
-  defp duel_label(%{type: "elite_matchmaking"}), do: "Elite MM"
-  defp duel_label(%{type: "pvp"}), do: "Duel"
-  defp duel_label(_), do: "Normal MM"
-
   defp duel_badge_class(%{type: "pvp"}), do: "badge badge-light-danger"
   defp duel_badge_class(%{type: "elite_matchmaking"}), do: "badge badge-light-warning"
   defp duel_badge_class(_), do: "badge badge-light-primary"
 
-  defp match_type_label(%{type: "auto"}), do: "A"
-  defp match_type_label(_), do: "M"
-
-  defp match_type_title(%{type: "auto"}), do: "Auto Match"
-  defp match_type_title(_), do: "Manual Match"
+  defp match_type_title(%{type: "auto"}), do: "Auto match"
+  defp match_type_title(_), do: "Manual match"
 
   defp opponent_for(duel, %{id: id}) when duel.player_id == id, do: duel.opponent_player
   defp opponent_for(duel, _player), do: duel.player
-
-  defp duel_resume_phase(%{phase: phase}) do
-    %{
-      "player_first_pick" => "First picks",
-      "opponent_first_pick" => "First picks",
-      "player_battle" => "Battle 1",
-      "opponent_second_pick" => "Final picks",
-      "player_second_pick" => "Final picks",
-      "opponent_battle" => "Battle 2"
-    }[phase]
-  end
 
   defp ranking_inclusion?(ranking, player), do: Enum.any?(ranking, &(&1.id == player.id))
 end

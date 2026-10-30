@@ -1,7 +1,7 @@
 <header id="pvp-progression" class="arena-cinematic" style="--arena-scene: url(/images/tutorial/arena-of-ascension.jpg)">
   <div class="arena-cinematic-heading">
     <div>
-      <p class="arena-eyebrow">The proving ground · 5v5</p>
+      <p class="arena-eyebrow">The proving ground · 1v1 &amp; 5v5</p>
       <h1>Arena</h1>
       <p id="current-pvp-tier">{tier_title(@current_player)}</p>
     </div>
@@ -12,12 +12,30 @@
   <div class="arena-cinematic-command">
     <div class="arena-daily-progress">
       <div class="arena-progress-label" id="arena-progress-label">
-        <span>Daily matches</span>
+        <span>Daily 5v5 matches</span>
         <strong>{@current_player.daily_matches}<span> / {Moba.daily_match_limit()}</span></strong>
       </div>
-      <div class="progress" id="daily-progression" role="progressbar" aria-labelledby="arena-progress-label" aria-valuemin="0" aria-valuemax={Moba.daily_match_limit()} aria-valuenow={@current_player.daily_matches}>
-        <div style={"width:#{manual_matches_percentage(@manual_matches)}%;"} class="progress-bar manual-bar" title={"Manual matches played: #{length(@manual_matches)}"}></div>
-        <div style={"width:#{auto_matches_percentage(@auto_matches)}%;"} class="progress-bar auto-bar" title={"Auto matches played: #{length(@auto_matches)}"}></div>
+      <div
+        class="progress"
+        id="daily-progression"
+        role="progressbar"
+        aria-labelledby="arena-progress-label"
+        aria-valuemin="0"
+        aria-valuemax={Moba.daily_match_limit()}
+        aria-valuenow={@current_player.daily_matches}
+      >
+        <div
+          style={"width:#{manual_matches_percentage(@manual_matches)}%;"}
+          class="progress-bar manual-bar"
+          title={"Manual matches played: #{length(@manual_matches)}"}
+        >
+        </div>
+        <div
+          style={"width:#{auto_matches_percentage(@auto_matches)}%;"}
+          class="progress-bar auto-bar"
+          title={"Auto matches played: #{length(@auto_matches)}"}
+        >
+        </div>
       </div>
       <div class="arena-progress-legend">
         <span><span class="legend-dot manual"></span>{length(@manual_matches)} manual</span>
@@ -25,35 +43,69 @@
       </div>
     </div>
     <div class="arena-cinematic-action">
-      <%= cond do %>
-        <% @pending_match -> %>
-          <.link id="resume-arena-match" navigate={preview_path(assigns, ~p"/matches/#{@pending_match}")} class="btn battle-primary arena-resume-match">
-            Resume match <span aria-hidden="true">→</span>
+      <div class="arena-play-actions" aria-label="Play in the Arena">
+        <%= if @pending_match do %>
+          <.link
+            id="resume-arena-match"
+            navigate={preview_path(assigns, ~p"/matches/#{@pending_match}")}
+            class="btn battle-primary arena-play-button"
+          >
+            <.icon name="game-strategy" /><span>Resume 5v5</span><span aria-hidden="true">→</span>
           </.link>
-        <% length(@manual_matches) < Moba.daily_match_limit() -> %>
-          <button type="button" phx-click="matchmaking" class="btn battle-primary" id="enter-arena-button">
-            <span class="loading-text">Enter the Arena <span aria-hidden="true">→</span></span>
+        <% else %>
+          <button
+            id="enter-arena-button"
+            type="button"
+            phx-click="matchmaking"
+            class="btn battle-primary arena-play-button"
+            disabled={length(@manual_matches) >= Moba.daily_match_limit()}
+          >
+            <span class="loading-text">
+              <.icon name="game-strategy" /><span>Play 5v5</span><span aria-hidden="true">→</span>
+            </span>
           </button>
-          <p class="arena-entry-reward" id="arena-entry-reward">
-            <span>Match reward</span><strong>◆ +{Moba.matchmaking_shards()} Shards</strong>
-          </p>
-        <% true -> %>
-          <div id="arena-daily-limit" class="arena-daily-limit">
-            <strong>Daily matches complete</strong><span>{daily_reset_label()}</span>
-          </div>
-      <% end %>
+        <% end %>
+        <%= if @pending_duel do %>
+          <.link
+            id="resume-arena-duel"
+            navigate={preview_path(assigns, ~p"/arena/#{@pending_duel}")}
+            class="btn battle-primary arena-play-button"
+          >
+            <.icon name="game-swords" /><span>Resume 1v1</span><span aria-hidden="true">→</span>
+          </.link>
+        <% else %>
+          <button
+            id="season-duel-button"
+            type="button"
+            phx-click="season-duel"
+            class="btn battle-primary arena-play-button"
+            disabled={@current_player.status == "silenced"}
+          >
+            <span class="loading-text">
+              <.icon name="game-swords" /><span>Play 1v1</span><span aria-hidden="true">→</span>
+            </span>
+          </button>
+        <% end %>
+      </div>
+      <p :if={@reward_games < Moba.daily_match_limit()} class="arena-entry-reward" id="arena-entry-reward">
+        <strong>◆ +{Moba.matchmaking_shards()} Shards</strong><span>per game</span>
+      </p>
     </div>
   </div>
   <div class="arena-cinematic-footer" id="arena-header-footer">
     <dl class="arena-cinematic-stats">
-      <div><dt>Season points</dt><dd class="arena-stat-gold">{@current_player.pvp_points}</dd></div>
-      <div title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}>
-        <dt>Total win rate</dt><dd class="arena-stat-blue">{total_win_rate(@current_player)}<small>%</small></dd>
+      <div>
+        <dt>Season points</dt>
+        <dd class="arena-stat-gold">{@current_player.pvp_points}</dd>
       </div>
-      <div><dt>Daily wins</dt><dd class="arena-stat-green">{@current_player.daily_wins}</dd></div>
+      <div title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}>
+        <dt>5v5 Win Rate</dt>
+        <dd class="arena-stat-blue">{total_win_rate(@current_player)}<small>%</small></dd>
+      </div>
+      <div>
+        <dt>Daily 5v5 wins</dt>
+        <dd class="arena-stat-green">{@current_player.daily_wins}</dd>
+      </div>
     </dl>
-    <button :if={!@pending_duel} id="season-duel-button" type="button" phx-click="season-duel" class="btn base-secondary arena-season-duel">
-      <span class="loading-text"><.icon name="game-attack" /> Play a Season Duel <span aria-hidden="true">→</span></span>
-    </button>
   </div>
 </header>

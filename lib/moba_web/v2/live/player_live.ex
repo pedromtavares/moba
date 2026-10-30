@@ -10,14 +10,24 @@ defmodule MobaWeb.V2.PlayerLive do
 
   def handle_params(%{"id" => id}, _uri, socket) do
     socket = user_assigns(id, nil, socket)
-    if connected?(socket), do: MobaWeb.subscribe("player-ranking")
+
+    if connected?(socket) do
+      MobaWeb.subscribe("player-ranking")
+      MobaWeb.subscribe("hero-ranking")
+    end
+
     {:noreply, socket}
   end
 
   def handle_params(%{"player_id" => id}, _uri, socket) do
     player = Game.get_player!(id)
     socket = user_assigns(player.user_id, player, socket)
-    if connected?(socket), do: MobaWeb.subscribe("player-ranking")
+
+    if connected?(socket) do
+      MobaWeb.subscribe("player-ranking")
+      MobaWeb.subscribe("hero-ranking")
+    end
+
     {:noreply, socket}
   end
 
@@ -34,13 +44,29 @@ defmodule MobaWeb.V2.PlayerLive do
     {:noreply, assign(socket, matches: matches, filter: "matches")}
   end
 
-  def handle_event("switch-ranking", _, %{assigns: %{ranking_display: display}} = socket) do
-    other_display = other_ranking_display(display)
-    {:noreply, assign(socket, ranking: ranking_for(other_display), ranking_display: other_display)}
+  def handle_event("profile-ranking", %{"type" => tab}, socket) when tab in ["season", "hero"] do
+    {:noreply, assign(socket, ranking_tab: tab)}
   end
 
-  def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}, ranking_display: display}} = socket) do
-    {:noreply, assign(socket, ranking: ranking_for(display), player: Game.get_player!(id))}
+  def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}}} = socket) do
+    player = Game.get_player!(id)
+    heroes = ranked_heroes()
+    best = Enum.find(heroes, &(&1.player_id == player.id))
+
+    {:noreply,
+     assign(socket,
+       ranking: Moba.season_ranking(),
+       hero_ranking: heroes,
+       best_ranked_hero_id: best && best.id,
+       best_hero_rank: Game.best_hero_rank(player.id),
+       player: player
+     )}
+  end
+
+  defp ranked_heroes do
+    Moba.pve_ranking()
+    |> Enum.filter(&(&1.pve_ranking in 1..Moba.pve_ranking_limit()))
+    |> Enum.sort_by(& &1.pve_ranking)
   end
 
   defp featured_hero(%{hero_collection: collection}) when length(collection) > 0 do
@@ -48,12 +74,6 @@ defmodule MobaWeb.V2.PlayerLive do
   end
 
   defp featured_hero(player), do: player.current_pve_hero
-
-  defp other_ranking_display("daily"), do: "season"
-  defp other_ranking_display(_), do: "daily"
-
-  defp ranking_for("daily"), do: Moba.daily_ranking()
-  defp ranking_for(_), do: Moba.season_ranking()
 
   defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do
     user = Accounts.get_user!(user_id)
@@ -63,8 +83,9 @@ defmodule MobaWeb.V2.PlayerLive do
     featured = featured_hero(player)
     duels = Game.list_finished_duels(player)
     matches = player |> Game.list_matches() |> Enum.filter(&(&1.phase == "scored"))
-    ranking_display = "daily"
-    ranking = ranking_for(ranking_display)
+    ranking = Moba.season_ranking()
+    hero_ranking = ranked_heroes()
+    best = Enum.find(hero_ranking, &(&1.player_id == player.id))
     sidebar_code = if player.id == current_player.id, do: "user", else: nil
 
     assign(socket,
@@ -75,7 +96,10 @@ defmodule MobaWeb.V2.PlayerLive do
       matches: matches,
       player: player,
       ranking: ranking,
-      ranking_display: ranking_display,
+      hero_ranking: hero_ranking,
+      best_ranked_hero_id: best && best.id,
+      best_hero_rank: Game.best_hero_rank(player.id),
+      ranking_tab: "season",
       sidebar_code: sidebar_code,
       user: user
     )

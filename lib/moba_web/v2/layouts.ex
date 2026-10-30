@@ -95,7 +95,7 @@ defmodule MobaWeb.V2.Layouts do
           <div class="col">
             {render_slot(@inner_block)}
             <%= if show_footer?(assigns) do %>
-              <.footer_stats />
+              <.footer_stats preview={@preview} />
             <% end %>
           </div>
         </div>

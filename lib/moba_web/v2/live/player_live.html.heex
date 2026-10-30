@@ -101,12 +101,12 @@
             </div>
             <div class="col text-center">
               <strong
-                title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
+                title={"5v5 Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
                 data-toggle="tooltip"
               >
                 <i class="ui-icon ui-swords text-white"></i> {total_win_rate(@player)}
               </strong>
-              <span :if={@preview} class="profile-metric-label">Win rate</span>
+              <span :if={@preview} class="profile-metric-label">5v5 Win Rate</span>
             </div>
             <div class="col text-center">
               <strong
@@ -115,7 +115,7 @@
               >
                 <i class="ui-icon ui-trophy text-white"></i> {@player.best_immortal_streak}
               </strong>
-              <span :if={@preview} class="profile-metric-label">Best streak</span>
+              <span :if={@preview} class="profile-metric-label">Best Immortal Streak</span>
             </div>
             <div class="col text-center">
               <strong title="Season Rank" data-toggle="tooltip">
@@ -132,7 +132,7 @@
                   <div class="btn-group profile-history-tabs">
                     <%= if @filter == "matches" do %>
                       <button type="button" class="btn btn-sm btn-secondary no-action">
-                        <span class="loading-text">Matches</span>
+                        <span class="loading-text">5v5</span>
                       </button>
                       <button
                         type="button"
@@ -141,7 +141,7 @@
                         phx-hook="Loading"
                         id="duels-btn"
                       >
-                        <span class="loading-text">Duels</span>
+                        <span class="loading-text">1v1</span>
                       </button>
                     <% else %>
                       <button
@@ -151,10 +151,10 @@
                         phx-hook="Loading"
                         id="matches-btn"
                       >
-                        <span class="loading-text">Matches</span>
+                        <span class="loading-text">5v5</span>
                       </button>
                       <button type="button" class="btn btn-sm btn-secondary no-action">
-                        <span class="loading-text">Duels</span>
+                        <span class="loading-text">1v1</span>
                       </button>
                     <% end %>
                   </div>
@@ -239,6 +239,7 @@
                         <.link navigate={preview_path(assigns, ~p"/player/#{opponent_for(duel, @player).id}")}>
                           {duel |> opponent_for(@player) |> username()}
                         </.link>
+                        <small :if={@preview} class="history-detail">{GH.duel_mode_label(duel)}</small>
                       </span>
                     </td>
 
@@ -292,177 +293,17 @@
                 <.icon name="game-trophy" />
                 <div>
                   <strong>Leaderboard</strong>
-                  <span>{if @ranking_display == "daily", do: "Daily wins", else: "Season score"}</span>
+                  <span>{if @ranking_tab == "season", do: "Season score", else: "Top 200 heroes"}</span>
                 </div>
               </div>
-              <div class="profile-ranking-switch" role="group" aria-label="Leaderboard period">
-                <button
-                  :for={period <- ["daily", "season"]}
-                  id={"profile-ranking-#{period}"}
-                  type="button"
-                  phx-click="switch-ranking"
-                  disabled={@ranking_display == period}
-                  aria-pressed={to_string(@ranking_display == period)}
-                >
-                  {String.capitalize(period)}
+              <div class="profile-ranking-switch" role="group" aria-label="Leaderboard type">
+                <button :for={{tab, label} <- [{"season", "Season Rank"}, {"hero", "Hero Rank"}]} id={"profile-ranking-#{tab}"} type="button" phx-click="profile-ranking" phx-value-type={tab} aria-pressed={to_string(@ranking_tab == tab)}>
+                  {label}
                 </button>
               </div>
             </div>
-            <table class="table table-dark text-center m-0 table-sm ranking-table" id="profile-ranking-table">
-              <colgroup :if={@preview}>
-                <col class="profile-rank-column" />
-                <col />
-                <col class="profile-score-column" />
-              </colgroup>
-              <thead :if={@preview} class="sr-only">
-                <tr>
-                  <th scope="col">Rank</th>
-                  <th scope="col">Player</th>
-                  <th scope="col">{if @ranking_display == "daily", do: "Daily wins", else: "Season score"}</th>
-                </tr>
-              </thead>
-              <thead :if={!@preview}>
-                <tr>
-                  <th>
-                    <a
-                      href="javascript:;"
-                      phx-click="switch-ranking"
-                      data-toggle="tooltip"
-                      title={"Switch to #{if @ranking_display == "daily", do: "Season", else: "Daily"} Rank"}
-                      phx-hook="Loading"
-                      class="text-white"
-                      id="loading-ranking"
-                    >
-                      <span class="loading-text">
-                        <i class="ui-icon ui-shuffle mr-1 text-primary"></i>
-                        {if @ranking_display == "daily", do: "Daily", else: "Season"} Rank
-                      </span>
-                    </a>
-                  </th>
-                  <th>Player</th>
-                  <%= if @ranking_display == "daily" do %>
-                    <th>Daily Wins</th>
-                  <% else %>
-                    <th
-                      data-toggle="tooltip"
-                      title="Score calculation: Best Immortal Streak x 100 + Training Rank x 100 + Season Points"
-                    >
-                      Season Score
-                    </th>
-                  <% end %>
-                </tr>
-              </thead>
-              <tbody>
-                <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
-                  <tr
-                    id={"player-#{player.id}"}
-                    phx-hook={if player.id == @player.id, do: "HalfScroll"}
-                    phx-container="#user-ranking"
-                    class={if player.id == @player.id, do: "selected-player"}
-                    data-bracket={if @preview, do: arena_bracket(player)}
-                  >
-                    <td>
-                      <h1 class="f-rpg">
-                        <%= if @ranking_display == "daily" do %>
-                          #{player.ranking || index}
-
-                          <%= if player.ranking in [6, 7, 8, 9] do %>
-                            <i
-                              class="ui-icon ui-chevrons-up text-success text-small h4"
-                              data-toggle="tooltip"
-                              title={"#{username(player)} will rank up to Immortal"}
-                            >
-                            </i>
-                          <% end %>
-                          <%= if player.ranking in [26, 27, 28, 29, 30] do %>
-                            <i
-                              class="ui-icon ui-chevrons-up text-success text-small h4"
-                              data-toggle="tooltip"
-                              title={"#{username(player)} will rank up to Shadow"}
-                            >
-                            </i>
-                          <% end %>
-                          <%= if player.ranking in [21, 22, 23, 24, 25] do %>
-                            <i
-                              class="ui-icon ui-chevrons-down text-danger text-small h4"
-                              data-toggle="tooltip"
-                              title={"#{username(player)} will rank down to Pleb"}
-                            >
-                            </i>
-                          <% end %>
-                        <% else %>
-                          #{player.season_ranking}
-                        <% end %>
-                      </h1>
-                    </td>
-                    <td>
-                      <.link
-                        navigate={preview_path(assigns, ~p"/player/#{player.id}")}
-                        title={"#{player.pvp_points} Season Points"}
-                        data-toggle="tooltip"
-                      >
-                        <img
-                          src={"/images/pve/#{player.pve_tier}.png"}
-                          class={"pvp-rank rank-shadow-#{shadow_rank(player)}"}
-                        />
-                        <h5 class={"text-white font-weight-bold mb-0 mt-1 name-shadow-#{shadow_rank(player)}"}>
-                          <%= if player.user.discord.id do %>
-                            <img src={player.user.discord.avatar} class="mini-discord-avatar" />
-                          <% end %>
-                          {username(player)}
-                          <span :if={@preview} class="profile-ranking-bracket">{arena_bracket(player)}</span>
-                        </h5>
-                      </.link>
-                    </td>
-                    <td>
-                      <%= if @ranking_display == "daily" do %>
-                        <h3
-                          class="text-success"
-                          title={"#{player.daily_wins} wins / #{player.daily_matches} matches"}
-                          data-toggle="tooltip"
-                          id={"daily-player-#{player.id}"}
-                        >
-                          {player.daily_wins}
-                        </h3>
-                      <% else %>
-                        <h3 class="text-success" id={"season-player-#{player.id}"}>{season_score(player)}</h3>
-                      <% end %>
-                    </td>
-                  </tr>
-                <% end %>
-              </tbody>
-              <%= if not in_ranking?(@ranking, @player) do %>
-                <tfoot>
-                  <tr>
-                    <th>
-                      <%= if @player.ranking do %>
-                        <h1 class="text-info f-rpg">#{@player.ranking}</h1>
-                      <% else %>
-                        <h4 class="text-info font-italic">Unranked</h4>
-                      <% end %>
-                    </th>
-                    <th>
-                      <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
-                      <h5 class="font-weight-bold mb-0 mt-1 text-info">
-                        <%= if @player.user.discord.id do %>
-                          <img src={@player.user.discord.avatar} class="mini-discord-avatar" />
-                        <% end %>
-                        {username(@player)}
-                      </h5>
-                    </th>
-                    <th>
-                      <h3
-                        class="text-success"
-                        title={"#{@player.daily_wins} wins / #{@player.daily_matches} matches"}
-                        data-toggle="tooltip"
-                      >
-                        {@player.daily_wins}
-                      </h3>
-                    </th>
-                  </tr>
-                </tfoot>
-              <% end %>
-            </table>
+            <.season_ranking :if={@ranking_tab == "season"} {assigns} />
+            <.hero_ranking :if={@ranking_tab == "hero"} {assigns} />
           </div>
         </div>
       </div>

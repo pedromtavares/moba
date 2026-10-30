@@ -28,6 +28,13 @@ defmodule MobaWeb.V2.PreviewLiveTest do
       assert has_element?(view, "#game-page .base-atmosphere[aria-hidden=true]")
       assert has_element?(view, "#game-page #{selector}"), path
       assert has_element?(view, ".stats-footer") == (path == "/community")
+
+      if path == "/community" do
+        for label <- ["Matches", "Players", "Trained heroes", "Masters", "Grandmasters", "Undefeated"] do
+          assert has_element?(view, "#community-footer dt", label)
+        end
+      end
+
       refute has_element?(view, "a[href^='/new/'], form[action^='/new/']")
       assert has_element?(view, "#game-sidebar a[href='/base']")
       assert has_element?(view, "#game-sidebar a[href='/arena']")
@@ -131,20 +138,13 @@ defmodule MobaWeb.V2.PreviewLiveTest do
     assert has_element?(view, "#show-skins-link[aria-selected=true]")
   end
 
-  test "profile switches ranking through the period controls", %{conn: conn} do
+  test "profile defaults to the season leaderboard when it has no ranked hero", %{conn: conn} do
     hero = create_base_hero()
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/player/#{hero.player_id}")
-
-    assert has_element?(view, "#profile-ranking-daily[aria-pressed=true]")
-    assert has_element?(view, "#profile-ranking-header", "Daily wins")
-
-    view |> element("#profile-ranking-season") |> render_click()
-    assert has_element?(view, "#profile-ranking-season[aria-pressed=true]")
     assert has_element?(view, "#profile-ranking-header", "Season score")
-
-    view |> element("#profile-ranking-daily") |> render_click()
-    assert has_element?(view, "#profile-ranking-daily[aria-pressed=true]")
+    assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season Rank")
+    assert has_element?(view, "#profile-ranking-hero", "Hero Rank")
   end
 
   test "account screens render the redesign and login returns to canonical routes", %{conn: conn} do

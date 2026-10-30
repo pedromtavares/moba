@@ -4,7 +4,9 @@
       <span class="squad-eyebrow">Arena · Lineup builder</span>
       <h1>Your teams</h1>
     </div>
-    <.link navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">Return to arena →</.link>
+    <.link id="teams-return-button" navigate={preview_path(assigns, if(@return_match_id, do: ~p"/matches/#{@return_match_id}", else: ~p"/arena"))} class="btn base-secondary">
+      {if @return_match_id, do: "Return to match", else: "Return to arena"} →
+    </.link>
   </header>
   <div class="squad-columns teams-columns">
     <section class="squad-panel saved-teams" id="teams-container" aria-labelledby="saved-teams-title">

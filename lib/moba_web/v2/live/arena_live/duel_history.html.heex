@@ -1,0 +1,54 @@
+<section
+  :if={@history_tab == "duels"}
+  id="arena-duel-history-section"
+  class="arena-history-panel"
+  aria-labelledby="arena-history-duels-tab"
+>
+  <.hud_notice
+    :if={@finished_duels == []}
+    id="arena-no-duels"
+    title="No completed duels yet"
+  />
+  <div :if={@finished_duels != []} class="history arena-history" aria-labelledby="arena-history-duels-tab">
+    <table class="table-dark table mb-0 history-table" id="arena-duels-table">
+      <%= for duel <- @finished_duels do %>
+        <% opponent = opponent_for(duel, @current_player) %>
+        <% rewards =
+          if duel.player_id == @current_player.id,
+            do: rewards_badge(duel.rewards.attacker_pvp_points),
+            else: rewards_badge(duel.rewards.defender_pvp_points) %>
+        <tr>
+          <td class="d-flex justify-content-center table-player-cell">
+            <img src={"/images/pve/#{opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
+            <div style="width: 70%">
+              <h4 class="mt-2">
+                <.link navigate={preview_path(assigns, ~p"/player/#{opponent.id}")} class="text-white">
+                  {username(opponent)}
+                </.link>
+                <span :if={@preview} class={[duel_badge_class(duel), "history-detail"]}>
+                  {GH.duel_mode_label(duel)}
+                </span>
+              </h4>
+            </div>
+          </td>
+          <td width="33%" class="text-center">
+            <h5 class={duel_result_class(duel, @current_player.id)}>
+              {duel_result_label(duel, @current_player.id)}
+            </h5>
+            <span :if={rewards} class={rewards.class}>{rewards.label}</span>
+          </td>
+          <td class="text-center">
+            <span :if={!@preview} class={duel_badge_class(duel)}>{GH.duel_mode_label(duel)}</span>
+            <.link
+              navigate={preview_path(assigns, ~p"/arena/#{duel}")}
+              class="btn btn-light ml-2 game-review"
+              aria-label={"Review duel #{duel.id}"}
+            >
+              <i class="ui-icon ui-eye"></i>
+            </.link>
+          </td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+</section>

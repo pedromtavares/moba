@@ -12,7 +12,7 @@ body:has(.game-page) {
     box-shadow: none;
   }
   #game-sidebar > a { display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 1; width: 100%; min-height: 0; max-height: none; margin: 0; padding: 10px 0; border: 1px solid transparent; border-radius: 8px; color: #9da6b2; text-shadow: none; transition: color .18s; }
-  #game-sidebar > a > .nav-emblem { flex-shrink: 1; min-height: 0; width: 56px; height: 50px; filter: saturate(.55) brightness(.9); opacity: .85; transition: filter .18s, opacity .18s; }
+  #game-sidebar > a > .nav-emblem { flex-shrink: 1; min-height: 0; width: 56px; height: 50px; transform: scale(1.2); filter: saturate(.55) brightness(.9); opacity: .85; transition: filter .18s, opacity .18s; }
   #game-sidebar .sidebar-label { flex-shrink: 0; width: 100%; height: 48px; margin-top: 8px; opacity: 0; color: inherit; font: 800 20px/1.2 'Nunito', sans-serif; text-align: center; transition: opacity .15s; }
   #game-sidebar > a:is(:hover, :focus-visible) .sidebar-label { opacity: 1; }
   #game-sidebar > a:hover { color: #e6d0a7; }

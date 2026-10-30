@@ -37,6 +37,10 @@ defmodule Moba.Game.Duels do
     Repo.all(from(duel in base_query(player)))
   end
 
+  def pending_duel(player) do
+    Repo.one(from duel in base_query(player), where: duel.phase != "finished", limit: 1)
+  end
+
   def load(queryable \\ Duel) do
     queryable
     |> preload(

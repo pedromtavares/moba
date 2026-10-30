@@ -31,7 +31,12 @@ revealed = Enum.take(@battles, @tick) %>
     <section class="squad-panel match-lineup" aria-labelledby="match-your-lineup">
       <div class="squad-panel-heading">
         <h2 id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</h2>
-        <strong>{length(@picked_heroes)} / 5</strong>
+        <div class="match-lineup-actions">
+          <.link :if={owner?} id="edit-teams-button" navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary match-edit-teams">
+            <.icon name="game-team" /> Edit Teams
+          </.link>
+          <strong>{length(@picked_heroes)} / 5</strong>
+        </div>
       </div>
       <div class="squad-scroll lineup-list">
         <%= for position <- 1..5 do %>

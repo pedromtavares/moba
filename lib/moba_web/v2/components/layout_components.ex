@@ -216,46 +216,83 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   # -------------------------------------------------------------------
 
   @doc """
-  Renders the footer stats bar — exact mirror of v1's stats-footer row.
+  Renders game totals with cinematic styling on redesigned pages.
   """
+  attr :preview, :boolean, default: false
+
   def footer_stats(assigns) do
     assigns = assign(assigns, :stats, build_footer_stats())
 
     ~H"""
-    <div class="row stats-footer">
-      <div class="col">
-        <div class="card dark-bg-lighter mb-0">
-          <div class="card-body pb-3 pt-3">
-            <div class="row justify-content-center">
-              <div class="col text-center">
-                <h5><i class="ui-icon ui-swords mr-1"></i>{@stats.matches} matches</h5>
-              </div>
-              <div class="col text-center">
-                <h5><i class="ui-icon ui-users mr-1"></i>{@stats.active} players</h5>
-              </div>
-              <div class="col text-center">
-                <h5><i class="ui-icon ui-helmet mr-1"></i>{@stats.heroes} trained</h5>
-              </div>
-              <div class="col text-center">
-                <h5>
-                  <img src="/images/league/5.png" class="mr-1" />{@stats.masters} masters
-                </h5>
-              </div>
-              <div class="col text-center">
-                <h5>
-                  <img src="/images/league/6.png" class="mr-1" />{@stats.grandmasters} grandmasters
-                </h5>
-              </div>
-              <div class="col text-center">
-                <h5>
-                  <img src="/images/league/6.png" class="mr-1 undefeated" />{@stats.undefeated} undefeated
-                </h5>
+    <%= if @preview do %>
+      <footer id="community-footer" class="stats-footer community-footer" aria-label="BrowserMOBA statistics">
+        <dl class="community-footer-metrics">
+          <div id="community-footer-matches" class="community-footer-stat">
+            <dt><.icon name="game-swords" class="community-footer-icon" /><span>Matches</span></dt>
+            <dd>{@stats.matches}</dd>
+          </div>
+          <div id="community-footer-players" class="community-footer-stat">
+            <dt><.icon name="game-team" class="community-footer-icon" /><span>Players</span></dt>
+            <dd>{@stats.active}</dd>
+          </div>
+          <div id="community-footer-heroes" class="community-footer-stat">
+            <dt><.icon name="game-hero" class="community-footer-icon" /><span>Trained heroes</span></dt>
+            <dd>{@stats.heroes}</dd>
+          </div>
+          <div id="community-footer-masters" class="community-footer-stat">
+            <dt><img src="/images/league/5.png" class="community-footer-icon" alt="" /><span>Masters</span></dt>
+            <dd>{@stats.masters}</dd>
+          </div>
+          <div id="community-footer-grandmasters" class="community-footer-stat">
+            <dt><img src="/images/league/6.png" class="community-footer-icon" alt="" /><span>Grandmasters</span></dt>
+            <dd>{@stats.grandmasters}</dd>
+          </div>
+          <div id="community-footer-undefeated" class="community-footer-stat">
+            <dt>
+              <img src="/images/league/6.png" class="community-footer-icon community-footer-undefeated" alt="" /><span>
+                Undefeated
+              </span>
+            </dt>
+            <dd>{@stats.undefeated}</dd>
+          </div>
+        </dl>
+      </footer>
+    <% else %>
+      <div class="row stats-footer">
+        <div class="col">
+          <div class="card dark-bg-lighter mb-0">
+            <div class="card-body pb-3 pt-3">
+              <div class="row justify-content-center">
+                <div class="col text-center">
+                  <h5><i class="ui-icon ui-swords mr-1"></i>{@stats.matches} matches</h5>
+                </div>
+                <div class="col text-center">
+                  <h5><i class="ui-icon ui-users mr-1"></i>{@stats.active} players</h5>
+                </div>
+                <div class="col text-center">
+                  <h5><i class="ui-icon ui-helmet mr-1"></i>{@stats.heroes} trained</h5>
+                </div>
+                <div class="col text-center">
+                  <h5>
+                    <img src="/images/league/5.png" class="mr-1" />{@stats.masters} masters
+                  </h5>
+                </div>
+                <div class="col text-center">
+                  <h5>
+                    <img src="/images/league/6.png" class="mr-1" />{@stats.grandmasters} grandmasters
+                  </h5>
+                </div>
+                <div class="col text-center">
+                  <h5>
+                    <img src="/images/league/6.png" class="mr-1 undefeated" />{@stats.undefeated} undefeated
+                  </h5>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    <% end %>
     """
   end
 

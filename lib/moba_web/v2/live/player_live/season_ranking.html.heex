@@ -1,0 +1,91 @@
+<table
+  class="table table-dark text-center m-0 table-sm ranking-table profile-leaderboard-table"
+  id="profile-ranking-table"
+>
+  <colgroup :if={@preview}>
+    <col class="profile-rank-column" />
+    <col />
+    <col class="profile-score-column" />
+  </colgroup>
+  <thead :if={@preview} class="sr-only">
+    <tr>
+      <th scope="col">Rank</th>
+      <th scope="col">Player</th>
+      <th scope="col">Season score</th>
+    </tr>
+  </thead>
+  <thead :if={!@preview}>
+    <tr>
+      <th>Season Rank</th>
+      <th>Player</th>
+      <th title="Score calculation: Best Immortal Streak x 100 + Training Rank x 100 + Season Points">Season Score</th>
+    </tr>
+  </thead>
+  <tbody>
+    <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
+      <tr
+        id={"player-#{player.id}"}
+        phx-hook={if player.id == @player.id, do: "HalfScroll"}
+        phx-container="#user-ranking"
+        class={if player.id == @player.id, do: "selected-player"}
+        data-bracket={if @preview, do: arena_bracket(player)}
+      >
+        <td>
+          <h1 class="f-rpg">
+            #{player.season_ranking || index}
+          </h1>
+        </td>
+        <td>
+          <.link
+            navigate={preview_path(assigns, ~p"/player/#{player.id}")}
+            title={"#{player.pvp_points} Season Points"}
+            data-toggle="tooltip"
+            class="profile-ranked-identity"
+          >
+            <img
+              src={"/images/pve/#{player.pve_tier}.png"}
+              class="pvp-rank profile-ranked-avatar"
+            />
+            <h5 class="profile-ranked-name">
+              <%= if player.user.discord.id do %>
+                <img src={player.user.discord.avatar} class="mini-discord-avatar" />
+              <% end %>
+              {username(player)}
+              <span :if={@preview} class="profile-ranking-bracket">{arena_bracket(player)}</span>
+            </h5>
+          </.link>
+        </td>
+        <td>
+          <h3 class="text-success" id={"season-player-#{player.id}"}>{season_score(player)}</h3>
+          <small class="profile-ranking-unit">score</small>
+        </td>
+      </tr>
+    <% end %>
+  </tbody>
+  <%= if not in_ranking?(@ranking, @player) do %>
+    <tfoot>
+      <tr>
+        <th>
+          <%= if @player.season_ranking do %>
+            <h1 class="text-info f-rpg">#{@player.season_ranking}</h1>
+          <% else %>
+            <h4 class="text-info font-italic">Unranked</h4>
+          <% end %>
+        </th>
+        <th>
+          <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
+          <h5 class="font-weight-bold mb-0 mt-1 text-info">
+            <%= if @player.user.discord.id do %>
+              <img src={@player.user.discord.avatar} class="mini-discord-avatar" />
+            <% end %>
+            {username(@player)}
+          </h5>
+        </th>
+        <th>
+          <h3 class="text-success">{season_score(@player)}</h3>
+          <small class="profile-ranking-unit">score</small>
+        </th>
+      </tr>
+    </tfoot>
+  <% end %>
+</table>

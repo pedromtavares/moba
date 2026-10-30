@@ -1,0 +1,37 @@
+<table id="profile-hero-ranking-table" class="table table-dark ranking-table m-0 profile-leaderboard-table">
+  <colgroup><col class="profile-rank-column" /><col /><col class="profile-score-column" /></colgroup>
+  <thead class="sr-only">
+    <tr>
+      <th scope="col">Hero rank</th>
+      <th scope="col">Hero and player</th>
+      <th scope="col">Total farm</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr
+      :for={hero <- @hero_ranking}
+      id={"profile-ranked-hero-#{hero.id}"}
+      class={hero.player_id == @player.id && "selected-player"}
+      data-profile-hero={to_string(hero.player_id == @player.id)}
+      phx-hook={if hero.id == @best_ranked_hero_id, do: "HalfScroll"}
+      phx-container="#user-ranking"
+    >
+      <td class="profile-hero-position">
+        <h1 class="f-rpg">#{hero.pve_ranking}</h1>
+      </td>
+      <td>
+        <.link navigate={preview_path(assigns, ~p"/hero/#{hero.id}")} class="profile-ranked-identity">
+          <img src={GH.image_url(hero.avatar)} alt="" class="profile-ranked-avatar" loading="lazy" />
+          <span>
+            <strong class="profile-ranked-name">{hero.name}</strong><small class="profile-ranking-detail">{hero.avatar.name} · {username(hero.player)}</small>
+          </span>
+        </.link>
+      </td>
+      <td class="profile-hero-farm" title={"#{hero.total_gold_farm + hero.total_xp_farm} total farm"}>
+        <h3 class="text-success">{GH.farming_amount_label(hero.total_gold_farm + hero.total_xp_farm)}</h3>
+        <small class="profile-ranking-unit">farm</small>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p :if={@hero_ranking == []} id="profile-no-ranked-heroes" class="profile-rank-empty">No ranked heroes yet.</p>

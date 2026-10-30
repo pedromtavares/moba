@@ -2,8 +2,12 @@ defmodule Moba.Game.Arena do
   @moduledoc """
   Module focused on cross-resource orchestration and logic related to PvP (Duels & Matchmaking)
   """
-  alias Moba.{Engine, Game}
+  alias Moba.{Engine, Game, Repo}
   alias Game.{Duels, Heroes, Matches, Players, Teams}
+  alias Game.Schema.{Duel, Match}
+  alias Moba.Accounts.Schema.User
+
+  import Ecto.Query
 
   @daily_match_limit Moba.daily_match_limit()
 
@@ -66,7 +70,9 @@ defmodule Moba.Game.Arena do
   end
 
   def create_duel!(player, opponent, auto) do
-    duel = Duels.create!(player, opponent, auto)
+    participants = if auto, do: [player], else: [player, opponent]
+
+    duel = with_daily_rewards(participants, fn -> Duels.create!(player, opponent, auto) end)
 
     Players.set_player_unavailable!(player)
 
@@ -87,9 +93,47 @@ defmodule Moba.Game.Arena do
   end
 
   def manual_matchmaking!(player) do
-    match = create_match!(player, Players.matchmaking_opponent(player), "manual")
-    if match, do: Moba.reward_shards!(player, Moba.matchmaking_shards())
-    match
+    with_daily_rewards([player], fn ->
+      player = Players.get_player!(player.id)
+      create_match!(player, Players.matchmaking_opponent(player), "manual")
+    end)
+  end
+
+  def daily_reward_games(%{id: id}) do
+    reset_at = Moba.current_season().last_pvp_update_at
+
+    matches =
+      from m in Match,
+        where: m.player_id == ^id and m.type == "manual" and m.inserted_at > ^reset_at
+
+    duels =
+      from d in Duel,
+        where: d.inserted_at > ^reset_at and (is_nil(d.type) or d.type == "pvp"),
+        where: d.player_id == ^id or (d.opponent_player_id == ^id and d.auto == false)
+
+    Repo.aggregate(matches, :count) + Repo.aggregate(duels, :count)
+  end
+
+  defp with_daily_rewards(players, play) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        user_ids = players |> Enum.map(& &1.user_id) |> Enum.reject(&is_nil/1) |> Enum.uniq()
+
+        # Serialize the shared allowance and balance across both modes and live participants.
+        users = Repo.all(from u in User, where: u.id in ^user_ids, order_by: u.id, lock: "FOR UPDATE")
+        eligible = Enum.filter(players, &(daily_reward_games(&1) < @daily_match_limit))
+        result = play.()
+
+        if result do
+          for player <- eligible, user <- users, user.id == player.user_id do
+            Repo.update_all(from(u in User, where: u.id == ^user.id), inc: [shard_count: Moba.matchmaking_shards()])
+          end
+        end
+
+        result
+      end)
+
+    result
   end
 
   def reset_match!(%{id: id} = match) do

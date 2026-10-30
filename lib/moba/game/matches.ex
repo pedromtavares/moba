@@ -89,7 +89,22 @@ defmodule Moba.Game.Matches do
 
   def list_matches(%{id: player_id}), do: list_query(player_id) |> Repo.all()
 
+  def match_id_for_player(%{id: player_id}, match_id \\ nil) do
+    query = from(m in Match, where: m.player_id == ^player_id, order_by: [desc: m.id], limit: 1, select: m.id)
+    query = if match_id, do: from(m in query, where: m.id == ^match_id), else: query
+    Repo.one(query)
+  end
+
   def list_manual(%{id: player_id}), do: list_query(player_id, "manual") |> Repo.all()
+
+  def pending_match(%{id: player_id}) do
+    Repo.one(
+      from m in load(),
+        where: m.player_id == ^player_id and (is_nil(m.phase) or m.phase != "scored"),
+        order_by: [desc: m.id],
+        limit: 1
+    )
+  end
 
   def load(queryable \\ Match) do
     preload(queryable, player: :user, opponent: :user, winner: :user)

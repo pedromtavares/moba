@@ -76,6 +76,11 @@ defmodule Moba.Game.Query.PlayerQuery do
     from(player in query, order_by: [desc: player.pvp_points])
   end
 
+  def season_points_ranked(limit) do
+    players = non_bots() |> non_guests() |> limit_by(limit)
+    from p in players, order_by: [desc: p.pvp_points, asc: p.id], preload: :user
+  end
+
   def eligible_arena_bots do
     bots() |> by_pvp_points()
   end

@@ -2,7 +2,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
-  test "pending duel has a full-width resume action and keeps completed history visible", %{conn: conn} do
+  test "pending duel resumes from its play button and history remains available", %{conn: conn} do
     hero = create_base_hero()
     opponent = create_player!()
     completed = Game.create_duel!(hero.player, opponent, false)
@@ -11,14 +11,16 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     conn = init_test_session(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/arena")
 
-    assert has_element?(view, "#arena-pending-duel[data-tone=active]")
+    assert has_element?(view, "#pvp-progression #resume-arena-duel", "Resume 1v1")
+    assert has_element?(view, "#set-status[disabled]")
+    view |> element("#arena-history-duels-tab") |> render_click()
     assert has_element?(view, "#resume-arena-duel[href='/arena/#{pending.id}']")
     refute has_element?(view, "#pvp_duels a.col-xl-4")
     assert has_element?(view, "#arena-duels-table a[href='/arena/#{completed.id}']")
     refute has_element?(view, "#arena-duels-table a[href='/arena/#{pending.id}']")
   end
 
-  test "a pending match stays resumable at the daily limit, then shows the reset state", %{conn: conn} do
+  test "a pending match stays resumable at the daily limit, then disables its play button", %{conn: conn} do
     hero = create_base_hero()
     player = Game.update_player!(hero.player, %{daily_matches: Moba.daily_match_limit()})
     opponent = create_player!()
@@ -37,7 +39,8 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
 
     Game.Matches.update!(pending, %{phase: "scored", winner_id: player.id, rewards: %{attacker_pvp_points: 0}})
     {:ok, finished, _} = live(conn, "/arena")
-    assert has_element?(finished, "#arena-daily-limit strong", "Daily matches complete")
+    assert has_element?(finished, "#enter-arena-button[disabled]", "Play 5v5")
+    refute has_element?(finished, "#arena-entry-reward")
     refute has_element?(finished, "#resume-arena-match")
     refute has_element?(finished, "#arena-daily-limit.btn")
   end
@@ -65,6 +68,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     conn = init_test_session(conn, player_id: hero.player_id)
     {:ok, arena, _} = live(conn, "/arena")
     assert has_element?(arena, "#arena-no-matches")
+    arena |> element("#arena-history-duels-tab") |> render_click()
     assert has_element?(arena, "#arena-no-duels")
 
     match = create_match(hero.player, opponent)
@@ -72,7 +76,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     assert has_element?(view, "#match-pick-status .hud-notice-counter", "0")
     refute has_element?(view, "#start-match-button")
     assert has_element?(view, "#match-no-trained-heroes #match-browse-available")
-    assert has_element?(view, "#match-no-teams a[href='/arena/edit']")
+    assert has_element?(view, "#match-no-teams a[href='/arena/edit?match_id=#{match.id}']")
     view |> element("#match-browse-available") |> render_click()
     assert has_element?(view, "#available-heroes.active.show")
 

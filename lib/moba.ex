@@ -10,6 +10,18 @@ defmodule Moba do
   defdelegate basic_attack, to: Game
   defdelegate evade, to: Game
 
+  def recent_community_players do
+    case Cachex.get(:game_cache, "community_players") do
+      {:ok, nil} ->
+        players = Moba.Admin.current_active_players()
+        Cachex.put(:game_cache, "community_players", players, ttl: 30_000)
+        players
+
+      {:ok, players} ->
+        players
+    end
+  end
+
   def cached_items do
     %{resource_uuid: uuid} = Game.current_season()
 

@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.MatchLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
   alias MobaWeb.V2.TutorialComponent
 
   embed_templates "match_live/*"

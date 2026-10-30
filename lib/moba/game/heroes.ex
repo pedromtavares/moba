@@ -6,8 +6,14 @@ defmodule Moba.Game.Heroes do
   alias Moba.{Repo, Game}
   alias Game.Schema.Hero
   alias Game.Query.HeroQuery
+  import Ecto.Query, only: [from: 2]
 
   # -------------------------------- PUBLIC API
+
+  def best_hero_rank(player_id) do
+    from(h in Hero, where: h.player_id == ^player_id and h.pve_ranking > 0, select: min(h.pve_ranking))
+    |> Repo.one()
+  end
 
   def available_hero?(hero) do
     ago = Timex.shift(Timex.now(), days: -Moba.available_hero_days()) |> Timex.to_datetime()

@@ -182,7 +182,7 @@
                       description="Pick heroes individually or build a team."
                     >
                       <:actions>
-                        <.link navigate={preview_path(assigns, ~p"/arena/edit")} class="btn base-secondary">
+                        <.link navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary">
                           Manage teams <span aria-hidden="true">→</span>
                         </.link>
                       </:actions>

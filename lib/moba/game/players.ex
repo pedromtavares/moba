@@ -67,6 +67,8 @@ defmodule Moba.Game.Players do
   """
   def daily_ranking(limit), do: PlayerQuery.daily_ranked(limit) |> Repo.all()
 
+  def season_points_ranking(limit), do: PlayerQuery.season_points_ranked(limit) |> Repo.all()
+
   def season_ranking(limit) do
     players = PlayerQuery.season_ranked(limit) |> Repo.all()
 

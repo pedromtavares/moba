@@ -15,7 +15,7 @@
   .arena-cinematic h1 { margin: 0; color: #f5edda; font: 900 clamp(38px, 4vw, 60px)/1.05 'Nunito', sans-serif; letter-spacing: -.035em; text-shadow: 0 3px 24px #0009; }
   .arena-cinematic #current-pvp-tier { max-width: 58ch; margin: 12px 0 0; color: #d1d6df; font-size: 16px; line-height: 1.5; }
   .arena-handicap { flex-shrink: 0; align-self: flex-start; padding: 8px 12px; border: 1px solid #d98d9455; border-radius: 5px; background: #29151ce0; color: #e9a5ac; font-size: 12px; }
-  .arena-cinematic-command { display: grid; grid-template-columns: minmax(0, 1fr) 320px; align-items: center; gap: clamp(24px, 6vw, 100px); margin: 26px 0 22px; }
+  .arena-cinematic-command { display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); margin: 26px 0 22px; }
   .arena-daily-progress { max-width: 900px; }
   .arena-cinematic .arena-progress-label { margin-bottom: 8px; color: #bfc4cc; font-size: 11px; font-weight: 800; }
   .arena-cinematic .arena-progress-label strong { font-size: 24px; }
@@ -29,9 +29,6 @@
   .arena-cinematic .arena-daily-limit { max-width: none; background: #08111bd9; }
   .arena-cinematic-footer { display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 16px 0; border-top: 1px solid #c7b17b33; }
   .arena-cinematic-stats { display: flex; gap: 0; margin: 0; }
-  .arena-season-duel { flex: 0 0 320px; min-height: 42px; padding: 10px 16px; border-radius: 6px; font: 800 13px/1.3 'Nunito', sans-serif; }
-  .arena-season-duel .loading-text { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
-  .arena-season-duel .loading-text > span { margin-left: auto; }
   .arena-cinematic-stats > div { display: flex; align-items: baseline; gap: 14px; padding: 0 30px; border-left: 1px solid #c7b17b26; }
   .arena-cinematic-stats > div:first-child { padding-left: 0; border-left: 0; }
   .arena-cinematic-stats dt { color: #aab4c1; font-size: 12px; font-weight: 600; }
@@ -41,6 +38,22 @@
   .arena-stat-blue { color: #8dc4dc; }
   .arena-stat-green { color: #8cc9ae; }
 
+  .arena-play-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .arena-cinematic .arena-play-button, .arena-cinematic #enter-arena-button { gap: 10px; min-height: 68px; padding: 16px; font-size: clamp(16px, 1.5vw, 22px); white-space: nowrap; box-shadow: inset 0 1px #ffd9a51a, 0 6px 24px #0003; transition: transform .18s, box-shadow .18s; }
+  .arena-play-button .loading-text { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
+  .arena-cinematic #enter-arena-button .loading-text { justify-content: center; }
+  .arena-play-button .ui-icon { font-size: 1.3em; }
+  .arena-play-button > span:last-child:not(.loading-text), .arena-play-button .loading-text > span:last-child { margin-left: auto; }
+  .arena-play-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: inset 0 1px #ffd9a533, 0 8px 24px #0005; }
+  .arena-play-button:focus-visible { outline: 2px solid #ebcc92; outline-offset: 3px; }
+  .arena-play-button:disabled { opacity: .45; cursor: not-allowed; }
+  .arena-cinematic .arena-entry-reward { display: flex; justify-content: center; gap: 8px; margin-bottom: 0; font-size: 13px; }
+  .arena-history-switcher { display: grid; flex-shrink: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin-bottom: 18px; padding: 4px; border: 1px solid #b9a67e33; border-radius: 8px; background: #080f1ac7; }
+  .arena-history-switcher button { min-height: 42px; padding: 8px 12px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #aab4c1; font: 800 16px/1.3 'Nunito', sans-serif; transition: background .18s, color .18s; cursor: pointer; }
+  .arena-history-switcher button:hover { color: #e5cc99; background: #c7b17b0d; }
+  .arena-history-switcher button[aria-pressed=true] { color: #edcf98; border-color: #c7b17b66; background: linear-gradient(135deg, #c7b17b29, #c7b17b0d); box-shadow: inset 0 1px #f1d7a51a; }
+  .arena-history-switcher button:focus-visible { outline: 2px solid #e6c58e; outline-offset: 1px; }
+  .arena-history-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
   .arena-board { gap: 22px; }
   .arena-board #matchmaking-container, .arena-board .card.ranking, .arena-board #pvp_duels {
     padding: 20px 18px;
@@ -50,27 +63,31 @@
     box-shadow: inset 0 1px #e2d1ab0d;
   }
   .arena-board #arena-standings { display: flex; flex-direction: column; height: auto !important; max-height: 60vh; min-height: 0; overflow: hidden; }
-  .arena-standings-heading { display: flex; flex-wrap: wrap; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 12px 16px; min-height: 56px; margin-bottom: 16px; }
+  .arena-standings-heading { display: block; flex-shrink: 0; min-height: 0; margin: 0; }
   .arena-standings-heading h2 { margin: 0; color: #e9dfcd; font-size: 22px; font-weight: 800; }
-  .arena-bracket-group { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); flex: 1; min-width: 250px; max-width: 320px; gap: 3px; padding: 3px; border: 1px solid #b9a67e33; border-radius: 8px; background: #080f1ac7; box-shadow: inset 0 1px 6px #0004; }
-  .arena-bracket-group button { --bracket-accent: #c9ac89; min-height: 36px; padding: 6px 8px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #95a0ae; font: 800 13px/1.3 'Nunito', sans-serif; cursor: pointer; transition: color .18s, background .18s, border-color .18s; }
-  .arena-bracket-group button[data-bracket=shadows] { --bracket-accent: #b5c7df; }
-  .arena-bracket-group button[data-bracket=immortals] { --bracket-accent: #ebcf92; }
-  .arena-bracket-group button:hover { color: var(--bracket-accent); background: #c7b17b0d; }
-  .arena-bracket-group button[aria-pressed=true] { color: var(--bracket-accent); border-color: #c7b17b66; background: linear-gradient(135deg, #c7b17b29, #c7b17b0d); box-shadow: inset 0 1px #f1d7a51a; }
-  .arena-bracket-group button:focus-visible { outline: 2px solid #e6c58e; outline-offset: 2px; }
   .arena-standings-list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
   .arena-standings-list > li + li { border-top: 1px solid #baa98a14; }
-  .arena-standing-row { display: grid; grid-template-columns: 44px 36px minmax(0, 1fr) 60px; align-items: center; gap: 12px; min-height: 84px; padding: 14px 10px; border-radius: 6px; color: #e7e0d1; transition: background .18s; }
+  .arena-standing-row { display: grid; grid-template-columns: 64px 36px minmax(0, 1fr) minmax(76px, max-content); align-items: center; gap: 12px; min-height: 84px; padding: 14px 10px; border-radius: 6px; color: #e7e0d1; transition: background .18s; }
   .arena-standing-row:hover, .arena-standing-row:focus-visible { background: #c7b17b0d; color: #fff1d3; }
   .arena-standing-row:focus-visible { outline: 2px solid #e6c58e; outline-offset: -2px; }
-  .arena-standing-position { color: #b7b8b6; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .arena-standing-position > small { margin-right: 1px; font-size: 13px; opacity: .65; }
+  .arena-standing-position { display: inline-flex; align-items: center; gap: 5px; color: #b7b8b6; font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .arena-standing-position small { margin-right: 1px; font-size: 13px; opacity: .65; }
+  .arena-standing-movement { display: inline-flex; align-items: center; flex-shrink: 0; color: #20bea7; font-size: 14px; }
+  .arena-standing-movement[data-direction=down] { color: #d87e8b; }
+  .arena-standing-movement .ui-icon { width: 1em; height: 1em; }
   .arena-standing-emblem { width: 36px; height: 36px; object-fit: contain; }
   .arena-standing-identity { min-width: 0; }
   .arena-standing-identity > strong { display: block; color: #e9e4db; font-size: 16px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
   .arena-standing-identity strong > small { display: inline-block; margin-left: 5px; padding: 2px 5px; border-radius: 3px; background: #d4b77b24; color: #e3c88e; font-size: 9px; font-weight: 800; text-transform: uppercase; vertical-align: middle; }
   .arena-standing-identity > span { display: block; margin-top: 4px; color: #8e9cac; font-size: 11px; }
+  .arena-standing-identity > .arena-standing-meta { display: flex; flex-wrap: wrap; gap: 3px 5px; }
+  .arena-standing-row[data-bracket] { --bracket-color: #929eaf; }
+  .arena-standing-row[data-bracket="Shadows"] { --bracket-color: #c4acee; background: linear-gradient(90deg, #9470cc18, #9470cc03); }
+  .arena-standing-row[data-bracket="Immortals"] { --bracket-color: #efd096; background: linear-gradient(90deg, #d6ad5f20, #d6ad5f04); }
+  .arena-standing-bracket { color: var(--bracket-color); font-weight: 800; }
+  .arena-standing-row[data-bracket]:not([data-bracket="Plebs"]) .arena-standing-position { color: var(--bracket-color); }
+  .arena-standing-row[data-bracket="Shadows"] .arena-standing-emblem { filter: drop-shadow(0 0 5px #a080dc66); }
+  .arena-standing-row[data-bracket="Immortals"] .arena-standing-emblem { filter: drop-shadow(0 0 6px #e6bc7066); }
   .arena-standing-score { text-align: right; }
   .arena-standing-score > strong { display: block; color: #8dcab0; font-size: 28px; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .arena-standing-score > span { color: #8e9cac; font-size: 10px; white-space: nowrap; }
@@ -116,14 +133,16 @@
   .arena-live-challenge:focus-visible { outline: 2px solid #e6c58e; outline-offset: 3px; }
   .arena-live-challenge:disabled { border-color: #9baabd33; background: #9baabd09; color: #929eac; cursor: not-allowed; }
   .arena-live-opponents-empty { margin: 0; padding: 16px 12px; border: 1px dashed #75b99c33; border-radius: 6px; color: #91a69e; font-size: 13px; }
-  .arena-board #pvp_duels.arena-duel-sections { padding: 0; border: 0; background: transparent !important; box-shadow: none; }
-  .arena-duel-sections > .card-body { display: flex; flex-direction: column; gap: 18px; }
   .arena-live-section { flex-shrink: 0; padding: 16px; border: 1px solid #77b8a35c; border-radius: 12px; background: linear-gradient(130deg, #1d463e66, #0a1822ed); box-shadow: inset 0 1px #b8ead514; }
   .arena-live-section .arena-live-pvp { margin: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
   .arena-live-section .arena-live-opponents { margin: 16px 0 0; padding-top: 16px; border-top: 1px solid #87c1aa29; }
-  .arena-duel-history-section { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 18px; border: 1px solid #bda77b33; border-radius: 12px; background: linear-gradient(145deg, #192432c7, #0a111cef 70%); box-shadow: inset 0 1px #e2d1ab0d; }
-  .arena-duel-history-header { display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; }
-  .arena-duel-history-header h2 { margin: 0; color: #e9dfcd; font: 800 20px/1.3 'Nunito', sans-serif; }
+  .arena-board #pvp_duels.arena-live-column { border-color: #77b8a35c; background: linear-gradient(135deg, #18332de0, #0a1822ed 65%) !important; }
+  .arena-live-column .arena-live-section { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+  .arena-live-column .arena-live-opponents { display: flex; flex-direction: column; flex: 1; min-height: 0; }
+  .arena-live-column .arena-live-opponents-list { max-height: none; min-height: 0; overflow-y: auto; }
+  .arena-live-pvp:has(input:disabled) { cursor: default; }
+  .arena-live-pvp:has(input:disabled) .arena-live-pvp-switch { opacity: .4; }
+
 }
 @media (min-width: 1200px) {
   .game-page .arena-overview {
@@ -133,20 +152,6 @@
     > .row { flex: 1; height: auto; min-height: 0; }
     .arena-board #arena-standings { height: 100% !important; max-height: none; }
     .arena-board .arena-section-heading { flex-shrink: 0; }
-    .arena-board #pvp_duels.arena-duel-sections { height: 100% !important; }
-  }
-}
-@media (min-width: 1200px) and (max-height: 850px) {
-  .game-page .arena-overview #arena-pending-duel {
-    margin: 0;
-    padding: 14px;
-    h3 { font-size: 20px; }
-    .hud-notice-identity { margin-top: 10px; gap: 10px; }
-    .hud-notice-identity img { flex-basis: 34px; width: 34px; height: 34px; }
-    .hud-notice-identity strong { font-size: 18px; }
-    .hud-notice-identity span { font-size: 12px; }
-    .hud-notice-actions { margin-top: 12px; }
-    .hud-notice-actions .btn { min-height: 36px; padding: 8px 12px; font-size: 15px; }
   }
 }
 @media (max-width: 991px) {
@@ -156,21 +161,18 @@
     .arena-live-pvp-heading > strong { font-size: 19px; }
     .arena-live-pvp-copy > span:last-child { font-size: 11px; }
     #pvp-progression.arena-cinematic { padding: 24px 24px 0; }
-    .arena-cinematic-command { grid-template-columns: minmax(0, 1fr) 270px; gap: 24px; }
+    .arena-cinematic-command { grid-template-columns: minmax(0, 1fr) minmax(360px, 1.2fr); gap: 24px; }
     .arena-cinematic-stats > div { flex-direction: column; padding: 0 20px; gap: 5px; }
-    .arena-season-duel { flex-basis: 270px; }
   }
 }
 @media (max-width: 767px) {
   .game-page .arena-overview {
-    .arena-bracket-group { max-width: none; }
     #pvp-progression.arena-cinematic { padding: 24px 20px 0; background-position: center, center, 58% center !important; }
     .arena-cinematic-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
     .arena-cinematic h1 { font-size: 42px; }
     .arena-cinematic #current-pvp-tier { font-size: 14px; }
     .arena-cinematic-command { grid-template-columns: minmax(0, 1fr); gap: 22px; margin: 22px 0; }
     .arena-cinematic-footer { flex-direction: column; align-items: stretch; gap: 16px; }
-    .arena-season-duel { flex-basis: auto; }
     .arena-cinematic-stats { justify-content: space-between; gap: 10px; }
     .arena-cinematic-stats > div { flex-direction: column; gap: 5px; padding: 0 0 0 12px; }
     .arena-cinematic-stats dt { font-size: 10px; }
@@ -178,7 +180,27 @@
     .arena-board #matchmaking-container, .arena-board .card.ranking, .arena-board #pvp_duels { padding: 18px 12px; }
     .history-table td.table-player-cell > img { display: block; margin: 0 0 6px !important; }
     .history-table td.table-player-cell > div { width: 100% !important; max-width: 100%; }
-    .arena-standing-row { grid-template-columns: 38px 30px minmax(0, 1fr) 52px; gap: 10px; padding-left: 8px; padding-right: 8px; }
+    .arena-standing-row { grid-template-columns: 56px 30px minmax(0, 1fr) minmax(70px, max-content); gap: 10px; padding-left: 8px; padding-right: 8px; }
     .arena-standing-emblem { width: 30px; height: 30px; }
   }
+}
+
+.game-page .match-lineup-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-shrink: 0; }
+.game-page .match-lineup-actions > strong { color: #d8bb88; font-size: 16px; white-space: nowrap; }
+.game-page .match-edit-teams { display: inline-flex; align-items: center; gap: 7px; min-height: 32px; padding: 6px 9px; font: 800 12px/1.2 'Nunito', sans-serif; border-radius: 5px; white-space: nowrap; }
+.game-page .match-edit-teams .ui-icon { font-size: 16px; }
+@media (max-width: 575px) {
+  .game-page .arena-overview .arena-cinematic .arena-play-button { min-height: 58px; padding: 12px 10px; font-size: 15px; gap: 7px; }
+  .game-page .arena-overview .arena-play-button .loading-text { gap: 7px; }
+  .game-page .match-lineup-actions { gap: 7px; }
+  .game-page .match-edit-teams { gap: 4px; padding: 5px; font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-page .arena-overview .arena-play-button:hover:not(:disabled) { transform: none; }
+}
+
+@media (max-width: 767px) {
+  .game-page #match-hud .match-lineup .squad-panel-heading { flex-wrap: wrap; gap: 7px; }
+  .game-page #match-hud .match-lineup-actions > strong { font-size: 12px; }
+  .game-page #match-hud .match-lineup-actions { flex-wrap: wrap; }
 }

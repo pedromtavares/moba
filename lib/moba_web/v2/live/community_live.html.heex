@@ -194,231 +194,126 @@
         </li>
       </ul>
       <div :if={@active_tab == "online"} class="mt-2 mb-2" id="community-online" role="tabpanel" aria-labelledby="show-online-link">
-        <div :if={@is_admin} class="row mt-3">
-          <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box" phx-click="user-filter">
-              <h3 class="text-success counter mt-0">{@user_stats.new_guests}</h3>
-              <p class="text-muted mb-0">New Guests</p>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box" phx-click="user-filter">
-              <h3 class="text-primary counter mt-0">
-                {@user_stats.new_users}
-                <%= if @user_stats.new_guests > 0 do %>
-                  ({div(@user_stats.new_users * 100, @user_stats.new_guests)}%)
-                <% end %>
-              </h3>
-              <p class="text-muted mb-0">New Users (% converted)</p>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box" phx-click="user-filter">
-              <h3 class="text-pink mt-0 counter">
-                {@user_stats.online_today}
-                <%= if @user_stats.online_today > 0 do %>
-                  ({div(@user_stats.new_users * 100, @user_stats.online_today)}%)
-                <% end %>
-              </h3>
-              <p class="text-muted mb-0">
-                Online {if @user_filter == :daily, do: "Today", else: "This Week"} (% new)
-              </p>
-            </div>
-          </div>
-
-          <div class="col-xl-3 col-md-6">
-            <div class="widget-simple text-center card-box" phx-click="user-filter">
-              <h3 class="text-danger counter mt-0">
-                {@user_stats.new_heroes}
-                <%= if @user_stats.online_today > 0 do %>
-                  ({Float.round(@user_stats.new_heroes / @user_stats.online_today, 1)}x)
-                <% end %>
-              </h3>
-              <p class="text-muted mb-0">New Heroes (x online)</p>
-            </div>
-          </div>
-        </div>
         <div class="row">
           <div class="col">
-            <table class="table table-dark mb-0 ranking border-left border-right border-bottom">
-              <tbody id="hall-of-training">
-                <tr class="f-rpg font-17 text-white">
-                  <th
-                    class="border"
-                    width="10%"
-                    phx-click={if @current_player.user && @current_player.user.is_admin, do: "toggle-admin"}
-                  >
+            <table id="community-recent-players" class="community-players-table">
+              <caption class="sr-only">Recently active players, their latest activity and recent heroes</caption>
+              <thead>
+                <tr>
+                  <th scope="col">
                     Player
                   </th>
-                  <th class="border" width="10%">Arena</th>
-                  <th class="border text-left">
-                    <div class="ml-4">LATEST HEROES</div>
-                  </th>
+                  <th scope="col">Latest activity</th>
+                  <th scope="col">Recent heroes</th>
+                </tr>
+              </thead>
+              <tbody id="hall-of-training">
+                <tr :if={@players == []}>
+                  <td colspan="3" class="community-players-empty">The hall is quiet. Recent players will appear here as they return.</td>
                 </tr>
                 <%= for player <- @players do %>
-                  <.player_row preview={Map.get(assigns, :preview, false)} player={player} is_admin={@is_admin} current={player.id == @current_player.id} />
+                  <.player_row preview={Map.get(assigns, :preview, false)} player={player} current={player.id == @current_player.id} live={MapSet.member?(@live_player_ids, player.id)} />
                 <% end %>
               </tbody>
             </table>
           </div>
         </div>
-        <div class="row mt-3">
-          <%= for player <- @guests do %>
-            <.guest
-              :if={player.current_pve_hero}
-              is_admin={@is_admin}
-              player={player}
-              current={player.id == @current_player.id}
-            />
-          <% end %>
-        </div>
-        <div :if={@is_admin} class="row">
-          <div class="col">
-            <div class="card">
-              <div class="card-body p-0 pt-2">
-                <h2 class="text-center mt-0 mb-0">Arena Stats</h2>
-                <h5 class="text-center">
-                  Avg Winrate: {Float.round(@match_stats.winrate, 1)}%
-                  <small>({@match_stats.total} total matches)</small>
-                </h5>
-                <ul class="nav nav-pills navtab-bg mt-2 mb-2 justify-content-center">
-                  <li class="nav-item">
-                    <a
-                      href="javascript:;"
-                      phx-click="match-filter"
-                      phx-value-type="pvp"
-                      data-toggle="tab"
-                      class={"nav-link px-2 py-1 #{if @match_filter == "pvp", do: "active"}"}
-                      phx-hook="Loading"
-                      id="immortal-ranking-button"
-                    >
-                      <span class="d-inline-block loading-text">All</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a
-                      href="javascript:;"
-                      phx-click="match-filter"
-                      phx-value-type="plebs"
-                      data-toggle="tab"
-                      class={"nav-link px-2 py-1 #{if @match_filter == "plebs", do: "active"}"}
-                      phx-hook="Loading"
-                      id="pleb-ranking-button"
-                    >
-                      <span class="d-inline-block loading-text">Plebs</span>
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a
-                      href="javascript:;"
-                      phx-click="match-filter"
-                      phx-value-type="elite"
-                      data-toggle="tab"
-                      class={"nav-link px-2 py-1 #{if @match_filter == "elite", do: "active"}"}
-                      phx-hook="Loading"
-                      id="elite-ranking-button"
-                    >
-                      <span class="d-inline-block loading-text">Elite</span>
-                    </a>
-                  </li>
-                </ul>
-                <div class="row">
-                  <div class="col">
-                    <div>
-                      <div class="row no-gutters">
-                        <div class="col">
-                          <.arena_stats
-                            records={top_performing(@match_stats, :avatars)}
-                            key={:avatars}
-                            match_filter={@match_filter}
-                          />
-                        </div>
-                        <div class="col">
-                          <.arena_stats
-                            records={bottom_performing(@match_stats, :avatars)}
-                            key={:avatars}
-                            match_filter={@match_filter}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col">
-                    <div>
-                      <div class="row no-gutters">
-                        <div class="col">
-                          <.arena_stats
-                            records={top_performing(@match_stats, :skills)}
-                            key={:skills}
-                            match_filter={@match_filter}
-                          />
-                        </div>
-                        <div class="col">
-                          <.arena_stats
-                            records={bottom_performing(@match_stats, :skills)}
-                            key={:skills}
-                            match_filter={@match_filter}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <h5 class="text-center">
-                  Avg Winrate: {Float.round(@match_stats.winrate, 1)}%
-                  <small>({@match_stats.total} total matches)</small>
-                </h5>
-                <div class="row">
-                  <div class="col-md-6 margin-auto">
-                    <div>
-                      <div class="row no-gutters">
-                        <div class="col">
-                          <.arena_stats
-                            records={top_performing(@match_stats, :items)}
-                            key={:items}
-                            match_filter={@match_filter}
-                          />
-                        </div>
-                        <div class="col">
-                          <.arena_stats
-                            records={bottom_performing(@match_stats, :items)}
-                            key={:items}
-                            match_filter={@match_filter}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+        <section :if={@current_user && @current_user.is_admin} id="community-admin-summary" class="community-admin-panel community-admin-summary" aria-labelledby="community-admin-summary-title">
+          <header class="community-admin-heading">
+            <div>
+              <p class="community-admin-eyebrow">Admin only</p>
+              <h2 id="community-admin-summary-title">Community pulse</h2>
             </div>
+            <div class="community-admin-controls">
+              <div :if={@is_admin} class="community-admin-switch" role="group" aria-label="Activity period">
+                <button :for={{period, label} <- [{"daily", "Last 24h"}, {"weekly", "Last 7 days"}]} id={"community-period-#{period}"} type="button" phx-click="user-filter" phx-value-period={period} aria-pressed={to_string(Atom.to_string(@user_filter) == period)}>{label}</button>
+              </div>
+              <button id="community-admin-toggle" type="button" class="community-admin-toggle" phx-click="toggle-admin" aria-expanded={to_string(@is_admin)} aria-controls="community-admin-metrics">{if @is_admin, do: "Hide stats", else: "Show stats"}</button>
+            </div>
+          </header>
+          <dl :if={@is_admin} id="community-admin-metrics" class="community-admin-metrics">
+            <div id="community-stat-guests">
+              <dt><.icon name="game-team" />New guests</dt>
+              <dd>{@user_stats.new_guests}</dd>
+              <span>Unregistered players</span>
+            </div>
+            <div id="community-stat-accounts">
+              <dt><.icon name="game-trophy" />New accounts</dt>
+              <dd>{@user_stats.new_users}</dd>
+              <span>Registered in this period</span>
+            </div>
+            <div id="community-stat-active">
+              <dt><.icon name="game-team" />Active players</dt>
+              <dd>{@user_stats.online_today}</dd>
+              <span>Seen in this period</span>
+            </div>
+            <div id="community-stat-heroes">
+              <dt><.icon name="game-magic" />New heroes</dt>
+              <dd>{@user_stats.new_heroes}</dd>
+              <span>{if @user_stats.online_today > 0, do: "#{Float.round(@user_stats.new_heroes / @user_stats.online_today, 1)} per active player", else: "Training activity"}</span>
+            </div>
+          </dl>
+          <section :if={@is_admin} id="community-guests" class="community-guests" aria-labelledby="community-guests-title">
+            <header class="community-guests-heading"><h3 id="community-guests-title">Recent guests</h3><span>{length(@guests)}</span></header>
+            <div class="community-guest-grid">
+              <.guest :for={player <- @guests} :if={player.current_pve_hero} player={player} current={player.id == @current_player.id} />
+            </div>
+            <p :if={@guests == []} class="community-balance-empty">No recent guests.</p>
+          </section>
+        </section>
+        <section :if={@is_admin} id="community-arena-stats" class="community-admin-panel community-balance" aria-labelledby="community-arena-stats-title">
+          <header class="community-arena-stats-heading">
+            <h2 id="community-arena-stats-title">Arena Stats</h2>
+            <p id="community-balance-baseline">Avg Winrate: <strong>{Float.round(@match_stats.winrate * 1.0, 1)}%</strong> <small>({@match_stats.total} total matches)</small></p>
+            <div class="community-admin-switch" role="group" aria-label="Balance bracket">
+              <button :for={{filter, label, id} <- [{"pvp", "All", "immortal-ranking-button"}, {"plebs", "Plebs", "pleb-ranking-button"}, {"elite", "Elite", "elite-ranking-button"}]} id={id} type="button" phx-click="match-filter" phx-value-type={filter} aria-pressed={to_string(@match_filter == filter)}>{label}</button>
+            </div>
+          </header>
+          <div class="community-arena-stats-grid">
+            <section :for={{key, label} <- [{:avatars, "Heroes"}, {:skills, "Skills"}]} class="community-arena-stats-category" aria-labelledby={"community-balance-#{key}-title"}>
+              <h3 id={"community-balance-#{key}-title"}>{label}</h3>
+              <div class="community-arena-stats-tables">
+                <.arena_stats records={top_performing(@match_stats, key)} key={key} side="highest" title="Highest win rates" match_filter={@match_filter} />
+                <.arena_stats records={bottom_performing(@match_stats, key)} key={key} side="lowest" title="Lowest win rates" match_filter={@match_filter} />
+              </div>
+            </section>
           </div>
-        </div>
-        <div :if={@is_admin} class="row mt-3">
-          <div class="col-xl-6 col-lg-8 margin-auto col-xs-12">
-            <table class="table table-dark mb-0 border-left border-right border-bottom text-center">
+          <div class="community-arena-items">
+            <p class="community-arena-items-average">Avg Winrate: <strong>{Float.round(@match_stats.winrate * 1.0, 1)}%</strong> <small>({@match_stats.total} total matches)</small></p>
+            <section class="community-arena-stats-category" aria-labelledby="community-balance-items-title">
+              <h3 id="community-balance-items-title">Items</h3>
+              <div class="community-arena-stats-tables">
+                <.arena_stats records={top_performing(@match_stats, :items)} key={:items} side="highest" title="Highest win rates" match_filter={@match_filter} />
+                <.arena_stats records={bottom_performing(@match_stats, :items)} key={:items} side="lowest" title="Lowest win rates" match_filter={@match_filter} />
+              </div>
+            </section>
+          </div>
+        </section>
+        <div :if={@is_admin} class="row mt-3" id="community-duel-history">
+          <div class="col-xl-6 col-lg-8 margin-auto col-xs-12 community-duels-column">
+            <div class="community-duels-frame" role="region" aria-label="Community duel history" tabindex="0">
+            <table class="table table-dark mb-0 text-center community-duels-table">
+              <caption class="sr-only">Recent duels: replay, time, players, result, points and mode</caption>
               <%= for duel <- @duels do %>
-                <tr>
-                  <td>
+                <tr id={"community-duel-#{duel.id}"}>
+                  <td class="community-duel-replay">
                     <h5><.link navigate={preview_path(assigns, ~p"/arena/#{duel}")}>Duel {duel.id}</.link></h5>
                   </td>
-                  <td>
+                  <td class="community-duel-time">
                     {duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)}
                   </td>
-                  <td>
-                    <img src={"/images/pve/#{duel.player.pve_tier}.png"} style="max-height:  40px" /><br />
-                    {username(duel.player)}
+                  <td class="community-duel-player">
+                    <img src={"/images/pve/#{duel.player.pve_tier}.png"} alt="" />
+                    <span>{username(duel.player)}</span>
                   </td>
-                  <td style="width: 1%">
+                  <td class="community-duel-versus">
                     vs
                   </td>
-                  <td>
-                    <img src={"/images/pve/#{duel.opponent_player.pve_tier}.png"} style="max-height:  40px" /><br />
-                    {username(duel.opponent_player)}
+                  <td class="community-duel-player">
+                    <img src={"/images/pve/#{duel.opponent_player.pve_tier}.png"} alt="" />
+                    <span>{username(duel.opponent_player)}</span>
                   </td>
-                  <td>
+                  <td class="community-duel-result">
                     <%= if duel.phase == "finished" do %>
                       <%= if duel.winner_player do %>
                         <span class="text-success">Winner: {username(duel.winner_player)}</span>
@@ -450,7 +345,7 @@
                       <span class="text-danger">In progress</span>
                     <% end %>
                   </td>
-                  <td>
+                  <td class="community-duel-mode" data-mode={if duel.auto, do: "auto", else: "live"}>
                     <%= if duel.auto do %>
                       <span class="text-muted">Auto</span>
                     <% else %>
@@ -460,6 +355,7 @@
                 </tr>
               <% end %>
             </table>
+            </div>
           </div>
         </div>
       </div>

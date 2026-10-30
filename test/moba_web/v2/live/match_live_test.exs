@@ -38,6 +38,12 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
     assert has_element?(view, "#match-hud #winner-card.match-command")
+
+    assert has_element?(
+             view,
+             ".match-lineup .squad-panel-heading #edit-teams-button[href='/arena/edit?match_id=#{match.id}']"
+           )
+
     assert has_element?(view, "#picks-card.match-picker")
     refute has_element?(view, ".stats-footer")
     render_click(view, "hero-tab", %{"type" => "trained"})
@@ -79,8 +85,12 @@ defmodule MobaWeb.V2.MatchLiveTest do
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 
     assert has_element?(view, "#pick-team-#{team.id}")
+
     for hero <- player_heroes do
-      assert has_element?(view, "#pick-team-#{team.id} img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(hero.avatar)}']")
+      assert has_element?(
+               view,
+               "#pick-team-#{team.id} img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(hero.avatar)}']"
+             )
     end
   end
 

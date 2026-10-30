@@ -6,6 +6,10 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   - No `content_tag`, no `raw/1`
   - Returns strings or structured data that components render
   """
+
+  def duel_mode_label(%{auto: true}), do: "Season duel"
+  def duel_mode_label(_), do: "Live duel"
+
   @league_names %{
     0 => "Bronze",
     1 => "Silver",

@@ -14,7 +14,7 @@
         </span>
       </.link>
       <button id={"#{if ready?, do: "can", else: "cannot"}-duel-#{player.id}"} type="button" class="arena-live-challenge" phx-click="challenge" phx-value-id={player.id} disabled={!ready?} aria-label={if ready?, do: "Challenge #{player.user.username} to a live duel", else: "Challenge cooldown for #{player.user.username}"}>
-        <.icon name={if ready?, do: "game-attack", else: "game-clock"} />
+        <.icon name={if ready?, do: "game-swords", else: "game-clock"} />
         {if ready?, do: "Challenge", else: "Cooldown"}
       </button>
     </li>

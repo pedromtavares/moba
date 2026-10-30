@@ -72,6 +72,8 @@ defmodule Moba.Game do
 
   defdelegate available_top_heroes, to: Heroes
 
+  defdelegate best_hero_rank(player_id), to: Heroes
+
   defdelegate broadcast_to_hero(hero_id), to: Training
 
   defdelegate buyback!(hero), to: Heroes
@@ -211,6 +213,8 @@ defmodule Moba.Game do
   defdelegate create_player!(attrs), to: Players
 
   defdelegate daily_ranking(limit), to: Players
+
+  defdelegate season_points_ranking(limit), to: Players
 
   defdelegate duel_opponent(player), to: Players
 

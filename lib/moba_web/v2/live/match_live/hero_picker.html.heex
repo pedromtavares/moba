@@ -21,7 +21,7 @@
         description="Pick heroes individually or build a team."
       >
         <:actions>
-          <.link navigate={preview_path(assigns, ~p"/arena/edit")} class="btn base-secondary">Manage teams →</.link>
+          <.link navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary">Manage teams →</.link>
         </:actions>
       </.hud_notice>
       <%= for team <- @teams do %>

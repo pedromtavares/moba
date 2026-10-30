@@ -1,15 +1,34 @@
-<.link navigate={preview_path(assigns, ~p"/player/#{@player.id}")} class="arena-standing-row" aria-current={if @player.id == @current_player.id, do: "true"} title={"#{@player.pvp_points} Season Points"}>
+<% position = if @mode == "5v5", do: @player.ranking || @index, else: @index %>
+<.link
+  navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
+  class="arena-standing-row"
+  data-bracket={if @mode == "5v5", do: arena_bracket(@player)}
+  aria-current={if @player.id == @current_player.id, do: "true"}
+  title={"#{@player.pvp_points} Season Points"}
+>
   <span class="arena-standing-position">
-    <%= if @player.ranking || @index do %>
-      <small>#</small>{@player.ranking || @index}
+    <%= if position do %>
+      <span><small>#</small>{position}</span>
     <% else %>
-      <span aria-label="Unranked">—</span>
+      <span aria-label={if @mode == "5v5", do: "Unranked", else: "Outside leaderboard"}>—</span>
+    <% end %>
+    <%= if @movement do %>
+      <% {direction, bracket} = @movement
+      label = "Projected #{if direction == :up, do: "promotion", else: "relegation"} to #{bracket} at the next daily reset" %>
+      <span class="arena-standing-movement" data-direction={direction} title={label} role="img" aria-label={label}>
+        <.icon name={if direction == :up, do: "game-rank-up", else: "game-rank-down"} />
+      </span>
     <% end %>
   </span>
   <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" class="arena-standing-emblem" />
   <span class="arena-standing-identity">
     <strong>{username(@player)} <small :if={@player.id == @current_player.id}>You</small></strong>
-    <span>{@player.daily_matches} {if @player.daily_matches == 1, do: "match", else: "matches"} played</span>
+    <span :if={@mode == "5v5"} class="arena-standing-meta">
+      <span class="arena-standing-bracket">{arena_bracket(@player)}</span>
+      <span>· {@player.daily_matches} {if @player.daily_matches == 1, do: "match", else: "matches"} played</span>
+    </span>
   </span>
-  <span class="arena-standing-score"><strong>{@player.daily_wins}</strong><span>{if @player.daily_wins == 1, do: "daily win", else: "daily wins"}</span></span>
+  <span class="arena-standing-score">
+    <strong>{if @mode == "5v5", do: @player.daily_wins, else: @player.pvp_points}</strong><span>{if @mode == "5v5", do: "daily wins", else: "season points"}</span>
+  </span>
 </.link>

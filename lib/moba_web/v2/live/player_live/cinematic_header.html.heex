@@ -74,12 +74,12 @@
     </div>
     <div class="col text-center">
       <strong
-        title={"Total Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
+        title={"5v5 Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
         data-toggle="tooltip"
       >
         <i class="ui-icon ui-swords text-white"></i> {total_win_rate(@player)}
       </strong>
-      <span :if={@preview} class="profile-metric-label">Win rate</span>
+      <span :if={@preview} class="profile-metric-label">5v5 Win Rate</span>
     </div>
     <div class="col text-center">
       <strong
@@ -88,13 +88,23 @@
       >
         <i class="ui-icon ui-trophy text-white"></i> {@player.best_immortal_streak}
       </strong>
-      <span :if={@preview} class="profile-metric-label">Best streak</span>
+      <span :if={@preview} class="profile-metric-label">Best Immortal Streak</span>
     </div>
-    <div class="col text-center">
+    <div class="col text-center" id="profile-season-rank">
       <strong title="Season Rank" data-toggle="tooltip">
         <i class="ui-icon ui-hashtag text-white"></i> {@player.season_ranking}
       </strong>
       <span :if={@preview} class="profile-metric-label">Season rank</span>
+    </div>
+    <div class="col text-center" id="profile-hero-rank">
+      <strong>
+        <%= if @best_hero_rank do %>
+          <i class="ui-icon ui-hashtag text-white"></i> {@best_hero_rank}
+        <% else %>
+          <span aria-label="Unranked">—</span>
+        <% end %>
+      </strong>
+      <span :if={@preview} class="profile-metric-label">Hero rank</span>
     </div>
   </div>
 </header>

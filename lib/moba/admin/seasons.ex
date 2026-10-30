@@ -63,20 +63,50 @@ defmodule Moba.Admin.Seasons do
   end
 
   def current_active_players do
-    PlayerQuery.non_bots()
-    |> PlayerQuery.non_guests()
-    |> PlayerQuery.currently_active(168)
-    |> Repo.all()
-    |> Repo.preload(:user)
+    players =
+      PlayerQuery.non_bots()
+      |> PlayerQuery.non_guests()
+      |> PlayerQuery.currently_active(168)
+      |> Repo.all()
+      |> Repo.preload(:user)
+
+    player_ids = Enum.map(players, & &1.id)
+    activities = Game.CommunityActivity.latest_for_players(player_ids)
+    heroes = recent_player_heroes(player_ids)
+
+    best_heroes =
+      from(h in HeroQuery.top_ranked_for_players(player_ids),
+        where: h.pve_ranking >= 1
+      )
+      |> Repo.all()
+      |> Map.new(&{&1.player_id, &1})
+
+    players
     |> Enum.map(fn player ->
-      heroes = HeroQuery.latest(player.id, 6) |> HeroQuery.load_avatar() |> Repo.all()
-
-      count = HeroQuery.with_player(HeroQuery.unarchived(), player.id) |> Repo.aggregate(:count)
-
       player
-      |> Map.put(:latest_heroes, heroes)
-      |> Map.put(:hero_count, count)
+      |> Map.put(:latest_heroes, Map.get(heroes, player.id, []))
+      |> Map.put(:recent_activity, Map.get(activities, player.id))
+      |> Map.put(:best_ranked_hero, Map.get(best_heroes, player.id))
     end)
+  end
+
+  defp recent_player_heroes(player_ids) do
+    ranked =
+      from(h in Hero,
+        where: h.player_id in ^player_ids and is_nil(h.archived_at),
+        windows: [per_player: [partition_by: h.player_id, order_by: [desc: h.inserted_at, desc: h.id]]],
+        select: %{id: h.id, position: over(row_number(), :per_player)}
+      )
+
+    from(h in Hero,
+      join: r in subquery(ranked),
+      on: h.id == r.id,
+      where: r.position <= 6,
+      order_by: [desc: h.inserted_at, desc: h.id],
+      preload: [:avatar]
+    )
+    |> Repo.all()
+    |> Enum.group_by(& &1.player_id)
   end
 
   def current_guests do
