@@ -19,8 +19,15 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     opponent = create_player!()
 
     for index <- 1..6 do
+      perfect_farm = div(Moba.max_total_farm(), 2)
+
       Game.create_hero!(
-        %{name: "Recent #{index}", pve_ranking: 20 + index},
+        %{
+          name: "Recent #{index}",
+          pve_ranking: 20 + index,
+          total_gold_farm: perfect_farm,
+          total_xp_farm: if(index == 6, do: perfect_farm, else: perfect_farm - 1)
+        },
         player,
         base_avatar(),
         base_skills()
@@ -51,6 +58,19 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#user-#{player.id} .community-season-rank", "#3")
     assert has_element?(view, "#user-#{player.id} .community-best-hero-rank[href='/hero/#{hero.id}']", "#15")
     assert has_element?(view, "#user-#{player.id} .community-recent-hero .community-hero-rank", "#26")
+
+    assert has_element?(
+             view,
+             "#user-#{player.id} .community-recent-hero[data-undefeated=true][aria-label*='undefeated'] .community-hero-rank",
+             "#26"
+           )
+
+    assert has_element?(
+             view,
+             "#user-#{player.id} .community-recent-hero[data-undefeated=false] .community-hero-rank",
+             "#25"
+           )
+
     assert has_element?(view, "#user-#{player.id} .community-activity-link[href='/matches/#{match.id}']", "Won a 5v5")
 
     assert has_element?(

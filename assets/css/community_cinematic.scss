@@ -97,8 +97,10 @@
   .community-hero-rank { position: absolute; top: 4px; right: 4px; padding: 2px 5px; border: 1px solid #8acac140; border-radius: 3px; background: #07111be8; color: #a6ead6; font-size: 13px; font-weight: 900; line-height: 1.2; font-variant-numeric: tabular-nums; box-shadow: 0 1px 5px #0008; }
   .community-recent-hero:hover { color: #ead1a4; transform: translateY(-2px); }
   .community-hero-portrait { display: block; width: 100%; aspect-ratio: 1.7; object-fit: cover; border: 1px solid #c7b17b33; border-radius: 5px; }
+  .community-recent-hero[data-undefeated=true] .community-hero-portrait { border-color: #ed6077; box-shadow: 0 0 7px #e52c4b66, 0 0 14px #e52c4b33; }
   .community-recent-hero > span { display: flex; align-items: center; justify-content: center; gap: 4px; margin-top: 7px; color: inherit; font-size: 11px; font-weight: 700; }
   .community-recent-hero > span img { width: 20px; height: 20px; object-fit: contain; }
+  .community-recent-hero[data-undefeated=true] > span img { filter: drop-shadow(0 0 4px #ff526bcc) drop-shadow(0 0 10px #e52c4b99); }
   .community-activity-empty { color: #8290a1; font-size: 13px; }
   .community-players-empty { text-align: center; color: #9fabb9; font-size: 14px; }
   .community-players-table a:focus-visible, .community-players-table button:focus-visible { outline: 2px solid #e6c58e; outline-offset: 4px; border-radius: 4px; }

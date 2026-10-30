@@ -389,7 +389,8 @@ defmodule MobaWeb.V2.CommunityLive do
             :for={hero <- Enum.take(@player.latest_heroes, 6)}
             navigate={preview_path(assigns, ~p"/hero/#{hero}")}
             class="community-recent-hero"
-            aria-label={"#{hero.avatar.name}, level #{hero.level}"}
+            data-undefeated={to_string(Game.max_farm?(hero))}
+            aria-label={"#{hero.avatar.name}, level #{hero.level}#{if Game.max_farm?(hero), do: ", undefeated", else: ""}"}
           >
             <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} class="community-hero-portrait" />
             <strong :if={hero.pve_ranking} class="community-hero-rank" aria-label={"Hero rank #{hero.pve_ranking}"}>
