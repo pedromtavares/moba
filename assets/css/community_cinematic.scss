@@ -79,6 +79,9 @@
   .community-player-identity strong small { margin-left: 8px; color: #d4b77b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
   .community-player-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin-top: 4px; }
   .community-player-identity time { color: #909dad; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .community-player-identity time[data-activity=recent] { color: #92cbb2; }
+  .community-player-identity time[data-activity=away] { color: #e2c080; }
+  .community-player-identity time[data-activity=offline] { color: #d88f9b; }
   .community-player-live { display: inline-flex; align-items: center; gap: 6px; color: #a4d9c4; font-size: 11px; font-weight: 800; }
   .community-player-live:hover { color: #c6f4e1; }
   .community-player-live .ui-icon { width: 16px; height: 16px; font-size: 16px; }

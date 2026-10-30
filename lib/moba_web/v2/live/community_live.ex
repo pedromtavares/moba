@@ -328,7 +328,10 @@ defmodule MobaWeb.V2.CommunityLive do
                 }>You</small>
               </strong>
               <span class="community-player-meta">
-                <time datetime={@player.user.last_online_at && DateTime.to_iso8601(@player.user.last_online_at)}>
+                <time
+                  datetime={@player.user.last_online_at && DateTime.to_iso8601(@player.user.last_online_at)}
+                  data-activity={activity_recency(@player.user.last_online_at)}
+                >
                   Active {relative_time(@player.user.last_online_at)}
                 </time>
                 <.link
@@ -405,6 +408,18 @@ defmodule MobaWeb.V2.CommunityLive do
       </td>
     </tr>
     """
+  end
+
+  defp activity_recency(nil), do: "unknown"
+
+  defp activity_recency(at) do
+    seconds = DateTime.diff(DateTime.utc_now(), at)
+
+    cond do
+      seconds < 7_200 -> "recent"
+      seconds < 86_400 -> "away"
+      true -> "offline"
+    end
   end
 
   defp relative_time(nil), do: "time unavailable"

@@ -86,6 +86,52 @@ defmodule MobaWeb.V2.CommunityLiveTest do
            |> Enum.count() == 6
   end
 
+  test "activity copy uses recent, away and offline colors at two-hour and one-day boundaries", %{conn: conn} do
+    viewer = create_base_hero()
+    now = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    players =
+      for {seconds, recency} <- [
+            {0, "recent"},
+            {7_140, "recent"},
+            {7_200, "away"},
+            {86_340, "away"},
+            {86_400, "offline"},
+            {172_800, "offline"}
+          ] do
+        user =
+          create_user() |> Ecto.Changeset.change(last_online_at: DateTime.add(now, -seconds)) |> Moba.Repo.update!()
+
+        {create_player!(%{}, user), recency}
+      end
+
+    cache_recent_players(Enum.map(players, fn {player, _} -> player.id end))
+    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.player_id), "/community")
+
+    for {player, recency} <- players do
+      assert has_element?(
+               view,
+               "#user-#{player.id} .community-player-identity time[data-activity=#{recency}]",
+               "Active"
+             )
+    end
+
+    {player, _} = hd(players)
+
+    Accounts.get_user!(player.user_id)
+    |> Ecto.Changeset.change(last_online_at: DateTime.add(now, -86_400))
+    |> Moba.Repo.update!()
+
+    Cachex.del(:game_cache, "community_players")
+    send(view.pid, :refresh_recent_players)
+
+    assert has_element?(
+             view,
+             "#user-#{player.id} .community-player-identity time[data-activity=offline]",
+             "Active 1d ago"
+           )
+  end
+
   test "live indicator requires a connected player accepting challenges", %{conn: conn} do
     hero = create_base_hero()
     live_player = create_player!(%{status: "available"})
