@@ -15,9 +15,9 @@ defmodule MobaWeb.GameControllerTest do
     end
 
     assert [mobile] = LazyHTML.query(document, "#landing-artwork source") |> LazyHTML.attribute("srcset")
-    assert mobile =~ "home-heroes-mobile-v1.webp"
+    assert mobile == "/images/landing/home-heroes-mobile-v1.webp"
     assert [desktop] = LazyHTML.query(document, "#landing-artwork-image") |> LazyHTML.attribute("src")
-    assert desktop =~ "home-heroes-v5.png"
+    assert desktop == "/images/landing/home-heroes-v5.png"
   end
 
   test "user has active pve hero and is redirected to training", %{conn: conn} do

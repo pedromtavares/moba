@@ -20,9 +20,9 @@ defmodule Moba.Content.HeroExpansion202610 do
   their playable versions. Regenerate bots afterwards with `MIX_ENV=prod mix bots`
   if they should use the expansion.
 
-  Landing art is separate from admin records. Copy the existing desktop/mobile
-  files to production asset storage at `uploads/resources/landing/home-heroes-v5.png`
-  and `uploads/resources/landing/home-heroes-mobile-v1.webp`.
+  Landing art is separate from admin records. The desktop/mobile images are
+  bundled from `assets/static/images/landing/` by the normal asset build and do
+  not require manual uploads.
 
   This is a manual operation, never invoked by deployment or migrations. It writes
   only these canonical records and skins, in one transaction. Existing IDs and art

@@ -35,14 +35,6 @@ defmodule MobaWeb.GameController do
         conn
         |> assign(:counts, counts)
         |> assign(:preview, true)
-        |> assign(
-          :landing_background,
-          Moba.Image.url({%{file_name: "home-heroes-v5.png", updated_at: nil}, %{code: "landing"}})
-        )
-        |> assign(
-          :landing_mobile_background,
-          Moba.Image.url({%{file_name: "home-heroes-mobile-v1.webp", updated_at: nil}, %{code: "landing"}})
-        )
         |> render(:homepage, layout: false)
     end
   end
