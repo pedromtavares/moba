@@ -45,7 +45,10 @@ defmodule MobaWeb.V2.CommunityLive do
         user_id: user.id
       })
 
-      {:noreply, assign(socket, form: to_form(Accounts.change_message()))}
+      {:noreply,
+       socket
+       |> assign(form: to_form(Accounts.change_message()))
+       |> push_event("community-message-sent", %{})}
     else
       {:noreply, socket}
     end
@@ -63,7 +66,10 @@ defmodule MobaWeb.V2.CommunityLive do
         user_id: user.id
       })
 
-      {:noreply, assign(socket, form: to_form(Accounts.change_message()))}
+      {:noreply,
+       socket
+       |> assign(form: to_form(Accounts.change_message()))
+       |> push_event("community-update-sent", %{})}
     else
       {:noreply, socket}
     end

@@ -69,7 +69,7 @@
           </div>
           <%= unless @current_player.status == "silenced" do %>
             <hr :if={!@preview} class="my-2" />
-            <.form for={@form} phx-submit="create-message" id="community-message-form" class="form-horizontal community-composer">
+            <.form for={@form} phx-submit="create-message" id="community-message-form" class="form-horizontal community-composer" phx-hook="ResetFormOnEvent" data-reset-event="community-message-sent">
               <div class="community-compose-field">
               <label :if={@preview} for="community-message-body">Share a message</label>
               <input
@@ -124,7 +124,7 @@
           </ul>
           <%= if @is_admin do %>
             <hr />
-            <.form for={@form} phx-submit="create-update" id="community-update-form" class="form-horizontal">
+            <.form for={@form} phx-submit="create-update" id="community-update-form" class="form-horizontal" phx-hook="ResetFormOnEvent" data-reset-event="community-update-sent">
               <label :if={@preview} for="community-update-title">Update title</label>
               <input type="text" id="community-update-title" name={@form[:title].name} class="form-control" />
               <br />

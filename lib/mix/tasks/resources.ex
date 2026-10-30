@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Resources do
 
   @shortdoc "Regenerates resources from canon"
   def run(_) do
-    Mix.Task.run("app.start")
-    Moba.Conductor.regenerate_resources!()
+    Mix.Task.run("app.config")
+    Moba.Release.resources()
   end
 end

@@ -140,6 +140,31 @@ Crucial runtime details:
 - PvP needs another eligible player. Seeded heroes fill lineups and training targets; they do not create fake user accounts. Use a second browser/account to exercise PvP; live duels also require the opponent to be online and accepting challenges.
 - Local gameplay/admin need no external credentials. Discord linking/unlocks require your own OAuth configuration. Production additionally requires reviewing [prod.exs](config/prod.exs) and [runtime.exs](config/runtime.exs), replacing development credentials/secrets, and configuring the host, Discord bot, S3, and email delivery. These instructions provision a local development game.
 
+### Production resource maintenance
+
+Run these sequentially after importing canonical content and uploading its artwork:
+
+```bash
+MIX_ENV=prod mix resources
+MIX_ENV=prod mix bots
+```
+
+These tasks start the database and bot notification dependencies without starting HTTP, Discord, or periodic workers, so they can run alongside the web server. For an assembled release without Mix, use:
+
+```bash
+_build/prod/rel/moba/bin/moba eval 'Moba.Release.resources()'
+_build/prod/rel/moba/bin/moba eval 'Moba.Release.bots()'
+```
+
+To use an already running release instead:
+
+```bash
+_build/prod/rel/moba/bin/moba rpc 'Moba.Conductor.regenerate_resources!()'
+_build/prod/rel/moba/bin/moba rpc 'Moba.Conductor.regenerate_bots!()'
+```
+
+Both operations change database records; wait for resource publication to finish before generating bots.
+
 ### Tests
 
 Seed a separate, empty test database once, then run the suite:

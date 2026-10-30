@@ -51,6 +51,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     {:ok, view, html} = live(conn, "/community")
 
     assert html =~ "Message Board"
+    assert has_element?(view, "#community-message-form[phx-hook='ResetFormOnEvent'][data-reset-event='community-message-sent']")
     assert html =~ "Updates"
     assert has_element?(view, "#community-message-form")
     assert has_element?(view, "#show-online-link")
@@ -85,6 +86,40 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     [message | _] = Accounts.latest_messages("community", "general", 1)
     assert message.body == "Parity audit message"
+    assert_push_event(view, "community-message-sent", %{})
+    refute_push_event(view, "community-update-sent", %{})
+  end
+
+  test "does not clear a rejected message", %{conn: conn} do
+    hero = create_base_hero()
+    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
+    {:ok, view, _} = live(conn, "/community")
+
+    view |> form("#community-message-form", %{"message" => %{"body" => "x"}}) |> render_submit()
+
+    refute_push_event(view, "community-message-sent", %{})
+  end
+
+  test "clears the admin update title and body only after posting an update", %{conn: conn} do
+    hero = create_base_hero()
+    user = hero.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
+    conn = conn |> log_in_user(user) |> put_session(:player_id, hero.player_id)
+    {:ok, view, _} = live(conn, "/community")
+
+    assert has_element?(view, "#community-update-form[phx-hook='ResetFormOnEvent'][data-reset-event='community-update-sent']")
+    assert has_element?(view, "#community-update-form input[type=text]")
+    assert has_element?(view, "#community-update-form textarea")
+
+    view
+    |> form("#community-update-form", %{"message" => %{"title" => "New update", "body" => "Development news"}})
+    |> render_submit()
+
+    assert_push_event(view, "community-update-sent", %{})
+    refute_push_event(view, "community-message-sent", %{})
+    [update] = Accounts.latest_messages("community", "updates", 1)
+    assert update.title == "New update"
+    assert update.body == "Development news"
+    assert has_element?(view, "#community-update-#{update.id}", "New update")
   end
 
   test "preview keeps message and update content, sends messages, and switches tabs", %{conn: conn} do

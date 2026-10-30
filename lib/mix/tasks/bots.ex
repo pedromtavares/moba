@@ -3,7 +3,7 @@ defmodule Mix.Tasks.Bots do
 
   @shortdoc "Generates new bots"
   def run(_) do
-    Mix.Task.run("app.start")
-    Moba.Conductor.regenerate_bots!()
+    Mix.Task.run("app.config")
+    Moba.Release.bots()
   end
 end

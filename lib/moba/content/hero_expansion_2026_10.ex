@@ -20,6 +20,10 @@ defmodule Moba.Content.HeroExpansion202610 do
   their playable versions. Regenerate bots afterwards with `MIX_ENV=prod mix bots`
   if they should use the expansion.
 
+  The resource/bot Mix tasks do not start the web server or periodic workers.
+  In an assembled release, use `bin/moba eval 'Moba.Release.resources()'` followed by
+  `bin/moba eval 'Moba.Release.bots()'` instead.
+
   Landing art is separate from admin records. The desktop/mobile images are
   bundled from `assets/static/images/landing/` by the normal asset build and do
   not require manual uploads.
