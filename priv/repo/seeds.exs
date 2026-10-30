@@ -1,6 +1,21 @@
 # Fresh-install seed data, exported from canonical development records on 2026-10-27.
-# Run with: mix run priv/repo/seeds.exs
+# Run with: mix ecto.setup (or mix run --no-start priv/repo/seeds.exs).
 # Artwork is independently generated; no development uploads are copied here.
+
+# Seeding is persistent setup work, not a test transaction. A full bot roster can
+# take longer than the SQL Sandbox's ownership limit. Use the normal pool in
+# this dedicated process, leaving the test runner's Sandbox configuration intact.
+repo_config = Application.fetch_env!(:moba, Moba.Repo)
+
+if repo_config[:pool] == Ecto.Adapters.SQL.Sandbox do
+  if Process.whereis(Moba.Repo) do
+    raise "Test seeds must run before the application starts. Use mix ecto.setup or mix run --no-start priv/repo/seeds.exs."
+  end
+
+  Application.put_env(:moba, Moba.Repo, Keyword.put(repo_config, :pool, DBConnection.ConnectionPool))
+end
+
+Mix.Task.run("app.start")
 
 alias Moba.{Accounts, Conductor, Game, Repo}
 alias Game.Schema.{Avatar, Item, Skill, Skin}

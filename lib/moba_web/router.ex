@@ -12,7 +12,6 @@ defmodule MobaWeb.Router do
     plug :accepts, ["html"]
     plug :fetch_session
     plug :fetch_live_flash
-    # plug :put_root_layout, {MobaWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
     plug :fetch_current_user
@@ -54,38 +53,6 @@ defmodule MobaWeb.Router do
     get "/auth", AuthController, :start
     get "/auth/:provider", AuthController, :request
     get "/auth/:provider/callback", AuthController, :callback
-  end
-
-  scope "/v1", MobaWeb.V1 do
-    pipe_through [:browser, :player_protected, :base_layout]
-
-    live_session :v1_game, on_mount: MobaWeb.PlayerLiveAuth do
-      live "/invoke", CreateLive
-
-      live "/training", TrainingLive
-
-      live "/battles", BattlesLive
-      live "/battles/:id", BattleLive
-
-      live "/base", DashboardLive
-
-      live "/arena", ArenaLive.Index
-      live "/arena/edit", ArenaLive.Edit, :edit, as: :edit_arena
-      live "/arena/:id", DuelLive
-
-      live "/matches/:id", MatchLive
-
-      live "/user/:id", PlayerLive
-      live "/player/:player_id", PlayerLive, :show, as: :player
-
-      live "/hero/:id", HeroLive
-
-      live "/tavern", TavernLive
-
-      live "/community", CommunityLive
-
-      live "/library", LibraryLive
-    end
   end
 
   scope "/", MobaWeb.V2 do

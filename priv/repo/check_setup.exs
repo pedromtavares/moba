@@ -72,12 +72,10 @@ end
 
 for path <- [
       "priv/static/css/app.css",
-      "priv/static/js/app.js",
-      "priv/static/v2/assets/app.css",
-      "priv/static/v2/assets/app.js"
+      "priv/static/js/app.js"
     ] do
   check!.(File.regular?(path), "Missing asset bundle: #{path}; follow the README asset build steps")
 end
 
-IO.puts("OK: both asset pipelines have built bundles")
+IO.puts("OK: Webpack asset bundles exist")
 IO.puts("Installation checks passed. Start with mix phx.server; sign in at /users/log_in, then open /admin.")

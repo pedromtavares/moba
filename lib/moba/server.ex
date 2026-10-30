@@ -15,11 +15,11 @@ defmodule Moba.Server do
   # 24h
   @pvp_update_diff_in_seconds 24 * 60 * 60
 
-  def start_link(_), do: GenServer.start_link(__MODULE__, [], name: __MODULE__)
+  def start_link(opts), do: GenServer.start_link(__MODULE__, [], Keyword.put_new(opts, :name, __MODULE__))
 
   def init(state) do
-    schedule_check()
-    Process.send_after(self(), :warm_caches, 1000)
+    if prod?(), do: schedule_check()
+    unless test?(), do: Process.send_after(self(), :warm_caches, 1000)
     {:ok, state}
   end
 
@@ -46,7 +46,7 @@ defmodule Moba.Server do
   defp schedule_check, do: Process.send_after(self(), :server_check, @check_timeout)
 
   defp server_check(state) do
-    unless dev?() do
+    if prod?() do
       schedule_check()
       season = Moba.current_season()
 
@@ -66,7 +66,7 @@ defmodule Moba.Server do
   defp time_diff_in_seconds(nil), do: 0
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
-  defp dev?, do: Application.get_env(:moba, :env) == :dev
+  defp prod?, do: Application.get_env(:moba, :env) == :prod
 
   defp test?, do: Application.get_env(:moba, :env) == :test
 end

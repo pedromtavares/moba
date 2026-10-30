@@ -25,7 +25,7 @@ development database on 2026-10-27, including every rank's actual values. Disabl
 historical content is omitted; the boss and its four effects remain included.
 Skins use league tiers 5 and 6 and credit `AI` at `https://chat.com`.
 
-Run `mix ecto.setup` for a new database, or `mix run priv/repo/seeds.exs` after
+Run `mix ecto.setup` for a new database, or `mix run --no-start priv/repo/seeds.exs` after
 creating and migrating an empty database. Seeding also publishes resources and
 generates bots, as before. It is not an update script for an existing database.
 Do not reset a database with player data to preview this pack. Production updates

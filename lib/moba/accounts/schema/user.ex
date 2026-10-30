@@ -9,7 +9,7 @@ defmodule Moba.Accounts.Schema.User do
     field :password, :string, virtual: true, redact: true
     field :hashed_password, :string, redact: true
     field :confirmed_at, :naive_datetime
-    field :password_hash, :string
+    field :password_hash, :string, redact: true
 
     field :username, :string
     field :last_online_at, :utc_datetime
@@ -146,6 +146,7 @@ defmodule Moba.Accounts.Schema.User do
       changeset
       |> validate_length(:password, max: 72, count: :bytes)
       |> put_change(:hashed_password, Bcrypt.hash_pwd_salt(password))
+      |> put_change(:password_hash, nil)
       |> delete_change(:password)
     else
       changeset

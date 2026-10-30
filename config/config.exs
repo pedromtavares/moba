@@ -40,7 +40,6 @@ config :torch,
   otp_app: :moba,
   template_format: "eex"
 
-
 config :moba, Moba.Mailer, adapter: Swoosh.Adapters.Local
 
 # Configures Elixir's Logger
@@ -50,27 +49,6 @@ config :logger, :console,
 
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
-
-# Esbuild configuration for v2 asset pipeline (JS only, Tailwind handles CSS)
-config :esbuild,
-  version: "0.25.0",
-  v2: [
-    args:
-      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/v2/assets --external:/fonts/* --external:/images/* --external:/v2/*),
-    cd: Path.expand("../assets_v2", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
-  ]
-
-# Tailwind configuration for v2 asset pipeline
-config :tailwind,
-  version: "4.1.7",
-  v2: [
-    args: ~w(
-      --input=assets_v2/css/app.css
-      --output=priv/static/v2/assets/app.css
-    ),
-    cd: Path.expand("..", __DIR__)
-  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

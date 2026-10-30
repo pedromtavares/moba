@@ -98,14 +98,11 @@ mix local.hex --force
 mix local.rebar --force
 mix deps.get
 npm ci --prefix assets
-npm ci --prefix assets_v2
 
 (cd assets && node node_modules/webpack/bin/webpack.js --mode development)
-mix esbuild v2
-mix tailwind v2
 ```
 
-Both asset directories/pipelines are required. Keep the Mix and npm lockfiles. The Mix wrappers download the configured esbuild and Tailwind executables automatically.
+The current UI uses the Webpack pipeline in `assets/`, which produces `priv/static/css/app.css` and `priv/static/js/app.js`. Keep the Mix and npm lockfiles.
 
 ### Seed and verify
 
@@ -126,6 +123,8 @@ The [setup checker](priv/repo/check_setup.exs) validates admin authentication, c
 
 Seeds refuse existing users/content. For upgrades, use `mix ecto.migrate`; do not reseed. `mix ecto.reset` is only for disposable databases—it deletes all players and progress. GitHub Actions skips artwork copying while seeding the same resource records.
 
+Setup runs seeds in a separate process with a normal database pool. Generating the complete bot roster can take several minutes; it is not subject to SQL Sandbox's two-minute ownership limit. Tests still use SQL Sandbox. To seed an already migrated empty database directly, use `mix run --no-start priv/repo/seeds.exs`.
+
 ### Run
 
 ```bash
@@ -139,7 +138,7 @@ Crucial runtime details:
 
 - `mix resources` publishes canonical content edits; `mix bots` regenerates opponents afterward. Both change data. `mix tick` runs season matchmaking/ranking maintenance, which is not automatic in development.
 - PvP needs another eligible player. Seeded heroes fill lineups and training targets; they do not create fake user accounts. Use a second browser/account to exercise PvP; live duels also require the opponent to be online and accepting challenges.
-- Local gameplay/admin need no external credentials. Discord linking/unlocks require your own OAuth configuration. Production additionally requires reviewing [prod.exs](config/prod.exs) and [releases.exs](config/releases.exs), replacing development credentials/secrets, and configuring the host, Discord bot, S3, and email delivery. These instructions provision a local development game.
+- Local gameplay/admin need no external credentials. Discord linking/unlocks require your own OAuth configuration. Production additionally requires reviewing [prod.exs](config/prod.exs) and [runtime.exs](config/runtime.exs), replacing development credentials/secrets, and configuring the host, Discord bot, S3, and email delivery. These instructions provision a local development game.
 
 ### Tests
 
@@ -151,5 +150,7 @@ mix test
 ```
 
 If `DATABASE_URL` is set, point it at the test database for **both** commands. Subsequent runs need only `mix test`; tests use SQL Sandbox transactions. Rebuild an outdated disposable test database with `MIX_ENV=test mix ecto.reset`, after confirming the target database.
+
+For a fresh test database, `mix seed_test` runs the complete setup and suite in the test environment, as GitHub Actions does.
 
 [discord]: https://discord.gg/QNwEdPS

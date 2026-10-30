@@ -29,7 +29,7 @@ defmodule MobaWeb do
     Phoenix.PubSub.broadcast_from(Moba.PubSub, from, channel, {event, payload})
   end
 
-  def static_paths, do: ~w(assets css fonts images resources js v2 favicon.ico robots.txt ads.txt .well-known)
+  def static_paths, do: ~w(assets css fonts images resources js favicon.ico robots.txt ads.txt .well-known)
 
   def router do
     quote do

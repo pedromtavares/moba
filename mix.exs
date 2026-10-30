@@ -13,7 +13,14 @@ defmodule Moba.MixProject do
       listeners: [Phoenix.CodeReloader],
       deps: deps(),
       test_coverage: [tool: ExCoveralls],
-      preferred_cli_env: [coveralls: :test, "coveralls.detail": :test, "coveralls.post": :test, "coveralls.html": :test]
+      preferred_cli_env: [
+        precommit: :test,
+        seed_test: :test,
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ]
     ]
   end
 
@@ -58,7 +65,6 @@ defmodule Moba.MixProject do
       {:ex_aws_s3, "~> 2.0"},
       {:sweet_xml, "~> 0.7"},
       {:torch, "~> 6.0.0"},
-      {:distillery, "~> 2.1", runtime: false},
       {:excoveralls, "~> 0.10", only: :test},
       {:timex, "~> 3.5"},
       {:swoosh, "~> 1.4"},
@@ -76,8 +82,6 @@ defmodule Moba.MixProject do
       {:floki, ">= 0.36.2", only: :test},
       {:lazy_html, ">= 0.1.0", only: :test},
       {:credo, "~> 1.5.0-rc.2", only: [:dev, :test], runtime: false},
-      {:esbuild, "~> 0.10", runtime: Mix.env() == :dev},
-      {:tailwind, "~> 0.2", runtime: Mix.env() == :dev},
       {:heroicons,
        github: "tailwindlabs/heroicons", tag: "v2.2.0", sparse: "optimized", app: false, compile: false, depth: 1},
       {:dns_cluster, "~> 0.2.0"},
@@ -93,9 +97,14 @@ defmodule Moba.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
+      "ecto.setup": [
+        "ecto.create",
+        "ecto.migrate",
+        "cmd env MIX_ENV=#{Mix.env()} mix run --no-start priv/repo/seeds.exs"
+      ],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       seed_test: ["ecto.setup", "test"],
+      precommit: ["test"],
       test: ["ecto.create --quiet", "ecto.migrate", "test"]
     ]
   end
