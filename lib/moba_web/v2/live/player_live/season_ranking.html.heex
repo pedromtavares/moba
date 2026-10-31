@@ -64,22 +64,33 @@
   </tbody>
   <%= if not in_ranking?(@ranking, @player) do %>
     <tfoot>
-      <tr>
+      <tr id="profile-current-standing" class={@preview && "selected-player"} data-bracket={if @preview, do: arena_bracket(@player)}>
         <th>
           <%= if @player.season_ranking do %>
-            <h1 class="text-info f-rpg">#{@player.season_ranking}</h1>
+            <h1 class={["f-rpg", !@preview && "text-info"]}>#{@player.season_ranking}</h1>
           <% else %>
-            <h4 class="text-info font-italic">Unranked</h4>
+            <h4 class={if @preview, do: "profile-rank-unranked", else: "text-info font-italic"}>Unranked</h4>
           <% end %>
         </th>
         <th>
-          <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
-          <h5 class="font-weight-bold mb-0 mt-1 text-info">
-            <%= if @player.user.discord.id do %>
-              <img src={@player.user.discord.avatar} class="mini-discord-avatar" />
-            <% end %>
-            {username(@player)}
-          </h5>
+          <%= if @preview do %>
+            <.link navigate={preview_path(assigns, ~p"/player/#{@player.id}")} class="profile-ranked-identity">
+              <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank profile-ranked-avatar" alt="" />
+              <h5 class="profile-ranked-name">
+                <img :if={@player.user.discord.id} src={@player.user.discord.avatar} class="mini-discord-avatar" />
+                {username(@player)}
+                <span class="profile-ranking-bracket">{arena_bracket(@player)}</span>
+              </h5>
+            </.link>
+          <% else %>
+            <img src={"/images/pve/#{@player.pve_tier}.png"} class="pvp-rank" />
+            <h5 class="font-weight-bold mb-0 mt-1 text-info">
+              <%= if @player.user.discord.id do %>
+                <img src={@player.user.discord.avatar} class="mini-discord-avatar" />
+              <% end %>
+              {username(@player)}
+            </h5>
+          <% end %>
         </th>
         <th>
           <h3 class="text-success">{season_score(@player)}</h3>

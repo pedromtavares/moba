@@ -116,7 +116,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     Game.Duels.finish!(live_duel, %{winner: hero.player, attacker_pvp_points: -5, defender_pvp_points: 5})
     {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
-    view |> element("#duels-btn") |> render_click()
+    assert has_element?(view, "#matches-btn")
+    refute has_element?(view, "#profile-arena-debut")
     assert has_element?(view, "#profile-duels-table .opponent a[href='/player/#{opponent.id}']")
     assert has_element?(view, "#profile-duels-table .opponent .history-detail", "Season duel")
     assert has_element?(view, "#profile-duels-table .opponent .history-detail", "Live duel")
@@ -200,11 +201,11 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert has_element?(view, "#profile-ranking-header", "Season score")
     end
 
-    test "the player's footer uses season rank and score", %{conn: conn} do
+    test "the player's footer keeps a three-digit rank, identity, and score in separate columns", %{conn: conn} do
       player =
         create_player!(%{
           ranking: 26,
-          season_ranking: 99,
+          season_ranking: 849,
           pve_tier: 1,
           best_immortal_streak: 3,
           pvp_points: 25,
@@ -216,7 +217,9 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       on_exit(fn -> Cachex.del(:game_cache, "season_ranking") end)
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, player.id)
       {:ok, view, _} = live(conn, "/player/#{player.id}")
-      assert has_element?(view, "#profile-ranking-table tfoot h1", "#99")
+      assert has_element?(view, "#profile-current-standing.selected-player > th:first-child h1", "#849")
+      assert has_element?(view, "#profile-current-standing > th:nth-child(2) .profile-ranked-identity[href='/player/#{player.id}'] .profile-ranked-avatar")
+      assert has_element?(view, "#profile-current-standing > th:nth-child(2) .profile-ranked-name", hero.player.user.username)
       assert has_element?(view, "#profile-ranking-table tfoot h3", "425")
     end
   end

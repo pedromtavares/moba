@@ -111,8 +111,38 @@
     </dl>
   </section>
 
-  <section id="hero-leaderboard" class="hero-leaderboard" aria-label="Training leaderboard">
-    <div id="ranking-card" class="hero-ranking-scroll" tabindex="0" role="region" aria-label="Training leaderboard">
+  <section id="hero-leaderboard" class="hero-leaderboard" aria-labelledby="hero-leaderboard-title">
+    <div id="hero-ranking-switcher" class="hero-ranking-switcher" role="group" aria-label="Training rankings">
+      <button
+        :for={{tab, label} <- [{"league", "League Ranking"}, {"global", "Global Ranking"}]}
+        id={"hero-ranking-#{tab}-tab"}
+        type="button"
+        phx-click="ranking-tab"
+        phx-value-type={tab}
+        aria-pressed={to_string(@ranking_tab == tab)}
+        aria-controls="ranking-card"
+        disabled={tab == "league" && @hero.league_tier < 2}
+      >{label}</button>
+    </div>
+    <header class="hero-leaderboard-heading">
+      <%= if @ranking_tab == "league" do %>
+        <img src={"/images/league/#{@hero.league_tier}.png"} alt="" />
+      <% else %>
+        <.icon name="game-trophy" />
+      <% end %>
+      <div>
+        <h2 id="hero-leaderboard-title">{if @ranking_tab == "league", do: Moba.leagues()[@hero.league_tier] <> " rankings", else: "Global rankings"}</h2>
+        <p>{if @ranking_tab == "league", do: "All-time completed runs", else: "Top #{Moba.pve_ranking_limit()} training runs"}</p>
+      </div>
+      <span id="hero-ranking-standing" :if={@leaderboard_position}>
+        <strong>#{@leaderboard_position}</strong>
+        <small><%= if @ranking_tab == "league" do %>of {@league_ranking.total} {if @league_ranking.total == 1, do: "run", else: "runs"}<% else %>Global rank<% end %></small>
+      </span>
+    </header>
+    <p :if={@hero.league_tier < 2} id="hero-ranking-minimum-league" class="hero-league-placement">League rankings begin at Gold. Keep climbing to earn your place.</p>
+    <p :if={!@hero.finished_at && @hero.league_tier >= 2} id="hero-league-placement" class="hero-league-placement">Finish training to earn your place in the standings.</p>
+    <p :if={@ranking_tab == "global" && @hero.finished_at && !@leaderboard_position} id="hero-global-placement" class="hero-league-placement">This run has no global rank. All completed runs from Gold onward have a league ranking.</p>
+    <div id="ranking-card" class="hero-ranking-scroll" tabindex="0" role="region" aria-labelledby="hero-leaderboard-title">
       <table class="hero-ranking-table">
         <thead>
           <tr>
@@ -124,17 +154,27 @@
         </thead>
         <tbody>
           <.ranking_entry
-            :for={hero <- @ranking}
-            hero={hero}
-            selected={hero.id == @hero.id}
-            scroll={hero.id == @hero.id}
+            :for={entry <- @leaderboard_entries}
+            hero={entry.hero}
+            position={entry.position}
+            selected={entry.hero.id == @hero.id}
+            scroll={entry.hero.id == @hero.id}
             preview={@preview}
           />
         </tbody>
-        <tfoot :if={!in_ranking?(@ranking, @hero)}>
-          <.ranking_entry hero={@hero} selected={true} scroll={false} preview={@preview} />
+        <tfoot :if={!Enum.any?(@leaderboard_entries, &(&1.hero.id == @hero.id))}>
+          <.ranking_entry hero={@hero} position={@leaderboard_position} selected={true} scroll={false} preview={@preview} />
         </tfoot>
       </table>
+      <div :if={@ranking_tab == "league" && @league_ranking.total == 0} id="hero-league-empty" class="hero-league-empty">
+        <.icon name="game-trophy" />
+        <strong>A new league story starts here</strong>
+        <p>Be the first to finish a run in these standings.</p>
+      </div>
     </div>
+    <aside id="hero-league-milestone" class="hero-league-milestone" aria-labelledby="hero-league-milestone-title">
+      <img src={"/images/league/#{@league_milestone.tier}.png"} alt="" />
+      <div><span>Next milestone</span><h3 id="hero-league-milestone-title">{@league_milestone.title}</h3><p>{@league_milestone.description}</p></div>
+    </aside>
   </section>
 </div>

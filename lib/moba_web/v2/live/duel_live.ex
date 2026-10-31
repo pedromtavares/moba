@@ -24,17 +24,21 @@ defmodule MobaWeb.V2.DuelLive do
     length = String.length(body)
 
     if length > 1 and length <= 200 do
-      Accounts.create_message!(%{
-        body: body,
-        author: user.username,
-        tier: player.pve_tier,
-        channel: channel,
-        topic: "general",
-        is_admin: user.is_admin,
-        user_id: user.id
-      })
+      message =
+        Accounts.create_message!(%{
+          body: body,
+          author: user.username,
+          tier: player.pve_tier,
+          channel: channel,
+          topic: "general",
+          is_admin: user.is_admin,
+          user_id: user.id
+        })
 
-      {:noreply, reset_message_form(socket, %{user_id: Timex.now()})}
+      {:noreply,
+       socket
+       |> reset_message_form(%{user_id: Timex.now()})
+       |> push_event("duel-message-sent", %{id: message.id})}
     else
       {:noreply, socket}
     end

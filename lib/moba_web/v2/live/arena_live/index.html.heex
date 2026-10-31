@@ -144,12 +144,15 @@
                   </button>
                 </div>
                 <div :if={@history_tab == "matches"} id="arena-history-matches" class="history arena-history" aria-labelledby="arena-history-matches-tab">
-                  <table class="table-dark table mb-0 history-table" id="arena-matches-table">
-                    <tbody :if={@preview && @matches == []}>
-                      <tr>
-                        <td colspan="3"><.hud_notice id="arena-no-matches" title="No completed matches yet" /></td>
-                      </tr>
-                    </tbody>
+                  <.hud_notice
+                    :if={@preview && @matches == []}
+                    id="arena-no-matches"
+                    title="Your first 5v5 awaits"
+                    description="Completed matches and rewards will appear here."
+                  >
+                    <.icon name="game-strategy" />
+                  </.hud_notice>
+                  <table :if={@matches != []} class="table-dark table mb-0 history-table" id="arena-matches-table">
                     <%= for match <- @matches do %>
                       <% rewards = rewards_badge(match.rewards.attacker_pvp_points) %>
                       <tr>

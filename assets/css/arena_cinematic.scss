@@ -54,6 +54,10 @@
   .arena-history-switcher button[aria-pressed=true] { color: #edcf98; border-color: #c7b17b66; background: linear-gradient(135deg, #c7b17b29, #c7b17b0d); box-shadow: inset 0 1px #f1d7a51a; }
   .arena-history-switcher button:focus-visible { outline: 2px solid #e6c58e; outline-offset: 1px; }
   .arena-history-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+  #arena-no-matches, #arena-no-duels { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; min-height: 190px; margin: 0; padding: 32px 18px; text-align: center; }
+  #arena-no-matches h3, #arena-no-duels h3 { margin: 0; color: #e5d6b9; font: 800 22px/1.3 'Nunito', sans-serif; text-transform: none; letter-spacing: 0; overflow-wrap: normal; }
+  #arena-no-matches p, #arena-no-duels p { max-width: 30ch; margin: 0; color: #a2afbf; font-size: 14px; line-height: 1.6; }
+  #arena-no-matches > .ui-icon, #arena-no-duels > .ui-icon { order: -1; color: #d6b880; font-size: 36px; }
   .arena-board { gap: 22px; }
   .arena-board #matchmaking-container, .arena-board .card.ranking, .arena-board #pvp_duels {
     padding: 20px 18px;

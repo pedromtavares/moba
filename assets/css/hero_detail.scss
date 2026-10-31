@@ -45,11 +45,38 @@
   .hero-detail-metrics .hero-farm-total, .hero-detail-metrics .hero-farm-gold { color: #e6c58e; }
   .hero-detail-metrics .hero-farm-xp { color: #8fc8df; }
   .hero-detail-metrics small { color: #a5adbb; font-size: 15px; font-weight: 600; }
-  .hero-leaderboard { grid-area: leaderboard; min-width: 0; }
-  .hero-ranking-scroll { max-height: 720px; overflow: auto; border: 1px solid #baa98a33; border-radius: 8px; background: #0b111a99; }
+  .hero-leaderboard { grid-area: leaderboard; display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #baa98a33; border-radius: 10px; background: linear-gradient(145deg, #182331bb, #0b111aee 70%); }
+  .hero-ranking-switcher { display: grid; flex-shrink: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin: 12px 12px 0; padding: 4px; border: 1px solid #baa98a33; border-radius: 7px; background: #080f1ac7; }
+  .hero-ranking-switcher button { min-width: 0; min-height: 42px; padding: 8px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #aab4c1; font: 800 14px/1.3 'Nunito', sans-serif; cursor: pointer; transition: background .18s, color .18s; }
+  .hero-ranking-switcher button:hover:not(:disabled) { color: #edcf98; background: #c7b17b0d; }
+  .hero-ranking-switcher button[aria-pressed=true] { color: #edcf98; border-color: #c7b17b66; background: linear-gradient(135deg, #c7b17b29, #c7b17b0d); }
+  .hero-ranking-switcher button:disabled { opacity: .4; cursor: not-allowed; }
+  .hero-leaderboard-heading { display: flex; flex-shrink: 0; align-items: center; gap: 12px; padding: 16px; border-bottom: 1px solid #baa98a26; }
+  .hero-leaderboard-heading > img { flex-shrink: 0; width: 38px; height: 44px; object-fit: contain; }
+  .hero-leaderboard-heading > .ui-icon { flex-shrink: 0; width: 38px; height: 44px; font-size: 32px; }
+  .hero-leaderboard-heading > div { min-width: 0; }
+  .hero-leaderboard-heading h2 { margin: 0; color: #e9dfcd; font: 800 20px/1.3 'Nunito', sans-serif; }
+  .hero-leaderboard-heading p { margin: 4px 0 0; color: #9eabba; font-size: 12px; line-height: 1.4; }
+  #hero-ranking-standing { flex-shrink: 0; margin-left: auto; text-align: right; }
+  #hero-ranking-standing strong { display: block; color: #efd3a3; font-size: 26px; font-weight: 900; line-height: 1.2; white-space: nowrap; }
+  #hero-ranking-standing small { display: block; color: #a6b3c3; font-size: 11px; }
+  .hero-league-placement { flex-shrink: 0; margin: 0; padding: 10px 16px; border-bottom: 1px solid #baa98a1a; color: #a9bbcf; background: #75a6c00a; font-size: 13px; line-height: 1.5; }
+  .hero-ranking-scroll { max-height: 720px; overflow: auto; background: #0b111a66; }
+  .hero-ranking-scroll:has(.hero-league-empty) { display: flex; flex-direction: column; }
+  .hero-ranking-scroll:has(.hero-league-empty) .hero-ranking-table { flex-shrink: 0; }
+  .hero-league-empty { display: grid; flex: 1; align-content: center; justify-items: center; gap: 10px; min-height: 180px; padding: 32px 20px; text-align: center; }
+  .hero-league-empty > .ui-icon { font-size: 34px; }
+  .hero-league-empty strong { color: #e3d1b0; font-size: 18px; }
+  .hero-league-empty p { max-width: 28ch; margin: 0; color: #9eabba; font-size: 14px; line-height: 1.5; }
+  .hero-league-milestone { display: flex; flex-shrink: 0; align-items: center; gap: 14px; padding: 16px; border-top: 1px solid #d7b57144; background: linear-gradient(115deg, #b6975520, #b6975505); }
+  .hero-league-milestone > img { flex-shrink: 0; width: 40px; height: 48px; object-fit: contain; filter: drop-shadow(0 0 8px #d6b57233); }
+  .hero-league-milestone > div { min-width: 0; }
+  .hero-league-milestone span { color: #d4b57b; font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; }
+  .hero-league-milestone h3 { margin: 3px 0 5px; color: #efdbb8; font: 800 18px/1.3 'Nunito', sans-serif; }
+  .hero-league-milestone p { margin: 0; color: #b0bac6; font-size: 13px; line-height: 1.5; }
   .hero-ranking-table { width: 100%; border-collapse: separate; border-spacing: 0; table-layout: fixed; font-variant-numeric: tabular-nums; }
   .hero-ranking-table thead th { position: sticky; top: 0; z-index: 2; padding: 13px 12px; border-bottom: 1px solid #baa98a40; color: #b9b5ac; background: #131a24; font-size: 14px; font-weight: 700; }
-  .hero-ranking-table th:first-child { width: 76px; }
+  .hero-ranking-table th:first-child { width: 104px; }
   .hero-ranking-table th:nth-child(3) { width: 126px; }
   .hero-ranking-table th:last-child { width: 90px; }
   .hero-ranking-table td { height: 80px; padding: 12px; border-bottom: 1px solid #baa98a1a; vertical-align: middle; }
@@ -57,7 +84,7 @@
   .hero-ranking-table tr[data-current="true"] td { background: #b78b3020; }
   .hero-ranking-table tr[data-current="true"] td:first-child { box-shadow: inset 3px 0 #d6b47c; }
   .hero-ranking-table tfoot td { position: sticky; bottom: 0; z-index: 2; border-top: 1px solid #d6b47c66; border-bottom: 0; background: #24251f !important; }
-  .hero-ranking-position { color: #c3bbac; font-size: 24px; font-weight: 800; }
+  .hero-ranking-position { color: #c3bbac; font-size: 24px; font-weight: 800; white-space: nowrap; }
   tr[data-current="true"] .hero-ranking-position { color: #efd3a3; }
   .hero-ranking-unranked { color: #8e97a5; }
   .hero-ranking-identity { display: flex; align-items: center; gap: 12px; color: #ede5d8; }
@@ -135,7 +162,7 @@
     .hero-league-path .current-tier img { width: 48px; height: 60px; }
     .hero-league-path li + li::before { right: calc(50% + 18px); width: calc(100% - 36px); }
     .hero-detail-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
-    .hero-ranking-table th:first-child { width: 62px; }
+    .hero-ranking-table th:first-child { width: 84px; }
     .hero-ranking-table th:nth-child(3) { width: 78px; }
     .hero-ranking-table th:last-child { width: 62px; }
     .hero-ranking-table th, .hero-ranking-table td { padding: 12px 6px; }
@@ -147,11 +174,17 @@
     .hero-ranking-identity small { font-size: 12px; }
     .hero-ranking-farm > img { width: 18px; height: 22px; margin-right: 2px; }
     .hero-ranking-farm strong, .hero-ranking-time strong { font-size: 20px; }
+    .hero-leaderboard-heading { flex-wrap: wrap; gap: 10px; padding: 14px 12px; }
+    .hero-leaderboard-heading > div { flex: 1; }
+    .hero-leaderboard-heading h2 { font-size: 18px; }
+    .hero-leaderboard-heading > img { width: 30px; height: 36px; }
+    .hero-league-milestone { gap: 10px; padding: 14px 12px; }
+    .hero-league-milestone h3 { font-size: 17px; }
   }
 }
 @media (max-width: 380px) {
   .game-page #hero-detail {
-    .hero-ranking-table th:first-child { width: 56px; }
+    .hero-ranking-table th:first-child { width: 74px; }
     .hero-ranking-table th:nth-child(3) { width: 70px; }
     .hero-ranking-table th:last-child { width: 54px; }
     .hero-ranking-position { font-size: 17px; }

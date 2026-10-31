@@ -225,6 +225,57 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
+  def league_ranking(hero, limit \\ Moba.pve_ranking_limit())
+
+  def league_ranking(%{league_tier: tier}, _limit) when tier < 2 do
+    %{entries: [], position: nil, total: 0}
+  end
+
+  def league_ranking(%{id: hero_id, league_tier: tier}, limit) do
+    eligible =
+      HeroQuery.non_bots()
+      |> HeroQuery.finished()
+
+    ranked =
+      from(h in eligible,
+        where: h.league_tier == ^tier,
+        windows: [
+          league: [
+            order_by: [
+              desc: fragment("? + ?", h.total_xp_farm, h.total_gold_farm),
+              asc: fragment("? - ?", h.finished_at, h.inserted_at),
+              asc: h.id
+            ]
+          ]
+        ],
+        select: %{id: h.id, position: over(row_number(), :league), total: over(count(), [])}
+      )
+
+    entries =
+      Repo.all(
+        from(h in Hero,
+          join: r in subquery(ranked),
+          on: r.id == h.id,
+          where: r.position <= ^limit or h.id == ^hero_id,
+          order_by: r.position,
+          preload: [:avatar, :skin],
+          select: %{hero: h, position: r.position, total: r.total}
+        )
+      )
+
+    current = Enum.find(entries, &(&1.hero.id == hero_id))
+
+    %{
+      entries: Enum.filter(entries, &(&1.position <= limit)),
+      position: current && current.position,
+      total:
+        case entries do
+          [entry | _] -> entry.total
+          [] -> 0
+        end
+    }
+  end
+
   def pvp_bots(limit \\ 5) do
     HeroQuery.pvp_bots("pvp_grandmaster", Moba.max_league_tier())
     |> HeroQuery.limit_by(limit)

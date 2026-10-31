@@ -163,7 +163,9 @@
             </div>
           <% end %>
 
-          <%= if @filter == "matches" do %>
+          <.arena_debut :if={@preview && @arena_debut} {assigns} />
+
+          <%= if @filter == "matches" && (!@preview || is_nil(@arena_debut)) do %>
             <div class="row">
               <div class="col">
                 <div class="transparent p-0 matches profile-history">
@@ -203,7 +205,7 @@
             </div>
           <% end %>
 
-          <%= if @filter == "duels" do %>
+          <%= if @filter == "duels" && (!@preview || is_nil(@arena_debut)) do %>
             <%= if @current_player.user && @player.user && @player.id != @current_player.id do %>
               <div class="border-top pt-1">
                 <div class="row no-gutters">

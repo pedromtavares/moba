@@ -90,7 +90,7 @@ defmodule MobaWeb.V2.DuelLiveTest do
     refute has_element?(view, "#battle-bar")
   end
 
-  test "clears duel chat input after sending a message", %{conn: conn} do
+  test "sending a duel message clears the input and requests scrolling to the new message", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
     skills = base_skills()
@@ -111,6 +111,12 @@ defmodule MobaWeb.V2.DuelLiveTest do
       |> render_submit()
 
     assert has_element?(view, ~s|#duel-message-form[phx-hook="ResetOnSubmit"]|)
+    assert has_element?(view, ~s|#duel-messages[phx-hook="DuelChat"]|)
+    assert_push_event(view, "duel-message-sent", %{id: message_id})
+    assert has_element?(view, "#duel-message-#{message_id}", "hello")
     refute html =~ ~s|value="hello"|
+
+    view |> form("#duel-message-form", %{"message" => %{"body" => "x"}}) |> render_submit()
+    refute_push_event(view, "duel-message-sent", %{})
   end
 end

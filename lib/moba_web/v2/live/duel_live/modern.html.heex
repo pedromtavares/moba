@@ -123,7 +123,7 @@
     </section>
 
     <aside :if={!@duel.auto} class="duel-chat" aria-label="Duel chat">
-      <div id="duel-messages" class="duel-messages">
+      <div id="duel-messages" class="duel-messages" phx-hook="DuelChat">
         <p :if={@messages == []} class="duel-chat-empty">Duel chat</p>
         <div :for={message <- @messages} id={"duel-message-#{message.id}"} class="duel-message">
           <img src={"/images/pve/#{message.tier}.png"} alt="" />

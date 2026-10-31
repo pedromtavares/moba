@@ -79,6 +79,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-history-matches-tab[aria-pressed=true]")
     assert has_element?(view, "#arena-no-matches")
+    assert has_element?(view, "#arena-history-matches > #arena-no-matches", "Your first 5v5 awaits")
+    refute has_element?(view, "#arena-matches-table")
     refute has_element?(view, "#arena-duel-history-section")
     assert has_element?(view, "#pvp_duels #arena-live-section")
     assert has_element?(view, "#season-duel-button .ui-swords")
@@ -88,6 +90,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     view |> element("#arena-history-duels-tab") |> render_click()
     assert has_element?(view, "#arena-history-duels-tab[aria-pressed=true]")
     assert has_element?(view, "#matchmaking-container #arena-no-duels")
+    assert has_element?(view, "#arena-no-duels", "Your first 1v1 awaits")
     refute has_element?(view, "#arena-matches-table")
     refute has_element?(view, "#pvp_duels #arena-duels-table")
 

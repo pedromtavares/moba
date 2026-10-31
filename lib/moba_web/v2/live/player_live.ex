@@ -52,6 +52,9 @@ defmodule MobaWeb.V2.PlayerLive do
     player = Game.get_player!(id)
     heroes = ranked_heroes()
     best = Enum.find(heroes, &(&1.player_id == player.id))
+    matches = player |> Game.list_matches() |> Enum.filter(&(&1.phase == "scored"))
+    duels = Game.list_finished_duels(player)
+    first_battle? = socket.assigns.matches == [] && socket.assigns.duels == []
 
     {:noreply,
      assign(socket,
@@ -59,7 +62,11 @@ defmodule MobaWeb.V2.PlayerLive do
        hero_ranking: heroes,
        best_ranked_hero_id: best && best.id,
        best_hero_rank: Game.best_hero_rank(player.id),
-       player: player
+       player: player,
+       matches: matches,
+       duels: duels,
+       filter: if(first_battle?, do: initial_history_tab(matches, duels), else: socket.assigns.filter),
+       arena_debut: if(matches == [] && duels == [], do: arena_debut(player, socket.assigns.featured))
      )}
   end
 
@@ -92,17 +99,35 @@ defmodule MobaWeb.V2.PlayerLive do
       blank_collection: blank_collection,
       duels: duels,
       featured: featured,
-      filter: "matches",
+      filter: initial_history_tab(matches, duels),
       matches: matches,
       player: player,
       ranking: ranking,
       hero_ranking: hero_ranking,
       best_ranked_hero_id: best && best.id,
       best_hero_rank: Game.best_hero_rank(player.id),
+      arena_debut: if(matches == [] && duels == [], do: arena_debut(player, featured)),
       ranking_tab: "season",
       sidebar_code: sidebar_code,
       user: user
     )
+  end
+
+  defp initial_history_tab([], [_ | _]), do: "duels"
+  defp initial_history_tab(_, _), do: "matches"
+
+  defp arena_debut(%{current_pve_hero: %{finished_at: nil} = hero}, _featured) do
+    %{state: :training, hero: hero, action: "Continue training", path: ~p"/training"}
+  end
+
+  defp arena_debut(player, featured) do
+    case Game.trained_pvp_heroes(player.id, [], 1) do
+      [hero] ->
+        %{state: :ready, hero: hero, action: "Enter Arena", path: ~p"/arena"}
+
+      [] ->
+        %{state: :train, hero: player.current_pve_hero || featured, action: "Train a new hero", path: ~p"/invoke"}
+    end
   end
 
   defp avatar_class(hero) do

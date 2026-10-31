@@ -47,6 +47,31 @@ Hooks.Scroll = {
   }
 }
 
+Hooks.DuelChat = {
+  mounted(){
+    this.el.scrollTop = this.el.scrollHeight;
+    this.handleEvent("duel-message-sent", ({id}) => {
+      cancelAnimationFrame(this.chatScrollFrame);
+      this.sentMessageId = id;
+      this.scrollToSentMessage();
+    });
+  },
+  updated(){
+    this.scrollToSentMessage();
+  },
+  destroyed(){
+    cancelAnimationFrame(this.chatScrollFrame);
+  },
+  scrollToSentMessage(){
+    if (!this.sentMessageId || !this.el.querySelector(`#duel-message-${this.sentMessageId}`)) return;
+    cancelAnimationFrame(this.chatScrollFrame);
+    this.chatScrollFrame = requestAnimationFrame(() => {
+      this.el.scrollTop = this.el.scrollHeight;
+      this.sentMessageId = null;
+    });
+  }
+}
+
 Hooks.HalfScroll = {
   mounted(){
     let el = this.el;

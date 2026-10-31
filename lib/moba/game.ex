@@ -126,6 +126,8 @@ defmodule Moba.Game do
 
   defdelegate pve_ranking(limit \\ 20), to: Heroes
 
+  defdelegate league_ranking(hero, limit \\ Moba.pve_ranking_limit()), to: Heroes
+
   defdelegate rank_finished_heroes!, to: Training
 
   defdelegate refresh_targets!(hero), to: Training

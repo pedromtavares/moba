@@ -43,7 +43,22 @@
   .profile-board { margin-left: 0; margin-right: 0; gap: 20px; }
   .profile-board > [class*="col-"] { padding: 0; min-width: 0; }
   .profile-board .collection-container, .profile-board #user-profile, .profile-board #user-ranking { border: 1px solid #bda77b33; border-radius: 12px; background: linear-gradient(145deg, #192432c7, #0a111cef 70%) !important; box-shadow: inset 0 1px #e2d1ab0d; overflow: hidden; }
-  .profile-board #user-ranking { overflow: auto; overscroll-behavior: contain; }
+  .profile-board #user-ranking { overflow: auto; overscroll-behavior: contain; padding-bottom: 0; }
+  .profile-arena-debut { display: flex; flex: 1; min-height: 0; flex-direction: column; justify-content: safe center; gap: 22px; padding: 28px 22px; overflow-y: auto; }
+  .profile-debut-copy h2 { margin: 0; color: #eee2ca; font: 900 clamp(24px, 2vw, 32px)/1.2 'Nunito', sans-serif; letter-spacing: -.02em; }
+  .profile-debut-copy p { margin: 12px 0 0; color: #aebdcb; font-size: 15px; line-height: 1.6; }
+  .profile-debut-hero { position: relative; flex-shrink: 0; display: block; overflow: hidden; border: 1px solid #c5ad7b44; border-radius: 8px; background: #0b1420; transition: border-color .18s, box-shadow .18s; }
+  .profile-debut-hero:hover { border-color: #dfc18b99; box-shadow: 0 0 22px #c5ad7b14; }
+  .profile-debut-art { display: block; width: 100%; height: clamp(140px, 20dvh, 210px); object-fit: cover; }
+  .profile-debut-hero-info { position: relative; display: flex; align-items: center; gap: 10px; padding: 12px; border-top: 1px solid #c5ad7b22; background: linear-gradient(110deg, #1a2632, #0c1520); }
+  .profile-debut-hero-info > img { width: 30px; height: 36px; object-fit: contain; }
+  .profile-debut-hero-info > span:first-of-type { min-width: 0; }
+  .profile-debut-hero-info strong { display: block; color: #e8dcc5; font-size: 17px; font-weight: 800; }
+  .profile-debut-hero-info small { display: block; margin-top: 3px; color: #a1afc0; font-size: 12px; }
+  .profile-debut-hero-info > span:last-child { margin-left: auto; color: #d4b67e; font-size: 22px; }
+  .profile-debut-placeholder { display: grid; flex-shrink: 0; place-items: center; min-height: 170px; border: 1px solid #c5ad7b26; border-radius: 8px; background: radial-gradient(ellipse at center, #c5ad7b14, transparent 70%); }
+  .profile-debut-placeholder .ui-icon { font-size: 64px; filter: drop-shadow(0 0 16px #d4b67e44); }
+  #profile-debut-action { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 12px; width: 100%; min-height: 48px; padding: 12px 16px; border-radius: 6px; font: 900 17px/1.3 'Nunito', sans-serif; letter-spacing: 0; }
   .profile-board .collection-container { padding-top: 12px; }
   .profile-board .collection { padding: 10px 12px 0; border: 0; }
   #user-profile > .row:has(.profile-history-tabs) { flex-shrink: 0; }
@@ -73,14 +88,16 @@
   .profile-ranking-switch button:hover { color: #f4dfb4; background: #c7b17b0d; }
   .profile-ranking-switch button[aria-pressed="true"] { border-color: #d1b57c55; background: #c7b17b24; color: #f4dfb4; }
   .profile-ranking-switch button:focus-visible { outline: 2px solid #dfc18b; outline-offset: 2px; }
-  #user-ranking .profile-leaderboard-table { table-layout: fixed; width: 100%; }
+  #user-ranking .profile-leaderboard-table { table-layout: fixed; width: 100%; border-collapse: separate; border-spacing: 0; }
   #user-ranking .profile-leaderboard-table .profile-rank-column,
-  #user-ranking .profile-leaderboard-table :is(td, th):first-child { width: 68px; text-align: left; }
+  #user-ranking .profile-leaderboard-table :is(td, th):first-child { width: 104px; text-align: left; }
   #user-ranking .profile-leaderboard-table .profile-score-column,
   #user-ranking .profile-leaderboard-table :is(td, th):last-child { width: 96px; text-align: center; }
   #user-ranking .profile-leaderboard-table td { height: 80px; padding: 14px 10px; vertical-align: middle; border-top: 0; border-bottom: 1px solid #baa98a1a; }
+  #user-ranking .profile-leaderboard-table tfoot th { height: 80px; padding: 14px 10px; vertical-align: middle; border-top: 1px solid #d6b47c66; background: #18212b; white-space: normal; }
   #user-ranking .profile-leaderboard-table :is(h1, h3) { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.35; }
-  #user-ranking .profile-leaderboard-table h1 { color: #bdb7ac; }
+  #user-ranking .profile-leaderboard-table h1 { color: #bdb7ac; white-space: nowrap; }
+  #user-ranking .profile-leaderboard-table .profile-rank-unranked { color: #c4bba9; font-size: 13px; }
   #user-ranking .profile-leaderboard-table .selected-player { background: linear-gradient(90deg, #d6ad5f20, #d6ad5f04); }
   #user-ranking .profile-leaderboard-table .selected-player :is(td, th):first-child { box-shadow: inset 2px 0 #d6b47c; }
   #user-ranking .profile-leaderboard-table .selected-player h1 { color: #efd096; }

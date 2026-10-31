@@ -1,0 +1,35 @@
+<% own_profile? = @player.id == @current_player.id
+hero = @arena_debut.hero %>
+<section id="profile-arena-debut" class="profile-arena-debut" data-state={@arena_debut.state} data-owner={to_string(own_profile?)} aria-labelledby="profile-arena-debut-title">
+  <div class="profile-debut-copy">
+    <h2 id="profile-arena-debut-title">{if own_profile?, do: "Your Arena story starts here", else: "Arena debut awaits"}</h2>
+    <p>
+      <%= cond do %>
+        <% own_profile? && @arena_debut.state == :training -> %>
+          Finish training to bring your build into 5v5 or 1v1.
+        <% own_profile? && @arena_debut.state == :ready -> %>
+          Your hero is ready. Take your build into 5v5 or 1v1.
+        <% own_profile? -> %>
+          Train a hero to Platinum, then bring your build into the Arena.
+        <% !hero -> %>
+          Their adventure is just beginning.
+        <% @arena_debut.state == :ready -> %>
+          Ready for their first Arena battle.
+        <% true -> %>
+          Training their first contender.
+      <% end %>
+    </p>
+  </div>
+  <.link :if={hero} id="profile-debut-hero" navigate={preview_path(assigns, ~p"/hero/#{hero.id}")} class="profile-debut-hero">
+    <img src={GH.background_url(hero)} alt={hero.avatar.name} class="profile-debut-art" />
+    <div class="profile-debut-hero-info">
+      <img src={"/images/league/#{hero.league_tier}.png"} alt="" />
+      <span><strong>{hero.avatar.name}</strong><small>Level {hero.level} · {Moba.leagues()[hero.league_tier]}</small></span>
+      <span aria-hidden="true">↗</span>
+    </div>
+  </.link>
+  <div :if={!hero} class="profile-debut-placeholder" aria-hidden="true"><.icon name="game-strategy" /></div>
+  <.link :if={own_profile?} id="profile-debut-action" navigate={preview_path(assigns, @arena_debut.path)} class="btn battle-primary">
+    {@arena_debut.action}<span aria-hidden="true">→</span>
+  </.link>
+</section>

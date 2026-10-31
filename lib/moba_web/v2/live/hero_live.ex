@@ -1,6 +1,8 @@
 defmodule MobaWeb.V2.HeroLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
   import MobaWeb.V2.Components.ProgressionComponents
 
   import MobaWeb.V2.Components.HeroBarComponents
@@ -23,9 +25,22 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply,
      socket
      |> assign(hero: hero, ranking: ranking, show_hud: false, editing: false, show_build: false, show_shop: false)
+     |> assign(:ranking_tab, if(hero.league_tier >= 2, do: "league", else: "global"))
+     |> league_assigns()
      |> owner_assigns()
      |> quest_assigns()}
   end
+
+  def handle_event("ranking-tab", %{"type" => "league"}, %{assigns: %{hero: %{league_tier: tier}}} = socket)
+      when tier < 2 do
+    {:noreply, socket}
+  end
+
+  def handle_event("ranking-tab", %{"type" => tab}, socket) when tab in ["league", "global"] do
+    {:noreply, socket |> assign(:ranking_tab, tab) |> leaderboard_assigns()}
+  end
+
+  def handle_event("ranking-tab", _, socket), do: {:noreply, socket}
 
   def handle_event("toggle-customize", _, %{assigns: %{hero: hero, current_player: player}} = socket)
       when hero.player_id == player.id do
@@ -226,6 +241,64 @@ defmodule MobaWeb.V2.HeroLive do
     |> assign(hero: hero)
     |> maybe_assign_current_hero(hero)
     |> quest_assigns()
+    |> league_assigns()
+  end
+
+  defp league_assigns(%{assigns: %{hero: hero}} = socket) do
+    socket
+    |> assign(league_ranking: Game.league_ranking(hero), league_milestone: league_milestone(hero))
+    |> leaderboard_assigns()
+  end
+
+  defp leaderboard_assigns(%{assigns: %{ranking_tab: "league", league_ranking: ranking}} = socket) do
+    assign(socket, leaderboard_entries: ranking.entries, leaderboard_position: ranking.position)
+  end
+
+  defp leaderboard_assigns(socket) do
+    entries = Enum.map(socket.assigns.ranking, &%{hero: &1, position: &1.pve_ranking})
+    assign(socket, leaderboard_entries: entries, leaderboard_position: socket.assigns.hero.pve_ranking)
+  end
+
+  defp league_milestone(%{league_tier: tier, player: player} = hero) when tier < 6 do
+    next_tier = tier + 1
+    name = Moba.leagues()[next_tier]
+
+    description =
+      cond do
+        next_tier > Moba.max_available_league(player.pve_tier) ->
+          Game.get_quest(player.pve_tier + 1).description <> " to unlock #{name}."
+
+        hero.finished_at || next_tier > Moba.max_available_league(hero.pve_tier) ->
+          "Reach #{name} on your next training run."
+
+        tier == Moba.master_league_tier() ->
+          "Defeat Roshan to reach Grandmaster League."
+
+        true ->
+          "Win the #{Moba.leagues()[tier]} challenge to advance."
+      end
+
+    %{
+      tier: next_tier,
+      title: if(next_tier > Moba.max_available_league(player.pve_tier), do: "Unlock #{name}", else: "Reach #{name}"),
+      description: description
+    }
+  end
+
+  defp league_milestone(hero) do
+    if Game.max_farm?(hero) do
+      %{
+        tier: 6,
+        title: "Master another avatar",
+        description: "Build your Grandmaster collection with a different avatar."
+      }
+    else
+      %{
+        tier: 6,
+        title: "Aim for a perfect 60K",
+        description: "Finish a Grandmaster run with 30K XP farm and 30K gold farm."
+      }
+    end
   end
 
   defp maybe_reset_shop(%{assigns: %{hero: %{id: shown_id}, current_hero: %{id: current_id}}} = socket)

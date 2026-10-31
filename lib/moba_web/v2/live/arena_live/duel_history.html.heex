@@ -7,8 +7,11 @@
   <.hud_notice
     :if={@finished_duels == []}
     id="arena-no-duels"
-    title="No completed duels yet"
-  />
+    title="Your first 1v1 awaits"
+    description="Completed duels and rewards will appear here."
+  >
+    <.icon name="game-swords" />
+  </.hud_notice>
   <div :if={@finished_duels != []} class="history arena-history" aria-labelledby="arena-history-duels-tab">
     <table class="table-dark table mb-0 history-table" id="arena-duels-table">
       <%= for duel <- @finished_duels do %>
