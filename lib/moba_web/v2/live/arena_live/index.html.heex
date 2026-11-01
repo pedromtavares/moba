@@ -67,7 +67,7 @@
                             <%= if length(@manual_matches) < Moba.daily_match_limit() do %>
                               <button
                                 type="button"
-                                phx-click="matchmaking"
+                                data-game-fullscreen phx-click="matchmaking"
                                 class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx"
                                 id="enter-arena-button"
                               >

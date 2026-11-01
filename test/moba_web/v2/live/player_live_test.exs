@@ -121,7 +121,33 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     assert has_element?(view, "#profile-duels-table .opponent a[href='/player/#{opponent.id}']")
     assert has_element?(view, "#profile-duels-table .opponent .history-detail", "Season duel")
     assert has_element?(view, "#profile-duels-table .opponent .history-detail", "Live duel")
+    refute has_element?(view, "#profile-duel-record")
     refute render(view) =~ "Normal MM"
+  end
+
+  test "another player's 1v1 history has an all-time matchup with the viewer", %{conn: conn} do
+    hero = create_base_hero()
+    viewer = create_player!()
+    duel = Game.Duels.create!(hero.player, viewer, true)
+    Game.Duels.finish!(duel, %{winner: nil, attacker_pvp_points: 0, defender_pvp_points: 0})
+    Game.update_player!(viewer, %{duel_score: %{"#{hero.player_id}" => 12}})
+    Game.update_player!(hero.player, %{duel_score: %{"#{viewer.id}" => 3}})
+
+    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.id), "/player/#{hero.player_id}")
+    assert has_element?(view, "#profile-duel-record[aria-label='All-time head-to-head duel record']")
+    assert has_element?(view, "#profile-duel-record .profile-duel-player[href='/player/#{viewer.id}']", "You")
+
+    assert has_element?(
+             view,
+             "#profile-duel-record .profile-duel-opponent[href='/player/#{hero.player_id}']",
+             "Opponent"
+           )
+
+    assert has_element?(view, "#profile-duel-your-wins[data-leading=true]", "12")
+    assert has_element?(view, "#profile-duel-opponent-wins[data-leading=false]", "3")
+
+    view |> element("#matches-btn") |> render_click()
+    refute has_element?(view, "#profile-duel-record")
   end
 
   test "banner shows the viewed player's best hero rank beside season rank and refreshes it", %{conn: conn} do
@@ -218,8 +244,18 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, player.id)
       {:ok, view, _} = live(conn, "/player/#{player.id}")
       assert has_element?(view, "#profile-current-standing.selected-player > th:first-child h1", "#849")
-      assert has_element?(view, "#profile-current-standing > th:nth-child(2) .profile-ranked-identity[href='/player/#{player.id}'] .profile-ranked-avatar")
-      assert has_element?(view, "#profile-current-standing > th:nth-child(2) .profile-ranked-name", hero.player.user.username)
+
+      assert has_element?(
+               view,
+               "#profile-current-standing > th:nth-child(2) .profile-ranked-identity[href='/player/#{player.id}'] .profile-ranked-avatar"
+             )
+
+      assert has_element?(
+               view,
+               "#profile-current-standing > th:nth-child(2) .profile-ranked-name",
+               hero.player.user.username
+             )
+
       assert has_element?(view, "#profile-ranking-table tfoot h3", "425")
     end
   end

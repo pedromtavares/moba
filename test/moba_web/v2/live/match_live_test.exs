@@ -38,6 +38,16 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
     assert has_element?(view, "#match-hud #winner-card.match-command")
+    assert has_element?(view, ".match-lineup .squad-panel-heading #player-card #match-your-lineup", "Your lineup")
+
+    assert has_element?(
+             view,
+             ".match-enemy .squad-panel-heading #opponent-card #match-opponent-lineup",
+             "Opponent lineup"
+           )
+
+    assert has_element?(view, ".match-center > #match-scoreboard .match-score", "Picking heroes")
+    refute has_element?(view, "#match-hud > .match-scoreboard")
 
     assert has_element?(
              view,
@@ -93,6 +103,29 @@ defmodule MobaWeb.V2.MatchLiveTest do
                "#pick-team-#{team.id} img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(hero.avatar)}']"
              )
     end
+
+    view |> element("#pick-team-#{team.id}") |> render_click()
+
+    assert has_element?(view, "#match-hud[data-playback=false] #start-match-button[data-game-fullscreen]")
+
+    for hero <- player_heroes do
+      assert has_element?(view, ".match-lineup .lineup-list #hero-#{hero.id} .roster-actions")
+    end
+
+    first_hero = List.first(player_heroes)
+    last_hero = List.last(player_heroes)
+    assert has_element?(view, "#move-up-#{first_hero.id}[disabled]")
+    assert has_element?(view, "#move-down-#{last_hero.id}[disabled]")
+
+    view |> element("#move-up-#{last_hero.id}") |> render_click()
+    assert has_element?(view, ".lineup-list > :nth-child(4)#hero-#{last_hero.id}")
+
+    view
+    |> element("#lineup-unpick-#{last_hero.id}[aria-label='Remove #{last_hero.name} from lineup']")
+    |> render_click()
+
+    refute has_element?(view, ".match-lineup #hero-#{last_hero.id}")
+    assert has_element?(view, "#match-empty-slot-5")
   end
 
   test "renders battle reviews from player and opponent pick perspective", %{conn: conn} do
@@ -138,6 +171,35 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     player_avatar = MobaWeb.V2.Components.GameHelpers.image_url(player_hero.avatar)
     opponent_avatar = MobaWeb.V2.Components.GameHelpers.image_url(opponent_hero.avatar)
+
+    assert has_element?(view, ".match-center > #match-scoreboard[data-complete=true]", "Heroes defeated")
+
+    defeated_card =
+      if battle.winner_player_id == player.id,
+        do: "#opponent-hero-#{opponent_hero.id}",
+        else: "#hero-#{player_hero.id}"
+
+    assert has_element?(view, "#{defeated_card} .roster-hero[data-defeated=true][data-falling=false]")
+
+    assigns = %{
+      preview: true,
+      current_player: player,
+      match: Game.get_match!(match.id),
+      picked_heroes: [player_hero],
+      battles: [battle],
+      starting: false,
+      show_battle_details: false
+    }
+
+    for {tick, defeated, falling} <- [{0, false, false}, {1, true, true}, {15, true, false}] do
+      document =
+        render_component(&MobaWeb.V2.MatchLive.modern/1, Map.put(assigns, :tick, tick))
+        |> LazyHTML.from_fragment()
+
+      assert document
+             |> LazyHTML.query("#{defeated_card} .roster-hero[data-defeated=#{defeated}][data-falling=#{falling}]")
+             |> Enum.count() == 1
+    end
 
     assert has_element?(
              view,

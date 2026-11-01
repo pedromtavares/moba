@@ -244,12 +244,22 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   attr :label, :string, required: true
   attr :icon, :string, default: nil
 
+  attr :continue_hotkey, :boolean, default: false
+
   def battle_nav_action(assigns) do
     ~H"""
-    <.link navigate={@navigate} class={@class} phx-hook="Loading" id={@id}>
+    <.link
+      navigate={@navigate}
+      class={@class}
+      phx-hook="Loading"
+      id={@id}
+      data-battle-continue={to_string(@continue_hotkey)}
+      aria-keyshortcuts={if @continue_hotkey, do: "Space"}
+    >
       <span class="loading-text">
         <i :if={@icon} class={@icon}></i>
         {@label}
+        <kbd :if={@continue_hotkey} class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>
       </span>
     </.link>
     """
@@ -288,7 +298,15 @@ defmodule MobaWeb.V2.Components.BattleComponents do
 
   def battle_guest_create_action(assigns) do
     ~H"""
-    <a href={preview_path(assigns, "/start")} class={@class}><i class={@icon}></i> {@label}</a>
+    <a
+      id="battle-guest-create"
+      href={preview_path(assigns, "/start")}
+      class={@class}
+      data-battle-continue="true"
+      aria-keyshortcuts="Space"
+    >
+      <i class={@icon}></i> {@label} <kbd class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>
+    </a>
     """
   end
 

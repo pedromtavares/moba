@@ -69,20 +69,26 @@ next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
         <button
           type="button"
           id="league-next-battle"
+          data-battle-continue="true"
+          aria-keyshortcuts="Space"
           class="btn league-continue"
-          phx-click="next-battle"
+          data-game-fullscreen phx-click="next-battle"
           phx-value-id={@battle.id}
           phx-disable-with="Loading…"
         >
           Battle {current_step} <span aria-hidden="true">→</span>
+          <kbd class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>
         </button>
       <% @current_player -> %>
         <.link
           id="load-training"
+          data-battle-continue="true"
+          aria-keyshortcuts="Space"
           navigate={preview_path(assigns, ~p"/training")}
           class="btn base-secondary league-return"
         >
           Continue training <span aria-hidden="true">→</span>
+          <kbd class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>
         </.link>
       <% true -> %>
         <.battle_guest_create_action

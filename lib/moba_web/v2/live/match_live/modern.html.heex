@@ -1,36 +1,16 @@
 <% picking? = is_nil(@match.phase) && !@starting
 owner? = @current_player.id == @match.player_id
 complete? = @match.phase in ["finished", "scored"] && @tick >= length(@battles)
-revealed = Enum.take(@battles, @tick) %>
+revealed = Enum.take(@battles, @tick)
+last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed) %>
 <div id="match-hud" class="matches squad-page match-modern" data-playback={to_string(!picking?)}>
-  <header class="match-scoreboard" data-complete={to_string(complete?)}>
-    <div class="match-player-side">
-      <.link navigate={preview_path(assigns, ~p"/player/#{@match.player}")} class="match-player" id="player-card">
-        <img src={"/images/pve/#{@match.player.pve_tier}.png"} alt="" />
-        <span>{username(@match.player)}<small>{if owner?, do: "Your lineup", else: "Challenger"}</small></span>
-      </.link>
-    </div>
-    <div class="match-score" aria-label="Heroes defeated">
-      <span class="squad-eyebrow">Arena · 5v5</span>
-      <strong>
-        {Enum.count(revealed, &(&1.winner_player_id == @match.player_id))}<span>—</span>{Enum.count(
-          revealed,
-          &(&1.winner_player_id == @match.opponent_id)
-        )}
-      </strong>
-      <span>{if picking?, do: "Picking heroes", else: "Heroes defeated"}</span>
-    </div>
-    <div class="match-player-side match-opponent-side">
-      <.link navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")} class="match-player match-player-opponent">
-        <img src={"/images/pve/#{@match.opponent.pve_tier}.png"} alt="" />
-        <span>{username(@match.opponent)}<small>Opponent</small></span>
-      </.link>
-    </div>
-  </header>
   <div class="squad-columns match-columns">
     <section class="squad-panel match-lineup" aria-labelledby="match-your-lineup">
       <div class="squad-panel-heading">
-        <h2 id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</h2>
+        <.link navigate={preview_path(assigns, ~p"/player/#{@match.player}")} class="match-player" id="player-card">
+          <img src={"/images/pve/#{@match.player.pve_tier}.png"} alt="" />
+          <span>{username(@match.player)}<small id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</small></span>
+        </.link>
         <div class="match-lineup-actions">
           <.link :if={owner?} id="edit-teams-button" navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary match-edit-teams">
             <.icon name="game-team" /> Edit Teams
@@ -42,7 +22,7 @@ revealed = Enum.take(@battles, @tick) %>
         <%= for position <- 1..5 do %>
           <%= if hero = Enum.at(@picked_heroes, position - 1) do %>
             <div id={"hero-#{hero.id}"}>
-              <.roster_hero hero={hero} position={position} defeated={eliminated?(hero, @match.player, revealed)}>
+              <.roster_hero hero={hero} position={position} defeated={eliminated?(hero, @match.player, revealed)} falling={!is_nil(last_reveal) && eliminated?(hero, @match.player, [last_reveal])}>
                 <:actions :if={picking? && owner?}>
                   <button
                     type="button"
@@ -72,8 +52,9 @@ revealed = Enum.take(@battles, @tick) %>
                     phx-click="unpick-hero"
                     phx-value-id={hero.id}
                     id={"lineup-unpick-#{hero.id}"}
+                    aria-label={"Remove #{hero.name} from lineup"}
                   >
-                    Remove
+                    <span aria-hidden="true">×</span>
                   </button>
                 </:actions>
               </.roster_hero>
@@ -87,6 +68,18 @@ revealed = Enum.take(@battles, @tick) %>
       </div>
     </section>
     <section class="squad-panel match-center" aria-label={if picking?, do: "Choose heroes", else: "Match battles"}>
+      <header id="match-scoreboard" class="match-scoreboard" data-complete={to_string(complete?)}>
+        <div class="match-score" aria-label="Heroes defeated">
+          <span class="squad-eyebrow">Arena · 5v5</span>
+          <strong>
+            {Enum.count(revealed, &(&1.winner_player_id == @match.player_id))}<span>—</span>{Enum.count(
+              revealed,
+              &(&1.winner_player_id == @match.opponent_id)
+            )}
+          </strong>
+          <span>{if picking?, do: "Picking heroes", else: "Heroes defeated"}</span>
+        </div>
+      </header>
       <div id="winner-card" class="match-command" data-complete={to_string(complete?)}>
         <%= cond do %>
           <% picking? && owner? -> %>
@@ -104,7 +97,7 @@ revealed = Enum.take(@battles, @tick) %>
                 :if={length(@picked_heroes) >= 5}
                 type="button"
                 class="btn battle-primary"
-                phx-click="start"
+                data-game-fullscreen phx-click="start"
                 phx-disable-with="Starting…"
                 id="start-match-button"
               >
@@ -173,12 +166,15 @@ revealed = Enum.take(@battles, @tick) %>
     </section>
     <section class="squad-panel match-lineup match-enemy" aria-labelledby="match-opponent-lineup">
       <div class="squad-panel-heading">
-        <h2 id="match-opponent-lineup">Opponent lineup</h2>
+        <.link navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")} class="match-player match-player-opponent" id="opponent-card">
+          <img src={"/images/pve/#{@match.opponent.pve_tier}.png"} alt="" />
+          <span>{username(@match.opponent)}<small id="match-opponent-lineup">Opponent lineup</small></span>
+        </.link>
         <strong>{length(@match.opponent_picks)} / 5</strong>
       </div>
       <div class="squad-scroll lineup-list" id="opponent-heroes-container">
         <div :for={{hero, index} <- Enum.with_index(@match.opponent_picks, 1)} id={"opponent-hero-#{hero.id}"}>
-          <.roster_hero hero={hero} position={index} defeated={eliminated?(hero, @match.opponent, revealed)} />
+          <.roster_hero hero={hero} position={index} defeated={eliminated?(hero, @match.opponent, revealed)} falling={!is_nil(last_reveal) && eliminated?(hero, @match.opponent, [last_reveal])} />
         </div>
       </div>
     </section>

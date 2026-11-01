@@ -112,7 +112,7 @@
   </section>
 
   <section id="hero-leaderboard" class="hero-leaderboard" aria-labelledby="hero-leaderboard-title">
-    <div id="hero-ranking-switcher" class="hero-ranking-switcher" role="group" aria-label="Training rankings">
+    <div :if={@hero.league_tier < 6} id="hero-ranking-switcher" class="hero-ranking-switcher" role="group" aria-label="Training rankings">
       <button
         :for={{tab, label} <- [{"league", "League Ranking"}, {"global", "Global Ranking"}]}
         id={"hero-ranking-#{tab}-tab"}
@@ -141,7 +141,7 @@
     </header>
     <p :if={@hero.league_tier < 2} id="hero-ranking-minimum-league" class="hero-league-placement">League rankings begin at Gold. Keep climbing to earn your place.</p>
     <p :if={!@hero.finished_at && @hero.league_tier >= 2} id="hero-league-placement" class="hero-league-placement">Finish training to earn your place in the standings.</p>
-    <p :if={@ranking_tab == "global" && @hero.finished_at && !@leaderboard_position} id="hero-global-placement" class="hero-league-placement">This run has no global rank. All completed runs from Gold onward have a league ranking.</p>
+    <p :if={@ranking_tab == "global" && @hero.finished_at && !@leaderboard_position} id="hero-global-placement" class="hero-league-placement">This run has no global rank.<span :if={@hero.league_tier < 6}> All completed runs from Gold onward have a league ranking.</span></p>
     <div id="ranking-card" class="hero-ranking-scroll" tabindex="0" role="region" aria-labelledby="hero-leaderboard-title">
       <table class="hero-ranking-table">
         <thead>
@@ -172,7 +172,7 @@
         <p>Be the first to finish a run in these standings.</p>
       </div>
     </div>
-    <aside id="hero-league-milestone" class="hero-league-milestone" aria-labelledby="hero-league-milestone-title">
+    <aside :if={@hero.player_id == @current_player.id} id="hero-league-milestone" class="hero-league-milestone" aria-labelledby="hero-league-milestone-title">
       <img src={"/images/league/#{@league_milestone.tier}.png"} alt="" />
       <div><span>Next milestone</span><h3 id="hero-league-milestone-title">{@league_milestone.title}</h3><p>{@league_milestone.description}</p></div>
     </aside>

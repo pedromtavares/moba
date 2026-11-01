@@ -1,0 +1,27 @@
+<% your_wins = @current_player.duel_score["#{@player.id}"] || 0
+opponent_wins = @player.duel_score["#{@current_player.id}"] || 0 %>
+<section id="profile-duel-record" class="profile-duel-record" aria-label="All-time head-to-head duel record">
+  <div class="profile-duel-record-heading">
+    <.icon name="game-swords" /><span>Head to head</span><small>All-time</small>
+  </div>
+  <div class="profile-duel-matchup">
+    <.link navigate={preview_path(assigns, ~p"/player/#{@current_player}")} class="profile-duel-player">
+      <img src={"/images/pve/#{@current_player.pve_tier}.png"} alt="" />
+      <span><strong title={username(@current_player)}>{username(@current_player)}</strong><small>You</small></span>
+    </.link>
+    <div
+      class="profile-duel-score"
+      aria-label={"#{username(@current_player)}: #{your_wins} wins. #{username(@player)}: #{opponent_wins} wins."}
+    >
+      <strong id="profile-duel-your-wins" data-leading={to_string(your_wins > opponent_wins)}>{your_wins}</strong>
+      <span aria-hidden="true">—</span>
+      <strong id="profile-duel-opponent-wins" data-leading={to_string(opponent_wins > your_wins)}>
+        {opponent_wins}
+      </strong>
+    </div>
+    <.link navigate={preview_path(assigns, ~p"/player/#{@player}")} class="profile-duel-player profile-duel-opponent">
+      <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" />
+      <span><strong title={username(@player)}>{username(@player)}</strong><small>Opponent</small></span>
+    </.link>
+  </div>
+</section>

@@ -207,29 +207,33 @@
 
           <%= if @filter == "duels" && (!@preview || is_nil(@arena_debut)) do %>
             <%= if @current_player.user && @player.user && @player.id != @current_player.id do %>
-              <div class="border-top pt-1">
-                <div class="row no-gutters">
-                  <div class="col">
-                    <h4 class="text-right">
-                      {username(@current_player)}
-                      <span class="badge badge-pill badge-light-danger font-15">
-                        {@current_player.duel_score["#{@player.id}"] || 0}
-                      </span>
-                    </h4>
-                  </div>
-                  <div class="col-1 d-flex align-items-center justify-content-center">
-                    <i class="ui-icon ui-close"></i>
-                  </div>
-                  <div class="col">
-                    <h4 class="text-left">
-                      <span class="badge badge-pill badge-light-danger font-15">
-                        {@player.duel_score["#{@current_player.id}"] || 0}
-                      </span>
-                      {username(@player)}
-                    </h4>
+              <%= if @preview do %>
+                <.duel_record {assigns} />
+              <% else %>
+                <div class="border-top pt-1">
+                  <div class="row no-gutters">
+                    <div class="col">
+                      <h4 class="text-right">
+                        {username(@current_player)}
+                        <span class="badge badge-pill badge-light-danger font-15">
+                          {@current_player.duel_score["#{@player.id}"] || 0}
+                        </span>
+                      </h4>
+                    </div>
+                    <div class="col-1 d-flex align-items-center justify-content-center">
+                      <i class="ui-icon ui-close"></i>
+                    </div>
+                    <div class="col">
+                      <h4 class="text-left">
+                        <span class="badge badge-pill badge-light-danger font-15">
+                          {@player.duel_score["#{@current_player.id}"] || 0}
+                        </span>
+                        {username(@player)}
+                      </h4>
+                    </div>
                   </div>
                 </div>
-              </div>
+              <% end %>
             <% end %>
 
             <div class="transparent p-0 duels profile-history">

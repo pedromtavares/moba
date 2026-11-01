@@ -28,7 +28,7 @@
         :if={@challenge_ready && @show_controls && !@history}
         id="start-league-challenge"
         class="ascent-challenge"
-        phx-click="league"
+        data-game-fullscreen phx-click="league"
         phx-hook="Loading"
         loading="Starting..."
       >

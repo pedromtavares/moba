@@ -66,6 +66,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   attr :position, :integer, default: nil
   attr :picked, :boolean, default: false
   attr :defeated, :boolean, default: false
+  attr :falling, :boolean, default: false
   slot :actions
 
   def roster_hero(assigns) do
@@ -73,6 +74,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
     <article
       class={["roster-hero hero-card", @picked && "roster-picked"]}
       data-defeated={to_string(@defeated)}
+      data-falling={to_string(@falling)}
     >
       <div class="roster-identity">
         <span :if={@position} class="roster-position" aria-label={"Lineup position #{@position}"}>{@position}</span>
@@ -80,11 +82,12 @@ defmodule MobaWeb.V2.Components.PvpComponents do
         <div class="roster-name">
           <strong>{@hero.name}</strong>
           <span>
-            {@hero.avatar.name}<span :if={@hero.pve_ranking} class="roster-rank"> · #{@hero.pve_ranking}</span><span
+            {@hero.avatar.name}<span :if={@hero.pve_ranking} class="roster-rank"> · #{@hero.pve_ranking}</span>
+            <span
               :if={@defeated}
               class="roster-fallen"
             >
-               · Fallen
+              · Fallen
             </span>
           </span>
         </div>

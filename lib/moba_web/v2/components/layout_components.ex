@@ -38,6 +38,8 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
         <.link
           navigate={preview_path(assigns, ~p"/base")}
           aria-label="Base"
+          data-sidebar-hotkey="1"
+          aria-keyshortcuts="1"
           data-toggle={if !@preview, do: "tooltip"}
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -45,12 +47,16 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           class={sidebar_class(["training", "base"], %{sidebar_code: @sidebar_code})}
         >
           <.icon name="nav-base" class="" />
-          <span :if={@preview} class="sidebar-label">Base</span>
+          <span :if={@preview} class="sidebar-label">
+            <span>Base</span><kbd class="sidebar-shortcut" aria-hidden="true">1</kbd>
+          </span>
         </.link>
         <%= if @current_player.user_id do %>
           <.link
             navigate={preview_path(assigns, ~p"/arena")}
             aria-label="Arena"
+            data-sidebar-hotkey="2"
+            aria-keyshortcuts="2"
             data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -58,7 +64,9 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             class={sidebar_class("arena", %{sidebar_code: @sidebar_code})}
           >
             <.icon name="nav-arena" class="" />
-            <span :if={@preview} class="sidebar-label">Arena</span>
+            <span :if={@preview} class="sidebar-label">
+              <span>Arena</span><kbd class="sidebar-shortcut" aria-hidden="true">2</kbd>
+            </span>
           </.link>
         <% else %>
           <a
@@ -80,6 +88,8 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           <.link
             navigate={preview_path(assigns, ~p"/users/register")}
             aria-label="Create an account"
+            data-sidebar-hotkey="3"
+            aria-keyshortcuts="3"
             data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -87,12 +97,16 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             id="create-account-link"
           >
             <.icon name="nav-join" class="" />
-            <span :if={@preview} class="sidebar-label">Join</span>
+            <span :if={@preview} class="sidebar-label">
+              <span>Join</span><kbd class="sidebar-shortcut" aria-hidden="true">3</kbd>
+            </span>
           </.link>
         <% else %>
           <.link
             navigate={preview_path(assigns, ~p"/player/#{@current_player.id}")}
             aria-label="Profile"
+            data-sidebar-hotkey="3"
+            aria-keyshortcuts="3"
             data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -100,11 +114,15 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             class={sidebar_class("user", %{sidebar_code: @sidebar_code})}
           >
             <.icon name="nav-profile" class="" />
-            <span :if={@preview} class="sidebar-label">Profile</span>
+            <span :if={@preview} class="sidebar-label">
+              <span>Profile</span><kbd class="sidebar-shortcut" aria-hidden="true">3</kbd>
+            </span>
           </.link>
           <.link
             navigate={preview_path(assigns, ~p"/tavern")}
             aria-label="Tavern"
+            data-sidebar-hotkey="4"
+            aria-keyshortcuts="4"
             data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
@@ -112,12 +130,16 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             class={sidebar_class("tavern", %{sidebar_code: @sidebar_code})}
           >
             <.icon name="nav-tavern" class="" />
-            <span :if={@preview} class="sidebar-label">Tavern</span>
+            <span :if={@preview} class="sidebar-label">
+              <span>Tavern</span><kbd class="sidebar-shortcut" aria-hidden="true">4</kbd>
+            </span>
           </.link>
         <% end %>
         <.link
           navigate={preview_path(assigns, ~p"/community")}
           aria-label="Community"
+          data-sidebar-hotkey="5"
+          aria-keyshortcuts="5"
           data-toggle={if !@preview, do: "tooltip"}
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -125,11 +147,15 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           class={sidebar_class("community", %{sidebar_code: @sidebar_code})}
         >
           <.icon name="nav-community" class="" />
-          <span :if={@preview} class="sidebar-label">Community</span>
+          <span :if={@preview} class="sidebar-label">
+            <span class="sidebar-long-title">Community</span><kbd class="sidebar-shortcut" aria-hidden="true">5</kbd>
+          </span>
         </.link>
         <.link
           navigate={preview_path(assigns, ~p"/library")}
           aria-label="Game Manual"
+          data-sidebar-hotkey="6"
+          aria-keyshortcuts="6"
           data-toggle={if !@preview, do: "tooltip"}
           data-tippy-placement="right"
           data-tippy-arrow={false}
@@ -138,7 +164,9 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
           id="game-manual"
         >
           <.icon name="nav-manual" class="" />
-          <span :if={@preview} class="sidebar-label">Game Manual</span>
+          <span :if={@preview} class="sidebar-label">
+            <span>Game Manual</span><kbd class="sidebar-shortcut" aria-hidden="true">6</kbd>
+          </span>
         </.link>
         <%= if @current_player.user && @current_player.user.is_admin do %>
           <a href="/admin" class={@preview && "sidebar-utility"} aria-label="Admin">

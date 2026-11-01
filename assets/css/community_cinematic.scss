@@ -78,10 +78,11 @@
   .community-player-identity strong a:hover { color: #eed19b; }
   .community-player-identity strong small { margin-left: 8px; color: #d4b77b; font-size: 10px; font-weight: 800; text-transform: uppercase; }
   .community-player-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 12px; margin-top: 4px; }
-  .community-player-identity time { color: #909dad; font-size: 12px; font-variant-numeric: tabular-nums; }
-  .community-player-identity time[data-activity=recent] { color: #92cbb2; }
-  .community-player-identity time[data-activity=away] { color: #e2c080; }
-  .community-player-identity time[data-activity=offline] { color: #d88f9b; }
+  .community-player-status { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; color: #909dad; font-size: 12px; font-variant-numeric: tabular-nums; }
+  .community-status-dot { flex-shrink: 0; width: 7px; height: 7px; border-radius: 50%; background: currentColor; box-shadow: 0 0 6px currentColor; }
+  .community-player-status[data-activity=recent] { color: #92cbb2; }
+  .community-player-status[data-activity=away] { color: #e2c080; }
+  .community-player-status[data-activity=offline] { color: #d88f9b; }
   .community-player-live { display: inline-flex; align-items: center; gap: 6px; color: #a4d9c4; font-size: 11px; font-weight: 800; }
   .community-player-live:hover { color: #c6f4e1; }
   .community-player-live .ui-icon { width: 16px; height: 16px; font-size: 16px; }
@@ -181,7 +182,7 @@
   .community-guest-skills img { width: 100%; max-width: 22px; aspect-ratio: 1; object-fit: cover; border: 1px solid #bda77b33; border-radius: 3px; }
   .community-guest-items { display: grid; grid-template-columns: repeat(3, 14px); gap: 2px; }
   .community-guest-items img { width: 14px; height: 14px; object-fit: cover; border-radius: 2px; }
-  .community-guest-card > footer { display: flex; flex-direction: column; gap: 2px; margin-top: auto; padding: 6px; border-top: 1px solid #bda77b20; color: #8290a1; font-size: 9px; line-height: 1.4; }
+  .community-guest-card > footer { margin-top: auto; padding: 6px; border-top: 1px solid #bda77b20; color: #8290a1; font-size: 9px; line-height: 1.4; white-space: nowrap; }
 
   .community-duels-column { flex: 0 1 1100px; width: 100%; max-width: 1100px; min-width: 0; padding: 0; }
   .community-duels-frame { overflow-x: auto; border: 1px solid #bda77b33; border-radius: 12px; background: linear-gradient(135deg, #192432b3, #09111be8 75%); box-shadow: inset 0 1px #e2d1ab0d; }
@@ -264,7 +265,7 @@
     .community-player-heroes { grid-column: 1; grid-row: 3; }
     .community-player-activity { grid-column: 1; grid-row: 2; }
     .community-player-identity strong { font-size: 15px; }
-    .community-player-identity time, .community-activity-link small { font-size: 11px; }
+    .community-player-status, .community-activity-link small { font-size: 11px; }
     .community-activity-link strong { font-size: 13px; }
     .community-activity-arrow { display: none; }
     .community-hero-strip { gap: 6px; }

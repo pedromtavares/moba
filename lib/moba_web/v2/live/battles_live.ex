@@ -14,7 +14,7 @@ defmodule MobaWeb.V2.BattlesLive do
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: nil}} = socket) do
-    redirect(socket, to: preview_path(socket, "/base"))
+    push_navigate(socket, to: preview_path(socket, "/base"))
   end
 
   defp maybe_redirect(socket), do: socket

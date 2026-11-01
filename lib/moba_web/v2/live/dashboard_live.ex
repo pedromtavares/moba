@@ -62,7 +62,7 @@ defmodule MobaWeb.V2.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> redirect(to: preview_path(socket, "/training"))}
+       |> push_navigate(to: preview_path(socket, "/training"))}
     else
       {:noreply, socket}
     end

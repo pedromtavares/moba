@@ -18,6 +18,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
 
     {:ok, preview, _} = live(conn, "/training")
     assert target_button_ids(preview) == expected
+    assert has_element?(preview, ".targets button[data-game-fullscreen][phx-click=battle]")
 
     hd(original_targets)
     |> Game.Schema.Target.changeset(%{difficulty: "moderate"})
@@ -87,7 +88,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> put_session(:player_id, hero.player_id)
 
     {:ok, view, _html} = live(conn, "/training")
-    assert has_element?(view, "#start-league-challenge")
+    assert has_element?(view, "#start-league-challenge[data-game-fullscreen]")
 
     {:ok, _battle_view, html} =
       view
@@ -363,7 +364,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     {:ok, view, html} = live(conn, "/training")
     assert html =~ "Roshan"
     assert has_element?(view, "#roshan-recovery", "final attempt")
-    assert has_element?(view, "#start-league-challenge")
+    assert has_element?(view, "#start-league-challenge[data-game-fullscreen]")
 
     {:ok, _battle_view, battle_html} =
       view

@@ -65,7 +65,7 @@ defmodule MobaWeb.V2.TrainingLive do
          skills = Enum.map(hero.skills, &Game.get_skill_by_code!(&1.code, true, 1)) do
       Game.create_current_pve_hero!(%{name: hero.name}, player, hero.avatar, skills)
 
-      {:noreply, socket |> redirect(to: preview_path(socket, "/training"))}
+      {:noreply, socket |> push_navigate(to: preview_path(socket, "/training"))}
     end
   end
 
@@ -260,11 +260,11 @@ defmodule MobaWeb.V2.TrainingLive do
 
   defp maybe_redirect(%{assigns: %{current_hero: %{finished_at: finished_at} = hero}} = socket)
        when not is_nil(finished_at) do
-    redirect(socket, to: preview_path(socket, ~p"/hero/#{hero.id}"))
+    push_navigate(socket, to: preview_path(socket, ~p"/hero/#{hero.id}"))
   end
 
   defp maybe_redirect(%{assigns: %{current_hero: current_hero}} = socket) when is_nil(current_hero) do
-    redirect(socket, to: preview_path(socket, "/base"))
+    push_navigate(socket, to: preview_path(socket, "/base"))
   end
 
   defp maybe_redirect(socket), do: socket

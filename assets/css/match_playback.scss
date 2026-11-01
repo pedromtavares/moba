@@ -1,16 +1,53 @@
 .game-page #match-hud {
-  .match-scoreboard { margin-bottom: 12px; padding: 12px 20px; }
-  .match-player-side { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; min-width: 0; }
-  .match-opponent-side { align-items: flex-end; }
+  .match-scoreboard { grid-template-columns: minmax(0, 1fr); margin: 0; padding: 12px 20px; border: 0; border-bottom: 1px solid var(--squad-line); border-radius: 0; }
+  .match-lineup .squad-panel-heading { min-height: 70px; }
   .match-player { font-size: 26px; gap: 10px; }
   .match-player > img { width: 44px; height: 44px; }
   .match-player small { font-size: 12px; margin-top: 2px; }
+  .match-player-opponent { flex-direction: row; text-align: left; }
+  .match-edit-teams { min-height: 32px; padding: 6px 8px; font-size: 12px; }
   .match-score > .squad-eyebrow { max-width: none; margin: 0 0 4px; color: #d8bb83; font-size: 11px; letter-spacing: .1em; }
   .match-score > strong { font-size: 36px; }
   .match-score > span:last-child { max-width: none; font-size: 11px; }
+  .roster-hero { transition: filter .55s ease, opacity .55s ease, border-color .55s ease; }
+  .roster-hero[data-defeated=true] { filter: grayscale(.85) saturate(.35) brightness(.9); opacity: .8; border-color: #7e89954d; }
+  .roster-hero[data-defeated=true] .roster-portrait { opacity: .8; }
+  .roster-hero[data-falling=true] { animation: match-hero-fall .65s ease-out both; }
 }
 
-.game-page #match-hud[data-playback=true] {
+@keyframes match-hero-fall {
+  0% { filter: grayscale(0) brightness(1.12); opacity: 1; transform: translateY(0); box-shadow: inset 0 0 0 2px #df8795, inset 0 0 28px #b33f5866; }
+  25% { transform: translateY(2px); box-shadow: inset 0 0 0 1px #c05b6c88, inset 0 0 18px #b33f5833; }
+  100% { filter: grayscale(.85) saturate(.35) brightness(.9); opacity: .8; transform: none; box-shadow: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page #match-hud .roster-hero { transition: none; }
+  .game-page #match-hud .roster-hero[data-falling=true] { animation: none; }
+}
+@media (min-width: 1200px) and (min-height: 700px) {
+  .game-page #match-hud .match-lineup {
+    .lineup-list { display: grid; grid-template-rows: repeat(5, minmax(120px, 1fr)); gap: 8px; container-type: size; }
+    .lineup-list > div { min-height: 0; margin: 0; }
+    .roster-hero { display: flex; flex-direction: column; height: 100%; }
+    .roster-identity { flex: 1; min-height: 56px; padding: 6px 10px; }
+    .roster-portrait { width: 54px; height: 42px; }
+    .roster-name > strong { font-size: 20px; }
+    .roster-name > span { font-size: 13px; }
+    .roster-hero .hero-stats { padding-bottom: 6px; }
+    .roster-loadout { padding: 6px 10px; }
+    .roster-loadout .skills-container { grid-template-columns: repeat(4, minmax(0, clamp(28px, 5cqh, 56px))); gap: 5px; }
+    .roster-loadout .items-container { max-width: calc(clamp(28px, 5cqh, 56px) * 2.4); }
+    .roster-hero:has(.roster-actions) { display: grid; grid-template-columns: minmax(0, 1fr) 28px; grid-template-rows: minmax(0, 1fr) auto auto; }
+    .roster-hero:has(.roster-actions) .roster-identity { grid-column: 1; grid-row: 1; }
+    .roster-hero:has(.roster-actions) .hero-stats { grid-column: 1; grid-row: 2; }
+    .roster-hero:has(.roster-actions) .roster-loadout { grid-column: 1; grid-row: 3; }
+    .roster-actions { grid-column: 2; grid-row: 1 / -1; flex-direction: column; justify-content: center; gap: 5px; padding: 4px 2px; border-top: 0; border-left: 1px solid var(--squad-line); }
+    .roster-actions .btn { flex: 0 0 28px; width: 100%; min-width: 0; min-height: 28px; padding: 0; font-size: 20px; }
+  }
+}
+
+.game-page #match-hud {
   display: flex;
   flex-direction: column;
   height: calc(100dvh - var(--game-topbar-height, 0px) - 24px);
@@ -23,6 +60,8 @@
   .squad-panel-heading h2 { font-size: 18px; }
   .squad-panel-heading > strong { font-size: 16px; }
   .lineup-list { flex: 1; min-height: 0; overflow-y: auto; }
+  .match-picker { flex: 1; }
+  .match-picker > .squad-scroll { flex: 1; max-height: none; }
   .match-command { flex-shrink: 0; padding: 10px 12px; }
   .match-playback-status { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 2px 16px; align-items: center; }
   .match-playback-status .squad-eyebrow { font-size: 10px; }
@@ -50,21 +89,18 @@
   .match-summary-review { color: #cbb17b; font-size: 17px; }
 }
 @media (min-width: 1200px) and (max-width: 1499px) {
-  .game-page #match-hud[data-playback=true] {
+  .game-page #match-hud {
     .match-columns { grid-template-columns: minmax(0, 1.065fr) minmax(440px, .87fr) minmax(0, 1.065fr); }
-    .roster-identity { display: grid; grid-template-columns: 20px 48px minmax(0, 1fr) 28px; gap: 6px; }
-    .roster-position { grid-column: 1; grid-row: 1 / 3; }
-    .roster-portrait { grid-column: 2; grid-row: 1 / 3; width: 48px; height: 38px; }
-    .roster-name { grid-column: 3 / 5; grid-row: 1; }
-    .roster-level { grid-column: 3; grid-row: 2; display: flex; align-items: baseline; gap: 4px; }
-    .roster-identity .league-logo { grid-column: 4; grid-row: 2; }
-    .roster-name > strong { font-size: 18px; }
-    .roster-name > span { font-size: 12px; }
-    .roster-hero .game-stat { font-size: 13px; }
+    .match-lineup .roster-identity { min-height: 50px; gap: 6px; padding: 5px 10px; }
+    .match-lineup .roster-portrait { width: 42px; height: 34px; }
+    .match-lineup .roster-name > strong { font-size: 18px; line-height: 1.1; }
+    .match-lineup .roster-name > span { font-size: 12px; }
+    .match-lineup .roster-hero .hero-stats { padding-bottom: 4px; }
+    .match-lineup .roster-hero .game-stat { padding: 0; font-size: 14px; }
   }
 }
 @media (max-width: 1199px) {
-  .game-page #match-hud[data-playback=true] {
+  .game-page #match-hud {
     .match-columns { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr) 190px; }
     .match-center { grid-column: 1 / -1; grid-row: 1; }
     .match-lineup { grid-column: 1; grid-row: 2; }
@@ -75,7 +111,7 @@
   }
 }
 @media (max-height: 850px) {
-  .game-page #match-hud[data-playback=true] {
+  .game-page #match-hud {
     .match-scoreboard { padding-top: 8px; padding-bottom: 8px; }
     .match-score > .squad-eyebrow { line-height: 1; margin-bottom: 3px; }
     .match-score > strong { font-size: 30px; }
@@ -99,9 +135,11 @@
     .match-score > strong { font-size: 28px; }
     .match-score > .squad-eyebrow, .match-score > span:last-child { font-size: 9px; }
   }
-  .game-page #match-hud[data-playback=true] {
+  .game-page #match-hud {
     height: calc(100dvh - var(--game-topbar-height, 0px) - 76px);
-    .match-columns { gap: 8px; grid-template-rows: minmax(0, 1fr) 140px; }
+    .match-columns { gap: 8px; grid-template-rows: minmax(0, 1fr) 220px; }
+    .match-lineup .squad-panel-heading { min-height: 90px; align-content: start; padding: 8px; }
+    .match-lineup-actions { flex: 1 1 100%; justify-content: space-between; }
     .match-playback-status { grid-template-columns: minmax(0, 1fr) auto; gap: 2px 8px; }
     .match-playback-status h2 { font-size: 18px; }
     .match-playback-status > span:last-of-type { grid-column: 1; grid-row: 3; font-size: 11px; }

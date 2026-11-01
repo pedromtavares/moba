@@ -179,7 +179,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       {:ok, view, _html} = live(conn, "/base")
 
-      assert {:error, {:redirect, %{to: "/training"}}} =
+      assert {:error, {:live_redirect, %{to: "/training"}}} =
                view
                |> element("#visible-hero-#{hero.id} [phx-click=continue]")
                |> render_click()

@@ -16,6 +16,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     assert has_element?(view, "#hero-detail-player[href='/player/#{hero.player_id}']")
     assert has_element?(view, "#hero-training-status[data-finished='false']")
     assert has_element?(view, "#hero-detail-duration", "#{hero.pve_current_turns + hero.pve_total_turns}")
+    assert has_element?(view, "#hero-league-milestone")
   end
 
   test "owners open customization on demand and closing resets the HUD", %{conn: conn} do
@@ -66,6 +67,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     assert has_element?(view, "#hero-detail-player[href='/player/#{hero.player_id}']")
     refute has_element?(view, "#hero-detail-skins")
     refute has_element?(view, "#customize-hero")
+    refute has_element?(view, "#hero-league-milestone")
     render_click(view, "toggle-customize")
     refute has_element?(view, "#hero-bar")
   end
@@ -150,6 +152,25 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     Game.update_hero!(hero, %{total_xp_farm: 30_000, total_gold_farm: 30_000})
     send(view.pid, {"hero", %{id: hero.id}})
     assert has_element?(view, "#hero-league-milestone-title", "Master another avatar")
+  end
+
+  test "Grandmasters only show global rankings, including after promotion", %{conn: conn} do
+    hero = create_base_hero(%{league_tier: 5, pve_ranking: 123})
+    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    assert has_element?(view, "#hero-ranking-league-tab[aria-pressed=true]")
+
+    Game.update_hero!(hero, %{league_tier: 6})
+    send(view.pid, {"hero", %{id: hero.id}})
+
+    refute has_element?(view, "#hero-ranking-switcher")
+    assert has_element?(view, "#hero-leaderboard-title", "Global rankings")
+    assert has_element?(view, "#hero-ranking-standing strong", "#123")
+    render_click(view, "ranking-tab", %{"type" => "league"})
+    assert has_element?(view, "#hero-leaderboard-title", "Global rankings")
+
+    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    refute has_element?(view, "#hero-ranking-switcher")
+    assert has_element?(view, "#hero-ranking-standing strong", "#123")
   end
 
   test "every earlier league offers its next challenge when unlocked", %{conn: conn} do

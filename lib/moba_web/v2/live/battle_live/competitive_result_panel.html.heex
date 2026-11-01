@@ -89,6 +89,7 @@ winner = if @battle.winner_id == @battle.attacker_id, do: @battle.attacker, else
         }
         class="btn battle-primary"
         id="load-battles"
+        continue_hotkey={true}
         label={
           cond do
             final? -> "View duel result →"

@@ -136,6 +136,8 @@ defmodule MobaWeb.V2.BattleLiveTest do
     assert has_element?(view, "#league-challenge-step-1[data-state=complete]", "Cleared")
     assert has_element?(view, "#league-challenge-step-2[data-state=next][aria-current=step]", "Up next")
     refute has_element?(view, "#league-challenge-step-3")
+    assert has_element?(view, "#league-next-battle[data-battle-continue=true][aria-keyshortcuts=Space]")
+    assert has_element?(view, "#league-next-battle .battle-continue-hotkey", "SPACE")
     view |> element("#league-next-battle") |> render_click()
     assert_patch(view, "/battles/#{Engine.latest_battle(attacker.id).id}")
 
@@ -159,7 +161,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     assert has_element?(view, "#league-challenge-step-2[data-state=complete]")
     assert has_element?(view, "#league-promotion-rewards .league-gold-reward")
     assert has_element?(view, "#league-promotion-rewards .league-xp-reward")
-    assert has_element?(view, "#load-training[href='/training']")
+    assert has_element?(view, "#load-training[href='/training'][data-battle-continue=true][aria-keyshortcuts=Space]")
     refute has_element?(view, "#league-next-battle")
   end
 
@@ -174,7 +176,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     assert has_element?(view, "#league-challenge-step-1[data-state=complete]")
     assert has_element?(view, "#league-challenge-step-2[data-state=failed]", "Failed")
     assert has_element?(view, "#league-challenge-step-3[data-state=pending]")
-    assert has_element?(view, "#load-training[href='/training']")
+    assert has_element?(view, "#load-training[href='/training'][data-battle-continue=true][aria-keyshortcuts=Space]")
     refute has_element?(view, "#league-next-battle")
   end
 

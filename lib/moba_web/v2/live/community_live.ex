@@ -297,7 +297,7 @@ defmodule MobaWeb.V2.CommunityLive do
         </div>
       </div>
       <footer>
-        <span>Joined {relative_time(@player.inserted_at)}</span><span>{length(@player.hero_collection)} collected</span>
+        Joined {relative_time(@player.inserted_at)}
       </footer>
     </article>
     """
@@ -328,12 +328,16 @@ defmodule MobaWeb.V2.CommunityLive do
                 }>You</small>
               </strong>
               <span class="community-player-meta">
-                <time
-                  datetime={@player.user.last_online_at && DateTime.to_iso8601(@player.user.last_online_at)}
+                <span
+                  class="community-player-status"
                   data-activity={activity_recency(@player.user.last_online_at)}
+                  data-toggle={if @admin, do: "tooltip"}
+                  title={if @admin, do: player_activity_tooltip(@player.user)}
+                  tabindex={if @admin, do: "0"}
                 >
-                  Active {relative_time(@player.user.last_online_at)}
-                </time>
+                  <span class="community-status-dot" aria-hidden="true"></span>
+                  {activity_status(@player.user.last_online_at)}
+                </span>
                 <.link
                   :if={@live}
                   navigate={preview_path(assigns, ~p"/arena")}
@@ -393,6 +397,11 @@ defmodule MobaWeb.V2.CommunityLive do
             navigate={preview_path(assigns, ~p"/hero/#{hero}")}
             class="community-recent-hero"
             data-undefeated={to_string(Game.max_farm?(hero))}
+            data-toggle={if @admin, do: "tooltip"}
+            title={
+              if @admin,
+                do: "Started training: #{relative_time(hero.inserted_at)}"
+            }
             aria-label={"#{hero.avatar.name}, level #{hero.level}#{if Game.max_farm?(hero), do: ", undefeated", else: ""}"}
           >
             <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} class="community-hero-portrait" />
@@ -410,7 +419,7 @@ defmodule MobaWeb.V2.CommunityLive do
     """
   end
 
-  defp activity_recency(nil), do: "unknown"
+  defp activity_recency(nil), do: "offline"
 
   defp activity_recency(at) do
     seconds = DateTime.diff(DateTime.utc_now(), at)
@@ -420,6 +429,19 @@ defmodule MobaWeb.V2.CommunityLive do
       seconds < 86_400 -> "away"
       true -> "offline"
     end
+  end
+
+  defp activity_status(at) do
+    case activity_recency(at) do
+      "recent" -> "Online"
+      "away" -> "Away"
+      "offline" -> "Offline"
+    end
+  end
+
+  defp player_activity_tooltip(user) do
+    "Last active: #{relative_time(user.last_online_at)}<br/>" <>
+      "Registered: #{relative_time(user.inserted_at)}"
   end
 
   defp relative_time(nil), do: "time unavailable"
@@ -480,7 +502,7 @@ defmodule MobaWeb.V2.CommunityLive do
     |> Phoenix.HTML.safe_to_string()
     |> String.replace(
       ~r/https:\/\/browsermoba.com\/battles\/([0-9]+)/,
-      "<a href='/battles/\\1' class='text-primary'>Battle #\\1</span>"
+      "<a href='/battles/\\1' data-phx-link='redirect' data-phx-link-state='push' class='text-primary'>Battle #\\1</a>"
     )
     |> Phoenix.HTML.raw()
   end

@@ -57,7 +57,7 @@ defmodule MobaWeb.V2.DuelChallengeLive do
   def handle_info({"reject", _}, socket), do: {:noreply, socket}
 
   def handle_info({"duel", %{id: id}}, socket) do
-    {:noreply, redirect(socket, to: "/arena/#{id}")}
+    {:noreply, push_navigate(socket, to: "/arena/#{id}")}
   end
 
   def handle_event("accept", _, %{assigns: %{challenge: %{outgoing: false} = challenge, state: "pending"}} = socket) do

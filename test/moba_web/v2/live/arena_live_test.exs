@@ -13,8 +13,19 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     {:ok, arena_view, arena_html} = live(conn, "/arena")
     assert arena_html =~ "Play 5v5"
     assert arena_html =~ "Play 1v1"
-    assert has_element?(arena_view, ".arena-play-actions > #enter-arena-button:first-child", "Play 5v5")
-    assert has_element?(arena_view, ".arena-play-actions > #season-duel-button:last-child", "Play 1v1")
+
+    assert has_element?(
+             arena_view,
+             ".arena-play-actions > #enter-arena-button[data-game-fullscreen]:first-child",
+             "Play 5v5"
+           )
+
+    assert has_element?(
+             arena_view,
+             ".arena-play-actions > #season-duel-button[data-game-fullscreen]:last-child",
+             "Play 1v1"
+           )
+
     assert has_element?(arena_view, "#arena-header-footer dt", "5v5 Win Rate")
     assert has_element?(arena_view, "#arena-header-footer dt", "Daily 5v5 wins")
     refute has_element?(arena_view, "#edit-teams-button")

@@ -13,7 +13,8 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     assert has_element?(view, "#battle-bar [id^='active-skill-'][role=button][tabindex='0']")
     assert has_element?(view, "#battle-bar [id^='attacker-item-'][role=button][aria-pressed=false]")
     assert has_element?(view, "#pick-basic-attack[role=button][tabindex='0']")
-    assert has_element?(view, "#attack-button[data-hero='#{attacker.id}']")
+    assert has_element?(view, "#attack-button[data-hero='#{attacker.id}'][aria-keyshortcuts=Space]")
+    assert has_element?(view, "#attack-button .attack-hotkey", "SPACE")
     refute has_element?(view, "#battle-bar button.game-stat")
     refute has_element?(view, "#battle-bar .battle-action-label")
 
@@ -83,7 +84,8 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     refute has_element?(view, "#battle-heading")
     assert has_element?(view, "#battle-outcome[data-result=victory]")
     assert has_element?(view, "#battle-experience")
-    assert has_element?(view, "#load-training[href='/training']")
+    assert has_element?(view, "#load-training[href='/training'][data-battle-continue=true][aria-keyshortcuts=Space]")
+    assert has_element?(view, "#load-training .battle-continue-hotkey", "SPACE")
     assert has_element?(view, "#load-battles[href='/battles']")
     assert has_element?(view, "#battle-over-training[href='/training']")
     assert has_element?(view, "#share-battle")
@@ -151,7 +153,13 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/battles/#{battle.id}")
     assert has_element?(view, "h2#battle-initiated", "Season match initiated by")
     assert has_element?(view, "#battle-competitive-result[data-result=victory]")
-    assert has_element?(view, "#load-battles[href='/matches/#{match.id}']", "Back to match")
+
+    assert has_element?(
+             view,
+             "#load-battles[href='/matches/#{match.id}'][data-battle-continue=true][aria-keyshortcuts=Space]",
+             "Back to match"
+           )
+
     assert has_element?(view, "#turn-1 .health[data-before='#{min(round(hp), winner.total_hp)}']")
     assert has_element?(view, "#turn-1 .energy[data-before='0']")
   end
@@ -176,7 +184,13 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
 
     assert has_element?(winner, ".battle-result-context", "Battle 1 of 2")
     refute has_element?(winner, ".duel-victory-seal")
-    assert has_element?(winner, "#load-battles[href='/arena/#{duel.id}']", "Continue duel")
+
+    assert has_element?(
+             winner,
+             "#load-battles[href='/arena/#{duel.id}'][data-battle-continue=true][aria-keyshortcuts=Space]",
+             "Continue duel"
+           )
+
     {:ok, loser, _} = live(init_test_session(conn, player_id: opponent.id), "/battles/#{battle.id}")
     assert has_element?(loser, "#battle-competitive-result[data-result=defeat]")
 
@@ -227,7 +241,13 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     assert has_element?(view, "#battle-result-title", "Duel victory")
     assert has_element?(view, ".duel-victory-seal")
     assert has_element?(view, ".duel-result-points[data-gain=true] strong", "+5")
-    assert has_element?(view, "#load-battles[href='/arena/#{duel.id}']", "View duel result")
+
+    assert has_element?(
+             view,
+             "#load-battles[href='/arena/#{duel.id}'][data-battle-continue=true][aria-keyshortcuts=Space]",
+             "View duel result"
+           )
+
     assert Game.get_duel!(duel.id).winner_player_id == player.id
 
     {:ok, loser, _} = live(init_test_session(conn, player_id: opponent.id), "/battles/#{final.id}")

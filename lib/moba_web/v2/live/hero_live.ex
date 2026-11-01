@@ -25,14 +25,14 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply,
      socket
      |> assign(hero: hero, ranking: ranking, show_hud: false, editing: false, show_build: false, show_shop: false)
-     |> assign(:ranking_tab, if(hero.league_tier >= 2, do: "league", else: "global"))
+     |> assign(:ranking_tab, if(hero.league_tier in 2..5, do: "league", else: "global"))
      |> league_assigns()
      |> owner_assigns()
      |> quest_assigns()}
   end
 
   def handle_event("ranking-tab", %{"type" => "league"}, %{assigns: %{hero: %{league_tier: tier}}} = socket)
-      when tier < 2 do
+      when tier < 2 or tier >= 6 do
     {:noreply, socket}
   end
 
@@ -245,6 +245,8 @@ defmodule MobaWeb.V2.HeroLive do
   end
 
   defp league_assigns(%{assigns: %{hero: hero}} = socket) do
+    socket = if hero.league_tier >= 6, do: assign(socket, :ranking_tab, "global"), else: socket
+
     socket
     |> assign(league_ranking: Game.league_ranking(hero), league_milestone: league_milestone(hero))
     |> leaderboard_assigns()

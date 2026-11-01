@@ -47,8 +47,11 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     final = Engine.last_duel_battle(duel)
     Engine.auto_finish_battle!(final)
     assert has_element?(view, "#duel-page[data-phase=finished]")
-    assert has_element?(view, "#duel-rewards")
-    assert has_element?(view, "#duel-return-arena[href='/arena']")
+    assert has_element?(view, "#duel-banner.duel-finished-banner #duel-status #duel-rewards")
+    assert has_element?(view, "#duel-banner #duel-return-arena[href='/arena']")
+    assert has_element?(view, "#duel-banner .duel-score")
+    assert has_element?(view, ".duel-finished-chat #duel-message-form")
+    refute has_element?(view, ".duel-command-row #duel-status")
     refute has_element?(view, "#battle-bar")
     refute has_element?(view, "#duel-hero-selection")
   end
@@ -67,6 +70,12 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     {:ok, season, _} = live(conn, "/arena/#{auto.id}")
     refute has_element?(season, "#duel-message-form")
     assert has_element?(season, ".duel-score", "Season duel")
+
+    Game.Duels.finish!(auto, %{winner: player, attacker_pvp_points: 2, defender_pvp_points: 0})
+    send(season.pid, {"phase", %{}})
+    assert has_element?(season, "#duel-banner.duel-finished-banner #duel-status h1", "wins")
+    assert has_element?(season, "#duel-banner #duel-rewards", "+2 SP")
+    refute has_element?(season, ".duel-command-row")
   end
 
   test "draws keep zero-point rewards and online players can request a rematch", %{conn: conn} do

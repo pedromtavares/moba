@@ -13,7 +13,7 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
     Game.duel_challenge(hero.player, other.player)
     assert has_element?(sender, "#duel-challenge-overlay[data-state=pending] #duel-challenge-close")
     assert has_element?(receiver, "#duel-challenge-overlay [role=dialog][aria-modal=true]")
-    assert has_element?(receiver, "#duel-challenge-accept")
+    assert has_element?(receiver, "#duel-challenge-accept[data-game-fullscreen]")
     assert has_element?(receiver, "#duel-challenge-decline")
     refute has_element?(sender, "#duel-challenge-accept")
 
@@ -34,7 +34,7 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
     {:ok, receiver_page, _} = live(init_test_session(conn, player_id: other.player_id), "/base")
     receiver = find_live_child(receiver_page, "duel-challenges")
     Game.duel_challenge(hero.player, other.player)
-    assert has_element?(receiver, "#duel-challenge-accept")
+    assert has_element?(receiver, "#duel-challenge-accept[data-game-fullscreen]")
 
     receiver |> element("#duel-challenge-accept") |> render_click()
     [duel] = Game.list_duels(hero.player)
@@ -70,5 +70,11 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
     hero = create_base_hero()
     {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/base")
     assert has_element?(view, "#duel-challenges")
+  end
+
+  test "accepted duels use LiveView navigation to preserve the fullscreen document" do
+    socket = %Phoenix.LiveView.Socket{}
+    {:noreply, socket} = MobaWeb.V2.DuelChallengeLive.handle_info({"duel", %{id: 42}}, socket)
+    assert {:live, :redirect, %{to: "/arena/42"}} = socket.redirected
   end
 end

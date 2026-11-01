@@ -212,7 +212,7 @@
                   <td colspan="3" class="community-players-empty">The hall is quiet. Recent players will appear here as they return.</td>
                 </tr>
                 <%= for player <- @players do %>
-                  <.player_row preview={Map.get(assigns, :preview, false)} player={player} current={player.id == @current_player.id} live={MapSet.member?(@live_player_ids, player.id)} />
+                  <.player_row preview={Map.get(assigns, :preview, false)} player={player} current={player.id == @current_player.id} live={MapSet.member?(@live_player_ids, player.id)} admin={@current_user && @current_user.is_admin} />
                 <% end %>
               </tbody>
             </table>

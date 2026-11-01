@@ -263,40 +263,50 @@ Hooks.AttackButton = {
       this.pushEvent("next-turn", {skill_id: skill, item_id: item, hero_id: heroId});
       e.stopPropagation();
     })
+    this.onKeyDown = event => {
+      if (event.code !== "Space" || event.defaultPrevented || event.repeat || event.isComposing ||
+          event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (event.target.closest("input, textarea, select, button, a, [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
+      if (el.disabled || !el.getClientRects().length) return;
+
+      const dialogOpen = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
+        .some(element => element.getClientRects().length);
+      if (dialogOpen) return;
+
+      event.preventDefault();
+      el.click();
+    };
+    window.addEventListener("keydown", this.onKeyDown);
+  },
+  destroyed(){
+    window.removeEventListener("keydown", this.onKeyDown);
   }
 }
 
 Hooks.BattleContinueHotkey = {
   mounted(){
     this.onKeyDown = (event) => {
-      if (event.key !== "Enter" || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) {
-        return;
-      }
+      if (event.code !== "Space" || event.defaultPrevented || event.repeat || event.isComposing ||
+          event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+      if (this.el.dataset.finished !== "true") return;
 
-      const activeElement = document.activeElement;
-      const tagName = activeElement && activeElement.tagName;
+      const dialogOpen = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
+        .some(element => element.getClientRects().length);
+      if (dialogOpen) return;
 
-      if (
-        activeElement &&
-          (activeElement.isContentEditable ||
-             tagName === "INPUT" ||
-             tagName === "TEXTAREA" ||
-             tagName === "SELECT" ||
-             tagName === "BUTTON")
-      ) {
-        return;
-      }
-
-      const selectors = ["#load-training", "#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training"];
-
+      const selectors = ["[data-battle-continue=true]", "#league-next-battle", "#load-training", "#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training", "#battle-guest-create"];
       const target = selectors
-        .map((selector) => this.el.querySelector(selector))
-        .find((element) => element && !element.disabled);
+        .map(selector => this.el.querySelector(selector))
+        .find(element => element && !element.disabled && element.getAttribute("aria-disabled") !== "true" && element.getClientRects().length);
+      if (!target) return;
 
-      if (target) {
-        event.preventDefault();
-        target.click();
-      }
+      const interactive = event.target.closest("input, textarea, select, button, a, [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])");
+      if (interactive && interactive !== target) return;
+      // Focused buttons already activate natively on Space; links need the shortcut.
+      if (interactive === target && target.tagName === "BUTTON") return;
+
+      event.preventDefault();
+      target.click();
     };
 
     window.addEventListener("keydown", this.onKeyDown);

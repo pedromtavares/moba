@@ -1,0 +1,40 @@
+<section id="duel-status" class="duel-status duel-final-status" aria-live="polite">
+  <div class="duel-status-copy">
+    <span class="duel-eyebrow">Duel complete</span>
+    <h1>
+      <%= if @duel.winner_player do %>
+        {username(@duel.winner_player)} wins
+      <% else %>
+        Duel drawn
+      <% end %>
+    </h1>
+    <div :if={!casual?(@duel)} id="duel-rewards" class="duel-rewards">
+      <span class={if @duel.rewards.attacker_pvp_points > 0, do: "duel-points-gain"}>
+        {username(@duel.player)}
+        <strong>
+          {if @duel.rewards.attacker_pvp_points > 0, do: "+"}{@duel.rewards.attacker_pvp_points} SP
+        </strong>
+      </span>
+      <span class={if @duel.rewards.defender_pvp_points > 0, do: "duel-points-gain"}>
+        {username(@duel.opponent_player)}
+        <strong>
+          {if @duel.rewards.defender_pvp_points > 0, do: "+"}{@duel.rewards.defender_pvp_points} SP
+        </strong>
+      </span>
+    </div>
+  </div>
+  <div class="duel-result-actions">
+    <button
+      :if={show_rematch?(assigns)}
+      id="duel-rematch"
+      type="button"
+      class="btn battle-primary"
+      data-game-fullscreen phx-click="rematch"
+    >
+      Rematch
+    </button>
+    <.link id="duel-return-arena" navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">
+      Return to Arena
+    </.link>
+  </div>
+</section>

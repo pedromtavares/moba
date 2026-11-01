@@ -1,5 +1,5 @@
-<div id="duel-page" class="duel duel-modern" data-phase={@duel.phase}>
-  <header class="duel-scoreboard">
+<div id="duel-page" class="duel duel-modern" data-phase={@duel.phase} data-live={to_string(!@duel.auto)}>
+  <header id="duel-banner" class={["duel-scoreboard", duel_finished?(@duel) && "duel-finished-banner"]}>
     <div class="duel-contestant">
       <img src={"/images/pve/#{@duel.player.pve_tier}.png"} alt={"Training tier #{@duel.player.pve_tier}"} />
       <div>
@@ -7,20 +7,23 @@
         <span>{if @duel.player_id == @current_player.id, do: "You", else: "Challenger"}</span>
       </div>
     </div>
-    <div class="duel-score">
-      <span>{if @duel.auto, do: "Season duel", else: "Live duel"}</span>
-      <strong>
-        {duel_score([@first_battle, @last_battle], @duel.player_id)}<small>:</small>{duel_score(
-          [@first_battle, @last_battle],
-          @duel.opponent_player_id
-        )}
-      </strong>
-      <span :if={casual?(@duel)} class="duel-casual">Casual</span>
-      <span :if={!@duel.auto} class="duel-head-to-head" title="All-time head-to-head">
-        Record {@duel.player.duel_score["#{@duel.opponent_player_id}"] || 0} – {@duel.opponent_player.duel_score[
-          "#{@duel.player_id}"
-        ] || 0}
-      </span>
+    <div class="duel-banner-center">
+      <div class="duel-score">
+        <span>{if @duel.auto, do: "Season duel", else: "Live duel"}</span>
+        <strong>
+          {duel_score([@first_battle, @last_battle], @duel.player_id)}<small>:</small>{duel_score(
+            [@first_battle, @last_battle],
+            @duel.opponent_player_id
+          )}
+        </strong>
+        <span :if={casual?(@duel)} class="duel-casual">Casual</span>
+        <span :if={!@duel.auto} class="duel-head-to-head" title="All-time head-to-head">
+          Record {@duel.player.duel_score["#{@duel.opponent_player_id}"] || 0} – {@duel.opponent_player.duel_score[
+            "#{@duel.player_id}"
+          ] || 0}
+        </span>
+      </div>
+      <.result_banner :if={duel_finished?(@duel)} {assigns} />
     </div>
     <div class="duel-contestant duel-contestant-opponent">
       <img
@@ -36,53 +39,15 @@
     </div>
   </header>
 
-  <div class={["duel-command-row", @duel.auto && "duel-solo-command"]}>
+  <div :if={!duel_finished?(@duel) || !@duel.auto} class={["duel-command-row", @duel.auto && "duel-solo-command", duel_finished?(@duel) && "duel-finished-chat"]}>
     <section
+      :if={!duel_finished?(@duel)}
       id="duel-status"
       class="duel-status"
       data-your-turn={to_string(your_pick?(@duel, @current_player) == true)}
       aria-live="polite"
     >
       <%= cond do %>
-        <% duel_finished?(@duel) -> %>
-          <div class="duel-status-copy">
-            <span class="duel-eyebrow">Duel complete</span>
-            <h1>
-              <%= if @duel.winner_player do %>
-                {username(@duel.winner_player)} wins
-              <% else %>
-                Duel drawn
-              <% end %>
-            </h1>
-            <div :if={!casual?(@duel)} id="duel-rewards" class="duel-rewards">
-              <span class={if @duel.rewards.attacker_pvp_points > 0, do: "duel-points-gain"}>
-                {username(@duel.player)}
-                <strong>
-                  {if @duel.rewards.attacker_pvp_points > 0, do: "+"}{@duel.rewards.attacker_pvp_points} SP
-                </strong>
-              </span>
-              <span class={if @duel.rewards.defender_pvp_points > 0, do: "duel-points-gain"}>
-                {username(@duel.opponent_player)}
-                <strong>
-                  {if @duel.rewards.defender_pvp_points > 0, do: "+"}{@duel.rewards.defender_pvp_points} SP
-                </strong>
-              </span>
-            </div>
-          </div>
-          <div class="duel-result-actions">
-            <button
-              :if={show_rematch?(assigns)}
-              id="duel-rematch"
-              type="button"
-              class="btn battle-primary"
-              phx-click="rematch"
-            >
-              Rematch
-            </button>
-            <.link id="duel-return-arena" navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">
-              Return to Arena
-            </.link>
-          </div>
         <% show_timer?(@duel) -> %>
           <div class="duel-status-copy">
             <span class="duel-eyebrow">

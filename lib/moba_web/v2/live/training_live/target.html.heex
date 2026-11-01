@@ -22,7 +22,7 @@
       <div class="gank-button">
         <%= if @current_hero.pve_current_turns > 0 do %>
           <button
-            phx-click="battle"
+            data-game-fullscreen phx-click="battle"
             id={"gank-#{@target.id}"}
             phx-value-id={@target.id}
             class={"battle-button target-battle btn btn-lg btn-icon loading-text dark-button btn-#{difficulty_color(@target.difficulty)}"}

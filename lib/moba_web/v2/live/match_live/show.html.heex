@@ -74,7 +74,7 @@
                             :if={length(@picked_heroes) >= 5}
                             type="button"
                             class="btn battle-primary"
-                            phx-click="start"
+                            data-game-fullscreen phx-click="start"
                             id="start-match-button"
                           >
                             Start match <span aria-hidden="true">→</span>
@@ -112,7 +112,7 @@
                       <button
                         type="button"
                         class="btn text-center btn-lg btn-block btn-primary dark-button margin-auto shadow-fx"
-                        phx-click="start"
+                        data-game-fullscreen phx-click="start"
                         id="start-match-button"
                       >
                         <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Lock Picks and Start Match</span>

@@ -56,7 +56,7 @@
           <button
             id="enter-arena-button"
             type="button"
-            phx-click="matchmaking"
+            data-game-fullscreen phx-click="matchmaking"
             class="btn battle-primary arena-play-button"
             disabled={length(@manual_matches) >= Moba.daily_match_limit()}
           >
@@ -77,7 +77,7 @@
           <button
             id="season-duel-button"
             type="button"
-            phx-click="season-duel"
+            data-game-fullscreen phx-click="season-duel"
             class="btn battle-primary arena-play-button"
             disabled={@current_player.status == "silenced"}
           >

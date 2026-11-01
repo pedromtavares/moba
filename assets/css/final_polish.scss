@@ -1,4 +1,5 @@
 /* Shared HUD overlays are appended to body by Tippy and the native dialog API. */
+.tippy-box[data-reference-hidden] { visibility: hidden; opacity: 0; }
 .tippy-box[data-theme~='game'] {
   max-width: unquote("min(420px, calc(100vw - 24px))") !important;
   border: 1px solid #bda16b80;
