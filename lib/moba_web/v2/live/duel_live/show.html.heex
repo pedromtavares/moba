@@ -48,27 +48,35 @@
                     <h3 :if={!casual?(@duel)} class="center">
                       <span
                         :if={@duel.rewards.attacker_pvp_points > 0}
+                        title="Arena Rating"
+                        data-toggle="tooltip"
                         class="badge badge-pill badge-light-success"
                       >
-                        {username(@duel.player)}: +{@duel.rewards.attacker_pvp_points} SP
+                        {username(@duel.player)}: +{@duel.rewards.attacker_pvp_points} AR
                       </span>
                       <span
                         :if={@duel.rewards.attacker_pvp_points <= 0}
+                        title="Arena Rating"
+                        data-toggle="tooltip"
                         class="badge badge-pill badge-light-dark"
                       >
-                        {username(@duel.player)}: {@duel.rewards.attacker_pvp_points} SP
+                        {username(@duel.player)}: {@duel.rewards.attacker_pvp_points} AR
                       </span>
                       <span
                         :if={@duel.rewards.defender_pvp_points > 0}
+                        title="Arena Rating"
+                        data-toggle="tooltip"
                         class="badge badge-pill badge-light-success"
                       >
-                        {username(@duel.opponent_player)}: +{@duel.rewards.defender_pvp_points} SP
+                        {username(@duel.opponent_player)}: +{@duel.rewards.defender_pvp_points} AR
                       </span>
                       <span
                         :if={@duel.rewards.defender_pvp_points < 0}
+                        title="Arena Rating"
+                        data-toggle="tooltip"
                         class="badge badge-pill badge-light-dark"
                       >
-                        {username(@duel.opponent_player)}: {@duel.rewards.defender_pvp_points} SP
+                        {username(@duel.opponent_player)}: {@duel.rewards.defender_pvp_points} AR
                       </span>
                     </h3>
                   </div>

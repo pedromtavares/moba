@@ -11,14 +11,14 @@
     <div :if={!casual?(@duel)} id="duel-rewards" class="duel-rewards">
       <span class={if @duel.rewards.attacker_pvp_points > 0, do: "duel-points-gain"}>
         {username(@duel.player)}
-        <strong>
-          {if @duel.rewards.attacker_pvp_points > 0, do: "+"}{@duel.rewards.attacker_pvp_points} SP
+        <strong title="Arena Rating" data-toggle="tooltip">
+          {if @duel.rewards.attacker_pvp_points > 0, do: "+"}{@duel.rewards.attacker_pvp_points} AR
         </strong>
       </span>
       <span class={if @duel.rewards.defender_pvp_points > 0, do: "duel-points-gain"}>
         {username(@duel.opponent_player)}
-        <strong>
-          {if @duel.rewards.defender_pvp_points > 0, do: "+"}{@duel.rewards.defender_pvp_points} SP
+        <strong title="Arena Rating" data-toggle="tooltip">
+          {if @duel.rewards.defender_pvp_points > 0, do: "+"}{@duel.rewards.defender_pvp_points} AR
         </strong>
       </span>
     </div>

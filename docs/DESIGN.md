@@ -81,7 +81,7 @@ Center scores within the space implied by their header. Align related columns an
 
 Live PvP is its own Arena subsection, distinct from past duels. Its full-width availability switch has a visible ready/off state and explains whether the player is accepting challenges.
 
-Place currently available opponents and Challenge actions within that live section. Put completed duels, results, season points, and replay actions in Duel history. Do not make past opponents look like live targets. Keep Season Duel visibly distinct from a live challenge.
+Place currently available opponents and Challenge actions within that live section. Put completed duels, results, Arena Rating, and replay actions in Duel history. Do not make past opponents look like live targets. Keep Season Duel visibly distinct from a live challenge.
 
 ## 10. Let navigation blend into the world
 

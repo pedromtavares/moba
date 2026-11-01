@@ -40,3 +40,19 @@
     #manual-heading nav { margin-top: 12px; }
   }
 }
+
+@media (min-width: 768px) {
+  .game-page {
+    --arena-profile-header-height: 368px;
+
+    .user-profile #profile-cinematic,
+    .arena-overview #pvp-progression.arena-cinematic {
+      height: var(--arena-profile-header-height);
+      min-height: var(--arena-profile-header-height);
+      box-sizing: border-box;
+    }
+
+    .arena-overview #pvp-progression.arena-cinematic { display: flex; flex-direction: column; }
+    .arena-overview .arena-cinematic-footer { margin-top: auto; }
+  }
+}

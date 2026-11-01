@@ -18,6 +18,9 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert html =~ hero.player.user.username
       assert has_element?(view, "#user-profile")
       assert has_element?(view, "#profile-ranking-header")
+      assert has_element?(view, "#profile-cinematic strong[title='Arena Rating'][data-toggle=tooltip]", "0 AR")
+      assert has_element?(view, "#profile-cinematic .profile-metric-label", "Arena Rating")
+      assert has_element?(view, "#profile-ranking-header", "Season score")
       assert has_element?(view, "#skill-#{hd(hero.skills).id}-#{hero.id}")
       assert has_element?(view, "#item-#{hd(hero.items).id}-#{hero.id}")
     end

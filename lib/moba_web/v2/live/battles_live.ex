@@ -184,7 +184,9 @@ defmodule MobaWeb.V2.BattlesLive do
           <div :if={rewards} class="history-rewards">
             <span :if={rewards.xp > 0} class="history-xp">+{rewards.xp} XP</span>
             <span :if={rewards.gold > 0} class="history-gold">+{rewards.gold}g</span>
-            <span :if={rewards.pvp_points} class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Points</span>
+            <span :if={rewards.pvp_points} class={pvp_badge_class(rewards.pvp_points)}>
+              {rewards.pvp_points} Arena Rating
+            </span>
           </div>
           <span
             :if={!league_result && (!rewards || (rewards.xp == 0 && rewards.gold == 0 && is_nil(rewards.pvp_points)))}
@@ -244,7 +246,7 @@ defmodule MobaWeb.V2.BattlesLive do
                 <span class="badge badge-light-warning">{rewards.gold}g</span>
               <% end %>
               <%= if rewards.pvp_points do %>
-                <span class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Points</span>
+                <span class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Arena Rating</span>
               <% end %>
             </div>
           <% end %>

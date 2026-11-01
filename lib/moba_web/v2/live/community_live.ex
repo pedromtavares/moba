@@ -155,7 +155,7 @@ defmodule MobaWeb.V2.CommunityLive do
               <div
                 class="f-rpg text-white"
                 data-toggle="tooltip"
-                title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Season Points (#{@player.pvp_points})"}
+                title={"Season Score Calculation: Training Rank (#{@player.pve_tier}) x 100 + Best Immortal Streak (#{@player.best_immortal_streak}) x 100 + Arena Rating (#{@player.pvp_points})"}
               >
                 <i class="ui-icon ui-globe"></i>
                 {player_season_score(@player)}
@@ -168,7 +168,7 @@ defmodule MobaWeb.V2.CommunityLive do
           <div class="row">
             <div class="col justify-content-center d-flex hero-card-stats">
               <div class="btn-group hero-stats">
-                <.hero_stat_button tone="info" icon="ui-icon ui-focus" title="Season Points" value={@player.pvp_points} />
+                <.hero_stat_button tone="info" icon="ui-icon ui-focus" title="Arena Rating" value={@player.pvp_points} />
                 <.hero_stat_button
                   tone="danger"
                   icon="ui-icon ui-swords"

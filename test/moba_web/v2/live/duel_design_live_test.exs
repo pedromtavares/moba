@@ -74,7 +74,8 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     Game.Duels.finish!(auto, %{winner: player, attacker_pvp_points: 2, defender_pvp_points: 0})
     send(season.pid, {"phase", %{}})
     assert has_element?(season, "#duel-banner.duel-finished-banner #duel-status h1", "wins")
-    assert has_element?(season, "#duel-banner #duel-rewards", "+2 SP")
+    assert has_element?(season, "#duel-banner #duel-rewards", "+2 AR")
+    assert has_element?(season, "#duel-rewards strong[title='Arena Rating'][data-toggle=tooltip]", "+2 AR")
     refute has_element?(season, ".duel-command-row")
   end
 
@@ -90,7 +91,8 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     {:ok, view, _} = live(conn, "/arena/#{duel.id}")
 
     assert has_element?(view, "#duel-status h1", "Duel drawn")
-    assert has_element?(view, "#duel-rewards strong", "0 SP")
+    assert has_element?(view, "#duel-rewards strong", "0 AR")
+    assert has_element?(view, "#duel-rewards strong[title='Arena Rating'][data-toggle=tooltip]", "0 AR")
     view |> element("#duel-rematch") |> render_click()
     child = find_live_child(view, "duel-challenges")
     assert has_element?(child, "#duel-challenge-overlay[data-state=pending] #duel-challenge-close")

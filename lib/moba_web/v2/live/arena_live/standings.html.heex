@@ -1,7 +1,7 @@
 <section id="arena-standings" class="card ranking arena-standings" aria-labelledby="arena-standings-title">
   <header class="arena-standings-heading">
     <h2 id="arena-standings-title" class="sr-only">
-      {if @ranking_tab == "5v5", do: "Daily ranking", else: "Season points ranking"}
+      {if @ranking_tab == "5v5", do: "Daily ranking", else: "Arena Rating"}
     </h2>
     <div id="arena-standings-switcher" class="arena-history-switcher" role="group" aria-label="Leaderboard mode">
       <button
@@ -20,7 +20,7 @@
   <ol
     id="arena-standings-list"
     class="arena-standings-list"
-    aria-label={if @ranking_tab == "5v5", do: "Daily ranking", else: "Season points descending"}
+    aria-label={if @ranking_tab == "5v5", do: "Daily ranking", else: "Arena Rating descending"}
   >
     <li
       :for={{player, index} <- Enum.with_index(@ranking, 1)}

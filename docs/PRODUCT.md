@@ -452,7 +452,7 @@ Before competing in matches, players manage teams of 5 heroes.
 
 ### 4.3 Bot Players for Matchmaking
 
-For new arena entrants with low/zero season points, **bot players** serve as guaranteed matchmaking opponents to ensure new players always have matches available.
+For new arena entrants with low/zero Arena Rating, **bot players** serve as guaranteed matchmaking opponents to ensure new players always have matches available.
 
 **Bot Player Structure** (see `lib/moba/game/schema/bot_options.ex`):
 - Players with `bot_options` set are bots
@@ -490,7 +490,7 @@ For new arena entrants with low/zero season points, **bot players** serve as gua
 
 **Pick Timer**: `@duel_timer_in_seconds` = 60 seconds. **Auto-pick on timeout** (system picks for you).
 
-**Season Duels**: Players can farm unlimited season points via async duels. However, auto 5v5 match losses eventually offset these gains, creating equilibrium.
+**Season Duels**: Players can farm unlimited Arena Rating via async duels. However, auto 5v5 match losses eventually offset these gains, creating equilibrium.
 
 **Important**: In async duels, opponent heroes are **real player data** played automatically. Players should configure `skill_order` and `item_order` on their heroes to optimize AI play.
 
@@ -518,9 +518,9 @@ Three PvP brackets with daily promotion/demotion:
 - #1 by `daily_wins` → Stays as "The Immortal"
 - Rest → Demote to Shadows
 
-### 4.6 Point System (ELO-like)
+### 4.6 Arena Rating (AR)
 
-Points gained/lost depend on rating difference between players.
+Arena Rating (AR) is the shared competitive rating for 5v5 matches and 1v1 duels. Rating gains and losses depend on the game mode, result, and rating difference between players. The internal field remains `pvp_points`.
 
 **Duel Points** (see `victory_duel_points/2`, `defeat_duel_points/2`, `tie_duel_points/2`):
 
@@ -577,7 +577,7 @@ Three-tier hierarchy:
 
 **Player** (see `lib/moba/game/schema/player.ex`):
 - `pvp_tier`: Current bracket (0-2)
-- `pvp_points`: ELO-like rating
+- `pvp_points`: Arena Rating (AR)
 - `pve_tier`: Account progression (0-7)
 - `hero_collection`: Best hero per avatar for display
 - `ranking`, `season_ranking`: Leaderboard positions
@@ -811,7 +811,7 @@ Roshan's +armor/+power per turn passive serves as a **build validator**:
 
 ### 9.2 Season Duels (Infinite Farming)
 
-Players can farm unlimited season points via async 1v1 duels:
+Players can farm unlimited Arena Rating via async 1v1 duels:
 - Challenge any player's heroes
 - AI plays both sides using `skill_order`/`item_order`
 - No daily limit on season duels

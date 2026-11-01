@@ -8,7 +8,7 @@
         <span>
           <strong>{player.user.username}</strong>
           <small class="arena-live-opponent-meta">
-            <span>{player.pvp_points} SP</span>
+            <span title="Arena Rating" data-toggle="tooltip">{player.pvp_points} AR</span>
             <span class="arena-live-opponent-activity">Active {player.user.last_online_at |> Timex.format("{relative}", :relative) |> elem(1)}</span>
           </small>
         </span>

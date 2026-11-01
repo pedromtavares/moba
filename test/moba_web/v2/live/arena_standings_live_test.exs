@@ -41,7 +41,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     refute has_element?(view, "#arena-your-standing, #arena-bracket-group, #arena-ranking-table")
   end
 
-  test "1v1 sorts season points rather than season score or daily rank", %{conn: conn} do
+  test "1v1 sorts Arena Rating rather than season score or daily rank", %{conn: conn} do
     player = create_player!(%{pvp_points: 10_000_001, pvp_tier: 0, ranking: 26, daily_wins: 1})
 
     composite_leader =
@@ -54,11 +54,11 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
 
     view |> element("#arena-standings-1v1") |> render_click()
     assert has_element?(view, "#arena-standings-1v1[aria-pressed=true]")
-    assert has_element?(view, "#arena-standings-list[aria-label='Season points descending']")
+    assert has_element?(view, "#arena-standings-list[aria-label='Arena Rating descending']")
     assert Enum.take(standings_ids(view), 2) == Enum.map([player, composite_leader], &"standing-player-#{&1.id}")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-position", "1")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score strong", "10000001")
-    assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score span", "season points")
+    assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score span", "Arena Rating")
     refute has_element?(view, "#arena-standings .arena-standing-row[data-bracket]")
     refute has_element?(view, "#arena-standings .arena-standing-movement")
     refute has_element?(view, "#standing-player-#{bot.id}, #standing-player-#{guest.id}")

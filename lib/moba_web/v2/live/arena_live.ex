@@ -602,9 +602,9 @@ defmodule MobaWeb.V2.ArenaLive do
   defp rewards_badge(0), do: nil
 
   defp rewards_badge(points) when points > 0,
-    do: %{class: "badge badge-pill badge-light-success", label: "+#{points} Season Points"}
+    do: %{class: "badge badge-pill badge-light-success", label: "+#{points} Arena Rating"}
 
-  defp rewards_badge(points), do: %{class: "badge badge-pill badge-light-dark", label: "#{points} Season Points"}
+  defp rewards_badge(points), do: %{class: "badge badge-pill badge-light-dark", label: "#{points} Arena Rating"}
 
   defp duel_badge_class(%{type: "pvp"}), do: "badge badge-light-danger"
   defp duel_badge_class(%{type: "elite_matchmaking"}), do: "badge badge-light-warning"

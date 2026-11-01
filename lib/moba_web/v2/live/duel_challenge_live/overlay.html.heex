@@ -35,7 +35,7 @@
       </h2>
       <div class="duel-challenge-opponent">
         <img src={"/images/pve/#{@challenge.other.pve_tier}.png"} alt={"Training tier #{@challenge.other.pve_tier}"} />
-        <div><strong>{username(@challenge.other)}</strong><span>{@challenge.other.pvp_points} SP</span></div>
+        <div><strong>{username(@challenge.other)}</strong><span title="Arena Rating" data-toggle="tooltip">{@challenge.other.pvp_points} AR</span></div>
       </div>
       <p id="duel-challenge-description">
         {case @state do

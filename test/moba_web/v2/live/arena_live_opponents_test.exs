@@ -14,7 +14,8 @@ defmodule MobaWeb.V2.ArenaLiveOpponentsTest do
 
     {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-live-section #arena-live-pvp")
-    assert has_element?(view, "#arena-live-section #duel-player-#{opponent.id}", "54 SP")
+    assert has_element?(view, "#arena-live-section #duel-player-#{opponent.id}", "54 AR")
+    assert has_element?(view, "#duel-player-#{opponent.id} [title='Arena Rating'][data-toggle=tooltip]", "54 AR")
     assert has_element?(view, "#arena-live-opponents a[href='/player/#{opponent.id}']")
     assert has_element?(view, "#can-duel-#{opponent.id}[phx-value-id='#{opponent.id}']:not([disabled])", "Challenge")
     assert has_element?(view, "#arena-live-heading", "Live 1v1")

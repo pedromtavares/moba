@@ -231,10 +231,10 @@ defmodule MobaWeb.V2.PlayerLive do
   defp rewards_badge(assigns) do
     ~H"""
     <%= if @rewards > 0 do %>
-      <span class="badge badge-pill badge-light-success">+{@rewards} Season Points</span>
+      <span class="badge badge-pill badge-light-success">+{@rewards} Arena Rating</span>
     <% else %>
       <%= if @rewards < 0 do %>
-        <span class="badge badge-pill badge-light-dark">{@rewards} Season Points</span>
+        <span class="badge badge-pill badge-light-dark">{@rewards} Arena Rating</span>
       <% end %>
     <% end %>
     """

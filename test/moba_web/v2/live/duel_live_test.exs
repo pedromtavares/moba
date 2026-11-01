@@ -84,9 +84,16 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     assert has_element?(view, "#duel-status h1", "#{duel.winner_player.user.username} wins")
     assert has_element?(view, "#duel-rewards > span:first-child", duel.player.user.username)
-    assert has_element?(view, "#duel-rewards > span:first-child strong", "+5 SP")
+    assert has_element?(view, "#duel-rewards > span:first-child strong", "+5 AR")
+
+    assert has_element?(
+             view,
+             "#duel-rewards > span:first-child strong[title='Arena Rating'][data-toggle=tooltip]",
+             "+5 AR"
+           )
+
     assert has_element?(view, "#duel-rewards > span:last-child", duel.opponent_player.user.username)
-    assert has_element?(view, "#duel-rewards > span:last-child strong", "-5 SP")
+    assert has_element?(view, "#duel-rewards > span:last-child strong", "-5 AR")
     refute has_element?(view, "#battle-bar")
   end
 

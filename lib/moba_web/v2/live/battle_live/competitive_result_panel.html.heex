@@ -76,7 +76,7 @@ winner = if @battle.winner_id == @battle.attacker_id, do: @battle.attacker, else
       >
         <span>{username(player)}</span>
         <strong>{if points > 0, do: "+"}{points}</strong>
-        <small>Season points</small>
+        <small>Arena Rating</small>
       </div>
     </div>
     <%= if @current_player do %>

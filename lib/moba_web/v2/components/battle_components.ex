@@ -463,8 +463,8 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   defp duel_reward_badge_class(points) when points > 0, do: "badge badge-pill badge-light-success"
   defp duel_reward_badge_class(_points), do: "badge badge-pill badge-light-dark"
 
-  defp duel_reward_points_label(points) when points > 0, do: "+#{points} Season Points"
-  defp duel_reward_points_label(points), do: "#{points} Season Points"
+  defp duel_reward_points_label(points) when points > 0, do: "+#{points} Arena Rating"
+  defp duel_reward_points_label(points), do: "#{points} Arena Rating"
 
   defp show_league_step?(hero, step), do: step <= Game.max_league_step_for(hero.league_tier)
 

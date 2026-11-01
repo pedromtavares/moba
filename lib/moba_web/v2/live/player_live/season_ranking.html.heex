@@ -18,7 +18,7 @@
     <tr>
       <th>Season Rank</th>
       <th>Player</th>
-      <th title="Score calculation: Best Immortal Streak x 100 + Training Rank x 100 + Season Points">Season Score</th>
+      <th title="Score calculation: Best Immortal Streak x 100 + Training Rank x 100 + Arena Rating">Season Score</th>
     </tr>
   </thead>
   <tbody>
@@ -38,7 +38,7 @@
         <td>
           <.link
             navigate={preview_path(assigns, ~p"/player/#{player.id}")}
-            title={"#{player.pvp_points} Season Points"}
+            title={"#{player.pvp_points} Arena Rating"}
             data-toggle="tooltip"
             class="profile-ranked-identity"
           >

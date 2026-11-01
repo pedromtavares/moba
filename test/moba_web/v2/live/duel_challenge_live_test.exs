@@ -14,6 +14,7 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
     assert has_element?(sender, "#duel-challenge-overlay[data-state=pending] #duel-challenge-close")
     assert has_element?(receiver, "#duel-challenge-overlay [role=dialog][aria-modal=true]")
     assert has_element?(receiver, "#duel-challenge-accept[data-game-fullscreen]")
+    assert has_element?(receiver, "#duel-challenge-overlay [title='Arena Rating'][data-toggle=tooltip]", "AR")
     assert has_element?(receiver, "#duel-challenge-decline")
     refute has_element?(sender, "#duel-challenge-accept")
 

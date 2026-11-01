@@ -4,7 +4,7 @@
   class="arena-standing-row"
   data-bracket={if @mode == "5v5", do: arena_bracket(@player)}
   aria-current={if @player.id == @current_player.id, do: "true"}
-  title={"#{@player.pvp_points} Season Points"}
+  title={"#{@player.pvp_points} Arena Rating"}
 >
   <span class="arena-standing-position">
     <%= if position do %>
@@ -29,6 +29,6 @@
     </span>
   </span>
   <span class="arena-standing-score">
-    <strong>{if @mode == "5v5", do: @player.daily_wins, else: @player.pvp_points}</strong><span>{if @mode == "5v5", do: "daily wins", else: "season points"}</span>
+    <strong>{if @mode == "5v5", do: @player.daily_wins, else: @player.pvp_points}</strong><span>{if @mode == "5v5", do: "daily wins", else: "Arena Rating"}</span>
   </span>
 </.link>
