@@ -129,6 +129,10 @@ defmodule MobaWeb.V2.CommunityLive do
     {:noreply, assign(socket, live_player_ids: live_player_ids())}
   end
 
+  def handle_info({"availability", _}, socket) do
+    {:noreply, assign(socket, live_player_ids: live_player_ids())}
+  end
+
   def handle_info(:refresh_recent_players, socket) do
     Process.send_after(self(), :refresh_recent_players, 30_000)
     {:noreply, assign(socket, players: Moba.recent_community_players(), live_player_ids: live_player_ids())}

@@ -48,7 +48,8 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     Engine.auto_finish_battle!(final)
     assert has_element?(view, "#duel-page[data-phase=finished]")
     assert has_element?(view, "#duel-banner.duel-finished-banner #duel-status #duel-rewards")
-    assert has_element?(view, "#duel-banner #duel-return-arena[href='/arena']")
+    assert has_element?(view, "#duel-banner #duel-rematch[phx-click=rematch][data-game-fullscreen]")
+    refute has_element?(view, "#duel-return-arena")
     assert has_element?(view, "#duel-banner .duel-score")
     assert has_element?(view, ".duel-finished-chat #duel-message-form")
     refute has_element?(view, ".duel-command-row #duel-status")
@@ -76,27 +77,51 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     assert has_element?(season, "#duel-banner.duel-finished-banner #duel-status h1", "wins")
     assert has_element?(season, "#duel-banner #duel-rewards", "+2 AR")
     assert has_element?(season, "#duel-rewards strong[title='Arena Rating'][data-toggle=tooltip]", "+2 AR")
+    assert has_element?(season, "#duel-return-arena[href='/arena']")
+    refute has_element?(season, "#duel-rematch")
     refute has_element?(season, ".duel-command-row")
   end
 
-  test "draws keep zero-point rewards and online players can request a rematch", %{conn: conn} do
+  test "finished live duels can be rematched while players retain their unavailable duel status", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
     duel = Game.create_duel!(player, opponent, false)
     Game.Duels.finish!(duel, %{winner: nil, attacker_pvp_points: 0, defender_pvp_points: 0})
-    Game.set_player_available!(player)
-    Game.set_player_available!(opponent)
-    MobaWeb.Presence.track_player(self(), opponent)
+    assert Game.get_player!(player.id).status == "unavailable"
+    assert Game.get_player!(opponent.id).status == "unavailable"
     conn = init_test_session(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/arena/#{duel.id}")
 
     assert has_element?(view, "#duel-status h1", "Duel drawn")
     assert has_element?(view, "#duel-rewards strong", "0 AR")
     assert has_element?(view, "#duel-rewards strong[title='Arena Rating'][data-toggle=tooltip]", "0 AR")
+    refute has_element?(view, "#duel-return-arena")
     view |> element("#duel-rematch") |> render_click()
     child = find_live_child(view, "duel-challenges")
     assert has_element?(child, "#duel-challenge-overlay[data-state=pending] #duel-challenge-close")
     assert length(Game.list_duels(player)) == 1
+  end
+
+  test "spectators and active or season duels cannot send a rematch challenge", %{conn: conn} do
+    player = create_player!()
+    opponent = create_player!()
+    viewer = create_player!()
+    duel = Game.create_duel!(player, opponent, false)
+
+    for {viewing_player, duel} <- [
+          {player, duel},
+          {player, Game.create_duel!(player, opponent, true)},
+          {viewer,
+           player
+           |> Game.create_duel!(opponent, false)
+           |> Game.Duels.finish!(%{winner: nil, attacker_pvp_points: 0, defender_pvp_points: 0})}
+        ] do
+      {:ok, view, _} = live(init_test_session(conn, player_id: viewing_player.id), "/arena/#{duel.id}")
+      refute has_element?(view, "#duel-rematch")
+      render_click(view, "rematch", %{})
+      child = find_live_child(view, "duel-challenges")
+      refute has_element?(child, "#duel-challenge-overlay")
+    end
   end
 
   test "casual results keep their badge and omit season-point rewards", %{conn: conn} do

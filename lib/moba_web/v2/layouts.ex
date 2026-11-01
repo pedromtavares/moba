@@ -16,6 +16,37 @@ defmodule MobaWeb.V2.Layouts do
 
   embed_templates "layouts/*"
 
+  def loading_screen(assigns) do
+    ~H"""
+    <div
+      id="game-loading-screen"
+      class="game-loading-screen"
+      data-state="idle"
+      hidden
+      role="status"
+      aria-live="polite"
+      aria-label="Loading BrowserMOBA"
+    >
+      <div class="game-loading-brand">
+        <div class="game-loading-emblem" aria-hidden="true">
+          <img id="game-loading-icon" src="/images/navigation/profile.webp" width="256" height="256" alt="" />
+        </div>
+        <p class="game-loading-wordmark">BROWSERMOBA</p>
+        <div
+          id="game-loading-progress"
+          class="game-loading-progress"
+          role="progressbar"
+          aria-label="Loading page"
+          aria-valuemin="0"
+          aria-valuemax="100"
+        >
+          <span id="game-loading-fill"></span>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   def live(assigns) do
     ~H"""
     {@inner_content}
@@ -92,7 +123,7 @@ defmodule MobaWeb.V2.Layouts do
       <%= if show_sidebar?(assigns) do %>
         <div class="row">
           <.sidebar current_player={@current_player} sidebar_code={@sidebar_code} preview={@preview} />
-          <div class="col">
+          <div class="col" id="game-content">
             {render_slot(@inner_block)}
             <%= if show_footer?(assigns) do %>
               <.footer_stats preview={@preview} />

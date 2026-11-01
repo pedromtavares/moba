@@ -290,30 +290,23 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, assign(socket, tutorial_step: step)}
   end
 
-  def handle_info(
-        %{event: "presence_diff"},
-        %{assigns: %{current_player: player, last_presence_update: last_update}} = socket
-      ) do
-    ago = Timex.shift(Timex.now(), seconds: -10)
+  def handle_info(%{event: "presence_diff"}, socket), do: {:noreply, refresh_live_opponents(socket)}
 
-    if Timex.diff(ago, last_update) > 0 do
-      {:noreply,
-       assign(socket,
-         duel_opponents: opponents_from_presence(player),
-         last_presence_update: Timex.now(),
-         current_time: Timex.now()
-       )}
-    else
-      {:noreply, socket}
-    end
+  def handle_info({"availability", _}, %{assigns: %{live_action: :index, current_player: %{id: id}}} = socket) do
+    player = Game.get_player!(id)
+
+    {:noreply,
+     socket
+     |> assign(current_player: player, pending_duel: Game.Duels.pending_duel(player))
+     |> refresh_live_opponents()}
   end
+
+  def handle_info({"availability", _}, socket), do: {:noreply, socket}
 
   def handle_info({"ranking", _}, %{assigns: %{current_player: %{id: id}}} = socket) do
     player = Game.get_player!(id)
     {:noreply, socket |> assign(current_player: player) |> assign_index()}
   end
-
-  def handle_info(%{event: "presence_diff"}, socket), do: {:noreply, socket}
 
   def render(%{live_action: :edit} = assigns), do: edit(assigns)
   def render(assigns), do: index(assigns)
@@ -338,7 +331,6 @@ defmodule MobaWeb.V2.ArenaLive do
       reward_games: Game.Arena.daily_reward_games(player),
       duel_opponents: duel_opponents,
       pending_duel: pending_duel,
-      last_presence_update: Timex.now(),
       ranking: ranking,
       ranking_tab: ranking_tab
     )
@@ -393,6 +385,15 @@ defmodule MobaWeb.V2.ArenaLive do
   end
 
   defp maybe_redirect_guest(socket), do: socket
+
+  defp refresh_live_opponents(%{assigns: %{live_action: :index, current_player: player}} = socket) do
+    assign(socket,
+      duel_opponents: opponents_from_presence(player),
+      current_time: Timex.now()
+    )
+  end
+
+  defp refresh_live_opponents(socket), do: socket
 
   defp opponents_from_presence(%{status: "available"} = player) do
     online_ids =

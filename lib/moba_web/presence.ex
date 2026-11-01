@@ -8,12 +8,7 @@ defmodule MobaWeb.Presence do
   end
 
   def update_player(pid, %{id: id} = player) do
-    metas =
-      get_by_key("online", id)[:metas]
-      |> List.first()
-      |> Map.merge(player_payload(player))
-
-    update(pid, "online", id, metas)
+    update(pid, "online", id, fn meta -> Map.merge(meta, player_payload(player)) end)
   end
 
   defp player_payload(player) do

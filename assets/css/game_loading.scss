@@ -1,0 +1,34 @@
+.game-loading-screen {
+  position: fixed;
+  inset: var(--loading-top, 0px) 0 0 var(--loading-left, 0px);
+  z-index: 10000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 32px 20px;
+  background: radial-gradient(ellipse at 50% 44%, #20324888, transparent 55%), radial-gradient(ellipse at 70% 100%, #77342c24, transparent 60%), #080c13;
+  color: #f2e4c8;
+
+  &[hidden] { display: none; }
+  &::before { content: ''; position: absolute; inset: 10% 8%; border-top: 1px solid #d6b47c14; border-bottom: 1px solid #d6b47c14; pointer-events: none; }
+  .game-loading-brand { position: relative; display: flex; flex-direction: column; align-items: center; width: 100%; transform: translateY(-12px); }
+  .game-loading-emblem { position: relative; display: grid; place-items: center; width: 220px; height: 220px; margin-bottom: 24px; }
+  .game-loading-emblem::before { content: ''; position: absolute; inset: 0; border: 1px solid #d4ae6426; border-radius: 50%; box-shadow: 0 0 70px #b68b3824, inset 0 0 42px #b68b3814; }
+  .game-loading-emblem::after { content: ''; position: absolute; inset: -16px; border: 1px solid #d4ae640c; border-radius: 50%; }
+  .game-loading-emblem img { position: relative; width: 154px; height: 154px; object-fit: contain; filter: drop-shadow(0 0 28px #d8ab4666); animation: game-loading-glow 2.4s ease-in-out infinite alternate; }
+  .game-loading-wordmark { margin: 0 0 30px; padding-left: .16em; font: 900 clamp(24px, 3vw, 42px)/1.1 'Nunito', sans-serif; letter-spacing: .16em; text-shadow: 0 2px 20px #d7af5226; }
+  .game-loading-progress { width: 76vw; max-width: 310px; height: 5px; overflow: hidden; border: 1px solid #d7b47233; border-radius: 4px; background: #d7b4720a; }
+  .game-loading-progress > span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #a57a40, #e7c789 65%, #fff0c8); box-shadow: 0 0 16px #e4bb68aa; transition: width .22s ease-out; }
+  &[data-state=complete] { animation: game-loading-exit .16s .16s both; pointer-events: none; }
+}
+
+@keyframes game-loading-glow { to { filter: drop-shadow(0 0 40px #d8ab4699); transform: translateY(-3px); } }
+@keyframes game-loading-exit { to { opacity: 0; } }
+@media (max-width: 575px) {
+  .game-loading-screen .game-loading-emblem { width: 174px; height: 174px; }
+  .game-loading-screen .game-loading-emblem img { width: 126px; height: 126px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-loading-screen .game-loading-emblem img, .game-loading-screen[data-state=complete] { animation: none; }
+  .game-loading-screen .game-loading-progress > span { transition: none; }
+}

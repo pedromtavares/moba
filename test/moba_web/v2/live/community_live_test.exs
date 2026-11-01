@@ -168,9 +168,10 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     refute has_element?(view, "#user-#{offline_player.id} .community-player-ranks")
     assert has_element?(view, "#user-#{offline_player.id} .community-activity-empty", "No recent activity")
 
-    Game.set_player_unavailable!(live_player)
-    send(view.pid, %{event: "presence_diff"})
+    live_player = Game.set_player_unavailable!(live_player)
     refute has_element?(view, "#user-#{live_player.id} .community-player-live")
+    Game.set_player_available!(live_player)
+    assert has_element?(view, "#user-#{live_player.id} .community-player-live")
   end
 
   test "only admins receive player activity and hero training timestamp tooltips", %{conn: conn} do

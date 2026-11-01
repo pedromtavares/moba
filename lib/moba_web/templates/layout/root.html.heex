@@ -17,6 +17,7 @@
       </div>
     </div>
     {csrf_meta_tag()}
+    <MobaWeb.V2.Layouts.loading_screen :if={assigns[:current_user] || (assigns[:current_player] && @current_player.user_id)} />
     <script type="text/javascript" src={~p"/js/app.js"}>
     </script>
   </body>

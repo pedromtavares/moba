@@ -33,7 +33,7 @@
     >
       Rematch
     </button>
-    <.link id="duel-return-arena" navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">
+    <.link :if={!show_rematch?(assigns)} id="duel-return-arena" navigate={preview_path(assigns, ~p"/arena")} class="btn base-secondary">
       Return to Arena
     </.link>
   </div>

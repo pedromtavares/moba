@@ -49,4 +49,44 @@ defmodule MobaWeb.V2.ArenaLiveOpponentsTest do
       assert Game.list_duels(player) == []
     end
   end
+
+  test "availability toggles refresh other players and synchronize the player's other tabs", %{conn: conn} do
+    viewer = create_player!(%{status: "available"})
+    opponent = create_player!(%{status: "unavailable"})
+    session = init_test_session(conn, player_id: viewer.id)
+    {:ok, first_tab, _} = live(session, "/arena")
+    {:ok, second_tab, _} = live(session, "/arena")
+    {:ok, opponent_tab, _} = live(init_test_session(conn, player_id: opponent.id), "/arena")
+    refute has_element?(first_tab, "#duel-player-#{opponent.id}")
+
+    render_click(opponent_tab, "set-status", %{"value" => "on"})
+    assert has_element?(first_tab, "#duel-player-#{opponent.id}")
+    assert has_element?(second_tab, "#duel-player-#{opponent.id}")
+
+    render_click(first_tab, "set-status", %{})
+    refute has_element?(second_tab, "#set-status[checked]")
+    refute has_element?(second_tab, "#duel-player-#{opponent.id}")
+    render_click(first_tab, "set-status", %{"value" => "on"})
+    assert has_element?(second_tab, "#set-status[checked]")
+    assert has_element?(second_tab, "#duel-player-#{opponent.id}")
+
+    render_click(opponent_tab, "set-status", %{})
+    refute has_element?(first_tab, "#duel-player-#{opponent.id}")
+    refute has_element?(second_tab, "#duel-player-#{opponent.id}")
+  end
+
+  test "presence changes immediately after mounting are never discarded", %{conn: conn} do
+    viewer = create_player!(%{status: "available"})
+    opponent = create_player!(%{status: "available"})
+    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.id), "/arena")
+    refute has_element?(view, "#duel-player-#{opponent.id}")
+
+    {:ok, _} = MobaWeb.Presence.track_player(self(), opponent)
+    send(view.pid, %{event: "presence_diff"})
+    assert has_element?(view, "#duel-player-#{opponent.id}")
+
+    :ok = MobaWeb.Presence.untrack(self(), "online", opponent.id)
+    send(view.pid, %{event: "presence_diff"})
+    refute has_element?(view, "#duel-player-#{opponent.id}")
+  end
 end

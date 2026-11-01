@@ -57,10 +57,14 @@ defmodule MobaWeb.V2.DuelLive do
   end
 
   def handle_event("rematch", _, %{assigns: %{duel: duel, current_player: player}} = socket) do
-    other = if player.id == duel.player_id, do: duel.opponent_player, else: duel.player
+    if show_rematch?(socket.assigns) do
+      player = Game.get_player!(player.id)
+      other_id = if player.id == duel.player_id, do: duel.opponent_player_id, else: duel.player_id
+      other = Game.get_player!(other_id)
 
-    if player.status == "available" && other.status == "available" do
-      Game.duel_challenge(player, other)
+      if player.status != "silenced" && other.status != "silenced" do
+        Game.duel_challenge(player, other)
+      end
     end
 
     {:noreply, socket}
@@ -165,8 +169,7 @@ defmodule MobaWeb.V2.DuelLive do
   defp phase_class(_, _), do: "nav-link no-action"
 
   defp show_rematch?(%{duel: duel, current_player: player}) do
-    duel_finished?(duel) &&
-      both_online?(duel, player) &&
+    duel_finished?(duel) && !duel.auto &&
       (player.id == duel.player_id || player.id == duel.opponent_player_id)
   end
 
@@ -178,16 +181,6 @@ defmodule MobaWeb.V2.DuelLive do
     else
       turn.defender
     end
-  end
-
-  defp both_online?(%{player: %{id: player_id}, opponent_player: %{id: opponent_id}}, current_player) do
-    online_ids =
-      MobaWeb.Presence.list("online")
-      |> Enum.map(fn {_user_id, data} -> List.first(data[:metas]) end)
-      |> Enum.map(& &1.player_id)
-      |> Kernel.++([current_player.id])
-
-    Enum.member?(online_ids, player_id) && Enum.member?(online_ids, opponent_id)
   end
 
   defp picking_player(%{phase: phase} = duel) do

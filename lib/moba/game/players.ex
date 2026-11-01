@@ -93,9 +93,14 @@ defmodule Moba.Game.Players do
   end
 
   def update_player!(%Player{} = player, attrs) do
+    changeset = Player.changeset(player, attrs)
+    player = Repo.update!(changeset)
+
+    if Map.has_key?(changeset.changes, :status) do
+      MobaWeb.broadcast("online", "availability", %{player_id: player.id})
+    end
+
     player
-    |> Player.changeset(attrs)
-    |> Repo.update!()
   end
 
   def update_preferences!(player, preferences) do

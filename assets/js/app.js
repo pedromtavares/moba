@@ -16,12 +16,14 @@ import {initAnalytics} from "./analytics";
 import {initReturnInvitation} from "./return_invitation";
 import {initGameFullscreen} from "./game_fullscreen";
 import {initSidebarHotkeys} from "./sidebar_hotkeys";
+import {initGameLoading} from "./game_loading";
 
 initGameConfirmations();
 initAnalytics();
 initReturnInvitation();
 initGameFullscreen();
 initSidebarHotkeys();
+initGameLoading();
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
@@ -29,6 +31,7 @@ let topBarScheduled = undefined;
 
 window.addEventListener("phx:page-loading-start", () => {
   hideTooltips();
+  if (document.getElementById('game-loading-screen')) return;
   if(!topBarScheduled) {
     topBarScheduled = setTimeout(() => topbar.show(), 200);
   }
