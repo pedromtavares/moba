@@ -191,7 +191,7 @@
     <section
       id="battle-ready"
       class="stage-ready"
-      hidden={@combat_scene.events != []}
+      hidden={@combat_scene.events != [] || !is_nil(@combat_scene.turnDeadline)}
       data-state={if @combat_scene.status == "Your turn", do: "ready", else: "waiting"}
     >
       <h3 data-stage-ready-title>
@@ -206,6 +206,18 @@
       </p>
     </section>
     <div id="stage-vfx" class="stage-vfx" aria-hidden="true"></div>
+    <div
+      id="stage-duel-clock"
+      class="stage-result stage-duel-clock"
+      data-stage-clock
+      data-urgent={to_string(!is_nil(@combat_scene.turnDeadline) && @turn_timer <= 10)}
+      hidden={is_nil(@combat_scene.turnDeadline)}
+      role="timer"
+      aria-label="Turn time remaining"
+    >
+      <span class="stage-result-eyebrow" data-stage-clock-owner>{@combat_scene.status}</span>
+      <strong><span data-stage-clock-seconds>{max(@turn_timer, 0)}</span><small>s</small></strong>
+    </div>
     <div class="stage-result" data-stage-result hidden={!@combat_scene.finished}>
       <span class="stage-result-eyebrow">Battle complete</span><strong data-stage-result-title>{@combat_scene.status}</strong>
     </div>

@@ -206,7 +206,7 @@ test('hero links use the card art rather than a skill icon, and profile labels o
     'strong, .profile-ranked-name': node({text: 'PDK'})
   }}), '/player/2');
   assert.equal(player.name, 'PDK');
-  assert.equal(player.subtitle, 'Player profile');
+  assert.deepEqual(player, {name: 'PDK', simple: true});
 });
 
 test('local actions never borrow the current profile identity', t => {
@@ -214,4 +214,19 @@ test('local actions never borrow the current profile identity', t => {
   window.location = new URL('http://localhost/player/2');
   const target = loadingTarget(node({text: '1v1', attrs: {'phx-click': 'history-tab'}}));
   assert.equal(target, null);
+});
+
+
+test('profile transitions show only the username and clear richer previous targets', t => {
+  const page = setup(t);
+  const control = node({text: 'PDK', attrs: {href: 'http://localhost/player/2', 'data-phx-link': 'redirect'}});
+  page.click(control);
+  page.emit('phx:page-loading-start', {kind: 'redirect', to: '/player/2'});
+  assert.equal(page.nodes['game-loading-title'].textContent, 'PDK');
+  assert.equal(page.nodes['game-loading-screen'].dataset.simple, 'true');
+  assert.equal(page.nodes['game-loading-subtitle'].hidden, true);
+  assert.equal(page.nodes['game-loading-art'].hidden, true);
+  assert.equal(page.nodes['game-loading-opponent'].hidden, true);
+  page.emit('phx:page-loading-start', {kind: 'redirect', to: '/tavern'});
+  assert.equal(page.nodes['game-loading-screen'].dataset.simple, 'false');
 });

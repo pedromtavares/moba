@@ -44,6 +44,7 @@ export default {
     const scene = JSON.parse(this.el.dataset.scene);
     if (scene.id !== this.scene.id) return this.reset(scene);
     this.scene = scene;
+    this.renderTurnClock();
     this.renderLogToggle();
     const fresh = scene.events.filter(event => event.number > this.seen);
     this.seen = Math.max(this.seen, ...scene.events.map(event => event.number));
@@ -55,6 +56,7 @@ export default {
   disconnected() { this.cancel(); this.settle(); },
   destroyed() {
     this.cancel();
+    clearInterval(this.turnClockInterval);
     this.soundButton.removeEventListener('click', this.onSound);
     this.replayButton.removeEventListener('click', this.onReplay);
     document.removeEventListener('click', this.guard, true);
@@ -220,6 +222,7 @@ export default {
   },
 
   settle() {
+    this.renderTurnClock();
     this.renderLogToggle();
     this.el.dataset.finished = String(this.scene.finished);
     this.el.dataset.presenting = 'false';
@@ -229,7 +232,7 @@ export default {
     this.el.querySelector('[data-stage-context]').textContent = this.scene.context;
     this.el.querySelector('[data-stage-initiated]').textContent = `Started by ${this.scene.initiator}`;
     const opening = this.el.querySelector('#battle-ready');
-    opening.hidden = this.scene.events.length > 0;
+    opening.hidden = this.scene.events.length > 0 || !!this.scene.turnDeadline;
     const yourTurn = this.scene.status === 'Your turn';
     opening.dataset.state = yourTurn ? 'ready' : 'waiting';
     opening.querySelector('[data-stage-ready-title]').textContent = yourTurn ? 'Make your first move' : this.scene.status;
@@ -242,6 +245,23 @@ export default {
     result.hidden = !this.scene.finished;
     result.dataset.winner = this.scene.winner || 'draw';
     result.querySelector('[data-stage-result-title]').textContent = this.scene.status;
+  },
+
+  renderTurnClock() {
+    const clock = this.el.querySelector('[data-stage-clock]');
+    if (!clock) return;
+    const active = !this.scene.finished && Number.isFinite(this.scene.turnDeadline);
+    clock.hidden = !active;
+    if (!active) {
+      clearInterval(this.turnClockInterval);
+      this.turnClockInterval = null;
+      return;
+    }
+    const remaining = Math.max(0, Math.ceil((this.scene.turnDeadline - Date.now()) / 1000));
+    clock.querySelector('[data-stage-clock-seconds]').textContent = remaining;
+    clock.querySelector('[data-stage-clock-owner]').textContent = this.scene.status;
+    clock.dataset.urgent = String(remaining <= 10);
+    if (!this.turnClockInterval) this.turnClockInterval = setInterval(() => this.renderTurnClock(), 1000);
   },
 
   headline(event) {

@@ -1,7 +1,8 @@
 <%= if show_timer?(assigns) do %>
   <span
     tabindex="0"
-    class={if @preview, do: "battle-turn-clock", else: "game-stat btn btn-outline-warning ml-2 no-action"}
+    class={if @preview, do: "battle-turn-clock d-none", else: "game-stat btn btn-outline-warning ml-2 no-action"}
+    aria-hidden={@preview && "true"}
     data-toggle="tooltip"
     title="Seconds left to act"
   >

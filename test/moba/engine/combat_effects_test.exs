@@ -112,6 +112,38 @@ defmodule Moba.Engine.CombatEffectsTest do
     assert cooling.defender.future_cooldowns["evade"] == 1
   end
 
+  test "Echo Stomp ignores evade on both turns without consuming its cooldown" do
+    stomp = Combat.skill("echo_stomp")
+
+    for charging? <- [true, false] do
+      result =
+        resolve([stomp], [], stomp, nil, fn turn ->
+          attacker =
+            if charging?,
+              do: turn.attacker,
+              else: %{turn.attacker | double_skill: stomp, last_skill: stomp}
+
+          %{
+            turn
+            | attacker: attacker,
+              defender: %{
+                turn.defender
+                | speed: 200,
+                  base_armor: 50,
+                  cooldowns: %{"evade" => -1},
+                  future_cooldowns: %{"evade" => -1}
+              }
+          }
+        end)
+
+      refute result.defender.evaded
+      assert result.defender.future_cooldowns["evade"] == -1
+      refute Enum.any?(result.defender.effects, &(&1["resource"] == "evade"))
+      assert result.defender.damage_type == "normal"
+      assert result.defender.damage == if(charging?, do: 0, else: 160)
+    end
+  end
+
   test "pure damage and physical ultimates never trigger evade" do
     pure_bolt = %{Combat.skill("lightning_bolt") | damage_type: "pure"}
     walrus = Combat.skill("walrus_punch")

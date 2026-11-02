@@ -16,7 +16,7 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def immortal_streak_debuff_percent(_), do: nil
 
   def immortal_streak_debuff_description do
-    "If you have an active Immortal Streak, your heroes will receive a debuff that lowers their stats in Matchmaking battles by #{Float.round(Moba.immortal_streak_multiplier() * 100, 1)}% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak."
+    "If you have an active Immortal Streak, your heroes will receive a debuff that lowers their stats in 5v5 matches by #{Float.round(Moba.immortal_streak_multiplier() * 100, 1)}% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak."
   end
 
   def match_immortal_streak(player, battles) do

@@ -455,7 +455,24 @@ defmodule MobaWeb.V2.CommunityLive do
 
   defp player_activity_tooltip(user) do
     "Last active: #{relative_time(user.last_online_at)}<br/>" <>
-      "Registered: #{relative_time(user.inserted_at)}"
+      "Registered: #{registration_time(user.inserted_at)}"
+  end
+
+  defp registration_time(nil), do: "time unavailable"
+
+  defp registration_time(at) do
+    seconds = max(Timex.diff(Timex.now(), at, :seconds), 0)
+
+    units = [{"year", 365 * 86_400}, {"month", 30 * 86_400}, {"day", 86_400}, {"hour", 3_600}, {"minute", 60}]
+
+    case Enum.find(units, fn {_unit, duration} -> seconds >= duration end) do
+      nil ->
+        "just now"
+
+      {unit, duration} ->
+        amount = round(seconds / duration)
+        "#{amount} #{unit}#{if amount == 1, do: "", else: "s"} ago"
+    end
   end
 
   defp relative_time(nil), do: "time unavailable"

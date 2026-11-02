@@ -83,6 +83,33 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     |> Jason.decode!()
   end
 
+  test "duel countdown appears in the banner and follows the current turn", %{conn: conn} do
+    player = create_player!()
+    opponent = create_player!()
+    hero = create_base_hero(%{name: "First", total_hp: 5000, speed: 200}, player)
+    enemy = create_base_hero(%{name: "Second", total_hp: 5000, speed: 0}, opponent)
+    duel = Game.create_duel!(player, opponent, false)
+    Game.continue_duel!(duel, hero)
+    Game.continue_duel!(Game.get_duel!(duel.id), enemy)
+    battle = duel.id |> Game.get_duel!() |> Engine.first_duel_battle()
+    battle = Moba.Repo.update!(Ecto.Changeset.change(battle, inserted_at: NaiveDateTime.add(battle.inserted_at, -5)))
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
+
+    initial_deadline = combat_scene(view)["turnDeadline"]
+    assert is_integer(initial_deadline)
+    assert has_element?(view, "#combat-stage #stage-duel-clock:not([hidden])[role=timer]")
+    assert has_element?(view, "#stage-duel-clock [data-stage-clock-owner]", "Your turn")
+    assert has_element?(view, "#battle-ready[hidden]")
+    assert has_element?(view, "#battle-bar .battle-turn-clock.d-none #turn-timer")
+
+    render_click(view, "next-turn", %{"skill_id" => "", "item_id" => "", "hero_id" => "#{hero.id}"})
+    assert combat_scene(view)["turnDeadline"] > initial_deadline
+    assert combat_scene(view)["status"] == "Waiting for Second"
+
+    {:ok, waiting, _} = live(log_in_player(conn, player_id: opponent.id), "/battles/#{battle.id}")
+    assert has_element?(waiting, "#stage-duel-clock:not([hidden]) [data-stage-clock-owner]", "Your turn")
+  end
+
   test "footer keeps both heroes' latest actions and complete effect icon lists on their own sides", %{conn: conn} do
     hero = create_base_hero(%{name: "First"})
     enemy = create_base_hero(%{name: "Second"})
@@ -300,6 +327,9 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     battle = duel |> Map.get(:id) |> Game.get_duel!() |> Engine.first_duel_battle() |> Engine.auto_finish_battle!()
 
     {:ok, winner, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
+
+    assert is_nil(combat_scene(winner)["turnDeadline"])
+    assert has_element?(winner, "#stage-duel-clock[hidden]")
 
     assert has_element?(
              winner,

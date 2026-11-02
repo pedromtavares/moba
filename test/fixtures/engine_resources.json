@@ -847,7 +847,7 @@
       "code": "echo_stomp",
       "name": "Echo Stomp",
       "level": 1,
-      "description": "Takes one turn to charge, dealing massive Attack based damage on the next turn. Deals half damage if interrupted via stun or silence.",
+      "description": "Takes one turn to charge, dealing massive Attack based damage on the next turn. Deals half damage if interrupted via stun or silence. Ignores evade.",
       "passive": false,
       "ultimate": false,
       "effects": "[damage]Damage: [base_damage] + [atk_multiplier]% Attack[/damage]\r\n\r\n[status]This is a channeling skill that uses 2 turns[/status]",

@@ -202,7 +202,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     assert has_element?(
              view,
-             "#user-#{hero.player_id} .community-player-status[data-toggle=tooltip][tabindex='0'][title='Last active: 1h ago<br/>Registered: 7d ago']"
+             "#user-#{hero.player_id} .community-player-status[data-toggle=tooltip][tabindex='0'][title='Last active: 1h ago<br/>Registered: 7 days ago']"
            )
 
     assert has_element?(
@@ -219,6 +219,28 @@ defmodule MobaWeb.V2.CommunityLiveTest do
              "#user-#{hero.player_id} .community-player-status[data-activity=offline][title*='Last active: time unavailable']",
              "Offline"
            )
+  end
+
+  test "admin registration tooltips express older accounts in readable months and years", %{conn: conn} do
+    hero = create_base_hero()
+    Accounts.set_online_now(hero.player.user)
+    viewer = create_base_hero()
+    admin = viewer.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
+    conn = conn |> log_in_user(admin) |> put_session(:player_id, viewer.player_id)
+    cache_recent_players([hero.player_id])
+    {:ok, view, _} = live(conn, "/community")
+
+    for {days, expected} <- [{40, "1 month ago"}, {90, "3 months ago"}, {400, "1 year ago"}, {700, "2 years ago"}] do
+      registered_at = DateTime.utc_now() |> DateTime.truncate(:second) |> DateTime.add(-days * 86_400) |> DateTime.to_naive()
+      hero.player.user |> Ecto.Changeset.change(inserted_at: registered_at) |> Moba.Repo.update!()
+      cache_recent_players([hero.player_id])
+      send(view.pid, :refresh_recent_players)
+
+      assert has_element?(
+               view,
+               "#user-#{hero.player_id} .community-player-status[title*='Registered: #{expected}']"
+             )
+    end
   end
 
   test "recent players has an empty state", %{conn: conn} do

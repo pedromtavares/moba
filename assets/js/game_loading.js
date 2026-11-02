@@ -68,11 +68,10 @@ export function loadingTarget(control, to, root = document) {
   if (/^\/player\/\d+\/?$/.test(path)) {
     if (control) {
       if (control.closest('#game-sidebar, #topnav')) return null;
-      return portrait(control, text(control, 'strong, .profile-ranked-name') || text(control).replace(text(control, 'small'), '').trim(), 'Player profile');
+      return {name: text(control, 'strong, .profile-ranked-name') || text(control).replace(text(control, 'small'), '').trim(), simple: true};
     }
     const header = samePage && root.querySelector('#profile-cinematic');
-    if (header) return {name: text(header, 'h1'), subtitle: 'Player profile', image: image(header, '.profile-crest'),
-      art: window.getComputedStyle(header).getPropertyValue('--profile-scene').match(/url\(["']?(.*?)["']?\)/)?.[1]};
+    if (header) return {name: text(header, 'h1'), simple: true};
   }
   if (/^\/(matches|arena)\/\d+\/?$/.test(path)) {
     const row = control?.closest('tr');
@@ -194,6 +193,7 @@ export function initGameLoading() {
     icon.src = target?.image || target?.art || fallback;
     screen.dataset.target = target?.name ? 'true' : 'false';
     screen.dataset.portrait = target?.image || target?.art ? 'true' : 'false';
+    screen.dataset.simple = String(target?.simple === true);
     if (title) { title.textContent = target?.name || ''; title.hidden = !target?.name; }
     if (subtitle) { subtitle.textContent = target?.subtitle || ''; subtitle.hidden = !target?.subtitle; }
     if (backdrop) {

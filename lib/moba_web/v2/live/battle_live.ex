@@ -189,13 +189,24 @@ defmodule MobaWeb.V2.BattleLive do
         socket.assigns.current_player
       )
 
-    assign(socket, :combat_scene, scene)
+    deadline =
+      if socket.assigns.battle.duel_id && !socket.assigns.battle.finished do
+        socket.assigns.last_turn
+        |> turn_deadline(socket.assigns.battle)
+        |> Timex.to_unix()
+        |> Kernel.*(1000)
+      end
+
+    assign(socket, :combat_scene, Map.put(scene, :turnDeadline, deadline))
   end
 
   defp turn_timer(last_turn, battle) do
+    Timex.diff(turn_deadline(last_turn, battle), Timex.now(), :seconds)
+  end
+
+  defp turn_deadline(last_turn, battle) do
     turn_time = (last_turn && last_turn.inserted_at) || battle.inserted_at
-    target = Timex.shift(turn_time, seconds: Moba.turn_timer_in_seconds())
-    Timex.diff(target, Timex.now(), :seconds)
+    Timex.shift(turn_time, seconds: Moba.turn_timer_in_seconds())
   end
 
   defp active_attacker?(battle, last_turn, %{id: player_id}) do

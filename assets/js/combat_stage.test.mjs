@@ -303,3 +303,42 @@ test('evade highlights only the defending hero with its own artwork and a distin
     assert.deepEqual(callouts, [[side, 'EVADED', 'evade']]);
   }
 });
+
+test('duel clock follows the server deadline through turns, urgency and completion', t => {
+  const original = {now: Date.now, setInterval: globalThis.setInterval, clearInterval: globalThis.clearInterval};
+  t.after(() => { Date.now = original.now; globalThis.setInterval = original.setInterval; globalThis.clearInterval = original.clearInterval; });
+  let now = 100000;
+  Date.now = () => now;
+  const intervals = new Map();
+  let nextId = 0;
+  globalThis.setInterval = callback => { intervals.set(++nextId, callback); return nextId; };
+  globalThis.clearInterval = id => intervals.delete(id);
+  const seconds = {}, owner = {};
+  const clock = {dataset: {}, querySelector: selector => selector === '[data-stage-clock-seconds]' ? seconds : owner};
+  const hook = Object.assign({}, CombatStage, {
+    scene: {turnDeadline: 130000, status: 'Your turn', finished: false},
+    el: {querySelector: () => clock}
+  });
+  hook.renderTurnClock();
+  assert.equal(clock.hidden, false);
+  assert.equal(seconds.textContent, 30);
+  assert.equal(owner.textContent, 'Your turn');
+  assert.equal(intervals.size, 1);
+  now = 125000; // Catch up after background throttling rather than decrementing a stale counter.
+  [...intervals.values()][0]();
+  assert.equal(seconds.textContent, 5);
+  assert.equal(clock.dataset.urgent, 'true');
+  now = 140000;
+  hook.renderTurnClock();
+  assert.equal(seconds.textContent, 0);
+  hook.scene = {turnDeadline: 170000, status: 'Waiting for PDK', finished: false};
+  hook.renderTurnClock();
+  assert.equal(seconds.textContent, 30);
+  assert.equal(clock.dataset.urgent, 'false');
+  assert.equal(owner.textContent, 'Waiting for PDK');
+  assert.equal(intervals.size, 1);
+  hook.scene = {turnDeadline: null, finished: true};
+  hook.renderTurnClock();
+  assert.equal(clock.hidden, true);
+  assert.equal(intervals.size, 0);
+});

@@ -18,13 +18,14 @@
   .game-loading-emblem::before { content: ''; position: absolute; inset: 0; border: 1px solid #d4ae6426; border-radius: 50%; box-shadow: 0 0 70px #b68b3824, inset 0 0 42px #b68b3814; }
   .game-loading-emblem::after { content: ''; position: absolute; inset: -16px; border: 1px solid #d4ae640c; border-radius: 50%; }
   .game-loading-emblem img { position: relative; width: 154px; height: 154px; object-fit: contain; filter: drop-shadow(0 0 28px #d8ab4666); animation: game-loading-glow 2.4s ease-in-out infinite alternate; }
-  .game-loading-wordmark { margin: 0 0 30px; padding-left: .16em; font: 900 clamp(24px, 3vw, 42px)/1.1 'Nunito', sans-serif; letter-spacing: .16em; text-shadow: 0 2px 20px #d7af5226; }
+  .game-loading-wordmark, &[data-simple=true] #game-loading-title { margin: 0 0 30px; padding-left: .16em; font: 900 clamp(24px, 3vw, 42px)/1.1 'Nunito', sans-serif; letter-spacing: .16em; text-shadow: 0 2px 20px #d7af5226; }
   &[data-target=true] {
     .game-loading-emblem:has(#game-loading-opponent:not([hidden])) { width: 320px; gap: 24px; grid-template-columns: 1fr 1fr; }
     .game-loading-emblem:has(#game-loading-opponent:not([hidden])) img { width: 140px; height: 140px; }
     .game-loading-wordmark { font-size: 16px; margin-bottom: 14px; color: #d3b57f; }
   }
   &[data-portrait=true] .game-loading-emblem img { object-fit: cover; border-radius: 18px; border: 1px solid #d6b47c80; }
+  &[data-simple=true] .game-loading-wordmark { display: none; }
   #game-loading-title { max-width: 800px; margin: 0 0 8px; font: 900 clamp(28px, 4vw, 52px)/1.15 'Nunito', sans-serif; text-align: center; overflow-wrap: anywhere; text-shadow: 0 4px 24px #000; }
   #game-loading-subtitle { margin: 0 0 28px; color: #b9c6d5; text-align: center; font-size: 16px; }
   .game-loading-progress { width: 76vw; max-width: 310px; height: 5px; overflow: hidden; border: 1px solid #d7b47233; border-radius: 4px; background: #d7b4720a; }

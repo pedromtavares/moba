@@ -534,6 +534,8 @@ defmodule Moba.Engine.Core.Processor do
     |> List.first()
   end
 
+  defp maybe_evade(%{skill: %{code: "echo_stomp"}} = turn), do: turn
+
   defp maybe_evade(%{defender: defender} = turn) do
     if Helper.normal_damage?(defender) && Helper.can_evade?(defender) && turn.attacker.last_skill &&
          !turn.attacker.last_skill.ultimate do
