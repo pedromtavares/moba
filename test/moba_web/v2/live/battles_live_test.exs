@@ -35,7 +35,8 @@ defmodule MobaWeb.V2.BattlesLiveTest do
       |> render_click()
       |> follow_redirect(conn)
 
-    assert battle_html =~ "Training battle initiated by"
+    assert battle_html =~ "Training battle"
+    assert battle_html =~ "Started by"
   end
 
   test "preview history has useful empty states and returns to training", %{conn: conn} do

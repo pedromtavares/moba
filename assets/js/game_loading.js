@@ -6,6 +6,7 @@ export function initGameLoading() {
   const progress = document.getElementById('game-loading-progress');
   const icon = document.getElementById('game-loading-icon');
   const active = new Set();
+  const lockedContent = new Map();
   let trickle;
   let completion;
   let amount = 0;
@@ -35,10 +36,25 @@ export function initGameLoading() {
   }
 
   function busy(value) {
+    if (!value) {
+      // Navigation can replace #game-content or introduce it inside #main-wrapper.
+      // Release the containers we locked, rather than looking up the new layout.
+      lockedContent.forEach((previous, target) => {
+        target.inert = previous.inert;
+        if (previous.busy === null) target.removeAttribute('aria-busy');
+        else target.setAttribute('aria-busy', previous.busy);
+      });
+      lockedContent.clear();
+      return;
+    }
+
     const target = content();
     if (target) {
-      target.inert = value;
-      target.setAttribute('aria-busy', String(value));
+      if (!lockedContent.has(target)) {
+        lockedContent.set(target, {inert: target.inert, busy: target.getAttribute('aria-busy')});
+      }
+      target.inert = true;
+      target.setAttribute('aria-busy', 'true');
     }
   }
 

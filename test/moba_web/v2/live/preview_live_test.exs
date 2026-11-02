@@ -90,12 +90,12 @@ defmodule MobaWeb.V2.PreviewLiveTest do
         ] do
       {:ok, view, _} = live(conn, path)
       assert has_element?(view, "#game-page #{selector}")
-      assert has_element?(view, ".hero-card")
+      assert has_element?(view, if(selector == "#battle-page", do: "#combat-stage", else: ".hero-card"))
       refute has_element?(view, "button.game-stat, .hero-stats button, .battle-stat-group button")
 
       if selector == "#battle-page" do
-        assert has_element?(view, ".battle-stat-group span.game-stat[title^='ATK:'] .stat-value")
-        assert has_element?(view, ".battle-stat-group .stat-label", "Attack")
+        assert has_element?(view, "#combat-stage [data-combat-stat=attack] [data-stat-value]")
+        assert has_element?(view, "#combat-stage [data-combat-stat=attack] small", "Attack")
       end
     end
   end

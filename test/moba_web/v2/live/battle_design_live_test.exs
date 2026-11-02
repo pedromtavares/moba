@@ -24,15 +24,112 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
 
     render_click(view, "next-turn", %{"skill_id" => "", "item_id" => "", "hero_id" => "#{attacker.id}"})
     assert has_element?(view, "#turn-1 .combat-turn-heading h3", "#{attacker.name} used Basic Attack")
-    last_turn = Engine.get_battle!(battle.id).turns |> List.last()
+    refute has_element?(view, "#scroll-to-turn")
+    assert has_element?(view, "#combat-log-panel[hidden]")
+    assert has_element?(view, "#combat-stage[phx-hook=CombatStage][phx-update=ignore]")
+    scene = combat_scene(view)
+    assert Enum.map(scene["events"], & &1["number"]) == Enum.map(Engine.get_battle!(battle.id).turns, & &1.number)
+    assert hd(scene["events"])["skill"] == "Basic Attack"
+    assert hd(scene["events"])["actor"] == "left"
+    assert hd(scene["events"])["before"]["left"]["hp"] == attacker.total_hp
+    assert hd(scene["events"])["before"]["right"]["hp"] == defender.total_hp
 
-    assert has_element?(
-             view,
-             "#scroll-to-turn[phx-hook=BattleTurnScroll][phx-target-element='#turn-1'][data-last-turn='#{last_turn.number}']"
-           )
+    assert has_element?(view, ".stage-footer #combat-log-toggle[phx-click=toggle-combat-log]")
+    render_click(view, "toggle-combat-log")
+    assert has_element?(view, ".stage-footer #combat-log-toggle[aria-controls=combat-log-panel]")
+    assert has_element?(view, "#combat-stage[data-log-expanded=true]")
+    refute has_element?(view, "#hero-battle #combat-log-toggle")
+    refute has_element?(view, "#combat-log-panel[hidden]")
 
     assert has_element?(view, "#turn-1 .combat-unit", attacker.name)
     assert has_element?(view, "#turn-1 .combat-unit", defender.name)
+  end
+
+  test "stage waits for saved turns and preserves the local side when the defender acts", %{conn: conn} do
+    attacker =
+      create_base_hero(%{name: "Left"}) |> Ecto.Changeset.change(%{speed: 0, pve_tier: 1}) |> Moba.Repo.update!()
+
+    defender = create_base_hero(%{name: "Right"}) |> Ecto.Changeset.change(%{speed: 200}) |> Moba.Repo.update!()
+    battle = create_basic_battle(attacker, defender)
+    {:ok, view, _} = live(log_in_player(conn, player_id: defender.player_id), "/battles/#{battle.id}")
+    opening = combat_scene(view)
+    assert opening["events"] == []
+    assert opening["status"] == "Your turn"
+    assert opening["next"] == "right"
+    assert Enum.find(opening["units"], &(&1["side"] == "right"))["you"]
+
+    view |> element("#pick-basic-attack") |> render_click()
+    assert combat_scene(view) == opening
+
+    render_click(view, "next-turn", %{"skill_id" => "", "item_id" => "", "hero_id" => "#{defender.id}"})
+    scene = combat_scene(view)
+    event = hd(scene["events"])
+    assert event["actor"] == "right"
+    assert event["target"] == "left"
+    assert event["after"]["left"]["hp"] < event["before"]["left"]["hp"]
+    assert scene["status"] == "Waiting for Left"
+
+    send(view.pid, {:turn, %{battle_id: battle.id, turn_number: 1}})
+    assert combat_scene(view)["events"] == scene["events"]
+  end
+
+  defp combat_scene(view) do
+    view
+    |> render()
+    |> LazyHTML.from_fragment()
+    |> LazyHTML.query("#combat-stage")
+    |> LazyHTML.attribute("data-scene")
+    |> List.first()
+    |> Jason.decode!()
+  end
+
+  test "footer keeps both heroes' latest actions and complete effect icon lists on their own sides", %{conn: conn} do
+    hero = create_base_hero(%{name: "First"})
+    enemy = create_base_hero(%{name: "Second"})
+    battle = create_basic_battle(hero, enemy) |> Engine.auto_finish_battle!()
+    {:ok, view, _} = live(log_in_player(conn, player_id: enemy.player_id), "/battles/#{battle.id}")
+    scene = combat_scene(view)
+
+    assert has_element?(view, "#stage-action-right [data-stage-action-owner]", "Your last action")
+    assert has_element?(view, "#stage-action-left [data-stage-action-owner]", "First’s last action")
+    refute has_element?(view, "#combat-log-panel .hero-card")
+    refute has_element?(view, "#combat-log-panel #battle-initiated")
+    refute has_element?(view, "#combat-log-panel #battle-ready")
+    refute has_element?(view, "#combat-log-panel #share-battle")
+
+    for unit <- scene["units"] do
+      side = unit["side"]
+      assert has_element?(view, ".stage-#{side} h2 [data-build-league]")
+      assert has_element?(view, ".stage-#{side} [data-combat-stat=armor] [data-stat-value]")
+
+      for skill <- unit["build"]["skills"],
+          do: assert(has_element?(view, ".stage-#{side} [data-build-skills] img[alt='#{skill["name"]}']"))
+
+      for item <- unit["build"]["items"],
+          do: assert(has_element?(view, ".stage-#{side} [data-build-items] img[alt='#{item["name"]}']"))
+    end
+
+    for side <- ["left", "right"] do
+      latest = scene["events"] |> Enum.reverse() |> Enum.find(&(&1["actor"] == side))
+      assert latest
+      assert has_element?(view, "#stage-action-#{side} [data-stage-skill-name]", latest["skill"])
+
+      assert has_element?(
+               view,
+               "#stage-action-#{side} [data-stage-summary]",
+               if(latest["damage"] > 0, do: "−#{latest["damage"]}", else: "0")
+             )
+
+      icons =
+        view
+        |> render()
+        |> LazyHTML.from_fragment()
+        |> LazyHTML.query("#stage-action-#{side} [data-stage-effects] .stage-effect-icon[aria-label]")
+        |> LazyHTML.attribute("aria-label")
+
+      for effect <- latest["effects"], do: assert(Enum.any?(icons, &String.starts_with?(&1, "#{effect["name"]}:")))
+      refute has_element?(view, "#combat-stage .stage-statuses")
+    end
   end
 
   test "defender controls use the same active layout and submit a turn", %{conn: conn} do
@@ -80,15 +177,39 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
       assert has_element?(view, "#turn-effects-#{turn.number}")
     end
 
-    assert has_element?(view, "h2#battle-initiated", "Training battle initiated by #{battle.initiator.name}")
+    assert has_element?(view, "#combat-stage #battle-initiated", "Started by #{battle.initiator.name}")
     refute has_element?(view, "#battle-heading")
     assert has_element?(view, "#battle-outcome[data-result=victory]")
     assert has_element?(view, "#battle-experience")
     assert has_element?(view, "#load-training[href='/training'][data-battle-continue=true][aria-keyshortcuts=Space]")
     assert has_element?(view, "#load-training .battle-continue-hotkey", "SPACE")
-    assert has_element?(view, "#load-battles[href='/battles']")
-    assert has_element?(view, "#battle-over-training[href='/training']")
-    assert has_element?(view, "#share-battle")
+    refute has_element?(view, "#battle-bar a[href='/battles']")
+    refute has_element?(view, "#battle-over-training")
+    refute has_element?(view, "#battle-replay-actions")
+    assert has_element?(view, "#battle-outcome .battle-result-footer #share-battle")
+    assert has_element?(view, "#combat-stage .stage-footer #combat-log-toggle[aria-expanded=false]", "Battle log")
+    refute has_element?(view, "#battle-review-actions")
+    refute has_element?(view, ".stage-result button")
+    assert has_element?(view, "#hero-battle[hidden]")
+
+    assert Enum.count(
+             view
+             |> render()
+             |> LazyHTML.from_fragment()
+             |> LazyHTML.query("#battle-page a[href='/training']")
+           ) ==
+             1
+
+    view |> element("#combat-log-toggle") |> render_click()
+    refute has_element?(view, "#hero-battle[hidden]")
+    refute has_element?(view, "#combat-log-panel[hidden]")
+    assert has_element?(view, "#combat-stage[data-log-expanded=true]")
+    # The stage hook synchronizes the button inside its ignored subtree.
+    assert has_element?(view, "#combat-log-toggle[aria-controls=combat-log-panel]")
+    assert has_element?(view, "#combat-log-panel #turn-1")
+
+    view |> element("#combat-log-toggle") |> render_click()
+    assert has_element?(view, "#hero-battle[hidden]")
     refute has_element?(view, "#attack-button")
   end
 
@@ -151,7 +272,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     )
 
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
-    assert has_element?(view, "h2#battle-initiated", "Season match initiated by")
+    assert has_element?(view, "#combat-stage #battle-initiated", "Started by")
     assert has_element?(view, "#battle-competitive-result[data-result=victory]")
 
     assert has_element?(

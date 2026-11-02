@@ -8,7 +8,8 @@ completed = if promoted?, do: step_count, else: max(current_step - 1, 0)
 next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
 <section
   id="league-challenge-result"
-  class={["league-outcome", promoted? && "is-promoted", stage_victory? && "is-stage-victory"]}
+  class={["league-outcome", promoted? && "is-promoted", stage_victory? && "is-stage-victory", !won? && "is-defeat"]}
+  aria-labelledby="league-result-title"
   data-result={if won?, do: "victory", else: "defeat"}
   data-league={if promoted?, do: @snapshot.league_tier}
   style={
@@ -19,7 +20,11 @@ next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
     end
   }
 >
+  <img :if={!won?} class="league-defeat-art" src={GH.background_url(@battle.defender)} alt="" aria-hidden="true" />
   <div class="league-outcome-heading">
+    <div :if={!won?} class="league-defeat-emblem" aria-hidden="true">
+      <img src={"/images/league/#{challenge_tier}.png"} alt="" />
+    </div>
     <div :if={stage_victory?} class="league-victory-seal" aria-hidden="true">
       <.icon name="game-trophy" />
     </div>
@@ -36,11 +41,11 @@ next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
         alt={Moba.leagues()[@snapshot.league_tier]}
       />
     </div>
-    <div>
+    <div class="league-outcome-copy">
       <p class="league-outcome-eyebrow">
         {if promoted?, do: "League Challenge · Complete", else: "#{Moba.leagues()[challenge_tier]} · League Challenge"}
       </p>
-      <h3>
+      <h3 id="league-result-title">
         <%= cond do %>
           <% promoted? -> %>
             Promoted to <span class="league-promotion-name">{Moba.leagues()[@snapshot.league_tier]}</span>
@@ -72,7 +77,8 @@ next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
           data-battle-continue="true"
           aria-keyshortcuts="Space"
           class="btn league-continue"
-          data-game-fullscreen phx-click="next-battle"
+          data-game-fullscreen
+          phx-click="next-battle"
           phx-value-id={@battle.id}
           phx-disable-with="Loading…"
         >
@@ -85,7 +91,7 @@ next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
           data-battle-continue="true"
           aria-keyshortcuts="Space"
           navigate={preview_path(assigns, ~p"/training")}
-          class="btn base-secondary league-return"
+          class={["btn league-return", if(won?, do: "base-secondary", else: "battle-primary")]}
         >
           Continue training <span aria-hidden="true">→</span>
           <kbd class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>

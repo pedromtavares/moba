@@ -2,8 +2,11 @@ import $ from 'jquery';
 import swal from 'sweetalert';
 import Tutorial from './tutorial.js';
 import ModernTutorial from './tutorial_modern.js';
+import CombatStage from './combat_stage';
+import {initTooltips} from './tooltips';
 
 let Hooks = {};
+Hooks.CombatStage = {...CombatStage, refreshTooltips: initTooltips};
 
 Hooks.TutorialStep = {
   mounted(){
@@ -109,39 +112,6 @@ Hooks.ScrollToTarget = {
     if (targetElement){
       targetElement[0].scrollIntoView();
     }
-  }
-}
-
-Hooks.BattleTurnScroll = {
-  mounted(){
-    this.scrollToTurns();
-  },
-  updated(){
-    this.scrollToTurns();
-  },
-  destroyed(){
-    cancelAnimationFrame(this.scrollFrame);
-  },
-  scrollToTurns(){
-    cancelAnimationFrame(this.scrollFrame);
-    this.scrollFrame = requestAnimationFrame(() => {
-      const first = document.querySelector(this.el.getAttribute("phx-target-element"));
-      const last = document.getElementById(`turn-${this.el.dataset.lastTurn}`);
-      if (!first || !last) return;
-
-      const firstPanel = first.querySelector(".combat-turn-panel").getBoundingClientRect();
-      const lastPanel = last.querySelector(".combat-turn-panel").getBoundingClientRect();
-      const start = Math.min(firstPanel.top, lastPanel.top);
-      const end = Math.max(firstPanel.bottom, lastPanel.bottom);
-      const bar = document.getElementById("battle-bar");
-      const visibleBottom = bar ? Math.min(window.innerHeight, bar.getBoundingClientRect().top) : window.innerHeight;
-      const margin = 16;
-      // Keep both turns in view when they fit; otherwise prioritize the final response above the HUD.
-      const top = end - start <= visibleBottom - margin * 2
-        ? window.scrollY + start - margin
-        : window.scrollY + end - visibleBottom + margin;
-      window.scrollTo({top: Math.max(0, top), behavior: "auto"});
-    });
   }
 }
 
@@ -266,7 +236,7 @@ Hooks.AttackButton = {
     this.onKeyDown = event => {
       if (event.code !== "Space" || event.defaultPrevented || event.repeat || event.isComposing ||
           event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      if (event.target.closest("input, textarea, select, button, a, [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
+      if (event.target.closest("input, textarea, select, summary, button, a, [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
       if (el.disabled || !el.getClientRects().length) return;
 
       const dialogOpen = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
@@ -300,7 +270,7 @@ Hooks.BattleContinueHotkey = {
         .find(element => element && !element.disabled && element.getAttribute("aria-disabled") !== "true" && element.getClientRects().length);
       if (!target) return;
 
-      const interactive = event.target.closest("input, textarea, select, button, a, [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])");
+      const interactive = event.target.closest("input, textarea, select, summary, button, a, [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])");
       if (interactive && interactive !== target) return;
       // Focused buttons already activate natively on Space; links need the shortcut.
       if (interactive === target && target.tagName === "BUTTON") return;
@@ -322,7 +292,7 @@ Hooks.FarmClaimHotkey = {
       if (event.code !== "Space" || event.defaultPrevented || event.repeat || event.isComposing ||
           event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
 
-      if (event.target.closest("input, textarea, select, button, a, [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
+      if (event.target.closest("input, textarea, select, summary, button, a, [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
       if (this.el.disabled || !this.el.getClientRects().length) return;
 
       const dialogOpen = Array.from(document.querySelectorAll("[role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))

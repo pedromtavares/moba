@@ -6,11 +6,12 @@ defmodule MobaWeb.V2.BattleLive do
   alias MobaWeb.V2.TutorialComponent
   alias Moba.Game
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
+  alias MobaWeb.V2.Components.CombatScene
 
   embed_templates "battle_live/*"
 
   def mount(_, _, %{assigns: %{current_player: player}} = socket) do
-    {:ok, assign(socket, tutorial_step: player.tutorial_step)}
+    {:ok, assign(socket, tutorial_step: player.tutorial_step, show_combat_log: false)}
   end
 
   def handle_params(params, _uri, socket) do
@@ -24,6 +25,9 @@ defmodule MobaWeb.V2.BattleLive do
       socket
     end)
   end
+
+  def handle_event("toggle-combat-log", _, socket),
+    do: {:noreply, assign(socket, show_combat_log: !socket.assigns.show_combat_log)}
 
   def handle_event(event, _, %{assigns: %{battle: nil}} = socket)
       when event in ["next-turn", "check-timer", "next-battle", "pick-skill"],
@@ -123,6 +127,7 @@ defmodule MobaWeb.V2.BattleLive do
       turn_timer: turn_timer(last_turn, battle)
     )
     |> check_stuck()
+    |> assign_combat_scene()
   end
 
   defp check_stuck(%{assigns: %{last_turn: last_turn, battle: %{type: type} = battle}} = socket)
@@ -172,6 +177,19 @@ defmodule MobaWeb.V2.BattleLive do
       turn: turn,
       turn_timer: turn_timer(last_turn, battle)
     )
+    |> assign_combat_scene()
+  end
+
+  defp assign_combat_scene(socket) do
+    scene =
+      CombatScene.build(
+        socket.assigns.battle,
+        socket.assigns.initial_turn,
+        socket.assigns.turn,
+        socket.assigns.current_player
+      )
+
+    assign(socket, :combat_scene, scene)
   end
 
   defp turn_timer(last_turn, battle) do

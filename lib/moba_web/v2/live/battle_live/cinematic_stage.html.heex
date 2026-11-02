@@ -1,0 +1,278 @@
+<section
+  id="combat-stage"
+  class="combat-stage"
+  phx-hook="CombatStage"
+  phx-update="ignore"
+  data-scene={Jason.encode!(@combat_scene)}
+  data-finished={to_string(@combat_scene.finished)}
+  data-log-expanded={to_string(@show_combat_log)}
+  aria-label="Live battlefield"
+>
+  <header class="stage-heading">
+    <span class="stage-context">
+      <span data-stage-context>{@combat_scene.context}</span><small id="battle-initiated" data-stage-initiated>Started by {@combat_scene.initiator}</small><span class="stage-turn">Turn <span data-stage-turn>{length(@combat_scene.events) + if(@battle.finished, do: 0, else: 1)}</span></span>
+    </span>
+    <span class="stage-turn-status" data-stage-status>{@combat_scene.status}</span>
+    <div class="stage-tools">
+      <button type="button" data-stage-replay class="stage-tool" hidden={@combat_scene.events == []}>↻ Replay</button>
+      <button type="button" data-stage-sound class="stage-tool" aria-pressed="false">Sound off</button>
+    </div>
+  </header>
+  <div
+    class="stage-world"
+    style="background-image: linear-gradient(0deg, #0a111ff2, #0a111f80), url('/images/tutorial/arena-of-ascension.jpg')"
+  >
+    <div class="stage-rift" aria-hidden="true"></div>
+    <article
+      :for={unit <- @combat_scene.units}
+      class={"stage-fighter stage-#{unit.side}"}
+      data-side={unit.side}
+      data-dead={to_string(unit.hp <= 0)}
+      data-stunned={to_string(unit.hp > 0 && unit.statuses.stunned)}
+      data-silenced={to_string(unit.hp > 0 && unit.statuses.silenced)}
+      data-disarmed={to_string(unit.hp > 0 && unit.statuses.disarmed)}
+    >
+      <img class="stage-art" src={unit.art} alt={unit.avatar} />
+      <div class="stage-art-shade" aria-hidden="true"></div>
+      <div class="stage-control-vfx" aria-hidden="true">
+        <span class="stage-stun-aura"></span>
+        <span class="stage-silence-aura"></span>
+        <span class="stage-disarm-aura"></span>
+      </div>
+      <div class="stage-control-labels">
+        <span
+          data-control-label="stunned"
+          hidden={unit.hp <= 0 || !unit.statuses.stunned}
+          aria-label="Stunned: cannot act"
+        >
+          Stunned
+        </span>
+        <span
+          data-control-label="silenced"
+          hidden={unit.hp <= 0 || !unit.statuses.silenced}
+          aria-label="Silenced: cannot cast skills"
+        >
+          Silenced
+        </span>
+        <span
+          data-control-label="disarmed"
+          hidden={unit.hp <= 0 || !unit.statuses.disarmed}
+          aria-label="Disarmed: cannot deal physical damage"
+        >
+          Disarmed
+        </span>
+      </div>
+      <div class="stage-fighter-heading">
+        <span class="stage-allegiance" data-unit-allegiance>{if unit.you, do: "Your hero", else: unit.avatar}</span>
+        <h2>
+          <img class="stage-league" data-build-league src={"/images/league/#{unit.build.tier}.png"} alt="League" />
+          <span data-unit-name>
+            {unit.name}
+          </span>
+        </h2>
+        <div class="stage-meta">
+          <span class="stage-unit-level" data-unit-level>Level {unit.level}{if unit.you, do: " · #{unit.avatar}"}</span><strong data-build-difficulty>{unit.build.difficulty}</strong>
+        </div>
+      </div>
+      <div class="stage-vitals">
+        <div class="stage-combat-stats" aria-label={"#{unit.name} current combat stats"}>
+          <span
+            :for={stat <- unit.combatStats}
+            class={"stage-combat-stat stage-stat-#{stat.key}"}
+            data-combat-stat={stat.key}
+            data-toggle="tooltip"
+            title={stat.tooltip}
+            tabindex="0"
+          >
+            <.icon name={"game-#{stat.key}"} /><small>{stat.name}</small><strong data-stat-value>{stat.value}</strong>
+            <em
+              data-stat-modifier
+              data-tone={if stat.modifier < 0, do: "negative", else: "positive"}
+              hidden={stat.modifier == 0}
+            >
+              {if stat.modifier > 0, do: "+"}{stat.modifier}
+            </em>
+          </span>
+        </div>
+        <div class="stage-health-heading">
+          <span>Health</span><strong><span data-unit-hp>{unit.hp}</span><small> / <span data-unit-max-hp>{unit.maxHp}</span></small></strong>
+        </div>
+        <div
+          class="stage-gauge stage-health"
+          role="progressbar"
+          aria-label={"#{unit.name} health"}
+          aria-valuemin="0"
+          aria-valuemax={unit.maxHp}
+          aria-valuenow={unit.hp}
+        >
+          <span class="stage-health-trail" style={"width:#{unit.hp / unit.maxHp * 100}%"}></span>
+          <span class="stage-health-fill" style={"width:#{unit.hp / unit.maxHp * 100}%"}></span>
+        </div>
+        <div class="stage-energy-row">
+          <span>Energy</span>
+          <div class="stage-gauge stage-energy">
+            <span
+              class="stage-energy-fill"
+              style={"width:#{if unit.maxMp > 0, do: unit.mp / unit.maxMp * 100, else: 0}%"}
+            >
+            </span>
+          </div>
+          <strong data-unit-mp>{unit.mp} / {unit.maxMp}</strong>
+        </div>
+        <div class="stage-build-loadout" data-build-side={unit.side} aria-label={"#{unit.name} loadout"}>
+          <div class="stage-build-resources" data-build-skills aria-label={"#{unit.name} skills"}>
+            <span
+              :for={skill <- unit.build.skills}
+              class="stage-build-resource"
+              data-build-code={skill.code}
+              data-cooling={to_string(Map.get(unit.cooldowns, skill.code, 0) > 0)}
+            >
+              <img
+                id={"stage-build-#{unit.side}-skill-#{skill.id}"}
+                src={skill.image}
+                alt={skill.name}
+                data-toggle="tooltip"
+                title={skill.tooltip}
+                tabindex="0"
+              />
+              <span
+                data-build-cooldown
+                hidden={Map.get(unit.cooldowns, skill.code, 0) == 0}
+                aria-label={"#{skill.name} cooldown in turns"}
+              >
+                {Map.get(unit.cooldowns, skill.code, 0)}
+              </span>
+            </span>
+          </div>
+          <div
+            class="stage-build-resources stage-build-items"
+            data-build-items
+            aria-label={"#{unit.name} items"}
+            hidden={unit.build.items == []}
+          >
+            <span
+              :for={item <- unit.build.items}
+              class="stage-build-resource"
+              data-build-code={item.code}
+              data-cooling={to_string(Map.get(unit.cooldowns, item.code, 0) > 0)}
+            >
+              <img
+                id={"stage-build-#{unit.side}-item-#{item.id}"}
+                src={item.image}
+                alt={item.name}
+                data-toggle="tooltip"
+                title={item.tooltip}
+                tabindex="0"
+              />
+              <span
+                data-build-cooldown
+                hidden={Map.get(unit.cooldowns, item.code, 0) == 0}
+                aria-label={"#{item.name} cooldown in turns"}
+              >
+                {Map.get(unit.cooldowns, item.code, 0)}
+              </span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </article>
+    <div class="stage-centerpiece" aria-hidden="true">
+      <span class="stage-versus">VS</span>
+    </div>
+    <section
+      id="battle-ready"
+      class="stage-ready"
+      hidden={@combat_scene.events != []}
+      data-state={if @combat_scene.status == "Your turn", do: "ready", else: "waiting"}
+    >
+      <h3 data-stage-ready-title>
+        {if @combat_scene.status == "Your turn", do: "Make your first move", else: @combat_scene.status}
+      </h3>
+      <p data-stage-ready-copy>
+        {cond do
+          @combat_scene.status == "Your turn" -> "Select a skill below, then attack."
+          Enum.any?(@combat_scene.units, & &1.you) -> "Your opponent moves first."
+          true -> "The battle will appear here when it starts."
+        end}
+      </p>
+    </section>
+    <div id="stage-vfx" class="stage-vfx" aria-hidden="true"></div>
+    <div class="stage-result" data-stage-result hidden={!@combat_scene.finished}>
+      <span class="stage-result-eyebrow">Battle complete</span><strong data-stage-result-title>{@combat_scene.status}</strong>
+    </div>
+  </div>
+  <footer class="stage-footer">
+    <section
+      :for={unit <- @combat_scene.units}
+      id={"stage-action-#{unit.side}"}
+      class={"stage-action-side stage-action-#{unit.side}"}
+      data-action-side={unit.side}
+      aria-label={"#{unit.name} last action"}
+    >
+      <% latest = Enum.find(Enum.reverse(@combat_scene.events), &(&1.actor == unit.side)) %>
+      <% primary = latest && Enum.find(unit.activeEffects, &(&1.code == latest.code)) %>
+      <div class="stage-latest-action">
+        <div class="stage-ability-ring" hidden={!latest}>
+          <img
+            data-stage-skill
+            src={if latest, do: latest.image, else: "/images/basic_attack.png"}
+            alt={if latest, do: latest.skill, else: ""}
+            data-toggle={latest && "tooltip"}
+            title={latest && latest.tooltip <> if(primary, do: primary.tooltip, else: "")}
+          />
+          <small data-skill-duration class="stage-effect-duration" hidden={!(primary && primary.duration)}>
+            {primary && primary.duration}
+          </small>
+        </div>
+        <div class="stage-latest-copy">
+          <span class="stage-action-owner" data-stage-action-owner>
+            {if unit.you, do: "Your last action", else: "#{unit.name}’s last action"}
+          </span>
+          <strong data-stage-skill-name>{if latest, do: latest.skill, else: "No action yet"}</strong>
+          <p
+            class="stage-damage"
+            data-stage-summary
+            data-damage={if latest, do: latest.damage, else: 0}
+            aria-label={latest && latest.summary}
+            role="status"
+            aria-live="polite"
+          >
+            {if latest, do: if(latest.damage > 0, do: "−#{latest.damage}", else: "0")}
+          </p>
+          <span data-stage-flag class="stage-impact-label">{latest && latest.flag}</span>
+        </div>
+      </div>
+      <div class="stage-effect-icons" data-stage-effects role="list" aria-label={"#{unit.name} triggered effects"}>
+        <span
+          :for={effect <- CombatScene.display_effects(latest, unit.activeEffects)}
+          class="stage-effect-icon"
+          data-kind={effect.kind}
+          role="listitem"
+          data-toggle="tooltip"
+          tabindex="0"
+          aria-label={"#{effect.name}: #{effect.description}"}
+          title={effect.tooltip}
+        >
+          <img :if={effect.image} src={effect.image} alt={effect.name} />
+          <span :if={!effect.image} class="stage-effect-name">{effect.name}</span>
+          <small :if={effect.duration} class="stage-effect-duration">{effect.duration}</small>
+        </span>
+      </div>
+    </section>
+    <button
+      id="combat-log-toggle"
+      class="stage-log-toggle stage-divider-log"
+      data-stage-log-toggle
+      type="button"
+      phx-click="toggle-combat-log"
+      aria-expanded={to_string(@show_combat_log)}
+      aria-controls="combat-log-panel"
+      aria-label={"Battle log (#{length(@battle.turns)} turns)"}
+      disabled={@battle.turns == []}
+    >
+      <.icon name="game-battle-log" />
+      <span data-stage-log-label>{if @show_combat_log, do: "Hide battle log", else: "Battle log"}</span>
+      <span data-stage-log-count>{length(@battle.turns)}</span>
+    </button>
+  </footer>
+</section>

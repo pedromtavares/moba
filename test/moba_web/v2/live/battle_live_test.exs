@@ -82,9 +82,9 @@ defmodule MobaWeb.V2.BattleLiveTest do
     {:ok, view, html} = live(conn, "/battles/#{battle.id}")
     assert html =~ "Make your first move"
     assert has_element?(view, ~s|#battle-page[phx-hook="BattleContinueHotkey"]|)
-    assert has_element?(view, ".hero-card .text-danger[title='Health']")
-    assert has_element?(view, ".hero-card .text-orange[title='Speed']")
-    assert has_element?(view, "#skill-#{hd(attacker.skills).id}-#{attacker.id}")
+    assert has_element?(view, "#combat-stage .stage-health[aria-label]")
+    assert has_element?(view, "#combat-stage [data-combat-stat=speed]")
+    assert has_element?(view, "#stage-build-left-skill-#{hd(attacker.skills).id}")
     assert has_element?(view, "[id^='active-skill-']")
     assert has_element?(view, "#pick-basic-attack[title]")
     assert has_element?(view, ".item-img.empty-item")
@@ -172,11 +172,19 @@ defmodule MobaWeb.V2.BattleLiveTest do
     conn = log_in_player(conn, player_id: attacker.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
-    assert has_element?(view, "#league-challenge-result[data-result=defeat] h3", "Challenge lost")
+    assert has_element?(
+             view,
+             "#league-challenge-result.is-defeat[data-result=defeat][aria-labelledby=league-result-title] h3",
+             "Challenge lost"
+           )
+
+    assert has_element?(view, "#league-challenge-result .league-defeat-art[aria-hidden=true]")
+    assert has_element?(view, "#league-challenge-result .league-defeat-emblem img[src='/images/league/1.png']")
     assert has_element?(view, "#league-challenge-step-1[data-state=complete]")
     assert has_element?(view, "#league-challenge-step-2[data-state=failed]", "Failed")
     assert has_element?(view, "#league-challenge-step-3[data-state=pending]")
     assert has_element?(view, "#load-training[href='/training'][data-battle-continue=true][aria-keyshortcuts=Space]")
+    assert has_element?(view, "#league-challenge-result #load-training.battle-primary", "Continue training")
     refute has_element?(view, "#league-next-battle")
   end
 
@@ -222,8 +230,9 @@ defmodule MobaWeb.V2.BattleLiveTest do
       |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
-    assert has_element?(view, ~s|#battle-over-duel[href="/arena/#{duel.id}"]|)
+    refute has_element?(view, "#battle-over-duel")
     assert has_element?(view, ~s|#load-battles[href="/arena/#{duel.id}"]|)
+    assert has_element?(view, "#battle-bar #battle-review-actions #share-battle")
   end
 
   test "finished match battle links back to the match", %{conn: conn} do
