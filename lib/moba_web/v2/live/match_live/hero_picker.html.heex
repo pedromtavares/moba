@@ -21,7 +21,9 @@
         description="Pick heroes individually or build a team."
       >
         <:actions>
-          <.link navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary">Manage teams →</.link>
+          <.link navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary">
+            Manage teams →
+          </.link>
         </:actions>
       </.hud_notice>
       <%= for team <- @teams do %>
@@ -63,7 +65,7 @@
         <%= for hero <- heroes do %>
           <% picked? = Enum.any?(@picked_heroes, &(&1.id == hero.id)) %>
           <div id={if type == "trained", do: "available-hero-#{hero.id}", else: "generated-hero-#{hero.id}"}>
-            <.roster_hero hero={hero} picked={picked?}>
+            <.roster_hero hero={hero} stats={GH.match_hero_stats(hero, @match.player)} picked={picked?}>
               <:actions>
                 <%= if picked? do %>
                   <button

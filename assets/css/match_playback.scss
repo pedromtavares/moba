@@ -1,6 +1,7 @@
 .game-page #match-hud {
   .match-scoreboard { grid-template-columns: minmax(0, 1fr); margin: 0; padding: 12px 20px; border: 0; border-bottom: 1px solid var(--squad-line); border-radius: 0; }
-  .match-lineup .squad-panel-heading { min-height: 70px; }
+  .match-lineup .squad-panel-heading { min-height: 70px; flex-wrap: wrap; row-gap: 8px; }
+  .match-streak-debuff { flex-basis: 100%; }
   .match-player { font-size: 26px; gap: 10px; }
   .match-player > img { width: 44px; height: 44px; }
   .match-player small { font-size: 12px; margin-top: 2px; }

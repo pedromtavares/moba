@@ -5,9 +5,6 @@
       <h1>Arena</h1>
       <p id="current-pvp-tier">{tier_title(@current_player)}</p>
     </div>
-    <span :if={tier_buff_pct(@current_player)} class="arena-handicap">
-      −{tier_buff_pct(@current_player)}% Hero Stats
-    </span>
   </div>
   <div class="arena-cinematic-command">
     <div class="arena-daily-progress">
@@ -44,48 +41,55 @@
     </div>
     <div class="arena-cinematic-action">
       <div class="arena-play-actions" aria-label="Play in the Arena">
-        <%= if @pending_match do %>
-          <.link
-            id="resume-arena-match"
-            navigate={preview_path(assigns, ~p"/matches/#{@pending_match}")}
-            class="btn battle-primary arena-play-button"
-          >
-            <.icon name="game-strategy" /><span>Resume 5v5</span><span aria-hidden="true">→</span>
-          </.link>
-        <% else %>
-          <button
-            id="enter-arena-button"
-            type="button"
-            data-game-fullscreen phx-click="matchmaking"
-            class="btn battle-primary arena-play-button"
-            disabled={length(@manual_matches) >= Moba.daily_match_limit()}
-          >
-            <span class="loading-text">
-              <.icon name="game-strategy" /><span>Play 5v5</span><span aria-hidden="true">→</span>
-            </span>
-          </button>
-        <% end %>
-        <%= if @pending_duel do %>
-          <.link
-            id="resume-arena-duel"
-            navigate={preview_path(assigns, ~p"/arena/#{@pending_duel}")}
-            class="btn battle-primary arena-play-button"
-          >
-            <.icon name="game-swords" /><span>Resume 1v1</span><span aria-hidden="true">→</span>
-          </.link>
-        <% else %>
-          <button
-            id="season-duel-button"
-            type="button"
-            data-game-fullscreen phx-click="season-duel"
-            class="btn battle-primary arena-play-button"
-            disabled={@current_player.status == "silenced"}
-          >
-            <span class="loading-text">
-              <.icon name="game-swords" /><span>Play 1v1</span><span aria-hidden="true">→</span>
-            </span>
-          </button>
-        <% end %>
+        <div class="arena-play-mode arena-play-5v5">
+          <%= if @pending_match do %>
+            <.link
+              id="resume-arena-match"
+              navigate={preview_path(assigns, ~p"/matches/#{@pending_match}")}
+              class="btn battle-primary arena-play-button"
+            >
+              <.icon name="game-strategy" /><span>Resume 5v5</span><span aria-hidden="true">→</span>
+            </.link>
+          <% else %>
+            <button
+              id="enter-arena-button"
+              type="button"
+              data-game-fullscreen
+              phx-click="matchmaking"
+              class="btn battle-primary arena-play-button"
+              disabled={length(@manual_matches) >= Moba.daily_match_limit()}
+            >
+              <span class="loading-text">
+                <.icon name="game-strategy" /><span>Play 5v5</span><span aria-hidden="true">→</span>
+              </span>
+            </button>
+          <% end %>
+          <.immortal_streak_debuff id="arena-immortal-streak-debuff" player={@current_player} />
+        </div>
+        <div class="arena-play-mode arena-play-1v1">
+          <%= if @pending_duel do %>
+            <.link
+              id="resume-arena-duel"
+              navigate={preview_path(assigns, ~p"/arena/#{@pending_duel}")}
+              class="btn battle-primary arena-play-button"
+            >
+              <.icon name="game-swords" /><span>Resume 1v1</span><span aria-hidden="true">→</span>
+            </.link>
+          <% else %>
+            <button
+              id="season-duel-button"
+              type="button"
+              data-game-fullscreen
+              phx-click="season-duel"
+              class="btn battle-primary arena-play-button"
+              disabled={@current_player.status == "silenced"}
+            >
+              <span class="loading-text">
+                <.icon name="game-swords" /><span>Play 1v1</span><span aria-hidden="true">→</span>
+              </span>
+            </button>
+          <% end %>
+        </div>
       </div>
       <p :if={@reward_games < Moba.daily_match_limit()} class="arena-entry-reward" id="arena-entry-reward">
         <strong>◆ +{Moba.matchmaking_shards()} Shards</strong><span>per game</span>

@@ -16,13 +16,13 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     assert has_element?(
              arena_view,
-             ".arena-play-actions > #enter-arena-button[data-game-fullscreen]:first-child",
+             ".arena-play-actions > .arena-play-5v5:first-child > #enter-arena-button[data-game-fullscreen]",
              "Play 5v5"
            )
 
     assert has_element?(
              arena_view,
-             ".arena-play-actions > #season-duel-button[data-game-fullscreen]:last-child",
+             ".arena-play-actions > .arena-play-1v1:last-child > #season-duel-button[data-game-fullscreen]",
              "Play 1v1"
            )
 
@@ -159,8 +159,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#pvp-progression #resume-arena-duel[href='/arena/#{pending.id}']", "Resume 1v1")
     assert has_element?(view, "#pvp-progression #resume-arena-match[href='/matches/#{match.id}']", "Resume 5v5")
-    assert has_element?(view, ".arena-play-actions > #resume-arena-match:first-child")
-    assert has_element?(view, ".arena-play-actions > #resume-arena-duel:last-child")
+    assert has_element?(view, ".arena-play-actions > .arena-play-5v5:first-child > #resume-arena-match")
+    assert has_element?(view, ".arena-play-actions > .arena-play-1v1:last-child > #resume-arena-duel")
     refute has_element?(view, "#season-duel-button, #enter-arena-button")
     render_click(view, "season-duel")
     assert_redirect(view, "/arena/#{pending.id}")

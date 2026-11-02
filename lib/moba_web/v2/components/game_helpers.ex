@@ -10,6 +10,62 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def duel_mode_label(%{auto: true}), do: "Season duel"
   def duel_mode_label(_), do: "Live duel"
 
+  def immortal_streak_debuff_percent(%{current_immortal_streak: streak}) when streak > 0,
+    do: Float.round(streak * Moba.immortal_streak_multiplier() * 100, 1)
+
+  def immortal_streak_debuff_percent(_), do: nil
+
+  def immortal_streak_debuff_description do
+    "If you have an active Immortal Streak, your heroes will receive a debuff that lowers their stats in Matchmaking battles by #{Float.round(Moba.immortal_streak_multiplier() * 100, 1)}% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak."
+  end
+
+  def match_immortal_streak(player, battles) do
+    Enum.find_value(battles, fn battle ->
+      hero =
+        Enum.find([battle.attacker, battle.defender], &(&1.player_id == player.id))
+
+      snapshot = hero && battle.loadouts[to_string(hero.id)]
+      snapshot && snapshot["immortal_streak"]
+    end) || player.current_immortal_streak
+  end
+
+  def match_hero_stats(hero, player, battles \\ []) do
+    battler =
+      Enum.find_value(battles, fn battle ->
+        case List.first(battle.turns) do
+          nil -> nil
+          turn -> Enum.find([turn.attacker, turn.defender], &(&1.hero_id == hero.id && &1.player_id == player.id))
+        end
+      end)
+
+    if battler do
+      %{
+        hp: battler.total_hp,
+        mp: battler.total_mp,
+        atk: battler.base_atk,
+        power: battler.base_power,
+        armor: battler.base_armor,
+        speed: battler.speed
+      }
+    else
+      # The engine applies Arrogance using the hero owner's streak, including
+      # borrowed heroes. Preview the same combined base + item totals and rounding.
+      streak = if hero.player, do: hero.player.current_immortal_streak, else: 0
+
+      Map.new([hp: :total_hp, mp: :total_mp, atk: :atk, power: :power, armor: :armor, speed: :speed], fn {key, field} ->
+        total = Map.fetch!(hero, field) + Map.fetch!(hero, item_stat_field(key))
+        {key, total - round(Moba.immortal_streak_multiplier() * streak * total)}
+      end)
+    end
+  end
+
+  defp item_stat_field(:hp), do: :item_hp
+  defp item_stat_field(:mp), do: :item_mp
+  defp item_stat_field(:atk), do: :item_atk
+  defp item_stat_field(:power), do: :item_power
+  defp item_stat_field(:armor), do: :item_armor
+  defp item_stat_field(:speed), do: :item_speed
+
   @league_names %{
     0 => "Bronze",
     1 => "Silver",

@@ -9,20 +9,39 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
       <div class="squad-panel-heading">
         <.link navigate={preview_path(assigns, ~p"/player/#{@match.player}")} class="match-player" id="player-card">
           <img src={"/images/pve/#{@match.player.pve_tier}.png"} alt="" />
-          <span>{username(@match.player)}<small id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</small></span>
+          <span>
+            {username(@match.player)}<small id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</small>
+          </span>
         </.link>
         <div class="match-lineup-actions">
-          <.link :if={owner?} id="edit-teams-button" navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary match-edit-teams">
+          <.link
+            :if={owner?}
+            id="edit-teams-button"
+            navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")}
+            class="btn base-secondary match-edit-teams"
+          >
             <.icon name="game-team" /> Edit Teams
           </.link>
           <strong>{length(@picked_heroes)} / 5</strong>
         </div>
+        <.immortal_streak_debuff
+          id="match-player-streak-debuff"
+          player={@match.player}
+          streak={GH.match_immortal_streak(@match.player, @battles)}
+          class="match-streak-debuff"
+        />
       </div>
       <div class="squad-scroll lineup-list">
         <%= for position <- 1..5 do %>
           <%= if hero = Enum.at(@picked_heroes, position - 1) do %>
             <div id={"hero-#{hero.id}"}>
-              <.roster_hero hero={hero} position={position} defeated={eliminated?(hero, @match.player, revealed)} falling={!is_nil(last_reveal) && eliminated?(hero, @match.player, [last_reveal])}>
+              <.roster_hero
+                hero={hero}
+                stats={GH.match_hero_stats(hero, @match.player, @battles)}
+                position={position}
+                defeated={eliminated?(hero, @match.player, revealed)}
+                falling={!is_nil(last_reveal) && eliminated?(hero, @match.player, [last_reveal])}
+              >
                 <:actions :if={picking? && owner?}>
                   <button
                     type="button"
@@ -97,7 +116,8 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
                 :if={length(@picked_heroes) >= 5}
                 type="button"
                 class="btn battle-primary"
-                data-game-fullscreen phx-click="start"
+                data-game-fullscreen
+                phx-click="start"
                 phx-disable-with="Starting…"
                 id="start-match-button"
               >
@@ -130,7 +150,13 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
                   else: if(complete?, do: "Match drawn", else: "Match in progress")}
               </h2>
               <span>{length(revealed)} {if length(revealed) == 1, do: "battle", else: "battles"} resolved</span>
-              <button id="match-details-toggle" type="button" phx-click="toggle-battle-details" class="btn base-secondary" aria-pressed={to_string(@show_battle_details)}>
+              <button
+                id="match-details-toggle"
+                type="button"
+                phx-click="toggle-battle-details"
+                class="btn base-secondary"
+                aria-pressed={to_string(@show_battle_details)}
+              >
                 {if @show_battle_details, do: "Summary", else: "Battle details"}
               </button>
             </div>
@@ -139,7 +165,11 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
       <%= if picking? && owner? do %>
         <.hero_picker {assigns} />
       <% else %>
-        <div id="match-battles" class={["squad-scroll match-battles", !@show_battle_details && "match-summary-list"]} style={"--match-battle-rows: #{max(length(@battles), 1)}"}>
+        <div
+          id="match-battles"
+          class={["squad-scroll match-battles", !@show_battle_details && "match-summary-list"]}
+          style={"--match-battle-rows: #{max(length(@battles), 1)}"}
+        >
           <.hud_notice
             :if={revealed == [] && !picking?}
             id="match-resolving"
@@ -166,15 +196,31 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
     </section>
     <section class="squad-panel match-lineup match-enemy" aria-labelledby="match-opponent-lineup">
       <div class="squad-panel-heading">
-        <.link navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")} class="match-player match-player-opponent" id="opponent-card">
+        <.link
+          navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")}
+          class="match-player match-player-opponent"
+          id="opponent-card"
+        >
           <img src={"/images/pve/#{@match.opponent.pve_tier}.png"} alt="" />
           <span>{username(@match.opponent)}<small id="match-opponent-lineup">Opponent lineup</small></span>
         </.link>
         <strong>{length(@match.opponent_picks)} / 5</strong>
+        <.immortal_streak_debuff
+          id="match-opponent-streak-debuff"
+          player={@match.opponent}
+          streak={GH.match_immortal_streak(@match.opponent, @battles)}
+          class="match-streak-debuff"
+        />
       </div>
       <div class="squad-scroll lineup-list" id="opponent-heroes-container">
         <div :for={{hero, index} <- Enum.with_index(@match.opponent_picks, 1)} id={"opponent-hero-#{hero.id}"}>
-          <.roster_hero hero={hero} position={index} defeated={eliminated?(hero, @match.opponent, revealed)} falling={!is_nil(last_reveal) && eliminated?(hero, @match.opponent, [last_reveal])} />
+          <.roster_hero
+            hero={hero}
+            stats={GH.match_hero_stats(hero, @match.opponent, @battles)}
+            position={index}
+            defeated={eliminated?(hero, @match.opponent, revealed)}
+            falling={!is_nil(last_reveal) && eliminated?(hero, @match.opponent, [last_reveal])}
+          />
         </div>
       </div>
     </section>

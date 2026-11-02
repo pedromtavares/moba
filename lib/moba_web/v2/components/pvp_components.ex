@@ -5,9 +5,32 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   use Phoenix.Component
 
   import MobaWeb.V2.Components.GameComponents,
-    only: [hero_item_strip: 1, hero_skill_strip: 1, hero_stat_group: 1, league_badge: 1]
+    only: [battle_hero_stat_group: 1, hero_item_strip: 1, hero_skill_strip: 1, hero_stat_group: 1, league_badge: 1]
 
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+
+  attr :player, :map, required: true
+  attr :id, :string, required: true
+  attr :class, :string, default: nil
+  attr :streak, :integer, default: nil
+
+  def immortal_streak_debuff(assigns) do
+    player = if is_integer(assigns.streak), do: %{current_immortal_streak: assigns.streak}, else: assigns.player
+    assigns = assign(assigns, :percent, GH.immortal_streak_debuff_percent(player))
+
+    ~H"""
+    <span
+      :if={@percent}
+      id={@id}
+      class={["immortal-streak-debuff tooltip-mobile", @class]}
+      data-toggle="tooltip"
+      title={GH.immortal_streak_debuff_description()}
+      tabindex="0"
+    >
+      Immortal Streak · −{@percent}% Hero Stats
+    </span>
+    """
+  end
 
   attr :hero, :map, required: true
   attr :class, :string, default: nil
@@ -67,6 +90,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   attr :picked, :boolean, default: false
   attr :defeated, :boolean, default: false
   attr :falling, :boolean, default: false
+  attr :stats, :map, default: nil
   slot :actions
 
   def roster_hero(assigns) do
@@ -94,7 +118,11 @@ defmodule MobaWeb.V2.Components.PvpComponents do
         <span class="roster-level">Lv <strong>{@hero.level}</strong></span>
         <.league_badge tier={@hero.league_tier} variant="legacy" />
       </div>
-      <.hero_stat_group hero={@hero} />
+      <%= if @stats do %>
+        <.battle_hero_stat_group {@stats} class="btn-group hero-stats" />
+      <% else %>
+        <.hero_stat_group hero={@hero} />
+      <% end %>
       <div class="roster-loadout">
         <.hero_skill_strip skills={@hero.skills} container_class="skills-container" />
         <.hero_item_strip

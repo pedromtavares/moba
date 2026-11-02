@@ -1,4 +1,5 @@
-# Fresh-install seed data, exported from canonical development records on 2026-10-27.
+# Fresh-install seed data. Skill/item/avatar values synced from production on 2026-11-02
+# (deployment 611b5aa); canonical and published values agree for seeded records.
 # Run with: mix ecto.setup (or mix run --no-start priv/repo/seeds.exs).
 # Artwork is independently generated; no development uploads are copied here.
 

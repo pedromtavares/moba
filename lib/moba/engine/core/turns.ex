@@ -24,6 +24,7 @@ defmodule Moba.Engine.Core.Turns do
         hero = preload_hero(hero)
 
         snapshot = %{
+          "immortal_streak" => Map.get(hero.player || %{}, :current_immortal_streak, 0),
           "skills" => Enum.map(hero.skills, &Ecto.embedded_dump(&1, :json)),
           "items" => Enum.map(hero.items, &Ecto.embedded_dump(&1, :json)),
           "stats" => Map.new(@combat_fields, &{Atom.to_string(&1), Map.fetch!(hero, &1)})

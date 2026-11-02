@@ -568,11 +568,7 @@ defmodule MobaWeb.V2.ArenaLive do
     end
   end
 
-  defp tier_buff_pct(%{current_immortal_streak: streak}) when streak > 0 do
-    Float.round(streak * Moba.immortal_streak_multiplier() * 100, 1)
-  end
-
-  defp tier_buff_pct(_), do: nil
+  defp tier_buff_pct(player), do: GH.immortal_streak_debuff_percent(player)
 
   defp match_result_label(%{phase: phase}) when phase != "scored", do: "In Progress"
   defp match_result_label(%{winner_id: winner_id, player_id: player_id}) when winner_id == player_id, do: "Victory"
