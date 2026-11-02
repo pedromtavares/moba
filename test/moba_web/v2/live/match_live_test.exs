@@ -138,6 +138,76 @@ defmodule MobaWeb.V2.MatchLiveTest do
     assert has_element?(view, "#match-empty-slot-5")
   end
 
+  test "selecting a saved team loads its available heroes in order even when incomplete", %{conn: conn} do
+    player = create_player!(%{pvp_tier: 1})
+    opponent = create_player!()
+
+    [first, second, third, archived, foreign] =
+      for {owner, name} <- [
+            {player, "First"},
+            {player, "Second"},
+            {player, "Third"},
+            {player, "Archived"},
+            {opponent, "Foreign"}
+          ] do
+        Game.create_hero!(
+          %{name: name, finished_at: Timex.now(), league_tier: 6},
+          owner,
+          strong_avatar(),
+          base_skills()
+        )
+      end
+
+    partial = Game.create_team!(%{name: "Partial", player_id: player.id, pick_ids: [third.id, first.id, second.id]})
+
+    stale =
+      Game.create_team!(%{name: "Stale", player_id: player.id, pick_ids: [second.id, archived.id, first.id, foreign.id]})
+
+    unavailable = Game.create_team!(%{name: "Unavailable", player_id: player.id, pick_ids: [archived.id]})
+
+    match =
+      Matches.create!(%{
+        player_id: player.id,
+        opponent_id: opponent.id,
+        player_picks: [],
+        opponent_picks: [],
+        generated_picks: [],
+        type: "manual"
+      })
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
+
+    view |> element("#pick-team-#{partial.id}") |> render_click()
+
+    for {hero, position} <- Enum.with_index([third, first, second], 1) do
+      assert has_element?(view, ".match-lineup .lineup-list > :nth-child(#{position})#hero-#{hero.id}")
+    end
+
+    assert has_element?(view, "#match-empty-slot-4")
+    refute has_element?(view, "#start-match-button")
+    refute Matches.valid_picks?(match, player, [third.id, first.id, second.id])
+
+    # Availability must be checked at selection time, not from the mounted team snapshot.
+    Game.update_hero!(archived, %{archived_at: Timex.now()})
+    view |> element("#pick-team-#{stale.id}") |> render_click()
+    assert has_element?(view, ".match-lineup .lineup-list > :nth-child(1)#hero-#{second.id}")
+    assert has_element?(view, ".match-lineup .lineup-list > :nth-child(2)#hero-#{first.id}")
+
+    refute has_element?(
+             view,
+             ".match-lineup #hero-#{archived.id}, .match-lineup #hero-#{foreign.id}, .match-lineup #hero-#{third.id}"
+           )
+
+    assert has_element?(view, "#match-empty-slot-3")
+    assert has_element?(view, "#game-feedback-info", "Choose replacements for the open slots.")
+
+    view |> element("#pick-team-#{unavailable.id}") |> render_click()
+    assert has_element?(view, "#game-feedback-error", "This team has no available heroes.")
+    assert has_element?(view, ".match-lineup #hero-#{second.id}")
+    assert has_element?(view, ".match-lineup #hero-#{first.id}")
+    assert Game.get_match!(match.id).player_picks == []
+  end
+
   test "renders battle reviews from player and opponent pick perspective", %{conn: conn} do
     player = create_player!(%{pvp_tier: 1})
     opponent = create_player!(%{pvp_tier: 1})

@@ -66,14 +66,38 @@ defmodule MobaWeb.V2.MatchLive do
   end
 
   def handle_event("pick-team", %{"id" => id}, %{assigns: %{teams: teams}} = socket) do
-    team = Enum.find(teams, &(&1.id == String.to_integer(id)))
-    picks = if team, do: Enum.take(team.picks, 5), else: []
+    case Enum.find(teams, &(&1.id == String.to_integer(id))) do
+      nil ->
+        {:noreply, socket}
 
-    if Moba.Game.Matches.valid_picks?(socket.assigns.match, socket.assigns.current_player, Enum.map(picks, & &1.id)) do
-      Game.update_team!(team, %{used_count: team.used_count + 1})
-      {:noreply, assign(socket, picked_heroes: picks)}
-    else
-      {:noreply, socket}
+      team ->
+        ids = team.pick_ids |> Enum.uniq() |> Enum.take(5)
+
+        eligible =
+          Moba.Game.Matches.selectable_heroes(socket.assigns.match, socket.assigns.current_player, ids)
+          |> Map.new(&{&1.id, &1})
+
+        picks = Enum.flat_map(ids, fn id -> if hero = eligible[id], do: [hero], else: [] end)
+
+        if picks == [] do
+          {:noreply,
+           put_flash(socket, :error, "This team has no available heroes. Update the team or pick heroes individually.")}
+        else
+          Game.update_team!(team, %{used_count: team.used_count + 1})
+          socket = assign(socket, picked_heroes: picks)
+
+          socket =
+            if length(picks) < length(ids),
+              do:
+                put_flash(
+                  socket,
+                  :info,
+                  "Some team heroes are no longer available. Choose replacements for the open slots."
+                ),
+              else: socket
+
+          {:noreply, socket}
+        end
     end
   end
 
