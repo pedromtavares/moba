@@ -535,7 +535,8 @@ defmodule Moba.Engine.Core.Processor do
   end
 
   defp maybe_evade(%{defender: defender} = turn) do
-    if Helper.can_evade?(defender) && turn.attacker.last_skill && !turn.attacker.last_skill.ultimate do
+    if Helper.normal_damage?(defender) && Helper.can_evade?(defender) && turn.attacker.last_skill &&
+         !turn.attacker.last_skill.ultimate do
       %{turn | resource: Moba.evade()}
       |> apply_spell()
     else

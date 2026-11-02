@@ -27,11 +27,15 @@ defmodule MobaWeb.V2.Layouts do
       aria-live="polite"
       aria-label="Loading BrowserMOBA"
     >
+      <img id="game-loading-art" class="game-loading-art" alt="" hidden />
       <div class="game-loading-brand">
         <div class="game-loading-emblem" aria-hidden="true">
           <img id="game-loading-icon" src="/images/navigation/profile.webp" width="256" height="256" alt="" />
+          <img id="game-loading-opponent" width="256" height="256" alt="" hidden />
         </div>
         <p class="game-loading-wordmark">BROWSERMOBA</p>
+        <h2 id="game-loading-title" hidden></h2>
+        <p id="game-loading-subtitle" hidden></p>
         <div
           id="game-loading-progress"
           class="game-loading-progress"

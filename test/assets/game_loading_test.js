@@ -4,7 +4,7 @@ const fs = require('node:fs');
 const vm = require('node:vm');
 
 const source = fs.readFileSync('assets/js/game_loading.js', 'utf8')
-  .replace('export function initGameLoading()', 'function initGameLoading()') + '\ninitGameLoading();';
+  .replace(/export function /g, 'function ') + '\ninitGameLoading();';
 
 function environment(authenticated = true) {
   const listeners = {};
@@ -12,9 +12,10 @@ function environment(authenticated = true) {
   const intervals = new Map();
   let nextId = 0;
   const node = () => ({
-    hidden: true, dataset: {}, attributes: {},
+    hidden: true, inert: false, dataset: {}, attributes: {},
     style: {setProperty(name, value) { this[name] = value; }},
     setAttribute(name, value) { this.attributes[name] = value; },
+    getAttribute(name) { return this.attributes[name] ?? null; },
     removeAttribute(name) { delete this.attributes[name]; }
   });
   const screen = node(), progress = node(), fill = node(), content = node(), icon = node();
@@ -29,7 +30,7 @@ function environment(authenticated = true) {
     'game-content': content, 'game-sidebar': sidebar, topnav};
   const addEventListener = (name, handler) => { listeners[name] = handler; };
   vm.runInNewContext(source, {
-    document: {getElementById: id => elements[id], addEventListener},
+    document: {getElementById: id => elements[id], querySelector: () => null, addEventListener},
     window: {location: new URL('http://localhost/base'), addEventListener}, URL,
     setInterval: fn => { intervals.set(++nextId, fn); return nextId; },
     clearInterval: id => intervals.delete(id),

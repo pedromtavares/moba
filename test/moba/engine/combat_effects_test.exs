@@ -54,6 +54,91 @@ defmodule Moba.Engine.CombatEffectsTest do
     assert result.defender.damage == 147
   end
 
+  test "magic damage does not trigger evade or consume its cooldown" do
+    bolt = Combat.skill("lightning_bolt")
+    result = resolve([bolt], [], bolt, nil, &put_in(&1.defender.speed, 200))
+
+    assert result.defender.damage == 100
+    refute result.defender.evaded
+    refute Map.has_key?(result.defender.future_cooldowns, "evade")
+    refute Enum.any?(result.defender.effects, &(&1["resource"] == "evade"))
+  end
+
+  test "Illuminate's charging and release turns do not trigger evade" do
+    illuminate = %{Combat.skill("illuminate") | base_damage: 380, level: 3}
+
+    charging = resolve([illuminate], [], illuminate, nil, &put_in(&1.defender.speed, 200))
+    assert charging.defender.damage == 0
+    refute charging.defender.evaded
+    refute Map.has_key?(charging.defender.future_cooldowns, "evade")
+
+    released =
+      resolve([illuminate], [], nil, nil, fn turn ->
+        %{
+          turn
+          | attacker: %{
+              turn.attacker
+              | double_skill: illuminate,
+                last_skill: illuminate,
+                base_power: 33,
+                battle_power: 16
+            },
+            defender: %{turn.defender | speed: 200, base_armor: 15, current_hp: 732}
+        }
+      end)
+
+    assert released.defender.damage == 481
+    assert released.defender.current_hp == 251
+    refute released.defender.evaded
+    refute Map.has_key?(released.defender.future_cooldowns, "evade")
+    refute Enum.any?(released.defender.effects, &(&1["resource"] == "evade"))
+  end
+
+  test "evade still blocks non-ultimate physical skills and respects its cooldown" do
+    shuriken = Combat.skill("shuriken_toss")
+    evaded = resolve([shuriken], [], shuriken, nil, &put_in(&1.defender.speed, 200))
+
+    assert evaded.defender.evaded
+    assert evaded.defender.damage == 0
+    assert evaded.defender.future_cooldowns["evade"] == 2
+
+    cooling =
+      resolve([shuriken], [], shuriken, nil, fn turn ->
+        %{turn | defender: %{turn.defender | speed: 200, cooldowns: %{"evade" => 1}, future_cooldowns: %{"evade" => 1}}}
+      end)
+
+    refute cooling.defender.evaded
+    assert cooling.defender.damage == 143
+    assert cooling.defender.future_cooldowns["evade"] == 1
+  end
+
+  test "pure damage and physical ultimates never trigger evade" do
+    pure_bolt = %{Combat.skill("lightning_bolt") | damage_type: "pure"}
+    walrus = Combat.skill("walrus_punch")
+
+    for skill <- [pure_bolt, walrus] do
+      result = resolve([skill], [], skill, nil, &put_in(&1.defender.speed, 200))
+      assert result.defender.damage > 0
+      refute result.defender.evaded
+      refute Map.has_key?(result.defender.future_cooldowns, "evade")
+    end
+  end
+
+  test "evading a physical skill still allows separate Pulse Nova magic damage" do
+    shuriken = Combat.skill("shuriken_toss")
+    nova = Combat.skill("pulse_nova")
+
+    result =
+      resolve([shuriken, nova], [], shuriken, nil, fn turn ->
+        %{turn | attacker: %{turn.attacker | pulse_nova: nova}, defender: %{turn.defender | speed: 200}}
+      end)
+
+    assert result.defender.evaded
+    # Shuriken's -10 Armor still applies, increasing Nova's 40 magic damage to 44.
+    assert result.defender.damage == 44
+    assert result.defender.current_hp == 756
+  end
+
   test "Coup and Daedalus armor penetration stack additively into negative Armor" do
     coup = Combat.skill("coup") |> Combat.proc(:success)
     daedalus = Combat.item("daedalus") |> Combat.proc(:success)
