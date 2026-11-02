@@ -62,8 +62,11 @@ defmodule MobaWeb.V2.DuelChallengeLive do
 
   def handle_event("accept", _, %{assigns: %{challenge: %{outgoing: false} = challenge, state: "pending"}} = socket) do
     if DateTime.compare(DateTime.utc_now(), challenge.expires_at) == :lt do
-      Game.create_duel!(challenge.other, socket.assigns.current_player)
-      {:noreply, assign(socket, challenge: nil)}
+      if Game.create_duel!(challenge.other, socket.assigns.current_player) do
+        {:noreply, assign(socket, challenge: nil)}
+      else
+        {:noreply, socket |> assign(challenge: nil) |> put_flash(:info, "A player is already in a duel.")}
+      end
     else
       {:noreply, assign(socket, state: "expired", seconds: 0)}
     end

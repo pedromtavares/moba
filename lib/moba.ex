@@ -3,7 +3,8 @@ defmodule Moba do
   Cross-domain orchestration and higher level operations
   """
 
-  alias Moba.{Accounts, Constants, Game, Ranker}
+  alias Moba.{Accounts, Constants, Game, Ranker, Repo}
+  import Ecto.Query
 
   use Constants
 
@@ -53,17 +54,17 @@ defmodule Moba do
     Accounts.update_user!(user, %{community_seen_at: DateTime.utc_now()})
 
     if player_id do
-      player =
-        player_id
-        |> Game.get_player!()
-        |> Game.update_player!(%{user_id: user.id})
-        |> Map.put(:user, user)
+      Repo.transaction(fn ->
+        case Repo.one(from p in Game.Schema.Player, where: p.id == ^player_id, lock: "FOR UPDATE") do
+          %{user_id: nil} ->
+            player = player_id |> Game.get_player!() |> Game.update_player!(%{user_id: user.id}) |> Map.put(:user, user)
+            Game.update_hero!(player.current_pve_hero, %{name: user.username})
+            if player.pve_tier > 0, do: reward_shards!(player, Game.get_quest(1).prize)
 
-      Game.update_hero!(player.current_pve_hero, %{name: user.username})
-
-      if player.pve_tier > 0 do
-        reward_shards!(player, Game.get_quest(1).prize)
-      end
+          _ ->
+            :ok
+        end
+      end)
     end
 
     update_pvp_rankings()
@@ -87,20 +88,29 @@ defmodule Moba do
 
   def season_ranking, do: cached_ranking("season_ranking", fn -> Game.season_ranking(@season_ranking_limit) end)
 
-  def reward_shards!(%{user: %{shard_count: current_count} = user}, shard_reward) do
-    Accounts.update_user!(user, %{shard_count: current_count + shard_reward})
+  def reward_shards!(%{user: %{id: id}}, shard_reward) do
+    Repo.update_all(from(u in Accounts.Schema.User, where: u.id == ^id), inc: [shard_count: shard_reward])
+    Accounts.get_user!(id)
   end
 
   def reward_shards!(player, _), do: player
 
-  def shard_buyback!(%{player: %{user: %{shard_count: count} = user}} = hero) do
-    if can_shard_buyback?(hero) do
-      price = shard_buyback_price(count)
-      Accounts.update_user!(user, %{shard_count: count - price})
-      Game.shard_buyback!(hero)
-    else
-      hero
-    end
+  def shard_buyback!(%{player: %{user: %{id: user_id}}} = hero) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        user = Repo.one!(from u in Accounts.Schema.User, where: u.id == ^user_id, lock: "FOR UPDATE")
+        stored = Game.get_hero!(hero.id)
+
+        if stored.pve_state == "dead" && Game.can_shard_buyback?(stored) &&
+             user.shard_count >= shard_buyback_price(user.shard_count) do
+          Accounts.update_user!(user, %{shard_count: user.shard_count - shard_buyback_price(user.shard_count)})
+          Game.shard_buyback!(stored)
+        else
+          stored
+        end
+      end)
+
+    result
   end
 
   def shard_buyback_price(shard_count) do
@@ -138,7 +148,14 @@ defmodule Moba do
         ranking
 
       {:ok, ranking} ->
-        ranking
+        season_id = if key in ["daily_ranking", "season_ranking"], do: Game.current_season().id
+
+        if season_id && Enum.any?(ranking, &(&1.season_id != season_id)) do
+          Cachex.del(:game_cache, key)
+          cached_ranking(key, fetch_fn)
+        else
+          ranking
+        end
     end
   end
 

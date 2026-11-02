@@ -180,9 +180,9 @@
   .community-guest-loadout { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 8px 6px; }
   .community-guest-skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; }
   .community-guest-skills img { width: 100%; max-width: 22px; aspect-ratio: 1; object-fit: cover; border: 1px solid #bda77b33; border-radius: 3px; }
-  .community-guest-items { display: grid; grid-template-columns: repeat(3, 14px); gap: 2px; }
-  .community-guest-items img { width: 14px; height: 14px; object-fit: cover; border-radius: 2px; }
-  .community-guest-card > footer { margin-top: auto; padding: 6px; border-top: 1px solid #bda77b20; color: #8290a1; font-size: 9px; line-height: 1.4; white-space: nowrap; }
+  .community-guest-items { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; }
+  .community-guest-items img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; border-radius: 2px; }
+  .community-guest-card > footer { margin-top: auto; padding: 8px 6px; border-top: 1px solid #bda77b20; color: #8290a1; font-size: 12px; font-weight: 600; line-height: 1.4; text-align: center; }
 
   .community-duels-column { flex: 0 1 1100px; width: 100%; max-width: 1100px; min-width: 0; padding: 0; }
   .community-duels-frame { overflow-x: auto; border: 1px solid #bda77b33; border-radius: 12px; background: linear-gradient(135deg, #192432b3, #09111be8 75%); box-shadow: inset 0 1px #e2d1ab0d; }

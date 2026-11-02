@@ -13,16 +13,21 @@ defmodule Moba.RankingCacheTest do
     :ok
   end
 
-  test "ranking cache misses are reused without repeating SQL queries" do
+  test "ranking caches reuse entries with only a season identity query for player rankings" do
     hero = create_base_hero(%{finished_at: Timex.now(), pve_ranking: 1})
     Game.update_player!(hero.player, %{season_ranking: 1, ranking: 1})
 
-    for fetch <- [&Moba.pve_ranking/0, &Moba.pve_ranking_available/0, &Moba.daily_ranking/0, &Moba.season_ranking/0] do
+    for {fetch, expected_warm_queries} <- [
+          {&Moba.pve_ranking/0, 0},
+          {&Moba.pve_ranking_available/0, 0},
+          {&Moba.daily_ranking/0, 1},
+          {&Moba.season_ranking/0, 1}
+        ] do
       {first, cold_queries} = count_queries(fetch)
       {second, warm_queries} = count_queries(fetch)
       assert second == first
-      assert cold_queries > 0
-      assert warm_queries == 0
+      assert cold_queries > expected_warm_queries
+      assert warm_queries == expected_warm_queries
     end
   end
 

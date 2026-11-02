@@ -4,16 +4,18 @@ defmodule Moba.Accounts.Auth do
   """
 
   alias Moba.Repo
+  import Ecto.Query
   alias Moba.Accounts.Schema.User
   alias Moba.Accounts.{UserToken, UserNotifier, LegacyPassword}
 
   def get_user_by_email(email) when is_binary(email) do
-    Repo.get_by(User, email: email)
+    normalized = User.normalize_email(email)
+    Repo.one(from u in User, where: fragment("lower(btrim(?))", u.email) == ^normalized)
   end
 
   def get_user_by_email_and_password(email, password)
       when is_binary(email) and is_binary(password) do
-    user = Repo.get_by(User, email: email)
+    user = get_user_by_email(email)
 
     cond do
       is_nil(user) ->
@@ -55,9 +57,11 @@ defmodule Moba.Accounts.Auth do
   end
 
   def update_user_settings(user, attrs) do
-    user
-    |> User.settings_changeset(attrs)
-    |> Repo.update()
+    changeset = User.settings_changeset(user, attrs)
+
+    if Ecto.Changeset.get_change(changeset, :hashed_password),
+      do: update_credentials(changeset),
+      else: Repo.update(changeset)
   end
 
   def change_user_email(user, attrs \\ %{}) do
@@ -101,14 +105,7 @@ defmodule Moba.Accounts.Auth do
       |> User.password_changeset(attrs)
       |> User.validate_current_password(password)
 
-    Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, changeset)
-    |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
-    |> Repo.transaction()
-    |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
-    end
+    update_credentials(changeset)
   end
 
   def generate_user_session_token(user) do
@@ -150,9 +147,24 @@ defmodule Moba.Accounts.Auth do
 
   def deliver_user_reset_password_instructions(%User{} = user, reset_password_url_fun)
       when is_function(reset_password_url_fun, 1) do
-    {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
-    Repo.insert!(user_token)
-    UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token))
+    case Repo.transaction(fn ->
+           user = Repo.one!(from u in User, where: u.id == ^user.id, lock: "FOR UPDATE")
+           recent = from t in UserToken, where: t.user_id == ^user.id and t.context == "reset_password"
+           hourly = Repo.aggregate(from(t in recent, where: t.inserted_at > ago(1, "hour")), :count)
+           cooling_down? = Repo.exists?(from t in recent, where: t.inserted_at > ago(60, "second"))
+
+           if cooling_down? || hourly >= 5, do: Repo.rollback(:rate_limited)
+           {encoded_token, user_token} = UserToken.build_email_token(user, "reset_password")
+           Repo.insert!(user_token)
+
+           case UserNotifier.deliver_reset_password_instructions(user, reset_password_url_fun.(encoded_token)) do
+             {:ok, email} -> email
+             {:error, reason} -> Repo.rollback(reason)
+           end
+         end) do
+      {:ok, email} -> {:ok, email}
+      {:error, reason} -> {:error, reason}
+    end
   end
 
   def get_user_by_reset_password_token(token) do
@@ -165,13 +177,27 @@ defmodule Moba.Accounts.Auth do
   end
 
   def reset_user_password(user, attrs) do
+    update_credentials(User.password_changeset(user, attrs))
+  end
+
+  defp update_credentials(changeset) do
+    user = changeset.data
+    sessions = Repo.all(UserToken.by_user_and_contexts_query(user, ["session"]))
+
     Ecto.Multi.new()
-    |> Ecto.Multi.update(:user, User.password_changeset(user, attrs))
+    |> Ecto.Multi.update(:user, changeset)
     |> Ecto.Multi.delete_all(:tokens, UserToken.by_user_and_contexts_query(user, :all))
     |> Repo.transaction()
     |> case do
-      {:ok, %{user: user}} -> {:ok, user}
-      {:error, :user, changeset, _} -> {:error, changeset}
+      {:ok, %{user: user}} ->
+        Enum.each(sessions, fn session ->
+          MobaWeb.Endpoint.broadcast("users_sessions:#{Base.url_encode64(session.token)}", "disconnect", %{})
+        end)
+
+        {:ok, user}
+
+      {:error, :user, changeset, _} ->
+        {:error, changeset}
     end
   end
 

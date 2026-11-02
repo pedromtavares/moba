@@ -4,7 +4,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
 
   test "the owner can continue an unfinished hero from the empty record", %{conn: conn} do
     hero = create_base_hero()
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
     assert has_element?(
              view,
@@ -20,7 +20,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
 
   test "an owner without a hero can start a new training run", %{conn: conn} do
     player = create_player!()
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/player/#{player.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/player/#{player.id}")
 
     assert has_element?(view, "#profile-debut-action[href='/invoke']", "Train a new hero")
     refute has_element?(view, "#profile-debut-hero")
@@ -28,7 +28,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
 
   test "a finished hero below Platinum prompts the owner to train another hero", %{conn: conn} do
     hero = create_base_hero(%{finished_at: Timex.now(), league_tier: 2})
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
     assert has_element?(view, "#profile-arena-debut[data-state=train]")
     assert has_element?(view, "#profile-debut-action[href='/invoke']", "Train a new hero")
@@ -38,7 +38,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
   test "a finished Platinum or higher hero can enter the Arena", %{conn: conn} do
     for tier <- 3..6 do
       hero = create_base_hero(%{finished_at: Timex.now(), league_tier: tier})
-      {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
       assert has_element?(view, "#profile-arena-debut[data-state=ready]")
       assert has_element?(view, "#profile-debut-action[href='/arena']", "Enter Arena")
@@ -55,7 +55,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
         ] do
       player = create_player!()
       hero = attrs && create_base_hero(attrs, player)
-      {:ok, view, _} = live(init_test_session(conn, player_id: viewer.id), "/player/#{player.id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/player/#{player.id}")
 
       assert has_element?(view, "#profile-arena-debut[data-owner=false]", "Arena debut awaits")
       assert has_element?(view, "#profile-arena-debut", description)
@@ -72,7 +72,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
   test "the first completed 5v5 replaces the debut on a ranking refresh", %{conn: conn} do
     hero = create_base_hero(%{finished_at: Timex.now(), league_tier: 3})
     opponent = create_player!()
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
     assert has_element?(view, "#profile-arena-debut")
 
     match =
@@ -96,7 +96,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
   test "the first completed 1v1 replaces the debut and selects its history", %{conn: conn} do
     hero = create_base_hero(%{finished_at: Timex.now(), league_tier: 3})
     opponent = create_player!()
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
     duel = Game.Duels.create!(hero.player, opponent, true)
     Game.Duels.finish!(duel, %{winner: hero.player, attacker_pvp_points: 5, defender_pvp_points: 0})

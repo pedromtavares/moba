@@ -2,10 +2,11 @@ defmodule Moba.Cleaner do
   @moduledoc """
   Module dedicated to cleaning up unused records, runs daily by the Conductor
   """
-  import Ecto.Query, only: [from: 2]
+  import Ecto.Query
+  require Logger
 
   alias Moba.{Repo, Game, Engine}
-  alias Game.Schema.{Duel, Player, Hero, Skill, Item, Avatar, Match}
+  alias Game.Schema.{Duel, Player, Hero, HeroSkill, HeroItem, Skill, Item, Avatar, Match}
   alias Engine.Schema.Battle
 
   def cleanup_old_records do
@@ -14,52 +15,60 @@ defmodule Moba.Cleaner do
 
     # deletes duels that have not finished within the hour
     query = from d in Duel, where: d.inserted_at <= ^last_hour, where: d.phase != "finished", order_by: d.id, limit: 20
-    Repo.all(query) |> delete_records()
+    delete_records(query)
 
     last_week = Timex.now() |> Timex.shift(days: -7)
 
     # deletes all non-duel battles from over a week ago
     query = from b in Battle, where: b.inserted_at <= ^last_week, where: b.type != "duel", order_by: b.id, limit: 20
-    Repo.all(query) |> delete_records()
+    delete_records(query)
 
     # deletes non-current avatars that are over a week old
     query =
       from s in Avatar,
+        as: :resource,
         where: s.inserted_at <= ^last_week,
         where: s.current == false,
         where: not is_nil(s.resource_uuid),
+        where: not exists(from h in Hero, where: h.avatar_id == parent_as(:resource).id),
         limit: 20
 
-    Repo.all(query) |> delete_records()
+    delete_records(query)
 
     # deletes non-current skills that are over a week old
     query =
       from s in Skill,
+        as: :resource,
         where: s.inserted_at <= ^last_week,
         where: s.current == false,
         where: not is_nil(s.resource_uuid),
+        where:
+          not exists(from a in Avatar, where: a.ultimate_id == parent_as(:resource).id) and
+            not exists(from hs in HeroSkill, where: hs.skill_id == parent_as(:resource).id),
         limit: 20
 
-    Repo.all(query) |> delete_records()
+    delete_records(query)
 
     # deletes non-current items that are over a week old
     query =
       from s in Item,
+        as: :resource,
         where: s.inserted_at <= ^last_week,
         where: s.current == false,
         where: not is_nil(s.resource_uuid),
+        where: not exists(from hi in HeroItem, where: hi.item_id == parent_as(:resource).id),
         limit: 20
 
-    Repo.all(query) |> delete_records()
+    delete_records(query)
 
     # archives all unfinished heroes that are over a week old
     query =
       from h in Hero,
         join: player in assoc(h, :player),
-        where: h.id != player.current_pve_hero_id,
+        where: is_nil(player.current_pve_hero_id) or h.id != player.current_pve_hero_id,
         where: is_nil(h.finished_at),
         where: is_nil(h.archived_at),
-        where: h.inserted_at <= ^last_week,
+        where: h.updated_at <= ^last_week,
         where: is_nil(h.bot_difficulty)
 
     Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
@@ -74,7 +83,12 @@ defmodule Moba.Cleaner do
     Repo.update_all(query, set: [current_pve_hero_id: nil])
 
     # sets current_pve_hero_id of all inactive guests to nil after a week
-    query = from p in Player, where: is_nil(p.user_id), where: p.inserted_at < ^last_week
+    query =
+      from p in Player,
+        join: h in assoc(p, :current_pve_hero),
+        where: is_nil(p.user_id) and p.updated_at < ^last_week,
+        where: h.updated_at < ^last_week
+
     Repo.update_all(query, set: [current_pve_hero_id: nil])
 
     # archives all guest heroes after a week
@@ -82,7 +96,7 @@ defmodule Moba.Cleaner do
       from h in Hero,
         join: player in assoc(h, :player),
         where: is_nil(player.user_id),
-        where: player.inserted_at < ^last_week,
+        where: player.updated_at < ^last_week and h.updated_at < ^last_week,
         where: is_nil(h.archived_at),
         where: is_nil(h.bot_difficulty)
 
@@ -96,7 +110,7 @@ defmodule Moba.Cleaner do
         where: is_nil(h.bot_difficulty) or h.bot_difficulty != "boss",
         limit: 20
 
-    Repo.all(query) |> delete_records()
+    delete_records(query)
 
     # deletes matches from > a week ago
 
@@ -105,17 +119,40 @@ defmodule Moba.Cleaner do
         where: m.inserted_at <= ^last_week,
         limit: 20
 
-    Repo.all(query) |> delete_records()
+    delete_records(query)
   end
 
-  defp delete_records(results) when length(results) > 0 do
-    Enum.map(results, fn record ->
-      IO.puts("Deleting #{record.__struct__} ##{record.id}")
-      Repo.delete(record)
-    end)
+  defp delete_records(query, after_id \\ 0) do
+    records = Repo.all(from r in exclude(query, :order_by), where: r.id > ^after_id, order_by: r.id)
+    Enum.each(records, &delete_record/1)
 
-    cleanup_old_records()
+    case List.last(records) do
+      nil -> :ok
+      record -> delete_records(query, record.id)
+    end
   end
 
-  defp delete_records(_), do: nil
+  defp delete_record(record) do
+    changeset =
+      record
+      |> Ecto.Changeset.change()
+      |> Ecto.Changeset.foreign_key_constraint(:id, name: "_fkey", match: :suffix)
+
+    # A reference may appear after the eligibility query. A savepoint keeps that
+    # conflict from aborting other cleanup work, including in an outer transaction.
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.delete(changeset, mode: :savepoint, stale_error_field: :id)
+      end)
+
+    case result do
+      {:ok, _} ->
+        :ok
+
+      {:error, _changeset} ->
+        Logger.warning(
+          "Cleanup retained referenced or concurrently changed #{inspect(record.__struct__)} ##{record.id}"
+        )
+    end
+  end
 end

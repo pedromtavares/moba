@@ -6,7 +6,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
     hero = create_base_hero()
     Game.update_tutorial_step!(hero.player, 1)
     target = hero |> Game.list_targets() |> hd()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     {:ok, view, _} = live(conn, "/training")
     assert has_element?(view, "#tutorial-step-1[data-preview=true][phx-hook=TutorialStep]")
@@ -21,7 +21,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
   test "preview shop lesson advances through purchases and can be skipped", %{conn: conn} do
     hero = create_base_hero(%{gold: 800})
     Game.update_tutorial_step!(hero.player, 2)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     {:ok, view, _} = live(conn, "/training")
     render_click(view, "tutorial3", %{})
@@ -46,7 +46,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
   test "preview Base chapter keeps progression and completion events", %{conn: conn} do
     hero = create_base_hero()
     Game.update_tutorial_step!(hero.player, 19)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     {:ok, view, _} = live(conn, "/base")
     assert has_element?(view, "#tutorial-step-20[data-preview=true]")
@@ -60,7 +60,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
   test "canonical routes use the redesigned tutorial", %{conn: conn} do
     hero = create_base_hero()
     Game.update_tutorial_step!(hero.player, 1)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     {:ok, view, _} = live(conn, "/training")
     assert has_element?(view, "#tutorial-step-1[data-preview=true]")
@@ -70,7 +70,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
   test "all farming tabs return after the first tutorial step", %{conn: conn} do
     hero = create_base_hero()
     Game.update_tutorial_step!(hero.player, 2)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     {:ok, view, _} = live(conn, "/training")
 
@@ -83,7 +83,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
     for step <- [29, 30, 31] do
       hero = create_base_hero()
       Game.update_tutorial_step!(hero.player, step)
-      session = init_test_session(conn, player_id: hero.player_id)
+      session = log_in_player(conn, player_id: hero.player_id)
 
       {:ok, view, _} = live(session, "/arena")
       refute has_element?(view, "[phx-hook=TutorialStep]")
@@ -110,7 +110,7 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
         type: "manual"
       })
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/matches/#{match.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
     refute has_element?(view, "[phx-hook=TutorialStep]")
     assert has_element?(view, "#picks-card")
     assert Game.get_player!(player.id).tutorial_step == 39

@@ -61,7 +61,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       player = Game.create_player!(%{user_id: nil, tutorial_step: 20})
       hero = create_base_hero(%{name: "Guest Hero"}, player)
       player = Game.update_collection!(player, [%{id: hero.id}])
-      conn = conn |> init_test_session(player_id: player.id)
+      conn = conn |> log_in_player(player_id: player.id)
 
       {:ok, view, _html} = live(conn, "/base")
 
@@ -143,7 +143,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
   test "cinematic progression retains advanced requirements and the final rank", %{conn: conn} do
     player = create_player!(%{pve_tier: 4, pve_progression: %{master_codes: ["phantom_assassin"]}})
     hero = create_base_hero(%{}, player)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/base")
 
     assert has_element?(view, "#base-rank-4[aria-current=step]")

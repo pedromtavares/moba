@@ -47,7 +47,7 @@ defmodule MobaWeb.V2.TrainingCompletionLiveTest do
     guest = Game.create_player!(%{user_id: nil, tutorial_step: 19})
     hero = completed_hero(Moba.platinum_league_tier(), guest)
     player = rank_up(hero)
-    conn = init_test_session(conn, player_id: player.id)
+    conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
     assert has_element?(view, "#completion-continue[href='/arena']")

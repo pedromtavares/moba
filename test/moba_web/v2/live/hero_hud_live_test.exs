@@ -5,7 +5,7 @@ defmodule MobaWeb.V2.HeroHudLiveTest do
   test "spending the last skill point updates its rank and restores order editing", %{conn: conn} do
     hero = create_base_hero(%{level: 10, skill_levels_available: 1})
     skill = Enum.find(hero.skills, &(!&1.ultimate))
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
     view |> element("#customize-hero") |> render_click()
 
@@ -26,7 +26,7 @@ defmodule MobaWeb.V2.HeroHudLiveTest do
 
   test "HUD preserves order editing, shop and the mobile build toggle", %{conn: conn} do
     hero = create_base_hero()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
     view |> element("#customize-hero") |> render_click()
 
@@ -53,7 +53,7 @@ defmodule MobaWeb.V2.HeroHudLiveTest do
   test "shop X closes and reopens in every preview HUD", %{conn: conn} do
     hero = create_base_hero()
     Game.update_tutorial_step!(hero.player, 29)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     for path <- ["/training", "/hero/#{hero.id}", "/arena/edit"] do
       {:ok, view, _} = live(conn, path)
@@ -71,7 +71,7 @@ defmodule MobaWeb.V2.HeroHudLiveTest do
 
   test "experience and available upgrades render in the default HUD", %{conn: conn} do
     hero = create_base_hero(%{experience: 0, skill_levels_available: 2})
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, preview, _} = live(conn, "/hero/#{hero.id}")
     preview |> element("#customize-hero") |> render_click()
 
@@ -89,7 +89,7 @@ defmodule MobaWeb.V2.HeroHudLiveTest do
 
   test "cancel exits order editing without saving in every preview HUD", %{conn: conn} do
     hero = create_base_hero(%{gold: 10_000}) |> Game.buy_item!(alternate_item())
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     for path <- ["/training", "/hero/#{hero.id}", "/arena/edit"] do
       {:ok, view, _} = live(conn, path)

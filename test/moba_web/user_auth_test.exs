@@ -31,6 +31,13 @@ defmodule MobaWeb.UserAuthTest do
       refute get_session(conn, :to_be_removed)
     end
 
+    test "always binds the login to the account's player instead of an existing guest", %{conn: conn, user: user} do
+      guest = Game.start_guest!("direct-login-#{System.unique_integer([:positive])}", base_avatar(), creation_skills())
+      conn = conn |> put_session(:player_id, guest.id) |> UserAuth.log_in_user(user)
+      assert get_session(conn, :player_id) == Moba.player_for(user).id
+      assert Moba.Repo.get!(Game.Schema.Player, guest.id).user_id == nil
+    end
+
     test "redirects to the configured path", %{conn: conn, user: user} do
       conn = conn |> put_session(:user_return_to, "/hello") |> UserAuth.log_in_user(user)
       assert redirected_to(conn) == "/hello"
@@ -99,11 +106,13 @@ defmodule MobaWeb.UserAuthTest do
 
       conn =
         conn
+        |> put_session(:player_id, create_player!().id)
         |> put_req_cookie(@remember_me_cookie, signed_token)
         |> UserAuth.fetch_current_user([])
 
       assert conn.assigns.current_user.id == user.id
       assert get_session(conn, :user_token) == user_token
+      assert get_session(conn, :player_id) == Moba.player_for(user).id
 
       assert get_session(conn, :live_socket_id) ==
                "users_sessions:#{Base.url_encode64(user_token)}"

@@ -70,6 +70,8 @@ defmodule Test.GameHelper do
     )
   end
 
+  def creation_skills, do: Enum.map(base_skills(), &Game.get_skill_by_code!(&1.code, true, 1))
+
   def alternate_skills do
     Enum.map(
       ["double_edge", "empower", "feast"],

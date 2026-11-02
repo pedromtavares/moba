@@ -63,7 +63,7 @@ defmodule Moba.Server do
     state
   end
 
-  defp time_diff_in_seconds(nil), do: 0
+  defp time_diff_in_seconds(nil), do: @pvp_update_diff_in_seconds
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
   defp prod?, do: Application.get_env(:moba, :env) == :prod

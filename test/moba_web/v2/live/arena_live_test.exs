@@ -8,7 +8,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, arena_view, arena_html} = live(conn, "/arena")
     assert arena_html =~ "Play 5v5"
@@ -44,7 +44,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     opponent = create_player!()
     source = teams_return_match(hero.player, opponent)
     teams_return_match(hero.player, opponent)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     {:ok, view, _} = live(conn, "/arena/edit?match_id=#{source.id}")
     assert has_element?(view, "#teams-return-button[href='/matches/#{source.id}']", "Return to match")
@@ -60,7 +60,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     |> Ecto.Changeset.change(inserted_at: ~N[2020-01-01 00:00:00])
     |> Moba.Repo.update!()
 
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
 
     for path <- ["/arena/edit", "/arena/edit?match_id=#{other.id}", "/arena/edit?match_id=invalid"] do
       {:ok, view, _} = live(conn, path)
@@ -73,7 +73,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, view, _html} = live(conn, "/arena/edit")
 
@@ -87,7 +87,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
   test "history switches between matches and duels while live 1v1 owns the third column", %{conn: conn} do
     player = create_player!()
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-history-matches-tab[aria-pressed=true]")
     assert has_element?(view, "#arena-no-matches")
     assert has_element?(view, "#arena-history-matches > #arena-no-matches", "Your first 5v5 awaits")
@@ -129,7 +129,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
       Game.Duels.finish!(duel, %{winner: player, attacker_pvp_points: 5, defender_pvp_points: 0})
     end
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     refute has_element?(view, "#arena-entry-reward")
     assert has_element?(view, "#season-duel-button:not([disabled])", "Play 1v1")
     assert has_element?(view, "#enter-arena-button:not([disabled])", "Play 5v5")
@@ -156,7 +156,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
         generated_picks: []
       })
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#pvp-progression #resume-arena-duel[href='/arena/#{pending.id}']", "Resume 1v1")
     assert has_element?(view, "#pvp-progression #resume-arena-match[href='/matches/#{match.id}']", "Resume 5v5")
     assert has_element?(view, ".arena-play-actions > #resume-arena-match:first-child")
@@ -184,7 +184,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, view, _html} = live(conn, "/arena/edit")
 
@@ -202,7 +202,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, view, _html} = live(conn, "/arena/edit")
 
@@ -236,7 +236,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/arena")
 
@@ -254,7 +254,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/arena")
 

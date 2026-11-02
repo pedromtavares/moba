@@ -134,16 +134,37 @@ defmodule Moba.Game.Heroes do
     end
   end
 
-  def finish_farming!(
-        %{
-          pve_farming_turns: farming_turns,
-          pve_current_turns: current_turns,
-          pve_farming_rewards: rewards,
-          pve_farming_started_at: started,
-          pve_state: state
-        } = hero
-      )
-      when state in ["meditating", "mining"] do
+  @doc "Claims a completed farming session once, returning {hero, claimed?}."
+  def claim_farming!(hero) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from h in Hero, where: h.id == ^hero.id, lock: "FOR UPDATE")
+        stored = get_hero!(hero.id)
+
+        if stored.pve_state in ["meditating", "mining"] &&
+             is_integer(stored.pve_farming_turns) && stored.pve_farming_turns > 0 &&
+             stored.pve_farming_turns <= stored.pve_current_turns && stored.pve_farming_started_at &&
+             DateTime.diff(DateTime.utc_now(), stored.pve_farming_started_at) >=
+               stored.pve_farming_turns * Moba.seconds_per_turn() do
+          {complete_farming!(stored), true}
+        else
+          {stored, false}
+        end
+      end)
+
+    result
+  end
+
+  defp complete_farming!(
+         %{
+           pve_farming_turns: farming_turns,
+           pve_current_turns: current_turns,
+           pve_farming_rewards: rewards,
+           pve_farming_started_at: started,
+           pve_state: state
+         } = hero
+       )
+       when state in ["meditating", "mining"] do
     remaining_turns = zero_limit(current_turns - farming_turns)
 
     {hero, amount} = apply_farming_rewards(hero, farming_turns, state)
@@ -159,8 +180,6 @@ defmodule Moba.Game.Heroes do
       pve_current_turns: remaining_turns
     })
   end
-
-  def finish_farming!(hero), do: hero
 
   def get_hero!(nil), do: nil
 
@@ -288,7 +307,20 @@ defmodule Moba.Game.Heroes do
   def shard_buyback!(hero), do: update!(hero, %{pve_state: "alive"})
 
   def start_farming!(hero, state, turns) do
-    update!(hero, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+    {:ok, result} =
+      Repo.transaction(fn ->
+        stored = Repo.one!(from h in Hero, where: h.id == ^hero.id, lock: "FOR UPDATE")
+
+        if state in ["meditating", "mining"] && stored.pve_state == "alive" && is_nil(stored.finished_at) &&
+             is_nil(stored.archived_at) && is_nil(Moba.Engine.pending_battle(stored.id)) &&
+             is_integer(turns) && turns > 0 && turns <= stored.pve_current_turns do
+          update!(stored, %{pve_state: state, pve_farming_turns: turns, pve_farming_started_at: Timex.now()})
+        else
+          stored
+        end
+      end)
+
+    get_hero!(result.id)
   end
 
   def trained_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5) do

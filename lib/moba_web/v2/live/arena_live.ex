@@ -491,7 +491,7 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp valid_addition?(hero, %{assigns: %{selected_team: selected_team, current_player: current_player}})
        when not is_nil(selected_team) do
-    (hero.player_id == current_player.id || Game.available_hero?(hero)) &&
+    Moba.Game.Matches.selectable_heroes(%{generated_picks: []}, current_player, [hero.id]) != [] &&
       length(selected_team.picks) < 5 &&
       not Enum.member?(selected_team.pick_ids, hero.id)
   end

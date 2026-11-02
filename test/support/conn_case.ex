@@ -41,11 +41,8 @@ defmodule MobaWeb.ConnCase do
   end
 
   setup tags do
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Moba.Repo)
-
-    unless tags[:async] do
-      Ecto.Adapters.SQL.Sandbox.mode(Moba.Repo, {:shared, self()})
-    end
+    owner = Ecto.Adapters.SQL.Sandbox.start_owner!(Moba.Repo, shared: !tags[:async])
+    on_exit(fn -> Ecto.Adapters.SQL.Sandbox.stop_owner(owner) end)
 
     {:ok, conn: Phoenix.ConnTest.build_conn()}
   end
@@ -74,5 +71,12 @@ defmodule MobaWeb.ConnCase do
     conn
     |> Phoenix.ConnTest.init_test_session(%{})
     |> Plug.Conn.put_session(:user_token, token)
+  end
+
+  @doc "Builds an authenticated player session, or a guest session for a guest player."
+  def log_in_player(conn, session) do
+    player = Moba.Game.get_player!(Keyword.fetch!(session, :player_id))
+    conn = if player.user, do: log_in_user(conn, player.user), else: Phoenix.ConnTest.init_test_session(conn, %{})
+    Enum.reduce(session, conn, fn {key, value}, conn -> Plug.Conn.put_session(conn, key, value) end)
   end
 end

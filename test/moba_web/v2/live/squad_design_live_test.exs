@@ -5,7 +5,7 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
   test "team builder creates, fills, reorders and edits a defensive lineup", %{conn: conn} do
     player = create_player!()
     [first, second | _] = heroes(player, 3)
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena/edit")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena/edit")
     assert has_element?(view, "#teams-hud #team-name")
     view |> form("#arena-team-form", %{"team" => %{"name" => "Five stack"}}) |> render_submit()
     team = Game.list_teams(player) |> List.first()
@@ -37,7 +37,7 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     picks = heroes(player, 5)
     opponent = create_player!()
     match = match(player, opponent, %{generated_picks: Enum.map(picks, & &1.id)})
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/matches/#{match.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
     view |> element("#available-heroes-button") |> render_click()
 
     for hero <- picks,
@@ -75,7 +75,7 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
       })
 
     Game.Matches.update!(match, %{phase: "scored", winner_id: player.id})
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/matches/#{match.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
     assert has_element?(view, "#winner-card[data-complete=true]", "#{Game.get_player!(player.id).user.username} wins")
     assert has_element?(view, "#battle-summary-#{battle.id} .match-summary-hero[data-winner=true] img")
     assert has_element?(view, "#battle-summary-#{battle.id} [role=progressbar][aria-label='Champion health']")
@@ -107,7 +107,7 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     refute has_element?(view, "#battle-review-#{battle.id}")
 
     spectator = create_player!()
-    {:ok, watching, _} = live(init_test_session(conn, player_id: spectator.id), "/matches/#{match.id}")
+    {:ok, watching, _} = live(log_in_player(conn, player_id: spectator.id), "/matches/#{match.id}")
     assert has_element?(watching, "#match-battles #battle-summary-#{battle.id}")
     refute has_element?(watching, "[phx-click=pick-hero]")
   end

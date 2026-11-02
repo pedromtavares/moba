@@ -25,10 +25,20 @@ defmodule MobaWeb.V2.TrainingLive do
     {:noreply, socket}
   end
 
-  def handle_event("battle", %{"id" => id}, socket) do
-    with socket = TutorialComponent.next_step(socket, 2),
-         battle = Game.get_target!(id) |> Game.start_pve_battle!() do
-      {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/battles/#{battle.id}"))}
+  def handle_event("battle", %{"id" => id}, %{assigns: %{current_hero: hero}} = socket) do
+    target = Game.get_target!(id)
+
+    if target.attacker_id == hero.id && target.attacker.player_id == socket.assigns.current_player.id do
+      case Game.start_pve_battle!(target) do
+        %{id: id} ->
+          {:noreply,
+           socket |> TutorialComponent.next_step(2) |> push_navigate(to: preview_path(socket, ~p"/battles/#{id}"))}
+
+        _ ->
+          {:noreply, socket}
+      end
+    else
+      {:noreply, socket}
     end
   end
 
@@ -41,8 +51,10 @@ defmodule MobaWeb.V2.TrainingLive do
 
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
     with socket = TutorialComponent.next_step(socket, 10),
-         battle = Game.start_league_battle!(hero) do
-      {:noreply, socket |> push_navigate(to: preview_path(socket, ~p"/battles/#{battle.id}"))}
+         %{id: id} <- Game.start_league_battle!(hero) do
+      {:noreply, socket |> push_navigate(to: preview_path(socket, ~p"/battles/#{id}"))}
+    else
+      _ -> {:noreply, socket}
     end
   end
 
@@ -186,7 +198,7 @@ defmodule MobaWeb.V2.TrainingLive do
 
   def handle_event("select-turns", params, %{assigns: %{current_hero: hero}} = socket) do
     with turns = String.to_integer(params["turns"]),
-         selected_turns = if(turns > hero.pve_current_turns, do: hero.pve_current_turns, else: turns) do
+         selected_turns = max(0, min(turns, hero.pve_current_turns)) do
       {:noreply, assign(socket, selected_turns: selected_turns)}
     end
   end

@@ -4,7 +4,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
 
   test "alive, dead, farming and history share the same training overview", %{conn: conn} do
     hero = create_base_hero(%{pve_tier: 4, pve_current_turns: 3, refresh_targets_count: 2})
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, alive, _} = live(conn, "/training")
     reference = alive |> element(".training-header") |> render() |> LazyHTML.from_fragment()
 
@@ -49,7 +49,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
     # A human-controlled defender keeps the fixture pending regardless of bot rolls.
     battle = Engine.create_pve_battle!(%{attacker: hero, defender: create_base_hero(), difficulty: "moderate"})
     refute battle.finished
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/training")
 
     assert has_element?(view, ".training-header #current-training-rank")
@@ -62,7 +62,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
 
   test "history header returns to training in the same preview scope", %{conn: conn} do
     hero = create_base_hero(%{pve_tier: 4})
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, history, _} = live(conn, "/battles")
 
     {:ok, training, _} =
@@ -78,7 +78,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
   test "league ascent shows turn progress and unlocks a functional challenge", %{conn: conn} do
     hero = create_base_hero(%{pve_current_turns: 3, pve_total_turns: 15})
     Game.update_tutorial_step!(hero.player, 20)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/training")
 
     assert has_element?(view, "#training-ascent-title", "Road to Diamond")
@@ -105,7 +105,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
 
   test "history, dead and farming states never offer an unavailable challenge", %{conn: conn} do
     hero = create_base_hero(%{pve_current_turns: 0, pve_total_turns: 15})
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, history, _} = live(conn, "/battles")
     refute has_element?(history, "#start-league-challenge")
     refute has_element?(history, "#training-ascent.is-challenge-stage")
@@ -126,14 +126,14 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
   test "advanced league tracks include their goal without an invalid next badge", %{conn: conn} do
     for {tier, goal} <- [{1, 5}, {4, 6}] do
       hero = create_base_hero(%{pve_tier: tier, league_tier: 4, pve_current_turns: 3})
-      conn = init_test_session(conn, player_id: hero.player_id)
+      conn = log_in_player(conn, player_id: hero.player_id)
       {:ok, view, _} = live(conn, "/training")
       assert has_element?(view, ".ascent-track img[src='/images/league/#{goal}.png']")
       refute has_element?(view, ".ascent-track img[src='/images/league/#{goal + 1}.png']")
     end
 
     hero = create_base_hero(%{pve_tier: 4, league_tier: 6, pve_current_turns: 0})
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, history, _} = live(conn, "/battles")
     assert has_element?(history, "#training-ascent-status", "Grandmaster reached")
     refute has_element?(history, "img[src='/images/league/7.png']")

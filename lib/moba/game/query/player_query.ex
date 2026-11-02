@@ -20,6 +20,11 @@ defmodule Moba.Game.Query.PlayerQuery do
     ])
   end
 
+  def current_season(query \\ Player) do
+    season_id = Game.current_season().id
+    from p in query, where: p.season_id == ^season_id
+  end
+
   def bots(query \\ Player) do
     from(player in query, where: not is_nil(player.bot_options))
   end
@@ -65,7 +70,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   def daily_ranked(limit) do
-    from(player in limit_by(Player, limit),
+    from(player in limit_by(current_season(), limit),
       where: not is_nil(player.ranking),
       order_by: [asc: player.ranking]
     )
@@ -77,16 +82,16 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   def season_points_ranked(limit) do
-    players = non_bots() |> non_guests() |> limit_by(limit)
+    players = current_season() |> non_bots() |> non_guests() |> limit_by(limit)
     from p in players, order_by: [desc: p.pvp_points, asc: p.id], preload: :user
   end
 
   def eligible_arena_bots do
-    bots() |> by_pvp_points()
+    current_season() |> bots() |> by_pvp_points()
   end
 
   def old_ranking(limit) do
-    base = non_bots() |> non_guests() |> limit_by(limit)
+    base = current_season() |> non_bots() |> non_guests() |> limit_by(limit)
 
     from(player in base,
       order_by: [desc: [player.pvp_points, player.pve_tier, player.total_farm]]
@@ -94,7 +99,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   def season_ranked(limit) do
-    from(player in limit_by(Player, limit),
+    from(player in limit_by(current_season(), limit),
       where: not is_nil(player.season_ranking),
       order_by: [asc: player.season_ranking]
     )
@@ -102,7 +107,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   def season_ranking(limit) do
-    base = non_bots() |> non_guests() |> limit_by(limit)
+    base = current_season() |> non_bots() |> non_guests() |> limit_by(limit)
 
     from(player in base,
       join: user in assoc(player, :user),
@@ -159,7 +164,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   def pvp_available(query \\ Player) do
-    base = query |> non_bots() |> non_guests()
+    base = query |> current_season() |> non_bots() |> non_guests()
 
     from player in base, where: player.total_matches > 0
   end
@@ -171,7 +176,7 @@ defmodule Moba.Game.Query.PlayerQuery do
   end
 
   def with_pve_tier_above(tier) do
-    from player in Player,
+    from player in current_season(),
       where: player.pve_tier > ^tier
   end
 end

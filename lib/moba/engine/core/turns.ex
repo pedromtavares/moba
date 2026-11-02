@@ -2,6 +2,56 @@ defmodule Moba.Engine.Core.Turns do
   alias Moba.{Engine, Repo}
   alias Engine.Schema.{Battler, Turn}
 
+  @combat_fields [
+    :level,
+    :total_hp,
+    :total_mp,
+    :speed,
+    :atk,
+    :power,
+    :armor,
+    :item_hp,
+    :item_mp,
+    :item_speed,
+    :item_atk,
+    :item_power,
+    :item_armor
+  ]
+
+  def snapshot_loadouts(battle) do
+    loadouts =
+      Map.new([battle.attacker, battle.defender], fn hero ->
+        hero = preload_hero(hero)
+
+        snapshot = %{
+          "skills" => Enum.map(hero.skills, &Ecto.embedded_dump(&1, :json)),
+          "items" => Enum.map(hero.items, &Ecto.embedded_dump(&1, :json)),
+          "stats" => Map.new(@combat_fields, &{Atom.to_string(&1), Map.fetch!(hero, &1)})
+        }
+
+        {to_string(hero.id), snapshot}
+      end)
+
+    %{battle | loadouts: loadouts}
+  end
+
+  defp battle_hero(battle, hero) do
+    hero = preload_hero(hero)
+
+    case battle.loadouts[to_string(hero.id)] do
+      nil ->
+        hero
+
+      snapshot ->
+        stats = Map.new(@combat_fields, &{&1, snapshot["stats"][Atom.to_string(&1)]})
+
+        hero
+        |> Map.merge(stats)
+        |> Map.put(:skills, Enum.map(snapshot["skills"], &Ecto.embedded_load(Moba.Game.Schema.Skill, &1, :json)))
+        |> Map.put(:items, Enum.map(snapshot["items"], &Ecto.embedded_load(Moba.Game.Schema.Item, &1, :json)))
+    end
+  end
+
   def build_turn(battle, orders) do
     last_turn = List.last(battle.turns)
 
@@ -124,12 +174,12 @@ defmodule Moba.Engine.Core.Turns do
 
   defp hero_from_battler(battle, %{player_id: player_id}) when not is_nil(player_id) do
     hero = if battle.attacker_player_id == player_id, do: battle.attacker, else: battle.defender
-    preload_hero(hero)
+    battle_hero(battle, hero)
   end
 
   defp hero_from_battler(battle, %{hero_id: hero_id}) do
     hero = if battle.attacker_id == hero_id, do: battle.attacker, else: battle.defender
-    preload_hero(hero)
+    battle_hero(battle, hero)
   end
 
   defp hero_active_items(%{items: items}), do: Enum.filter(items, & &1.active)
@@ -192,7 +242,7 @@ defmodule Moba.Engine.Core.Turns do
 
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
   defp prepare_battler(hero, player, battle, orders) do
-    %{skills: skills, items: items, avatar: avatar} = hero = preload_hero(hero)
+    %{skills: skills, items: items, avatar: avatar} = hero = battle_hero(battle, hero)
     initial_hp = prepare_stat(player, battle, orders, :attacker_initial_hp)
     initial_mp = prepare_stat(player, battle, orders, :attacker_initial_mp)
 

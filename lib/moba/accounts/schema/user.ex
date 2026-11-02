@@ -3,6 +3,7 @@ defmodule Moba.Accounts.Schema.User do
   import Ecto.Changeset
 
   alias Moba.{Game, Accounts}
+  import Ecto.Query, only: [from: 2]
 
   schema "users" do
     field :email, :string
@@ -14,6 +15,8 @@ defmodule Moba.Accounts.Schema.User do
     field :username, :string
     field :last_online_at, :utc_datetime
     field :community_seen_at, :utc_datetime
+    field :chat_burst_count, :integer, default: 0
+    field :chat_last_message_at, :utc_datetime_usec
     field :shard_count, :integer, default: 0
     field :is_admin, :boolean, default: false
 
@@ -37,8 +40,10 @@ defmodule Moba.Accounts.Schema.User do
   def update_changeset(user, attrs) do
     user
     |> cast(attrs, [:username, :email, :shard_count, :community_seen_at])
+    |> normalize_email_change()
     |> cast_embed(:discord)
     |> validations_and_constraints()
+    |> maybe_validate_unique_email([])
   end
 
   def admin_changeset(user, attrs) do
@@ -110,11 +115,13 @@ defmodule Moba.Accounts.Schema.User do
     |> validate_required([:username, :email])
     |> validate_length(:username, min: 3, max: 15)
     |> unique_constraint(:email)
+    |> unique_constraint(:email, name: :users_email_normalized_index)
     |> unique_constraint(:username)
   end
 
   defp validate_email(changeset, opts) do
     changeset
+    |> normalize_email_change()
     |> validate_required([:email])
     |> validate_format(:email, ~r/^[^\s]+@[^\s]+$/, message: "must have the @ sign and no spaces")
     |> validate_length(:email, max: 160)
@@ -153,13 +160,30 @@ defmodule Moba.Accounts.Schema.User do
     end
   end
 
+  def normalize_email(email) when is_binary(email), do: email |> String.trim() |> String.downcase()
+
+  defp normalize_email_change(changeset), do: update_change(changeset, :email, &normalize_email/1)
+
   defp maybe_validate_unique_email(changeset, opts) do
-    if Keyword.get(opts, :validate_email, true) do
-      changeset
-      |> unsafe_validate_unique(:email, Moba.Repo)
-      |> unique_constraint(:email)
-    else
-      changeset
-    end
+    email = get_change(changeset, :email)
+
+    changeset =
+      if Keyword.get(opts, :validate_email, true) && email do
+        query = from u in __MODULE__, where: fragment("lower(btrim(?))", u.email) == ^email
+        id = get_field(changeset, :id)
+        query = if id, do: from(u in query, where: u.id != ^id), else: query
+
+        if Moba.Repo.exists?(query) do
+          add_error(changeset, :email, "has already been taken", validation: :unsafe_unique, fields: [:email])
+        else
+          changeset
+        end
+      else
+        changeset
+      end
+
+    changeset
+    |> unique_constraint(:email)
+    |> unique_constraint(:email, name: :users_email_normalized_index)
   end
 end

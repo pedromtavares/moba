@@ -22,7 +22,7 @@ defmodule Test.EngineHelper do
     |> Enum.shuffle()
     |> Enum.take(6)
     |> Enum.reduce(hero, fn item, acc ->
-      Game.buy_item!(%{acc | gold: 99999}, item)
+      acc |> Game.update_hero!(%{gold: 99_999}) |> Game.buy_item!(item)
     end)
   end
 

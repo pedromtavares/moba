@@ -5,24 +5,38 @@ defmodule Moba.Accounts.Unlocks do
 
   alias Moba.{Repo, Accounts, Game}
   alias Accounts.Schema.Unlock
+  alias Accounts.Schema.User
+  import Ecto.Query
 
-  def buy_unlock!(%{shard_count: shard_count} = user, resource) do
-    user = Repo.preload(user, :unlocks)
-    price = price_to_unlock(resource)
+  def buy_unlock!(user, resource) do
+    {:ok, user} =
+      Repo.transaction(fn ->
+        stored = Repo.one!(from u in User, where: u.id == ^user.id, lock: "FOR UPDATE") |> Repo.preload(:unlocks)
+        price = price_to_unlock(resource)
+        owned? = Enum.any?(stored.unlocks, &(&1.resource_code == resource.code))
 
-    if shard_count >= price do
-      unlock = find_or_create!(user.unlocks, %{user_id: user.id, resource_code: resource.code})
-      user = Accounts.update_user!(user, %{shard_count: shard_count - price})
-      %{user | unlocks: user.unlocks ++ [unlock]}
-    else
-      user
-    end
+        if !owned? && stored.shard_count >= price do
+          find_or_create!(stored.unlocks, %{user_id: stored.id, resource_code: resource.code})
+
+          Accounts.update_user!(stored, %{shard_count: stored.shard_count - price})
+          |> Repo.preload(:unlocks, force: true)
+        else
+          stored
+        end
+      end)
+
+    user
   end
 
   def create_unlock!(user, resource_code) do
-    user = Repo.preload(user, :unlocks)
-    unlock = find_or_create!(user.unlocks, %{user_id: user.id, resource_code: resource_code})
-    %{user | unlocks: user.unlocks ++ [unlock]}
+    {:ok, user} =
+      Repo.transaction(fn ->
+        stored = Repo.one!(from u in User, where: u.id == ^user.id, lock: "FOR UPDATE") |> Repo.preload(:unlocks)
+        find_or_create!(stored.unlocks, %{user_id: stored.id, resource_code: resource_code})
+        Repo.preload(stored, :unlocks, force: true)
+      end)
+
+    user
   end
 
   def unlocked_codes_for(user) do

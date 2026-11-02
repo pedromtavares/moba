@@ -61,7 +61,7 @@ defmodule Moba.EngineTest do
 
   describe "pve" do
     test "not enough battles", %{base_hero: attacker, alternate_hero: defender} do
-      updated = %{attacker | pve_current_turns: 0}
+      updated = Game.update_hero!(attacker, %{pve_current_turns: 0})
       assert {:error, _} = Game.start_pve_battle!(%{attacker: updated, defender: defender, difficulty: "weak"})
     end
 
@@ -158,7 +158,7 @@ defmodule Moba.EngineTest do
 
     test "attacker wins and ranks up", %{strong_hero: attacker} do
       battle =
-        Game.start_league_battle!(%{attacker | league_step: 2})
+        Game.start_league_battle!(Game.update_hero!(attacker, %{league_step: 2}))
         |> Engine.auto_finish_battle!()
 
       hero = Game.get_hero!(attacker.id)
@@ -177,7 +177,7 @@ defmodule Moba.EngineTest do
       with_boss = Game.generate_boss!(hero)
 
       battle =
-        Game.start_league_battle!(%{with_boss | league_step: 1, league_tier: master_league_tier})
+        Game.start_league_battle!(Game.update_hero!(with_boss, %{league_step: 1, league_tier: master_league_tier}))
         |> Engine.auto_finish_battle!()
 
       assert battle.winner_id == with_boss.id
@@ -206,6 +206,11 @@ defmodule Moba.EngineTest do
       assert with_boss.league_tier == master_league_tier
       assert with_boss.league_step == 1
       assert with_boss.boss_id
+
+      with_boss =
+        with_boss
+        |> Game.update_hero!(%{gold: Game.buyback_price(with_boss)})
+        |> Game.buyback!()
 
       battle =
         Game.start_league_battle!(with_boss)
@@ -301,13 +306,16 @@ defmodule Moba.EngineTest do
 
   describe "core" do
     test "#begin_battle!", %{strong_hero: attacker, alternate_hero: defender} do
-      battle = build_basic_battle(attacker, %{defender | bot_difficulty: "test"}) |> Engine.begin_battle!()
+      battle =
+        build_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"})) |> Engine.begin_battle!()
 
       assert battle.initiator == attacker
       assert length(battle.turns) == 0
 
       no_speed = %{attacker | speed: 0, pve_tier: 3}
-      battle = build_basic_battle(no_speed, %{defender | bot_difficulty: "test"}) |> Engine.begin_battle!()
+
+      battle =
+        build_basic_battle(no_speed, Game.update_hero!(defender, %{bot_difficulty: "test"})) |> Engine.begin_battle!()
 
       assert battle.initiator.id == defender.id
       assert length(battle.turns) == 1
@@ -322,7 +330,7 @@ defmodule Moba.EngineTest do
       skill = base_skill()
 
       battle =
-        create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
+        create_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"}))
         |> Engine.continue_battle!(%{skill: skill, item: nil})
 
       last_turn = List.last(battle.turns)
@@ -336,7 +344,7 @@ defmodule Moba.EngineTest do
       skill = base_skill()
 
       battle =
-        create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
+        create_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"}))
         |> Engine.continue_battle!(%{skill: skill, item: nil})
         |> Engine.continue_battle!(%{skill: skill, item: nil})
 
@@ -366,7 +374,7 @@ defmodule Moba.EngineTest do
       attacker = Game.buy_item!(%{attacker | gold: 9999}, item)
 
       battle =
-        create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
+        create_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"}))
         |> Engine.continue_battle!(%{skill: nil, item: item})
 
       assert Enum.count(battle.turns) == 2
@@ -394,7 +402,7 @@ defmodule Moba.EngineTest do
 
     test "#last_turn", %{strong_hero: attacker, alternate_hero: defender} do
       last_turn =
-        create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
+        create_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"}))
         |> Engine.continue_battle!(%{skill: nil, item: nil})
         |> Map.get(:turns)
         |> List.last()
@@ -405,7 +413,7 @@ defmodule Moba.EngineTest do
 
     test "#can_use_resource?", %{strong_hero: attacker, alternate_hero: defender} do
       skill = base_skill()
-      battle = create_basic_battle(attacker, %{defender | bot_difficulty: "test"})
+      battle = create_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"}))
       assert Engine.build_turn(battle) |> Engine.can_use_resource?(skill)
       battle = Engine.continue_battle!(battle, %{skill: skill, item: nil})
       refute Engine.build_turn(battle) |> Engine.can_use_resource?(skill)

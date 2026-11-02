@@ -10,7 +10,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
 
     conn =
       Phoenix.ConnTest.build_conn()
-      |> init_test_session(player_id: attacker.player_id)
+      |> log_in_player(player_id: attacker.player_id)
 
     %{conn: conn, battle: battle, attacker: attacker}
   end
@@ -110,7 +110,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: attacker.player_id)
+      |> log_in_player(player_id: attacker.player_id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
     rewards_html = play_until_finished(view, battle.id, attacker.id, skill_id, 20)
@@ -127,7 +127,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     attacker = create_base_hero(%{league_tier: 0, league_step: 1}, create_player!(), strong_avatar())
     battle = attacker |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
     assert battle.winner_id == attacker.id
-    conn = init_test_session(conn, player_id: attacker.player_id)
+    conn = log_in_player(conn, player_id: attacker.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
     assert has_element?(view, "#league-challenge-result.is-stage-victory h3", "Victory")
@@ -152,7 +152,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     attacker = create_base_hero(%{league_tier: 0, league_step: 2}, create_player!(), strong_avatar())
     battle = attacker |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
     assert battle.winner_id == attacker.id
-    conn = init_test_session(conn, player_id: attacker.player_id)
+    conn = log_in_player(conn, player_id: attacker.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
     assert has_element?(view, "#league-challenge-result h3", "Promoted to Silver")
@@ -169,7 +169,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     attacker = create_base_hero(%{league_tier: 1, league_step: 2, current_hp: 1}, create_player!(), weak_avatar())
     battle = attacker |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
     assert battle.winner_id != attacker.id
-    conn = init_test_session(conn, player_id: attacker.player_id)
+    conn = log_in_player(conn, player_id: attacker.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
     assert has_element?(view, "#league-challenge-result[data-result=defeat] h3", "Challenge lost")
@@ -192,7 +192,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: attacker.player_id)
+      |> log_in_player(player_id: attacker.player_id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
     _rewards_html = play_until_finished(view, battle.id, attacker.id, skill_id, 20)
@@ -219,7 +219,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
     assert has_element?(view, ~s|#battle-over-duel[href="/arena/#{duel.id}"]|)
@@ -256,7 +256,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
     assert has_element?(view, ~s|#load-battles[href="/matches/#{match.id}"]|)

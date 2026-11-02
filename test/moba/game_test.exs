@@ -263,6 +263,12 @@ defmodule Moba.GameTest do
     test "#finish_farming!" do
       hero = create_base_hero(%{pve_current_turns: 5}) |> Game.start_farming!("meditating", 5)
       targets = Game.generate_targets!(hero) |> Map.get(:targets) |> Enum.map(& &1.id) |> Enum.sort()
+
+      hero =
+        Game.update_hero!(hero, %{
+          pve_farming_started_at: DateTime.add(DateTime.utc_now(), -5 * Moba.seconds_per_turn() - 1)
+        })
+
       updated = Game.finish_farming!(hero)
 
       assert updated.pve_state == "alive"
@@ -274,6 +280,12 @@ defmodule Moba.GameTest do
       assert updated.total_xp_farm > hero.total_xp_farm
 
       hero = create_base_hero(%{pve_current_turns: 5}) |> Game.start_farming!("mining", 5)
+
+      hero =
+        Game.update_hero!(hero, %{
+          pve_farming_started_at: DateTime.add(DateTime.utc_now(), -5 * Moba.seconds_per_turn() - 1)
+        })
+
       updated = Game.finish_farming!(hero)
 
       assert updated.total_gold_farm > hero.total_gold_farm
@@ -388,10 +400,11 @@ defmodule Moba.GameTest do
 
       assert hero == Game.buy_item!(hero, base_item())
 
-      Game.buy_item!(%{hero | gold: 10000}, base_item())
-      tranquil_boots = base_rare_item()
-      more_boots = Game.buy_item!(%{hero | gold: 10000}, tranquil_boots)
-      assert more_boots.item_speed == hero.item_speed + tranquil_boots.base_speed
+      funded = Game.update_hero!(hero, %{gold: 10_000})
+      with_boots = Game.buy_item!(funded, base_item())
+      more_boots = Game.buy_item!(with_boots, base_rare_item())
+      assert more_boots.item_speed == with_boots.item_speed
+      assert length(more_boots.items) == 3
     end
 
     test "#sell_item!" do
@@ -424,7 +437,9 @@ defmodule Moba.GameTest do
       normal_items = base_normal_items()
       rare = base_rare_item()
 
-      assert Game.transmute_item!(base_hero, normal_items, rare) == base_hero
+      unchanged = Game.transmute_item!(base_hero, normal_items, rare)
+      assert unchanged.items == []
+      assert unchanged.gold == base_hero.gold
 
       hero =
         base_hero
@@ -468,7 +483,9 @@ defmodule Moba.GameTest do
     test "#level_up_skill!" do
       base_hero = create_base_hero()
       skill = base_skill()
-      assert Game.level_up_skill!(base_hero, skill.code) == base_hero
+      unchanged = Game.level_up_skill!(base_hero, skill.code)
+      assert unchanged.skill_levels_available == 0
+      assert Map.new(unchanged.skills, &{&1.code, &1.level}) == Map.new(base_hero.skills, &{&1.code, &1.level})
 
       hero =
         base_hero

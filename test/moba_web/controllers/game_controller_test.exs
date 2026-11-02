@@ -45,7 +45,7 @@ defmodule MobaWeb.GameControllerTest do
   end
 
   test "create as guest", %{conn: conn} do
-    skills = Enum.map(base_skills(), fn skill -> skill.id end)
+    skills = Enum.map(creation_skills(), fn skill -> skill.id end)
     avatar = base_avatar().id
 
     conn = conn |> get("/start") |> recycle() |> post("/start", %{"skills" => skills, "avatar" => avatar})
@@ -77,7 +77,7 @@ defmodule MobaWeb.GameControllerTest do
       conn
       |> get("/start")
       |> recycle()
-      |> post("/new/start", %{"skills" => Enum.map(base_skills(), & &1.id), "avatar" => base_avatar().id})
+      |> post("/new/start", %{"skills" => Enum.map(creation_skills(), & &1.id), "avatar" => base_avatar().id})
 
     assert redirected_to(response) == "/training"
     assert get_session(response, :player_id)

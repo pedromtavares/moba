@@ -60,7 +60,7 @@ defmodule MobaWeb.UserRegistrationLiveTest do
     end
 
     test "guest onboarding keeps the created hero and logs the user in", %{conn: conn} do
-      skills = Enum.map(base_skills(), & &1.id)
+      skills = Enum.map(creation_skills(), & &1.id)
       avatar = base_avatar().id
 
       conn = conn |> get(~p"/start") |> recycle() |> post(~p"/start", %{"skills" => skills, "avatar" => avatar})

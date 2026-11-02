@@ -7,17 +7,28 @@ defmodule Moba.Game.Players do
   alias Moba.{Repo, Game}
   alias Game.Schema.Player
   alias Game.Query.{HeroQuery, PlayerQuery}
+  import Ecto.Query
 
   def add_total_farm!(%{player: player} = hero) do
     update_player!(player, %{total_farm: player.total_farm + hero.total_gold_farm + hero.total_xp_farm})
   end
 
-  def bot_ranking, do: PlayerQuery.bots() |> PlayerQuery.by_pvp_points() |> Repo.all()
+  def bot_ranking, do: PlayerQuery.current_season() |> PlayerQuery.bots() |> PlayerQuery.by_pvp_points() |> Repo.all()
 
   def create_player!(attrs \\ %{}) do
-    %Player{}
-    |> Player.changeset(attrs)
-    |> Repo.insert!()
+    {:ok, player} =
+      Repo.transaction(fn ->
+        user_id = attrs[:user_id] || attrs["user_id"]
+        if user_id, do: Repo.one!(from u in Moba.Accounts.Schema.User, where: u.id == ^user_id, lock: "FOR UPDATE")
+        existing = user_id && get_player_from_user!(user_id)
+
+        existing ||
+          %Player{season_id: Game.current_season().id}
+          |> Player.changeset(attrs)
+          |> Repo.insert!()
+      end)
+
+    player
   end
 
   def duel_opponent(player), do: matchmaking_opponent(player)
@@ -37,21 +48,39 @@ defmodule Moba.Game.Players do
   Each player holds the score count of every other player they have dueled against
   """
   def duel_update!(player, updates) do
-    loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
-    current_score = player.duel_score[loser_id] || 0
-    duel_score = loser_id && Map.put(player.duel_score, loser_id, current_score + 1)
+    {:ok, updated} =
+      Repo.transaction(fn ->
+        player = Map.fetch!(lock_players!([player.id]), player.id)
+        loser_id = updates[:loser_id] && Integer.to_string(updates[:loser_id])
 
-    updates = %{
-      duel_score: duel_score || player.duel_score,
-      pvp_points: updates[:pvp_points] || player.pvp_points
-    }
+        duel_score =
+          if loser_id do
+            Map.update(player.duel_score, loser_id, 1, &(&1 + 1))
+          else
+            player.duel_score
+          end
 
-    update_player!(player, updates)
+        update_player!(player, %{
+          duel_score: duel_score,
+          pvp_points: max(0, player.pvp_points + Map.get(updates, :rating_change, 0))
+        })
+      end)
+
+    updated
+  end
+
+  @doc "Locks players in a stable order inside the caller's transaction before calculating a result."
+  def lock_players!(ids) do
+    Repo.all(from p in Player, where: p.id in ^ids, order_by: p.id, lock: "FOR UPDATE")
+    |> Map.new(&{&1.id, &1})
   end
 
   def get_player!(id), do: PlayerQuery.load() |> Repo.get!(id)
 
-  def get_player_from_user!(user_id), do: Repo.get_by(PlayerQuery.load(), user_id: user_id)
+  def get_player_from_user!(user_id) do
+    season_id = Game.current_season().id
+    Repo.one(from p in PlayerQuery.load(), where: p.user_id == ^user_id and p.season_id == ^season_id, limit: 1)
+  end
 
   def matchmaking_opponent(%{pvp_tier: 0, id: id, pvp_points: points}) do
     pleb = PlayerQuery.pleb_opponents(id, points) |> Repo.all() |> List.first()
@@ -101,6 +130,14 @@ defmodule Moba.Game.Players do
     end
 
     player
+  end
+
+  def touch_guest(%Player{user_id: nil, id: id}) do
+    cutoff = NaiveDateTime.utc_now() |> NaiveDateTime.add(-60)
+
+    Repo.update_all(from(p in Player, where: p.id == ^id and is_nil(p.user_id) and p.updated_at < ^cutoff),
+      set: [updated_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second)]
+    )
   end
 
   def update_preferences!(player, preferences) do
@@ -166,7 +203,7 @@ defmodule Moba.Game.Players do
   end
 
   def update_season_ranking! do
-    Repo.update_all(Player, set: [season_ranking: nil])
+    Repo.update_all(PlayerQuery.current_season(), set: [season_ranking: nil])
 
     PlayerQuery.season_ranking(1000)
     |> Repo.all()

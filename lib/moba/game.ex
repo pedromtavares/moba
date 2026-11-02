@@ -51,6 +51,8 @@ defmodule Moba.Game do
   # DUELS
 
   defdelegate continue_duel!(duel, hero \\ nil), to: Arena
+  defdelegate pick_duel_hero(duel, player, hero), to: Arena
+  defdelegate start_match(match, player, picks), to: Arena
 
   defdelegate create_duel!(player, opponent, auto \\ false), to: Arena
 
@@ -85,6 +87,8 @@ defmodule Moba.Game do
   defdelegate create_bot!(avatar, level, difficulty, tier), to: Heroes
 
   defdelegate create_current_pve_hero!(attrs, player, avatar, skills), to: Training
+  defdelegate creation_loadout(player, avatar_id, skill_ids), to: Training
+  defdelegate invoke_hero(player, attrs, avatar_id, skill_ids), to: Training
 
   defdelegate start_guest!(session_key, avatar, skills), to: Training
 
@@ -205,8 +209,6 @@ defmodule Moba.Game do
   defdelegate list_matches(player), to: Matches
 
   defdelegate manual_matchmaking!(player), to: Arena
-
-  defdelegate reset_match!(match), to: Arena
 
   # PLAYERS
 

@@ -24,6 +24,7 @@ defmodule Moba.Engine.Schema.Battle do
     field :type, :string
     field :difficulty, :string
     field :finished, :boolean
+    field :loadouts, :map, default: %{}
 
     field :attacker_pick_position, :integer
     field :defender_pick_position, :integer

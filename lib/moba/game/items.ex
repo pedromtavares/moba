@@ -7,7 +7,8 @@ defmodule Moba.Game.Items do
   """
 
   alias Moba.{Repo, Game}
-  alias Game.Schema.Item
+  alias Game.Schema.{Hero, Item}
+  import Ecto.Query
   alias Game.Query.ItemQuery
 
   @boots ["arcane_boots", "phase_boots", "tranquil_boots", "boots_of_travel", "boots_of_speed"]
@@ -17,17 +18,15 @@ defmodule Moba.Game.Items do
   def buy_item!(hero, nil), do: hero
 
   def buy_item!(hero, item) do
-    hero = Repo.preload(hero, :items)
-
-    if can_buy_item?(hero, item) do
-      hero
-      |> equip(item)
-      |> Game.update_hero!(%{
-        gold: hero.gold - item_price(item)
-      })
-    else
-      hero
-    end
+    with_inventory(hero, fn hero ->
+      if can_buy_item?(hero, item) do
+        inventory = hero.items ++ [item]
+        attrs = Map.put(item_attributes(inventory), :gold, hero.gold - item_price(item))
+        Game.Heroes.update!(hero, attrs, inventory)
+      else
+        hero
+      end
+    end)
   end
 
   def can_equip_item?(hero, item) do
@@ -93,36 +92,45 @@ defmodule Moba.Game.Items do
   def sell_item!(hero, nil), do: hero
 
   def sell_item!(hero, item) do
-    hero = Repo.preload(hero, :items)
+    with_inventory(hero, fn hero ->
+      item = Enum.find(hero.items, &(&1.code == item.code))
 
-    if has_item?(hero, item) do
-      hero
-      |> unequip([item])
-      |> Game.update_hero!(%{
-        gold: hero.gold + item_sell_price(hero, item)
-      })
-    else
-      hero
-    end
+      if item do
+        inventory = Enum.reject(hero.items, &(&1.code == item.code))
+        attrs = Map.put(item_attributes(inventory), :gold, hero.gold + item_sell_price(hero, item))
+        Game.Heroes.update!(hero, attrs, inventory)
+      else
+        hero
+      end
+    end)
   end
 
   def shop_list, do: ItemQuery.base_current() |> Repo.all()
 
-  @doc """
-  A Hero can transform weaker items into stronger items by merging them at no extra gold cost
-  """
+  @doc "A Hero can merge weaker items into stronger items at no extra gold cost."
   def transmute_item!(hero, _, nil), do: hero
 
   def transmute_item!(hero, ingredients, result) do
-    hero = Repo.preload(hero, :items)
+    with_inventory(hero, fn hero ->
+      if can_equip_item?(hero, result) && has_items?(hero, ingredients) && correct_recipe?(ingredients, result) do
+        codes = Enum.map(ingredients, & &1.code)
+        inventory = Enum.reject(hero.items, &(&1.code in codes)) ++ [result]
+        Game.Heroes.update!(hero, item_attributes(inventory), inventory)
+      else
+        hero
+      end
+    end)
+  end
 
-    if can_equip_item?(hero, result) && has_items?(hero, ingredients) && correct_recipe?(ingredients, result) do
-      hero
-      |> unequip(ingredients)
-      |> equip(result)
-    else
-      hero
-    end
+  defp with_inventory(hero, update) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from h in Hero, where: h.id == ^hero.id, lock: "FOR UPDATE")
+        update.(Game.get_hero!(hero.id))
+      end)
+
+    Game.broadcast_to_hero(result.id)
+    result
   end
 
   def sort_items(list), do: Enum.sort_by(list, fn item -> !item.active end)
@@ -134,27 +142,6 @@ defmodule Moba.Game.Items do
   defp full_inventory?(hero), do: length(hero.items) >= 6
 
   defp has_items?(hero, items), do: Enum.all?(items, fn item -> has_item?(hero, item) end)
-
-  defp equip(hero, item) do
-    new_inventory = hero.items ++ [item]
-
-    Game.update_hero!(
-      hero,
-      item_attributes(new_inventory),
-      new_inventory
-    )
-  end
-
-  defp unequip(hero, items) do
-    items_codes = Enum.map(items, & &1.code)
-    new_inventory = Enum.filter(hero.items, fn item -> !Enum.member?(items_codes, item.code) end)
-
-    Game.update_hero!(
-      hero,
-      item_attributes(new_inventory),
-      new_inventory
-    )
-  end
 
   defp correct_recipe?(ingredients, result) do
     ingredients = Enum.uniq(ingredients)

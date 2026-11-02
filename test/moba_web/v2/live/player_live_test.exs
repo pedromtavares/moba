@@ -117,7 +117,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     Game.Duels.finish!(season, %{winner: hero.player, attacker_pvp_points: 5, defender_pvp_points: 0})
     live_duel = Game.Duels.create!(opponent, hero.player, false)
     Game.Duels.finish!(live_duel, %{winner: hero.player, attacker_pvp_points: -5, defender_pvp_points: 5})
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
     assert has_element?(view, "#matches-btn")
     refute has_element?(view, "#profile-arena-debut")
@@ -136,7 +136,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     Game.update_player!(viewer, %{duel_score: %{"#{hero.player_id}" => 12}})
     Game.update_player!(hero.player, %{duel_score: %{"#{viewer.id}" => 3}})
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/player/#{hero.player_id}")
     assert has_element?(view, "#profile-duel-record[aria-label='All-time head-to-head duel record']")
     assert has_element?(view, "#profile-duel-record .profile-duel-player[href='/player/#{viewer.id}']", "You")
 
@@ -157,7 +157,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     viewer = create_base_hero(%{pve_ranking: 1})
     hero = create_base_hero(%{pve_ranking: 405})
     Game.create_hero!(%{name: "Lower placement", pve_ranking: 500}, hero.player, base_avatar(), base_skills())
-    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.player_id), "/player/#{hero.player_id}")
 
     assert has_element?(view, "#profile-season-rank + #profile-hero-rank strong", "405")
     assert has_element?(view, "#profile-hero-rank .profile-metric-label", "Hero rank")
@@ -169,7 +169,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
   test "banner shows unranked when the player has no ranked heroes", %{conn: conn} do
     hero = create_base_hero()
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
     assert has_element?(view, "#profile-hero-rank [aria-label=Unranked]", "—")
   end
 
@@ -281,7 +281,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
       leader = create_base_hero() |> Game.update_hero!(%{pve_ranking: 1})
       Cachex.put(:game_cache, "pve_ranking", Enum.map([outside, hero, leader], &Game.get_hero!(&1.id)))
-      {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
       assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season Rank")
       view |> element("#profile-ranking-hero") |> render_click()
@@ -312,7 +312,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     test "only a top-200 hero qualifies and the empty hero leaderboard stays usable", %{conn: conn} do
       hero = create_base_hero() |> Game.update_hero!(%{pve_ranking: 201})
       Cachex.put(:game_cache, "pve_ranking", [Game.get_hero!(hero.id)])
-      {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
       assert has_element?(view, "#profile-ranking-season[aria-pressed=true]")
       view |> element("#profile-ranking-hero") |> render_click()
       assert has_element?(view, "#profile-no-ranked-heroes")
@@ -329,7 +329,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
         |> Game.update_hero!(%{pve_ranking: 100})
 
       Cachex.put(:game_cache, "pve_ranking", Enum.map([viewer, profile_hero, second], &Game.get_hero!(&1.id)))
-      {:ok, view, _} = live(init_test_session(conn, player_id: viewer.player_id), "/player/#{profile_hero.player_id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: viewer.player_id), "/player/#{profile_hero.player_id}")
       assert has_element?(view, "#profile-ranking-season[aria-pressed=true]")
       view |> element("#profile-ranking-hero") |> render_click()
       assert has_element?(view, "#profile-ranking-hero[aria-pressed=true]")

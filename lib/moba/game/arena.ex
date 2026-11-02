@@ -13,7 +13,46 @@ defmodule Moba.Game.Arena do
 
   def auto_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "auto")
 
-  def continue_duel!(%{phase: "opponent_battle"} = duel, _) do
+  def continue_duel!(duel, hero) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from d in Duel, where: d.id == ^duel.id, lock: "FOR UPDATE")
+        stored = Duels.get_duel!(duel.id)
+        if stored.phase == duel.phase, do: advance_duel!(stored, hero), else: stored
+      end)
+
+    result
+  end
+
+  def pick_duel_hero(duel, player, hero) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from d in Duel, where: d.id == ^duel.id, lock: "FOR UPDATE")
+        stored = Duels.get_duel!(duel.id)
+        hero = Heroes.get_hero!(hero.id)
+
+        picker_id =
+          case stored.phase do
+            phase when phase in ["player_first_pick", "player_second_pick"] -> stored.player_id
+            phase when phase in ["opponent_first_pick", "opponent_second_pick"] -> stored.opponent_player_id
+            _ -> nil
+          end
+
+        own? = hero.player_id == player.id && hero.finished_at && hero.league_tier >= Moba.platinum_league_tier()
+        bot? = hero.bot_difficulty == "pvp_grandmaster"
+
+        if picker_id == player.id && stored.phase == duel.phase && is_nil(hero.archived_at) &&
+             hero.id not in [stored.player_first_pick_id, stored.opponent_first_pick_id] && (own? || bot?) do
+          advance_duel!(stored, hero)
+        else
+          stored
+        end
+      end)
+
+    result
+  end
+
+  defp advance_duel!(%{phase: "opponent_battle"} = duel, _) do
     score = score_duel!(duel)
     Players.set_player_available!(duel.player)
 
@@ -26,7 +65,7 @@ defmodule Moba.Game.Arena do
     updated
   end
 
-  def continue_duel!(duel, hero) do
+  defp advance_duel!(duel, hero) do
     updated = Duels.next_phase!(duel, hero)
     hero && hero != :auto && Game.update_hero!(hero, %{pvp_last_picked: Timex.now(), pvp_picks: hero.pvp_picks + 1})
     MobaWeb.broadcast("duel-#{duel.id}", "phase", updated.phase)
@@ -34,18 +73,44 @@ defmodule Moba.Game.Arena do
   end
 
   def continue_match!(match, player_picks) do
-    Matches.update!(match, %{player_picks: player_picks})
-    Matches.get_match!(match.id) |> continue_match!()
+    case start_match(match, Players.get_player!(match.player_id), player_picks) do
+      {:ok, result} -> result
+      {:error, _} -> Matches.get_match!(match.id)
+    end
   end
 
-  def continue_match!(%{winner_id: winner_id, type: type} = match) when not is_nil(winner_id) do
+  def start_match(match, player, picks) do
+    Repo.transaction(fn ->
+      Repo.one!(from m in Match, where: m.id == ^match.id, lock: "FOR UPDATE")
+      stored = Matches.get_match!(match.id)
+
+      if stored.player_id != player.id || stored.phase || stored.winner_id ||
+           !Matches.valid_picks?(stored, player, picks),
+         do: Repo.rollback(:invalid_lineup)
+
+      Matches.update!(stored, %{player_picks: picks})
+      stored.id |> Matches.get_match!() |> advance_match!()
+    end)
+  end
+
+  def continue_match!(match) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from m in Match, where: m.id == ^match.id, lock: "FOR UPDATE")
+        Matches.get_match!(match.id) |> advance_match!()
+      end)
+
+    result
+  end
+
+  defp advance_match!(%{winner_id: winner_id, type: type} = match) when not is_nil(winner_id) do
     match = score_match!(match)
     if type != "auto", do: Moba.update_pvp_rankings()
 
     match
   end
 
-  def continue_match!(match) do
+  defp advance_match!(match) do
     latest_battle = Engine.latest_match_battle(match.id)
     last_turn = if latest_battle, do: List.last(latest_battle.turns), else: nil
 
@@ -65,19 +130,32 @@ defmodule Moba.Game.Arena do
 
       match
       |> Matches.finish!(battle)
-      |> continue_match!()
+      |> advance_match!()
     end
   end
 
   def create_duel!(player, opponent, auto) do
     participants = if auto, do: [player], else: [player, opponent]
 
-    duel = with_daily_rewards(participants, fn -> Duels.create!(player, opponent, auto) end)
+    duel =
+      with_daily_rewards(participants, fn ->
+        ids = Enum.map(participants, & &1.id)
 
-    Players.set_player_unavailable!(player)
+        busy? =
+          Repo.exists?(
+            from d in Duel,
+              where: d.phase != "finished" and (is_nil(d.type) or d.type == "pvp"),
+              where: d.player_id in ^ids or (d.opponent_player_id in ^ids and not d.auto)
+          )
 
-    unless auto do
-      Players.set_player_unavailable!(opponent)
+        if player.id != opponent.id && !busy? do
+          duel = Duels.create!(player, opponent, auto)
+          Enum.each(participants, &Players.set_player_unavailable!/1)
+          duel
+        end
+      end)
+
+    if duel && !auto do
       MobaWeb.broadcast("player-#{player.id}", "duel", %{id: duel.id})
       MobaWeb.broadcast("player-#{opponent.id}", "duel", %{id: duel.id})
     end
@@ -95,7 +173,11 @@ defmodule Moba.Game.Arena do
   def manual_matchmaking!(player) do
     with_daily_rewards([player], fn ->
       player = Players.get_player!(player.id)
-      create_match!(player, Players.matchmaking_opponent(player), "manual")
+
+      case Matches.pending_match(player) do
+        nil -> create_match!(player, Players.matchmaking_opponent(player), "manual")
+        pending -> {:existing, pending}
+      end
     end)
   end
 
@@ -121,26 +203,26 @@ defmodule Moba.Game.Arena do
 
         # Serialize the shared allowance and balance across both modes and live participants.
         users = Repo.all(from u in User, where: u.id in ^user_ids, order_by: u.id, lock: "FOR UPDATE")
+        player_ids = players |> Enum.map(& &1.id) |> Enum.uniq()
+        Repo.all(from p in Game.Schema.Player, where: p.id in ^player_ids, order_by: p.id, lock: "FOR UPDATE")
         eligible = Enum.filter(players, &(daily_reward_games(&1) < @daily_match_limit))
-        result = play.()
 
-        if result do
-          for player <- eligible, user <- users, user.id == player.user_id do
-            Repo.update_all(from(u in User, where: u.id == ^user.id), inc: [shard_count: Moba.matchmaking_shards()])
-          end
+        case play.() do
+          {:existing, game} ->
+            game
+
+          game ->
+            if game do
+              for player <- eligible, user <- users, user.id == player.user_id do
+                Repo.update_all(from(u in User, where: u.id == ^user.id), inc: [shard_count: Moba.matchmaking_shards()])
+              end
+            end
+
+            game
         end
-
-        result
       end)
 
     result
-  end
-
-  def reset_match!(%{id: id} = match) do
-    Engine.delete_match_battles!(match)
-
-    Matches.get_match!(id)
-    |> Matches.update!(%{winner_id: nil, phase: nil, player_picks: []})
   end
 
   def update_daily_ranking!(update_tiers?) do
@@ -191,8 +273,7 @@ defmodule Moba.Game.Arena do
 
   defp match_picks(player_id, 0, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
-    team_heroes = team && Game.get_heroes(team.pick_ids) |> Enum.filter(& &1)
-    team_has_heroes? = team_heroes && length(team_heroes) >= 5
+    team_has_heroes? = valid_saved_team?(team, player_id)
 
     pick_ids =
       if team_has_heroes? do
@@ -206,8 +287,7 @@ defmodule Moba.Game.Arena do
 
   defp match_picks(player_id, _, bot_ids, defensive) do
     team = Teams.list_teams(player_id, defensive) |> Enum.shuffle() |> List.first()
-    team_heroes = team && Game.get_heroes(team.pick_ids) |> Enum.filter(& &1)
-    team_has_heroes? = team_heroes && length(team_heroes) >= 5
+    team_has_heroes? = valid_saved_team?(team, player_id)
 
     pick_ids =
       if team_has_heroes? do
@@ -240,6 +320,12 @@ defmodule Moba.Game.Arena do
     end
   end
 
+  defp valid_saved_team?(nil, _), do: false
+
+  defp valid_saved_team?(team, player_id) do
+    Matches.valid_picks?(%{generated_picks: []}, Players.get_player!(player_id), Enum.take(team.pick_ids, 5))
+  end
+
   defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent, auto: auto} = duel) do
     %{winner_id: first_winner_id} = Engine.first_duel_battle(duel)
     %{winner_id: last_winner_id} = Engine.last_duel_battle(duel)
@@ -255,14 +341,17 @@ defmodule Moba.Game.Arena do
         true -> nil
       end
 
+    locked = Players.lock_players!([player.id, opponent.id])
+    player = Map.fetch!(locked, player.id)
+    opponent = Map.fetch!(locked, opponent.id)
     duel_points = Duels.pvp_points(player, opponent, winner, auto)
     player_updates = if player_win && !auto, do: %{loser_id: opponent.id}, else: %{}
 
-    Players.duel_update!(player, Map.merge(player_updates, %{pvp_points: duel_points.total_player_points}))
+    Players.duel_update!(player, Map.merge(player_updates, %{rating_change: duel_points.player_points}))
 
     unless auto do
       opponent_updates = if opponent_win, do: %{loser_id: player.id}, else: %{}
-      Players.duel_update!(opponent, Map.merge(opponent_updates, %{pvp_points: duel_points.total_opponent_points}))
+      Players.duel_update!(opponent, Map.merge(opponent_updates, %{rating_change: duel_points.opponent_points}))
     end
 
     Moba.update_pvp_rankings()
@@ -273,8 +362,10 @@ defmodule Moba.Game.Arena do
   defp score_duel!(_), do: %{}
 
   defp score_match!(%{phase: phase, player: player, opponent: opponent} = match) when phase != "scored" do
+    locked = Players.lock_players!([player.id, opponent.id])
+    player = Map.fetch!(locked, player.id)
+    opponent = Map.fetch!(locked, opponent.id)
     winner = if match.winner_id == player.id, do: player, else: opponent
-    _loser = if match.winner_id == player.id, do: opponent, else: player
 
     pvp_points = Matches.pvp_points(player, opponent, winner)
 
@@ -291,7 +382,7 @@ defmodule Moba.Game.Arena do
         %{}
       end
 
-    Players.update_player!(match.player, Map.merge(match_attrs, winner_attrs))
+    Players.update_player!(player, Map.merge(match_attrs, winner_attrs))
 
     Matches.update!(match, %{phase: "scored", rewards: %{attacker_pvp_points: pvp_points.player_points}})
   end

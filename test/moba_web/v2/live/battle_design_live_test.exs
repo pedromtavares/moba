@@ -6,7 +6,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     attacker = create_base_hero(%{gold: 10000}) |> Game.buy_item!(Game.get_item_by_code!("dagon"))
     defender = create_base_hero()
     battle = create_basic_battle(attacker, defender)
-    conn = init_test_session(conn, player_id: attacker.player_id)
+    conn = log_in_player(conn, player_id: attacker.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
     refute has_element?(view, "#battle-heading")
@@ -47,7 +47,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
       |> Moba.Repo.update!()
 
     battle = create_basic_battle(attacker, defender)
-    conn = init_test_session(conn, player_id: defender.player_id)
+    conn = log_in_player(conn, player_id: defender.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
     assert has_element?(
@@ -65,7 +65,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     Game.generate_targets!(hero)
     target = hero |> Game.list_targets() |> List.first() |> then(&Game.get_target!(&1.id))
     battle = target |> Game.start_pve_battle!() |> Engine.auto_finish_battle!()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
 
     for turn <- battle.turns do
@@ -101,7 +101,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
       [battle.id]
     )
 
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, modern, _} = live(conn, "/battles/#{battle.id}")
 
     for {turn, previous} <- Enum.zip(battle.turns, [nil | battle.turns]), battler <- [turn.attacker, turn.defender] do
@@ -150,7 +150,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
       [battle.id]
     )
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/battles/#{battle.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
     assert has_element?(view, "h2#battle-initiated", "Season match initiated by")
     assert has_element?(view, "#battle-competitive-result[data-result=victory]")
 
@@ -174,7 +174,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     Game.continue_duel!(Game.get_duel!(duel.id), enemy)
     battle = duel |> Map.get(:id) |> Game.get_duel!() |> Engine.first_duel_battle() |> Engine.auto_finish_battle!()
 
-    {:ok, winner, _} = live(init_test_session(conn, player_id: player.id), "/battles/#{battle.id}")
+    {:ok, winner, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
 
     assert has_element?(
              winner,
@@ -191,13 +191,13 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
              "Continue duel"
            )
 
-    {:ok, loser, _} = live(init_test_session(conn, player_id: opponent.id), "/battles/#{battle.id}")
+    {:ok, loser, _} = live(log_in_player(conn, player_id: opponent.id), "/battles/#{battle.id}")
     assert has_element?(loser, "#battle-competitive-result[data-result=defeat]")
 
     Game.continue_duel!(Game.get_duel!(duel.id), hero)
     Game.continue_duel!(Game.get_duel!(duel.id), enemy)
     rematch = duel.id |> Game.get_duel!() |> Engine.last_duel_battle() |> Engine.auto_finish_battle!()
-    {:ok, reversed, _} = live(init_test_session(conn, player_id: opponent.id), "/battles/#{rematch.id}")
+    {:ok, reversed, _} = live(log_in_player(conn, player_id: opponent.id), "/battles/#{rematch.id}")
 
     assert has_element?(
              reversed,
@@ -208,7 +208,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     refute has_element?(reversed, ".duel-victory-seal")
 
     spectator = create_player!()
-    {:ok, replay, _} = live(init_test_session(conn, player_id: spectator.id), "/battles/#{battle.id}")
+    {:ok, replay, _} = live(log_in_player(conn, player_id: spectator.id), "/battles/#{battle.id}")
     assert has_element?(replay, "#battle-competitive-result[data-result=complete]")
   end
 
@@ -232,7 +232,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     final = duel.id |> Game.get_duel!() |> Engine.last_duel_battle()
     refute final.finished
     assert final.initiator_player_id == player.id
-    session = init_test_session(conn, player_id: player.id)
+    session = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(session, "/battles/#{final.id}")
 
     render_click(view, "next-turn", %{"skill_id" => "", "item_id" => "", "hero_id" => "#{hero.id}"})
@@ -250,12 +250,12 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
 
     assert Game.get_duel!(duel.id).winner_player_id == player.id
 
-    {:ok, loser, _} = live(init_test_session(conn, player_id: opponent.id), "/battles/#{final.id}")
+    {:ok, loser, _} = live(log_in_player(conn, player_id: opponent.id), "/battles/#{final.id}")
     assert has_element?(loser, "#battle-competitive-result[data-stage=final][data-result=defeat]", "Duel defeat")
     refute has_element?(loser, ".duel-victory-seal")
 
     spectator = create_player!()
-    {:ok, replay, _} = live(init_test_session(conn, player_id: spectator.id), "/battles/#{final.id}")
+    {:ok, replay, _} = live(log_in_player(conn, player_id: spectator.id), "/battles/#{final.id}")
     assert has_element?(replay, "#battle-competitive-result[data-result=complete]", "Duel complete")
     refute has_element?(replay, ".duel-victory-seal")
 
@@ -271,14 +271,14 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     first = if battle.initiator_id == attacker.id, do: attacker, else: defender
     second = if battle.initiator_id == attacker.id, do: defender, else: attacker
 
-    {:ok, active, _} = live(init_test_session(conn, player_id: first.player_id), "/battles/#{battle.id}")
+    {:ok, active, _} = live(log_in_player(conn, player_id: first.player_id), "/battles/#{battle.id}")
     assert has_element?(active, "#battle-ready[data-state=ready]", "Make your first move")
     assert has_element?(active, "#attack-button[data-hero='#{first.id}']")
-    {:ok, waiting, _} = live(init_test_session(conn, player_id: second.player_id), "/battles/#{battle.id}")
+    {:ok, waiting, _} = live(log_in_player(conn, player_id: second.player_id), "/battles/#{battle.id}")
     assert has_element?(waiting, "#battle-ready[data-state=waiting]", "Waiting for #{first.name}")
     refute has_element?(waiting, "#attack-button")
     spectator = create_player!()
-    {:ok, watching, _} = live(init_test_session(conn, player_id: spectator.id), "/battles/#{battle.id}")
+    {:ok, watching, _} = live(log_in_player(conn, player_id: spectator.id), "/battles/#{battle.id}")
     assert has_element?(watching, "#battle-ready[data-state=waiting]", "The battle will appear here")
     refute has_element?(watching, "#attack-button")
   end
@@ -287,7 +287,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     hero = create_base_hero()
     battle = create_basic_battle(hero, create_base_hero()) |> Engine.auto_finish_battle!()
     Moba.Repo.update!(Ecto.Changeset.change(battle, type: "match", winner_id: nil))
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/battles/#{battle.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/battles/#{battle.id}")
     assert has_element?(view, "#battle-competitive-result[data-result=draw] #battle-result-title", "Draw")
     assert has_element?(view, "#battle-competitive-result", "Both heroes survived")
     refute has_element?(view, "#battle-competitive-result .battle-result-identity > img")

@@ -19,8 +19,8 @@ defmodule MobaWeb.V2.CreateLive do
     {:noreply, assign(socket, filter: filter, avatars: avatars)}
   end
 
-  def handle_event("pick-avatar", %{"id" => id}, %{assigns: %{cache_key: cache_key}} = socket) do
-    avatar = Game.get_avatar!(id)
+  def handle_event("pick-avatar", %{"id" => id}, %{assigns: %{cache_key: cache_key, all_avatars: avatars}} = socket) do
+    avatar = Enum.find(avatars, &(to_string(&1.id) == to_string(id)))
     put_cache(cache_key, avatar, [], nil)
 
     {:noreply,
@@ -43,8 +43,8 @@ defmodule MobaWeb.V2.CreateLive do
         %{"id" => id},
         %{assigns: %{custom: true, cache_key: cache_key, selected_avatar: selected_avatar} = assigns} = socket
       ) do
-    skill = Game.get_skill!(id)
-    selected_skills = manage_skills(assigns.selected_skills, skill)
+    skill = Enum.find(assigns.skills, &(to_string(&1.id) == to_string(id)))
+    selected_skills = if skill, do: manage_skills(assigns.selected_skills, skill), else: assigns.selected_skills
     put_cache(cache_key, selected_avatar, selected_skills, nil)
     {:noreply, assign(socket, selected_skills: selected_skills, selected_build_index: nil)}
   end
@@ -56,10 +56,14 @@ defmodule MobaWeb.V2.CreateLive do
         %{"number" => index},
         %{assigns: %{cache_key: cache_key, selected_avatar: selected_avatar}} = socket
       ) do
-    index = String.to_integer(index)
-    selected_skills = selected_avatar.role |> Game.skill_build_for(index) |> elem(0)
-    put_cache(cache_key, selected_avatar, selected_skills, index)
-    {:noreply, assign(socket, selected_skills: selected_skills, selected_build_index: index)}
+    with true <- not is_nil(selected_avatar),
+         {index, ""} when index >= 0 <- Integer.parse(to_string(index)),
+         {selected_skills, _} <- Game.skill_build_for(selected_avatar.role, index) do
+      put_cache(cache_key, selected_avatar, selected_skills, index)
+      {:noreply, assign(socket, selected_skills: selected_skills, selected_build_index: index)}
+    else
+      _ -> {:noreply, socket}
+    end
   end
 
   def handle_event("toggle-custom", _, %{assigns: %{custom: custom}} = socket) do
@@ -81,10 +85,16 @@ defmodule MobaWeb.V2.CreateLive do
         %{assigns: %{current_player: player, selected_avatar: avatar, selected_skills: selected_skills, name: name}} =
           socket
       ) do
-    skills = selected_skills |> Enum.map(& &1.id) |> Game.list_chosen_skills()
-    hero_name = hero_name(player, avatar, name, socket)
-    Game.create_current_pve_hero!(%{name: hero_name}, player, avatar, skills)
-    {:noreply, socket |> push_navigate(to: preview_path(socket, "/training"))}
+    if player && Map.get(player, :id) && avatar do
+      hero_name = hero_name(player, avatar, name, socket)
+
+      case Game.invoke_hero(player, %{name: hero_name}, avatar.id, Enum.map(selected_skills, & &1.id)) do
+        {:ok, _} -> {:noreply, push_navigate(socket, to: preview_path(socket, "/training"))}
+        {:error, _} -> {:noreply, assign(socket, error: "Choose an unlocked hero and three unlocked skills.")}
+      end
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("validate", %{"name" => name}, socket) do

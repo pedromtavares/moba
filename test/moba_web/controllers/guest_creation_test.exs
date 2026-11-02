@@ -106,5 +106,5 @@ defmodule MobaWeb.GuestCreationTest do
     assert is_nil(get_session(retry, :player_id))
   end
 
-  defp build_params, do: %{"avatar" => base_avatar().id, "skills" => Enum.map(base_skills(), & &1.id)}
+  defp build_params, do: %{"avatar" => base_avatar().id, "skills" => Enum.map(creation_skills(), & &1.id)}
 end

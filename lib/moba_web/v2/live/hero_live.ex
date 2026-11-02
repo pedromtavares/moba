@@ -10,7 +10,22 @@ defmodule MobaWeb.V2.HeroLive do
   embed_templates "hero_live/*"
 
   def mount(_params, _session, socket) do
-    {:ok, socket_init(socket)}
+    socket =
+      attach_hook(socket_init(socket), :authorize_hero_changes, :handle_event, fn event, _, socket ->
+        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit buy sell finish-transmute) do
+          hero = Game.get_hero!(socket.assigns.hero.id)
+
+          if hero.player_id == socket.assigns.current_player.id do
+            {:cont, assign(socket, hero: hero)}
+          else
+            {:halt, socket}
+          end
+        else
+          {:cont, socket}
+        end
+      end)
+
+    {:ok, socket}
   end
 
   def handle_params(%{"id" => id}, _uri, socket) do

@@ -31,17 +31,22 @@ defmodule MobaWeb.V2.BattleLive do
 
   def handle_event(
         "next-turn",
-        %{"skill_id" => skill_id, "item_id" => item_id, "hero_id" => hero_id},
+        %{"skill_id" => skill_id, "item_id" => item_id, "hero_id" => _hero_id},
         %{assigns: %{battle: %{id: battle_id}}} = socket
       ) do
     with_battle(socket, battle_id, fn battle ->
       skill = skill_id != "" && Game.get_skill!(skill_id)
       item = item_id != "" && Game.get_item!(item_id)
       last_turn = List.last(battle.turns)
-      valid_attacker? = is_nil(last_turn) || last_turn.defender.hero_id == String.to_integer(hero_id)
+
+      valid_attacker? =
+        active_attacker?(battle, last_turn, socket.assigns.current_player) ||
+          active_defender?(battle, last_turn, socket.assigns.current_player)
 
       if valid_attacker? do
-        socket = next_turn(socket, battle, %{skill: skill, item: item}, last_turn)
+        socket =
+          next_turn(socket, battle, %{skill: skill, item: item, player_id: socket.assigns.current_player.id}, last_turn)
+
         check_tutorial(socket, socket.assigns.battle)
       else
         socket
@@ -55,7 +60,7 @@ defmodule MobaWeb.V2.BattleLive do
       timer = turn_timer(last_turn, battle)
 
       if timer < 0 do
-        next_turn(socket, battle, %{auto: true}, last_turn)
+        next_turn(socket, battle, %{auto: true, timeout: true, player_id: socket.assigns.current_player.id}, last_turn)
       else
         socket
       end
@@ -122,7 +127,8 @@ defmodule MobaWeb.V2.BattleLive do
 
   defp check_stuck(%{assigns: %{last_turn: last_turn, battle: %{type: type} = battle}} = socket)
        when not is_nil(last_turn) and type != "duel" do
-    if battle.defender.bot_difficulty && last_turn.defender.hero_id == battle.defender_id do
+    if socket.assigns.current_player.id in [battle.attacker_player_id, battle.defender_player_id] &&
+         battle.defender.bot_difficulty && last_turn.defender.hero_id == battle.defender_id do
       next_turn(socket, battle, %{auto: true}, last_turn)
     else
       socket

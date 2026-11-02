@@ -31,7 +31,7 @@ defmodule MobaWeb.PulseNovaLiveTest do
     attacker = Game.update_hero!(attacker, %{skill_order: [nova.code, normal.code]}, nil, [nova, normal])
     defender = create_base_hero(%{total_hp: 5000, atk: 0, bot_difficulty: "test"})
     battle = create_basic_battle(attacker, defender)
-    conn = init_test_session(conn, player_id: attacker.player_id)
+    conn = log_in_player(conn, player_id: attacker.player_id)
     {:ok, view, _} = live(conn, "/battles/#{battle.id}")
     assert has_element?(view, "#active-skill-#{nova.id}.can-use")
 

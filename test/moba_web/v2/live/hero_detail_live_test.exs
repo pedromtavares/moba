@@ -21,7 +21,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
 
   test "owners open customization on demand and closing resets the HUD", %{conn: conn} do
     hero = create_base_hero()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
     refute has_element?(view, "#hero-bar")
@@ -51,7 +51,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
 
   test "guest owners can open their hero HUD", %{conn: conn} do
     hero = create_base_hero(%{}, Game.create_player!(%{user_id: nil}))
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
     refute has_element?(view, "#hero-detail-player")
     refute has_element?(view, "#hero-bar")
     view |> element("#customize-hero") |> render_click()
@@ -116,7 +116,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     hero = create_base_hero(%{finished_at: Timex.now(), league_tier: 4, pve_tier: 0, total_gold_farm: 10_000})
     peer = create_base_hero(%{finished_at: Timex.now(), league_tier: 4, total_gold_farm: 20_000})
     higher = create_base_hero(%{finished_at: Timex.now(), league_tier: 6, total_gold_farm: 30_000})
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
 
     assert has_element?(view, "#hero-leaderboard-title", "Diamond League rankings")
     assert has_element?(view, "#ranking-#{hero.id} .hero-ranking-position", "#2")
@@ -128,7 +128,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
 
   test "an unfinished run has an inviting empty state and ranks when training completes", %{conn: conn} do
     hero = create_base_hero(%{league_tier: 2})
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
 
     assert has_element?(view, "#hero-league-empty")
     assert has_element?(view, "#hero-league-placement", "Finish training")
@@ -146,7 +146,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
 
   test "Grandmaster milestones cover imperfect and perfect runs", %{conn: conn} do
     hero = create_base_hero(%{finished_at: Timex.now(), league_tier: 6, pve_tier: 2})
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
     assert has_element?(view, "#hero-league-milestone-title", "Aim for a perfect 60K")
 
     Game.update_hero!(hero, %{total_xp_farm: 30_000, total_gold_farm: 30_000})
@@ -156,7 +156,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
 
   test "Grandmasters only show global rankings, including after promotion", %{conn: conn} do
     hero = create_base_hero(%{league_tier: 5, pve_ranking: 123})
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
     assert has_element?(view, "#hero-ranking-league-tab[aria-pressed=true]")
 
     Game.update_hero!(hero, %{league_tier: 6})
@@ -168,7 +168,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     render_click(view, "ranking-tab", %{"type" => "league"})
     assert has_element?(view, "#hero-leaderboard-title", "Global rankings")
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
     refute has_element?(view, "#hero-ranking-switcher")
     assert has_element?(view, "#hero-ranking-standing strong", "#123")
   end
@@ -178,7 +178,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
 
     for tier <- 0..5 do
       hero = create_base_hero(%{league_tier: tier, pve_tier: 2}, Game.get_player!(player.id))
-      {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/hero/#{hero.id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/hero/#{hero.id}")
 
       assert has_element?(view, "#hero-league-milestone-title", "Reach #{Moba.leagues()[tier + 1]}")
 
@@ -191,7 +191,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
   test "Master runs explain the Grandmaster account unlock", %{conn: conn} do
     player = create_player!(%{pve_tier: 1})
     hero = create_base_hero(%{league_tier: 5, pve_tier: 1, finished_at: Timex.now()}, player)
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/hero/#{hero.id}")
 
     assert has_element?(view, "#hero-league-milestone-title", "Unlock Grandmaster League")
     assert has_element?(view, "#hero-league-milestone", "5 different Avatars")
@@ -212,7 +212,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
   test "an old completed Gold run gets a league rank even without a global rank", %{conn: conn} do
     hero = create_base_hero(%{finished_at: ~U[2021-01-01 12:00:00Z], league_tier: 2})
     hero = hero |> Ecto.Changeset.change(inserted_at: ~N[2021-01-01 11:30:00]) |> Moba.Repo.update!()
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
 
     assert has_element?(view, "#hero-leaderboard-title", "Gold League rankings")
     assert has_element?(view, "#ranking-#{hero.id} .hero-ranking-position", "#1")
@@ -225,7 +225,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
   test "Bronze and Silver offer global rankings and explain the Gold threshold", %{conn: conn} do
     for tier <- 0..1 do
       hero = create_base_hero(%{league_tier: tier})
-      {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
       assert has_element?(view, "#hero-ranking-league-tab[disabled]")
       assert has_element?(view, "#hero-ranking-global-tab[aria-pressed=true]")
       assert has_element?(view, "#hero-ranking-minimum-league", "League rankings begin at Gold")

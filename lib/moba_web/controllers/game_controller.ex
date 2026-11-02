@@ -51,21 +51,25 @@ defmodule MobaWeb.GameController do
         redirect(conn, to: preview_path(conn, ~p"/"))
 
       session_key = get_session(conn, :cache_key) ->
-        avatar = Game.get_avatar!(selected_avatar)
-        skills = Game.list_chosen_skills(selected_skills)
-        player = Game.start_guest!(session_key, avatar, skills)
+        case Game.creation_loadout(nil, selected_avatar, selected_skills) do
+          {:ok, avatar, skills} ->
+            player = Game.start_guest!(session_key, avatar, skills)
 
-        if player.user_id do
-          redirect(conn, to: preview_path(conn, ~p"/users/log_in"))
-        else
-          path =
-            if player.current_pve_hero && is_nil(player.current_pve_hero.finished_at),
-              do: ~p"/training",
-              else: ~p"/base"
+            if player.user_id do
+              redirect(conn, to: preview_path(conn, ~p"/users/log_in"))
+            else
+              path =
+                if player.current_pve_hero && is_nil(player.current_pve_hero.finished_at),
+                  do: ~p"/training",
+                  else: ~p"/base"
 
-          conn
-          |> put_session(:player_id, player.id)
-          |> redirect(to: preview_path(conn, path))
+              conn
+              |> put_session(:player_id, player.id)
+              |> redirect(to: preview_path(conn, path))
+            end
+
+          {:error, _} ->
+            conn |> put_flash(:error, "Choose a valid starting build.") |> redirect(to: "/start")
         end
 
       true ->

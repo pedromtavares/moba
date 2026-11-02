@@ -8,7 +8,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     completed = Game.create_duel!(hero.player, opponent, false)
     Game.Duels.finish!(completed, %{winner: hero.player, attacker_pvp_points: 5, defender_pvp_points: -5})
     pending = Game.create_duel!(hero.player, opponent, false)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/arena")
 
     assert has_element?(view, "#pvp-progression #resume-arena-duel", "Resume 1v1")
@@ -30,7 +30,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     end
 
     pending = create_match(player, opponent)
-    conn = init_test_session(conn, player_id: player.id)
+    conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/arena")
     assert has_element?(view, "#resume-arena-match[href='/matches/#{pending.id}']")
     refute has_element?(view, "#arena-daily-limit")
@@ -47,7 +47,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
 
   test "empty team states guide creation and available-hero browsing", %{conn: conn} do
     hero = create_base_hero()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/arena/edit")
     assert has_element?(view, "#arena-no-teams")
     assert has_element?(view, "#arena-no-selected-team")
@@ -65,7 +65,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
   test "empty history and match pick tabs show clear next actions", %{conn: conn} do
     hero = create_base_hero()
     opponent = create_player!()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, arena, _} = live(conn, "/arena")
     assert has_element?(arena, "#arena-no-matches")
     arena |> element("#arena-history-duels-tab") |> render_click()
@@ -92,7 +92,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     opponent = create_player!()
     picks = for index <- 1..5, do: Game.create_hero!(%{name: "Hero #{index}"}, player, base_avatar(), base_skills())
     match = create_match(player, opponent, %{player_picks: Enum.map(picks, & &1.id)})
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/matches/#{match.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
 
     assert has_element?(view, "#match-pick-status-title", "Lineup ready")
     assert has_element?(view, "#start-match-button[phx-click=start].battle-primary")

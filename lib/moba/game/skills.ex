@@ -5,7 +5,8 @@ defmodule Moba.Game.Skills do
   """
 
   alias Moba.{Repo, Game}
-  alias Game.Schema.Skill
+  alias Game.Schema.{Hero, Skill}
+  import Ecto.Query
   alias Game.Query.SkillQuery
 
   # -------------------------------- PUBLIC API
@@ -95,18 +96,24 @@ defmodule Moba.Game.Skills do
   @doc """
   Levels up a skill by replacing the current one (via its code) with its higher level version
   """
-  def level_up_skill!(%{skills: skills} = hero, code) do
-    current = Enum.find(skills, fn skill -> skill.code == code end)
+  def level_up_skill!(hero, code) do
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from h in Hero, where: h.id == ^hero.id, lock: "FOR UPDATE")
+        hero = Game.get_hero!(hero.id)
+        current = Enum.find(hero.skills, &(&1.code == code))
 
-    if current && can_level_skill?(hero, current) && !max_level?(current) do
-      leveled = get_skill_by_code!(code, true, current.level + 1)
-      replaced = skills -- [current]
-      added = replaced ++ [leveled]
+        if current && can_level_skill?(hero, current) && !max_level?(current) do
+          leveled = get_skill_by_code!(code, true, current.level + 1)
+          skills = (hero.skills -- [current]) ++ [leveled]
+          Game.Heroes.update!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, skills)
+        else
+          hero
+        end
+      end)
 
-      Game.update_hero!(hero, %{skill_levels_available: hero.skill_levels_available - 1}, nil, added)
-    else
-      hero
-    end
+    Game.broadcast_to_hero(result.id)
+    result
   end
 
   def list_all_current_skills do

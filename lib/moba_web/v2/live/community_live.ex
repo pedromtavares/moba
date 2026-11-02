@@ -40,20 +40,25 @@ defmodule MobaWeb.V2.CommunityLive do
     length = String.length(body)
 
     if length > 1 && length <= 500 do
-      Accounts.create_message!(%{
-        body: body,
-        author: user.username,
-        tier: player.pve_tier,
-        channel: "community",
-        topic: "general",
-        is_admin: user.is_admin,
-        user_id: user.id
-      })
+      case Accounts.create_message(%{
+             body: body,
+             author: user.username,
+             tier: player.pve_tier,
+             channel: "community",
+             topic: "general",
+             is_admin: user.is_admin,
+             user_id: user.id
+           }) do
+        {:ok, _message} ->
+          {:noreply,
+           socket
+           |> clear_flash(:error)
+           |> assign(form: to_form(Accounts.change_message()))
+           |> push_event("community-message-sent", %{})}
 
-      {:noreply,
-       socket
-       |> assign(form: to_form(Accounts.change_message()))
-       |> push_event("community-message-sent", %{})}
+        {:error, :rate_limited} ->
+          {:noreply, put_flash(socket, :error, "Please wait 5 seconds before sending another message.")}
+      end
     else
       {:noreply, socket}
     end
@@ -61,20 +66,25 @@ defmodule MobaWeb.V2.CommunityLive do
 
   def handle_event("create-update", params, %{assigns: %{current_user: user}} = socket) do
     if user.is_admin do
-      Accounts.create_message!(%{
-        title: params["message"]["title"],
-        body: params["message"]["body"],
-        author: user.username,
-        channel: "community",
-        topic: "updates",
-        is_admin: true,
-        user_id: user.id
-      })
+      case Accounts.create_message(%{
+             title: params["message"]["title"],
+             body: params["message"]["body"],
+             author: user.username,
+             channel: "community",
+             topic: "updates",
+             is_admin: true,
+             user_id: user.id
+           }) do
+        {:ok, _message} ->
+          {:noreply,
+           socket
+           |> clear_flash(:error)
+           |> assign(form: to_form(Accounts.change_message()))
+           |> push_event("community-update-sent", %{})}
 
-      {:noreply,
-       socket
-       |> assign(form: to_form(Accounts.change_message()))
-       |> push_event("community-update-sent", %{})}
+        {:error, :rate_limited} ->
+          {:noreply, put_flash(socket, :error, "Please wait 5 seconds before sending another message.")}
+      end
     else
       {:noreply, socket}
     end

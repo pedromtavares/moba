@@ -57,7 +57,8 @@ defmodule Moba.ArenaRewardsTest do
     player = create_player!()
     opponent = create_player!()
     balance = Accounts.get_user!(player.user_id).shard_count
-    Game.create_duel!(player, opponent, true)
+    duel = Game.create_duel!(player, opponent, true)
+    duel |> Game.Schema.Duel.changeset(%{phase: "finished"}) |> Repo.update!()
     Game.create_duel!(player, opponent, true)
     assert Accounts.get_user!(player.user_id).shard_count == balance + 40
   end
@@ -79,7 +80,8 @@ defmodule Moba.ArenaRewardsTest do
           player_picks: [],
           opponent_picks: [],
           generated_picks: [],
-          type: "manual"
+          type: "manual",
+          phase: "scored"
         },
         attrs
       )

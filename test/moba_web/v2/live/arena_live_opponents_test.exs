@@ -12,7 +12,7 @@ defmodule MobaWeb.V2.ArenaLiveOpponentsTest do
     Accounts.set_online_now(Game.get_player!(opponent.id).user)
     MobaWeb.Presence.track_player(self(), opponent)
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-live-section #arena-live-pvp")
     assert has_element?(view, "#arena-live-section #duel-player-#{opponent.id}", "54 AR")
     assert has_element?(view, "#duel-player-#{opponent.id} [title='Arena Rating'][data-toggle=tooltip]", "54 AR")
@@ -43,7 +43,7 @@ defmodule MobaWeb.V2.ArenaLiveOpponentsTest do
       Game.update_player!(cooling_player, %{last_challenge_at: Timex.now()})
       MobaWeb.Presence.track_player(self(), opponent)
 
-      {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+      {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
       assert has_element?(view, "#cannot-duel-#{opponent.id}[disabled]", "Cooldown")
       refute has_element?(view, "#can-duel-#{opponent.id}")
       assert Game.list_duels(player) == []
@@ -53,10 +53,10 @@ defmodule MobaWeb.V2.ArenaLiveOpponentsTest do
   test "availability toggles refresh other players and synchronize the player's other tabs", %{conn: conn} do
     viewer = create_player!(%{status: "available"})
     opponent = create_player!(%{status: "unavailable"})
-    session = init_test_session(conn, player_id: viewer.id)
+    session = log_in_player(conn, player_id: viewer.id)
     {:ok, first_tab, _} = live(session, "/arena")
     {:ok, second_tab, _} = live(session, "/arena")
-    {:ok, opponent_tab, _} = live(init_test_session(conn, player_id: opponent.id), "/arena")
+    {:ok, opponent_tab, _} = live(log_in_player(conn, player_id: opponent.id), "/arena")
     refute has_element?(first_tab, "#duel-player-#{opponent.id}")
 
     render_click(opponent_tab, "set-status", %{"value" => "on"})
@@ -78,7 +78,7 @@ defmodule MobaWeb.V2.ArenaLiveOpponentsTest do
   test "presence changes immediately after mounting are never discarded", %{conn: conn} do
     viewer = create_player!(%{status: "available"})
     opponent = create_player!(%{status: "available"})
-    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/arena")
     refute has_element?(view, "#duel-player-#{opponent.id}")
 
     {:ok, _} = MobaWeb.Presence.track_player(self(), opponent)

@@ -62,10 +62,15 @@ defmodule MobaWeb.Admin.UserController do
 
   def delete(conn, %{"id" => id}) do
     user = Admin.get_user!(id)
-    {:ok, _user} = Admin.delete_user(user)
 
-    conn
-    |> put_flash(:info, "User deleted successfully.")
-    |> redirect(to: ~p"/admin/users")
+    case Admin.delete_user(user) do
+      {:ok, _user} ->
+        conn |> put_flash(:info, "User deleted successfully.") |> redirect(to: ~p"/admin/users")
+
+      {:error, _changeset} ->
+        conn
+        |> put_flash(:error, "This user could not be deleted because records still reference the account.")
+        |> redirect(to: ~p"/admin/users/#{user.id}")
+    end
   end
 end

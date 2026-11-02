@@ -5,6 +5,8 @@ defmodule Moba.Engine.Core do
 
   alias Moba.{Engine, Repo}
   alias Engine.Core.{Duel, Helper, Match, League, Logger, Processor, Pve, Turns}
+  alias Engine.Schema.Battle
+  import Ecto.Query
 
   @doc """
   Automatically continues a battle until it finishes
@@ -18,11 +20,17 @@ defmodule Moba.Engine.Core do
   Creates a battle and jumps to a state where the attacker can start (case they are not the initiator)
   """
   def begin_battle!(battle, opts) do
-    battle
-    |> determine_initiator()
-    |> Repo.insert!()
-    |> maybe_skip_next_turn(opts)
-    |> maybe_finalize_battle()
+    {:ok, result} =
+      Repo.transaction(fn ->
+        battle
+        |> Turns.snapshot_loadouts()
+        |> determine_initiator()
+        |> Repo.insert!()
+        |> maybe_skip_next_turn(opts)
+        |> maybe_finalize_battle()
+      end)
+
+    result
   end
 
   defdelegate build_turn(battle, orders), to: Turns
@@ -43,10 +51,52 @@ defmodule Moba.Engine.Core do
   def continue_battle!(%{finished: true} = battle, _), do: battle
 
   def continue_battle!(battle, orders) do
-    battle
-    |> create_turn!(orders)
-    |> maybe_finalize_battle()
+    {:ok, result} =
+      Repo.transaction(fn ->
+        Repo.one!(from b in Battle, where: b.id == ^battle.id, lock: "FOR UPDATE")
+        stored = Engine.get_battle!(battle.id)
+
+        # Pre-upgrade battles acquire a fixed loadout on their next accepted turn.
+        stored =
+          if !stored.finished && stored.loadouts == %{} do
+            Ecto.Changeset.change(stored, loadouts: Turns.snapshot_loadouts(stored).loadouts) |> Repo.update!()
+          else
+            stored
+          end
+
+        if !stored.finished && turn_number(stored) == turn_number(battle) && action_allowed?(stored, orders) do
+          stored |> create_turn!(orders) |> maybe_finalize_battle()
+        else
+          stored
+        end
+      end)
+
+    result
   end
+
+  defp turn_number(battle) do
+    case List.last(battle.turns) do
+      nil -> 0
+      turn -> turn.number
+    end
+  end
+
+  defp action_allowed?(%{type: "match"}, %{player_id: _}), do: false
+
+  defp action_allowed?(battle, %{player_id: player_id, timeout: true}) do
+    last = List.last(battle.turns)
+    time = if last, do: last.inserted_at, else: battle.inserted_at
+
+    player_id in [battle.attacker_player_id, battle.defender_player_id] &&
+      DateTime.diff(DateTime.utc_now(), time) > Moba.turn_timer_in_seconds()
+  end
+
+  defp action_allowed?(battle, %{player_id: player_id}) do
+    turn = build_turn(battle, %{})
+    !is_nil(player_id) && turn.attacker.player_id == player_id
+  end
+
+  defp action_allowed?(_, _), do: true
 
   def effect_descriptions(turn), do: Logger.descriptions_for(turn)
 

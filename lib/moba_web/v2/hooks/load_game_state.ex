@@ -17,7 +17,11 @@ defmodule MobaWeb.V2.Hooks.LoadGameState do
       end)
 
     if player do
-      player.user && Accounts.set_online_now(player.user)
+      if player.user do
+        Accounts.set_online_now(player.user)
+      else
+        Game.Players.touch_guest(player)
+      end
 
       socket =
         socket

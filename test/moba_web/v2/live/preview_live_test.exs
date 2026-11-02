@@ -81,7 +81,7 @@ defmodule MobaWeb.V2.PreviewLiveTest do
         type: "manual"
       })
 
-    conn = conn |> init_test_session(player_id: hero.player_id)
+    conn = conn |> log_in_player(player_id: hero.player_id)
 
     for {path, selector} <- [
           {"/battles/#{battle.id}", "#battle-page"},
@@ -120,7 +120,7 @@ defmodule MobaWeb.V2.PreviewLiveTest do
     response =
       post(conn, "/start", %{
         "avatar" => base_avatar().id,
-        "skills" => Enum.map(base_skills(), & &1.id)
+        "skills" => Enum.map(creation_skills(), & &1.id)
       })
 
     assert redirected_to(response) == "/training"

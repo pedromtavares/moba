@@ -5,8 +5,8 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
   test "challenges appear across preview pages and declining updates both players", %{conn: conn} do
     hero = create_base_hero()
     other = create_base_hero()
-    {:ok, sender_page, _} = live(init_test_session(conn, player_id: hero.player_id), "/base")
-    {:ok, receiver_page, _} = live(init_test_session(conn, player_id: other.player_id), "/hero/#{other.id}")
+    {:ok, sender_page, _} = live(log_in_player(conn, player_id: hero.player_id), "/base")
+    {:ok, receiver_page, _} = live(log_in_player(conn, player_id: other.player_id), "/hero/#{other.id}")
     sender = find_live_child(sender_page, "duel-challenges")
     receiver = find_live_child(receiver_page, "duel-challenges")
 
@@ -31,8 +31,8 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
   test "accept creates a duel and both players stay in the preview routes", %{conn: conn} do
     hero = create_base_hero()
     other = create_base_hero()
-    {:ok, sender_page, _} = live(init_test_session(conn, player_id: hero.player_id), "/base")
-    {:ok, receiver_page, _} = live(init_test_session(conn, player_id: other.player_id), "/base")
+    {:ok, sender_page, _} = live(log_in_player(conn, player_id: hero.player_id), "/base")
+    {:ok, receiver_page, _} = live(log_in_player(conn, player_id: other.player_id), "/base")
     receiver = find_live_child(receiver_page, "duel-challenges")
     Game.duel_challenge(hero.player, other.player)
     assert has_element?(receiver, "#duel-challenge-accept[data-game-fullscreen]")
@@ -69,7 +69,7 @@ defmodule MobaWeb.V2.DuelChallengeLiveTest do
 
   test "canonical pages mount the challenge overlay", %{conn: conn} do
     hero = create_base_hero()
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/base")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/base")
     assert has_element?(view, "#duel-challenges")
   end
 

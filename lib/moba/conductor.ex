@@ -6,6 +6,7 @@ defmodule Moba.Conductor do
   alias Moba.{Game, Repo}
   alias Game.Query.{AvatarQuery, HeroQuery, ItemQuery, PlayerQuery, SkillQuery}
 
+  import Ecto.Query
   require Logger
 
   @doc """
@@ -13,48 +14,77 @@ defmodule Moba.Conductor do
   so Moba.Server knows when to run this again, currently every 30 mins.
   """
   def season_tick! do
-    auto_matchmaking()
-    Moba.update_pvp_rankings()
-    Game.update_season_ranking!()
-
-    Moba.current_season()
-    |> Game.update_season!(%{last_server_update_at: DateTime.utc_now()})
+    run_due_tick(:last_server_update_at, 30 * 60, fn ->
+      auto_matchmaking()
+      Game.update_season_ranking!()
+    end)
   end
 
   def pvp_tick! do
-    Game.update_daily_ranking!(true)
-    Repo.update_all(PlayerQuery.non_bots(), set: [daily_matches: 0, daily_wins: 0])
-    Moba.update_pvp_rankings()
+    run_due_tick(:last_pvp_update_at, 24 * 60 * 60, fn ->
+      Game.update_daily_ranking!(true)
+      Repo.update_all(PlayerQuery.current_season() |> PlayerQuery.non_bots(), set: [daily_matches: 0, daily_wins: 0])
+    end)
+  end
 
-    Moba.current_season()
-    |> Game.update_season!(%{last_pvp_update_at: DateTime.utc_now()})
+  defp run_due_tick(field, interval, work) do
+    {season, ran?} =
+      with_season_lock(fn season ->
+        last = Map.fetch!(season, field)
+
+        if is_nil(last) || DateTime.diff(DateTime.utc_now(), last) >= interval do
+          work.()
+          {Game.update_season!(season, %{field => DateTime.utc_now()}), true}
+        else
+          {season, false}
+        end
+      end)
+
+    if ran?, do: Moba.update_pvp_rankings()
+    season
+  end
+
+  defp with_season_lock(work) do
+    {:ok, result} =
+      Repo.transaction(
+        fn ->
+          season_id = Game.current_season().id
+          season = Repo.one!(from s in Game.Schema.Season, where: s.id == ^season_id, lock: "FOR UPDATE")
+          work.(season)
+        end,
+        timeout: :infinity
+      )
+
+    result
   end
 
   # Generates new resources based on canon so edits in the admin panel don't affect the current resources
   # also updating current records to current: false 
   def regenerate_resources! do
-    resource_uuid = UUID.uuid1()
-    Logger.info("Generating skills...")
+    with_season_lock(fn _season ->
+      resource_uuid = UUID.uuid1()
+      Logger.info("Generating skills...")
 
-    ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(resource_uuid) |> Enum.map(& &1.id)
-    Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), set: [current: false])
+      ids = SkillQuery.base_canon() |> Repo.all() |> duplicate_resources!(resource_uuid) |> Enum.map(& &1.id)
+      Repo.update_all(SkillQuery.current() |> SkillQuery.exclude(ids), set: [current: false])
 
-    Logger.info("Generating items...")
+      Logger.info("Generating items...")
 
-    ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(resource_uuid) |> Enum.map(& &1.id)
-    Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), set: [current: false])
+      ids = ItemQuery.base_canon() |> Repo.all() |> duplicate_resources!(resource_uuid) |> Enum.map(& &1.id)
+      Repo.update_all(ItemQuery.current() |> ItemQuery.exclude(ids), set: [current: false])
 
-    Logger.info("Generating avatars...")
+      Logger.info("Generating avatars...")
 
-    ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(resource_uuid) |> Enum.map(& &1.id)
-    Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
+      ids = AvatarQuery.base_canon() |> Repo.all() |> duplicate_avatars!(resource_uuid) |> Enum.map(& &1.id)
+      Repo.update_all(AvatarQuery.current() |> AvatarQuery.exclude(ids), set: [current: false])
 
-    # updates all existing hero-record relations to link to the newly created resources
-    update_hero_skills()
-    update_hero_items()
-    update_hero_avatars()
+      # updates all existing hero-record relations to link to the newly created resources
+      update_hero_skills()
+      update_hero_items()
+      update_hero_avatars()
 
-    Game.update_season!(Moba.current_season(), %{resource_uuid: resource_uuid})
+      Game.update_season!(Moba.current_season(), %{resource_uuid: resource_uuid})
+    end)
   end
 
   def regenerate_bots!(level_range \\ 0..35) do

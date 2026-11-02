@@ -3,7 +3,8 @@ defmodule Moba.Game.Quests do
   Manages tracking of player PVE progression
   """
 
-  alias Moba.Game
+  alias Moba.{Game, Repo}
+  import Ecto.Query
   alias Game.Schema.PveProgression
 
   @platinum_league_tier Moba.platinum_league_tier()
@@ -84,22 +85,36 @@ defmodule Moba.Game.Quests do
 
   def track_pve_progression!(%{player: player, league_tier: league_tier, avatar: %{code: avatar_code}} = hero)
       when league_tier >= @platinum_league_tier do
-    progression = player.pve_progression || %PveProgression{}
+    {:ok, updated} =
+      Repo.transaction(fn ->
+        stored = Repo.get!(Game.Schema.Player, player.id)
 
-    updates =
-      progression
-      |> track(:season_codes, avatar_code, true)
-      |> track(:master_codes, avatar_code, league_tier >= Moba.master_league_tier())
-      |> track(:grandmaster_codes, avatar_code, league_tier >= Moba.max_league_tier())
-      |> track(
-        :invoker_codes,
-        avatar_code,
-        league_tier >= Moba.max_league_tier() && hero.total_xp_farm + hero.total_gold_farm >= Moba.max_total_farm()
-      )
-      |> maybe_complete(player)
+        if stored.user_id do
+          Repo.one!(from u in Moba.Accounts.Schema.User, where: u.id == ^stored.user_id, lock: "FOR UPDATE")
+        end
 
-    if updates[:shard_prize], do: Moba.reward_shards!(player, updates[:shard_prize])
-    Game.update_player!(player, updates)
+        player =
+          Repo.one!(from p in Game.Schema.Player, where: p.id == ^player.id, lock: "FOR UPDATE") |> Repo.preload(:user)
+
+        progression = player.pve_progression || %PveProgression{}
+
+        updates =
+          progression
+          |> track(:season_codes, avatar_code, true)
+          |> track(:master_codes, avatar_code, league_tier >= Moba.master_league_tier())
+          |> track(:grandmaster_codes, avatar_code, league_tier >= Moba.max_league_tier())
+          |> track(
+            :invoker_codes,
+            avatar_code,
+            league_tier >= Moba.max_league_tier() && hero.total_xp_farm + hero.total_gold_farm >= Moba.max_total_farm()
+          )
+          |> maybe_complete(player)
+
+        if updates[:shard_prize], do: Moba.reward_shards!(player, updates[:shard_prize])
+        Game.update_player!(player, updates)
+      end)
+
+    updated
   end
 
   def track_pve_progression!(hero), do: hero

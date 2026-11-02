@@ -7,7 +7,7 @@ defmodule MobaWeb.V2.BattlesLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, view, html} = live(conn, "/battles")
 
@@ -25,7 +25,7 @@ defmodule MobaWeb.V2.BattlesLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, view, _html} = live(conn, "/battles")
 
@@ -40,7 +40,7 @@ defmodule MobaWeb.V2.BattlesLiveTest do
 
   test "preview history has useful empty states and returns to training", %{conn: conn} do
     hero = create_base_hero()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/battles")
 
     refute has_element?(view, ".history-heading")
@@ -61,7 +61,7 @@ defmodule MobaWeb.V2.BattlesLiveTest do
     battle = target |> Game.start_pve_battle!() |> Engine.auto_finish_battle!()
     battle = Engine.update_battle!(battle, %{defender_snapshot: %{level: battle.defender.level}})
     Game.update_hero!(battle.defender, %{level: battle.defender_snapshot.level + 10})
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/battles")
 
     result =
@@ -93,7 +93,7 @@ defmodule MobaWeb.V2.BattlesLiveTest do
     cleared = hero |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
     hero = Game.get_hero!(hero.id)
     promoted = hero |> Game.start_league_battle!() |> Engine.auto_finish_battle!()
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/battles")
 
     refute has_element?(view, "#history-league-empty")
@@ -107,7 +107,7 @@ defmodule MobaWeb.V2.BattlesLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     live(conn, "/battles") |> follow_redirect(conn, "/base")
   end

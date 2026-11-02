@@ -10,7 +10,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       Moba.Repo.insert!(%Game.Schema.Target{attacker_id: hero.id, defender_id: defender.id, difficulty: "strong"})
     end
 
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     original_targets = Game.list_targets(hero)
     expected = original_targets |> Enum.sort_by(& &1.defender.level) |> Enum.map(&"gank-#{&1.id}")
     original_order = Enum.map(original_targets, &"gank-#{&1.id}")
@@ -54,7 +54,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: hero.player_id)
+      |> log_in_player(player_id: hero.player_id)
 
     {:ok, view, _html} = live(conn, "/training")
     assert has_element?(view, "#current-training-rank")
@@ -312,7 +312,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
       |> Game.generate_boss!()
 
     boss = Game.get_hero!(hero.boss_id)
-    conn = init_test_session(conn, player_id: hero.player_id)
+    conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, first_attempt, _} = live(conn, "/training")
 
     assert has_element?(first_attempt, "#roshan-challenge[data-attempt='1']")

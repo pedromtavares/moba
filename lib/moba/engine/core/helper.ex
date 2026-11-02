@@ -21,7 +21,11 @@ defmodule Moba.Engine.Core.Helper do
         battler.passive_skills ++ battler.passive_items
       end
 
-    codes = resources |> Enum.map(& &1.code)
+    owned? =
+      Enum.any?(
+        resources,
+        &(&1.code == resource.code && &1.id == resource.id && Map.get(&1, :level) == Map.get(resource, :level))
+      )
 
     # skip cooldown check for passive fx when resource is both active and passive
     # initially done for scythe of vyse proc chance to not interfere with stun cd
@@ -32,7 +36,7 @@ defmodule Moba.Engine.Core.Helper do
         battler.cooldowns[resource.code]
       end
 
-    Enum.member?(codes, resource.code) &&
+    owned? &&
       (is_nil(resource.mp_cost) || battler.current_mp >= resource.mp_cost) &&
       (is_nil(cooldown) || cooldown + 1 <= 0)
   end

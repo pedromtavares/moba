@@ -25,7 +25,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
       user_id: hero.player.user_id
     })
 
-    {:ok, view, _} = live(init_test_session(conn, player_id: hero.player_id), "/community")
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/community")
     assert has_element?(view, "a[href='/battles/123'][data-phx-link=redirect][data-phx-link-state=push]", "Battle #123")
   end
 
@@ -122,7 +122,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
       end
 
     cache_recent_players(Enum.map(players, fn {player, _} -> player.id end))
-    {:ok, view, _} = live(init_test_session(conn, player_id: viewer.player_id), "/community")
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.player_id), "/community")
 
     for {player, recency} <- players do
       assert has_element?(

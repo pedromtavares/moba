@@ -12,7 +12,12 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     player_heroes =
       for index <- 1..5 do
-        Game.create_hero!(%{name: "Player #{index}"}, player, strong_avatar(), skills)
+        Game.create_hero!(
+          %{name: "Player #{index}", finished_at: Timex.now(), league_tier: 6},
+          player,
+          strong_avatar(),
+          skills
+        )
       end
 
     opponent_heroes =
@@ -32,7 +37,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     first_hero = List.first(player_heroes)
 
@@ -69,7 +74,12 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     player_heroes =
       for index <- 1..5 do
-        Game.create_hero!(%{name: "Player #{index}"}, player, strong_avatar(), skills)
+        Game.create_hero!(
+          %{name: "Player #{index}", finished_at: Timex.now(), league_tier: 6},
+          player,
+          strong_avatar(),
+          skills
+        )
       end
 
     opponent_heroes =
@@ -91,7 +101,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 
@@ -163,7 +173,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     Matches.update!(match, %{phase: "scored", winner_id: battle.winner_player_id})
 
@@ -227,7 +237,12 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     _player_heroes =
       for index <- 1..5 do
-        Game.create_hero!(%{name: "Player #{index}"}, player, strong_avatar(), skills)
+        Game.create_hero!(
+          %{name: "Player #{index}", finished_at: Timex.now(), league_tier: 6},
+          player,
+          strong_avatar(),
+          skills
+        )
       end
 
     opponent_heroes =
@@ -247,7 +262,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
 

@@ -14,7 +14,7 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/arena/#{duel.id}")
     assert has_element?(view, "#duel-status[data-your-turn=true]", "Your pick")
@@ -43,7 +43,7 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/arena/#{duel.id}")
 
@@ -76,7 +76,7 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     duel = Game.get_duel!(duel.id)
 
@@ -108,7 +108,7 @@ defmodule MobaWeb.V2.DuelLiveTest do
 
     conn =
       conn
-      |> init_test_session(player_id: player.id)
+      |> log_in_player(player_id: player.id)
 
     {:ok, view, _html} = live(conn, "/arena/#{duel.id}")
 

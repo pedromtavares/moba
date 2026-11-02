@@ -24,32 +24,38 @@ defmodule MobaWeb.V2.DuelLive do
     length = String.length(body)
 
     if length > 1 and length <= 200 do
-      message =
-        Accounts.create_message!(%{
-          body: body,
-          author: user.username,
-          tier: player.pve_tier,
-          channel: channel,
-          topic: "general",
-          is_admin: user.is_admin,
-          user_id: user.id
-        })
+      case Accounts.create_message(%{
+             body: body,
+             author: user.username,
+             tier: player.pve_tier,
+             channel: channel,
+             topic: "general",
+             is_admin: user.is_admin,
+             user_id: user.id
+           }) do
+        {:ok, message} ->
+          {:noreply,
+           socket
+           |> clear_flash(:error)
+           |> reset_message_form(%{user_id: Timex.now()})
+           |> push_event("duel-message-sent", %{id: message.id})}
 
-      {:noreply,
-       socket
-       |> reset_message_form(%{user_id: Timex.now()})
-       |> push_event("duel-message-sent", %{id: message.id})}
+        {:error, :rate_limited} ->
+          {:noreply, put_flash(socket, :error, "Please wait 5 seconds before sending another message.")}
+      end
     else
       {:noreply, socket}
     end
   end
 
-  def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel, heroes: heroes}} = socket) do
+  def handle_event("pick", %{"id" => hero_id}, %{assigns: %{duel: duel, current_player: player}} = socket) do
+    duel = Game.get_duel!(duel.id)
+    heroes = socket.assigns.heroes
     hero_id = parse_int(hero_id)
     hero = Enum.find(heroes, &(&1.id == hero_id))
 
-    if hero do
-      Game.continue_duel!(duel, hero)
+    if hero && your_pick?(duel, player) do
+      Game.pick_duel_hero(duel, player, hero)
       {:noreply, assign(socket, heroes: heroes -- [hero])}
     else
       {:noreply, socket}
@@ -70,10 +76,19 @@ defmodule MobaWeb.V2.DuelLive do
     {:noreply, socket}
   end
 
-  def handle_event("delete-message", %{"id" => id}, %{assigns: %{messages: messages}} = socket) do
-    message = Accounts.get_message!(id)
-    {:ok, _} = Accounts.delete_message(message)
-    {:noreply, assign(socket, messages: List.delete(messages, message))}
+  def handle_event(
+        "delete-message",
+        %{"id" => id},
+        %{assigns: %{current_player: player, channel: channel, messages: messages}} = socket
+      ) do
+    message = Enum.find(messages, &(to_string(&1.id) == to_string(id)))
+
+    if player.user && player.user.is_admin && message && message.channel == channel do
+      {:ok, _} = Accounts.delete_message(message)
+      {:noreply, assign(socket, messages: List.delete(messages, message))}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_info({"phase", _}, socket) do
@@ -84,22 +99,20 @@ defmodule MobaWeb.V2.DuelLive do
     {:noreply, assign(socket, messages: messages ++ [message])}
   end
 
-  def handle_info(:check_phase, %{assigns: %{duel: %{phase: phase} = duel}} = socket)
-      when phase not in ["player_battle", "opponent_battle", "finished"] do
-    schedule_phase_check()
+  def handle_info(:check_phase, socket) do
+    duel = Game.get_duel!(socket.assigns.duel.id)
+    now = Timex.now()
 
     duel =
-      if pick_timer(duel, Timex.now()) <= 0 do
+      if duel.phase not in ["player_battle", "opponent_battle", "finished"] && pick_timer(duel, now) <= 0 do
         Game.continue_duel!(duel, :auto)
       else
         duel
       end
 
-    {:noreply, socket |> assign(current_time: Timex.now(), duel: duel) |> refresh_duel()}
-  end
-
-  def handle_info(:check_phase, socket) do
-    {:noreply, assign(socket, current_time: Timex.now())}
+    socket = socket |> assign(current_time: now, duel: duel) |> refresh_duel()
+    unless duel_finished?(socket.assigns.duel), do: schedule_phase_check()
+    {:noreply, socket}
   end
 
   def render(assigns), do: show(assigns)

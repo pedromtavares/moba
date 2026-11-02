@@ -8,6 +8,29 @@ defmodule Moba.Game.Matches do
 
   def create!(attrs), do: Match.changeset(%Match{}, attrs) |> Repo.insert!()
 
+  def valid_picks?(match, player, ids) when is_list(ids) do
+    length(ids) == 5 && length(Enum.uniq(ids)) == 5 &&
+      length(selectable_heroes(match, player, ids)) == 5
+  end
+
+  def valid_picks?(_, _, _), do: false
+
+  def selectable_heroes(match, player, ids) do
+    if Enum.all?(ids, &is_integer/1) do
+      borrowed = if player.pvp_tier > 0, do: Enum.map(Game.available_top_heroes(), & &1.id), else: []
+      generated = match.generated_picks |> Enum.map(& &1.id)
+
+      Game.get_heroes(ids)
+      |> Enum.filter(fn hero ->
+        is_nil(hero.archived_at) &&
+          ((hero.player_id == player.id && !is_nil(hero.finished_at) && hero.league_tier >= Moba.platinum_league_tier()) ||
+             hero.id in borrowed || hero.id in generated)
+      end)
+    else
+      []
+    end
+  end
+
   # prioritizes deleting losses first
   def delete_oldest_auto(%{id: player_id}) do
     query = list_query(player_id, "auto") |> exclude(:order_by) |> exclude(:preload)

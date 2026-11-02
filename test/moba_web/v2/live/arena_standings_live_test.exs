@@ -13,7 +13,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     immortal = create_player!(%{pvp_tier: 2, ranking: 1, daily_wins: 8, daily_matches: 10})
     shadow = create_player!(%{pvp_tier: 1, ranking: 6, daily_wins: 3})
     Cachex.put(:game_cache, "daily_ranking", [immortal, shadow, player])
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
 
     assert has_element?(view, "#arena-history-matches-tab", "5v5")
     assert has_element?(view, "#arena-history-duels-tab", "1v1")
@@ -50,7 +50,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     bot = create_player!(%{pvp_points: 99_999_999}, create_user(), "Ranking bot")
     guest = Game.create_player!(%{pvp_points: 99_999_999})
     Cachex.put(:game_cache, "daily_ranking", [composite_leader, player])
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
 
     view |> element("#arena-standings-1v1") |> render_click()
     assert has_element?(view, "#arena-standings-1v1[aria-pressed=true]")
@@ -78,7 +78,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
   test "an unranked player's daily standing remains visible", %{conn: conn} do
     player = create_player!()
     Cachex.put(:game_cache, "daily_ranking", [])
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-your-standing [aria-label=Unranked]")
     assert has_element?(view, "#arena-standings-empty")
     refute has_element?(view, "#arena-your-standing .arena-standing-movement")
@@ -107,7 +107,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
       end)
 
     Cachex.put(:game_cache, "daily_ranking", [incumbent, leader, other_immortal] ++ Enum.map(rows, &elem(&1, 0)))
-    {:ok, view, _} = live(init_test_session(conn, player_id: incumbent.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: incumbent.id), "/arena")
 
     for {player, direction, bracket} <- rows do
       if direction do
@@ -148,7 +148,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
   test "the personal standing footer includes projected movement", %{conn: conn} do
     player = create_player!(%{pvp_tier: 0, ranking: 31})
     Cachex.put(:game_cache, "daily_ranking", [])
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-your-standing .arena-standing-movement[aria-label*='promotion to Shadows']")
   end
 

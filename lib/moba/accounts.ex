@@ -24,10 +24,18 @@ defmodule Moba.Accounts do
 
   defdelegate change_message(attrs \\ %{}), to: Messages
 
+  def create_message(attrs \\ %{}) do
+    with {:ok, message} <- Messages.create_message(attrs) do
+      MobaWeb.broadcast(message.channel, message.topic, message)
+      {:ok, message}
+    end
+  end
+
   def create_message!(attrs \\ %{}) do
-    message = Messages.create_message!(attrs)
-    MobaWeb.broadcast(message.channel, message.topic, message)
-    message
+    case create_message(attrs) do
+      {:ok, message} -> message
+      {:error, reason} -> raise ArgumentError, "could not create message: #{inspect(reason)}"
+    end
   end
 
   defdelegate delete_message(message), to: Messages

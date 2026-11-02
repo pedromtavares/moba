@@ -13,6 +13,19 @@ defmodule MobaWeb.V2.MatchLive do
   def mount(%{"id" => match_id}, _session, socket) do
     socket = socket_init(match_id, @max_tick, socket) |> TutorialComponent.skip_arena()
 
+    socket =
+      attach_hook(socket, :authorize_match_changes, :handle_event, fn event, _, socket ->
+        if event in ~w(repeat pick-hero unpick-hero pick-team move-up move-down start) do
+          match = Game.get_match!(socket.assigns.match.id)
+
+          if match.player_id == socket.assigns.current_player.id && is_nil(match.phase) && is_nil(match.winner_id),
+            do: {:cont, assign(socket, match: match)},
+            else: {:halt, socket}
+        else
+          {:cont, socket}
+        end
+      end)
+
     if connected?(socket) do
       MobaWeb.subscribe(socket.assigns.channel)
     end
@@ -29,14 +42,22 @@ defmodule MobaWeb.V2.MatchLive do
   end
 
   def handle_event("repeat", _, %{assigns: %{latest_match: match}} = socket) when not is_nil(match) do
-    {:noreply, assign(socket, picked_heroes: match.player_picks)}
+    ids = Enum.map(match.player_picks, & &1.id)
+
+    if Moba.Game.Matches.valid_picks?(socket.assigns.match, socket.assigns.current_player, ids),
+      do: {:noreply, assign(socket, picked_heroes: match.player_picks)},
+      else: {:noreply, socket}
   end
 
   def handle_event("repeat", _, socket), do: {:noreply, socket}
 
   def handle_event("pick-hero", %{"id" => id}, %{assigns: %{picked_heroes: heroes}} = socket) do
     hero = Game.get_hero!(id)
-    {:noreply, assign(socket, picked_heroes: heroes ++ [hero])}
+    eligible = Moba.Game.Matches.selectable_heroes(socket.assigns.match, socket.assigns.current_player, [hero.id])
+
+    if length(heroes) < 5 && !Enum.any?(heroes, &(&1.id == hero.id)) && eligible != [],
+      do: {:noreply, assign(socket, picked_heroes: heroes ++ [hero])},
+      else: {:noreply, socket}
   end
 
   def handle_event("unpick-hero", %{"id" => id}, %{assigns: %{picked_heroes: heroes}} = socket) do
@@ -46,8 +67,14 @@ defmodule MobaWeb.V2.MatchLive do
 
   def handle_event("pick-team", %{"id" => id}, %{assigns: %{teams: teams}} = socket) do
     team = Enum.find(teams, &(&1.id == String.to_integer(id)))
-    Game.update_team!(team, %{used_count: team.used_count + 1})
-    {:noreply, assign(socket, picked_heroes: Enum.take(team.picks, 5))}
+    picks = if team, do: Enum.take(team.picks, 5), else: []
+
+    if Moba.Game.Matches.valid_picks?(socket.assigns.match, socket.assigns.current_player, Enum.map(picks, & &1.id)) do
+      Game.update_team!(team, %{used_count: team.used_count + 1})
+      {:noreply, assign(socket, picked_heroes: picks)}
+    else
+      {:noreply, socket}
+    end
   end
 
   def handle_event("move-up", %{"id" => id}, socket) do
@@ -58,13 +85,14 @@ defmodule MobaWeb.V2.MatchLive do
     {:noreply, move(String.to_integer(id), 1, socket)}
   end
 
-  def handle_event("start", _, %{assigns: %{preview: true, starting: true}} = socket), do: {:noreply, socket}
+  def handle_event("start", _, %{assigns: %{starting: true}} = socket), do: {:noreply, socket}
 
   def handle_event("start", _, %{assigns: %{match: match, picked_heroes: picked_heroes}} = socket) do
     ids = picked_heroes |> Enum.take(5) |> Enum.map(& &1.id)
-    Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.continue_match!(match, ids) end)
+    player = socket.assigns.current_player
+    task = Task.Supervisor.async_nolink(Moba.TaskSupervisor, fn -> Game.start_match(match, player, ids) end)
     schedule_tick()
-    {:noreply, assign(socket, tick: 0, starting: socket.assigns.preview)}
+    {:noreply, assign(socket, tick: 0, starting: true, match_task_ref: task.ref)}
   end
 
   def handle_event("finish-tutorial", _, socket) do
@@ -88,15 +116,34 @@ defmodule MobaWeb.V2.MatchLive do
 
   def handle_info(:tick, socket), do: {:noreply, socket}
 
-  def handle_info({:DOWN, _ref, _, _, _reason}, %{assigns: %{match: match}} = socket) do
-    match = Game.reset_match!(match)
-    {:noreply, socket_init(match.id, @max_tick, assign(socket, starting: false))}
+  def handle_info({:DOWN, ref, :process, _, _reason}, %{assigns: %{match_task_ref: ref}} = socket) do
+    socket = socket_init(socket.assigns.match.id, @max_tick, assign(socket, starting: false, match_task_ref: nil))
+
+    socket =
+      if socket.assigns.match.phase == "scored" do
+        socket
+      else
+        put_flash(socket, :error, "The match could not start. Please try again.")
+      end
+
+    {:noreply, socket}
   end
 
-  def handle_info({ref, match}, socket) do
+  def handle_info({:DOWN, _, _, _, _}, socket), do: {:noreply, socket}
+
+  def handle_info({ref, {:error, _}}, %{assigns: %{match_task_ref: ref}} = socket) when is_reference(ref) do
     Process.demonitor(ref, [:flush])
+    socket = assign(socket, starting: false, match_task_ref: nil)
+    {:noreply, socket_init(socket.assigns.match.id, @max_tick, socket)}
+  end
+
+  def handle_info({ref, {:ok, match}}, %{assigns: %{match_task_ref: ref}} = socket) when is_reference(ref) do
+    Process.demonitor(ref, [:flush])
+    socket = assign(socket, starting: false, match_task_ref: nil)
     {:noreply, socket_init(match.id, socket.assigns.tick, socket)}
   end
+
+  def handle_info({ref, _result}, socket) when is_reference(ref), do: {:noreply, socket}
 
   def render(assigns), do: show(assigns)
 
@@ -112,6 +159,7 @@ defmodule MobaWeb.V2.MatchLive do
       sidebar_code: "arena",
       channel: "match-#{match_id}",
       match: match,
+      match_task_ref: Map.get(socket.assigns, :match_task_ref),
       battles: battles,
       tick: tick,
       trained_heroes: trained_heroes,

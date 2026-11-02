@@ -8,7 +8,7 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     hero = Game.create_hero!(%{name: "Player Hero"}, player, strong_avatar(), base_skills())
     other = Game.create_hero!(%{name: "Opponent Hero"}, opponent, weak_avatar(), base_skills())
     duel = Game.create_duel!(player, opponent, false)
-    conn = init_test_session(conn, player_id: player.id)
+    conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/arena/#{duel.id}")
 
     assert has_element?(view, "#duel-status[data-your-turn=true]")
@@ -61,12 +61,13 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     player = create_player!()
     opponent = create_player!()
     duel = Game.create_duel!(player, opponent, false)
-    conn = init_test_session(conn, player_id: player.id)
+    conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/arena/#{duel.id}")
     view |> form("#duel-message-form", %{"message" => %{"body" => "Good luck!"}}) |> render_submit()
     assert has_element?(view, "#duel-messages .duel-message", "Good luck!")
     refute has_element?(view, "#duel-message-form input[value='Good luck!']")
 
+    Game.Duels.finish!(duel, %{winner: nil})
     auto = Game.create_duel!(player, opponent, true)
     {:ok, season, _} = live(conn, "/arena/#{auto.id}")
     refute has_element?(season, "#duel-message-form")
@@ -89,7 +90,7 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     Game.Duels.finish!(duel, %{winner: nil, attacker_pvp_points: 0, defender_pvp_points: 0})
     assert Game.get_player!(player.id).status == "unavailable"
     assert Game.get_player!(opponent.id).status == "unavailable"
-    conn = init_test_session(conn, player_id: player.id)
+    conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/arena/#{duel.id}")
 
     assert has_element?(view, "#duel-status h1", "Duel drawn")
@@ -110,13 +111,13 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
 
     for {viewing_player, duel} <- [
           {player, duel},
-          {player, Game.create_duel!(player, opponent, true)},
+          {player, Game.Duels.create!(player, opponent, true)},
           {viewer,
            player
-           |> Game.create_duel!(opponent, false)
+           |> Game.Duels.create!(opponent, false)
            |> Game.Duels.finish!(%{winner: nil, attacker_pvp_points: 0, defender_pvp_points: 0})}
         ] do
-      {:ok, view, _} = live(init_test_session(conn, player_id: viewing_player.id), "/arena/#{duel.id}")
+      {:ok, view, _} = live(log_in_player(conn, player_id: viewing_player.id), "/arena/#{duel.id}")
       refute has_element?(view, "#duel-rematch")
       render_click(view, "rematch", %{})
       child = find_live_child(view, "duel-challenges")
@@ -129,7 +130,7 @@ defmodule MobaWeb.V2.DuelDesignLiveTest do
     opponent = create_player!(%{pvp_points: 1000})
     duel = Game.create_duel!(player, opponent, false)
     Game.Duels.finish!(duel, %{winner: player, attacker_pvp_points: 0, defender_pvp_points: 0})
-    {:ok, view, _} = live(init_test_session(conn, player_id: player.id), "/arena/#{duel.id}")
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena/#{duel.id}")
 
     assert has_element?(view, ".duel-casual", "Casual")
     assert has_element?(view, "#duel-status h1", "wins")

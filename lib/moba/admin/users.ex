@@ -62,7 +62,10 @@ defmodule Moba.Admin.Users do
   end
 
   def delete(%User{} = user) do
-    Repo.delete(user)
+    user
+    |> Ecto.Changeset.change()
+    |> Ecto.Changeset.foreign_key_constraint(:id, name: "_fkey", match: :suffix)
+    |> Repo.delete(mode: :savepoint)
   end
 
   def change(%User{} = user) do

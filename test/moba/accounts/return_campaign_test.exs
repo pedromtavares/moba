@@ -4,16 +4,14 @@ defmodule Moba.Accounts.ReturnCampaignTest do
   import Moba.AccountsFixtures
   alias Moba.Accounts.{ReturnCampaign, UserToken}
 
-  test "audience uses progression score, breaks ties by wins, and deduplicates users and emails" do
+  test "audience uses progression score, breaks ties by wins, and deduplicates players per user" do
     first = user_fixture()
     second = user_fixture()
-    duplicate = user_fixture(%{email: String.upcase(second.email)})
     first_player = create_player!(%{pve_tier: 3, pvp_points: 10, total_wins: 2}, first)
-    create_player!(%{pvp_points: 5}, first)
+    Repo.insert!(%Game.Schema.Player{user_id: first.id, pvp_points: 5})
     create_player!(%{pve_tier: 2, pvp_points: 110, total_wins: 1}, second)
-    create_player!(%{pvp_points: 1}, duplicate)
 
-    ids = [first.id, second.id, duplicate.id]
+    ids = [first.id, second.id]
     contacts = ReturnCampaign.audience() |> Enum.filter(&(&1.user_id in ids))
     assert [%{user_id: first_id, player_id: player_id, score: 310}, %{user_id: second_id, score: 310}] = contacts
     assert first_id == first.id
