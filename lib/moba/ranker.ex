@@ -21,12 +21,13 @@ defmodule Moba.Ranker do
     {:noreply, state}
   end
 
-  def handle_cast(:pvp, state) do
-    if state.timer_ref, do: Process.cancel_timer(state.timer_ref)
+  def handle_cast(:pvp, %{timer_ref: nil} = state) do
     token = make_ref()
     ref = Process.send_after(self(), {:update_pvp, token}, @limit)
     {:noreply, %{state | timer_ref: ref, token: token}}
   end
+
+  def handle_cast(:pvp, state), do: {:noreply, state}
 
   def handle_info({:update_pvp, token}, %{token: token} = state) do
     Game.update_daily_ranking!()

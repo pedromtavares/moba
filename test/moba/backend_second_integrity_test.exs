@@ -142,17 +142,25 @@ defmodule Moba.BackendSecondIntegrityTest do
     assert after_second.current_immortal_streak == 1
   end
 
-  test "ranker debounces repeated requests and ignores cancelled timer deliveries" do
+  test "ranker coalesces repeated requests without delaying the scheduled refresh" do
     pid = start_supervised!({Moba.Ranker, name: __MODULE__})
+    MobaWeb.subscribe("player-ranking")
     GenServer.cast(pid, :pvp)
     first = :sys.get_state(pid)
-    GenServer.cast(pid, :pvp)
-    last = :sys.get_state(pid)
-    assert first.token != last.token
-    refute Process.read_timer(first.timer_ref)
+
+    for _ <- 1..100, do: GenServer.cast(pid, :pvp)
+    assert :sys.get_state(pid) == first
     send(pid, {:update_pvp, first.token})
-    assert :sys.get_state(pid) == last
-    send(pid, {:update_pvp, last.token})
     assert %{token: nil, timer_ref: nil} = :sys.get_state(pid)
+    assert_receive {"ranking", %{}}
+
+    GenServer.cast(pid, :pvp)
+    next = :sys.get_state(pid)
+    send(pid, {:update_pvp, first.token})
+    assert :sys.get_state(pid) == next
+    refute_received {"ranking", %{}}
+    send(pid, {:update_pvp, next.token})
+    assert %{token: nil, timer_ref: nil} = :sys.get_state(pid)
+    assert_receive {"ranking", %{}}
   end
 end

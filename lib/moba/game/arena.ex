@@ -11,7 +11,19 @@ defmodule Moba.Game.Arena do
 
   @daily_match_limit Moba.daily_match_limit()
 
-  def auto_matchmaking!(player), do: create_match!(player, Players.matchmaking_opponent(player), "auto")
+  def auto_matchmaking!(player) do
+    {:ok, match} =
+      Repo.transaction(fn ->
+        player = Players.get_player!(player.id)
+
+        if opponent = Players.matchmaking_opponent(player) do
+          locked = Players.lock_players!([player.id, opponent.id])
+          create_match!(Map.fetch!(locked, player.id), Map.fetch!(locked, opponent.id), "auto")
+        end
+      end)
+
+    match
+  end
 
   def continue_duel!(duel, hero) do
     {:ok, result} =

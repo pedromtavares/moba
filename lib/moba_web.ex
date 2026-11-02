@@ -22,11 +22,15 @@ defmodule MobaWeb do
   end
 
   def broadcast(channel, event, payload) do
-    Phoenix.PubSub.broadcast(Moba.PubSub, channel, {event, payload})
+    Moba.Repo.after_commit(fn ->
+      Phoenix.PubSub.broadcast(Moba.PubSub, channel, {event, payload})
+    end)
   end
 
   def broadcast_from(from, channel, event, payload) do
-    Phoenix.PubSub.broadcast_from(Moba.PubSub, from, channel, {event, payload})
+    Moba.Repo.after_commit(fn ->
+      Phoenix.PubSub.broadcast_from(Moba.PubSub, from, channel, {event, payload})
+    end)
   end
 
   def static_paths, do: ~w(assets css fonts images resources js favicon.ico robots.txt ads.txt .well-known)

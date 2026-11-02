@@ -14,10 +14,24 @@ defmodule Moba.Conductor do
   so Moba.Server knows when to run this again, currently every 30 mins.
   """
   def season_tick! do
-    run_due_tick(:last_server_update_at, 30 * 60, fn ->
+    {season, ran?} =
+      with_season_lock(fn season ->
+        last = season.last_server_update_at
+
+        if is_nil(last) || DateTime.diff(DateTime.utc_now(), last) >= 30 * 60 do
+          {Game.update_season!(season, %{last_server_update_at: DateTime.utc_now()}), true}
+        else
+          {season, false}
+        end
+      end)
+
+    if ran? do
       auto_matchmaking()
       Game.update_season_ranking!()
-    end)
+      Moba.update_pvp_rankings()
+    end
+
+    season
   end
 
   def pvp_tick! do
@@ -142,14 +156,19 @@ defmodule Moba.Conductor do
     |> Repo.preload(:user)
     |> Enum.filter(& &1.user)
     |> Enum.take(70)
-    |> Enum.map(fn player ->
-      match = Game.auto_matchmaking!(player)
+    |> Enum.each(&play_auto_match/1)
+  end
 
-      if match do
-        Game.get_match!(match.id) |> Game.continue_match!()
-        Logger.info("Created match ##{match.id} for #{player.user.username}")
-      end
-    end)
+  defp play_auto_match(player) do
+    case Repo.transaction(fn ->
+           if match = Game.auto_matchmaking!(player), do: Game.continue_match!(match)
+         end) do
+      {:ok, %{id: id}} -> Logger.info("Created match ##{id} for player ##{player.id}")
+      {:ok, nil} -> :ok
+      {:error, _} -> Logger.error("Automatic match rolled back for player ##{player.id}")
+    end
+  rescue
+    error -> Logger.error("Automatic match failed for player ##{player.id}: #{Exception.message(error)}")
   end
 
   defp create_bot_hero!(avatar, level, difficulty, league_tier \\ nil) do

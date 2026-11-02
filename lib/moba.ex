@@ -130,14 +130,18 @@ defmodule Moba do
   Game pve_ranking is defined by which hero has the highest total_farm (gold + xp)
   """
   def rank_finished_heroes do
-    if test?(), do: Game.rank_finished_heroes!(), else: GenServer.cast(Ranker, :pve)
+    Repo.after_commit(fn ->
+      if test?(), do: Game.rank_finished_heroes!(), else: GenServer.cast(Ranker, :pve)
+    end)
   end
 
   @doc """
   Game pvp_ranking is defined by which player has the highest pvp_points
   """
   def update_pvp_rankings do
-    if test?(), do: Game.update_daily_ranking!() && Game.update_season_ranking!(), else: GenServer.cast(Ranker, :pvp)
+    Repo.after_commit(fn ->
+      if test?(), do: Game.update_daily_ranking!() && Game.update_season_ranking!(), else: GenServer.cast(Ranker, :pvp)
+    end)
   end
 
   defp cached_ranking(key, fetch_fn) do

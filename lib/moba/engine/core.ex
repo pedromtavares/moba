@@ -88,7 +88,7 @@ defmodule Moba.Engine.Core do
     time = if last, do: last.inserted_at, else: battle.inserted_at
 
     player_id in [battle.attacker_player_id, battle.defender_player_id] &&
-      DateTime.diff(DateTime.utc_now(), time) > Moba.turn_timer_in_seconds()
+      NaiveDateTime.diff(NaiveDateTime.utc_now(), time) > Moba.turn_timer_in_seconds()
   end
 
   defp action_allowed?(battle, %{player_id: player_id}) do
