@@ -51,8 +51,15 @@
   .ascent-tool .ui-icon, .ascent-time .ui-icon, .ascent-challenge .ui-icon { display: inline-block; width: 16px; height: 16px; vertical-align: middle; }
   .ascent-switch { margin-left: auto; color: #9ba8b5; font-size: 12px; }
   .ascent-switch > div { margin: 0 !important; }
-  .ascent-switch label { display: flex; align-items: center; gap: 7px; margin: 0; cursor: pointer; }
-  .ascent-checkbox { accent-color: #d4b676; cursor: pointer; }
+  .ascent-switch label { position: relative; display: flex; align-items: center; gap: 12px; min-height: 44px; margin: 0; color: #aeb8c5; font: 750 13px/1.3 'Nunito', sans-serif; cursor: pointer; transition: color .2s; }
+  .ascent-switch label::before { content: ''; display: block; flex: 0 0 48px; width: 48px; height: 28px; border: 1px solid #9cabb34d; border-radius: 999px; background: #080f1b; box-shadow: inset 0 2px 6px #0006; transition: background .2s, border-color .2s, box-shadow .2s; }
+  .ascent-switch label::after { content: ''; position: absolute; top: 50%; left: 4px; width: 20px; height: 20px; border-radius: 50%; background: #8b99ab; box-shadow: 0 2px 5px #0007; transform: translateY(-50%); transition: transform .2s, background .2s; }
+  .ascent-switch label:hover::before { border-color: #e2c18b99; }
+  .ascent-switch label:has(.ascent-checkbox:checked) { color: #e8d2a7; }
+  .ascent-switch label:has(.ascent-checkbox:checked)::before { border-color: #dbb875aa; background: linear-gradient(115deg, #826237, #53432c); box-shadow: inset 0 1px #f5d39526, 0 0 15px #d7ab491a; }
+  .ascent-switch label:has(.ascent-checkbox:checked)::after { background: #ffe9bd; transform: translate(20px, -50%); }
+  .ascent-switch label:has(.ascent-checkbox:focus-visible)::before { outline: 2px solid #edcc90; outline-offset: 4px; }
+  .ascent-checkbox { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
   .ascent-farm { margin-left: auto; font-size: 12px; color: #97a5b4; white-space: nowrap; }
   .ascent-farm strong { font-size: 20px; font-weight: 850; margin-right: 4px; }
   .ascent-xp strong { color: #88cadf; }
@@ -104,6 +111,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .game-page .training-ascent.is-ready::after { animation: none; display: none; }
+  .game-page .training-ascent .ascent-switch label,
+  .game-page .training-ascent .ascent-switch label::before,
+  .game-page .training-ascent .ascent-switch label::after { transition: none; }
 }
 
 .game-page .training-ascent.is-challenge-stage {

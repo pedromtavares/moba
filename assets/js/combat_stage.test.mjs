@@ -70,6 +70,7 @@ test('each hero retains its own latest action and every effect icon across respo
   assert.equal(right.nodes['[data-stage-summary]']['aria-label'], 'right used Bad Juju');
   assert.equal(right.nodes['[data-stage-effects]'].icons[0].title, '<h3>Effect 0</h3>Triggered 0');
   assert.equal(right.nodes['[data-stage-effects]'].icons.length, 5);
+
   assert.equal(right.nodes['[data-stage-effects]'].icons[4].image.alt, 'Effect 4');
 
   hook.activeEffects.left = [
@@ -88,6 +89,14 @@ test('each hero retains its own latest action and every effect icon across respo
   hook.renderEffectIcons('left');
   assert.equal(left.nodes['[data-skill-duration]'].hidden, true);
   assert.equal(left.nodes['[data-stage-effects]'].icons.length, 4);
+
+  hook.renderAction('right', {...opponent, damage: 0, flag: 'Evaded'});
+  assert.equal(right.nodes['[data-stage-summary]'].textContent, 'EVADED');
+  assert.equal(right.nodes['[data-stage-summary]'].dataset.outcome, 'evaded');
+  assert.equal(right.nodes['[data-stage-flag]'].textContent, '');
+  hook.renderAction('right', {...opponent, damage: 20, flag: 'Evaded'});
+  assert.equal(right.nodes['[data-stage-summary]'].textContent, '−20');
+  assert.equal(right.nodes['[data-stage-flag]'].textContent, 'Evaded');
 
   hook.renderActions([]);
   for (const side of [left, right]) {
@@ -144,6 +153,48 @@ test('build cooldown badges update skills and items independently on both sides 
   assert.ok(right.every(t => t.badge.hidden && t.dataset.cooling === 'false'));
   hook.renderBuildCooldowns('left');
   assert.ok(left.every(t => t.badge.hidden));
+});
+
+test('altered combat stats glow by modifier and pulse only when their displayed values change', t => {
+  const original = globalThis.document;
+  globalThis.document = {hidden: false};
+  t.after(() => { globalThis.document = original; });
+  const stat = (key, value, modifier = 0) => ({key, value, modifier, tooltip: `${key}: ${value}`});
+  const makeBadge = value => {
+    const total = {};
+    const modifier = {dataset: {}};
+    return {dataset: {statTotal: String(value), statDelta: '0'}, total, modifier,
+      querySelector: selector => selector === '[data-stat-value]' ? total : modifier};
+  };
+  const badges = {attack: makeBadge(100), power: makeBadge(20), armor: makeBadge(10), speed: makeBadge(100)};
+  const pulses = [];
+  const fighter = {querySelector: selector => badges[selector.match(/data-combat-stat="(\w+)"/)[1]]};
+  const hook = Object.assign({}, CombatStage, {motion: {matches: false}, animate: (...args) => pulses.push(args)});
+  const changed = [stat('attack', 130, 30), stat('power', 20), stat('armor', -5, -15), stat('speed', 120)];
+  hook.renderCombatStats(fighter, changed);
+  assert.equal(badges.attack.dataset.statState, 'buff');
+  assert.equal(badges.attack.total.textContent, 130);
+  assert.equal(badges.attack.modifier.textContent, '+30');
+  assert.equal(badges.armor.dataset.statState, 'debuff');
+  assert.equal(badges.armor.modifier.textContent, '-15');
+  assert.deepEqual(pulses.map(pulse => pulse[0]), [badges.attack, badges.armor]);
+
+  hook.renderCombatStats(fighter, changed);
+  assert.equal(pulses.length, 2, 'Duplicate updates must not retrigger pulses');
+  hook.renderCombatStats(fighter, [stat('attack', 100)]);
+  assert.equal(badges.attack.dataset.statState, 'normal');
+  assert.equal(badges.attack.modifier.hidden, true);
+  assert.equal(pulses.length, 3, 'Expiry also draws attention to the changed total');
+
+  hook.motion.matches = true;
+  hook.renderCombatStats(fighter, [stat('armor', 10)]);
+  assert.equal(badges.armor.dataset.statState, 'normal');
+  assert.equal(pulses.length, 3);
+  hook.motion.matches = false;
+  globalThis.document.hidden = true;
+  hook.renderCombatStats(fighter, [stat('power', 25, 5)]);
+  assert.equal(badges.power.dataset.statState, 'buff');
+  assert.equal(pulses.length, 3);
 });
 
 test('stun, silence and disarm artwork states stay distinct, clear on expiry and stop on death', () => {
@@ -226,4 +277,29 @@ test('reduced motion applies the confirmed resources immediately without animati
   });
   await hook.play({actor: 'left', kind: 'spell', after: {left: {hp: 900}, right: {hp: 0}}}, 1);
   assert.deepEqual(applied, [['left', 900], ['right', 0]]);
+});
+
+test('evade highlights only the defending hero with its own artwork and a distinct callout', async t => {
+  const original = globalThis.document;
+  const created = [];
+  globalThis.document = {createElement(tag) { const node = {tag, remove() {}}; created.push(node); return node; }};
+  t.after(() => { globalThis.document = original; });
+  for (const side of ['left', 'right']) {
+    const art = {src: `${side}-hero.jpg`};
+    const appended = [];
+    const fighter = {querySelector: selector => selector === '.stage-art' ? art : {append: node => appended.push(node)}};
+    const animations = [];
+    const callouts = [];
+    const hook = Object.assign({}, CombatStage, {
+      el: {querySelector(selector) { assert.equal(selector, `[data-side="${side}"]`); return fighter; }},
+      animate(node) { animations.push(node); return Promise.resolve(); },
+      float(...args) { callouts.push(args); }
+    });
+    hook.evade(side);
+    assert.equal(appended[0].src, art.src);
+    assert.equal(appended[0].className, 'stage-evade-echo');
+    assert.equal(appended[1].className, 'stage-evade-wind');
+    assert.ok(animations.includes(art));
+    assert.deepEqual(callouts, [[side, 'EVADED', 'evade']]);
+  }
 });

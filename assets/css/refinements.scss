@@ -459,10 +459,11 @@ body:has(.game-page) .tippy-box .game-stat .stat-value { color: #e3dfd7; font-we
 }
 
 .game-page .training .training-target {
-  height: 300px;
-  .gank-button { position: absolute; right: 14px; bottom: 12px; border: 0; background: transparent; }
-  .target-battle { display: inline-flex; align-items: center; justify-content: center; width: 110px; min-width: 110px; min-height: 60px; padding: 14px 6px; border-radius: 6px; border-image: none; font-family: 'Nunito', sans-serif; font-size: 22px; font-weight: 800; letter-spacing: 0; line-height: 1.2; white-space: nowrap; }
-  .target-battle .loading-text { display: inline-flex; align-items: center; gap: 6px; }
+  height: auto;
+  > .card-body { flex: 1 0 220px; min-height: 220px; }
+  .gank-button { position: absolute; right: 14px; bottom: 12px; width: 170px; max-width: calc(100% - 28px); border: 0; background: transparent; }
+  .target-battle { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-width: 0; min-height: 60px; padding: 14px 16px; border-radius: 6px; border-image: none; font-family: 'Nunito', sans-serif; font-size: 20px; font-weight: 800; letter-spacing: 0; line-height: 1.2; white-space: normal; }
+  .target-battle .loading-text { display: inline-flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px; max-width: 100%; }
   .target-battle .loading-text i { margin-right: 0 !important; }
   .target-battle:focus-visible { outline: 2px solid #f0d7aa; outline-offset: 3px; }
   .target-performance { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 0 !important; padding: 11px 12px 3px; }

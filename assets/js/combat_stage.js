@@ -164,18 +164,41 @@ export default {
     const gauge = fighter.querySelector('.stage-health');
     gauge.setAttribute('aria-valuenow', number(unit.hp));
     gauge.setAttribute('aria-valuemax', number(unit.maxHp));
-    unit.combatStats.forEach(stat => {
-      const badge = fighter.querySelector(`[data-combat-stat="${stat.key}"]`);
-      badge.title = stat.tooltip;
-      badge.querySelector('[data-stat-value]').textContent = number(stat.value);
-      const modifier = badge.querySelector('[data-stat-modifier]');
-      modifier.hidden = !stat.modifier;
-      modifier.dataset.tone = stat.modifier < 0 ? 'negative' : 'positive';
-      modifier.textContent = `${stat.modifier > 0 ? '+' : ''}${number(stat.modifier)}`;
-    });
+    this.renderCombatStats(fighter, unit.combatStats);
     this.activeEffects[side] = unit.activeEffects;
     this.renderEffectIcons(side);
     this.renderBuildCooldowns(side, unit.cooldowns);
+  },
+
+  renderCombatStats(fighter, stats) {
+    stats.forEach(stat => {
+      const badge = fighter.querySelector(`[data-combat-stat="${stat.key}"]`);
+      const previous = Number(badge.dataset.statTotal);
+      const previousDelta = Number(badge.dataset.statDelta);
+      const value = number(stat.value);
+      const delta = number(stat.modifier);
+      badge.title = stat.tooltip;
+      badge.dataset.statTotal = String(value);
+      badge.dataset.statDelta = String(delta);
+      badge.dataset.statState = delta > 0 ? 'buff' : delta < 0 ? 'debuff' : 'normal';
+      badge.querySelector('[data-stat-value]').textContent = value;
+      const modifier = badge.querySelector('[data-stat-modifier]');
+      modifier.hidden = delta === 0;
+      modifier.dataset.tone = delta < 0 ? 'negative' : 'positive';
+      modifier.textContent = `${delta > 0 ? '+' : ''}${delta}`;
+
+      const changed = Number.isFinite(previous) && (previous !== value || previousDelta !== delta);
+      if (changed && ['attack', 'power', 'armor'].includes(stat.key) && !this.motion.matches && !document.hidden) {
+        const increase = value !== previous ? value > previous : delta > previousDelta;
+        const glow = increase ? '#8ce4ba' : '#ff9caa';
+        this.animate(badge, [
+          {transform: 'scale(1)', boxShadow: `0 0 0 0 ${glow}00`},
+          {offset: .25, transform: 'scale(1.06)', boxShadow: `0 0 0 2px ${glow}bb, 0 0 28px ${glow}88`, borderColor: glow},
+          {offset: .65, transform: 'scale(1.025)', boxShadow: `0 0 0 1px ${glow}66, 0 0 18px ${glow}55`, borderColor: glow},
+          {transform: 'scale(1)'}
+        ], 650);
+      }
+    });
   },
 
   renderBuildCooldowns(side, cooldowns = {}) {
@@ -270,7 +293,10 @@ export default {
     action.querySelector('[data-stage-skill-name]').textContent = event ? event.skill : 'No action yet';
     action.querySelector('[data-stage-flag]').textContent = event ? event.flag || '' : '';
     const damage = action.querySelector('[data-stage-summary]');
-    damage.textContent = event ? event.damage > 0 ? `−${number(event.damage)}` : '0' : '';
+    const evaded = event?.flag === 'Evaded' && !event.damage;
+    damage.textContent = evaded ? 'EVADED' : event ? event.damage > 0 ? `−${number(event.damage)}` : '0' : '';
+    damage.dataset.outcome = evaded ? 'evaded' : '';
+    if (evaded) action.querySelector('[data-stage-flag]').textContent = '';
     damage.dataset.damage = event ? number(event.damage) : 0;
     damage.setAttribute('aria-label', event ? event.summary : '');
     this.renderEffectIcons(side);
@@ -370,7 +396,7 @@ export default {
       this.el.querySelector('.stage-vfx').append(flash);
       this.animate(flash, [{opacity:0, transform:'scale(.3)'}, {offset:.2, opacity:.8}, {opacity:0, transform:'scale(2)'}], 380).then(() => flash.remove());
     } else if (event.flag === 'Evaded') {
-      this.animate(target.querySelector('.stage-art'), [{opacity:1}, {offset:.4, opacity:.3, transform:`scale(1.02) translateX(${-sign * 18}px)`}, {opacity:1, transform:'scale(1.02)'}], 350);
+      this.evade(event.target);
     }
     Object.entries(event.after).forEach(([side, unit]) => {
       const change = number(unit.hp - event.before[side].hp);
@@ -382,9 +408,28 @@ export default {
       }
     });
     this.refreshTooltips();
-    if (event.flag) this.float(['Stunned', 'Charging'].includes(event.flag) ? event.actor : event.target, event.flag.toUpperCase(), 'status');
+    if (event.flag && event.flag !== 'Evaded') this.float(['Stunned', 'Charging'].includes(event.flag) ? event.actor : event.target, event.flag.toUpperCase(), 'status');
     this.tone(event.flag === 'Critical' ? 65 : 90, .1);
     await this.wait(410);
+  },
+
+  evade(side) {
+    const fighter = this.el.querySelector(`[data-side="${side}"]`);
+    const art = fighter.querySelector('.stage-art');
+    const field = fighter.querySelector('.stage-control-vfx');
+    const direction = side === 'left' ? -1 : 1;
+    const echo = document.createElement('img');
+    echo.className = 'stage-evade-echo';
+    echo.src = art.src;
+    echo.alt = '';
+    field.append(echo);
+    this.animate(echo, [{opacity:0}, {offset:.2, opacity:.4}, {opacity:0, transform:`scale(1.02) translateX(${-direction * 22}px)`}], 650).then(() => echo.remove());
+    this.animate(art, [{opacity:1, transform:'scale(1.02)'}, {offset:.28, opacity:.25, transform:`scale(1.035) translateX(${direction * 42}px)`}, {offset:.65, opacity:.65, transform:`scale(1.02) translateX(${direction * 14}px)`}, {opacity:1, transform:'scale(1.02)'}], 550);
+    const wind = document.createElement('span');
+    wind.className = 'stage-evade-wind';
+    field.append(wind);
+    this.animate(wind, [{opacity:0, transform:`translateX(${-direction * 25}px)`}, {offset:.25, opacity:.85}, {opacity:0, transform:`translateX(${direction * 55}px)`}], 550).then(() => wind.remove());
+    this.float(side, 'EVADED', 'evade');
   },
 
   float(side, text, kind) {
@@ -392,7 +437,7 @@ export default {
     label.className = `stage-float ${side} ${kind}`;
     label.textContent = text;
     this.el.querySelector('.stage-vfx').append(label);
-    this.animate(label, [{opacity:0, transform:'translate(-50%, 15px) scale(.7)'}, {offset:.2, opacity:1, transform:'translate(-50%, 0) scale(1.08)'}, {offset:.7, opacity:1}, {opacity:0, transform:'translate(-50%, -65px) scale(1)'}], 900).then(() => label.remove());
+    this.animate(label, [{opacity:0, transform:'translate(-50%, 15px) scale(.7)'}, {offset:.2, opacity:1, transform:'translate(-50%, 0) scale(1.08)'}, {offset:.7, opacity:1}, {opacity:0, transform:'translate(-50%, -65px) scale(1)'}], kind === 'evade' ? 1150 : 900).then(() => label.remove());
   },
 
   animate(element, frames, duration) {

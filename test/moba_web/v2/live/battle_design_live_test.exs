@@ -117,7 +117,11 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
       assert has_element?(
                view,
                "#stage-action-#{side} [data-stage-summary]",
-               if(latest["damage"] > 0, do: "−#{latest["damage"]}", else: "0")
+               cond do
+                 latest["flag"] == "Evaded" && latest["damage"] == 0 -> "EVADED"
+                 latest["damage"] > 0 -> "−#{latest["damage"]}"
+                 true -> "0"
+               end
              )
 
       icons =

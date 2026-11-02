@@ -80,6 +80,15 @@
             :for={stat <- unit.combatStats}
             class={"stage-combat-stat stage-stat-#{stat.key}"}
             data-combat-stat={stat.key}
+            data-stat-total={stat.value}
+            data-stat-delta={stat.modifier}
+            data-stat-state={
+              cond do
+                stat.modifier > 0 -> "buff"
+                stat.modifier < 0 -> "debuff"
+                true -> "normal"
+              end
+            }
             data-toggle="tooltip"
             title={stat.tooltip}
             tabindex="0"
@@ -233,13 +242,22 @@
             class="stage-damage"
             data-stage-summary
             data-damage={if latest, do: latest.damage, else: 0}
+            data-outcome={if latest && latest.flag == "Evaded" && latest.damage == 0, do: "evaded", else: ""}
             aria-label={latest && latest.summary}
             role="status"
             aria-live="polite"
           >
-            {if latest, do: if(latest.damage > 0, do: "−#{latest.damage}", else: "0")}
+            <%= if latest do %>
+              {cond do
+                latest.flag == "Evaded" && latest.damage == 0 -> "EVADED"
+                latest.damage > 0 -> "−#{latest.damage}"
+                true -> "0"
+              end}
+            <% end %>
           </p>
-          <span data-stage-flag class="stage-impact-label">{latest && latest.flag}</span>
+          <span data-stage-flag class="stage-impact-label">
+            {latest && if(latest.flag == "Evaded" && latest.damage == 0, do: "", else: latest.flag)}
+          </span>
         </div>
       </div>
       <div class="stage-effect-icons" data-stage-effects role="list" aria-label={"#{unit.name} triggered effects"}>
