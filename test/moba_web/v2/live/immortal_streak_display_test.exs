@@ -6,7 +6,9 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
   alias Moba.Game.Matches
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
-  test "Arena explains the debuff beneath 5v5, using the manual's wording, including when resuming", %{conn: conn} do
+  test "Arena explains the debuff beneath the title copy, using the manual's wording, including when resuming", %{
+    conn: conn
+  } do
     player = create_player!(%{current_immortal_streak: 7})
     opponent = create_player!()
     conn = log_in_player(conn, player_id: player.id)
@@ -14,13 +16,12 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
 
     assert has_element?(
              view,
-             ".arena-play-5v5 > #enter-arena-button + #arena-immortal-streak-debuff",
+             ".arena-banner-intro > #current-pvp-tier + #arena-immortal-streak-debuff",
              "−7.0% Hero Stats"
            )
 
     assert has_element?(view, "#arena-immortal-streak-debuff[data-toggle=tooltip][tabindex='0']")
-    refute has_element?(view, ".arena-cinematic-heading .immortal-streak-debuff")
-    refute has_element?(view, ".arena-play-1v1 .immortal-streak-debuff")
+    refute has_element?(view, ".arena-play-actions .immortal-streak-debuff")
     assert_tooltip(view, "#arena-immortal-streak-debuff")
 
     {:ok, manual, _} = live(conn, "/library")
@@ -28,7 +29,8 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
 
     match(player, opponent, [], [])
     {:ok, resume, _} = live(conn, "/arena")
-    assert has_element?(resume, ".arena-play-5v5 > #resume-arena-match + #arena-immortal-streak-debuff")
+    assert has_element?(resume, ".arena-play-5v5 > #resume-arena-match")
+    assert has_element?(resume, ".arena-banner-intro > #current-pvp-tier + #arena-immortal-streak-debuff")
     assert_tooltip(resume, "#arena-immortal-streak-debuff")
   end
 

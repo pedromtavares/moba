@@ -1,9 +1,10 @@
 <header id="pvp-progression" class="arena-cinematic" style="--arena-scene: url(/images/tutorial/arena-of-ascension.jpg)">
   <div class="arena-cinematic-heading">
-    <div>
+    <div class="arena-banner-intro">
       <p class="arena-eyebrow">The proving ground · 1v1 &amp; 5v5</p>
       <h1>Arena</h1>
       <p id="current-pvp-tier">{tier_title(@current_player)}</p>
+      <.immortal_streak_debuff id="arena-immortal-streak-debuff" player={@current_player} />
     </div>
   </div>
   <div class="arena-cinematic-command">
@@ -64,7 +65,6 @@
               </span>
             </button>
           <% end %>
-          <.immortal_streak_debuff id="arena-immortal-streak-debuff" player={@current_player} />
         </div>
         <div class="arena-play-mode arena-play-1v1">
           <%= if @pending_duel do %>

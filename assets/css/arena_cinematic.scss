@@ -17,6 +17,9 @@
   .arena-eyebrow { margin: 0 0 6px; color: #e0c68d; font-size: 11px; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; }
   .arena-cinematic h1 { margin: 0; color: #f5edda; font: 900 clamp(38px, 4vw, 60px)/1.05 'Nunito', sans-serif; letter-spacing: -.035em; text-shadow: 0 3px 24px #0009; }
   .arena-cinematic #current-pvp-tier { max-width: 58ch; margin: 12px 0 0; color: #d1d6df; font-size: 16px; line-height: 1.5; }
+  .arena-banner-intro { position: relative; }
+  .arena-banner-intro .immortal-streak-debuff { position: absolute; top: calc(100% + 4px); left: 0; gap: 7px; padding: 1px 9px; border-color: #ddbd8233; border-radius: 4px; background: linear-gradient(90deg, #111e2bba, #111e2b38); color: #d9bda2; font-size: 11px; line-height: 16px; letter-spacing: .02em; box-shadow: inset 0 1px #f4dbab0a; }
+  .arena-banner-intro .immortal-streak-debuff::before { content: ''; width: 4px; height: 4px; flex-shrink: 0; transform: rotate(45deg); background: #d69c8c; box-shadow: 0 0 8px #d69c8c55; }
   .arena-cinematic-command { display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); margin: 26px 0 22px; }
   .arena-daily-progress { max-width: 900px; }
   .arena-cinematic .arena-progress-label { margin-bottom: 8px; color: #bfc4cc; font-size: 11px; font-weight: 800; }
@@ -42,7 +45,6 @@
 
   .arena-play-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .arena-play-mode { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
-  .arena-play-mode .immortal-streak-debuff { align-self: center; text-align: center; }
   .arena-cinematic .arena-play-button, .arena-cinematic #enter-arena-button { gap: 10px; min-height: 68px; padding: 16px; font-size: clamp(16px, 1.5vw, 22px); white-space: nowrap; box-shadow: inset 0 1px #ffd9a51a, 0 6px 24px #0003; transition: transform .18s, box-shadow .18s; }
   .arena-play-button .loading-text { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
   .arena-cinematic #enter-arena-button .loading-text { justify-content: center; }
@@ -180,6 +182,7 @@
     .arena-cinematic h1 { font-size: 42px; }
     .arena-cinematic #current-pvp-tier { font-size: 14px; }
     .arena-cinematic-command { grid-template-columns: minmax(0, 1fr); gap: 22px; margin: 22px 0; }
+    .arena-cinematic-heading:has(#arena-immortal-streak-debuff) + .arena-cinematic-command { margin-top: 34px; }
     .arena-cinematic-footer { flex-direction: column; align-items: stretch; gap: 16px; }
     .arena-cinematic-stats { justify-content: space-between; gap: 10px; }
     .arena-cinematic-stats > div { flex-direction: column; gap: 5px; padding: 0 0 0 12px; }
