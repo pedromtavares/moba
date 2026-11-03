@@ -155,3 +155,16 @@
   .game-page #hero-bar .hud-upgrade .can-level { animation: none; }
   .game-page #hero-bar .hud-experience-fill { transition: none; }
 }
+
+.game-page #hero-bar {
+  #hero-inventory[data-reorderable=true] [data-item-code] { cursor: grab; touch-action: none; user-select: none; }
+  #hero-inventory [data-item-code]:focus-visible { outline: 2px solid #efd29b; outline-offset: 3px; border-radius: 4px; }
+  #hero-inventory .is-dragging { z-index: 15; opacity: .85; pointer-events: none; cursor: grabbing; filter: drop-shadow(0 5px 10px #0009); }
+  #hero-inventory .is-drop-target::after { content: ''; position: absolute; inset: -3px; border: 2px solid #f2cf8a; border-radius: 5px; background: #e2b86a22; pointer-events: none; }
+  #hero-inventory.is-saving { opacity: .7; }
+  @media (max-width: 767px) {
+    .hud-inventory-open { display: block !important; flex: 0 0 100%; max-width: 100%; padding-top: 9px; }
+    .hud-inventory-open h3 { display: none; }
+    .hud-inventory-open .inventory { grid-template-columns: repeat(3, 1fr); max-width: 224px; margin: 0 auto; }
+  }
+}

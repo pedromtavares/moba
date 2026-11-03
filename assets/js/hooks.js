@@ -3,10 +3,12 @@ import swal from 'sweetalert';
 import Tutorial from './tutorial.js';
 import ModernTutorial from './tutorial_modern.js';
 import CombatStage from './combat_stage';
-import {initTooltips} from './tooltips';
+import {initTooltips, hideTooltips} from './tooltips';
+import InventoryOrder from './inventory_order';
 
 let Hooks = {};
 Hooks.CombatStage = {...CombatStage, refreshTooltips: initTooltips};
+Hooks.InventoryOrder = {...InventoryOrder, hideTooltips};
 
 Hooks.TutorialStep = {
   mounted(){
@@ -422,10 +424,16 @@ Hooks.HeroReviewViewport = {
 Hooks.ShopViewport = {
   mounted(){
     if (!this.el.closest(".game-page")) return;
-    this.shopViewportObserver = new ResizeObserver(() => {
-      this.el.style.setProperty("--shop-hud-height", `${Math.ceil(this.el.getBoundingClientRect().height)}px`);
-    });
+    this.shopViewportObserver = new ResizeObserver(() => this.updateShopViewport());
     this.shopViewportObserver.observe(this.el);
+    this.updateShopViewport();
+  },
+  updated(){
+    this.updateShopViewport();
+  },
+  updateShopViewport(){
+    if (!this.el.closest(".game-page")) return;
+    this.el.style.setProperty("--shop-hud-height", `${Math.ceil(this.el.getBoundingClientRect().height)}px`);
   },
   destroyed(){
     if (this.shopViewportObserver) this.shopViewportObserver.disconnect();

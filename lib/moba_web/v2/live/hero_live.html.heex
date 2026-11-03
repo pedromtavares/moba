@@ -434,6 +434,7 @@
   <% end %>
   <.hero_bar
     :if={@show_hud && @hero.player_id == @current_player.id}
+    reorderable={true}
     preview={@preview}
     current_hero={@hero}
     editing={@editing}

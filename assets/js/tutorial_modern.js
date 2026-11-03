@@ -1,5 +1,6 @@
 import Shepherd from 'shepherd.js';
 import {offset, shift} from '@floating-ui/dom';
+import {startShopTutorial} from './shop_tutorial';
 
 const chapters = ['Training', 'Base'];
 
@@ -15,14 +16,14 @@ const goals = entries => `<ol class="tutorial-goals">${entries.map(([title, text
   `<li><span>0${index + 1}</span><div><strong>${title}</strong><p>${text}</p></div></li>`
 ).join('')}</ol>`;
 
-const shopRecommendations = () => `<div class="tutorial-shop-items">${[
-  ['boots_of_speed', 'Boots of Speed'], ['sages_mask', 'Sage’s Mask']
-].map(([code, name]) => `<div><img src="${document.querySelector(`.normal-items .code-${code}`)?.src || ''}" alt="" /><strong>${name}</strong></div>`).join('')}</div>`;
-
 const ModernTutorial = {
   start(hook, step) {
     this.stop(hook);
     Shepherd.activeTour && Shepherd.activeTour.complete();
+    if ([3, 7, 8].includes(step)) {
+      startShopTutorial(hook, step);
+      return;
+    }
     const chapter = step >= 20 ? 1 : 0;
     const interactive = [1, 3, 4, 6, 7, 8, 9].includes(step);
     const tour = new Shepherd.Tour({
@@ -96,11 +97,6 @@ const ModernTutorial = {
           extra: facts([['XP', 'Level up & grow stronger', 'blue'], ['Gold', 'Buy & upgrade items']]),
           primary: button('Gear up at the shop →', event('tutorial3')) });
         break;
-      case 3:
-        add({ id: 'buy', objective: 'Shop · Buy 2 items', title: 'Your first upgrades.', shop: true,
-          text: 'Buy two different Normal items. We recommend:',
-          target: '.normal-items', extra: shopRecommendations() });
-        break;
       case 4:
         add({ id: 'stats', objective: 'Upgrades equipped', title: 'Feel the difference.',
           text: 'Your items are equipped. Inspect the colored stats in your hero bar to see what changed. Keep battling to earn more gold.',
@@ -110,20 +106,10 @@ const ModernTutorial = {
         add({ id: 'forge', objective: 'Stronger gear', title: 'Item transmutation',
           text: 'Looks like you have enough gold to transmute your first Rare item.',
           extra: facts([['3 Normal', 'Combine into', 'gold'], ['1 Rare', 'Your next upgrade', 'blue']]),
-          primary: button('Open Shop →', () => hook.pushEvent('toggle-shop', {}, next)) });
-        add({ id: 'third-item', objective: 'Shop · Prepare the recipe', title: 'One more ingredient.', shop: true,
-          text: 'Buy one more Normal item. Choose one you don’t already own.',
-          target: '.normal-items' });
-        break;
-      case 7:
-        add({ id: 'rare', objective: 'Shop · Choose a Rare item', title: 'Make it Rare.', shop: true,
-          text: "Now, pick one of the Rare items and select the 'Transmute' action. We recommend the Tranquil Boots.",
-          target: '.rare-items .code-tranquil_boots', on: 'left' });
-        break;
-      case 8:
-        add({ id: 'recipe', objective: 'Shop · Selection', title: 'Three become one.', shop: true,
-          text: 'Select your 3 Normal items and then click on Transmute.',
-          target: '.inventory-item', on: 'top-start' });
+          primary: button('Open Shop →', () => {
+            tour.complete();
+            hook.pushEvent('toggle-shop', {}, () => startShopTutorial(hook, 6));
+          }) });
         break;
       case 9:
         add({ id: 'forged', objective: 'Transmutation complete', title: 'First Rare', shop: true,
@@ -167,6 +153,8 @@ const ModernTutorial = {
   },
 
   stop(hook) {
+    hook.gameShopTutorial?.stop();
+    hook.gameShopTutorial = null;
     clearTimeout(hook.gameTutorialTimer);
     if (hook.gameTutorial) {
       hook.gameTutorial.complete();

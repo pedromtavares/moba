@@ -26,6 +26,7 @@ defmodule Moba.Game.Schema.Hero do
     field :archived_at, :utc_datetime
     field :skill_order, {:array, :string}
     field :item_order, {:array, :string}
+    field :inventory_order, {:array, :string}, default: []
 
     # PVE related fields
     field :pve_total_turns, :integer
@@ -92,6 +93,7 @@ defmodule Moba.Game.Schema.Hero do
       :level,
       :skill_order,
       :item_order,
+      :inventory_order,
       :wins,
       :losses,
       :pve_current_turns,

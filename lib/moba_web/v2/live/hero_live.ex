@@ -12,7 +12,7 @@ defmodule MobaWeb.V2.HeroLive do
   def mount(_params, _session, socket) do
     socket =
       attach_hook(socket_init(socket), :authorize_hero_changes, :handle_event, fn event, _, socket ->
-        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit buy sell finish-transmute) do
+        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit reorder-items buy sell finish-transmute) do
           hero = Game.get_hero!(socket.assigns.hero.id)
 
           if hero.player_id == socket.assigns.current_player.id do
@@ -98,6 +98,20 @@ defmodule MobaWeb.V2.HeroLive do
   def handle_event("start-edit", _, socket) do
     {:noreply, assign(socket, editing: true)}
   end
+
+  def handle_event(
+        "reorder-items",
+        %{"codes" => codes, "hero_id" => hero_id},
+        %{assigns: %{hero: hero, current_player: player, show_hud: true}} = socket
+      ) do
+    if hero.player_id == player.id && hero_id == to_string(hero.id) do
+      {:noreply, update_hero_assigns(socket, Game.reorder_inventory!(player, hero, codes))}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("reorder-items", _, socket), do: {:noreply, socket}
 
   def handle_event("cancel-edit", _, socket) do
     {:noreply, assign(socket, editing: false)}

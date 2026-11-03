@@ -154,7 +154,10 @@
             </div>
           </div>
         </div>
-        <div class="hud-inventory col-lg-2 d-none d-xl-block" id="current-hero-gold">
+        <div
+          class={["hud-inventory col-lg-2 d-none d-xl-block", @show_build && "hud-inventory-open"]}
+          id="current-hero-gold"
+        >
           <div class="row">
             <div class="col center">
               <h3 class="mb-1 mt-0 no-wrap">
@@ -170,17 +173,34 @@
                   SHOP
                 </a>
               </h3>
-              <div class={"inventory #{if @editing, do: "editing"}"}>
+              <div
+                class={"inventory #{if @editing, do: "editing"}"}
+                id="hero-inventory"
+                phx-hook="InventoryOrder"
+                data-hero-id={@current_hero.id}
+                data-reorderable={to_string(@reorderable && !@editing)}
+                data-inventory-order="true"
+                role="group"
+                aria-label="Hero inventory"
+              >
                 <%= for item <- sorted_items(@current_hero) do %>
                   <div
                     class={"item-container #{if !item.active, do: "passive", else: "active"}"}
                     id={"inventory-#{item.id}"}
+                    data-item-code={item.code}
+                    data-item-name={item.name}
+                    role={@reorderable && "button"}
+                    tabindex={if @reorderable, do: "0"}
+                    aria-label={if @reorderable, do: "#{item.name}. Drag to reorder, or use Alt and arrow keys."}
+                    aria-keyshortcuts={if @reorderable, do: "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown"}
+                    data-toggle="tooltip"
+                    title={TT.item_tooltip(item)}
                   >
                     <img
                       src={GH.image_url(item)}
-                      data-toggle="tooltip"
-                      title={TT.item_tooltip(item)}
                       class="item-img img-border-sm"
+                      alt=""
+                      draggable="false"
                     />
                     <%= if @editing do %>
                       <%= if item.active do %>
@@ -206,6 +226,8 @@
                   <% end %>
                 <% end %>
               </div>
+              <span id="hero-inventory-status" class="sr-only" role="status" aria-live="polite" phx-update="ignore">
+              </span>
             </div>
           </div>
         </div>
@@ -303,12 +325,16 @@
     phx-key="Escape"
     {target_attrs(@event_target)}
     id="shop-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="shop-title"
   >
     <.live_component
       module={ShopComponent}
       current_hero={@current_hero}
       tutorial_step={@tutorial_step}
       event_target={@event_target}
+      reorderable={@reorderable && !@editing}
       id="shop"
     />
   </div>

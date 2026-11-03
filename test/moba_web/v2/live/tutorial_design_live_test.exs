@@ -29,8 +29,8 @@ defmodule MobaWeb.V2.TutorialDesignLiveTest do
     assert has_element?(view, "#shop-modal.d-block .normal-items")
 
     for code <- ["boots_of_speed", "sages_mask"] do
-      view |> element(".normal-items .code-#{code}") |> render_click()
-      view |> element(".normal-items button[phx-click=buy]") |> render_click()
+      view |> element(".normal-items button[phx-value-code='#{code}']") |> render_click()
+      view |> element("#buy-button") |> render_click()
     end
 
     assert has_element?(view, "#tutorial-step-4[data-preview=true]")

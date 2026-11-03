@@ -184,6 +184,10 @@ defmodule Moba.Game do
 
   defdelegate sort_items(list), to: Items
 
+  defdelegate inventory_items(hero), to: Items
+
+  defdelegate reorder_inventory!(player, hero, codes), to: Items
+
   defdelegate transmute_item!(hero, recipe, item), to: Items
 
   # LEAGUES

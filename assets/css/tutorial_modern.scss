@@ -66,24 +66,12 @@ body.tutorial-active .shepherd-modal-is-visible { opacity: .78; }
 }
 
 .game-page .tutorial-focus { outline: 2px solid #edcc8b; outline-offset: 6px; box-shadow: 0 0 0 5px #e6bd6f18, 0 0 30px #e6bd6f30; }
-.game-page:has(#tutorial-step-3[data-preview=true]) .normal-items .buy-button:not(:disabled),
-.game-page:has(#tutorial-step-6[data-preview=true]) .normal-items .buy-button:not(:disabled),
-.game-page:has(#tutorial-step-7[data-preview=true]) .rare-items .transmute-button:not(:disabled),
-.game-page:has(#tutorial-step-8[data-preview=true]) #finish-transmute:not(.disabled) {
-  outline: 2px solid #f2cf8a;
-  outline-offset: 4px;
-  box-shadow: 0 0 22px #e6bd6f55;
-}
 .shepherd-element.tutorial-shop-guide {
   width: 360px;
   .tutorial-body { padding: 22px 22px 0; }
   .tutorial-chapters { margin-bottom: 20px; }
   h2 { font-size: 27px; }
   .tutorial-lead { font-size: 16px; line-height: 1.55; }
-  .tutorial-shop-items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 16px; }
-  .tutorial-shop-items > div { text-align: center; }
-  .tutorial-shop-items img { display: block; width: 64px; height: 48px; object-fit: cover; border: 1px solid #c6a36877; border-radius: 4px; margin: 0 auto 5px; }
-  .tutorial-shop-items strong { color: #e6d2ab; font-size: 13px; }
   .shepherd-footer { padding: 12px 22px 16px; }
   .shepherd-arrow::before { background: #e7c384 !important; }
 }
@@ -116,4 +104,41 @@ body.tutorial-active .shepherd-modal-is-visible { opacity: .78; }
 
 @media (prefers-reduced-motion: reduce) {
   .shepherd-element.tutorial-hud, .shepherd-element.tutorial-hud * { animation: none; transition: none; scroll-behavior: auto; }
+}
+
+// Small, moving callouts keep the shop usable while pointing at the exact next click.
+.shepherd-element.tutorial-shop-pointer {
+  z-index: 12001;
+  width: max-content;
+  max-width: min(260px, calc(100vw - 24px));
+  border-radius: 9px;
+  background: #111c2a;
+  color: #fae7bf;
+  box-shadow: 0 10px 32px #0009, 0 0 22px #ddad4d20;
+  font-family: 'Nunito', sans-serif;
+  .shepherd-content { border: 1px solid #e4bd76; border-radius: inherit; background: linear-gradient(125deg, #233144, #101a28); }
+  .shepherd-header { position: absolute; right: 5px; top: 3px; z-index: 1; padding: 0; background: none; }
+  .shepherd-cancel-icon { padding: 0 4px; color: #aeab9c; font-size: 20px; }
+  .shepherd-text { padding: 13px 25px 0 15px; color: #fae7bf; font-size: 15px; line-height: 1.35; }
+  .shop-guide-caption { margin: 0 0 4px; color: #b9c4d4; font-size: 10px; line-height: 1.4; }
+  .shepherd-text strong { font-weight: 900; }
+  .shepherd-footer { padding: 5px 15px 9px; }
+  .shepherd-button { min-height: 0; margin: 0; padding: 0; border: 0; background: none; color: #9baabe; font: 700 10px/1.4 'Nunito', sans-serif; }
+  .shepherd-button:hover { color: #ffe3ab; background: none; }
+  .shepherd-arrow { width: 16px; height: 16px; }
+  .shepherd-arrow::before { width: 16px; height: 16px; background: #e4bd76 !important; }
+  &[data-popper-placement^=bottom] .shepherd-arrow { top: -8px; }
+  &[data-popper-placement^=top] .shepherd-arrow { bottom: -8px; }
+}
+.game-page #shop .tutorial-shop-focus {
+  outline: 2px solid #ffe3a5;
+  outline-offset: 4px;
+  animation: shop-guide-glow 1.5s ease-in-out infinite;
+}
+@keyframes shop-guide-glow {
+  0%, 100% { box-shadow: 0 0 0 4px #e6bc6a19, 0 0 18px #e6bc6a40; }
+  50% { box-shadow: 0 0 0 7px #e6bc6a27, 0 0 28px #e6bc6a80; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-page #shop .tutorial-shop-focus { animation: none; }
 }

@@ -219,7 +219,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     |> element("#buy-button")
     |> render_click()
 
-    refute has_element?(view, "#buy-button")
+    assert has_element?(view, "#buy-button[disabled]")
 
     view
     |> element("#item-#{second_item.id}")
@@ -271,7 +271,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     |> render_click()
 
     view
-    |> element(".code-tranquil_boots")
+    |> element(".rare-items button[phx-value-code=tranquil_boots]")
     |> render_click()
 
     view

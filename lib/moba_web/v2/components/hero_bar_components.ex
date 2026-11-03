@@ -17,6 +17,7 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   attr :tutorial_step, :integer, required: true
   attr :preview, :boolean, default: false
   attr :event_target, :any, default: nil
+  attr :reorderable, :boolean, default: false
 
   def hero_bar(assigns) do
     hero_bar_template(assigns)
@@ -64,7 +65,7 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
     "Click to edit the skill and item orders that will be used when defending against other players in the Arena."
   end
 
-  def sorted_items(%{items: items}), do: Game.sort_items(items)
+  def sorted_items(hero), do: Game.inventory_items(hero)
   def sorted_skills(%{skills: skills}), do: Enum.sort_by(skills, &{&1.ultimate, &1.passive, &1.name})
   def can_level_skill?(hero, skill), do: Game.can_level_skill?(hero, skill)
   def max_skill_level(skill), do: Game.max_skill_level(skill)

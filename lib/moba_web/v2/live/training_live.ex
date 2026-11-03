@@ -137,6 +137,20 @@ defmodule MobaWeb.V2.TrainingLive do
     {:noreply, assign(socket, editing: true)}
   end
 
+  def handle_event(
+        "reorder-items",
+        %{"codes" => codes, "hero_id" => hero_id},
+        %{assigns: %{current_hero: hero, current_player: player}} = socket
+      ) do
+    if hero.player_id == player.id && hero_id == to_string(hero.id) do
+      {:noreply, assign(socket, current_hero: Game.reorder_inventory!(player, hero, codes))}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  def handle_event("reorder-items", _, socket), do: {:noreply, socket}
+
   def handle_event("cancel-edit", _, socket) do
     {:noreply, assign(socket, editing: false)}
   end

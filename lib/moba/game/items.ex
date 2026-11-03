@@ -21,7 +21,7 @@ defmodule Moba.Game.Items do
     with_inventory(hero, fn hero ->
       if can_buy_item?(hero, item) do
         inventory = hero.items ++ [item]
-        attrs = Map.put(item_attributes(inventory), :gold, hero.gold - item_price(item))
+        attrs = Map.put(inventory_attributes(hero, inventory), :gold, hero.gold - item_price(item))
         Game.Heroes.update!(hero, attrs, inventory)
       else
         hero
@@ -97,7 +97,7 @@ defmodule Moba.Game.Items do
 
       if item do
         inventory = Enum.reject(hero.items, &(&1.code == item.code))
-        attrs = Map.put(item_attributes(inventory), :gold, hero.gold + item_sell_price(hero, item))
+        attrs = Map.put(inventory_attributes(hero, inventory), :gold, hero.gold + item_sell_price(hero, item))
         Game.Heroes.update!(hero, attrs, inventory)
       else
         hero
@@ -115,7 +115,7 @@ defmodule Moba.Game.Items do
       if can_equip_item?(hero, result) && has_items?(hero, ingredients) && correct_recipe?(ingredients, result) do
         codes = Enum.map(ingredients, & &1.code)
         inventory = Enum.reject(hero.items, &(&1.code in codes)) ++ [result]
-        Game.Heroes.update!(hero, item_attributes(inventory), inventory)
+        Game.Heroes.update!(hero, inventory_attributes(hero, inventory), inventory)
       else
         hero
       end
@@ -135,7 +135,44 @@ defmodule Moba.Game.Items do
 
   def sort_items(list), do: Enum.sort_by(list, fn item -> !item.active end)
 
+  def inventory_items(%{items: items} = hero) do
+    order = if hero.inventory_order == [], do: hero.item_order, else: hero.inventory_order
+    codes = ordered_codes(order, sort_items(items))
+    Enum.map(codes, fn code -> Enum.find(items, &(&1.code == code)) end)
+  end
+
+  def reorder_inventory!(player, hero, codes) when is_list(codes) do
+    with_inventory(hero, fn current ->
+      owned_codes = Enum.map(current.items, & &1.code)
+
+      if current.player_id == player.id && length(codes) == length(owned_codes) &&
+           Enum.sort(codes) == Enum.sort(owned_codes) do
+        active_codes = for code <- codes, Enum.any?(current.items, &(&1.code == code && &1.active)), do: code
+        Game.Heroes.update!(current, %{inventory_order: codes, item_order: active_codes})
+      else
+        current
+      end
+    end)
+  end
+
+  def reorder_inventory!(_player, hero, _codes), do: hero
+
   # --------------------------------
+
+  defp inventory_attributes(hero, items) do
+    item_attributes(items)
+    |> Map.put(:item_order, ordered_codes(hero.item_order, Enum.filter(items, & &1.active)))
+    |> Map.put(
+      :inventory_order,
+      if(hero.inventory_order == [], do: [], else: ordered_codes(hero.inventory_order, items))
+    )
+  end
+
+  defp ordered_codes(order, items) do
+    codes = Enum.map(items, & &1.code)
+    saved = Enum.filter(order || [], &(&1 in codes)) |> Enum.uniq()
+    saved ++ (codes -- saved)
+  end
 
   defp has_item?(hero, item), do: Enum.map(hero.items, & &1.code) |> Enum.member?(item.code)
 

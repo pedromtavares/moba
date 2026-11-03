@@ -114,4 +114,48 @@ defmodule MobaWeb.V2.HeroHudLiveTest do
       end
     end
   end
+
+  test "dragging inventory saves its displayed order in Training and hero customization", %{conn: conn} do
+    hero =
+      Enum.reduce(["boots_of_speed", "dagon", "arcane_boots"], create_base_hero(%{gold: 30_000}), fn code, hero ->
+        Game.buy_item!(hero, Game.get_item_by_code!(code))
+      end)
+
+    Game.update_tutorial_step!(hero.player, 39)
+    conn = log_in_player(conn, player_id: hero.player_id)
+
+    for path <- ["/training", "/hero/#{hero.id}"] do
+      {:ok, view, _} = live(conn, path)
+      if path != "/training", do: view |> element("#customize-hero") |> render_click()
+      current = Game.get_hero!(hero.id)
+      codes = current |> Game.inventory_items() |> Enum.map(& &1.code) |> Enum.reverse()
+      assert has_element?(view, "#hero-inventory[phx-hook=InventoryOrder][data-reorderable=true]")
+      render_click(view, "reorder-items", %{"codes" => codes, "hero_id" => to_string(hero.id)})
+      assert Game.get_hero!(hero.id).inventory_order == codes
+      assert Game.get_hero!(hero.id).skill_order == current.skill_order
+
+      for {code, position} <- Enum.with_index(codes, 1) do
+        assert has_element?(view, "#hero-inventory > :nth-child(#{position})[data-item-code=#{code}]")
+      end
+
+      {:ok, reloaded, _} = live(conn, path)
+      if path != "/training", do: reloaded |> element("#customize-hero") |> render_click()
+      assert has_element?(reloaded, "#hero-inventory > :first-child[data-item-code=#{hd(codes)}]")
+    end
+  end
+
+  test "inventory reorder rejects a foreign hero and requires hero customization to be open", %{conn: conn} do
+    hero = create_base_hero(%{gold: 10_000}) |> Game.buy_item!(alternate_item())
+    payload = %{"codes" => [alternate_item().code], "hero_id" => to_string(hero.id)}
+    {:ok, owner, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    render_click(owner, "reorder-items", payload)
+    assert Game.get_hero!(hero.id).inventory_order == []
+    {:ok, visitor, _} = live(log_in_player(conn, player_id: create_player!().id), "/hero/#{hero.id}")
+    render_click(visitor, "reorder-items", payload)
+    assert Game.get_hero!(hero.id).inventory_order == []
+
+    owner |> element("#customize-hero") |> render_click()
+    render_click(owner, "reorder-items", %{payload | "hero_id" => "0"})
+    assert Game.get_hero!(hero.id).inventory_order == []
+  end
 end
