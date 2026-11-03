@@ -43,6 +43,10 @@ config :torch,
   template_format: "eex"
 
 config :moba, Moba.Mailer, adapter: Swoosh.Adapters.Local
+config :swoosh, api_client: Swoosh.ApiClient.Req
+
+config :waffle, http_client: Waffle.HTTPClient.Req
+config :ex_aws, http_client: ExAws.Request.Req
 
 # Configures Elixir's Logger
 config :logger, :console,

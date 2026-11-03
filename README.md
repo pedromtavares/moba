@@ -135,4 +135,19 @@ mix test
 
 For a fresh test database, `mix seed_test` runs the complete setup and suite in the test environment, as GitHub Actions does.
 
+Asset dependencies use Node 22.23.4 (`.node-version` for CI/Render and `.tool-versions` for asdf) and the committed npm lockfile:
+
+```bash
+npm ci --prefix assets
+npm audit --package-lock-only --prefix assets
+node --test test/assets/*.js assets/js/*.test.mjs
+npm run deploy --prefix assets
+```
+
+CI verifies installation, audits development and runtime dependencies, and builds production assets; Dependabot checks npm packages and GitHub Actions weekly. GitHub closes fixed alerts after the updated lockfile reaches the default branch; inactivity-paused update PRs resume when an existing Dependabot PR is interacted with. The tutorial uses Shepherd 15 under AGPL-3.0.
+
+The 2026-11-02 dependency review removed Hackney by upgrading the libraries that previously required it. Waffle 2, ExAws, and Swoosh use the existing Req client, Sentry uses Finch, Tzdata uses its built-in HTTP client, and ExCoveralls no longer depends on Hackney. HTTP integration tests exercise artwork downloads, signed S3 uploads, email, Sentry, Discord OAuth, and timezone update requests against a local server. The existing Erlang/Elixir runtime remains supported.
+
+Bootstrap 4 and Popper 1 also remain deprecated dependencies; moving to their current major versions requires a separate UI migration.
+
 [discord]: https://discord.gg/QNwEdPS

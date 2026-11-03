@@ -1,4 +1,5 @@
 import Shepherd from 'shepherd.js';
+import {offset} from '@floating-ui/dom';
 import mobileCheck from "./mobile_check";
 
 const Tutorial = {
@@ -47,8 +48,8 @@ const Tutorial = {
               element: '.targets .battle-button',
               on: 'right'
             },
-            popperOptions: {
-              modifiers: [{ name: 'offset', options: { offset: [0, 25] } }]
+            floatingUIOptions: {
+              middleware: [offset(25)]
             },
             advanceOn: {
               selector: "button", event: "click"
@@ -80,8 +81,8 @@ const Tutorial = {
             element: '.normal-items',
             on: 'right'
           },
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 20] } }]
+          floatingUIOptions: {
+            middleware: [offset(20)]
           },
           cancelIcon: { enabled: true }
         });
@@ -138,8 +139,8 @@ const Tutorial = {
             on: 'left'
           },
           cancelIcon: { enabled: true },
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 20] } }]
+          floatingUIOptions: {
+            middleware: [offset(20)]
           }
         });
         break;
@@ -152,8 +153,8 @@ const Tutorial = {
             on: 'left'
           },
           cancelIcon: { enabled: true },
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 20] } }]
+          floatingUIOptions: {
+            middleware: [offset(20)]
           }
         });
         break;
@@ -171,8 +172,8 @@ const Tutorial = {
               action: function () { hookInstance.pushEventTo("#hero-bar", "close-shop", {}); this.complete() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         break;
@@ -190,8 +191,8 @@ const Tutorial = {
               action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         break;
@@ -209,8 +210,8 @@ const Tutorial = {
               action: function () { hookInstance.pushEvent("tutorial1", {}); this.complete() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, -60] } }]
+          floatingUIOptions: {
+            middleware: [offset(-60)]
           }
         });
         break;
@@ -228,8 +229,8 @@ const Tutorial = {
               action: function () { this.next() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         tour.addStep({
@@ -245,8 +246,8 @@ const Tutorial = {
               action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         break;
@@ -264,8 +265,8 @@ const Tutorial = {
               action: function () { this.next() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         $(".arena")[0] && tour.addStep({
@@ -281,8 +282,8 @@ const Tutorial = {
               action: function () { this.next() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         $(".arena")[0] && tour.addStep({
@@ -298,8 +299,8 @@ const Tutorial = {
               action: function () { this.next() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         $(".arena")[0] && tour.addStep({
@@ -315,8 +316,8 @@ const Tutorial = {
               action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         break;
@@ -334,8 +335,8 @@ const Tutorial = {
               action: function () { hookInstance.pushEvent("finish-tutorial", {}); this.complete() }
             }
           ],
-          popperOptions: {
-            modifiers: [{ name: 'offset', options: { offset: [0, 10] } }]
+          floatingUIOptions: {
+            middleware: [offset(10)]
           }
         });
         break;

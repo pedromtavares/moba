@@ -1,5 +1,4 @@
 const path = require('path');
-const glob = require('glob');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -9,7 +8,7 @@ module.exports = (env, options) => {
 
   return {
     entry: {
-      'app': glob.sync('./vendor/**/*.js').concat(['./js/app.js'])
+      'app': ['./js/app.js']
     },
     output: {
       path: path.resolve(__dirname, '../priv/static/js'),

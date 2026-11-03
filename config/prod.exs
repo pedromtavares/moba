@@ -26,9 +26,6 @@ config :waffle,
   storage: Waffle.Storage.S3,
   bucket: {:system, "S3_BUCKET"}
 
-# Configures Swoosh API Client
-config :swoosh, api_client: Swoosh.ApiClient.Req
-
 # Disable Swoosh Local Memory Storage
 config :swoosh, local: false
 

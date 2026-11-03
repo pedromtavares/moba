@@ -1,4 +1,5 @@
 import Shepherd from 'shepherd.js';
+import {offset, shift} from '@floating-ui/dom';
 
 const chapters = ['Training', 'Base'];
 
@@ -35,10 +36,9 @@ const ModernTutorial = {
         modalOverlayOpeningPadding: 10,
         modalOverlayOpeningRadius: 8,
         highlightClass: 'tutorial-focus',
-        popperOptions: { modifiers: [
-          { name: 'offset', options: { offset: [0, 18] } },
-          { name: 'preventOverflow', options: { padding: 16, altAxis: true, tether: false, rootBoundary: 'viewport' } }
-        ] }
+        floatingUIOptions: {
+          middleware: [offset(18), shift({padding: 16, crossAxis: true, rootBoundary: 'viewport'})]
+        }
       }
     });
     hook.gameTutorial = tour;

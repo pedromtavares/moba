@@ -26,14 +26,20 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: '.node-version'
+          package-manager-cache: false
       - uses: erlef/setup-beam@v1
         with:
           elixir-version: '1.16.2'
           otp-version: '26.2.4'
       - run: mix deps.get
       - run: mix deps.compile
-      - run: cd assets && npm install
+      - run: npm ci --prefix assets
+      - run: npm audit --package-lock-only --prefix assets
+      - run: npm run deploy --prefix assets
       - run: mix seed_test
         env:
           MIX_ENV: test
