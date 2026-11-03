@@ -1,35 +1,36 @@
 defmodule MobaWeb.V2.LibraryLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.V2.Components.ManualComponents
+
   def mount(_, _session, socket) do
     {:ok, socket_init(socket)}
   end
 
-  # Private functions
-
   defp socket_init(socket) do
-    avatars = Game.list_avatars()
-    ultimates = Game.list_ultimate_skills()
+    ultimates = Game.list_ultimate_skills() |> rank_groups() |> Map.new(fn {first, levels} -> {first.code, levels} end)
 
-    skills =
-      Game.list_normal_skills()
-      |> Enum.group_by(& &1.code)
-      |> Enum.map(fn {_code, levels} ->
-        sorted = Enum.sort_by(levels, & &1.level)
-        {List.first(sorted), sorted}
-      end)
+    avatars =
+      Game.list_avatars()
+      |> Enum.sort_by(&{if(&1.code == "juggernaut", do: 0, else: 1), &1.name})
+      |> Enum.map(&Map.put(&1, :ultimate_ranks, Map.get(ultimates, &1.ultimate_code, [])))
+
+    skills = Game.list_normal_skills() |> rank_groups()
 
     assign(socket,
       avatars: avatars,
       skills: skills,
-      ultimates: ultimates,
       sidebar_code: "library"
     )
   end
 
-  defp ultimates_for(avatar, ultimates) do
-    ultimates
-    |> Enum.filter(fn ult -> ult.code == avatar.ultimate_code end)
-    |> Enum.sort_by(fn ult -> ult.level end)
+  defp rank_groups(skills) do
+    skills
+    |> Enum.group_by(& &1.code)
+    |> Enum.map(fn {_code, levels} ->
+      levels = levels |> Enum.sort_by(&{&1.level, -&1.id}) |> Enum.uniq_by(& &1.level)
+      {hd(levels), levels}
+    end)
+    |> Enum.sort_by(fn {first, _} -> first.name end)
   end
 end
