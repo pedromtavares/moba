@@ -34,10 +34,10 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 class="avatar-container text-center mx-1"
                 data-toggle="tooltip"
                 title={hero["avatar"]["name"]}
-            >
-              <img src={GH.image_url(hero["avatar"])} class="avatar" />
-              <.league_badge tier={hero["tier"]} variant="legacy" />
-            </div>
+              >
+                <img src={GH.image_url(hero["avatar"])} class="avatar" />
+                <.league_badge tier={hero["tier"]} variant="legacy" />
+              </div>
             <% end %>
             <%= for avatar <- @blank_collection do %>
               <div style="width:100px;height:75px" class="avatar-container text-center mx-1">
@@ -549,73 +549,46 @@ defmodule MobaWeb.V2.Components.CreateComponents do
 
   attr :avatar, :map, required: true
   attr :avatars, :list, required: true
-  attr :selected, :boolean, default: false
 
-  defp invoke_avatar(assigns) do
+  defp invoke_stats(assigns) do
     ~H"""
-    <article class="invoke-avatar" id={"avatar-#{@avatar.id}"}>
-      <div class="invoke-avatar-art" style={"background-image: url(#{GH.background_url(@avatar)})"}>
-        <h2>{@avatar.name}</h2>
-        <div class="invoke-ultimate" tabindex="0" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
-          <img src={GH.image_url(@avatar.ultimate)} alt="" />
-          <div><small>Ultimate</small><strong>{@avatar.ultimate.name}</strong></div>
-        </div>
-      </div>
-      <div class="invoke-avatar-info">
-        <div class="invoke-role">
-          <img src={"/images/#{@avatar.role}_icon.png"} alt="" />
-          <div><strong>{role(@avatar)}</strong><span>{role_description(@avatar)}</span></div>
-        </div>
-        <div class="invoke-attributes">
-          <div
-            :for={{stat, label} <- [offense: "Offense", defense: "Defense", magic: "Magic", speed: "Speed"]}
-            data-stat={stat}
-          >
-            <strong><.icon name={"game-#{stat}"} class="invoke-stat-icon" />{label}</strong>
-            <div
-              class="invoke-meter"
-              role="meter"
-              aria-label={label}
-              aria-valuemin="0"
-              aria-valuemax="100"
-              aria-valuenow={round(display_percentage(stat, @avatar, @avatars))}
-            >
-              <span style={"width:#{display_percentage(stat, @avatar, @avatars)}%"}></span>
-            </div>
-          </div>
-        </div>
-        <dl :if={@selected} class="invoke-base-stats">
-          <div
-            :for={
-              {stat, label, value, gain} <- [
-                {:health, "Health", @avatar.total_hp, @avatar.hp_per_level},
-                {:energy, "Energy", @avatar.total_mp, @avatar.mp_per_level},
-                {:attack, "Attack", @avatar.atk, @avatar.atk_per_level},
-                {:armor, "Armor", @avatar.armor, nil},
-                {:power, "Power", @avatar.power, nil},
-                {:speed, "Speed", @avatar.speed, nil}
-              ]
-            }
-            data-stat={stat}
-          >
-            <dt><.icon name={"game-#{stat}"} class="invoke-stat-icon" />{label}</dt>
-            <dd>{value}</dd>
-            <small :if={gain}>+{gain} / level</small>
-          </div>
-        </dl>
-        <p class="invoke-gameplay">{@avatar.description}</p>
-        <button
-          :if={!@selected}
-          type="button"
-          id={"pick-avatar-#{@avatar.id}"}
-          class="invoke-primary"
-          phx-click="pick-avatar"
-          phx-value-id={@avatar.id}
+    <div class="invoke-attributes">
+      <div
+        :for={{stat, label} <- [offense: "Offense", defense: "Defense", magic: "Magic", speed: "Speed"]}
+        data-stat={stat}
+      >
+        <strong><.icon name={"game-#{stat}"} class="invoke-stat-icon" />{label}</strong>
+        <div
+          class="invoke-meter"
+          role="meter"
+          aria-label={label}
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow={round(display_percentage(stat, @avatar, @avatars))}
         >
-          Choose {@avatar.name} <span aria-hidden="true">→</span>
-        </button>
+          <span style={"width:#{display_percentage(stat, @avatar, @avatars)}%"}></span>
+        </div>
       </div>
-    </article>
+    </div>
+    <dl class="invoke-base-stats">
+      <div
+        :for={
+          {stat, label, value, gain} <- [
+            {:health, "Health", @avatar.total_hp, @avatar.hp_per_level},
+            {:energy, "Energy", @avatar.total_mp, @avatar.mp_per_level},
+            {:attack, "Attack", @avatar.atk, @avatar.atk_per_level},
+            {:armor, "Armor", @avatar.armor, nil},
+            {:power, "Power", @avatar.power, nil},
+            {:speed, "Speed", @avatar.speed, nil}
+          ]
+        }
+        data-stat={stat}
+      >
+        <dt><.icon name={"game-#{stat}"} class="invoke-stat-icon" />{label}</dt>
+        <dd>{value}</dd>
+        <small :if={gain}>+{gain} / level</small>
+      </div>
+    </dl>
     """
   end
 
@@ -633,7 +606,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     assigns = assign(assigns, form: to_form(%{"name" => assigns.name}))
 
     ~H"""
-    <.form for={@form} id="invoke-name-form" phx-change="validate">
+    <.form for={@form} id="invoke-name-form">
       <.input
         field={@form[:name]}
         label="Hero name"
@@ -641,12 +614,73 @@ defmodule MobaWeb.V2.Components.CreateComponents do
         minlength="3"
         maxlength="15"
         class="invoke-name-input"
-        phx-debounce="250"
         aria-describedby={@error && "invoke-name-error"}
       />
-      <p :if={@error} id="invoke-name-error" role="alert">{@error}</p>
+      <p id="invoke-name-error" role="alert" hidden={is_nil(@error)}>{@error}</p>
     </.form>
     """
+  end
+
+  defp invoke_creation_data(assigns) do
+    avatars =
+      Enum.map(assigns.all_avatars, fn avatar ->
+        %{
+          id: to_string(avatar.id),
+          name: avatar.name,
+          role: avatar.role,
+          description: avatar.description,
+          art: GH.background_url(avatar),
+          ultimate: invoke_skill_data(avatar.ultimate),
+          stats: %{
+            health: avatar.total_hp,
+            energy: avatar.total_mp,
+            attack: avatar.atk,
+            armor: avatar.armor,
+            power: avatar.power,
+            speed: avatar.speed
+          },
+          gains: %{health: avatar.hp_per_level, energy: avatar.mp_per_level, attack: avatar.atk_per_level},
+          ratings:
+            Map.new(
+              [:offense, :defense, :magic, :speed],
+              &{&1, round(display_percentage(&1, avatar, assigns.all_avatars))}
+            )
+        }
+      end)
+
+    builds =
+      Map.new(roles(), fn role ->
+        {role,
+         Enum.map(builds_for(role), fn {skills, title} ->
+           %{name: title, art: invoke_build_art(title), skills: Enum.map(skills, &to_string(&1.id))}
+         end)}
+      end)
+
+    Jason.encode!(%{
+      avatars: avatars,
+      skills: Enum.map(assigns.skills, &invoke_skill_data/1),
+      builds: builds,
+      storage_key: "invoke:#{assigns.cache_key}",
+      named: !is_nil(assigns.current_player.user_id),
+      initial: %{
+        avatar: to_string(assigns.selected_avatar.id),
+        skills: Enum.map(assigns.selected_skills, &to_string(&1.id)),
+        preset: assigns.selected_build_index,
+        custom: assigns.custom,
+        name: assigns.name,
+        filter: assigns.filter
+      }
+    })
+  end
+
+  defp invoke_skill_data(skill) do
+    %{
+      id: to_string(skill.id),
+      name: skill.name,
+      image: GH.image_url(skill),
+      energy: skill.mp_cost || 0,
+      tooltip: TT.skill_tooltip(skill)
+    }
   end
 
   defp roles, do: ["tank", "bruiser", "nuker", "carry", "support"]

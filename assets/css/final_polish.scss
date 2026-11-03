@@ -30,6 +30,20 @@
   .badge-light-dark { color: #bac5d5; }
   > div { margin-top: 10px; }
 }
+.game-tooltip-content .skill-upgrade-preview {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px solid #c9a66538;
+  border-radius: 6px;
+  background: linear-gradient(120deg, #c4a06312, #c4a06304);
+  > header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 10px; color: #dac08c; }
+  > header > span { font-size: 11px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+  > header > strong { padding: 2px 7px; border-radius: 4px; background: #c4a0631a; font-size: 13px; font-weight: 900; }
+  .skill-upgrade-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .skill-upgrade-meta:empty { display: none; }
+  .badge { margin: 0; padding: 3px 6px; font-size: 12px; }
+  .skill-upgrade-effects { font-size: 14px; line-height: 1.55; }
+}
 .game-confirm-dialog {
   width: 480px;
   max-width: calc(100vw - 32px);

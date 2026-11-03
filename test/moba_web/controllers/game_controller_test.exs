@@ -38,10 +38,10 @@ defmodule MobaWeb.GameControllerTest do
 
   test "start loads", %{conn: conn} do
     conn = get(conn, "/start")
-    html = html_response(conn, 200)
-    assert html =~ "Pick your"
-    assert html =~ "Avatar"
-    assert html =~ "randomize-button"
+    document = conn |> html_response(200) |> LazyHTML.from_document()
+    assert LazyHTML.query(document, "#invoke-hero-name") |> LazyHTML.text() == "Juggernaut"
+    assert Enum.count(LazyHTML.query(document, "#randomize-button")) == 1
+    assert Enum.count(LazyHTML.query(document, "#invoke-guest-form #create-button:not([disabled])")) == 1
   end
 
   test "create as guest", %{conn: conn} do

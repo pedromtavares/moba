@@ -30,6 +30,28 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
     "#{name || ""}#{level || ""}<span class='text-dark'>#{skill.description}</span><div class='text-center'>#{full || ""}</div>"
   end
 
+  def skill_upgrade_tooltip(skill, next) do
+    current = GH.skill_info(skill)
+    upgrade = GH.skill_info(next)
+
+    changes =
+      [
+        if(current.mp_cost != upgrade.mp_cost, do: mp_cost_badge(upgrade.mp_cost), else: ""),
+        if(current.cooldown != upgrade.cooldown, do: cooldown_badge(upgrade.cooldown), else: ""),
+        if(current.damage_type != upgrade.damage_type, do: damage_type_html(upgrade.damage_type), else: "")
+      ]
+      |> Enum.join()
+
+    """
+    #{skill_tooltip(skill)}
+    <section class='skill-upgrade-preview' aria-label='Next skill level'>
+      <header><span>Next level</span><strong>Lv #{next.level}</strong></header>
+      <div class='skill-upgrade-meta'>#{changes}</div>
+      <div class='skill-upgrade-effects'>#{formatted_effect_html(upgrade.effects)}</div>
+    </section>
+    """
+  end
+
   def skill_details(skill), do: full_skill_description_html(skill)
 
   def basic_attack_tooltip do
@@ -134,7 +156,9 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
   defp damage_type_html(_), do: nil
 
   defp mp_cost_badge(nil), do: ""
-  defp mp_cost_badge(cost), do: "<span class='badge badge-light-primary'><i class='ui-icon ui-bolt mr-1'></i>#{cost}</span>"
+
+  defp mp_cost_badge(cost),
+    do: "<span class='badge badge-light-primary'><i class='ui-icon ui-bolt mr-1'></i>#{cost}</span>"
 
   defp cooldown_badge(nil), do: ""
 

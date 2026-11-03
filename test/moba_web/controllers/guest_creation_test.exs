@@ -46,10 +46,15 @@ defmodule MobaWeb.GuestCreationTest do
 
     {:ok, view, _} = first |> recycle() |> live("/invoke")
     avatar = base_avatar()
-    render_click(view, "pick-avatar", %{"id" => avatar.id})
-    render_click(view, "pick-build", %{"number" => "0"})
-    assert has_element?(view, "#create-button[phx-click=create]")
-    view |> element("#create-button") |> render_click()
+    {skills, _} = Game.skill_build_for(avatar.role, 0)
+    assert has_element?(view, "#create-button[data-invoke-action=create]")
+
+    render_hook(view, "create", %{
+      avatar: to_string(avatar.id),
+      skills: Enum.map(skills, &to_string(&1.id)),
+      name: avatar.name
+    })
+
     assert_redirect(view, "/training")
 
     player = Game.get_player!(player_id)
@@ -63,7 +68,7 @@ defmodule MobaWeb.GuestCreationTest do
     render_click(view, "pick-avatar", %{"id" => base_avatar().id})
     render_click(view, "pick-build", %{"number" => "0"})
     assert has_element?(view, "form[action='/start'] #create-button[type=submit]")
-    refute has_element?(view, "#create-button[phx-click=create]")
+    refute has_element?(view, "#create-button[data-invoke-action=create]")
   end
 
   test "an old form restores the original guest session after its hero was archived", %{conn: conn} do

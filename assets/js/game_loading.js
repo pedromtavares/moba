@@ -10,7 +10,7 @@ export function loadingTarget(control, to, root = document) {
   const portrait = (node, name, subtitle, selector) => ({
     name, subtitle, image: image(node, selector), art: art(node)
   });
-  const event = control?.getAttribute('phx-click');
+  const event = control?.getAttribute('phx-click') || control?.dataset?.invokeAction;
   let path;
   try { path = new URL(to || window.location.href, window.location.href).pathname; }
   catch (_) { return null; }
@@ -40,7 +40,7 @@ export function loadingTarget(control, to, root = document) {
   }
   if (event === 'create') {
     const selected = root.querySelector('.invoke-avatar-art');
-    return {name: text(control).replace(/\s*→$/, ''), subtitle: 'Your next hero', art: art(selected)};
+    return {name: control.dataset.heroName || text(control).replace(/\s*→$/, ''), subtitle: 'Your next hero', art: control.dataset.heroArt || art(selected)};
   }
   if (event === 'continue') {
     const card = control.closest('.hero-card');
@@ -257,7 +257,7 @@ export function initGameLoading() {
   document.addEventListener('click', event => {
     if (event.defaultPrevented || event.button !== 0 || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
     pendingTarget = null;
-    const control = event.target.closest('a[href], button[phx-click]');
+    const control = event.target.closest('a[href], button[phx-click], button[data-invoke-action="create"]');
     if (!control || control.disabled || control.getAttribute('aria-disabled') === 'true' || control.target ||
         ['download', 'data-method'].some(attribute => control.hasAttribute(attribute))) return;
     let url;
@@ -267,7 +267,7 @@ export function initGameLoading() {
     }
     const target = loadingTarget(control, url?.href);
     if (!target?.name) return;
-    const action = control.getAttribute('phx-click');
+    const action = control.getAttribute('phx-click') || control.dataset?.invokeAction;
     pendingTarget = {target, at: Date.now(), accepts: path => url ? path === url.pathname :
       (['create', 'continue'].includes(action) ? path === '/training' : /^\/(battles|matches|arena)\/\d+\/?$/.test(path))};
   }, true);

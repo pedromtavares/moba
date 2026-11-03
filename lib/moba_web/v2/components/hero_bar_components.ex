@@ -75,6 +75,6 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   def next_skill_description(skill) do
     next = Game.get_current_skill!(skill.code, skill.level + 1)
 
-    "#{TT.skill_tooltip(skill)}<hr/>#{TT.skill_tooltip(%{next | name: "Next Level (#{next.level})", level: nil, description: ""})}"
+    TT.skill_upgrade_tooltip(skill, next)
   end
 end

@@ -5,117 +5,108 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
   setup %{conn: conn} do
     hero = create_base_hero()
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
-    avatar = Game.list_creation_avatars(Accounts.unlocked_codes_for(hero.player.user)) |> List.first()
-    %{conn: conn, hero: hero, avatar: avatar}
+    %{conn: conn, hero: hero}
   end
 
-  test "role filters preserve all available Avatar choices", %{conn: conn, avatar: avatar} do
+  test "creation loads all choices for browser-only selection", %{conn: conn} do
     {:ok, view, _} = live(conn, "/invoke")
-    assert has_element?(view, "#invoke-modern #invoke-filter-all[aria-pressed=true]")
-    assert has_element?(view, "section#invoke-collection .invoke-collection-hero.is-untrained")
-    refute has_element?(view, "#invoke-collection summary")
-    view |> element("#invoke-filter-#{avatar.role}") |> render_click()
-    assert has_element?(view, "#invoke-filter-#{avatar.role}[aria-pressed=true]")
-    assert has_element?(view, "#pick-avatar-#{avatar.id}")
-    view |> element("#invoke-filter-all") |> render_click()
-    assert has_element?(view, "#invoke-filter-all[aria-pressed=true]")
+    assert has_element?(view, "#invoke-modern[phx-update=ignore][data-creation]")
+    assert has_element?(view, "#invoke-hero-name", "Juggernaut")
+    refute has_element?(view, "#invoke-modern [phx-click], #invoke-modern [phx-change]")
 
-    for available <- Game.list_creation_avatars([]) do
-      assert has_element?(view, "#pick-avatar-#{available.id}")
+    for avatar <- Game.list_creation_avatars([]) do
+      assert has_element?(view, "#pick-avatar-#{avatar.id}[data-invoke-action=avatar]")
     end
-  end
 
-  test "preset selection, name validation and invoking retain the training flow", %{
-    conn: conn,
-    hero: hero,
-    avatar: avatar
-  } do
-    {:ok, view, _} = live(conn, "/invoke")
-    view |> element("#pick-avatar-#{avatar.id}") |> render_click()
-    assert has_element?(view, "#invoke-builds")
+    for skill <- Game.list_creation_skills(1) do
+      assert has_element?(view, "#invoke-custom-skills #pick-skill-#{skill.id}[data-invoke-action=skill]")
+    end
+
+    assert has_element?(view, "#invoke-build-footer #create-button[data-invoke-action=create]")
     assert has_element?(view, ".invoke-base-stats [data-stat=health] .ui-heart")
     assert has_element?(view, ".invoke-attributes [data-stat=offense] .ui-fist")
-    assert has_element?(view, "#create-button[disabled]")
-    assert has_element?(view, "#skill_#{avatar.ultimate.id}")
-    view |> element("#pick-build-0") |> render_click()
-    assert has_element?(view, "#pick-build-0[aria-pressed=true]")
-    refute has_element?(view, "#create-button[disabled]")
-    view |> form("#invoke-name-form", name: "x") |> render_change()
-    assert has_element?(view, "#invoke-name-error")
-    assert has_element?(view, "#create-button[disabled]")
-    view |> form("#invoke-name-form", name: "Forge Knight") |> render_change()
-    refute has_element?(view, "#invoke-name-error")
-    assert has_element?(view, "#invoke-name-form input[value='Forge Knight']")
-    view |> element("#create-button") |> render_click()
+  end
+
+  test "the final browser choice is validated and creates the selected hero", %{conn: conn, hero: hero} do
+    {:ok, view, _} = live(conn, "/invoke")
+    avatar = Game.list_creation_avatars([]) |> List.first()
+    {skills, _} = Game.skill_build_for(avatar.role, 0)
+
+    render_hook(view, "create", %{
+      avatar: to_string(avatar.id),
+      skills: Enum.map(skills, &to_string(&1.id)),
+      name: "Forge Knight"
+    })
+
     assert_redirect(view, "/training")
-    player = Game.get_player!(hero.player_id)
-    created = Game.get_hero!(player.current_pve_hero_id)
+    created = Game.get_player!(hero.player_id).current_pve_hero_id |> Game.get_hero!()
     assert created.name == "Forge Knight"
     assert created.avatar.code == avatar.code
     assert length(created.skills) == 4
   end
 
-  test "custom skills cap at three, can be removed and survive mode switches", %{conn: conn, avatar: avatar} do
+  test "invalid or duplicate choices cannot create a record", %{conn: conn, hero: hero} do
     {:ok, view, _} = live(conn, "/invoke")
-    view |> element("#pick-avatar-#{avatar.id}") |> render_click()
-    view |> element("#custom-build-button") |> render_click()
-    skills = Game.list_creation_skills(1) |> Enum.take(4)
+    avatar = Game.list_creation_avatars([]) |> List.first()
+    skills = Game.list_creation_skills(1) |> Enum.take(3) |> Enum.map(&to_string(&1.id))
+    params = %{avatar: to_string(avatar.id), skills: skills, name: hero.player.user.username}
 
-    for skill <- Enum.take(skills, 3) do
-      view |> element("#pick-skill-#{skill.id}") |> render_click()
-      assert has_element?(view, "#pick-skill-#{skill.id}[aria-pressed=true]")
-
-      assert has_element?(
-               view,
-               "#pick-skill-#{skill.id} .invoke-energy[aria-label='Energy cost: #{skill.mp_cost || 0}'] .ui-bolt"
-             )
-
-      assert has_element?(
-               view,
-               ".invoke-loadout-slot:has(#skill_#{skill.id}) .invoke-energy[aria-label='Energy cost: #{skill.mp_cost || 0}'] .ui-bolt"
-             )
+    for invalid <- [
+          %{params | avatar: "invalid"},
+          %{params | skills: [hd(skills), hd(skills), hd(skills)]},
+          %{params | skills: ["invalid"]},
+          %{params | name: "x"},
+          %{params | skills: "invalid"}
+        ] do
+      render_hook(view, "create", invalid)
+      assert Game.get_player!(hero.player_id).current_pve_hero_id == hero.id
     end
-
-    assert has_element?(
-             view,
-             ".invoke-ultimate-slot .invoke-energy[aria-label='Energy cost: #{avatar.ultimate.mp_cost || 0}'] .ui-bolt"
-           )
-
-    fourth = Enum.at(skills, 3)
-    assert has_element?(view, "#pick-skill-#{fourth.id}[aria-disabled=true]")
-    view |> element("#pick-skill-#{fourth.id}") |> render_click()
-    refute has_element?(view, "#skill_#{fourth.id}")
-    first = hd(skills)
-    view |> element("#skill_#{first.id}") |> render_click()
-    refute has_element?(view, "#pick-skill-#{first.id}[aria-pressed=true]")
-    assert has_element?(view, "#create-button[disabled]")
-    view |> element("#pick-skill-#{fourth.id}") |> render_click()
-    refute has_element?(view, "#create-button[disabled]")
-    view |> element("#back-to-builds-button") |> render_click()
-    assert has_element?(view, "#skill_#{fourth.id}")
-    view |> element("#repick-button") |> render_click()
-    assert has_element?(view, "#invoke-avatars")
-    refute has_element?(view, "#create-bar")
   end
 
-  test "guest creation retains its POST and selected skill fields", %{avatar: avatar} do
-    guest = Phoenix.ConnTest.build_conn()
-    {:ok, view, _} = live(guest, "/start")
-    assert has_element?(view, "#invoke-start-header h1", "Pick your Avatar")
-    refute has_element?(view, "#invoke-collection")
-    view |> element("#pick-avatar-#{avatar.id}") |> render_click()
-    refute has_element?(view, "#invoke-start-header")
-    view |> element("#pick-build-0") |> render_click()
+  test "name availability is checked on creation", %{conn: conn, hero: hero} do
+    other = create_base_hero()
+    {:ok, view, _} = live(conn, "/invoke")
+    avatar = Game.list_creation_avatars([]) |> List.first()
+    {skills, _} = Game.skill_build_for(avatar.role, 0)
+
+    render_hook(view, "create", %{
+      avatar: to_string(avatar.id),
+      skills: Enum.map(skills, &to_string(&1.id)),
+      name: other.player.user.username
+    })
+
+    assert Game.get_player!(hero.player_id).current_pve_hero_id == hero.id
+  end
+
+  test "every unlocked skill is provided when the page loads", %{conn: conn, hero: hero} do
+    Enum.each(Game.list_unlockable_skills(), &Accounts.Unlocks.create_unlock!(hero.player.user, &1.code))
+    available = Game.list_creation_skills(1, Accounts.unlocked_codes_for(Accounts.get_user!(hero.player.user_id)))
+    {:ok, view, _} = live(conn, "/invoke")
+    for skill <- available, do: assert(has_element?(view, "#invoke-custom-skills #pick-skill-#{skill.id}"))
+
+    assert length(available) ==
+             view
+             |> element("#invoke-custom-skills")
+             |> render()
+             |> LazyHTML.from_fragment()
+             |> LazyHTML.query("button")
+             |> Enum.count()
+  end
+
+  test "guests retain a native POST with a ready starter build" do
+    {:ok, view, _} = live(Phoenix.ConnTest.build_conn(), "/start")
+    avatar = Enum.find(Game.list_creation_avatars([]), &(&1.code == "juggernaut"))
+    assert has_element?(view, "#invoke-hero-name", "Juggernaut")
     assert has_element?(view, "#invoke-guest-form[action='/start'][method=post]")
     assert has_element?(view, "#invoke-guest-form input[name=avatar][value='#{avatar.id}']")
 
-    assert Enum.count(
+    assert 3 ==
              view
              |> element("#invoke-guest-form")
              |> render()
              |> LazyHTML.from_fragment()
              |> LazyHTML.query("input[name='skills[]']")
-           ) == 3
+             |> Enum.count()
 
     refute has_element?(view, "#create-button[disabled]")
   end

@@ -5,8 +5,10 @@ import ModernTutorial from './tutorial_modern.js';
 import CombatStage from './combat_stage';
 import {initTooltips, hideTooltips} from './tooltips';
 import InventoryOrder from './inventory_order';
+import {InvokeStage} from './invoke_stage';
 
 let Hooks = {};
+Hooks.InvokeStage = {...InvokeStage, refreshTooltips: initTooltips, hideTooltips};
 Hooks.CombatStage = {...CombatStage, refreshTooltips: initTooltips};
 Hooks.InventoryOrder = {...InventoryOrder, hideTooltips};
 
