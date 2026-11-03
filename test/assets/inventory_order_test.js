@@ -5,23 +5,34 @@ const vm = require('node:vm');
 const source = fs.readFileSync('assets/js/inventory_order.js', 'utf8')
   .replace('export function ', 'function ').replace('export default InventoryOrder;', '({InventoryOrder, moveInventoryItem});');
 
-function environment({columns = 3, statusId = 'hero-inventory-status', codes = ['boots', 'dagon', 'mask']} = {}) {
+function environment({columns = 3, statusId = 'hero-inventory-status', codes = ['boots', 'dagon', 'mask'], reducedMotion = false} = {}) {
   const classes = () => { const values = new Set(); return {add: name => values.add(name), remove: name => values.delete(name), has: name => values.has(name)}; };
   let items, hit, request, hidden = 0, requestedStatus;
-  const listeners = new Map(), captured = new Set(), status = {};
-  const el = {dataset: {reorderable: 'true', heroId: '123', orderStatus: statusId}, classList: classes(),
+  const listeners = new Map(), documentListeners = new Map(), captured = new Set(), status = {}, flying = [];
+  const el = {id: statusId === 'shop-inventory-status' ? 'shop-inventory-order' : 'hero-inventory', dataset: {reorderable: 'true', heroId: '123', orderStatus: statusId}, classList: classes(),
+    getBoundingClientRect: () => ({width: 400}),
     querySelectorAll: () => items, contains: item => items.includes(item),
     addEventListener: (type, fn) => listeners.set(type, fn), removeEventListener: type => listeners.delete(type),
     setPointerCapture: id => captured.add(id), hasPointerCapture: id => captured.has(id), releasePointerCapture: id => captured.delete(id)};
-  items = codes.map(code => ({dataset: {itemCode: code, itemName: code}, classList: classes(),
+  const makeItem = (code, rarity = 'normal') => ({dataset: {itemCode: code, itemName: code, rarity}, classList: classes(),
+    animate(frames, options) { this.animation = {frames, options, cancel() { this.cancelled = true; }}; return this.animation; },
     style: {removeProperty(name) { delete this[name]; }}, focus() { this.focused = true; },
-    getBoundingClientRect() { return {top: Math.floor(items.indexOf(this) / columns) * 50}; },
-    closest(selector) { return selector === '[data-item-code]' ? this : selector === '[data-inventory-order]' ? el : null; }}));
-  const {InventoryOrder} = vm.runInNewContext(source, {document: {elementFromPoint: () => hit, getElementById: id => {requestedStatus = id; return status;}}});
+    getBoundingClientRect() { return {left: items.indexOf(this) * 50, top: Math.floor(items.indexOf(this) / columns) * 50, width: 48, height: 48}; },
+    querySelector() { return {src: `/items/${code}.png`}; },
+    closest(selector) { return selector === '[data-item-code]' ? this : selector === '[data-inventory-order]' ? el : null; }});
+  items = codes.map(code => makeItem(code));
+  const document = {elementFromPoint: () => hit, getElementById: id => {
+    if (id === 'shop-inventory-order') return el.id === id ? el : null;
+    requestedStatus = id; return status;
+  }, addEventListener: (type, listener) => documentListeners.set(type, listener), removeEventListener: type => documentListeners.delete(type),
+  createElement: () => ({style: {}, setAttribute() {}, remove() { this.removed = true; }, animate(frames, options) { this.animation = {frames, options, cancel() { this.cancelled = true; }}; return this.animation; }}),
+  body: {appendChild: image => flying.push(image)}};
+  const {InventoryOrder} = vm.runInNewContext(source, {window: {matchMedia: () => ({matches: reducedMotion})}, document});
   const hook = {...InventoryOrder, el, hideTooltips: () => hidden++, pushEvent: (name, payload, callback) => {request = {name, payload, callback}; }};
   hook.mounted();
   const pointer = (type, item, x, y = 10) => listeners.get(type)({button: 0, isPrimary: true, pointerId: 1, target: item, clientX: x, clientY: y, preventDefault() {}});
-  return {hook, el, listeners, status, pointer,
+  return {hook, el, listeners, documentListeners, flying, status, pointer,
+    patch(codes, rarity = 'normal') { items = codes.map(code => items.find(item => item.dataset.itemCode === code) || makeItem(code, rarity)); hook.updated(); },
     items: () => items, hit: item => {hit = item;}, request: () => request, hidden: () => hidden, requestedStatus: () => requestedStatus,
     confirm() { items = request.payload.codes.map(code => items.find(item => item.dataset.itemCode === code)); hook.updated(); request.callback(); }
   };
@@ -99,4 +110,95 @@ test('LiveView updates cancel an in-progress drag and destroying removes listene
   assert.equal(env.request(), undefined);
   assert.equal(boots.classList.has('is-dragging'), false);
   env.hook.destroyed(); assert.equal(env.listeners.size, 0);
+});
+
+test('purchases and transmutes animate only newly acquired items in their rarity colour', () => {
+  const env = environment();
+  assert.ok(env.items().every(item => !item.animation), 'initial inventory stays still');
+  env.patch(['boots', 'dagon', 'mask', 'arcane_boots'], 'rare');
+  const rare = env.items().at(-1);
+  assert.match(rare.animation.frames[0].filter, /#8abde6/);
+  assert.equal(rare.animation.options.duration, 1000);
+  assert.ok(env.items().slice(0, 3).every(item => !item.animation));
+  rare.animation.onfinish();
+  assert.equal(env.hook.arrivals.size, 0);
+
+  env.patch(['arcane_boots', 'octarine_core'], 'legendary');
+  const legendary = env.items().at(-1);
+  assert.match(legendary.animation.frames[0].filter, /#ec9a9e/);
+  assert.equal(env.hook.arrivals.size, 1);
+  env.patch(['octarine_core', 'arcane_boots']);
+  assert.equal(env.items()[0].animation, legendary.animation, 'reordering does not restart the bloom');
+  env.patch(['arcane_boots']);
+  assert.equal(legendary.animation.cancelled, true, 'selling an arriving item stops its animation');
+});
+
+test('hero changes and reopening inventory do not celebrate existing equipment', () => {
+  const env = environment();
+  env.el.dataset.heroId = '456';
+  env.patch(['new_hero_item'], 'epic');
+  assert.equal(env.items()[0].animation, undefined);
+  env.patch(['new_hero_item']);
+  assert.equal(env.items()[0].animation, undefined);
+});
+
+test('reduced motion retains a short rarity glow without movement and teardown cancels it', () => {
+  const env = environment({reducedMotion: true});
+  env.patch(['boots', 'dagon', 'mask', 'bloodstone'], 'epic');
+  const animation = env.items().at(-1).animation;
+  assert.ok(animation.frames.every(frame => frame.transform === 'none'));
+  assert.match(animation.frames[0].filter, /#bb9ae4/);
+  assert.equal(animation.options.duration, 450);
+  env.hook.destroyed();
+  assert.equal(animation.cancelled, true);
+  assert.equal(env.hook.arrivals.size, 0);
+});
+
+test('a confirmed purchase flies from its button to the hero bar before the landing glow', () => {
+  const env = environment();
+  const button = {dataset: {acquireCode: 'bloodstone', heroId: '123'}, getBoundingClientRect: () => ({left: 600, top: 400, width: 200, height: 50})};
+  env.documentListeners.get('click')({target: {closest: () => button}});
+  assert.equal(env.flying.length, 0, 'a click alone cannot celebrate a failed purchase');
+  env.patch(['boots', 'dagon', 'mask', 'bloodstone'], 'epic');
+  assert.equal(env.flying.length, 1);
+  const image = env.flying[0];
+  assert.equal(image.src, '/items/bloodstone.png');
+  assert.match(image.animation.frames[0].transform, /translate\(676px, 401px\)/);
+  assert.match(image.style.border, /#bb9ae4/);
+  assert.equal(env.items().at(-1).animation.options.delay, 650);
+  image.animation.onfinish();
+  assert.equal(image.removed, true);
+  assert.equal(env.hook.flights.size, 0);
+});
+
+test('the shop inventory pops immediately without launching a second transfer', () => {
+  const env = environment({statusId: 'shop-inventory-status'});
+  const button = {dataset: {acquireCode: 'bloodstone', heroId: '123'}, getBoundingClientRect: () => ({left: 600, top: 400, width: 200, height: 50})};
+  env.documentListeners.get('click')({target: {closest: () => button}});
+  env.patch(['boots', 'dagon', 'mask', 'bloodstone'], 'epic');
+  assert.equal(env.flying.length, 0);
+  assert.equal(env.items().at(-1).animation.options.delay, 0);
+});
+
+test('submitted transmutes transfer too; other heroes and reduced motion never launch a flight', () => {
+  const env = environment();
+  const button = {dataset: {acquireCode: 'arcane_boots', heroId: '123'}, getBoundingClientRect: () => ({left: 600, top: 400, width: 200, height: 50})};
+  env.documentListeners.get('submit')({submitter: button});
+  env.patch(['arcane_boots'], 'rare');
+  assert.equal(env.flying.length, 1);
+  env.hook.destroyed();
+  assert.equal(env.flying[0].removed, true);
+  assert.equal(env.flying[0].animation.cancelled, true);
+  assert.equal(env.documentListeners.size, 0);
+
+  const reduced = environment({reducedMotion: true});
+  reduced.documentListeners.get('submit')({submitter: button});
+  reduced.patch(['arcane_boots'], 'rare');
+  assert.equal(reduced.flying.length, 0);
+  assert.equal(reduced.items()[0].animation.options.delay, 0);
+
+  const other = environment();
+  other.documentListeners.get('submit')({submitter: {...button, dataset: {...button.dataset, heroId: '456'}}});
+  other.patch(['arcane_boots'], 'rare');
+  assert.equal(other.flying.length, 0);
 });

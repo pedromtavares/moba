@@ -279,6 +279,11 @@ defmodule MobaWeb.CoreComponents do
     classes = %{
       "health" => "ui-heart",
       "energy" => "ui-bolt",
+      "xp" => "ui-star",
+      "gold" => "ui-coins",
+      "damage" => "ui-burst",
+      "chance" => "ui-dice",
+      "stun" => "ui-star",
       "attack" => "ui-dagger",
       "swords" => "ui-swords",
       "strategy" => "ui-strategy",

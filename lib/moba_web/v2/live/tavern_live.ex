@@ -397,7 +397,7 @@ defmodule MobaWeb.V2.TavernLive do
             </div>
             <span :if={unlocked?(@skill, @player)} class="tavern-owned">Owned ✓</span>
           </header>
-          <p class="tavern-skill-description">{@skill.description}</p>
+          <p class="tavern-skill-description">{Moba.Game.SkillDescriptions.summary(@skill)}</p>
           <details class="tavern-skill-details" id={"skill-details-#{@skill.id}"}>
             <summary>Skill details <span aria-hidden="true">+</span></summary>
             <div class="tavern-skill-readout">{Phoenix.HTML.raw(TT.skill_details(@skill))}</div>

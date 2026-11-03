@@ -45,6 +45,8 @@ defmodule MobaWeb.V2.ShopLiveTest do
     refute has_element?(view, "#shop-purchase-hint")
     assert has_element?(view, "#shop-gold", "#{hero.gold - Game.item_price(item)}")
     assert has_element?(view, "#inventory", "1 / 6 slots")
+    assert has_element?(view, "#hero-inventory [data-item-code='#{item.code}'][data-rarity='#{item.rarity}']")
+    assert has_element?(view, "#shop-inventory-order [data-item-code='#{item.code}'][data-rarity='#{item.rarity}']")
 
     view |> element("#transmute-#{item.id}") |> render_click()
     assert has_element?(view, "#inventory .shop-shelf-label[aria-pressed=true]")
@@ -87,6 +89,8 @@ defmodule MobaWeb.V2.ShopLiveTest do
     assert Enum.map(Game.get_hero!(hero.id).items, & &1.code) == [result.code]
     assert has_element?(view, "#shop-detail-name", result.name)
     assert has_element?(view, "#inventory", "1 / 6 slots")
+    assert has_element?(view, "#hero-inventory [data-item-code='#{result.code}'][data-rarity=rare]")
+    assert has_element?(view, "#shop-inventory-order [data-item-code='#{result.code}'][data-rarity=rare]")
     refute has_element?(view, "#shop-transmute-form")
   end
 

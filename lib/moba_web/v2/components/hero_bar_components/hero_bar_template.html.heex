@@ -189,6 +189,7 @@
                     id={"inventory-#{item.id}"}
                     data-item-code={item.code}
                     data-item-name={item.name}
+                    data-rarity={item.rarity}
                     role={@reorderable && "button"}
                     tabindex={if @reorderable, do: "0"}
                     aria-label={if @reorderable, do: "#{item.name}. Drag to reorder, or use Alt and arrow keys."}

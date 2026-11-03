@@ -6,8 +6,6 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
   tooltip integration still depends on `title` attributes.
   """
 
-  alias MobaWeb.V2.Components.GameHelpers, as: GH
-
   def hero_stats_tooltip(hero, show_speed \\ false) do
     buttons =
       hero_stat_entries(hero, show_speed)
@@ -18,79 +16,15 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
 
   def hero_stats_string(hero, show_speed \\ false), do: hero_stats_tooltip(hero, show_speed)
 
-  def skill_tooltip(%{code: "basic_attack"} = skill) do
-    "<h3 class='text-center'>#{skill.name}</h3>#{skill.description}"
-  end
-
   def skill_tooltip(skill, full_description \\ true, show_name \\ true) do
-    name = show_name && "<h3 class='mb-1 text-center'>#{skill.name}</h3>"
-    level = full_description && skill.level && "<h5 class='text-center'>Level #{skill.level}</h5>"
-    full = full_description && full_skill_description_html(skill)
-
-    "#{name || ""}#{level || ""}<span class='text-dark'>#{skill.description}</span><div class='text-center'>#{full || ""}</div>"
+    MobaWeb.V2.Components.SkillTooltip.render(skill, full: full_description, show_name: show_name)
   end
 
-  def skill_upgrade_tooltip(skill, next) do
-    current = GH.skill_info(skill)
-    upgrade = GH.skill_info(next)
+  def skill_upgrade_tooltip(skill, next), do: MobaWeb.V2.Components.SkillTooltip.render(skill, next: next)
+  def skill_details(skill), do: MobaWeb.V2.Components.SkillTooltip.render(skill, details_only: true)
+  def basic_attack_tooltip, do: skill_tooltip(Moba.basic_attack())
 
-    changes =
-      [
-        if(current.mp_cost != upgrade.mp_cost, do: mp_cost_badge(upgrade.mp_cost), else: ""),
-        if(current.cooldown != upgrade.cooldown, do: cooldown_badge(upgrade.cooldown), else: ""),
-        if(current.damage_type != upgrade.damage_type, do: damage_type_html(upgrade.damage_type), else: "")
-      ]
-      |> Enum.join()
-
-    """
-    #{skill_tooltip(skill)}
-    <section class='skill-upgrade-preview' aria-label='Next skill level'>
-      <header><span>Next level</span><strong>Lv #{next.level}</strong></header>
-      <div class='skill-upgrade-meta'>#{changes}</div>
-      <div class='skill-upgrade-effects'>#{formatted_effect_html(upgrade.effects)}</div>
-    </section>
-    """
-  end
-
-  def skill_details(skill), do: full_skill_description_html(skill)
-
-  def basic_attack_tooltip do
-    basic = Moba.basic_attack()
-    "#{skill_tooltip(basic)}<br/><br/>#{damage_type_html(basic.damage_type) || ""}"
-  end
-
-  def item_tooltip(item) do
-    info = GH.item_info(item)
-    effects = formatted_effect_html(info.effects)
-
-    rarity =
-      case info.rarity do
-        "normal" -> "<span class='badge badge-light-dark'>Normal</span>"
-        "rare" -> "<span class='badge badge-light-primary'>Rare</span>"
-        "epic" -> "<span class='badge badge-light-purple'>Epic</span>"
-        "legendary" -> "<span class='badge badge-light-danger'>Legendary</span>"
-        _ -> ""
-      end
-
-    "
-      <h3 class='mb-1 text-center'>#{info.name}</h3>
-      <div class='text-center mb-1 mt-1'>#{rarity}</div>
-      <span class='text-dark'>#{info.description}</span>
-      <div class='text-center mb-2 mt-1'>
-        #{stat_badge(:hp, info.stats)}
-        #{stat_badge(:mp, info.stats)}
-        #{stat_badge(:atk, info.stats)}
-        #{stat_badge(:power, info.stats)}
-        #{stat_badge(:armor, info.stats)}
-        #{stat_badge(:speed, info.stats)}
-      </div>
-      <div class='text-center mb-2 mt-1'>
-        #{mp_cost_badge(info.mp_cost)}
-        #{cooldown_badge(info.cooldown)}
-      </div>
-      <div class='text-center'>#{effects}</div>
-    "
-  end
+  def item_tooltip(item), do: MobaWeb.V2.Components.ItemTooltip.render(item)
 
   def formatted_effect_tooltip(effect) when is_binary(effect), do: formatted_effect_html(effect)
   def formatted_effect_tooltip(_), do: ""
@@ -127,73 +61,6 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
   defp hero_stat_tooltip_button({title, class_name, icon, value}) do
     "<span class='game-stat #{class_name}' title='#{title}'><i class='#{icon}' aria-hidden='true'></i> <span class='stat-value'>#{value}</span></span>"
   end
-
-  defp full_skill_description_html(skill) do
-    info = GH.skill_info(skill)
-    effects = formatted_effect_html(info.effects)
-    damage_type = damage_type_html(info.damage_type)
-
-    "
-      <div class='text-center mb-2 mt-1'>
-        #{mp_cost_badge(info.mp_cost)}
-        #{cooldown_badge(info.cooldown)}
-        #{passive_badge(info.passive)}
-        #{if damage_type, do: "#{damage_type}<br/>", else: ""}
-      </div>
-      #{effects}
-    "
-  end
-
-  defp damage_type_html("normal"),
-    do: "<span class='badge badge-light-success'><i class='ui-icon ui-burst mr-1'></i>Normal Damage</span>"
-
-  defp damage_type_html("pure"),
-    do: "<span class='badge badge-light-danger'><i class='ui-icon ui-burst mr-1'></i>Pure Damage</span>"
-
-  defp damage_type_html("magic"),
-    do: "<span class='badge badge-light-purple'><i class='ui-icon ui-burst mr-1'></i>Magic Damage</span>"
-
-  defp damage_type_html(_), do: nil
-
-  defp mp_cost_badge(nil), do: ""
-
-  defp mp_cost_badge(cost),
-    do: "<span class='badge badge-light-primary'><i class='ui-icon ui-bolt mr-1'></i>#{cost}</span>"
-
-  defp cooldown_badge(nil), do: ""
-
-  defp cooldown_badge(cooldown),
-    do: "<span class='badge badge-light-warning'><i class='ui-icon ui-clock mr-1'></i>#{cooldown}</span>"
-
-  defp passive_badge(true),
-    do: "<span class='badge badge-light-dark'><i class='ui-icon ui-circle-dot mr-1'></i>Passive</span>"
-
-  defp passive_badge(false), do: ""
-
-  defp stat_badge(key, stats) do
-    case List.keyfind(stats, key, 0) do
-      {_, value} -> stat_badge_html(key, value)
-      nil -> ""
-    end
-  end
-
-  defp stat_badge_html(:hp, value),
-    do: "<span class='badge badge-light-danger'><i class='ui-icon ui-heart mr-1'></i> +#{value} Health</span>"
-
-  defp stat_badge_html(:mp, value),
-    do: "<span class='badge badge-light-info'><i class='ui-icon ui-bolt mr-1'></i> +#{value} Energy</span>"
-
-  defp stat_badge_html(:atk, value),
-    do: "<span class='badge badge-light-success'><i class='ui-icon ui-dagger mr-1'></i> +#{value} Attack</span>"
-
-  defp stat_badge_html(:power, value),
-    do: "<span class='badge badge-light-pink'><i class='ui-icon ui-vortex mr-1'></i> +#{value} Power</span>"
-
-  defp stat_badge_html(:armor, value),
-    do: "<span class='badge badge-light-warning'><i class='ui-icon ui-shield mr-1'></i> +#{value} Armor</span>"
-
-  defp stat_badge_html(:speed, value),
-    do: "<span class='badge badge-light-purple'><i class='ui-icon ui-runner mr-1'></i> +#{value} Speed</span>"
 
   defp formatted_effect_html(effect) when is_binary(effect) do
     effect

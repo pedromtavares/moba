@@ -34,6 +34,35 @@ defmodule MobaWeb.V2.Components.TrainingComponents do
 
   def training_header(assigns), do: header(assigns)
 
+  def target_rewards_tooltip(reward, label, difficulty) do
+    assigns = %{reward: reward, label: label, difficulty: difficulty}
+    assigns |> rewards_tooltip() |> Phoenix.HTML.Safe.to_iodata() |> IO.iodata_to_binary()
+  end
+
+  defp rewards_tooltip(assigns) do
+    ~H"""
+    <article class="rewards-tooltip" data-difficulty={@difficulty}>
+      <header>
+        <.icon name="game-swords" class="rewards-tooltip-emblem" />
+        <div>
+          <span class="rewards-tooltip-eyebrow">Target rewards</span>
+          <h3>{@label} target</h3>
+        </div>
+      </header>
+      <dl>
+        <div data-reward="xp">
+          <dt><.icon name="game-xp" class="rewards-tooltip-icon" /><span>XP</span></dt>
+          <dd>+{@reward}</dd>
+        </div>
+        <div data-reward="gold">
+          <dt><.icon name="game-gold" class="rewards-tooltip-icon" /><span>Gold</span></dt>
+          <dd>+{@reward}</dd>
+        </div>
+      </dl>
+    </article>
+    """
+  end
+
   defp short_league(tier), do: String.replace(Moba.leagues()[tier], " League", "")
 
   defp ascent_status(hero, next, goal, pending) do

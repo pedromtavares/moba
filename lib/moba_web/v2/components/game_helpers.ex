@@ -126,7 +126,7 @@ defmodule MobaWeb.V2.Components.GameHelpers do
     %{
       name: skill.name,
       level: nil,
-      description: skill.description,
+      description: Moba.Game.SkillDescriptions.summary(skill),
       mp_cost: nil,
       cooldown: nil,
       passive: false,
@@ -139,12 +139,12 @@ defmodule MobaWeb.V2.Components.GameHelpers do
     %{
       name: skill.name,
       level: skill.level,
-      description: skill.description,
+      description: Moba.Game.SkillDescriptions.summary(skill),
       mp_cost: positive_or_nil(skill.mp_cost),
       cooldown: positive_or_nil(skill.cooldown),
       passive: skill.passive || false,
       damage_type: skill.damage_type,
-      effects: resource_effects_text(skill)
+      effects: Moba.Game.SkillDescriptions.plain_effects(skill)
     }
   end
 

@@ -11,6 +11,8 @@
         <div class="target-name">{@target.defender.avatar.name}</div>
         <span
           class="font-20 font-italic text-warning tooltip-cursor target-rewards"
+          id={"target-rewards-#{@target.id}"}
+          aria-label="View target rewards"
           data-toggle="tooltip"
           title={target_rewards_tooltip(@current_hero, @target.difficulty)}
         >

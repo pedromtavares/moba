@@ -167,3 +167,92 @@ body:has(.game-confirm-dialog[open]) { overflow: hidden; }
     .account-modern-footer { padding: 18px 22px; }
   }
 }
+
+.tippy-box[data-theme~='game']:has(.skill-tooltip) {
+  width: max-content;
+  max-width: none !important;
+}
+
+.game-tooltip-content .skill-tooltip {
+  width: max-content;
+  min-width: min(384px, calc(100vw - 60px));
+}
+.game-page .tavern-skill-readout .skill-tooltip { min-width: 0; }
+.game-page .tavern-skill-readout .skill-tooltip-meta { max-width: 100%; min-width: 0; overflow-x: auto; }
+
+/* Authored ability cards share a shell; each skill supplies its own effect rows. */
+.tippy-box[data-theme~='game']:has(.rewards-tooltip) {
+  --difficulty-accent: #b8c4d2;
+  &:has([data-difficulty=weak]) { --difficulty-accent: #8bd3b5; }
+  &:has([data-difficulty=moderate]) { --difficulty-accent: #89c8e6; }
+  &:has([data-difficulty=strong]) { --difficulty-accent: #e993a5; }
+  border-color: color-mix(in srgb, var(--difficulty-accent) 65%, transparent);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--difficulty-accent) 16%, #101c29), #0b121c 85%);
+  box-shadow: 0 14px 40px #0009, 0 0 24px color-mix(in srgb, var(--difficulty-accent) 17%, transparent), inset 0 1px #ffffff14;
+}
+.game-tooltip-content .rewards-tooltip {
+  min-width: 270px;
+  header { display: flex; align-items: center; gap: 13px; }
+  .rewards-tooltip-emblem { color: var(--difficulty-accent); font-size: 37px; filter: drop-shadow(0 0 10px color-mix(in srgb, var(--difficulty-accent) 35%, transparent)); }
+  .rewards-tooltip-eyebrow { display: block; margin-bottom: 4px; color: #bdc9d7; font: 800 14px/1.3 'Nunito', sans-serif; }
+  h3 { margin: 0 !important; color: var(--difficulty-accent); font: 900 29px/1.15 'Nunito', sans-serif; }
+  dl { display: grid; margin: 17px 0 0; }
+  dl > div { --reward-color: #89c8e6; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 10px 0; border-top: 1px solid color-mix(in srgb, var(--difficulty-accent) 22%, transparent); }
+  dl > div[data-reward=gold] { --reward-color: #edc477; }
+  dt { display: flex; align-items: center; gap: 10px; color: #c5cfdd; font: 800 16px/1.4 'Nunito', sans-serif; }
+  .rewards-tooltip-icon { color: var(--reward-color); font-size: 21px; }
+  dd { margin: 0; color: var(--reward-color); font: 900 27px/1.2 'Nunito', sans-serif; white-space: nowrap; }
+}
+
+.game-tooltip-content .skill-tooltip,
+.game-page .tavern-skill-readout .skill-tooltip {
+  .skill-tooltip-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 13px; }
+  .skill-tooltip-heading > img { width: 48px; height: 48px; flex-shrink: 0; object-fit: cover; border: 1px solid #c6ae795c; border-radius: 6px; box-shadow: 0 4px 16px #0003; }
+  .skill-tooltip-heading h3 { margin: 0 0 4px !important; font: 900 23px/1.2 'Nunito', sans-serif; color: #f4e8cf; }
+  .skill-tooltip-rank { display: flex; flex-wrap: wrap; gap: 7px; color: #bda779; font: 800 14px/1.3 'Nunito', sans-serif; }
+  .skill-tooltip-summary { max-width: 420px; margin: 0 0 15px; color: #c5cfdd; font: 600 16px/1.5 'Nunito', sans-serif; }
+  .skill-tooltip-effects { margin: 0; display: grid; gap: 0; }
+  .skill-tooltip-effect { --effect-color: #c4d2e1; display: grid; grid-template-columns: minmax(90px, 1fr) auto; align-items: center; gap: 6px 14px; padding: 8px 0; border-bottom: 1px solid #a6b3c214; }
+  .skill-tooltip-effect:last-child { border-bottom: 0; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=damage] { --effect-color: #e993a5; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=health] { --effect-color: #8bd3b5; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=energy] { --effect-color: #89c8e6; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=armor], :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=chance] { --effect-color: #dfc18a; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=power] { --effect-color: #d99fc9; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=attack] { --effect-color: #80c7ba; }
+  .skill-tooltip-effect[data-tone=speed] { --effect-color: #b7a0e3; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change)[data-tone=status] { --effect-color: #dfc18a; }
+  .skill-tooltip-effect dt { color: #a5b4c7; font: 700 14px/1.4 'Nunito', sans-serif; }
+  :is(.skill-tooltip-effect, .skill-tooltip-change) dt { display: flex; align-items: center; gap: 8px; }
+  .skill-tooltip-effect-icon { color: var(--effect-color); font-size: 18px; }
+  .skill-tooltip-effect dd { display: flex; justify-content: flex-end; flex-wrap: wrap; align-items: baseline; gap: 3px; max-width: 220px; margin: 0; color: var(--effect-color); text-align: right; }
+  .skill-tooltip-term { display: inline-flex; align-items: baseline; flex-wrap: wrap; justify-content: flex-end; gap: 3px; }
+  .skill-tooltip-term strong { font: 900 20px/1.3 'Nunito', sans-serif; }
+  .skill-tooltip-unit { color: #b2c0d0; font: 600 14px/1.3 'Nunito', sans-serif; }
+  .skill-tooltip-plus { color: #75879a; margin: 0 2px; font-size: 12px; }
+  .skill-tooltip-notes { max-width: 420px; display: grid; gap: 7px; margin: 14px 0; color: #b6c4d5; font: 600 14px/1.5 'Nunito', sans-serif; }
+  .skill-tooltip-notes p { margin: 0; }
+  .skill-tooltip-meta { display: flex; flex-wrap: nowrap; width: max-content; min-width: 100%; gap: 8px; margin-top: 16px; padding-top: 14px; border-top: 1px solid #bba37540; font: 800 15px/1.3 'Nunito', sans-serif; }
+  .skill-tooltip-meta-entry { white-space: nowrap; flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; padding: 6px 8px; border: 1px solid currentColor; border-radius: 5px; background: #ffffff05; }
+  .skill-tooltip-meta-icon { flex-shrink: 0; font-size: 19px; }
+  .skill-tooltip-meta-entry[data-kind=energy] { color: #77cbee; background: #419acb0d; }
+  .skill-tooltip-meta-entry[data-kind=cooldown] { color: #edc477; background: #d4a6540d; }
+  .skill-tooltip-meta-entry[data-kind=normal] { color: #65cbb0; background: #46b99a0d; }
+  .skill-tooltip-meta-entry[data-kind=magic] { color: #c2a3ee; background: #9e79d30d; }
+  .skill-tooltip-meta-entry[data-kind=pure] { color: #ee9ba9; background: #d7697c0d; }
+  .skill-upgrade-preview { margin-top: 15px; padding: 11px 12px; }
+  .skill-tooltip-changes { display: grid; gap: 7px; margin: 0; }
+  .skill-tooltip-changes > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 4px 12px; }
+  .skill-tooltip-changes dt { color: #a9b8c8; font: 600 13px/1.35 'Nunito', sans-serif; }
+  .skill-tooltip-changes dd { display: flex; align-items: baseline; justify-content: flex-end; flex-wrap: wrap; gap: 5px; max-width: 215px; margin: 0; font: 700 14px/1.4 'Nunito', sans-serif; text-align: right; }
+  .skill-tooltip-before { color: #8092a7; }
+  .skill-tooltip-arrow { color: #c1a46c; }
+  .skill-tooltip-changes strong { color: #ebcf94; font-weight: 900; }
+  .item-tooltip-stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 20px; margin: 0 0 12px; padding: 0 0 10px; border-bottom: 1px solid #bba37540; }
+  .item-tooltip-stats .item-tooltip-stat { display: flex; justify-content: space-between; gap: 12px; border: 0; }
+  .item-tooltip-stat strong { font: 900 20px/1.3 'Nunito', sans-serif; }
+  &.item-tooltip[data-rarity=normal] .item-tooltip-rarity { color: #b8c4d2; }
+  &.item-tooltip[data-rarity=rare] .item-tooltip-rarity { color: #8abde6; }
+  &.item-tooltip[data-rarity=epic] .item-tooltip-rarity { color: #bb9ae4; }
+  &.item-tooltip[data-rarity=legendary] .item-tooltip-rarity { color: #ec9a9e; }
+}

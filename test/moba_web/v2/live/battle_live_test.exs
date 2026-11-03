@@ -83,6 +83,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     assert html =~ "Make your first move"
     assert has_element?(view, ~s|#battle-page[phx-hook="BattleContinueHotkey"]|)
     assert has_element?(view, "#combat-stage .stage-health[aria-label]")
+    assert has_element?(view, "#combat-stage .stage-health [data-unit-hp-percent]", "100%")
     assert has_element?(view, "#combat-stage [data-combat-stat=speed]")
     assert has_element?(view, "#stage-build-left-skill-#{hd(attacker.skills).id}")
     assert has_element?(view, "[id^='active-skill-']")

@@ -178,7 +178,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 <%= if skill.passive do %>
                   <span class="badge badge-light-dark"><i class="ui-icon ui-circle-dot mr-1"></i>Passive</span>
                 <% end %>
-                <p class="d-block d-md-none text-dark"><em>{skill.description}</em></p>
+                <p class="d-block d-md-none text-dark"><em>{Moba.Game.SkillDescriptions.summary(skill)}</em></p>
               </div>
             <% end %>
           </div>

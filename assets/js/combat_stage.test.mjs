@@ -342,3 +342,24 @@ test('duel clock follows the server deadline through turns, urgency and completi
   assert.equal(clock.hidden, true);
   assert.equal(intervals.size, 0);
 });
+
+test('health percentages stay centered and update with each combat state', () => {
+  const nodes = new Map();
+  const fighter = {dataset: {}, querySelector(selector) {
+    if (!nodes.has(selector)) nodes.set(selector, {style: {}, textContent: '', setAttribute() {}});
+    return nodes.get(selector);
+  }};
+  const hook = {...CombatStage, el: {querySelector: () => fighter}, activeEffects: {},
+    renderControlStatuses() {}, renderCombatStats() {}, renderEffectIcons() {}, renderBuildCooldowns() {}};
+  const unit = {hp: 35, maxHp: 100, mp: 20, maxMp: 50, activeEffects: [], cooldowns: {}, combatStats: []};
+  hook.setVitals('left', unit);
+  assert.equal(nodes.get('[data-unit-hp-percent]').textContent, '35%');
+  assert.equal(nodes.get('.stage-health-fill').style.width, '35%');
+  hook.setVitals('left', {...unit, hp: 0});
+  assert.equal(nodes.get('[data-unit-hp-percent]').textContent, '0%');
+  assert.equal(fighter.dataset.dead, 'true');
+  hook.setVitals('left', {...unit, hp: 1, maxHp: 1000});
+  assert.equal(nodes.get('[data-unit-hp-percent]').textContent, '1%');
+  hook.setVitals('left', {...unit, hp: 150});
+  assert.equal(nodes.get('[data-unit-hp-percent]').textContent, '100%');
+});

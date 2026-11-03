@@ -49,6 +49,37 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     assert has_element?(view, "#current-training-rank")
   end
 
+  test "target reward tooltips show current XP and Gold rewards with matching icons", %{conn: conn} do
+    for tier <- [0, Moba.veteran_pve_tier()] do
+      hero = create_base_hero(%{pve_tier: tier})
+      Game.update_tutorial_step!(hero.player, 39)
+      {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/training")
+      document = render(view) |> LazyHTML.from_fragment()
+      targets = Game.list_targets(hero)
+      assert targets != []
+
+      for target <- targets do
+        tooltip =
+          document
+          |> LazyHTML.query("#target-rewards-#{target.id}")
+          |> LazyHTML.attribute("title")
+          |> hd()
+          |> LazyHTML.from_fragment()
+
+        expected = "+#{Moba.pve_battle_rewards(target.difficulty, tier)}"
+        label = %{"weak" => "Easy", "moderate" => "Medium", "strong" => "Hard"}[target.difficulty]
+        assert LazyHTML.query(tooltip, "h3") |> LazyHTML.text() == "#{label} target"
+        assert Enum.count(LazyHTML.query(tooltip, "header .ui-swords")) == 1
+        assert Enum.count(LazyHTML.query(tooltip, ".rewards-tooltip[data-difficulty='#{target.difficulty}']")) == 1
+        assert LazyHTML.query(tooltip, "[data-reward=xp] dd") |> LazyHTML.text() == expected
+        assert LazyHTML.query(tooltip, "[data-reward=gold] dd") |> LazyHTML.text() == expected
+        assert Enum.count(LazyHTML.query(tooltip, "[data-reward=xp] .ui-star")) == 1
+        assert Enum.count(LazyHTML.query(tooltip, "[data-reward=gold] .ui-coins")) == 1
+        refute LazyHTML.text(tooltip) =~ "??"
+      end
+    end
+  end
+
   test "guest with player_id can access /training", %{conn: conn} do
     hero = create_base_hero()
 

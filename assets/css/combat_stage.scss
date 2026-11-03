@@ -70,6 +70,7 @@
   .stage-health-heading small { color: #9ba6b7; font-size: 12px; font-weight: 600; }
   .stage-gauge { position: relative; overflow: hidden; height: 16px; border: 1px solid #eac59e38; border-radius: 3px; background: #050b13; box-shadow: 0 2px 15px #0005; }
   .stage-gauge > span { position: absolute; inset: 0 auto 0 0; transition: width .84s cubic-bezier(.2,.7,.2,1); }
+  .stage-health-percentage { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; color: #fff4e5; font: 900 13px/1 'Nunito', sans-serif; text-shadow: 0 1px 3px #000, 0 0 5px #000; pointer-events: none; }
   .stage-health-fill { background: linear-gradient(90deg, #a83f5a, #dc8791); box-shadow: 0 0 20px #e07d8855; }
   .stage-right .stage-health-fill { background: linear-gradient(90deg, #427d9f, #9cd4e1); }
   .stage-gauge .stage-health-trail { background: #ebce91; transition: width 1.3s .24s; }

@@ -223,6 +223,8 @@
                     disabled={!proper_recipe(@recipe, @transmute)}
                     phx-disable-with="Transmuting..."
                     id="finish-transmute"
+                    data-acquire-code={@transmute.code}
+                    data-hero-id={@current_hero.id}
                   >
                     <span class="loading-text"><i class="ui-icon ui-refresh" aria-hidden="true"></i> Transmute</span>
                   </button>
@@ -263,6 +265,8 @@
                   disabled={!can_buy?(@current_hero, @selected_shop)}
                   phx-disable-with="Buying..."
                   id="buy-button"
+                  data-acquire-code={@selected_shop.code}
+                  data-hero-id={@current_hero.id}
                   {target_attrs(@event_target)}
                 >
                   <span class="loading-text">

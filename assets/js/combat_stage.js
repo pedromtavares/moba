@@ -160,6 +160,8 @@ export default {
     fighter.querySelector('[data-unit-max-hp]').textContent = number(unit.maxHp);
     fighter.querySelector('[data-unit-mp]').textContent = `${number(unit.mp)} / ${number(unit.maxMp)}`;
     const hp = `${percent(unit.hp, unit.maxHp)}%`;
+    const healthLabel = unit.hp > 0 && unit.maxHp > 0 ? Math.max(1, Math.round(percent(unit.hp, unit.maxHp))) : 0;
+    fighter.querySelector('[data-unit-hp-percent]').textContent = `${healthLabel}%`;
     fighter.querySelector('.stage-health-fill').style.width = hp;
     fighter.querySelector('.stage-health-trail').style.width = hp;
     fighter.querySelector('.stage-energy-fill').style.width = `${percent(unit.mp, unit.maxMp)}%`;

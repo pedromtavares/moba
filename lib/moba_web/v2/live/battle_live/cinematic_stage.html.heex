@@ -116,6 +116,9 @@
         >
           <span class="stage-health-trail" style={"width:#{unit.hp / unit.maxHp * 100}%"}></span>
           <span class="stage-health-fill" style={"width:#{unit.hp / unit.maxHp * 100}%"}></span>
+          <strong class="stage-health-percentage" data-unit-hp-percent aria-hidden="true">
+            {if unit.hp > 0 && unit.maxHp > 0, do: min(100, max(1, round(unit.hp / unit.maxHp * 100))), else: 0}%
+          </strong>
         </div>
         <div class="stage-energy-row">
           <span>Energy</span>
