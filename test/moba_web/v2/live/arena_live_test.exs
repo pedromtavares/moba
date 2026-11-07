@@ -11,13 +11,13 @@ defmodule MobaWeb.V2.ArenaLiveTest do
       |> log_in_player(player_id: hero.player_id)
 
     {:ok, arena_view, arena_html} = live(conn, "/arena")
-    assert arena_html =~ "Play 5v5"
+    assert arena_html =~ "Play 3v3"
     assert arena_html =~ "Play 1v1"
 
     assert has_element?(
              arena_view,
-             ".arena-play-actions > .arena-play-5v5:first-child > #enter-arena-button[data-game-fullscreen]",
-             "Play 5v5"
+             ".arena-play-actions > .arena-play-3v3:first-child > #enter-arena-button[data-game-fullscreen]",
+             "Play 3v3"
            )
 
     assert has_element?(
@@ -26,8 +26,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
              "Play 1v1"
            )
 
-    assert has_element?(arena_view, "#arena-header-footer dt", "5v5 Win Rate")
-    assert has_element?(arena_view, "#arena-header-footer dt", "Daily 5v5 wins")
+    assert has_element?(arena_view, "#arena-header-footer dt", "3v3 Win Rate")
+    assert has_element?(arena_view, "#arena-header-footer dt", "Daily 3v3 wins")
     refute has_element?(arena_view, "#edit-teams-button")
     assert has_element?(arena_view, ~s|#matchmaking-container[phx-hook="EqualHeight"][phx-target=".arena .ranking"]|)
     assert has_element?(arena_view, ~s|#pvp_duels[phx-hook="EqualHeight"][phx-target=".arena .ranking"]|)
@@ -48,6 +48,47 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     {:ok, view, _} = live(conn, "/arena/edit?match_id=#{source.id}")
     assert has_element?(view, "#teams-return-button[href='/matches/#{source.id}']", "Return to match")
+  end
+
+  test "the arena and profile show the same recent 3v3 rate", %{conn: conn} do
+    player = create_player!(%{total_matches: 20, total_wins: 19})
+    opponent = create_player!()
+
+    for winner_id <- [player.id, opponent.id] do
+      Game.Matches.create!(%{
+        player_id: player.id,
+        opponent_id: opponent.id,
+        winner_id: winner_id,
+        phase: "scored",
+        type: "manual",
+        rewards: %{attacker_pvp_points: 0}
+      })
+    end
+
+    conn = log_in_player(conn, player_id: player.id)
+    {:ok, arena, _} = live(conn, "/arena")
+    assert has_element?(arena, "#arena-header-footer dd.arena-stat-blue", "50%")
+
+    {:ok, profile, _} = live(conn, "/player/#{player.id}")
+    assert has_element?(profile, "#profile-3v3-win-rate", "50%")
+  end
+
+  test "a retained interactive match with an expired replay returns to Arena", %{conn: conn} do
+    player = create_player!()
+    opponent = create_player!()
+
+    match =
+      Game.Matches.create!(%{
+        player_id: player.id,
+        opponent_id: opponent.id,
+        winner_id: player.id,
+        phase: "scored",
+        type: "manual",
+        interactive: true
+      })
+
+    assert {:error, {:live_redirect, %{to: "/arena"}}} =
+             live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
   end
 
   test "direct teams links return to the latest own match and ignore invalid or other players' ids", %{conn: conn} do
@@ -90,13 +131,14 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-history-matches-tab[aria-pressed=true]")
     assert has_element?(view, "#arena-no-matches")
-    assert has_element?(view, "#arena-history-matches > #arena-no-matches", "Your first 5v5 awaits")
+    assert has_element?(view, "#arena-history-matches > #arena-no-matches", "Your first 3v3 awaits")
     refute has_element?(view, "#arena-matches-table")
     refute has_element?(view, "#arena-duel-history-section")
     assert has_element?(view, "#pvp_duels #arena-live-section")
     assert has_element?(view, "#season-duel-button .ui-swords")
-    assert has_element?(view, "#enter-arena-button .ui-strategy")
-    assert has_element?(view, "#arena-entry-reward", "+20 Shards")
+    assert has_element?(view, "#enter-arena-button .ui-arena-3v3")
+    assert has_element?(view, "#arena-entry-reward", "+30 Shards")
+    assert has_element?(view, "#daily-progression[aria-valuemax='20']")
 
     view |> element("#arena-history-duels-tab") |> render_click()
     assert has_element?(view, "#arena-history-duels-tab[aria-pressed=true]")
@@ -109,11 +151,11 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     assert has_element?(view, "#arena-no-matches")
   end
 
-  test "the reward copy disappears after a mixture of thirty matches and duels", %{conn: conn} do
+  test "the reward copy disappears after a mixture of twenty matches and duels", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
 
-    for _ <- 1..15 do
+    for _ <- 1..10 do
       Game.Matches.create!(%{
         player_id: player.id,
         opponent_id: opponent.id,
@@ -132,7 +174,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     refute has_element?(view, "#arena-entry-reward")
     assert has_element?(view, "#season-duel-button:not([disabled])", "Play 1v1")
-    assert has_element?(view, "#enter-arena-button:not([disabled])", "Play 5v5")
+    assert has_element?(view, "#enter-arena-button:not([disabled])", "Play 3v3")
     refute has_element?(view, "#arena-daily-limit")
   end
 
@@ -158,8 +200,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
 
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#pvp-progression #resume-arena-duel[href='/arena/#{pending.id}']", "Resume 1v1")
-    assert has_element?(view, "#pvp-progression #resume-arena-match[href='/matches/#{match.id}']", "Resume 5v5")
-    assert has_element?(view, ".arena-play-actions > .arena-play-5v5:first-child > #resume-arena-match")
+    assert has_element?(view, "#pvp-progression #resume-arena-match[href='/matches/#{match.id}']", "Resume 3v3")
+    assert has_element?(view, ".arena-play-actions > .arena-play-3v3:first-child > #resume-arena-match")
     assert has_element?(view, ".arena-play-actions > .arena-play-1v1:last-child > #resume-arena-duel")
     refute has_element?(view, "#season-duel-button, #enter-arena-button")
     render_click(view, "season-duel")
@@ -171,7 +213,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     hero = create_base_hero()
 
     extra_heroes =
-      for index <- 1..4 do
+      for index <- 1..2 do
         Game.create_hero!(%{name: "Extra #{index}"}, hero.player, strong_avatar(), base_skills())
       end
 
@@ -197,7 +239,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
   end
 
   test "edits a team hero inline from the arena screen", %{conn: conn} do
-    hero = create_base_hero()
+    item = base_item()
+    hero = create_base_hero(%{gold: 10_000}) |> Game.buy_item!(item)
     team = Game.create_team!(%{name: "Inline", player_id: hero.player_id, pick_ids: [hero.id]})
 
     conn =
@@ -216,6 +259,12 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     assert has_element?(view, ".hud-experience")
     assert has_element?(view, "#toggle-shop")
 
+    view |> element("#inventory-#{item.id}") |> render_click()
+    assert has_element?(view, "#shop-modal.d-block")
+    assert has_element?(view, "#shop-detail-name", item.name)
+    assert has_element?(view, "#sell-#{item.id}")
+    view |> element("#close-button") |> render_click()
+
     view
     |> element("#hero-bar #edit-button")
     |> render_click()
@@ -230,7 +279,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     assert has_element?(view, "#shop-modal.d-block")
   end
 
-  test "skips the retired arena tutorial when the player is on step 29", %{conn: conn} do
+  test "ignores retired tutorial state when entering Arena", %{conn: conn} do
     hero = create_base_hero()
     player = Game.update_tutorial_step!(hero.player, 29)
 
@@ -241,7 +290,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     {:ok, view, _html} = live(conn, "/arena")
 
     refute has_element?(view, "[phx-hook=TutorialStep]")
-    assert Game.get_player!(player.id).tutorial_step == 39
+    assert Game.get_player!(player.id).tutorial_step == 29
   end
 
   test "arena tutorial keeps the v1 anchor targets", %{conn: conn} do

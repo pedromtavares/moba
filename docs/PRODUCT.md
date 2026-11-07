@@ -124,7 +124,7 @@ See `lib/moba/game/skills.ex` → `can_level_skill?/2`.
 - **Active items**: Require MP, have cooldowns, manually triggered
 - **Passive items**: Auto-activate when conditions met
 
-**Selling**: 90% refund (100% if hero is finished training)
+**Selling**: Full gold refund in solo and team training, including after training ends.
 
 ---
 
@@ -439,16 +439,16 @@ Before competing in matches, players manage teams of 5 heroes.
 
 **Winner Advantage**: The winner is always the **attacker** in the next battle, gaining first-attack advantage.
 
-**Daily Limit**: `@daily_match_limit` = 30 matches per day
+**Daily Limit**: `@daily_match_limit` = 20 3v3 matches per day
 
 **Match Modes**:
 - **Auto**: System creates matches every 30 minutes (see `lib/moba/conductor.ex` → `season_tick!/0`)
-- **Manual**: Player initiates, earns `@matchmaking_shards` = 20 shards per match
+- **Manual**: The player initiates the match. The first 20 eligible Arena games per day award 30 shards each, shared across manual 3v3 and 1v1.
 
 **Manual Match Strategy**: 
 - Each manual victory can replace an auto loss
 - But manual losses can also replace wins
-- Players can play all 30 manually or let auto-play handle it
+- Players can play all 20 manually or let auto-play handle it
 
 ### 4.3 Bot Players for Matchmaking
 
@@ -552,7 +552,7 @@ Consecutive days as #1 in Immortals bracket.
 - 5-streak = 5% stat penalty
 - Makes maintaining high streaks progressively harder
 
-**Season Score Contribution**: `100 × best_immortal_streak` (see Season Ranking below)
+**Season Score Contribution**: 20 points per day of the best Immortal Streak. The current Immortal (Immortals bracket, daily rank #1) also receives a flat 200-point bonus while holding the title.
 
 **Target Streak**: Currently balanced around 5-6 days being achievable with effort.
 
@@ -595,8 +595,8 @@ Three-tier hierarchy:
 | Tier | Title | Requirement |
 |------|-------|-------------|
 | 0 | Initiate | Starting tier |
-| 1 | Novice | 2 avatars on Platinum+ |
-| 2 | Adept | 5 avatars on Platinum+ |
+| 1 | Novice | Finish one training run on Platinum or higher |
+| 2 | Adept | Finish one training run on Master or higher |
 | 3 | Veteran | 10 avatars on Platinum+ |
 | 4 | Expert | 15 avatars on Platinum+ |
 | 5 | Master | 20 avatars on Master+ |
@@ -622,7 +622,7 @@ Each tier advancement grants rewards (see `lib/moba/game/quests.ex`):
 | 7 (Invoker) | 5,000 | 20 target refreshes |
 
 **Starting Gold** (see `initial_gold/1`):
-- Tier 0: `@initial_gold` = 800
+- Tier 0: `@initial_gold` = 1,200
 - Tier 1+: `@veteran_initial_gold` = 2,000
 
 ### 5.4 Rankings
@@ -632,7 +632,9 @@ Each tier advancement grants rewards (see `lib/moba/game/quests.ex`):
 - Resets daily with bracket recalculation
 
 **Season Ranking** (`@season_ranking_limit` = 50):
-- Formula: `(100 × best_immortal_streak) + (100 × pve_tier) + pvp_points`
+- Formula: Training Rank score + Arena Rating + (20 × best Immortal Streak) + 200 while holding The Immortal title.
+- Training Rank scores: Initiate 0, Novice 100, Adept 200, Veteran 300, Expert 400, Master 500, Grandmaster 600, Invoker 700.
+- The 200-point title bonus moves to the new Immortal when the daily brackets update. The 20-point-per-day best-streak contribution remains with the player.
 - Secondary sort: `total_wins`
 - Only includes players active after cutoff date
 
@@ -666,7 +668,7 @@ Permanent currency on User account.
 
 **Sources**:
 - Quest completion: 200-5,000
-- Manual matchmaking: `@matchmaking_shards` = 20 per match
+- Arena: `@matchmaking_shards` = 30 per game for the first 20 eligible manual 3v3 matches and 1v1 duels combined each day
 
 **Uses**:
 - Unlock avatars: 150 shards
@@ -830,7 +832,7 @@ The cinematic redesign is the default on the canonical game and account routes. 
 | Screen | Route | Current experience |
 |--------|-------|--------------------|
 | First hero | `/start` | Avatar role filters, random pick, preset or custom skill builds, guest creation |
-| Invoke | `/invoke` | Collection context, avatar selection, reusable build artwork, selected loadout |
+| Start training | `/new` | Collection context, avatar selection, reusable build artwork, selected loadout |
 | Base | `/base` | Account-rank journey, progression rewards, finished/in-progress heroes, full roster collection |
 | Training | `/training` | League ascent, battle/meditation/mining tabs, Shop, league and Roshan challenges |
 | Battle history / replay | `/battles`, `/battles/:id` | Compact history, readable turn resources and effects, contextual outcome and continuation |
@@ -843,10 +845,10 @@ The cinematic redesign is the default on the canonical game and account routes. 
 | Community / Game Manual | `/community`, `/library` | Message board, updates and player lists; illustrated game reference |
 | Account | `/users/...` | Matching sign-in, registration, recovery, confirmation, and settings screens |
 
-### Tutorial and Training
+### Training
 
-- The guided tutorial covers **Training** and **Base**. The former Arena tutorial is retired; returning players on those old lessons advance past them without starting matchmaking.
-- Tutorial steps point at the target or control needed for the action. Shop purchase and transmutation steps retain precise interaction anchors.
+- There are no guided tutorials. A newly created roster shows an arrow above the first battle target until its first battle starts.
+- Roster training offers three targets per hero at every progression tier. New players get two Easy targets and one Medium target.
 - League challenges replace farming controls when no turns remain. Stage wins show the cleared battle and the next step; promotions show the earned league and rewards.
 - Roshan's panel shows health and attempt state, including the final-attempt recovery information.
 - Meditation and mining show progress and a Claim XP / Claim Gold action. A visible **Space** hint appears when the claim is ready. The shortcut ignores typing, other interactive controls, and open dialogs; Attack has no global Space shortcut.
@@ -929,7 +931,7 @@ All values from `lib/moba/constants.ex`:
 | `@turns_per_tier` | 5 | Turns per league tier |
 | `@base_xp` | 600 | XP for level 2 |
 | `@xp_increment` | 50 | Additional XP per level |
-| `@initial_gold` | 800 | Starting gold (tier 0) |
+| `@initial_gold` | 1,200 | Starting gold (tier 0) |
 | `@veteran_initial_gold` | 2,000 | Starting gold (tier 1+) |
 | `@items_base_price` | 400 | Normal item price |
 | `@buyback_multiplier` | 10 | Gold buyback = level × 10 |
@@ -949,8 +951,8 @@ All values from `lib/moba/constants.ex`:
 ### PvP
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `@daily_match_limit` | 30 | Matches per day |
-| `@matchmaking_shards` | 20 | Shards per manual match |
+| `@daily_match_limit` | 20 | 3v3 matches per day and shared daily shard rewards |
+| `@matchmaking_shards` | 30 | Shards per eligible Arena game |
 | `@duel_timer_in_seconds` | 60 | Pick timeout |
 | `@turn_timer_in_seconds` | 30 | Battle turn timeout |
 | `@immortal_streak_multiplier` | 0.01 | 1% stat penalty per streak |

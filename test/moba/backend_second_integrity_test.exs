@@ -59,7 +59,7 @@ defmodule Moba.BackendSecondIntegrityTest do
     refute Game.create_duel!(third, other, false)
     refute Game.create_duel!(other, third, true)
     assert Game.Duels.pending_duel(first).id == duel.id
-    assert Accounts.get_user!(first.user_id).shard_count == before + 20
+    assert Accounts.get_user!(first.user_id).shard_count == before + Moba.matchmaking_shards()
   end
 
   test "being the automated opponent does not block starting a player's own duel" do

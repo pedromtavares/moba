@@ -2,6 +2,7 @@
   id="combat-stage"
   class="combat-stage"
   phx-hook="CombatStage"
+  phx-target={Map.get(assigns, :event_target)}
   phx-update="ignore"
   data-scene={Jason.encode!(@combat_scene)}
   data-finished={to_string(@combat_scene.finished)}
@@ -9,6 +10,7 @@
   aria-label="Live battlefield"
 >
   <header class="stage-heading">
+    {render_slot(Map.get(assigns, :header_navigation, []))}
     <span class="stage-context">
       <span data-stage-context>{@combat_scene.context}</span><small id="battle-initiated" data-stage-initiated>Started by {@combat_scene.initiator}</small><span class="stage-turn">Turn <span data-stage-turn>{length(@combat_scene.events) + if(@battle.finished, do: 0, else: 1)}</span></span>
     </span>
@@ -71,7 +73,9 @@
           </span>
         </h2>
         <div class="stage-meta">
-          <span class="stage-unit-level" data-unit-level>Level {unit.level}{if unit.you, do: " · #{unit.avatar}"}</span><strong data-build-difficulty>{unit.build.difficulty}</strong>
+          <span class="stage-unit-level" data-unit-level>
+            Level {unit.level}{if unit.you && unit.name != unit.avatar, do: " · #{unit.avatar}"}
+          </span><strong data-build-difficulty>{unit.build.difficulty}</strong>
         </div>
       </div>
       <div class="stage-vitals">
@@ -298,6 +302,7 @@
       data-stage-log-toggle
       type="button"
       phx-click="toggle-combat-log"
+      phx-target={Map.get(assigns, :event_target)}
       aria-expanded={to_string(@show_combat_log)}
       aria-controls="combat-log-panel"
       aria-label={"Battle log (#{length(@battle.turns)} turns)"}

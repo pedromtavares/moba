@@ -20,8 +20,8 @@
     --cinematic-header-height: 272px;
 
     .user-profile #profile-cinematic { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .user-profile .profile-cinematic-identity { gap: 14px; }
-    .user-profile .profile-crest { width: 64px; height: 64px; }
+    .user-profile .profile-cinematic-identity { gap: 18px; }
+    .user-profile .profile-crest { width: 83px; height: 83px; }
     .user-profile #profile-cinematic .profile-metrics { padding-top: 12px !important; padding-bottom: 12px !important; }
     .user-profile #profile-cinematic .profile-metrics strong { font-size: 22px; }
   }

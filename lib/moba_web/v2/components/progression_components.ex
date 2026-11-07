@@ -5,15 +5,24 @@ defmodule MobaWeb.V2.Components.ProgressionComponents do
   alias MobaWeb.V2.Components.GameHelpers, as: GH
   import MobaWeb.Preview, only: [preview_path: 2]
 
-  attr :hero, :map, required: true
+  attr :hero, :map, default: nil
+  attr :team, :map, default: nil
   attr :player, :map, required: true
   attr :quest, :map, default: nil
 
   def training_completion(assigns) do
+    league_tier = (assigns.team || assigns.hero).league_tier
+    qualified = league_tier >= Moba.platinum_league_tier()
+    guest = is_nil(assigns.player.user_id)
+    return_to_base = guest || assigns.team != nil || assigns.quest != nil || qualified
+
     assigns =
       assign(assigns,
         preview: true,
-        qualified: assigns.hero.league_tier >= Moba.platinum_league_tier()
+        league_tier: league_tier,
+        qualified: qualified,
+        guest: guest,
+        return_to_base: return_to_base
       )
 
     ~H"""
@@ -27,53 +36,45 @@ defmodule MobaWeb.V2.Components.ProgressionComponents do
           true -> "retry"
         end
       }
-      data-league={@hero.league_tier}
+      data-league={@league_tier}
       aria-labelledby="training-completion-title"
     >
       <div class="completion-emblem" aria-hidden="true">
-        <img src={if @quest, do: "/images/pve/#{@player.pve_tier}.png", else: "/images/league/#{@hero.league_tier}.png"} />
+        <img src={if @quest, do: "/images/pve/#{@player.pve_tier}.png", else: "/images/league/#{@league_tier}.png"} />
       </div>
       <div class="completion-heading">
         <p class="completion-eyebrow">{if @quest, do: "Rank up", else: "Training complete"}</p>
-        <h1 id="training-completion-title">{if @quest, do: @quest.title, else: Moba.leagues()[@hero.league_tier]}</h1>
+        <h1 id="training-completion-title">{if @quest, do: @quest.title, else: Moba.leagues()[@league_tier]}</h1>
         <p class="completion-description">
           <%= cond do %>
             <% @quest -> %>
               {@quest.description}
+            <% @team && @qualified -> %>
+              Your team is ready for the Arena.
             <% @qualified -> %>
               {@hero.name} is ready for the Arena.
+            <% @team -> %>
+              Reach Platinum League to bring your team to the Arena.
             <% true -> %>
               Reach Platinum League to bring your hero to the Arena.
           <% end %>
         </p>
-        <div :if={@quest} id="completion-shards" class="completion-shards">
+        <div :if={@quest && !@guest} id="completion-shards" class="completion-shards">
           <span aria-hidden="true">◆</span> +{@quest.prize} <span>Shards earned</span>
         </div>
       </div>
       <div class="completion-actions">
         <.link
           id="completion-continue"
-          navigate={
-            preview_path(
-              assigns,
-              cond do
-                @quest && is_nil(@player.user_id) -> "/arena"
-                @quest || @qualified -> "/base"
-                true -> "/invoke"
-              end
-            )
-          }
-          class="btn completion-primary"
+          navigate={preview_path(assigns, if(@return_to_base, do: "/base", else: "/new"))}
+          class={["btn completion-primary", @guest && @team && "completion-team-guided"]}
         >
-          {cond do
-            @quest && is_nil(@player.user_id) -> "Enter the Arena"
-            @quest || @qualified -> "Return to Base"
-            true -> "Train again"
-          end}
-          <span aria-hidden="true">→</span>
+          <.onboarding_cta_arrow :if={@guest} team_id={@team && @team.id} />
+          {if @return_to_base, do: "Return to Base", else: "Train again"}
+          <span :if={!@guest} aria-hidden="true">→</span>
         </.link>
         <button
-          :if={@quest}
+          :if={@quest && !@guest}
           id="completion-view-rewards"
           type="button"
           class="btn completion-rewards"
@@ -83,21 +84,22 @@ defmodule MobaWeb.V2.Components.ProgressionComponents do
           View rewards
         </button>
       </div>
-      <dl class="completion-stats">
-        <div>
-          <dt>League reached</dt>
-          <dd>{Moba.leagues()[@hero.league_tier]}</dd>
-        </div>
-        <div>
-          <dt>Total farm</dt>
-          <dd>{GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}</dd>
-        </div>
-        <div>
-          <dt>Training time</dt>
-          <dd>{GH.minutes_label(GH.finished_time(@hero), true)} <small>min</small></dd>
-        </div>
-      </dl>
     </section>
+    """
+  end
+
+  attr :team_id, :integer, default: nil
+
+  def onboarding_cta_arrow(assigns) do
+    ~H"""
+    <span
+      id={if @team_id, do: "team-completion-arrow-#{@team_id}"}
+      class={["first-battle-arrow", if(@team_id, do: "completion-team-arrow", else: "onboarding-cta-arrow")]}
+      phx-hook={if @team_id, do: "TeamCompletionArrow"}
+      phx-update={if @team_id, do: "ignore"}
+      aria-hidden="true"
+    >
+    </span>
     """
   end
 

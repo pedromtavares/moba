@@ -6,7 +6,13 @@ export const InvokeStage = {
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.measure = () => {
       this.creation?.measureFooter?.();
-      this.el.style.setProperty('--invoke-height', `${Math.max(0, window.innerHeight - (this.el.getBoundingClientRect().top + window.scrollY))}px`);
+      const draft = this.el.closest('#team-draft-page');
+      if (draft && window.innerWidth >= 1000) {
+        draft.style.setProperty('--draft-height', `${Math.max(0, window.innerHeight - (draft.getBoundingClientRect().top + window.scrollY) - 12)}px`);
+        this.el.style.setProperty('--invoke-height', '100%');
+      } else {
+        this.el.style.setProperty('--invoke-height', `${Math.max(0, window.innerHeight - (this.el.getBoundingClientRect().top + window.scrollY))}px`);
+      }
     };
     this.move = event => {
       if (this.reducedMotion || event.pointerType !== 'mouse') return;
@@ -20,7 +26,7 @@ export const InvokeStage = {
     };
     this.launch = event => {
       const button = event.target.closest('#create-button');
-      if (button && !button.disabled) this.el.classList.add('is-invoking');
+      if (button && !button.disabled && !this.creation?.draft) this.el.classList.add('is-invoking');
     };
     this.el.addEventListener('pointermove', this.move);
     this.el.addEventListener('pointerleave', this.leave);

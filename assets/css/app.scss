@@ -37,7 +37,6 @@
 @import "./invoke_modern.scss";
 @import "./collection_badges.scss";
 
-@import "../node_modules/shepherd.js/dist/css/shepherd.css";
 @import '../node_modules/tippy.js/dist/tippy.css';
 
 @font-face {
@@ -171,24 +170,6 @@ hr{
   box-shadow: inset 0px 0px 300px black;
 }
 
-.shepherd-content{
-  background: #38414a;
-  border: 2px solid;
-  border-color: white;
-  box-shadow: inset 0px 0px 300px black;
-  border-radius: 0;
-  z-index: 999999;
-
-  .shepherd-header{
-    display: block;
-    float: right;
-  }
-
-  .shepherd-text{
-    color: white;
-  }
-}
-
 .swal-modal{
   background: #38414a;
   border: 3px solid;
@@ -286,7 +267,7 @@ hr{
 
 .wrapper {
   padding-top: 0px; //5px
-  overflow-y: hidden;
+  overflow: hidden;
 }
 
 .content-with-hero-bar{
@@ -743,7 +724,6 @@ b, strong {
   cursor: pointer;
 }
 
-@import "./tutorial_modern.scss";
 @import "./training_ascent.scss";
 @import "./base_ascent.scss";
 @import "./community_cinematic.scss";
@@ -756,3 +736,12 @@ b, strong {
 @import "./sidebar_cinematic.scss";
 @import "./game_loading.scss";
 @import "./combat_stage.scss";
+@import "./training_battle.scss";
+
+@import "./team_training.scss";
+
+@import "./arena_fights.scss";
+
+@import "./season_score.scss";
+
+@import "./teams_cinematic.scss";

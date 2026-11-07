@@ -1,0 +1,26 @@
+<tr class="profile-history-row">
+  <td class="opponent">
+    <.link
+      navigate={preview_path(assigns, ~p"/player/#{@opponent.id}")}
+      data-profile-username={Moba.Utils.username(@opponent)}
+      class="profile-ranked-identity"
+    >
+      <img src={"/images/pve/#{@opponent.pve_tier}.png"} class="pvp-rank profile-ranked-avatar" alt="" />
+      <span>
+        <strong class="profile-ranked-name">{username(@opponent)}</strong>
+        <small class="profile-ranking-detail history-detail">{@mode}</small>
+      </span>
+    </.link>
+  </td>
+  <td class="profile-history-result" data-result={@result}>
+    <strong>{@result}</strong>
+    <small :if={@rating != 0} class="profile-ranking-unit">
+      <b data-negative={to_string(@rating < 0)}>{if @rating > 0, do: "+"}{@rating}</b> Arena Rating
+    </small>
+  </td>
+  <td class="profile-history-replay-cell">
+    <.link navigate={@replay_path} class="profile-history-replay" aria-label={@replay_label}>
+      <.icon name="game-eye" />
+    </.link>
+  </td>
+</tr>

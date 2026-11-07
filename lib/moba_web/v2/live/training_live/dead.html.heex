@@ -29,6 +29,11 @@
         >
           Buy back <span aria-hidden="true">→</span>
         </button>
+        <TrainingComponents.buyback_farm_impact
+          id="death-buyback-farm-impact"
+          total={Moba.Game.Training.PerfectRun.farm(@current_hero)}
+          cost={gold_cost}
+        />
         <p :if={!enough_gold?} id="death-gold-help" class="death-buyback-help">
           You need {gold_cost - @current_hero.gold} more Gold. Sell an item in the Shop to buy back.
         </p>
@@ -77,7 +82,7 @@
         <small>Level 1 · Same build</small>
       </div>
       <div class="death-alternative">
-        <.link id="death-new-hero" navigate={preview_path(assigns, ~p"/invoke")} class="btn base-secondary">
+        <.link id="death-new-hero" navigate={preview_path(assigns, ~p"/new")} class="btn base-secondary">
           <i class="ui-icon ui-user-plus" aria-hidden="true"></i>New Hero
         </.link>
         <small>Your current hero is saved</small>
@@ -144,7 +149,7 @@
         <i class="ui-icon ui-recycle mr-1"></i>Restart Hero
       </button>
       <.link
-        navigate={preview_path(assigns, ~p"/invoke")}
+        navigate={preview_path(assigns, ~p"/new")}
         class="btn btn-success btn-sm ml-5"
         data-toggle="tooltip"
         title="Create a new hero. Your current hero will be saved."

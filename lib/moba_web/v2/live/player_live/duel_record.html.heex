@@ -5,7 +5,11 @@ opponent_wins = @player.duel_score["#{@current_player.id}"] || 0 %>
     <.icon name="game-swords" /><span>Head to head</span><small>All-time</small>
   </div>
   <div class="profile-duel-matchup">
-    <.link navigate={preview_path(assigns, ~p"/player/#{@current_player}")} class="profile-duel-player">
+    <.link
+      navigate={preview_path(assigns, ~p"/player/#{@current_player}")}
+      data-profile-username={Moba.Utils.username(@current_player)}
+      class="profile-duel-player"
+    >
       <img src={"/images/pve/#{@current_player.pve_tier}.png"} alt="" />
       <span><strong title={username(@current_player)}>{username(@current_player)}</strong><small>You</small></span>
     </.link>
@@ -19,7 +23,11 @@ opponent_wins = @player.duel_score["#{@current_player.id}"] || 0 %>
         {opponent_wins}
       </strong>
     </div>
-    <.link navigate={preview_path(assigns, ~p"/player/#{@player}")} class="profile-duel-player profile-duel-opponent">
+    <.link
+      navigate={preview_path(assigns, ~p"/player/#{@player}")}
+      data-profile-username={Moba.Utils.username(@player)}
+      class="profile-duel-player profile-duel-opponent"
+    >
       <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" />
       <span><strong title={username(@player)}>{username(@player)}</strong><small>Opponent</small></span>
     </.link>

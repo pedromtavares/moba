@@ -8,23 +8,19 @@ defmodule MobaWeb.V2.PolishLiveTest do
     :ok
   end
 
-  test "skill unlocks show requirements, then ownership and updated balance", %{conn: conn} do
+  test "Tavern excludes skills without charging players for their access", %{conn: conn} do
     hero = create_base_hero()
     skill = Game.get_skill_by_code!("decay", false, 5)
     Moba.Repo.update!(Ecto.Changeset.change(skill, level_requirement: 1, enabled: true))
-    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
-    {:ok, locked, _} = live(conn, "/tavern")
-    assert has_element?(locked, "#skill-#{skill.id} .tavern-unlock-button[disabled]")
-    assert has_element?(locked, "#skill-#{skill.id} .tavern-unlock-requirement")
-    assert has_element?(locked, "#skill-details-#{skill.id} summary")
     Accounts.update_user!(hero.player.user, %{shard_count: 100})
+    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/tavern")
-    view |> element("#skill-#{skill.id} #unlock-#{skill.code}") |> render_click()
-    assert has_element?(view, "#skill-#{skill.id} [data-unlocked=true] .tavern-owned")
-    refute has_element?(view, "#skill-#{skill.id} #unlock-#{skill.code}")
-    assert has_element?(view, "#tavern-shards strong", "0")
-    assert has_element?(view, "#game-feedback-info", "unlocked")
-    assert skill.code in Accounts.unlocked_codes_for(Accounts.get_user!(hero.player.user_id))
+
+    refute has_element?(view, "#show-skills-link")
+    refute has_element?(view, "#skill-#{skill.id}")
+    refute has_element?(view, "[phx-click='unlock-skill']")
+    assert has_element?(view, "#tavern-shards strong", "100")
+    assert Accounts.get_user!(hero.player.user_id).shard_count == 100
   end
 
   test "settings retain validation and save feedback in the preview shell", %{conn: conn} do

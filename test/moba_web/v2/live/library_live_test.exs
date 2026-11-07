@@ -1,39 +1,63 @@
 defmodule MobaWeb.V2.LibraryLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
 
   import Phoenix.LiveViewTest
 
   setup %{conn: conn} do
-    hero = create_base_hero()
-    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
+    player = create_player!()
+    conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/library")
     %{view: view}
   end
 
-  test "preserves the original banner, wiki tabs and copy", %{view: view} do
-    assert has_element?(view, "#manual-title", "Game Manual")
-    assert has_element?(view, "#manual-heading .manual-heading-description", "Master the rules. Refine your strategy.")
-    assert has_element?(view, "#manual-navigation a[href='#faq-tab']", "Frequently Asked Questions")
-    assert has_element?(view, "#manual-navigation a[href='#training-tab']", "Training Guide")
-    assert has_element?(view, "#manual-navigation a[href='#arena-tab']", "Arena Guide")
-    assert has_element?(view, "#faq-tab .faq-answer", "20 different Avatars")
-    assert has_element?(view, "#training-tab .faq-answer", "You have 2 chances of beating Roshan")
+  test "the Library has three icon tabs and opens on Avatars", %{view: view} do
+    assert has_element?(view, "#manual-title", "Library")
+    assert has_element?(view, "#manual-heading .manual-heading-description", "Refine your strategy.")
+    assert has_element?(view, "#library[phx-hook=ManualCodex][phx-update=ignore]")
+
+    for {key, label, icon} <- [
+          {"avatars", "Avatars", "profile"},
+          {"skills", "Skills", "manual"},
+          {"items", "Items", "catalog-items"}
+        ] do
+      assert has_element?(view, "#library-tab-#{key}[role=tab][aria-controls=manual-#{key}]", label)
+      assert has_element?(view, "#library-tab-#{key} img[src$='/#{icon}.webp']")
+      assert has_element?(view, "#manual-#{key}[role=tabpanel][aria-labelledby=library-tab-#{key}]")
+    end
+
+    assert has_element?(view, "#library-tab-avatars[aria-selected=true]")
+    assert has_element?(view, "#manual-avatars:not([hidden])")
+    assert has_element?(view, "#manual-skills[hidden]")
+    assert has_element?(view, "#manual-items[hidden]")
+    refute has_element?(view, "#manual-wiki, #faq-tab, #training-tab, #arena-tab, .faq-question")
+  end
+
+  test "a guest can browse the Items tab without a hero or transaction controls", %{conn: conn} do
+    guest = Game.create_player!(%{})
+    {:ok, view, _} = live(log_in_player(conn, player_id: guest.id), "/library")
+
+    assert has_element?(view, "#library-tab-items[aria-controls=manual-items]")
+    assert has_element?(view, "#manual-items .shop-detail #library-item-detail-boots_of_speed:not([hidden])")
+    assert has_element?(view, "#manual-items #library-shop-category-normal[aria-pressed=true]", "400")
+
+    for rarity <- ~w(normal rare epic legendary) do
+      assert has_element?(view, "#manual-items .shop-shelf[data-rarity=#{rarity}] .shop-tile img[data-toggle=tooltip]")
+    end
 
     assert has_element?(
              view,
-             "#arena-tab .faq-answer",
-             MobaWeb.V2.Components.GameHelpers.immortal_streak_debuff_description()
+             "#manual-items [data-code=octarine_core][aria-controls=library-item-detail-octarine_core]"
            )
 
-    document = render(view) |> LazyHTML.from_fragment()
-    assert Enum.count(LazyHTML.query(document, ".faq-question")) == 16
-    refute has_element?(view, "#about-tab, #support-tab, #manual-items, [data-manual-panel]")
+    assert has_element?(view, "#library-item-detail-octarine_core[hidden] .item-tooltip[data-rarity=epic]")
+    assert has_element?(view, "#library-item-detail-boots_of_speed [data-stat=base_speed]")
+
+    refute has_element?(view, "#shop-modal, #manual-items :is(.shop-inventory, .shop-wallet, [phx-click], form)")
   end
 
   test "the avatar browser preloads the entire roster, growth stats and ultimate ranks", %{view: view} do
     document = render(view) |> LazyHTML.from_fragment()
     assert Enum.count(LazyHTML.query(document, "#manual-avatars [data-manual-pick=avatar]")) == 24
-    assert has_element?(view, "#manual-avatars[phx-hook=ManualCodex][phx-update=ignore]")
     assert has_element?(view, "#manual-avatar-juggernaut:not([hidden]) h2", "Juggernaut")
     assert has_element?(view, "#manual-avatar-juggernaut [data-stat=health] dd small", "/ level")
     assert has_element?(view, "#manual-ultimate-juggernaut-rank-1:not([hidden]) .skill-tooltip", "Omnislash")
@@ -43,7 +67,6 @@ defmodule MobaWeb.V2.LibraryLiveTest do
   test "the skill browser exposes all normal skills and every rank without server events", %{view: view} do
     document = render(view) |> LazyHTML.from_fragment()
     assert Enum.count(LazyHTML.query(document, "#manual-skills [data-manual-pick=skill]")) == 24
-    assert has_element?(view, "#manual-skills[phx-hook=ManualCodex][phx-update=ignore]")
 
     refute has_element?(
              view,

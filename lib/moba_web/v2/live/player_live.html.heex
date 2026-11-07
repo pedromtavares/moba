@@ -10,7 +10,11 @@
     <div class="row mt-2 profile-board">
       <div class="col-md-6 col-xl-4 profile-collection-column">
         <div class="collection-container" id="profile-collection">
-          <.featured_hero_card preview={Map.get(assigns, :preview, false)} :if={@featured && !@preview} hero={@featured} />
+          <.featured_hero_card
+            :if={@featured && !@preview}
+            preview={Map.get(assigns, :preview, false)}
+            hero={@featured}
+          />
           <div class="card collection mb-0">
             <div class="card-body pb-1 d-flex">
               <div class="row">
@@ -87,9 +91,12 @@
               <strong>{age} <span class="profile-age-unit">{unit}</span></strong>
               <span class="profile-metric-label">
                 <%= cond do %>
-                  <% @player.bot_options -> %>A.I. Player
-                  <% @player.user -> %>Registered
-                  <% true -> %>Joined
+                  <% @player.bot_options -> %>
+                    A.I. Player
+                  <% @player.user -> %>
+                    Registered
+                  <% true -> %>
+                    Joined
                 <% end %>
               </span>
             </div>
@@ -101,12 +108,13 @@
             </div>
             <div class="col text-center">
               <strong
-                title={"5v5 Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
+                id="profile-3v3-win-rate"
+                title={GH.win_rate_summary(@recent_results)}
                 data-toggle="tooltip"
               >
-                <i class="ui-icon ui-swords text-white"></i> {total_win_rate(@player)}
+                <i class="ui-icon ui-swords text-white"></i> {GH.win_rate(@recent_results)}%
               </strong>
-              <span :if={@preview} class="profile-metric-label">5v5 Win Rate</span>
+              <span :if={@preview} class="profile-metric-label">3v3 Win Rate</span>
             </div>
             <div class="col text-center">
               <strong
@@ -124,153 +132,85 @@
               <span :if={@preview} class="profile-metric-label">Season rank</span>
             </div>
           </div>
-          <%= if length(@duels) > 0 do %>
-            <hr />
-            <div class="row">
-              <div class="col d-flex justify-content-center">
-                <div class="pt-2 pb-2 profile-history-switcher">
-                  <div class="btn-group profile-history-tabs">
-                    <%= if @filter == "matches" do %>
-                      <button type="button" class="btn btn-sm btn-secondary no-action">
-                        <span class="loading-text">5v5</span>
-                      </button>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-light"
-                        phx-click="show-duels"
-                        phx-hook="Loading"
-                        id="duels-btn"
-                      >
-                        <span class="loading-text">1v1</span>
-                      </button>
-                    <% else %>
-                      <button
-                        type="button"
-                        class="btn btn-sm btn-light"
-                        phx-click="show-matches"
-                        phx-hook="Loading"
-                        id="matches-btn"
-                      >
-                        <span class="loading-text">5v5</span>
-                      </button>
-                      <button type="button" class="btn btn-sm btn-secondary no-action">
-                        <span class="loading-text">1v1</span>
-                      </button>
-                    <% end %>
-                  </div>
-                </div>
-              </div>
+          <div :if={@duels != []} class="profile-history-switcher">
+            <div class="profile-ranking-switch profile-history-tabs" role="group" aria-label="Battle history mode">
+              <button
+                :for={{tab, label, icon} <- [{"matches", "3v3", "game-arena-3v3"}, {"duels", "1v1", "game-swords"}]}
+                type="button"
+                id={"#{tab}-btn"}
+                phx-click={if @filter != tab, do: "show-#{tab}"}
+                aria-pressed={to_string(@filter == tab)}
+              >
+                <.icon name={icon} /> {label}
+              </button>
             </div>
-          <% end %>
+          </div>
 
           <.arena_debut :if={@preview && @arena_debut} {assigns} />
 
-          <%= if @filter == "matches" && (!@preview || is_nil(@arena_debut)) do %>
-            <div class="row">
-              <div class="col">
-                <div class="transparent p-0 matches profile-history">
-                  <table class="table table-dark text-center table-sm m-0 history-table" id="profile-matches-table">
-                    <%= for match <- @matches do %>
-                      <tr>
-                        <td class="text-center" width="33%">
-                          <span class="opponent">
-                            <.link navigate={preview_path(assigns, ~p"/player/#{match.opponent_id}")}>
-                              {username(match.opponent)}
-                            </.link>
-                            <small :if={@preview} class="history-detail">{String.capitalize(match.type)} match</small>
-                          </span>
-                        </td>
+          <%= if !@preview || is_nil(@arena_debut) do %>
+            <.duel_record
+              :if={@filter == "duels" && @current_player.user && @player.user && @player.id != @current_player.id}
+              {assigns}
+            />
 
-                        <td class="text-center" width="33%">
-                          <.match_result match={match} />
-                          <.rewards_badge rewards={match.rewards.attacker_pvp_points} />
-                        </td>
-
-                        <td class="text-center" width="33%">
-                          <.link
-                            navigate={preview_path(assigns, ~p"/matches/#{match}")}
-                            class="btn btn-light btn-sm game-review"
-                            aria-label={"Review match #{match.id}"}
-                            data-toggle="tooltip"
-                            title={String.capitalize(match.type)}
-                          >
-                            <i class="ui-icon ui-eye"></i>
-                          </.link>
-                        </td>
-                      </tr>
-                    <% end %>
-                  </table>
-                </div>
-              </div>
-            </div>
-          <% end %>
-
-          <%= if @filter == "duels" && (!@preview || is_nil(@arena_debut)) do %>
-            <%= if @current_player.user && @player.user && @player.id != @current_player.id do %>
-              <%= if @preview do %>
-                <.duel_record {assigns} />
-              <% else %>
-                <div class="border-top pt-1">
-                  <div class="row no-gutters">
-                    <div class="col">
-                      <h4 class="text-right">
-                        {username(@current_player)}
-                        <span class="badge badge-pill badge-light-danger font-15">
-                          {@current_player.duel_score["#{@player.id}"] || 0}
-                        </span>
-                      </h4>
-                    </div>
-                    <div class="col-1 d-flex align-items-center justify-content-center">
-                      <i class="ui-icon ui-close"></i>
-                    </div>
-                    <div class="col">
-                      <h4 class="text-left">
-                        <span class="badge badge-pill badge-light-danger font-15">
-                          {@player.duel_score["#{@current_player.id}"] || 0}
-                        </span>
-                        {username(@player)}
-                      </h4>
-                    </div>
-                  </div>
-                </div>
-              <% end %>
-            <% end %>
-
-            <div class="transparent p-0 duels profile-history">
-              <table class="table table-dark text-center table-sm m-0 history-table" id="profile-duels-table">
-                <%= for duel <- @duels do %>
+            <div class="profile-history">
+              <p :if={@filter == "matches" && @matches == []} class="profile-rank-empty">
+                No completed 3v3 matches yet.
+              </p>
+              <table
+                :if={@filter == "duels" || @matches != []}
+                id={"profile-#{@filter}-table"}
+                class="profile-history-table"
+              >
+                <colgroup>
+                  <col />
+                  <col class="profile-history-result-column" />
+                  <col class="profile-history-replay-column" />
+                </colgroup>
+                <thead class="sr-only">
                   <tr>
-                    <td class="text-center">
-                      <span class="opponent">
-                        <.link navigate={preview_path(assigns, ~p"/player/#{opponent_for(duel, @player).id}")}>
-                          {duel |> opponent_for(@player) |> username()}
-                        </.link>
-                        <small :if={@preview} class="history-detail">{GH.duel_mode_label(duel)}</small>
-                      </span>
-                    </td>
-
-                    <td class="text-center">
-                      <.duel_result duel={duel} player_id={@player.id} />
-                      <%= if duel.player_id == @player.id do %>
-                        <.rewards_badge rewards={duel.rewards.attacker_pvp_points} />
-                      <% else %>
-                        <.rewards_badge rewards={duel.rewards.defender_pvp_points} />
-                      <% end %>
-                    </td>
-
-                    <td>
-                      <.link navigate={preview_path(assigns, ~p"/arena/#{duel}")} class="btn btn-light btn-sm game-review" aria-label={"Review duel #{duel.id}"}>
-                        <i class="ui-icon ui-eye"></i>
-                      </.link>
-                    </td>
+                    <th scope="col">Opponent</th>
+                    <th scope="col">Result</th>
+                    <th scope="col">Replay</th>
                   </tr>
-                <% end %>
+                </thead>
+                <tbody>
+                  <%= if @filter == "matches" do %>
+                    <.history_row
+                      :for={match <- @matches}
+                      opponent={match.opponent}
+                      mode={"#{String.capitalize(match.type)} match"}
+                      result={if match.winner_id == @player.id, do: "Victory", else: "Defeat"}
+                      rating={match.rewards.attacker_pvp_points}
+                      replay_path={preview_path(assigns, ~p"/matches/#{match}")}
+                      replay_label={"Review match #{match.id}"}
+                      preview={@preview}
+                    />
+                  <% else %>
+                    <.history_row
+                      :for={duel <- @duels}
+                      opponent={opponent_for(duel, @player)}
+                      mode={GH.duel_mode_label(duel)}
+                      result={history_result(duel.winner_player_id, @player.id)}
+                      rating={duel_rating(duel, @player.id)}
+                      replay_path={preview_path(assigns, ~p"/arena/#{duel}")}
+                      replay_label={"Review duel #{duel.id}"}
+                      preview={@preview}
+                    />
+                  <% end %>
+                </tbody>
               </table>
             </div>
           <% end %>
 
           <div :if={!@preview || @player.id == @current_player.id} class="card-footer p-1">
-            <nav :if={@preview && @player.id == @current_player.id} id="profile-actions" class="profile-actions" aria-label="Account actions">
+            <nav
+              :if={@preview && @player.id == @current_player.id}
+              id="profile-actions"
+              class="profile-actions"
+              aria-label="Account actions"
+            >
               <.link navigate={preview_path(assigns, ~p"/users/settings")}>
                 <i class="ui-icon ui-edit mr-1"></i>Edit Profile
               </.link>
@@ -299,11 +239,24 @@
                 <.icon name="game-trophy" />
                 <div>
                   <strong>Leaderboard</strong>
-                  <span>{if @ranking_tab == "season", do: "Season score", else: "Top 200 heroes"}</span>
+                  <span
+                    data-toggle={if @ranking_tab == "season", do: "tooltip"}
+                    title={if @ranking_tab == "season", do: TT.season_score_tooltip(@player)}
+                    tabindex={if @ranking_tab == "season", do: "0"}
+                  >
+                    {if @ranking_tab == "season", do: "Season score", else: "Top 200 heroes"}
+                  </span>
                 </div>
               </div>
               <div class="profile-ranking-switch" role="group" aria-label="Leaderboard type">
-                <button :for={{tab, label} <- [{"season", "Season Rank"}, {"hero", "Hero Rank"}]} id={"profile-ranking-#{tab}"} type="button" phx-click="profile-ranking" phx-value-type={tab} aria-pressed={to_string(@ranking_tab == tab)}>
+                <button
+                  :for={{tab, label} <- [{"season", "Season Rank"}, {"hero", "Hero Rank"}]}
+                  id={"profile-ranking-#{tab}"}
+                  type="button"
+                  phx-click="profile-ranking"
+                  phx-value-type={tab}
+                  aria-pressed={to_string(@ranking_tab == tab)}
+                >
                   {label}
                 </button>
               </div>

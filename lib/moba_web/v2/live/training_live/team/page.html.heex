@@ -1,0 +1,179 @@
+<Layouts.app
+  flash={@flash}
+  current_scope={@current_scope}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  preview={@preview}
+  sidebar_code="training"
+  hide_footer
+>
+  <.hud_notice
+    :if={!@run && @record}
+    id="training-save-unavailable"
+    title="This team’s saved run could not be loaded."
+    description="You can return to Base or start a new team."
+  >
+    <:actions>
+      <.link navigate={~p"/base"} class="btn btn-secondary">Back to Base</.link>
+      <.link navigate={~p"/new"} class="btn battle-primary">Start a new team</.link>
+    </:actions>
+  </.hud_notice>
+
+  <main
+    :if={@run}
+    id="team-training-page"
+    class={["training", "team-training", @run.phase == :playing && "content-with-hero-bar"]}
+  >
+    <link :for={art <- team_artwork(@run)} rel="preload" as="image" href={art} />
+    <%= cond do %>
+      <% @run.phase == :playing -> %>
+        <.hero_panel
+          :for={hero <- TeamTraining.team(@run)}
+          record={@record}
+          run={@run}
+          hero={hero}
+          initial_hero={@initial_hero}
+          battle_guide_hero={@battle_guide_hero}
+          skill_guide_hero={@skill_guide_hero}
+          current_player={@current_player}
+          show_log={@show_log}
+          encounters={@encounters}
+          ui={Map.get(@hero_ui, hero.id, %{})}
+          show_shop={@show_shop}
+          roshan={@roshan}
+        />
+      <% @run.phase == :engagement -> %>
+        <TrainingComponents.training_header
+          :if={@run.phase != :finished}
+          current_hero={@selected.hero}
+          current_player={@current_player}
+          preview={true}
+          team_mode={true}
+          training_team={@run}
+          id_prefix=""
+          hero_id={@run.selected}
+          goal_override={@run.goal}
+          battle_pending={@run.phase == :engagement}
+          show_controls={@run.phase == :playing && TeamTraining.roster_alive?(@run)}
+        >
+          <:history_controls>
+            <button
+              id={GH.dom_id("", "team-battle-log")}
+              type="button"
+              class="ascent-tool"
+              phx-click="show-log"
+              phx-value-hero_id={@run.selected}
+              aria-expanded={to_string(@show_log)}
+            >
+              <.icon name="game-battle-log" /> Battle log <small>{length(@encounters)}</small>
+            </button>
+          </:history_controls>
+          <:reward_controls>
+            <button
+              id={GH.dom_id("", "team-reward-mode")}
+              class="team-reward-mode"
+              type="button"
+              role="switch"
+              aria-label="Focus rewards"
+              aria-checked={to_string(@run.reward_mode == :focus)}
+              phx-click="reward-mode"
+              phx-value-hero_id={@run.selected}
+              phx-value-mode={if @run.reward_mode == :shared, do: :focus, else: :shared}
+              disabled={@run.phase != :playing}
+              data-toggle="tooltip"
+              title="Shared rewards will equally distribute all rewards gained from training battles. Focus rewards will reward only the hero who engaged. League challenge rewards remain equally split always."
+            >
+              <span class={["team-reward-option", @run.reward_mode == :shared && "is-active"]}>
+                <.icon name="game-team" /> Shared
+              </span>
+              <span class="team-reward-track" aria-hidden="true"></span>
+              <span class={["team-reward-option", @run.reward_mode == :focus && "is-active"]}>
+                <.icon name="game-hero" /> Focus
+              </span>
+            </button>
+          </:reward_controls>
+        </TrainingComponents.training_header>
+
+        <nav
+          :if={@show_log}
+          id={GH.dom_id("", "team-encounter-log")}
+          class="team-encounter-log"
+          aria-label="Team battle history"
+        >
+          <p :if={@encounters == []}>Your battles will appear here.</p>
+          <.link
+            :for={e <- Enum.reverse(@encounters)}
+            id={GH.dom_id("", "team-replay-#{e.id}")}
+            navigate={TrainingEncounters.path(e)}
+          >
+            Turn {e.turn} · {e.label} <span aria-hidden="true">↗</span>
+          </.link>
+        </nav>
+
+        <% e = TeamTraining.active_encounter(@run) %>
+        <section class="team-pending training-pending" id="team-pending">
+          <.icon name="game-swords" />
+          <div>
+            <span class="team-eyebrow">Battle in progress</span>
+            <h2>{e.label}</h2>
+            <p>Your team is waiting for your next move.</p>
+          </div>
+          <.link
+            id="team-resume"
+            class="btn battle-primary"
+            navigate={TrainingEncounters.path(e, length(e.battles))}
+          >
+            Resume battle →
+          </.link>
+        </section>
+    <% end %>
+
+    <div :if={@run.phase == :playing} id="hero-team-tabs" class="hud-team-roster">
+      <div id="team-hero-selector" class="team-hero-selector" role="tablist" aria-label="Training roster">
+        <button
+          :for={h <- TeamTraining.team(@run)}
+          id={"team-select-#{h.id}"}
+          type="button"
+          phx-click={select_hero(h.id)}
+          role="tab"
+          aria-selected={to_string(@initial_hero == h.id)}
+          aria-pressed={to_string(@initial_hero == h.id)}
+          aria-controls={"team-hero-panel-#{h.id}"}
+          aria-keyshortcuts={to_string(h.id)}
+          data-battle-guide={if @battle_guide_hero == h.id, do: ""}
+          title={if TeamTraining.dead?(h), do: "#{h.hero.avatar.name} · Buyback required", else: h.hero.avatar.name}
+          data-dead={to_string(TeamTraining.dead?(h))}
+        >
+          <img src={GH.image_url(h.hero.avatar)} alt={h.hero.avatar.name} />
+          <kbd class="team-tab-hotkey" aria-hidden="true">{h.id}</kbd>
+          <span>
+            <strong>{h.hero.avatar.name}</strong><small>{if TeamTraining.dead?(h), do: "Dead · Buyback", else: "Lv #{h.hero.level}"}</small>
+          </span>
+          <b
+            :if={h.hero.skill_levels_available > 0}
+            class="team-tab-skill-points"
+            aria-label={"#{h.hero.skill_levels_available} skill points"}
+          >
+            +{h.hero.skill_levels_available}
+          </b>
+        </button>
+        <span
+          :if={@battle_guide_hero}
+          id={"first-battle-hero-arrow-#{@battle_guide_hero}"}
+          class="skill-guidance-arrow first-battle-hero-arrow"
+          style={"left: #{(@battle_guide_hero - 0.5) * 100 / 3}%"}
+          aria-hidden="true"
+        >
+        </span>
+        <span
+          :if={@skill_guide_hero}
+          id="league-hero-skill-arrow"
+          class="skill-guidance-arrow league-hero-skill-arrow"
+          style={"left: #{(@skill_guide_hero.id - 0.5) * 100 / 3}%"}
+          aria-hidden="true"
+        >
+        </span>
+      </div>
+    </div>
+  </main>
+</Layouts.app>

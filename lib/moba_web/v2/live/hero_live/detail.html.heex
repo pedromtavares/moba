@@ -21,8 +21,17 @@
             <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
           </div>
         </div>
-        <nav :if={@hero.player.user_id || @hero.player_id == @current_player.id} class="hero-detail-actions" aria-label="Hero actions">
-          <.link :if={@hero.player.user_id} id="hero-detail-player" navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}>
+        <nav
+          :if={@hero.player.user_id || @hero.player_id == @current_player.id}
+          class="hero-detail-actions"
+          aria-label="Hero actions"
+        >
+          <.link
+            :if={@hero.player.user_id}
+            id="hero-detail-player"
+            navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}
+            data-profile-username={Moba.Utils.username(@hero.player)}
+          >
             Player profile <span aria-hidden="true">→</span>
           </.link>
           <button
@@ -70,8 +79,12 @@
   <section id="hero-detail-performance" class="hero-detail-performance" aria-labelledby="hero-league-title">
     <div class="hero-detail-section-heading">
       <h2 id="hero-league-title">{Moba.leagues()[@hero.league_tier]}</h2>
-      <span id="hero-training-status" data-finished={to_string(!is_nil(@hero.finished_at))}>
-        {if @hero.finished_at, do: "Complete", else: "In training"}
+      <span
+        :if={!@hero.training_team_id && is_nil(@hero.finished_at)}
+        id="hero-training-status"
+        data-finished={to_string(!is_nil(@hero.finished_at))}
+      >
+        In training
       </span>
     </div>
     <ol class="hero-league-path" aria-label="League progression">
@@ -86,7 +99,10 @@
     </ol>
     <dl class="hero-detail-metrics">
       <div>
-        <dt>Total farm</dt>
+        <dt>
+          Total farm
+          <.perfect_indicator :if={@perfect_run} id="hero-perfect-run" finished={not is_nil(@hero.finished_at)} />
+        </dt>
         <dd class="hero-farm-total" title={@hero.total_xp_farm + @hero.total_gold_farm}>
           {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
         </dd>
@@ -111,70 +127,143 @@
     </dl>
   </section>
 
-  <section id="hero-leaderboard" class="hero-leaderboard" aria-labelledby="hero-leaderboard-title">
-    <div :if={@hero.league_tier < 6} id="hero-ranking-switcher" class="hero-ranking-switcher" role="group" aria-label="Training rankings">
-      <button
-        :for={{tab, label} <- [{"league", "League Ranking"}, {"global", "Global Ranking"}]}
-        id={"hero-ranking-#{tab}-tab"}
-        type="button"
-        phx-click="ranking-tab"
-        phx-value-type={tab}
-        aria-pressed={to_string(@ranking_tab == tab)}
-        aria-controls="ranking-card"
-        disabled={tab == "league" && @hero.league_tier < 2}
-      >{label}</button>
-    </div>
-    <header class="hero-leaderboard-heading">
-      <%= if @ranking_tab == "league" do %>
-        <img src={"/images/league/#{@hero.league_tier}.png"} alt="" />
-      <% else %>
-        <.icon name="game-trophy" />
-      <% end %>
-      <div>
-        <h2 id="hero-leaderboard-title">{if @ranking_tab == "league", do: Moba.leagues()[@hero.league_tier] <> " rankings", else: "Global rankings"}</h2>
-        <p>{if @ranking_tab == "league", do: "All-time completed runs", else: "Top #{Moba.pve_ranking_limit()} training runs"}</p>
+  <div class="hero-detail-rankings">
+    <.training_completion
+      :if={just_finished_training?(@current_player, @hero)}
+      hero={@hero}
+      player={@current_player}
+      quest={@completed_quest}
+    />
+    <MobaWeb.V2.Components.TeamComponents.ranking
+      :if={@hero.training_team_id}
+      entries={@team_ranking}
+      current_id={@hero.training_team_id}
+    />
+    <section
+      :if={!@hero.training_team_id}
+      id="hero-leaderboard"
+      class="hero-leaderboard"
+      aria-labelledby="hero-leaderboard-title"
+    >
+      <div
+        :if={@hero.league_tier < 6}
+        id="hero-ranking-switcher"
+        class="hero-ranking-switcher"
+        role="group"
+        aria-label="Training rankings"
+      >
+        <button
+          :for={{tab, label} <- [{"league", "League Ranking"}, {"global", "Global Ranking"}]}
+          id={"hero-ranking-#{tab}-tab"}
+          type="button"
+          phx-click="ranking-tab"
+          phx-value-type={tab}
+          aria-pressed={to_string(@ranking_tab == tab)}
+          aria-controls="ranking-card"
+          disabled={tab == "league" && @hero.league_tier < 2}
+        >
+          {label}
+        </button>
       </div>
-      <span id="hero-ranking-standing" :if={@leaderboard_position}>
-        <strong>#{@leaderboard_position}</strong>
-        <small><%= if @ranking_tab == "league" do %>of {@league_ranking.total} {if @league_ranking.total == 1, do: "run", else: "runs"}<% else %>Global rank<% end %></small>
-      </span>
-    </header>
-    <p :if={@hero.league_tier < 2} id="hero-ranking-minimum-league" class="hero-league-placement">League rankings begin at Gold. Keep climbing to earn your place.</p>
-    <p :if={!@hero.finished_at && @hero.league_tier >= 2} id="hero-league-placement" class="hero-league-placement">Finish training to earn your place in the standings.</p>
-    <p :if={@ranking_tab == "global" && @hero.finished_at && !@leaderboard_position} id="hero-global-placement" class="hero-league-placement">This run has no global rank.<span :if={@hero.league_tier < 6}> All completed runs from Gold onward have a league ranking.</span></p>
-    <div id="ranking-card" class="hero-ranking-scroll" tabindex="0" role="region" aria-labelledby="hero-leaderboard-title">
-      <table class="hero-ranking-table">
-        <thead>
-          <tr>
-            <th scope="col">Rank</th>
-            <th scope="col">Hero</th>
-            <th scope="col">Farm</th>
-            <th scope="col">Time</th>
-          </tr>
-        </thead>
-        <tbody>
-          <.ranking_entry
-            :for={entry <- @leaderboard_entries}
-            hero={entry.hero}
-            position={entry.position}
-            selected={entry.hero.id == @hero.id}
-            scroll={entry.hero.id == @hero.id}
-            preview={@preview}
-          />
-        </tbody>
-        <tfoot :if={!Enum.any?(@leaderboard_entries, &(&1.hero.id == @hero.id))}>
-          <.ranking_entry hero={@hero} position={@leaderboard_position} selected={true} scroll={false} preview={@preview} />
-        </tfoot>
-      </table>
-      <div :if={@ranking_tab == "league" && @league_ranking.total == 0} id="hero-league-empty" class="hero-league-empty">
-        <.icon name="game-trophy" />
-        <strong>A new league story starts here</strong>
-        <p>Be the first to finish a run in these standings.</p>
+      <header class="hero-leaderboard-heading">
+        <%= if @ranking_tab == "league" do %>
+          <img src={"/images/league/#{@hero.league_tier}.png"} alt="" />
+        <% else %>
+          <.icon name="game-trophy" />
+        <% end %>
+        <div>
+          <h2 id="hero-leaderboard-title">
+            {if @ranking_tab == "league", do: Moba.leagues()[@hero.league_tier] <> " rankings", else: "Global rankings"}
+          </h2>
+          <p>
+            {if @ranking_tab == "league",
+              do: "All-time completed runs",
+              else: "Top #{Moba.pve_ranking_limit()} training runs"}
+          </p>
+        </div>
+        <span :if={@leaderboard_position} id="hero-ranking-standing">
+          <strong>#{@leaderboard_position}</strong>
+          <small>
+            <%= if @ranking_tab == "league" do %>
+              of {@league_ranking.total} {if @league_ranking.total == 1, do: "run", else: "runs"}
+            <% else %>
+              Global rank
+            <% end %>
+          </small>
+        </span>
+      </header>
+      <p :if={@hero.league_tier < 2} id="hero-ranking-minimum-league" class="hero-league-placement">
+        League rankings begin at Gold. Keep climbing to earn your place.
+      </p>
+      <p :if={!@hero.finished_at && @hero.league_tier >= 2} id="hero-league-placement" class="hero-league-placement">
+        Finish training to earn your place in the standings.
+      </p>
+      <p
+        :if={@ranking_tab == "global" && @hero.finished_at && !@leaderboard_position}
+        id="hero-global-placement"
+        class="hero-league-placement"
+      >
+        This run has no global rank.<span :if={@hero.league_tier < 6}> All completed runs from Gold onward have a league ranking.</span>
+      </p>
+      <div
+        id="ranking-card"
+        class="hero-ranking-scroll"
+        tabindex="0"
+        role="region"
+        aria-labelledby="hero-leaderboard-title"
+      >
+        <table class="hero-ranking-table">
+          <thead>
+            <tr>
+              <th scope="col">Rank</th>
+              <th scope="col">Hero</th>
+              <th scope="col">Farm</th>
+              <th scope="col">Time</th>
+            </tr>
+          </thead>
+          <tbody>
+            <.ranking_entry
+              :for={entry <- @leaderboard_entries}
+              hero={entry.hero}
+              position={entry.position}
+              selected={entry.hero.id == @hero.id}
+              scroll={entry.hero.id == @hero.id}
+              preview={@preview}
+            />
+          </tbody>
+          <tfoot :if={!Enum.any?(@leaderboard_entries, &(&1.hero.id == @hero.id))}>
+            <.ranking_entry
+              hero={@hero}
+              position={@leaderboard_position}
+              selected={true}
+              scroll={false}
+              preview={@preview}
+            />
+          </tfoot>
+        </table>
+        <div
+          :if={@ranking_tab == "league" && @league_ranking.total == 0}
+          id="hero-league-empty"
+          class="hero-league-empty"
+        >
+          <.icon name="game-trophy" />
+          <strong>A new league story starts here</strong>
+          <p>Be the first to finish a run in these standings.</p>
+        </div>
       </div>
-    </div>
-    <aside :if={@hero.player_id == @current_player.id} id="hero-league-milestone" class="hero-league-milestone" aria-labelledby="hero-league-milestone-title">
-      <img src={"/images/league/#{@league_milestone.tier}.png"} alt="" />
-      <div><span>Next milestone</span><h3 id="hero-league-milestone-title">{@league_milestone.title}</h3><p>{@league_milestone.description}</p></div>
-    </aside>
-  </section>
+      <aside
+        :if={@hero.player_id == @current_player.id && @league_milestone}
+        id="hero-league-milestone"
+        class="hero-league-milestone"
+        aria-labelledby="hero-league-milestone-title"
+      >
+        <img src={"/images/league/#{@league_milestone.tier}.png"} alt="" />
+        <div>
+          <span>Next milestone</span>
+          <h3 id="hero-league-milestone-title">{@league_milestone.title}</h3>
+          <p>{@league_milestone.description}</p>
+        </div>
+      </aside>
+    </section>
+  </div>
 </div>

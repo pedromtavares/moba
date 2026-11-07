@@ -84,7 +84,7 @@ defmodule Moba.Content.HeroExpansion202610Test do
     assert Enum.all?(canonical(Item, @items), &(&1.enabled && &1.active && &1.rarity == "epic"))
 
     assert MapSet.subset?(MapSet.new(@avatars), MapSet.new(Game.list_unlockable_avatars(), & &1.code))
-    assert MapSet.subset?(MapSet.new(@normals), MapSet.new(Game.list_unlockable_skills(), & &1.code))
+    assert Game.list_unlockable_skills() == []
 
     for code <- @avatars do
       skins = Repo.all(from s in Skin, where: s.avatar_code == ^code and s.code in @skins)
@@ -160,7 +160,7 @@ defmodule Moba.Content.HeroExpansion202610Test do
     assert Repo.get!(Skin, skin.id).avatar_code == "axe"
   end
 
-  test "the normal resource reset publishes playable versions and keeps Tavern gating" do
+  test "the normal resource reset publishes playable versions with free skills and gated avatars" do
     Import.run()
     previous_uuid = Game.current_season().resource_uuid
     Moba.Conductor.regenerate_resources!()
@@ -193,7 +193,7 @@ defmodule Moba.Content.HeroExpansion202610Test do
     end
 
     refute Enum.any?(Game.list_creation_avatars([]), &(&1.code in @avatars))
-    refute Enum.any?(Game.list_creation_skills(1), &(&1.code in @normals))
+    assert MapSet.subset?(MapSet.new(@normals), MapSet.new(Game.list_creation_skills(1), & &1.code))
     assert Enum.any?(Game.list_creation_avatars(["anti_mage"]), &(&1.code == "anti_mage"))
     assert Enum.any?(Game.list_creation_skills(1, ["chakra_magic"]), &(&1.code == "chakra_magic"))
   end

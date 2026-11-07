@@ -41,6 +41,10 @@ defmodule Moba.Engine.Core.Helper do
       (is_nil(cooldown) || cooldown + 1 <= 0)
   end
 
+  def should_use?(%{current_hp: hp, total_hp: max_hp}, %{code: "tranquil_boots"}, :active, nil)
+      when hp >= max_hp,
+      do: false
+
   def should_use?(battler, resource, type, nil), do: can_use?(battler, resource, type)
 
   # avoids having the AI using skills after shivas and guardian angel

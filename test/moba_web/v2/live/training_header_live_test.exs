@@ -1,5 +1,5 @@
 defmodule MobaWeb.V2.TrainingHeaderLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
   test "alive, dead, farming and history share the same training overview", %{conn: conn} do
@@ -82,7 +82,10 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
     {:ok, view, _} = live(conn, "/training")
 
     assert has_element?(view, "#training-ascent-title", "Road to Diamond")
+    refute has_element?(view, ".ascent-guest-sign-in")
     assert has_element?(view, "#current-training-rank[aria-current=step]", "Bronze")
+    assert has_element?(view, "#training-ascent-status", "Spend 3 turns to challenge Silver")
+    assert has_element?(view, "#training-ascent-status .ascent-status-league", "Silver")
     assert has_element?(view, ".ascent-turns[aria-label='2 of 5 turns spent']")
     assert has_element?(view, ".ascent-pip.is-spent:nth-child(2)")
     refute has_element?(view, ".ascent-pip.is-spent:nth-child(3)")

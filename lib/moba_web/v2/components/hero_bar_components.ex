@@ -11,16 +11,35 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   embed_templates "hero_bar_components/*"
 
   attr :current_hero, :map, required: true
+  attr :display_name, :string, default: nil
   attr :editing, :boolean, required: true
   attr :show_build, :boolean, required: true
   attr :show_shop, :boolean, required: true
-  attr :tutorial_step, :integer, required: true
   attr :preview, :boolean, default: false
   attr :event_target, :any, default: nil
   attr :reorderable, :boolean, default: false
+  attr :id_prefix, :string, default: ""
+  attr :hero_id, :integer, default: nil
+  attr :team_roster, :boolean, default: false
+  attr :resource_tooltip, :string, default: nil
+  slot :resources
+  slot :skill_guidance
+  slot :shop_actions
+  slot :mobile_shop_actions
+  slot :roster
+  slot :identity
 
   def hero_bar(assigns) do
-    hero_bar_template(assigns)
+    assigns |> assign(:orders_form, to_form(%{}, as: :orders)) |> hero_bar_template()
+  end
+
+  def open_shop_item(socket, hero, code, id_prefix \\ "") do
+    if hero && Enum.any?(hero.items, &(&1.code == code)) do
+      Phoenix.LiveView.send_update(ShopComponent, id: GH.dom_id(id_prefix, "shop"), inspect_inventory: code)
+      assign(socket, show_shop: true)
+    else
+      socket
+    end
   end
 
   attr :current_hero, :map, required: true
@@ -54,8 +73,11 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
     """
   end
 
-  def target_attrs(nil), do: %{}
-  def target_attrs(target), do: %{"phx-target" => target}
+  def target_attrs(target, hero_id \\ nil) do
+    %{}
+    |> then(fn attrs -> if target, do: Map.put(attrs, :"phx-target", target), else: attrs end)
+    |> then(fn attrs -> if hero_id, do: Map.put(attrs, :"phx-value-hero_id", hero_id), else: attrs end)
+  end
 
   def edit_orders_label(%{finished_at: finished_at}) when is_nil(finished_at) do
     "Click to edit the skill and item orders that will be preselected so you don't have to manually select them in every battle."

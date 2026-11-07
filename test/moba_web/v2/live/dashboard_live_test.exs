@@ -1,6 +1,149 @@
 defmodule MobaWeb.V2.DashboardLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
+  import Test.TeamHelper
+
+  describe "team cards" do
+    test "cards show reward mode and average farm without graying fallen heroes", %{conn: conn} do
+      {scope, player} = team_account()
+      record = team_run(scope, player)
+
+      {:ok, record} =
+        Game.TeamRuns.update(scope, record, fn run ->
+          heroes =
+            Map.new(run.heroes, fn {id, unit} ->
+              {id, %{unit | hero: %{unit.hero | total_gold_farm: 6000, total_xp_farm: 6000, pve_state: "dead"}}}
+            end)
+
+          %{run | heroes: heroes, league_tier: 6, reward_mode: :focus, phase: :finished}
+        end)
+
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, view, _} = live(conn, "/base")
+      card = "#visible-team-#{record.id}"
+      assert has_element?(view, "#{card} .hero-card-meta", "Focus")
+      assert has_element?(view, "#{card} .team-card-farm strong", "12K")
+      assert has_element?(view, "#{card} .team-card-farm small", "Avg farm")
+      refute has_element?(view, "#{card} .is-fallen")
+      refute has_element?(view, "#{card} .hero-card-meta", "Grandmaster")
+    end
+
+    test "deleting a team removes it persistently and cannot affect another account", %{conn: conn} do
+      {scope, player} = team_account()
+      record = team_run(scope, player)
+      {other_scope, other_player} = team_account()
+      other = team_run(other_scope, other_player)
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, view, _} = live(conn, "/base")
+
+      assert has_element?(view, "#visible-team-#{record.id} .hero-card-meta", "Shared")
+      render_click(view, "archive-team", %{"id" => to_string(other.id)})
+      assert Game.TeamRuns.get!(other_scope, other.id).archived_at == nil
+      assert has_element?(view, "#visible-team-#{record.id}")
+
+      view |> element("#base-team-delete-#{record.id}") |> render_click()
+      refute has_element?(view, "#visible-team-#{record.id}")
+      assert Moba.Repo.get!(Game.Schema.TrainingTeam, record.id).archived_at
+      assert Game.TeamRuns.active(scope, player.id) == nil
+      assert Game.TeamRuns.latest(scope, player.id) == nil
+      assert_raise Ecto.NoResultsError, fn -> Game.TeamRuns.get!(scope, record.id) end
+
+      {:ok, reloaded, _} = live(conn, "/base")
+      refute has_element?(reloaded, "#visible-team-#{record.id}")
+    end
+
+    test "deleting a completed team preserves its collected heroes and public result", %{conn: conn} do
+      {scope, player} = team_account()
+      record = team_run(scope, player)
+      {:ok, finished} = Game.TeamRuns.update(scope, record, &%{&1 | phase: :finished})
+      collection = Game.Heroes.collection_for(player.id) |> Enum.map(& &1.hero_id)
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, view, _} = live(conn, "/base")
+
+      view |> element("#base-team-delete-#{finished.id}") |> render_click()
+      refute has_element?(view, "#visible-team-#{finished.id}")
+      assert Game.TeamRuns.profile!(scope, finished.id).hero_ids == finished.hero_ids
+      assert Enum.map(Game.Heroes.collection_for(player.id), & &1.hero_id) == collection
+      assert Enum.all?(Game.get_heroes(finished.hero_ids), &is_nil(&1.archived_at))
+    end
+
+    test "teams share the hero grid and each opens its own run", %{conn: conn} do
+      {scope, player} = team_account()
+      first = team_run(scope, player)
+      second = team_run(scope, player)
+      {other_scope, other_player} = team_account()
+      other = team_run(other_scope, other_player)
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, view, _} = live(conn, "/base")
+
+      assert has_element?(view, "#base-invoke-btn[href='/new']", "Start training")
+      refute has_element?(view, "#base-resume-team, #base-no-heroes")
+      refute has_element?(view, "#visible-team-#{other.id}")
+
+      for record <- [first, second] do
+        card = "#hero-list-unfinished #visible-team-#{record.id}"
+        assert has_element?(view, "#{card} .team-training-card")
+        assert has_element?(view, "#{card} #base-team-continue-#{record.id}[href='/training?run=#{record.id}']")
+
+        assert view
+               |> element("#{card} .team-card-roster")
+               |> render()
+               |> LazyHTML.from_fragment()
+               |> LazyHTML.query(".team-card-hero")
+               |> Enum.count() == 3
+
+        for unit <- Game.TeamTraining.team(Game.TeamRuns.state(record)) do
+          assert has_element?(view, "#{card} .team-card-identity", unit.hero.avatar.name)
+        end
+      end
+
+      {:ok, training, _} =
+        view |> element("#base-team-continue-#{first.id}") |> render_click() |> follow_redirect(conn)
+
+      assert has_element?(training, "#team-training-page")
+    end
+
+    test "completed teams appear together and their collected heroes are not duplicated", %{conn: conn} do
+      {scope, player} = team_account()
+      record = team_run(scope, player)
+      {:ok, finished} = Game.TeamRuns.update(scope, record, &%{&1 | phase: :finished})
+      active = team_run(scope, player)
+      solo = create_base_hero(%{name: "Solo training"}, Game.get_player!(player.id))
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, view, _} = live(conn, "/base")
+
+      assert has_element?(view, "#visible-team-#{active.id}")
+      assert has_element?(view, "#visible-hero-#{solo.id}")
+      refute has_element?(view, "#visible-team-#{finished.id}")
+      view |> element("#finished-heroes-btn") |> render_click()
+      assert has_element?(view, "#hero-list-finished #visible-team-#{finished.id}")
+      assert has_element?(view, "#base-team-continue-#{finished.id}[href='/teams/#{finished.id}']", "View team")
+      refute has_element?(view, "#visible-team-#{active.id}")
+
+      for id <- finished.hero_ids, do: refute(has_element?(view, "#visible-hero-#{id}"))
+
+      view |> element("#in-progress-heroes-btn") |> render_click()
+      view |> element("#visible-hero-#{solo.id} [phx-click=continue]") |> render_click()
+      assert_redirect(view, "/training?solo=true")
+    end
+
+    test "load all includes older teams without including drafts or abandoned runs", %{conn: conn} do
+      {scope, player} = team_account()
+      oldest = team_run(scope, player)
+      for _ <- 1..Moba.base_hero_count(), do: team_run(scope, player)
+      abandoned = team_run(scope, player)
+      {:ok, _} = Game.TeamRuns.update(scope, abandoned, &%{&1 | phase: :abandoned})
+      {:ok, draft} = Game.TeamRuns.draft(scope, player)
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, view, _} = live(conn, "/base")
+
+      refute has_element?(view, "#visible-team-#{oldest.id}")
+      view |> element("#load-all-heroes-unfinished") |> render_click()
+      assert has_element?(view, "#visible-team-#{oldest.id}")
+      refute has_element?(view, "#visible-team-#{abandoned.id}, #visible-team-#{draft.id}")
+      refute has_element?(view, "#load-all-heroes-unfinished")
+    end
+  end
 
   describe "unauthenticated access" do
     test "redirects to /start without player_id in session", %{conn: conn} do
@@ -19,7 +162,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       {:ok, view, html} = live(conn, "/base")
 
-      assert html =~ "Train a new Hero"
+      assert html =~ "Start training"
       assert html =~ "In Progress"
       assert html =~ "Finished"
       assert html =~ "id=\"pve-progression\""
@@ -47,17 +190,17 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       assert has_element?(view, "#hero-list-unfinished")
     end
 
-    test "starts the base tutorial when the player is on step 19", %{conn: conn} do
+    test "does not start a guide for players with an old tutorial state", %{conn: conn} do
       hero = create_base_hero()
       player = Game.update_tutorial_step!(hero.player, 19)
       conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
 
       {:ok, view, _html} = live(conn, "/base")
 
-      assert has_element?(view, "#tutorial-step-20[data-step='20']")
+      refute has_element?(view, "[phx-hook=TutorialStep]")
     end
 
-    test "guest base tutorial keeps the v1 anchor targets", %{conn: conn} do
+    test "guest Base keeps collection and account actions available", %{conn: conn} do
       player = Game.create_player!(%{user_id: nil, tutorial_step: 20})
       hero = create_base_hero(%{name: "Guest Hero"}, player)
       player = Game.update_collection!(player, [%{id: hero.id}])
@@ -67,7 +210,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       assert has_element?(view, "#hero-list-container")
       assert has_element?(view, "#create-account-link")
-      assert has_element?(view, "#tutorial-step-20[data-step='20']")
+      refute has_element?(view, "[phx-hook=TutorialStep]")
     end
   end
 
@@ -198,33 +341,6 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       |> render_click()
 
       refute has_element?(view, "#visible-hero-#{hero.id}")
-    end
-  end
-
-  describe "tutorial events" do
-    test "advances from step 20 to 21", %{conn: conn} do
-      hero = create_base_hero()
-      player = Game.update_tutorial_step!(hero.player, 20)
-      conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
-
-      {:ok, view, _html} = live(conn, "/base")
-
-      render_click(view, "tutorial1", %{})
-
-      assert has_element?(view, "#tutorial-step-21[data-step='21']")
-    end
-
-    test "finish-tutorial completes the base tutorial", %{conn: conn} do
-      hero = create_base_hero()
-      player = Game.update_tutorial_step!(hero.player, 21)
-      conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
-
-      {:ok, view, _html} = live(conn, "/base")
-
-      render_click(view, "finish-tutorial", %{})
-
-      assert Game.get_player!(player.id).tutorial_step == 39
-      assert has_element?(view, "#tutorial-step-39[data-step='39']")
     end
   end
 end

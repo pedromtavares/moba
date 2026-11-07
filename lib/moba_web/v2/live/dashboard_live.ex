@@ -2,8 +2,7 @@ defmodule MobaWeb.V2.DashboardLive do
   use MobaWeb, :v2_live_view
 
   import MobaWeb.V2.Components.ProgressionComponents
-
-  alias MobaWeb.V2.TutorialComponent
+  import MobaWeb.CoreComponents, only: [icon: 1]
 
   embed_templates "dashboard_live/*"
 
@@ -11,45 +10,28 @@ defmodule MobaWeb.V2.DashboardLive do
 
   def mount(_params, _session, socket) do
     %{assigns: %{current_player: player}} = socket
-    socket = socket_init(socket, player)
 
-    if connected?(socket) do
-      TutorialComponent.subscribe(player.id)
-    end
+    socket = socket |> assign(:current_scope, Game.TeamRuns.scope(player)) |> socket_init(player)
 
     {:ok, socket}
   end
 
-  def handle_event("show-finished", _, socket) do
-    %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket
-    visible = Enum.filter(all_heroes, & &1.finished_at)
-    loaded = if length(visible) < @base_hero_count, do: Enum.uniq(loaded ++ ["finished"]), else: loaded
-    {:noreply, assign(socket, visible_heroes: visible, filter: "finished", loaded: loaded)}
-  end
-
-  def handle_event("show-unfinished", _, socket) do
-    %{assigns: %{all_heroes: all_heroes, loaded: loaded}} = socket
-    visible = Enum.filter(all_heroes, &is_nil(&1.finished_at))
-    loaded = if length(visible) < @base_hero_count, do: Enum.uniq(loaded ++ ["unfinished"]), else: loaded
-    {:noreply, assign(socket, visible_heroes: visible, filter: "unfinished", loaded: loaded)}
-  end
+  def handle_event("show-finished", _, socket), do: {:noreply, filter_training(socket, "finished")}
+  def handle_event("show-unfinished", _, socket), do: {:noreply, filter_training(socket, "unfinished")}
 
   def handle_event("load-all", _, socket) do
-    %{assigns: %{filter: filter, current_player: player, all_heroes: all_heroes, loaded: loaded}} = socket
-
-    visible =
-      if filter == "finished",
-        do: Game.list_all_finished_heroes(player.id),
-        else: Game.list_all_unfinished_heroes(player.id)
-
-    all_heroes = Enum.uniq(all_heroes ++ visible)
+    %{filter: filter, current_player: player} = socket.assigns
+    heroes = Game.Heroes.list_solo_training(socket.assigns.current_scope, filter, 100)
+    teams = training_teams(player, filter, 100)
 
     {:noreply,
-     assign(socket,
-       visible_heroes: visible,
-       all_heroes: all_heroes,
-       loaded: Enum.uniq(loaded ++ [filter])
-     )}
+     socket
+     |> assign(
+       all_heroes: Enum.uniq_by(socket.assigns.all_heroes ++ heroes, & &1.id),
+       all_teams: Enum.uniq_by(socket.assigns.all_teams ++ teams, & &1.id),
+       loaded: Enum.uniq(socket.assigns.loaded ++ [filter])
+     )
+     |> filter_training(filter)}
   end
 
   def handle_event("continue", %{"id" => id}, socket) do
@@ -62,7 +44,9 @@ defmodule MobaWeb.V2.DashboardLive do
       {:noreply,
        socket
        |> assign(current_hero: hero, current_player: player)
-       |> push_navigate(to: preview_path(socket, "/training"))}
+       |> push_navigate(
+         to: preview_path(socket, if(socket.assigns.has_active_team, do: "/training?solo=true", else: "/training"))
+       )}
     else
       {:noreply, socket}
     end
@@ -89,46 +73,100 @@ defmodule MobaWeb.V2.DashboardLive do
     end
   end
 
-  def handle_event("tutorial1", _, socket) do
-    {:noreply, TutorialComponent.next_step(socket, 21)}
-  end
+  def handle_event("archive-team", %{"id" => id}, socket) do
+    case Game.TeamRuns.archive(socket.assigns.current_scope, id) do
+      {:ok, team} ->
+        {:noreply,
+         assign(socket,
+           visible_teams: Enum.reject(socket.assigns.visible_teams, &(&1.id == team.id)),
+           all_teams: Enum.reject(socket.assigns.all_teams, &(&1.id == team.id)),
+           hero_count: socket.assigns.hero_count - 1,
+           has_active_team:
+             not is_nil(Game.TeamRuns.active(socket.assigns.current_scope, socket.assigns.current_player.id))
+         )}
 
-  def handle_event("finish-tutorial", _, socket) do
-    {:noreply, TutorialComponent.finish_base(socket)}
-  end
-
-  def handle_info({:tutorial, %{step: step}}, socket) do
-    {:noreply, assign(socket, tutorial_step: step)}
+      {:error, _} ->
+        {:noreply, socket}
+    end
   end
 
   # Private functions
 
   defp socket_init(socket, player) do
-    unfinished = Game.latest_unfinished_heroes(player.id)
-    finished = Game.latest_finished_heroes(player.id)
+    unfinished = Game.Heroes.list_solo_training(socket.assigns.current_scope, "unfinished")
+    finished = Game.Heroes.list_solo_training(socket.assigns.current_scope, "finished")
+    unfinished_teams = training_teams(player, "unfinished", @base_hero_count)
+    finished_teams = training_teams(player, "finished", @base_hero_count)
+    all_teams = unfinished_teams ++ finished_teams
     all_heroes = unfinished ++ finished
     collection_codes = Enum.map(player.hero_collection || [], & &1["code"])
     blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
-    filter = if Enum.any?(unfinished), do: "unfinished", else: "finished"
+    filter = if unfinished != [] || unfinished_teams != [], do: "unfinished", else: "finished"
     visible = if filter == "unfinished", do: unfinished, else: finished
-    loaded = if length(visible) < @base_hero_count, do: [filter], else: []
+    teams = if filter == "unfinished", do: unfinished_teams, else: finished_teams
+    loaded = if length(visible) < @base_hero_count && length(teams) < @base_hero_count, do: [filter], else: []
+    register_to_train = is_nil(player.user_id) && (finished != [] || finished_teams != [])
 
     assign(socket,
       sidebar_code: "base",
-      tutorial_step: player.tutorial_step,
+      register_to_train: register_to_train,
+      guide_training_cta:
+        register_to_train ||
+          (player.user_id != nil && Phoenix.Flash.get(socket.assigns.flash, :training_registered) != nil),
       all_heroes: all_heroes,
+      all_teams: all_teams,
+      visible_teams: teams,
+      has_active_team: unfinished_teams != [],
       visible_heroes: visible,
       filter: filter,
       loaded: loaded,
       blank_collection: blank_collection,
       collection_codes: collection_codes,
-      hero_count: length(all_heroes)
+      hero_count: length(all_heroes) + length(all_teams)
     )
-    |> check_tutorial()
   end
 
-  defp check_tutorial(socket) do
-    TutorialComponent.next_step(socket, 20)
+  defp training_cta_path(%{register_to_train: true}), do: ~p"/users/register?from=training"
+  defp training_cta_path(_assigns), do: ~p"/new"
+
+  defp training_cta_label(true), do: "Register to continue training"
+  defp training_cta_label(false), do: "Start training"
+
+  defp filter_training(socket, filter) do
+    heroes = Enum.filter(socket.assigns.all_heroes, &(is_nil(&1.finished_at) == (filter == "unfinished")))
+    teams = Enum.filter(socket.assigns.all_teams, &(is_nil(&1.finished_at) == (filter == "unfinished")))
+
+    loaded =
+      if length(heroes) < @base_hero_count && length(teams) < @base_hero_count,
+        do: Enum.uniq(socket.assigns.loaded ++ [filter]),
+        else: socket.assigns.loaded
+
+    assign(socket, visible_heroes: heroes, visible_teams: teams, filter: filter, loaded: loaded)
+  end
+
+  defp training_teams(player, filter, limit) do
+    Game.TeamRuns.list_training(Game.TeamRuns.scope(player), player.id, filter, limit)
+    |> Enum.flat_map(fn record ->
+      with {:ok, run} <- Game.TeamRuns.read_state(record) do
+        heroes = Game.TeamTraining.team(run) |> Enum.map(& &1.hero)
+
+        [
+          %{
+            id: record.id,
+            name: record.name,
+            heroes: heroes,
+            league_tier: run.league_tier,
+            reward_mode: run.reward_mode,
+            avg_farm: div(Enum.sum(Enum.map(heroes, &(&1.total_gold_farm + &1.total_xp_farm))), length(heroes)),
+            turns_left: run.turns_left + run.reserve_turns,
+            finished_at: record.finished_at,
+            duration_seconds: record.duration_seconds
+          }
+        ]
+      else
+        {:error, :invalid_snapshot} -> []
+      end
+    end)
   end
 
   @max_pve_tier Moba.max_pve_tier()
@@ -138,22 +176,25 @@ defmodule MobaWeb.V2.DashboardLive do
 
   defp current_quest_description(%{pve_tier: tier}), do: Game.get_quest(tier + 1).description
 
-  defp quest_progression_pct(%{pve_progression: nil}), do: 0
-
-  defp quest_progression_pct(%{pve_tier: tier, pve_progression: progression}) do
-    quest = Game.get_quest(tier + 1)
-    codes = Map.get(progression, quest.field, [])
-    trunc(length(codes) * 100 / quest.goal)
+  defp quest_progression_pct(player) do
+    {count, goal} = quest_progress(player)
+    div(count * 100, goal)
   end
 
-  defp quest_progression_label(%{pve_progression: nil}), do: "0/? Avatars"
-
-  defp quest_progression_label(%{pve_tier: tier, pve_progression: progression}) do
-    quest = Game.get_quest(tier + 1)
-    codes = Map.get(progression, quest.field, [])
-    "#{length(codes)}/#{quest.goal} Avatars"
+  defp quest_progression_label(player) do
+    case quest_progress(player) do
+      {count, 1} -> "#{count}/1 Training runs"
+      {count, goal} -> "#{count}/#{goal} Avatars"
+    end
   end
 
+  defp quest_progress(%{pve_tier: tier, pve_progression: progression}) do
+    quest = Game.get_quest(tier + 1)
+    codes = Map.get(progression || %{}, quest.field, [])
+    {min(length(codes), quest.goal), quest.goal}
+  end
+
+  defp quest_avatars_title(%{pve_tier: tier}) when tier < 2, do: nil
   defp quest_avatars_title(%{pve_progression: nil}), do: "Already trained: none"
 
   defp quest_avatars_title(%{pve_tier: tier, pve_progression: progression}) do

@@ -9,9 +9,7 @@
       content="Train your own custom heroes with MOBA abilities and items to battle against other players in turn-based strategy matches. Online, no downloads, for free."
     />
     <meta name="csrf-token" content={get_csrf_token()} />
-    <.live_title prefix="Browser MOBA – ">
-      {assigns[:page_title] || "Free Strategy Game"}
-    </.live_title>
+    <title>Browser MOBA – Free Strategy Game</title>
     <link rel="stylesheet" href={~p"/css/app.css"} />
     <link rel="icon" type="image/png" href={assigns[:favicon] || ~p"/images/favicon.png?v=helmet-edge-to-edge"} />
     <.analytics conn={assigns[:conn]} />

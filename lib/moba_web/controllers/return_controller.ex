@@ -37,7 +37,6 @@ defmodule MobaWeb.ReturnController do
     conn
     |> assign(:invalid_invitation, invalid?)
     |> assign(:form, Phoenix.Component.to_form(%{}, as: :invitation))
-    |> assign(:page_title, "Welcome back")
     |> render(:show, layout: false)
   end
 

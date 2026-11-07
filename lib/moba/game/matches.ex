@@ -1,16 +1,19 @@
 defmodule Moba.Game.Matches do
   alias Moba.{Game, Repo}
-  alias Game.Schema.Match
+  alias Game.Schema.{Match, Player}
 
   import Ecto.Query
 
   @types %{manual: "manual", auto: "auto"}
+  @win_rate_window 100
 
-  def create!(attrs), do: Match.changeset(%Match{}, attrs) |> Repo.insert!()
+  def create!(attrs), do: Match.changeset(%Match{team_size: Map.get(attrs, :team_size, 3)}, attrs) |> Repo.insert!()
 
   def valid_picks?(match, player, ids) when is_list(ids) do
-    length(ids) == 5 && length(Enum.uniq(ids)) == 5 &&
-      length(selectable_heroes(match, player, ids)) == 5
+    size = Map.get(match, :team_size, 3)
+
+    length(ids) == size && length(Enum.uniq(ids)) == size &&
+      length(selectable_heroes(match, player, ids)) == size
   end
 
   def valid_picks?(_, _, _), do: false
@@ -112,8 +115,68 @@ defmodule Moba.Game.Matches do
 
   def list_matches(%{id: player_id}), do: list_query(player_id) |> Repo.all()
 
+  def win_rate_window, do: @win_rate_window
+
+  def recent_results(%{id: player_id}), do: Map.fetch!(recent_results([player_id]), player_id)
+
+  def recent_results([]), do: %{}
+
+  def recent_results(player_ids) do
+    # Like the Arena counters, count only matches the player actually played as the challenger.
+    recent =
+      from m in Match,
+        join: owner in Player,
+        on: m.player_id == owner.id,
+        where: ^rated_match(),
+        where: owner.id == parent_as(:player).id or owner.user_id == parent_as(:player).user_id,
+        order_by: [desc: m.updated_at, desc: m.id],
+        limit: @win_rate_window,
+        select: %{id: m.id, won: m.winner_id == m.player_id}
+
+    from(p in Player,
+      as: :player,
+      where: p.id in ^player_ids,
+      left_lateral_join: m in subquery(recent),
+      on: true,
+      group_by: p.id,
+      select: {p.id, %{wins: filter(count(m.id), m.won), matches: count(m.id)}}
+    )
+    |> Repo.all()
+    |> Map.new()
+  end
+
+  def expired_matches(before) do
+    eligible = rated_match()
+
+    newer =
+      from m in Match,
+        where: ^eligible,
+        where: m.player_id == parent_as(:expired).player_id,
+        where: fragment("(?, ?) > (?, ?)", m.updated_at, m.id, parent_as(:expired).updated_at, parent_as(:expired).id),
+        order_by: [desc: m.updated_at, desc: m.id],
+        offset: @win_rate_window - 1,
+        limit: 1,
+        select: m.id
+
+    from m in Match,
+      as: :expired,
+      where: is_nil(m.training_team_id) and m.inserted_at <= ^before,
+      where: ^dynamic(not coalesce(^eligible, false) or exists(newer))
+  end
+
+  defp rated_match do
+    dynamic([m], m.team_size == 3 and m.phase == "scored" and is_nil(m.training_team_id) and not is_nil(m.winner_id))
+  end
+
   def match_id_for_player(%{id: player_id}, match_id \\ nil) do
-    query = from(m in Match, where: m.player_id == ^player_id, order_by: [desc: m.id], limit: 1, select: m.id)
+    query =
+      from(m in Match,
+        where: m.player_id == ^player_id and is_nil(m.training_team_id),
+        order_by: [desc: m.id],
+        limit: 1,
+        select: m.id
+      )
+
     query = if match_id, do: from(m in query, where: m.id == ^match_id), else: query
     Repo.one(query)
   end
@@ -124,6 +187,7 @@ defmodule Moba.Game.Matches do
     Repo.one(
       from m in load(),
         where: m.player_id == ^player_id and (is_nil(m.phase) or m.phase != "scored"),
+        where: is_nil(m.training_team_id),
         order_by: [desc: m.id],
         limit: 1
     )
@@ -164,22 +228,23 @@ defmodule Moba.Game.Matches do
 
   defp last_winner(match, battle) do
     battle_attacker_is_match_player = battle.attacker_player_id == match.player_id
+    last_position = match.team_size - 1
 
     cond do
       battle_attacker_is_match_player && battle.winner_player_id == battle.attacker_player_id &&
-          battle.defender_pick_position == 4 ->
+          battle.defender_pick_position == last_position ->
         match.player
 
       battle_attacker_is_match_player && battle.winner_player_id == battle.defender_player_id &&
-          battle.attacker_pick_position == 4 ->
+          battle.attacker_pick_position == last_position ->
         match.opponent
 
       !battle_attacker_is_match_player && battle.winner_player_id == battle.attacker_player_id &&
-          battle.defender_pick_position == 4 ->
+          battle.defender_pick_position == last_position ->
         match.opponent
 
       !battle_attacker_is_match_player && battle.winner_player_id == battle.defender_player_id &&
-          battle.attacker_pick_position == 4 ->
+          battle.attacker_pick_position == last_position ->
         match.player
 
       true ->
@@ -192,11 +257,14 @@ defmodule Moba.Game.Matches do
 
     from(match in load(),
       where: match.player_id == ^player_id,
+      where: is_nil(match.training_team_id),
       where: match.inserted_at > ^season.last_pvp_update_at,
       order_by: [desc: :id]
     )
     |> type_query(type)
   end
+
+  defp load_picks(%{training_team_id: id} = match) when not is_nil(id), do: match
 
   defp load_picks(
          %{player_picks: player_picks, opponent_picks: opponent_picks, generated_picks: generated_picks} = match

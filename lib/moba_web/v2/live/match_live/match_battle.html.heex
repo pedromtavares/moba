@@ -3,7 +3,7 @@ opponent_hero = opponent_pick(@battle, @match)
 player_turn = turn_hero_for(@battle, @match.player)
 opponent_turn = turn_hero_for(@battle, @match.opponent) %>
 <.link
-  navigate={preview_path(assigns, ~p"/battles/#{@battle}")}
+  navigate={Map.get(assigns, :review_path) || preview_path(assigns, ~p"/battles/#{@battle}")}
   id={"battle-review-#{@battle.id}"}
   class="match-battle"
   aria-label={"Review battle #{@index}: #{player_hero.name} vs #{opponent_hero.name}"}

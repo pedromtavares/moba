@@ -141,7 +141,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   def lineup_preview(assigns) do
     ~H"""
     <div class="lineup-preview">
-      <%= for index <- 0..4 do %>
+      <%= for index <- 0..2 do %>
         <%= if hero = Enum.at(@heroes, index) do %>
           <img src={GH.image_url(hero.avatar)} alt={hero.name} title={"#{index + 1}. #{hero.name} · #{hero.avatar.name}"} />
         <% else %>

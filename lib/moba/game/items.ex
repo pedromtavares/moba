@@ -15,6 +15,8 @@ defmodule Moba.Game.Items do
 
   # -------------------------------- PUBLIC API
 
+  def boots?(%{code: code}), do: code in @boots
+
   def buy_item!(hero, nil), do: hero
 
   def buy_item!(hero, item) do
@@ -78,8 +80,7 @@ defmodule Moba.Game.Items do
     end
   end
 
-  def item_sell_price(%{finished_at: finished}, item) when not is_nil(finished), do: item_price(item)
-  def item_sell_price(_, item), do: trunc(item_price(item) * 0.9)
+  def item_sell_price(_hero, item), do: item_price(item)
 
   def previous_item_rarity(item) do
     cond do

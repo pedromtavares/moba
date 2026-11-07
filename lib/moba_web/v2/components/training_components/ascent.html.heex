@@ -1,47 +1,83 @@
 <section
-  id="training-ascent"
+  id={GH.dom_id(@id_prefix, "training-ascent")}
   style="--ascent-scene: url(/images/tutorial/arena-of-ascension.jpg)"
   class={["training-ascent", @challenge_ready && "is-ready", @challenge_stage && "is-challenge-stage"]}
   data-league={@next}
   data-goal={@goal}
-  aria-labelledby="training-ascent-title"
+  aria-labelledby={GH.dom_id(@id_prefix, "training-ascent-title")}
 >
   <div class="ascent-heading">
     <div>
-      <span class="ascent-eyebrow">Training · League ascent</span>
-      <h2 id="training-ascent-title">Road to <span>{short_league(@goal)}</span></h2>
+      <div class="ascent-kicker">
+        <span class="ascent-eyebrow">Training · League ascent</span>
+        <.link
+          :if={!@history && is_nil(@current_player.user_id)}
+          id={GH.dom_id(@id_prefix, "training-guest-sign-in")}
+          href="/users/log_in"
+          class="ascent-guest-sign-in"
+        >
+          <.icon name="game-sign-in" />
+          <span>Already registered? <strong>Sign in</strong></span>
+        </.link>
+      </div>
+      <h2 id={GH.dom_id(@id_prefix, "training-ascent-title")}>Road to <span>{short_league(@goal)}</span></h2>
     </div>
-    <div id={if @challenge_ready, do: "league-challenge-intro"} class="ascent-objective">
+    <div id={if @challenge_ready, do: GH.dom_id(@id_prefix, "league-challenge-intro")} class="ascent-objective">
       <div>
-        <p id="training-ascent-status" role="status">{ascent_status(@current_hero, @next, @goal, @battle_pending)}</p>
+        <p id={GH.dom_id(@id_prefix, "training-ascent-status")} class="ascent-status" role="status">
+          <.ascent_status
+            hero={@current_hero}
+            next={@next}
+            goal={@goal}
+            pending={@battle_pending}
+            boss_ready={@boss_ready}
+            team_mode={@team_mode}
+          />
+        </p>
         <p :if={@challenge_ready} class="ascent-rules">
-          Win <strong>{Moba.Game.max_league_step_for(@current_hero.league_tier)} battles</strong> in a row to rank up.
+          <%= if @team_mode do %>
+            Win a <strong>3v3 team fight</strong> to rank up.
+          <% else %>
+            Win <strong>{Moba.Game.max_league_step_for(@current_hero.league_tier)} battles</strong> in a row to rank up.
+          <% end %>
         </p>
         <p
-          :if={!@battle_pending && @current_hero.pve_state == "alive" && @current_hero.pve_current_turns > 0}
+          :if={
+            !@team_mode && !@battle_pending && @current_hero.pve_state == "alive" && @current_hero.pve_current_turns > 0
+          }
           class="ascent-rules"
         >
           Battle, meditate or mine to advance.
         </p>
       </div>
-      <button
-        :if={@challenge_ready && @show_controls && !@history}
-        id="start-league-challenge"
-        class="ascent-challenge"
-        data-game-fullscreen phx-click="league"
-        phx-hook="Loading"
-        loading="Starting..."
-      >
-        <span class="loading-text">
-          <.icon name="game-trophy" /> Challenge {short_league(@next)} <span aria-hidden="true">→</span>
-        </span>
-      </button>
+      <div :if={@challenge_ready && @show_controls && !@history} class="ascent-challenge-action">
+        <button
+          id={GH.dom_id(@id_prefix, "start-league-challenge")}
+          class="ascent-challenge"
+          disabled={@skill_guidance != nil}
+          aria-describedby={if @skill_guidance, do: GH.dom_id(@id_prefix, "league-skill-warning")}
+          data-game-fullscreen
+          phx-click="league"
+          phx-value-hero_id={@hero_id}
+          phx-hook="Loading"
+          loading="Starting..."
+        >
+          <span class="loading-text">
+            <.icon name="game-trophy" /> Challenge {short_league(@next)} <span aria-hidden="true">→</span>
+          </span>
+        </button>
+        <.league_skill_warning
+          :if={@skill_guidance}
+          id={GH.dom_id(@id_prefix, "league-skill-warning")}
+          action={@skill_guidance}
+        />
+      </div>
     </div>
   </div>
   <ol class="ascent-track" aria-label="League progression">
     <li
       :for={tier <- 0..@goal}
-      id={if tier == @current_hero.league_tier, do: "current-training-rank"}
+      id={if tier == @current_hero.league_tier, do: GH.dom_id(@id_prefix, "current-training-rank")}
       class={[
         "ascent-rank",
         tier < @current_hero.league_tier && "is-complete",
@@ -67,20 +103,29 @@
   </ol>
   <div class="ascent-utilities">
     <div class="ascent-actions">
+      {render_slot(@history_controls)}
       <.link
         :if={@history}
-        id="history-return-training"
+        id={GH.dom_id(@id_prefix, "history-return-training")}
         navigate={preview_path(assigns, "/training")}
         class="ascent-tool"
       >
         <.icon name="game-back" /> Return to Training
       </.link>
-      <.link :if={!@history} id="training-battle-log" navigate={preview_path(assigns, "/battles")} class="ascent-tool">
+      <.link
+        :if={!@history && !@team_mode}
+        id={GH.dom_id(@id_prefix, "training-battle-log")}
+        navigate={preview_path(assigns, "/battles")}
+        class="ascent-tool"
+      >
         <.icon name="game-battle-log" /> Battle Log
       </.link>
       <button
-        :if={@show_controls && @current_hero.pve_current_turns > 0 && @current_hero.refresh_targets_count > 0}
-        id="training-refresh-targets"
+        :if={
+          !@team_mode && @show_controls && @current_hero.pve_current_turns > 0 &&
+            @current_hero.refresh_targets_count > 0
+        }
+        id={GH.dom_id(@id_prefix, "training-refresh-targets")}
         class="ascent-tool"
         phx-click="refresh-targets"
         title={"#{@current_hero.refresh_targets_count} refreshes remaining"}
@@ -88,8 +133,9 @@
         <.icon name="game-refresh" /> Refresh Targets <small>{@current_hero.refresh_targets_count}</small>
       </button>
     </div>
+    <div :if={@reward_controls != []} class="team-reward-controls">{render_slot(@reward_controls)}</div>
     <div
-      :if={@show_controls && expert_hero?(@current_hero) && @current_hero.pve_current_turns > 0}
+      :if={!@team_mode && @show_controls && expert_hero?(@current_hero) && @current_hero.pve_current_turns > 0}
       class="ascent-switch"
     >
       <.input
@@ -98,21 +144,34 @@
         value={@current_player.preferences.show_farm_tabs}
         role="switch"
         class="ascent-checkbox"
-        id="show-farm-tabs"
+        id={GH.dom_id(@id_prefix, "show-farm-tabs")}
         phx-click="show-farm-tabs"
         checked={@current_player.preferences.show_farm_tabs}
         label="Show farm tabs"
       />
     </div>
+    <p
+      :if={!@history && !@battle_pending && @current_hero.pve_state == "alive" && @current_hero.pve_current_turns > 0}
+      id={GH.dom_id(@id_prefix, "training-controls-hint")}
+      class="ascent-controls-hint"
+    >
+      Use arrow keys <kbd>←</kbd> <kbd>→</kbd> to move between targets and <kbd>SPACE</kbd> to start a battle
+    </p>
     <div class="ascent-farm">
       <span :if={expert_hero?(@current_hero)} class="ascent-time" title="Time since creation">
         <.icon name="game-clock" /><strong>{GH.minutes_label(elapsed_time(@current_hero), @preview)}</strong> min
       </span>
-      <span class="ascent-xp" title={@current_hero.total_xp_farm}>
-        <strong>{GH.farming_amount_label(@current_hero.total_xp_farm)}</strong> XP farm
-      </span>
-      <span class="ascent-gold" title={@current_hero.total_gold_farm}>
-        <strong>{GH.farming_amount_label(@current_hero.total_gold_farm)}</strong> Gold farm
+      <span class="ascent-total">
+        <span data-toggle="tooltip" title={@farm_breakdown}>
+          <strong>{GH.farming_amount_label(div(@farm_total, @farm_size))}</strong> {if @team_mode,
+            do: "Avg Farm",
+            else: "Total farm"}
+        </span>
+        <.perfect_indicator
+          :if={@perfect_run}
+          id={GH.dom_id(@id_prefix, "training-perfect-run")}
+          finished={not is_nil(@current_hero.finished_at)}
+        />
       </span>
     </div>
   </div>

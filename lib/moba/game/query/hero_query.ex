@@ -67,6 +67,8 @@ defmodule Moba.Game.Query.HeroQuery do
     from(hero in base, limit: ^limit, order_by: [desc: [hero.inserted_at]])
   end
 
+  def solo(query \\ Hero), do: from(h in query, where: is_nil(h.training_team_id))
+
   def finished(query) do
     from(hero in query, where: not is_nil(hero.finished_at))
   end
@@ -180,7 +182,7 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def pve_ranked(query \\ Hero) do
-    from hero in non_bots(query),
+    from hero in solo(non_bots(query)),
       where: not is_nil(hero.pve_ranking),
       order_by: [asc: hero.pve_ranking]
   end

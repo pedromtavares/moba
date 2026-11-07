@@ -33,6 +33,22 @@ defmodule Moba.Game.Builds do
 
   def skill_build_for(role, index), do: skill_builds_for(role) |> Enum.at(index)
 
+  @doc "Default team-training build and item priorities."
+  def training_build_for(avatar, skills \\ nil) do
+    {_, items, _} = lists_for(avatar.code) |> hd()
+    {codes, name} = lists_for(avatar.role) |> hd()
+
+    skills =
+      if skills do
+        index = Map.new(skills, &{{&1.code, &1.level}, &1})
+        Enum.map(codes, &Map.fetch!(index, {&1, 1}))
+      else
+        Enum.map(codes, &Game.get_current_skill!/1)
+      end
+
+    %{skills: skills, items: items, name: name}
+  end
+
   # --------------------------------
 
   # random skill set depending on difficulty, the higher the difficulty the less random
@@ -169,16 +185,16 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "tank" do
     [
       {
-        ["empower", "double_edge", "counter_helix"],
-        "Balanced Tank"
-      },
-      {
         ["double_edge", "decay", "counter_helix"],
         "Regenerator"
       },
       {
-        ["empower", "double_edge", "shuriken_toss"],
-        "Power Carry"
+        ["shuriken_toss", "decay", "jinada"],
+        "Ninja Carry"
+      },
+      {
+        ["echo_stomp", "feast", "jinada"],
+        "Stomper"
       }
     ]
   end
@@ -186,12 +202,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "bruiser" do
     [
       {
-        ["empower", "double_edge", "decay"],
-        "Balanced Bruiser"
+        ["empower", "decay", "fury_swipes"],
+        "Fury Bruiser"
       },
       {
-        ["double_edge", "decay", "fiery_soul"],
-        "Versatile Bruiser"
+        ["shuriken_toss", "jinada", "feast"],
+        "Ninja Bruiser"
       },
       {
         ["empower", "double_edge", "fiery_soul"],
@@ -203,12 +219,12 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "carry" do
     [
       {
-        ["blink_strike", "decay", "fiery_soul"],
+        ["blink_strike", "decay", "feast"],
         "Blink Striker"
       },
       {
-        ["blade_fury", "shuriken_toss", "fiery_soul"],
-        "Power Carry"
+        ["shuriken_toss", "decay", "jinada"],
+        "Ninja Carry"
       },
       {
         ["empower", "blade_fury", "fiery_soul"],
@@ -220,16 +236,16 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "nuker" do
     [
       {
-        ["maledict", "lightning_bolt", "death_pulse"],
-        "Versatile Nuker"
+        ["lightning_bolt", "death_pulse", "fiery_soul"],
+        "Destroyer"
       },
       {
-        ["mana_burn", "maledict", "lightning_bolt"],
-        "Extreme Nuker"
+        ["purifying_flames", "maledict", "lightning_bolt"],
+        "Purifier"
       },
       {
-        ["empower", "shuriken_toss", "mana_burn"],
-        "Magic Ninja"
+        ["mana_shield", "death_pulse", "phase_shift"],
+        "Undying"
       }
     ]
   end
@@ -237,16 +253,16 @@ defmodule Moba.Game.Builds do
   defp lists_for(code) when code == "support" do
     [
       {
-        ["blade_fury", "shuriken_toss", "fiery_soul"],
-        "Furious Blade"
+        ["empower", "double_edge", "fiery_soul"],
+        "Full Power"
       },
       {
-        ["mana_burn", "maledict", "lightning_bolt"],
-        "Extreme Nuker"
+        ["purifying_flames", "maledict", "lightning_bolt"],
+        "Purifier"
       },
       {
-        ["empower", "double_edge", "lightning_bolt"],
-        "Lethal Support"
+        ["shuriken_toss", "decay", "jinada"],
+        "Ninja Carry"
       }
     ]
   end

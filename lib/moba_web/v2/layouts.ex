@@ -113,6 +113,7 @@ defmodule MobaWeb.V2.Layouts do
   attr :flash, :map, required: true
   attr :current_player, :map, default: nil
   attr :current_hero, :map, default: nil
+  attr :current_scope, :map, default: nil
   attr :sidebar_code, :string, default: nil
   attr :hide_footer, :boolean, default: false
   attr :hide_sidebar, :boolean, default: false

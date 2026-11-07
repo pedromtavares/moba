@@ -3,13 +3,23 @@ defmodule MobaWeb.V2.Components.ManualComponents do
 
   import MobaWeb.CoreComponents, only: [icon: 1]
   import Phoenix.HTML, only: [raw: 1]
-  alias MobaWeb.V2.Components.{GameHelpers, TooltipComponents}
+  alias MobaWeb.V2.Components.{GameHelpers, ItemTooltip, Shop, TooltipComponents}
 
   attr :avatars, :list, required: true
 
   def avatar_reference(assigns) do
     ~H"""
     <div class="manual-avatar-stage">
+      <fieldset class="manual-compact-view manual-avatar-view" aria-label="Avatar details">
+        <label>
+          <input type="radio" name="manual-avatar-view" id="manual-avatar-view-stats" checked />
+          <span>Stats</span>
+        </label>
+        <label>
+          <input type="radio" name="manual-avatar-view" id="manual-avatar-view-ultimate" />
+          <span>Ultimate</span>
+        </label>
+      </fieldset>
       <article
         :for={{avatar, index} <- Enum.with_index(@avatars)}
         data-manual-detail="avatar"
@@ -38,10 +48,6 @@ defmodule MobaWeb.V2.Components.ManualComponents do
       </article>
     </div>
     <div class="manual-roster">
-      <header>
-        <h3>Choose an avatar</h3>
-        <span>{length(@avatars)} avatars</span>
-      </header>
       <div class="manual-avatar-grid" role="group" aria-label="Avatar reference roster">
         <button
           :for={{avatar, index} <- Enum.with_index(@avatars)}
@@ -89,6 +95,55 @@ defmodule MobaWeb.V2.Components.ManualComponents do
           hidden={index != 0}
         >
           <.ranked_skill levels={levels} id={"manual-skill-ranks-#{skill.code}"} />
+        </section>
+      </aside>
+    </div>
+    """
+  end
+
+  attr :items, :list, required: true
+
+  def item_reference(assigns) do
+    shelves = Enum.map(Shop.categories(), &{&1, Shop.rarity_filter(assigns.items, &1)})
+    first_item = Enum.find_value(shelves, fn {_rarity, items} -> List.first(items) end)
+    assigns = assign(assigns, shelves: shelves, first_item: first_item)
+
+    ~H"""
+    <fieldset class="manual-compact-view manual-item-view" aria-label="Item catalog view">
+      <label>
+        <input type="radio" name="manual-item-view" id="manual-item-view-list" checked />
+        <span>Browse</span>
+      </label>
+      <label>
+        <input type="radio" name="manual-item-view" id="manual-item-view-details" />
+        <span>Details</span>
+      </label>
+    </fieldset>
+    <div class="shop-workspace">
+      <nav class="shop-shelves" aria-label="Item rarities">
+        <Shop.shelf
+          :for={{rarity, items} <- @shelves}
+          rarity={rarity}
+          items={items}
+          selected_category={@first_item && @first_item.rarity}
+          selected_item={@first_item}
+          id_prefix="library"
+          catalog
+        />
+      </nav>
+      <aside class="shop-detail" aria-label="Selected item details">
+        <section
+          :for={item <- @items}
+          id={"library-item-detail-#{item.code}"}
+          data-manual-detail="item"
+          data-code={item.code}
+          data-rarity={item.rarity}
+          hidden={item != @first_item}
+        >
+          <Shop.item_showcase item={item} id_prefix={"library-#{item.code}"} />
+          <div class="shop-tooltip-readout">
+            <ItemTooltip.card item={item} show_heading={false} />
+          </div>
         </section>
       </aside>
     </div>

@@ -5,6 +5,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync('assets/js/hooks.js', 'utf8')
   .replace(/^import .*;\n/gm, '')
+  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|ManualCodex) = .*;\n/gm, '')
   .replace('export default Hooks;', 'module.exports = Hooks.AttackButton;');
 
 function environment() {
@@ -13,7 +14,7 @@ function environment() {
   const sent = [];
   const dialogs = [];
   const button = {
-    disabled: false, visible: true, dataset: {hero: '42'},
+    closest: () => null, disabled: false, visible: true, dataset: {hero: '42'},
     attributes: {'data-skill': '7', 'data-item': '8'},
     addEventListener: (event, handler) => { clicks[event] = handler; },
     getClientRects: () => button.visible ? [{}] : [],

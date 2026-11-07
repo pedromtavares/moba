@@ -1,3 +1,9 @@
+/* Let content reflow inside the game and contain stray viewport overflow. */
+html:has(.game-page) { overflow-x: clip; }
+body:has(.game-page) #navigation { overflow-x: hidden; }
+
+.game-page pre { white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: hidden; }
+
 /* Page content stays open; portraits, hero cards and dialogs keep their frames. */
 .game-page {
   * { scrollbar-width: thin; scrollbar-color: #695d4b #0c111a; }
@@ -112,9 +118,9 @@
   .text-dark { color: #bcb5a8 !important; }
   .info-box { border: 0 !important; border-right: 1px solid var(--base-line) !important; }
   .info-box:last-child { border-right: 0 !important; }
-  #hero-bar, #shop { background: #0c111af5 !important; border-image: none; border-color: #baa98a55; box-shadow: 0 -6px 30px #00000040; }
-  #hero-bar { border-top: 1px solid #baa98a55; }
-  #shop .card-box { border: 0; }
+  :is(#hero-bar, .hero-bar), :is(#shop, .cinematic-shop) { background: #0c111af5 !important; border-image: none; border-color: #baa98a55; box-shadow: 0 -6px 30px #00000040; }
+  :is(#hero-bar, .hero-bar) { border-top: 1px solid #baa98a55; }
+  :is(#shop, .cinematic-shop) .card-box { border: 0; }
   .modal-content .table { background: transparent; }
   .account-pages { margin-top: clamp(24px, 8vh, 88px) !important; padding-top: 24px; }
   .account-pages h3 { font-family: "landing-rpg", Georgia, serif; color: #e9d4af; letter-spacing: .05em; }
@@ -145,7 +151,7 @@ body:has(.game-page .tavern) #topnav a[href$="/tavern"] {
     .nav-tabs .nav-link { padding: 10px 6px; font-size: 13px; }
     .nav-tabs .nav-link .ui-2x { font-size: 1.4em; }
     .account-pages { padding-top: 20px; }
-    #hero-bar .btn { min-height: 30px; }
+    :is(#hero-bar, .hero-bar) .btn { min-height: 30px; }
     .table .btn { padding-left: 6px; padding-right: 6px; }
     #pvp-progression .mt-4.d-flex { flex-direction: column; gap: 20px; }
     #pvp-progression .mt-4.d-flex > .col { flex: 0 0 auto; width: 100%; max-width: 100%; padding: 0; }

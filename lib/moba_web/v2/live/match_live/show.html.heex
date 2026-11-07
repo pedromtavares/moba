@@ -1,4 +1,5 @@
 <Layouts.app
+  current_scope={@current_scope}
   preview={@preview}
   flash={@flash}
   current_player={@current_player}
@@ -7,14 +8,22 @@
   hide_footer={@hide_footer}
 >
   <%= if @preview do %>
-    <.modern {assigns} />
+    <%= if is_nil(@match.phase) do %>
+      <.preparation {assigns} />
+    <% else %>
+      <.modern {assigns} />
+    <% end %>
   <% else %>
     <div class="matches">
       <div class="row mt-2">
         <div class="col-4">
           <div class="card mb-0" id="player-card">
             <h2 class="text-center f-rpg">
-              <.link navigate={preview_path(assigns, ~p"/player/#{@match.player}")} class="text-white">
+              <.link
+                navigate={preview_path(assigns, ~p"/player/#{@match.player}")}
+                data-profile-username={Moba.Utils.username(@match.player)}
+                class="text-white"
+              >
                 {username(@match.player)}
               </.link>
             </h2>
@@ -66,21 +75,26 @@
                     <% @current_player.id == @match.player_id -> %>
                       <.hud_notice
                         id="match-pick-status"
-                        title={if length(@picked_heroes) >= 5, do: "Lineup ready", else: "Choose your lineup"}
+                        title={
+                          if length(@picked_heroes) >= @match.team_size, do: "Lineup ready", else: "Choose your lineup"
+                        }
                       >
-                        <strong class="hud-notice-counter">{length(@picked_heroes)}<small> / 5 heroes</small></strong>
+                        <strong class="hud-notice-counter">
+                          {length(@picked_heroes)}<small> / {@match.team_size} heroes</small>
+                        </strong>
                         <:actions>
                           <button
-                            :if={length(@picked_heroes) >= 5}
+                            :if={length(@picked_heroes) >= @match.team_size}
                             type="button"
                             class="btn battle-primary"
-                            data-game-fullscreen phx-click="start"
+                            data-game-fullscreen
+                            phx-click="start"
                             id="start-match-button"
                           >
                             Start match <span aria-hidden="true">→</span>
                           </button>
                           <button
-                            :if={length(@picked_heroes) < 5 && @latest_match}
+                            :if={length(@picked_heroes) < @match.team_size && @latest_match}
                             type="button"
                             class="btn base-secondary"
                             phx-click="repeat"
@@ -108,18 +122,21 @@
                       <% end %>
                     </h2>
                   <% else %>
-                    <%= if length(@picked_heroes) >= 5 && @current_player.id == @match.player_id do %>
+                    <%= if length(@picked_heroes) >= @match.team_size && @current_player.id == @match.player_id do %>
                       <button
                         type="button"
                         class="btn text-center btn-lg btn-block btn-primary dark-button margin-auto shadow-fx"
-                        data-game-fullscreen phx-click="start"
+                        data-game-fullscreen
+                        phx-click="start"
                         id="start-match-button"
                       >
-                        <span class="loading-text"><i class="ui-icon ui-play mr-1"></i> Lock Picks and Start Match</span>
+                        <span class="loading-text">
+                          <i class="ui-icon ui-play mr-1"></i> Lock Picks and Start Match
+                        </span>
                       </button>
                     <% else %>
                       <h2 class="text-center text-white">
-                        Pick 5 Heroes
+                        Pick {@match.team_size} Heroes
                         <i
                           :if={@latest_match}
                           class="ui-icon ui-repeat text-right ml-4 action-cursor"
@@ -157,7 +174,9 @@
                       class={["nav-link px-2 py-1", @hero_tab == "trained" && "active"]}
                       id="trained-heroes-button"
                     >
-                      <span class="d-inline-block loading-text"><i class="ui-icon ui-sword mr-1"></i>Trained Heroes</span>
+                      <span class="d-inline-block loading-text">
+                        <i class="ui-icon ui-sword mr-1"></i>Trained Heroes
+                      </span>
                     </a>
                   </li>
                   <li class="nav-item">
@@ -168,7 +187,9 @@
                       class={["nav-link px-2 py-1", @hero_tab == "available" && "active"]}
                       id="available-heroes-button"
                     >
-                      <span class="d-inline-block loading-text"><i class="ui-icon ui-dice mr-1"></i>Available Heroes</span>
+                      <span class="d-inline-block loading-text">
+                        <i class="ui-icon ui-dice mr-1"></i>Available Heroes
+                      </span>
                     </a>
                   </li>
                 </ul>
@@ -182,7 +203,10 @@
                       description="Pick heroes individually or build a team."
                     >
                       <:actions>
-                        <.link navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")} class="btn base-secondary">
+                        <.link
+                          navigate={preview_path(assigns, ~p"/arena/edit?#{[match_id: @match.id]}")}
+                          class="btn base-secondary"
+                        >
                           Manage teams <span aria-hidden="true">→</span>
                         </.link>
                       </:actions>
@@ -246,7 +270,8 @@
                           </button>
                           <button
                             :if={
-                              !Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id) && length(@picked_heroes) < 5
+                              !Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id) &&
+                                length(@picked_heroes) < @match.team_size
                             }
                             type="button"
                             class="btn btn-secondary dark-button text-white btn-block pick-button"
@@ -282,7 +307,8 @@
                           </button>
                           <button
                             :if={
-                              !Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id) && length(@picked_heroes) < 5
+                              !Enum.member?(Enum.map(@picked_heroes, & &1.id), hero.id) &&
+                                length(@picked_heroes) < @match.team_size
                             }
                             type="button"
                             class="btn btn-secondary dark-button text-white btn-block pick-button"
@@ -330,7 +356,11 @@
         <div class="col-4">
           <div class="card mb-0">
             <h2 class="text-center f-rpg">
-              <.link navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")} class="text-white">
+              <.link
+                navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")}
+                data-profile-username={Moba.Utils.username(@match.opponent)}
+                class="text-white"
+              >
                 {username(@match.opponent)}
               </.link>
             </h2>
@@ -344,5 +374,4 @@
       </div>
     </div>
   <% end %>
-  <.live_component :if={!@preview} module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} preview={@preview} id="tutorial-step" />
 </Layouts.app>

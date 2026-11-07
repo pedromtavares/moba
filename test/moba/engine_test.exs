@@ -1,25 +1,21 @@
 defmodule Moba.EngineTest do
   use Moba.DataCase, async: true
 
-  setup do
+  setup tags do
     attrs = %{pvp_points: 50, pve_tier: 1}
 
-    base_hero = create_base_hero(attrs)
-    weak_hero = create_base_hero(attrs, create_player!(attrs), weak_avatar())
-
-    strong_hero = create_base_hero(attrs, create_player!(attrs), strong_avatar())
-
-    alternate_hero = create_base_hero(attrs, create_player!(attrs), strong_avatar())
-
-    %{
-      weak_hero: weak_hero,
-      strong_hero: strong_hero,
-      base_hero: base_hero,
-      alternate_hero: alternate_hero
+    factories = %{
+      base_hero: fn -> create_combat_hero(attrs) end,
+      weak_hero: fn -> create_combat_hero(attrs, create_player!(attrs), weak_avatar()) end,
+      strong_hero: fn -> create_combat_hero(attrs, create_player!(attrs), strong_avatar()) end,
+      alternate_hero: fn -> create_combat_hero(attrs, create_player!(attrs), strong_avatar()) end
     }
+
+    Map.new(tags.heroes, &{&1, Map.fetch!(factories, &1).()})
   end
 
   describe "battles" do
+    @describetag heroes: [:strong_hero, :alternate_hero]
     test "optional battle lookup loads existing battles and returns nil for missing or invalid IDs", %{
       strong_hero: attacker,
       alternate_hero: defender
@@ -60,6 +56,8 @@ defmodule Moba.EngineTest do
   end
 
   describe "pve" do
+    @describetag heroes: [:strong_hero, :weak_hero]
+    @tag heroes: [:base_hero, :alternate_hero]
     test "not enough battles", %{base_hero: attacker, alternate_hero: defender} do
       updated = Game.update_hero!(attacker, %{pve_current_turns: 0})
       assert {:error, _} = Game.start_pve_battle!(%{attacker: updated, defender: defender, difficulty: "weak"})
@@ -123,6 +121,7 @@ defmodule Moba.EngineTest do
   end
 
   describe "league" do
+    @describetag heroes: [:strong_hero]
     test "default case", %{strong_hero: attacker} do
       battle =
         Game.start_league_battle!(attacker)
@@ -145,6 +144,7 @@ defmodule Moba.EngineTest do
       assert Engine.pending_battle(attacker.id)
     end
 
+    @tag heroes: [:weak_hero]
     test "defender wins", %{weak_hero: attacker} do
       battle =
         Game.start_league_battle!(attacker)
@@ -188,6 +188,7 @@ defmodule Moba.EngineTest do
       assert with_boss.league_tier == master_league_tier + 1
     end
 
+    @tag heroes: [:weak_hero]
     test "attacker loses to boss", %{weak_hero: hero} do
       master_league_tier = Moba.master_league_tier()
 
@@ -226,6 +227,7 @@ defmodule Moba.EngineTest do
   end
 
   describe "pvp duel" do
+    @describetag heroes: [:strong_hero, :weak_hero]
     test "full cycle", %{strong_hero: attacker, weak_hero: defender} do
       duel = Game.create_duel!(attacker.player, defender.player)
       Game.continue_duel!(duel, attacker)
@@ -261,6 +263,7 @@ defmodule Moba.EngineTest do
   end
 
   describe "same hero battle" do
+    @describetag heroes: [:strong_hero, :weak_hero]
     test "attacker wins", %{strong_hero: strong, weak_hero: weak} do
       match = Game.Matches.create!(%{type: "manual", player_id: strong.player_id, opponent_id: weak.player_id})
 
@@ -305,6 +308,7 @@ defmodule Moba.EngineTest do
   end
 
   describe "core" do
+    @describetag heroes: [:strong_hero, :alternate_hero]
     test "#begin_battle!", %{strong_hero: attacker, alternate_hero: defender} do
       battle =
         build_basic_battle(attacker, Game.update_hero!(defender, %{bot_difficulty: "test"})) |> Engine.begin_battle!()
@@ -386,9 +390,13 @@ defmodule Moba.EngineTest do
       assert previous_turn.attacker.cooldowns == %{"tranquil_boots" => 2}
     end
 
-    test "#auto_finish_battle!", %{strong_hero: attacker, alternate_hero: defender} do
+    @tag heroes: [:strong_hero, :weak_hero]
+    test "#auto_finish_battle!", %{strong_hero: attacker, weak_hero: defender} do
       battle = create_basic_battle(attacker, defender) |> Engine.auto_finish_battle!()
       assert battle.finished
+      assert battle.winner_id == attacker.id
+      assert Engine.get_battle!(battle.id).finished
+      assert length(battle.turns) < 10
     end
 
     test "#build_turn", %{strong_hero: attacker, alternate_hero: defender} do
@@ -421,38 +429,37 @@ defmodule Moba.EngineTest do
   end
 
   describe "simulations" do
-    test "skill and item effects dont break" do
+    @describetag heroes: []
+    test "every avatar completes a short persisted battle with skills and items" do
       avatars = Game.list_avatars()
+      skills = base_skills()
+      items = [base_item(), Game.get_item_by_code!("dagon")]
 
-      skills =
-        Game.Query.SkillQuery.normals()
-        |> Game.Query.SkillQuery.canon()
-        |> Game.Query.SkillQuery.with_level(1)
-        |> Repo.all()
+      attrs =
+        Map.merge(Game.item_attributes(items), %{
+          name: "Fighter",
+          total_hp: 80,
+          total_mp: 200,
+          atk: 200,
+          armor: 0,
+          power: 0
+        })
 
-      items = Game.shop_list()
-
-      Enum.reduce(avatars, [], fn a1, acc ->
-        # Logger.info("\n\n-----------Battle ##{a1.id}: #{a1.ultimate_code}\n\n")
-        a2 = avatars |> Enum.shuffle() |> List.first()
-
-        a1 = %{a1 | atk: 1, total_mp: 200}
-        a2 = %{a2 | atk: 1, total_mp: 200}
-
-        acc = if Enum.count(acc) >= Enum.count(skills), do: [], else: acc
-        s1 = Enum.shuffle(skills) |> Enum.reject(fn skill -> Enum.member?(acc, skill) end) |> Enum.take(3)
-        acc = acc ++ s1
-
-        acc = if Enum.count(acc) >= Enum.count(skills), do: [], else: acc
-        s2 = Enum.shuffle(skills) |> Enum.reject(fn skill -> Enum.member?(acc, skill) end) |> Enum.take(3)
-        acc = acc ++ s2
-
-        attacker = Game.create_hero!(%{name: "attacker"}, nil, a1, s1) |> equip_random_items(items)
-        defender = Game.create_hero!(%{name: "defender"}, nil, a2, s2) |> equip_random_items(items)
-        assert create_basic_battle(attacker, defender) |> Engine.auto_finish_battle!()
-
-        acc
-      end)
+      # Broad combinations and proc outcomes belong to the pure combat matrices.
+      # This test covers real loadout snapshots, turn persistence and completion for every avatar.
+      for {avatar, index} <- Enum.with_index(avatars) do
+        :rand.seed(:exsss, {1, 2, index + 1})
+        opponent = Enum.at(avatars, rem(index + 1, length(avatars)))
+        attacker = Game.Heroes.create!(attrs, nil, avatar, skills, items) |> then(&Game.get_hero!(&1.id))
+        defender = Game.Heroes.create!(attrs, nil, opponent, skills, items) |> then(&Game.get_hero!(&1.id))
+        battle = create_basic_battle(attacker, defender) |> Engine.auto_finish_battle!()
+        assert battle.finished
+        assert battle.turns != []
+        assert length(battle.turns) < 20
+        assert Engine.get_battle!(battle.id).finished
+        assert Enum.any?(battle.turns, & &1.skill_code)
+        assert Enum.any?(battle.turns, & &1.item_code)
+      end
     end
   end
 end

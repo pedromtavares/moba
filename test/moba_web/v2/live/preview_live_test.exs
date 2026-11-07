@@ -13,7 +13,7 @@ defmodule MobaWeb.V2.PreviewLiveTest do
 
     for {path, selector} <- [
           {"/base", "#base-page.base-page"},
-          {"/invoke", "#invoke-modern"},
+          {"/new", "#invoke-modern"},
           {"/training", ".training"},
           {"/battles", "#battle-history"},
           {"/arena", ".arena-cinematic"},
@@ -35,7 +35,7 @@ defmodule MobaWeb.V2.PreviewLiveTest do
         end
       end
 
-      refute has_element?(view, "a[href^='/new/'], form[action^='/new/']")
+      refute has_element?(view, "a[href^='/new/base'], form[action^='/new/start']")
       assert has_element?(view, "#game-sidebar a[href='/base']")
       assert has_element?(view, "#game-sidebar a[href='/arena']")
       assert conn |> get("/new" <> path) |> redirected_to(301) == path
@@ -60,7 +60,7 @@ defmodule MobaWeb.V2.PreviewLiveTest do
     {:ok, view, _} =
       view |> element(".sidebar-nav a[href='/base']") |> render_click() |> follow_redirect(conn, "/base")
 
-    assert has_element?(view, "#game-page #base-invoke-btn[href='/invoke']")
+    assert has_element?(view, "#game-page #base-invoke-btn[href='/new']")
     view |> element("#visible-hero-#{hero.id} [phx-click=continue]") |> render_click()
     assert_redirect(view, "/training")
   end
@@ -90,7 +90,16 @@ defmodule MobaWeb.V2.PreviewLiveTest do
         ] do
       {:ok, view, _} = live(conn, path)
       assert has_element?(view, "#game-page #{selector}")
-      assert has_element?(view, if(selector == "#battle-page", do: "#combat-stage", else: ".hero-card"))
+
+      assert has_element?(
+               view,
+               cond do
+                 selector == "#battle-page" -> "#combat-stage"
+                 selector == "#picks-card" -> ".arena-preparation-cards"
+                 true -> ".hero-card"
+               end
+             )
+
       refute has_element?(view, "button.game-stat, .hero-stats button, .battle-stat-group button")
 
       if selector == "#battle-page" do
@@ -102,7 +111,6 @@ defmodule MobaWeb.V2.PreviewLiveTest do
 
   test "guest creation submits and redirects through canonical routes", %{conn: conn} do
     {:ok, view, _} = live(conn, "/start")
-    view |> render_click("pick-avatar", %{"id" => base_avatar().id})
 
     assert view
            |> element("#create-new")
@@ -112,15 +120,14 @@ defmodule MobaWeb.V2.PreviewLiveTest do
            |> Enum.count() == 6
 
     refute has_element?(view, "#create-new button.avatar-attribute")
-    view |> render_click("pick-build", %{"number" => "0"})
-    assert has_element?(view, "#game-page form[action='/start'] #create-button")
+    assert has_element?(view, "#game-page #team-draft-launch[action='/start'] #team-draft-begin")
 
     conn = conn |> get("/start") |> recycle()
 
     response =
       post(conn, "/start", %{
-        "avatar" => base_avatar().id,
-        "skills" => Enum.map(creation_skills(), & &1.id)
+        "team" => "true",
+        "roster" => Jason.encode!(Test.TeamHelper.team_picks(%{user: nil}))
       })
 
     assert redirected_to(response) == "/training"
@@ -131,11 +138,10 @@ defmodule MobaWeb.V2.PreviewLiveTest do
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/tavern")
     assert has_element?(view, "#show-avatars-link[aria-selected=true]")
-    view |> element("#show-skills-link") |> render_click()
-    assert has_element?(view, "#show-skills-link[aria-selected=true]")
-    assert has_element?(view, "#show-avatars-link[aria-selected=false]")
+    refute has_element?(view, "#show-skills-link")
     view |> element("#show-skins-link") |> render_click()
     assert has_element?(view, "#show-skins-link[aria-selected=true]")
+    assert has_element?(view, "#show-avatars-link[aria-selected=false]")
   end
 
   test "profile defaults to the season leaderboard when it has no ranked hero", %{conn: conn} do

@@ -1,6 +1,6 @@
 <div
   class="shop cinematic-shop"
-  id="shop"
+  id={GH.dom_id(@id_prefix, "shop")}
   data-selected-code={@selected_shop && @selected_shop.code}
   data-item-inspected={to_string(@item_inspected)}
   data-selected-rarity={@selected_shop && @selected_shop.rarity}
@@ -10,14 +10,22 @@
   <img class="shop-backdrop" src={GH.background_url(@current_hero)} alt="" aria-hidden="true" />
   <header class="shop-heading">
     <div class="shop-heading-copy">
-      <span class="shop-eyebrow">Build your advantage</span>
-      <h2 id="shop-title">Shop<span class="shop-heading-rule"></span></h2>
+      <h2 id={GH.dom_id(@id_prefix, "shop-title")}>Shop<span class="shop-heading-rule"></span></h2>
     </div>
+    <p class="shop-keyboard-hint" aria-label="Use arrow keys to browse and Space for the selected action">
+      <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> Browse <span></span><kbd>SPACE</kbd> Action
+    </p>
     <div class="shop-wallet" aria-label={"#{@current_hero.gold} gold available"}>
       <i class="ui-icon ui-coins" aria-hidden="true"></i>
-      <strong id="shop-gold">{@current_hero.gold}</strong><span>gold</span>
+      <strong id={GH.dom_id(@id_prefix, "shop-gold")}>{@current_hero.gold}</strong><span>gold</span>
     </div>
-    <button type="button" aria-label="Close shop" id="close-button" phx-click="close-shop" {target_attrs(@event_target)}>
+    <button
+      type="button"
+      aria-label="Close shop"
+      id={GH.dom_id(@id_prefix, "close-button")}
+      phx-click="close-shop"
+      {target_attrs(@event_target, @hero_id)}
+    >
       <i class="ui-icon ui-close" aria-hidden="true"></i>
     </button>
   </header>
@@ -25,55 +33,13 @@
   <div class="shop-workspace">
     <nav class="shop-shelves" aria-label="Shop rarities and inventory">
       <section
-        :for={rarity <- categories()}
-        id={"shop-shelf-#{rarity}"}
-        class={["shop-shelf", "#{rarity}-items", @selected_category == rarity && "is-current"]}
-        data-rarity={rarity}
-      >
-        <button
-          type="button"
-          class="shop-shelf-label"
-          phx-click="select-category"
-          phx-value-rarity={rarity}
-          phx-target={@myself}
-          aria-pressed={to_string(@selected_category == rarity)}
-        >
-          <span>{String.capitalize(rarity)}</span>
-          <small><i class="ui-icon ui-coins" aria-hidden="true"></i> {category_price(rarity)}</small>
-        </button>
-        <div class="shop-miniatures">
-          <button
-            :for={item <- rarity_filter(@items, rarity)}
-            type="button"
-            id={"item-#{item.id}"}
-            class={["shop-tile", @selected_shop && @selected_shop.code == item.code && "is-selected"]}
-            aria-label={item.name}
-            aria-pressed={to_string((@selected_shop && @selected_shop.code == item.code) || false)}
-            phx-click="select-shop"
-            phx-value-code={item.code}
-            phx-target={@myself}
-          >
-            <img
-              src={GH.image_url(item)}
-              alt=""
-              class={"code-#{item.code} tooltip-mobile"}
-              data-toggle="tooltip"
-              title={TT.item_tooltip(item)}
-            />
-            <span :if={Enum.any?(@current_hero.items, &(&1.code == item.code))} class="shop-owned" aria-label="Owned">
-              ✓
-            </span>
-          </button>
-        </div>
-      </section>
-
-      <section
-        id="inventory"
+        id={GH.dom_id(@id_prefix, "inventory")}
         class={["shop-shelf shop-inventory", @selected_category == "inventory" && "is-current"]}
         data-rarity="inventory"
       >
         <button
           type="button"
+          id={GH.dom_id(@id_prefix, "shop-category-inventory")}
           class="shop-shelf-label"
           phx-click="select-category"
           phx-value-rarity="inventory"
@@ -84,19 +50,19 @@
         </button>
         <div
           class="shop-miniatures"
-          id="shop-inventory-order"
+          id={GH.dom_id(@id_prefix, "shop-inventory-order")}
           phx-hook="InventoryOrder"
           data-inventory-order="true"
           data-hero-id={@current_hero.id}
           data-reorderable={to_string(@reorderable)}
-          data-order-status="shop-inventory-status"
+          data-order-status={GH.dom_id(@id_prefix, "shop-inventory-status")}
           role="group"
           aria-label="Inventory items"
         >
           <button
             :for={item <- Game.inventory_items(@current_hero)}
             type="button"
-            id={"transmute-#{item.id}"}
+            id={GH.dom_id(@id_prefix, "transmute-#{item.id}")}
             class={[
               "shop-tile inventory-item",
               !can_select_inventory(item, @transmute, @recipe) && "is-unavailable",
@@ -134,35 +100,36 @@
             <span>+</span>
           </div>
         </div>
-        <span id="shop-inventory-status" class="sr-only" role="status" aria-live="polite" phx-update="ignore"></span>
+        <span
+          id={GH.dom_id(@id_prefix, "shop-inventory-status")}
+          class="sr-only"
+          role="status"
+          aria-live="polite"
+          phx-update="ignore"
+        >
+        </span>
       </section>
+
+      <Shop.shelf
+        :for={rarity <- categories()}
+        rarity={rarity}
+        items={rarity_filter(@items, rarity)}
+        selected_category={@selected_category}
+        selected_item={@selected_shop}
+        owned_items={@current_hero.items}
+        id_prefix={@id_prefix}
+        event_target={@myself}
+      />
     </nav>
 
     <section
-      id="shop-detail"
+      id={GH.dom_id(@id_prefix, "shop-detail")}
       class="shop-detail"
       data-rarity={@detail_item && @detail_item.rarity}
       aria-label="Selected item details"
     >
       <%= if @detail_item do %>
-        <div class="shop-item-showcase">
-          <div class="shop-item-aura" aria-hidden="true"></div>
-          <img id="shop-detail-image" src={GH.image_url(@detail_item)} alt={@detail_item.name} />
-          <div class="shop-item-identity">
-            <span class="shop-eyebrow">
-              {if @transmute, do: "Transmute", else: String.capitalize(@detail_item.rarity)}<span class="shop-item-kind">{if @detail_item.active, do: "Active item", else: "Passive item"}</span>
-            </span>
-            <h3 id="shop-detail-name">{@detail_item.name}</h3>
-            <div class="shop-item-timing">
-              <span :if={@detail_info.mp_cost}>
-                <i class="ui-icon ui-bolt" aria-hidden="true"></i> {@detail_info.mp_cost} energy
-              </span>
-              <span :if={@detail_info.cooldown}>
-                <i class="ui-icon ui-clock" aria-hidden="true"></i> {@detail_info.cooldown} turn cooldown
-              </span>
-            </div>
-          </div>
-        </div>
+        <Shop.item_showcase item={@detail_item} id_prefix={@id_prefix} transmuting={not is_nil(@transmute)} />
 
         <div class="shop-item-description" data-detail-tab={@detail_tab}>
           <div class="shop-inspect-tabs" aria-label="Item information">
@@ -177,17 +144,8 @@
               {label}
             </button>
           </div>
-          <div class="shop-item-overview">
-            <div class="shop-item-stats" aria-label="Item stat bonuses">
-              <div :for={{stat, value} <- @detail_info.stats} class="shop-stat" data-stat={stat}>
-                <% {label, icon} = stat_label(stat) %>
-                <i class={"ui-icon ui-#{icon}"} aria-hidden="true"></i><strong>+{value}</strong><span>{label}</span>
-              </div>
-            </div>
-            <p id="shop-detail-description">{@detail_info.description}</p>
-          </div>
-          <div id="shop-detail-effects" class="shop-item-effects">
-            {raw(TT.formatted_effect_tooltip(@detail_info.effects))}
+          <div id={GH.dom_id(@id_prefix, "shop-detail-description")} class="shop-tooltip-readout">
+            <MobaWeb.V2.Components.ItemTooltip.card item={@detail_item} show_heading={false} />
           </div>
         </div>
 
@@ -195,9 +153,14 @@
           <%= cond do %>
             <% @transmute -> %>
               <div class="shop-recipe">
-                <p id="transmute-instructions">{transmute_instructions_for(@transmute)}</p>
+                <p id={GH.dom_id(@id_prefix, "transmute-instructions")}>{transmute_instructions_for(@transmute)}</p>
                 <div class="shop-recipe-slots">
-                  <img :for={item <- @recipe} src={GH.image_url(item)} alt={item.name} id={"recipe-#{item.id}"} />
+                  <img
+                    :for={item <- @recipe}
+                    src={GH.image_url(item)}
+                    alt={item.name}
+                    id={GH.dom_id(@id_prefix, "recipe-#{item.id}")}
+                  />
                   <div
                     :for={_ <- List.duplicate(nil, max(0, ingredients_count_for(@transmute) - length(@recipe)))}
                     class="shop-empty-slot"
@@ -211,9 +174,9 @@
               <div class="shop-detail-actions">
                 <.form
                   for={to_form(%{}, as: :transmute)}
-                  id="shop-transmute-form"
+                  id={GH.dom_id(@id_prefix, "shop-transmute-form")}
                   phx-submit="finish-transmute"
-                  {target_attrs(@event_target)}
+                  {target_attrs(@event_target, @hero_id)}
                 >
                   <input type="hidden" name="transmute_code" value={@transmute.code} />
                   <input :for={item <- @recipe} type="hidden" name="recipe_codes[]" value={item.code} />
@@ -222,7 +185,7 @@
                     class="shop-primary"
                     disabled={!proper_recipe(@recipe, @transmute)}
                     phx-disable-with="Transmuting..."
-                    id="finish-transmute"
+                    id={GH.dom_id(@id_prefix, "finish-transmute")}
                     data-acquire-code={@transmute.code}
                     data-hero-id={@current_hero.id}
                   >
@@ -233,7 +196,7 @@
                   type="button"
                   class="shop-secondary"
                   phx-click="cancel-transmute"
-                  id="cancel-transmute"
+                  id={GH.dom_id(@id_prefix, "cancel-transmute")}
                   phx-target={@myself}
                 >
                   Cancel
@@ -246,14 +209,21 @@
                 class="shop-secondary shop-sell"
                 phx-click="sell"
                 phx-value-code={@selected_inventory.code}
-                id={"sell-#{@selected_inventory.id}"}
-                {target_attrs(@event_target)}
+                id={GH.dom_id(@id_prefix, "sell-#{@selected_inventory.id}")}
+                {target_attrs(@event_target, @hero_id)}
               >
                 Sell for
-                <i class="ui-icon ui-coins" aria-hidden="true"></i> {sell_price(@current_hero, @selected_inventory)}
+                <i class="ui-icon ui-coins" aria-hidden="true"></i> {Game.item_sell_price(
+                  @current_hero,
+                  @selected_inventory
+                )}
               </button>
             <% true -> %>
-              <p :if={purchase_hint(@current_hero, @selected_shop)} class="shop-action-hint" id="shop-purchase-hint">
+              <p
+                :if={purchase_hint(@current_hero, @selected_shop)}
+                class="shop-action-hint"
+                id={GH.dom_id(@id_prefix, "shop-purchase-hint")}
+              >
                 {purchase_hint(@current_hero, @selected_shop)}
               </p>
               <div class="shop-detail-actions">
@@ -264,10 +234,10 @@
                   phx-value-code={@selected_shop.code}
                   disabled={!can_buy?(@current_hero, @selected_shop)}
                   phx-disable-with="Buying..."
-                  id="buy-button"
+                  id={GH.dom_id(@id_prefix, "buy-button")}
                   data-acquire-code={@selected_shop.code}
                   data-hero-id={@current_hero.id}
-                  {target_attrs(@event_target)}
+                  {target_attrs(@event_target, @hero_id)}
                 >
                   <span class="loading-text">
                     <%= if can_equip?(@current_hero, @selected_shop) do %>
@@ -284,7 +254,7 @@
                   phx-click="start-transmute"
                   phx-target={@myself}
                   disabled={!can_transmute?(@current_hero, @selected_shop)}
-                  id="start-transmute"
+                  id={GH.dom_id(@id_prefix, "start-transmute")}
                 >
                   <i class="ui-icon ui-refresh" aria-hidden="true"></i> Transmute
                 </button>

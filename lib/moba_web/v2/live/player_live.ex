@@ -63,6 +63,7 @@ defmodule MobaWeb.V2.PlayerLive do
        best_ranked_hero_id: best && best.id,
        best_hero_rank: Game.best_hero_rank(player.id),
        player: player,
+       recent_results: Game.Matches.recent_results(player),
        matches: matches,
        duels: duels,
        filter: if(first_battle?, do: initial_history_tab(matches, duels), else: socket.assigns.filter),
@@ -102,6 +103,7 @@ defmodule MobaWeb.V2.PlayerLive do
       filter: initial_history_tab(matches, duels),
       matches: matches,
       player: player,
+      recent_results: Game.Matches.recent_results(player),
       ranking: ranking,
       hero_ranking: hero_ranking,
       best_ranked_hero_id: best && best.id,
@@ -126,7 +128,7 @@ defmodule MobaWeb.V2.PlayerLive do
         %{state: :ready, hero: hero, action: "Enter Arena", path: ~p"/arena"}
 
       [] ->
-        %{state: :train, hero: player.current_pve_hero || featured, action: "Train a new hero", path: ~p"/invoke"}
+        %{state: :train, hero: player.current_pve_hero || featured, action: "Train a new hero", path: ~p"/new"}
     end
   end
 
@@ -171,9 +173,7 @@ defmodule MobaWeb.V2.PlayerLive do
     end
   end
 
-  defp season_score(player) do
-    100 * player.best_immortal_streak + 100 * player.pve_tier + player.pvp_points
-  end
+  defp season_score(player), do: Game.season_score(player)
 
   defp shadow_rank(%{ranking: 1, pvp_tier: tier}), do: tier + 1
   defp shadow_rank(%{pvp_tier: tier}), do: tier
@@ -181,12 +181,6 @@ defmodule MobaWeb.V2.PlayerLive do
   defp arena_bracket(%{pvp_tier: 2}), do: "Immortals"
   defp arena_bracket(%{pvp_tier: 1}), do: "Shadows"
   defp arena_bracket(_), do: "Plebs"
-
-  defp total_win_rate(%{total_matches: matches, total_wins: wins}) when matches > 0 do
-    "#{round(wins / matches * 100)}%"
-  end
-
-  defp total_win_rate(_), do: "0%"
 
   defp featured_hero_card(assigns) do
     ~H"""
@@ -228,44 +222,10 @@ defmodule MobaWeb.V2.PlayerLive do
     """
   end
 
-  defp rewards_badge(assigns) do
-    ~H"""
-    <%= if @rewards > 0 do %>
-      <span class="badge badge-pill badge-light-success">+{@rewards} Arena Rating</span>
-    <% else %>
-      <%= if @rewards < 0 do %>
-        <span class="badge badge-pill badge-light-dark">{@rewards} Arena Rating</span>
-      <% end %>
-    <% end %>
-    """
-  end
+  defp history_result(nil, _player_id), do: "Tie"
+  defp history_result(player_id, player_id), do: "Victory"
+  defp history_result(_winner_id, _player_id), do: "Defeat"
 
-  defp match_result(assigns) do
-    ~H"""
-    <%= if @match.phase != "scored" do %>
-      <h5>In Progress</h5>
-    <% else %>
-      <%= if @match.winner_id == @match.player_id do %>
-        <h5 class="text-success">Victory</h5>
-      <% else %>
-        <h5 class="text-muted">Defeat</h5>
-      <% end %>
-    <% end %>
-    """
-  end
-
-  defp duel_result(assigns) do
-    ~H"""
-    <%= cond do %>
-      <% @duel.phase != "finished" -> %>
-        <h5>In Progress</h5>
-      <% is_nil(@duel.winner_player) -> %>
-        <h5 class="text-white">Tie</h5>
-      <% @duel.winner_player_id == @player_id -> %>
-        <h5 class="text-success">Victory</h5>
-      <% true -> %>
-        <h5 class="text-muted">Defeat</h5>
-    <% end %>
-    """
-  end
+  defp duel_rating(%{player_id: player_id, rewards: rewards}, player_id), do: rewards.attacker_pvp_points
+  defp duel_rating(duel, _player_id), do: duel.rewards.defender_pvp_points
 end

@@ -39,7 +39,7 @@ defmodule MobaWeb.UserRegistrationLive do
                   phx-submit="save"
                   phx-change="validate"
                   phx-trigger-action={@trigger_submit}
-                  action={preview_path(assigns, ~p"/users/log_in?_action=registered")}
+                  action={preview_path(assigns, @registration_action)}
                   method="post"
                 >
                   <%= if @check_errors do %>
@@ -95,12 +95,22 @@ defmodule MobaWeb.UserRegistrationLive do
     """
   end
 
-  def mount(_params, session, socket) do
+  def mount(params, session, socket) do
     changeset = Accounts.change_user_registration(%User{})
+
+    registration_action =
+      if params["from"] == "training" && session["player_id"],
+        do: ~p"/users/log_in?_action=registered&from=training",
+        else: ~p"/users/log_in?_action=registered"
 
     socket =
       socket
-      |> assign(trigger_submit: false, check_errors: false, player_id: session["player_id"])
+      |> assign(
+        trigger_submit: false,
+        check_errors: false,
+        player_id: session["player_id"],
+        registration_action: registration_action
+      )
       |> assign_form(changeset)
 
     {:ok, socket, temporary_assigns: [form: nil]}

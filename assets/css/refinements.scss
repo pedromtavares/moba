@@ -18,9 +18,9 @@
   .game-stat i { font-size: 13px; opacity: .85; }
   .game-stat .stat-value { color: #e3dfd7; font-weight: 700; }
   .game-stat:focus-visible { outline: 1px solid #d6b47c; outline-offset: 2px; }
-  #hero-bar .stats-group { display: flex; width: 100%; justify-content: space-between; padding-top: 6px; }
-  #hero-bar .game-stat { padding: 6px 7px; }
-  #hero-bar .stats-group .game-stat + .game-stat { border-left: 1px solid #baa98a20 !important; }
+  :is(#hero-bar, .hero-bar) .stats-group { display: flex; width: 100%; justify-content: space-between; padding-top: 6px; }
+  :is(#hero-bar, .hero-bar) .game-stat { padding: 6px 7px; }
+  :is(#hero-bar, .hero-bar) .stats-group .game-stat + .game-stat { border-left: 1px solid #baa98a20 !important; }
   .avatar-attributes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 100%; gap: 8px; margin: 16px 0 0 !important; }
   .avatar-attribute { display: block; padding: 12px 4px; font-size: 12px; line-height: 1.6; border-top: 1px solid var(--base-line) !important; }
   .avatar-attribute i { font-size: 14px; margin-bottom: 6px; }
@@ -87,16 +87,7 @@
   #arena-duels-table td:last-child { white-space: nowrap; }
   #arena-duels-table td:last-child .badge { display: inline-block; max-width: 65px; font-size: 9px; vertical-align: middle; margin-right: 3px; }
   #arena-duels-table .game-review { margin-left: 2px !important; }
-  .profile-history { background: transparent; padding: 0; height: auto; max-height: 48vh; }
-  .profile-history .history-table td { width: auto !important; padding: 20px 14px !important; }
-  .profile-history .history-table td:first-child { width: 44% !important; }
-  .profile-history .history-table :is(h5, a:not(.btn)) { font-size: 18px; }
-  .profile-history .history-table .badge { font-size: 12px; padding-top: 5px; }
-  .profile-history .game-review { width: 40px; min-height: 40px; font-size: 15px; border-radius: 5px; }
   .history-detail { display: block; margin-top: 5px; color: #969da9; font-size: 12px; }
-  .profile-history-tabs { gap: 20px; }
-  .profile-history-tabs .btn { min-height: 44px; padding: 12px 0; border: 0; border-radius: 0 !important; border-bottom: 2px solid transparent; background: transparent; box-shadow: none; font-family: 'Nunito', sans-serif; font-size: 16px; letter-spacing: 0; }
-  .profile-history-tabs .no-action { border-bottom-color: #d6b47c; color: #e6ceaa; }
   :is(.arena, .user-profile) .ranking .ranking-table :is(thead, tfoot) th { padding: 16px 14px; background: #0c111af5; border-color: var(--base-line); font-size: 13px; font-weight: 600; letter-spacing: .01em; text-align: left; white-space: nowrap; }
   :is(.arena, .user-profile) .ranking .ranking-table th:last-child { text-align: right; }
   .ranking-table td { padding: 14px 10px; height: 64px; border-top: 0; border-bottom: 1px solid #baa98a14; }
@@ -166,17 +157,6 @@
   .manual-heading a:hover { color: #fff1d9; }
   .manual-heading .base-secondary { padding: 10px 16px; font-family: 'Nunito', sans-serif; font-size: 14px; letter-spacing: 0; }
   #library > .row:first-of-type .btn-purple { max-width: 240px; margin: 12px 24px 24px !important; font-size: 13px; min-height: 38px; }
-  #library .manual-navigation { gap: 4px 16px; padding: 0 0 14px; border-bottom: 1px solid var(--base-line); }
-  #library .manual-navigation .nav-link { font-family: 'Nunito', sans-serif; font-size: 15px; padding: 14px 4px !important; }
-  #library > .row > .col-12 > .card-box { padding: 20px 24px 32px; }
-  #library .tab-content { padding: 32px 0 0; }
-  #library .tab-pane .p-lg-2 { padding: 0 20px 0 0 !important; }
-  #library .tab-pane .mt-5 { margin-top: 0 !important; }
-  #library .faq-question-q-box { display: none; }
-  #library .faq-question { margin: 0 0 12px; padding: 0; color: #e4d7c2 !important; font-size: 20px; font-weight: 600; line-height: 1.5; }
-  #library .faq-answer, #library .tab-pane p { margin-left: 0; padding: 0; max-width: 67ch; font-size: 16px; line-height: 1.85; color: #b9bdc5; }
-  #library .tab-pane div:has(> .faq-question) { padding: 0 0 20px; margin-bottom: 26px; border-bottom: 1px solid #baa98a14; }
-  #library .tab-pane a:not(.nav-link) { color: #d6b47c; text-decoration: underline; text-underline-offset: 3px; }
   #library .page-title { padding: 28px 0 8px; color: #e0d3bc; font-size: 22px; font-weight: 600; }
   #library .select-avatar { padding-top: 16px; padding-bottom: 16px; }
   #library .select-avatar > .card-box { padding: 24px 16px; }
@@ -255,11 +235,8 @@
     .collection .league-logo { position: absolute; bottom: 0; left: calc(50% - 12px); margin: 0; }
     #user-profile { display: flex; flex-direction: column; }
     #user-profile > .card-body, #user-profile > .row { flex: 0 0 auto; }
-    #user-profile > .row:has(.profile-history) { flex: 1; min-height: 0; }
-    #user-profile > .row:has(.profile-history) > .col { display: flex; flex-direction: column; height: 100%; min-height: 0; }
-    .profile-history { flex: 1; min-height: 0; height: auto; max-height: none; overflow: auto; }
     #user-profile > .card-footer { flex: 0 0 auto; padding-top: 12px !important; margin-top: 12px; }
-    #user-ranking { overflow: auto; }
+    #user-ranking { overflow: hidden auto; }
   }
 
   .game-page .arena-overview {
@@ -271,8 +248,8 @@
     .arena-board > .col { height: 100%; min-height: 0; }
     .arena-board :is(#matchmaking-container, #pvp_duels, .ranking) { height: 100% !important; max-height: none; margin-bottom: 0; padding-bottom: 12px; border-bottom: 1px solid var(--base-line); display: flex; flex-direction: column; }
     .arena-board .card-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-    .arena-board .arena-history { flex: 1; min-height: 0; max-height: none; overflow: auto; }
-    .arena-board .ranking > .card-body { overflow: auto; }
+    .arena-board .arena-history { flex: 1; min-height: 0; max-height: none; overflow: hidden auto; }
+    .arena-board .ranking > .card-body { overflow: hidden auto; }
     .arena-board .ranking .nav { flex: 0 0 auto; margin-top: 0 !important; }
   }
 }
@@ -287,8 +264,6 @@
     #user-profile > .card-body > .pvp-rank { max-height: 90px; }
     #user-profile > .card-body h2 { font-size: 28px; margin: 10px 0 0; }
     .profile-metrics { padding: 10px 0 !important; margin: 4px 0; }
-    .profile-history-tabs .btn { min-height: 38px; padding-top: 9px; padding-bottom: 9px; }
-    .profile-history .history-table td { padding-top: 18px !important; padding-bottom: 18px !important; }
   }
 }
 
@@ -334,11 +309,6 @@
     .manual-heading { padding: 24px 12px 8px; }
     .manual-heading { align-items: flex-start; flex-direction: column; gap: 16px; }
     .manual-heading nav { gap: 16px; }
-    #library > .row > .col-12 > .card-box { padding: 12px; }
-    #library .manual-navigation { gap: 0 14px; flex-wrap: wrap; }
-    #library .tab-pane .p-lg-2 { padding: 0 !important; }
-    #library .faq-question { font-size: 17px; }
-    #library .faq-answer, #library .tab-pane p { font-size: 16px; line-height: 1.85; }
     .avatar-attributes { gap: 4px; }
     .avatar-attribute strong { font-size: 22px; }
   }
@@ -489,7 +459,7 @@ body:has(.game-page) .tippy-box .game-stat .stat-value { color: #e3dfd7; font-we
     .pve-tier-container { padding: 0; width: auto; max-width: none; }
     .pve-tier-container h5 { font-size: 10px; line-height: 1.4; }
     .league-logo { max-width: 50px; height: auto !important; max-height: 64px; }
-    #current-training-rank { grid-column: 1; grid-row: 2; }
+    :is(#current-training-rank, .ascent-rank.is-current) { grid-column: 1; grid-row: 2; }
     .pve-tier-container:last-child { grid-column: 3; grid-row: 2; }
     .col-8 { display: contents; }
     .col-8 > h4 { grid-column: 1 / -1; font-size: 14px; line-height: 1.5; }

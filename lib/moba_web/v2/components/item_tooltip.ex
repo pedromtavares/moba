@@ -16,14 +16,20 @@ defmodule MobaWeb.V2.Components.ItemTooltip do
   ]
 
   def render(item) do
-    assigns = %{item: item, content: ItemDescriptions.describe(item), stats: stats(item), metadata: metadata(item)}
+    assigns = %{item: item, show_heading: true, __changed__: nil}
     assigns |> card() |> Phoenix.HTML.Safe.to_iodata() |> IO.iodata_to_binary()
   end
 
-  defp card(assigns) do
+  attr :item, :map, required: true
+  attr :show_heading, :boolean, default: true
+
+  def card(assigns) do
+    item = assigns.item
+    assigns = assign(assigns, content: ItemDescriptions.describe(item), stats: stats(item), metadata: metadata(item))
+
     ~H"""
     <article class="skill-tooltip item-tooltip" data-item-code={@item.code} data-rarity={@item.rarity}>
-      <header class="skill-tooltip-heading">
+      <header :if={@show_heading} class="skill-tooltip-heading">
         <img :if={@item.image} src={GH.image_url(@item)} alt="" />
         <div>
           <h3>{@item.name}</h3>
@@ -33,16 +39,25 @@ defmodule MobaWeb.V2.Components.ItemTooltip do
           </span>
         </div>
       </header>
-      <p :if={@content.summary} class="skill-tooltip-summary">{@content.summary}</p>
-      <dl :if={@stats != []} class="item-tooltip-stats" aria-label="Equipment bonuses">
-        <div :for={stat <- @stats} data-stat={stat.key} data-tone={stat.tone} class="skill-tooltip-effect item-tooltip-stat">
-          <dt><.icon name={"game-" <> stat.icon} class="skill-tooltip-effect-icon" /><span>{stat.label}</span></dt>
-          <dd><strong>+{SkillDescriptions.number(stat.value)}</strong></dd>
+      <div class="item-tooltip-overview">
+        <p :if={@content.summary} class="skill-tooltip-summary">{@content.summary}</p>
+        <dl :if={@stats != []} class="item-tooltip-stats" aria-label="Equipment bonuses">
+          <div
+            :for={stat <- @stats}
+            data-stat={stat.key}
+            data-tone={stat.tone}
+            class="skill-tooltip-effect item-tooltip-stat"
+          >
+            <dt><.icon name={"game-" <> stat.icon} class="skill-tooltip-effect-icon" /><span>{stat.label}</span></dt>
+            <dd><strong>+{SkillDescriptions.number(stat.value)}</strong></dd>
+          </div>
+        </dl>
+      </div>
+      <div class="item-tooltip-effects">
+        <.effect_rows effects={@content.effects} />
+        <div :if={@content.notes != []} class="skill-tooltip-notes">
+          <p :for={note <- @content.notes}>{note}</p>
         </div>
-      </dl>
-      <.effect_rows effects={@content.effects} />
-      <div :if={@content.notes != []} class="skill-tooltip-notes">
-        <p :for={note <- @content.notes}>{note}</p>
       </div>
       <.metadata_rows entries={@metadata} />
     </article>

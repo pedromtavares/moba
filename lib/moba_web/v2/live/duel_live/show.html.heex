@@ -18,11 +18,17 @@
                 <div>
                   <h2 class="mb-0">
                     <img src={"/images/pve/#{@duel.player.pve_tier}.png"} style="max-height: 50px" />
-                    <.link navigate={preview_path(assigns, ~p"/player/#{@duel.player}")}>
+                    <.link
+                      navigate={preview_path(assigns, ~p"/player/#{@duel.player}")}
+                      data-profile-username={Moba.Utils.username(@duel.player)}
+                    >
                       {username(@duel.player)}
                     </.link>
                     vs
-                    <.link navigate={preview_path(assigns, ~p"/player/#{@duel.opponent_player}")}>
+                    <.link
+                      navigate={preview_path(assigns, ~p"/player/#{@duel.opponent_player}")}
+                      data-profile-username={Moba.Utils.username(@duel.opponent_player)}
+                    >
                       {username(@duel.opponent_player)}
                     </.link>
                     <img src={"/images/pve/#{@duel.opponent_player.pve_tier}.png"} style="max-height: 50px" />
@@ -94,7 +100,8 @@
                 :if={show_rematch?(assigns)}
                 href="javascript:;"
                 class="h3 mt-2 nav-link text-danger mb-0 text-center"
-                data-game-fullscreen phx-click="rematch"
+                data-game-fullscreen
+                phx-click="rematch"
               >
                 <i class="ui-icon ui-refresh ui-2x align-middle"></i>
                 <br /> Rematch

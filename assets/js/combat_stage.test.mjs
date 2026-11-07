@@ -363,3 +363,61 @@ test('health percentages stay centered and update with each combat state', () =>
   hook.setVitals('left', {...unit, hp: 150});
   assert.equal(nodes.get('[data-unit-hp-percent]').textContent, '100%');
 });
+
+test('training autoplay waits until animation is idle and emits each frame once', async () => {
+  const sent = [];
+  const target = {};
+  const hook = {...CombatStage, epoch: 1, busy: true, scene: {finished: false, trainingPlayback: {enabled: true, frame: 'duel:1'}}, el: {closest: () => target}, wait: async () => {}, pushEventTo: (...args) => sent.push(args)};
+  hook.trainingReady();
+  assert.equal(sent.length, 0);
+  hook.busy = false;
+  hook.trainingReady();
+  await Promise.resolve();
+  assert.deepEqual(sent, [[target, 'training-playback-ready', {frame: 'duel:1'}]]);
+  hook.trainingReady();
+  await Promise.resolve();
+  assert.equal(sent.length, 1);
+  hook.scene.trainingPlayback.frame = 'duel:2';
+  hook.trainingReady();
+  await Promise.resolve();
+  assert.equal(sent.length, 2);
+});
+
+test('navigation or a changed frame cancels a queued training autoplay request', async () => {
+  let done;
+  const sent = [];
+  const hook = {...CombatStage, epoch: 1, busy: false, scene: {finished: true, trainingPlayback: {enabled: true, frame: 'old'}}, el: {closest: () => ({})}, wait: () => new Promise(resolve => { done = resolve; }), pushEventTo: (...args) => sent.push(args)};
+  hook.trainingReady();
+  hook.epoch++;
+  done();
+  await Promise.resolve();
+  assert.equal(sent.length, 0);
+  hook.scene.trainingPlayback.frame = 'new';
+  hook.trainingReady();
+  hook.scene.trainingPlayback.frame = 'paused';
+  done();
+  await Promise.resolve();
+  assert.equal(sent.length, 0);
+});
+
+test('effect grids shrink and add rows without increasing their allotted height', async () => {
+  const {effectGrid} = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
+  assert.deepEqual(effectGrid(3, 240, 100), {columns: 3, size: 72});
+  assert.ok(effectGrid(5, 240, 100).size < 72);
+  assert.ok(effectGrid(12, 240, 100).size < effectGrid(5, 240, 100).size);
+  for (const width of [65, 150, 240, 400]) {
+    for (const count of [1, 3, 4, 5, 8, 12, 20, 32]) {
+      const grid = effectGrid(count, width, 100);
+      const rows = Math.ceil(count / grid.columns);
+      assert.ok(grid.size > 0);
+      assert.ok(grid.columns * grid.size + (grid.columns - 1) * 6 <= width);
+      assert.ok(rows * grid.size + (rows - 1) * 6 <= 100);
+    }
+  }
+  const styles = {};
+  const row = {children: Array(8), style: {setProperty(key, value) { styles[key] = value; }}};
+  CombatStage.fitEffects(row, 240, 100);
+  assert.equal(styles['--effect-size'], `${effectGrid(8, 240, 100).size}px`);
+  CombatStage.fitEffects(row, 120, 100);
+  assert.equal(styles['--effect-size'], `${effectGrid(8, 120, 100).size}px`);
+});

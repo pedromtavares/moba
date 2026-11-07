@@ -10,7 +10,6 @@
       alt={Moba.pve_tiers()[@player.pve_tier]}
     />
     <div>
-      <p class="profile-eyebrow">Player profile</p>
       <h1>
         <img :if={@player.user.discord.id} src={@player.user.discord.avatar} class="discord-avatar" alt="" />
         {username(@player)}
@@ -47,8 +46,19 @@
       <span aria-hidden="true">↗</span>
     </.link>
     <div class="profile-featured-loadout">
-      <.hero_skill_strip skills={@featured.skills} container_class="skills-container" id_prefix="skill" id_suffix={@featured.id} />
-      <.hero_item_strip items={Game.sort_items(@featured.items)} container_class="items-container" item_container_class="item-container" id_prefix="item" id_suffix={@featured.id} />
+      <.hero_skill_strip
+        skills={@featured.skills}
+        container_class="skills-container"
+        id_prefix="skill"
+        id_suffix={@featured.id}
+      />
+      <.hero_item_strip
+        items={Game.sort_items(@featured.items)}
+        container_class="items-container"
+        item_container_class="item-container"
+        id_prefix="item"
+        id_suffix={@featured.id}
+      />
     </div>
   </div>
   <div class="row no-gutters py-1 profile-metrics">
@@ -74,12 +84,13 @@
     </div>
     <div class="col text-center">
       <strong
-        title={"5v5 Win Rate: #{total_win_rate(@player)}<br/>Total Matches: #{@player.total_matches}<br/>Total Wins: #{@player.total_wins}"}
+        id="profile-3v3-win-rate"
+        title={GH.win_rate_summary(@recent_results)}
         data-toggle="tooltip"
       >
-        <i class="ui-icon ui-swords text-white"></i> {total_win_rate(@player)}
+        <i class="ui-icon ui-swords text-white"></i> {GH.win_rate(@recent_results)}%
       </strong>
-      <span :if={@preview} class="profile-metric-label">5v5 Win Rate</span>
+      <span :if={@preview} class="profile-metric-label">3v3 Win Rate</span>
     </div>
     <div class="col text-center">
       <strong

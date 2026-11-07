@@ -1,0 +1,162 @@
+/* The lineup workshop shares Arena's artwork, compact builds, and paged libraries. */
+.game-page #teams-hud.teams-cinematic {
+  --workshop-line: #c6ae7038;
+  height: var(--hero-review-height, calc(100dvh - 48px));
+  display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 18px;
+  min-height: 0; padding: 8px 0 0; color: #bac8d7;
+  font-variant-numeric: tabular-nums;
+  h1, h2 { margin: 0; font-weight: 900; }
+  h1 { color: #f7e9c9; font-size: clamp(28px, 2.3vw, 42px); }
+  h2 { color: #e3c995; font-size: 21px; }
+  h2 small { margin-left: 10px; color: #94a6ba; font-size: 15px; font-weight: 700; white-space: nowrap; }
+  button, .btn, input { font-family: 'Nunito', sans-serif; letter-spacing: 0; }
+  button { cursor: pointer; }
+  button:disabled { cursor: default; }
+  :is(button, a, input):focus-visible { outline: 2px solid #f3d492; outline-offset: 3px; }
+  .squad-eyebrow { color: #c9aa72; font-size: 12px; font-weight: 900; letter-spacing: .15em; text-transform: uppercase; }
+  .team-workshop-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 16px 24px; border: 1px solid var(--workshop-line); border-radius: 14px; background: linear-gradient(90deg, #101e2cec, #0a1520a8), var(--workshop-scene) center 45% / cover; }
+  .team-workshop-actions { display: flex; gap: 12px; align-items: center; }
+  .team-workshop-actions .btn { padding: 10px 18px; font-size: 16px; font-weight: 800; white-space: nowrap; }
+  .team-workshop-layout { display: grid; grid-template-columns: minmax(260px, .7fr) minmax(0, 2fr); grid-template-rows: minmax(0, 1.65fr) minmax(0, 1fr); gap: 18px; min-height: 0; }
+  .workshop-collection { grid-column: 1 / -1; }
+  .squad-panel { min-width: 0; min-height: 0; padding: 16px; border: 1px solid var(--workshop-line); border-radius: 13px; background: linear-gradient(130deg, #1b2a3be0, #0b1520e8); }
+  .workshop-panel-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; }
+  .workshop-panel-heading h2 { min-width: 0; overflow-wrap: anywhere; }
+  .workshop-library-controls, .workshop-pagination, .workshop-team-settings { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .workshop-pagination button, #hero-sort { min-height: 30px; border: 1px solid var(--workshop-line); border-radius: 5px; padding: 2px 11px; background: #07131da8; color: #e4ca94; font-weight: 800; font-size: 17px; transition: background .18s, border-color .18s; }
+  .workshop-pagination button:disabled { opacity: .25; }
+  .workshop-pagination button:enabled:hover, #hero-sort:hover { border-color: #dfbe7c; background: #d9b47116; }
+  #hero-sort { border-color: transparent; font-size: 14px; }
+  .workshop-saved { display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 14px; }
+  .workshop-create { display: grid; grid-template-columns: minmax(0, 1fr) 44px; gap: 7px; margin: 0; }
+  .workshop-create > div { margin: 0 !important; min-width: 0; }
+  .workshop-create label { display: block; width: 100%; margin: 0; }
+  .workshop-team-input { display: block; width: 100%; height: 44px; padding: 10px 12px; border: 1px solid #b9a37450; border-radius: 6px; background: #07111dd9; color: #f5e8cc; font-size: 16px; }
+  #create-team-button { height: 44px; min-height: 44px; border: 1px solid #bf9e60aa; border-radius: 6px; background: linear-gradient(135deg, #863c33, #57282c); color: #ffe5ad; font-size: 22px; }
+  #create-team-button:hover { filter: brightness(1.15); }
+  .workshop-team-grid { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: repeat(5, minmax(0, 1fr)); gap: 8px; min-height: 0; }
+  .workshop-team-card { position: relative; min-width: 0; min-height: 0; overflow: hidden; isolation: isolate; padding: 0; border: 1px solid #baa98a44; border-radius: 9px; background: radial-gradient(ellipse at 50% 20%, #2d4059, #0a1520); text-align: left; color: #f4e6c4; transition: border-color .2s, box-shadow .2s; }
+  .workshop-team-card:hover, .workshop-team-card.active { border-color: #e9c67e; box-shadow: 0 0 18px #deba5e14; }
+  .workshop-team-art { position: absolute; inset: 0 0 0 auto; width: 57%; z-index: -2; display: flex; }
+  .workshop-team-art img { width: 33.333%; height: 100%; object-fit: cover; object-position: center 30%; transition: transform .35s; }
+  .workshop-team-card:hover .workshop-team-art img { transform: scale(1.035); }
+  .workshop-team-card::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #07111efc 30%, #07111ed9 44%, #07111e22 70%); }
+  .workshop-team-count { position: absolute; top: 5px; right: 6px; padding: 2px 6px; border-radius: 4px; background: #07111edb; font-size: 13px; }
+  .workshop-team-caption { position: absolute; top: 50%; transform: translateY(-50%); left: 12px; right: 48%; }
+  .workshop-team-caption strong { display: block; font-size: 18px; font-weight: 900; line-height: 1.15; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .workshop-team-caption small { display: block; margin-top: 3px; color: #acbccc; font-size: 12px; }
+  .workshop-lineup, .workshop-collection { display: grid; grid-template-rows: auto minmax(0, 1fr); gap: 12px; }
+  .workshop-defense { display: flex; align-items: center; gap: 8px; margin: 0; color: #b4c3d1; font-size: 13px; cursor: pointer; }
+  .workshop-defense input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .workshop-switch { position: relative; width: 34px; height: 20px; border-radius: 20px; border: 1px solid #899db966; background: #07121e; transition: .2s; }
+  .workshop-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 12px; height: 12px; border-radius: 50%; background: #8396ab; transition: transform .2s, background .2s; }
+  .workshop-defense input:checked + .workshop-switch { border-color: #ddbc77; background: #a4823c44; }
+  .workshop-defense input:checked + .workshop-switch::after { transform: translateX(14px); background: #f7d993; }
+  .workshop-defense input:focus-visible + .workshop-switch { outline: 2px solid #f3d492; outline-offset: 3px; }
+  .workshop-delete { display: grid; place-items: center; padding: 7px; border: 0; background: transparent; color: #c38c97; font-size: 17px; }
+  .workshop-delete:hover { color: #ffa5b1; }
+  .workshop-lineup-grid { display: grid; grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 10px; min-height: 0; }
+  .workshop-hero { position: relative; isolation: isolate; display: grid; grid-template-columns: 30px minmax(0, 1fr) minmax(170px, 1.15fr) auto; align-items: center; gap: 12px; min-height: 0; padding: 10px 14px; border: 1px solid #baa98a44; border-radius: 9px; overflow: hidden; background: #081420; }
+  .workshop-hero-art { position: absolute; inset: 0; z-index: -2; width: 65%; height: 100%; object-fit: cover; object-position: center 35%; transition: transform .4s; }
+  .workshop-hero::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, #07121e77, #07121e44 20%, #081420f5 53%, #081420); }
+  .workshop-hero:hover .workshop-hero-art { transform: scale(1.025); }
+  .roster-position { align-self: start; padding-top: 3px; color: #e9cd95; font-size: 17px; font-weight: 900; }
+  .workshop-hero-identity { align-self: end; padding-bottom: 4px; min-width: 0; text-shadow: 0 2px 10px #000; }
+  .workshop-hero-identity strong { display: block; color: #f6eace; font-size: clamp(18px, 1.5vw, 28px); font-weight: 900; line-height: 1.05; overflow-wrap: anywhere; }
+  .workshop-hero-identity small { display: block; font-size: 13px; margin-top: 4px; }
+  .workshop-level { display: inline-flex; align-items: center; gap: 6px; margin-top: 5px; color: #f0d499; font-size: 18px; font-weight: 900; cursor: help; white-space: nowrap; }
+  .workshop-level .ui-icon { font-size: 16px; }
+  .workshop-build { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 3fr); align-items: center; gap: 8px; min-width: 0; }
+  .workshop-build .skills-container { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+  .workshop-build .items-container { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; padding-left: 8px; border-left: 1px solid #baa98a44; }
+  .workshop-build .item-container { width: 100%; min-width: 0; max-width: none; max-height: none; margin: 0; }
+  .workshop-build .skill-img, .workshop-build .item-img { display: block; width: 100%; max-width: none; height: auto; max-height: none; margin: 0; aspect-ratio: 1; object-fit: cover; border: 1px solid #ffffff1a !important; border-image: none !important; border-radius: 3px; }
+  .workshop-hero-actions { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+  .workshop-customize { display: flex; align-items: center; gap: 5px; padding: 6px 8px; border: 1px solid #baa98a44; border-radius: 5px; background: #c9a86b0d; color: #e9cd95; font-size: 13px; font-weight: 800; }
+  .workshop-customize:hover, .workshop-customize.active { border-color: #e8c680; background: #c9a86b22; }
+  .workshop-order { display: flex; align-items: center; gap: 5px; }
+  .workshop-order button { border: 0; border-radius: 4px; padding: 0 7px; background: #07121eaa; color: #e9cd95; font-size: 21px; line-height: 1.3; }
+  .workshop-order button:last-child { color: #d995a0; }
+  .workshop-order button:disabled { opacity: .25; }
+  .workshop-empty-slot { position: relative; display: flex; align-items: center; gap: 22px; padding: 12px 22px; border: 1px dashed #b7a26f44; border-radius: 9px; background: radial-gradient(ellipse at 20% 50%, #2a3c5340, transparent); color: #a6b5c5; }
+  .workshop-empty-slot strong { color: #c5b18a77; font-size: 38px; font-weight: 900; }
+  .workshop-empty-slot span { font-size: 16px; }
+  .workshop-collection-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); gap: 10px; min-height: 0; }
+  .workshop-collection-hero { position: relative; min-width: 0; min-height: 0; }
+  .workshop-collection-hero > button:first-child { position: relative; isolation: isolate; width: 100%; height: 100%; min-height: 0; overflow: hidden; display: flex; align-items: flex-end; text-align: left; padding: 8px; border: 1px solid #baa98a44; border-radius: 7px; background: #07131f; transition: border-color .2s; }
+  .workshop-collection-hero > button:first-child::after { content: ''; position: absolute; z-index: -1; inset: 0; background: linear-gradient(0deg, #07121ef7, transparent 90%); }
+  .workshop-collection-hero img { position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .workshop-collection-hero strong { color: #f5e9cf; font-size: 14px; font-weight: 900; line-height: 1.05; text-shadow: 0 1px 5px #000; }
+  .workshop-collection-hero > button:first-child > span { position: absolute; top: 5px; right: 5px; border-radius: 4px; background: #07111edd; padding: 1px 5px; font-size: 19px; font-weight: 900; color: #f1ddb7; }
+  .workshop-collection-hero.selected > button:first-child, .workshop-collection-hero > button:enabled:hover { border-color: #e8c680; }
+  .workshop-collection-remove { position: absolute; top: 4px; left: 4px; display: grid; place-items: center; width: 24px; height: 24px; padding: 0; border: 1px solid #d7bb8088; border-radius: 4px; background: #07121eee; color: #ffe2a1; font-size: 21px; line-height: 1; }
+  .hud-notice { grid-column: 1 / -1; grid-row: 1 / -1; align-self: center; margin: 0; }
+}
+@media (min-width: 1101px) {
+  .game-page #teams-hud.teams-cinematic {
+    gap: 12px;
+    .team-workshop-heading { padding: 10px 20px; }
+    .squad-panel { padding: 12px; }
+    .workshop-hero { padding: 8px 10px; gap: 8px; grid-template-columns: 24px minmax(0, 1fr) minmax(130px, 1.1fr) auto; }
+    .workshop-hero-identity small { margin-top: 2px; }
+    .workshop-level { margin-top: 3px; font-size: 16px; }
+    .workshop-hero-actions { gap: 5px; }
+    .workshop-collection-grid { gap: 7px; }
+    &[data-editing-hero=true] {
+      .team-workshop-layout { grid-template-rows: minmax(0, 1.65fr) minmax(0, 1fr); }
+      .workshop-team-grid { grid-template-rows: repeat(3, minmax(0, 1fr)); }
+      .workshop-hero { grid-template-columns: 24px minmax(0, 1fr) minmax(130px, 1.1fr) auto; padding-block: 5px; }
+      .workshop-hero-identity { align-self: center; padding: 0; }
+      .workshop-hero-identity strong { font-size: 16px; }
+      .workshop-hero-identity small { display: none; }
+      .workshop-level { font-size: 14px; line-height: 1.15; }
+      .workshop-build { max-width: 230px; }
+      .workshop-hero-actions { flex-direction: row; gap: 4px; }
+      .workshop-customize { padding: 5px; }
+      .workshop-customize span { display: none; }
+      .workshop-order { gap: 2px; }
+      .workshop-order button { padding-inline: 5px; }
+      .workshop-collection-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
+      .workshop-collection-hero strong { font-size: 13px; }
+      .workshop-collection-hero > button:first-child > span { font-size: 15px; top: 3px; right: 3px; }
+      .workshop-collection-hero > button:first-child { padding: 5px; }
+      .workshop-collection-remove { width: 19px; height: 19px; font-size: 17px; }
+    }
+  }
+}
+@media (min-width: 1101px) and (max-height: 800px) {
+  .game-page #teams-hud.teams-cinematic[data-editing-hero=false] {
+    .workshop-collection-hero > button:first-child { padding: 5px; }
+    .workshop-collection-hero strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+    .workshop-collection-hero > button:first-child > span { top: 3px; right: 3px; font-size: 15px; line-height: 1.2; }
+    .workshop-collection-remove { width: 19px; height: 19px; font-size: 17px; }
+  }
+}
+@media (max-width: 1100px) {
+  .game-page #teams-hud.teams-cinematic {
+    height: auto; padding-bottom: calc(var(--hero-review-hud-height, 0px) + 24px);
+    .team-workshop-layout { grid-template-columns: minmax(210px, .65fr) minmax(0, 1.5fr); grid-template-rows: auto auto; }
+    .workshop-team-grid { grid-template-columns: minmax(0, 1fr); grid-auto-rows: 120px; grid-template-rows: none; align-content: start; }
+    .workshop-lineup-grid { grid-auto-rows: 130px; grid-template-rows: none; }
+    .workshop-hero { grid-template-columns: 20px minmax(0, 1fr) minmax(110px, .9fr); }
+    .workshop-hero-actions { grid-column: 3; flex-direction: row; gap: 4px; }
+    .workshop-hero-identity { grid-row: 1 / 3; grid-column: 2; }
+    .workshop-collection-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 100px; grid-template-rows: none; }
+  }
+}
+@media (max-width: 700px) {
+  .game-page #teams-hud.teams-cinematic {
+    .team-workshop-heading { align-items: flex-start; padding: 14px; }
+    .team-workshop-actions { flex-direction: column; align-items: flex-end; }
+    .team-workshop-actions .btn { font-size: 12px; padding: 8px; }
+    .team-workshop-layout { grid-template-columns: minmax(0, 1fr); }
+    .workshop-collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .workshop-team-grid { grid-template-columns: minmax(0, 1fr); }
+    .workshop-team-settings { gap: 3px; }
+    .workshop-defense { font-size: 11px; gap: 4px; }
+    h2 { font-size: 18px; }
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-page #teams-hud.teams-cinematic * { transition: none !important; }
+}

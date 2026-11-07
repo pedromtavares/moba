@@ -17,7 +17,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
           {"Profile", "profile"},
           {"Tavern", "tavern"},
           {"Community", "community"},
-          {"Game Manual", "manual"},
+          {"Library", "manual"},
           {"Admin", "admin"}
         ] do
       icon = LazyHTML.query(document, "#game-sidebar a[aria-label='#{label}'] img.nav-emblem[aria-hidden=true]")
@@ -27,11 +27,11 @@ defmodule MobaWeb.V2.NavigationIconsTest do
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar a.active"), "aria-label") == ["Arena"]
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar i"), "class") == []
 
-    for {label, key} <- Enum.with_index(["Base", "Arena", "Profile", "Tavern", "Community", "Game Manual"], 1) do
+    for label <- ["Base", "Arena", "Profile", "Tavern", "Community", "Library"] do
       link = LazyHTML.query(document, "#game-sidebar a[aria-label='#{label}']")
-      assert LazyHTML.attribute(link, "data-sidebar-hotkey") == [to_string(key)]
-      assert LazyHTML.attribute(link, "aria-keyshortcuts") == [to_string(key)]
-      assert LazyHTML.text(LazyHTML.query(link, ".sidebar-label kbd")) == to_string(key)
+      assert LazyHTML.attribute(link, "data-sidebar-hotkey") == []
+      assert LazyHTML.attribute(link, "aria-keyshortcuts") == []
+      assert LazyHTML.query(link, ".sidebar-label kbd") |> Enum.empty?()
       assert LazyHTML.attribute(link, "data-phx-link") == ["redirect"]
     end
 
@@ -39,7 +39,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
              []
   end
 
-  test "guest navigation preserves the locked Arena and registration action" do
+  test "guest navigation shows the locked Arena and registration action without Community or Library" do
     player = %{id: 42, user_id: nil, user: nil}
 
     document =
@@ -49,7 +49,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
     locked = LazyHTML.query(document, "#game-sidebar .no-action")
     assert LazyHTML.attribute(locked, "aria-label") == ["Arena locked: create an account to play"]
     assert LazyHTML.attribute(locked, "data-sidebar-hotkey") == []
-    assert LazyHTML.attribute(LazyHTML.query(document, "#create-account-link"), "data-sidebar-hotkey") == ["3"]
+    assert LazyHTML.attribute(LazyHTML.query(document, "#create-account-link"), "data-sidebar-hotkey") == []
     assert LazyHTML.attribute(LazyHTML.query(document, "#create-account-link"), "href") == ["/users/register"]
 
     assert LazyHTML.attribute(LazyHTML.query(document, "#create-account-link .nav-emblem"), "src") == [
@@ -57,6 +57,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
            ]
 
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar a[aria-label=Admin]"), "href") == []
+    assert Enum.empty?(LazyHTML.query(document, "#game-sidebar a:is([aria-label=Community], [aria-label=Library])"))
   end
 
   test "mobile navigation distinguishes Training from Base with named raster controls" do

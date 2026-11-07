@@ -181,7 +181,7 @@ test('league challenges and Roshan use the visible emblem or boss, with no oppon
   setup(t);
   const emblem = node({attrs: {src: '/images/league/3.png'}});
   const ascent = node({children: {'.is-next .ascent-rank-name': node({text: 'Platinum'}), '.is-next img': emblem}});
-  const league = loadingTarget(node({attrs: {'phx-click': 'league'}, closest: {'#training-ascent': ascent}}));
+  const league = loadingTarget(node({attrs: {'phx-click': 'league'}, closest: {'.training-ascent': ascent}}));
   assert.equal(league.name, 'Platinum');
   assert.equal(league.image, '/images/league/3.png');
   const boss = node({children: {'#roshan-title': node({text: 'Roshan'}), '.roshan-attempt': node({text: 'Attempt 2 / 2'}),
@@ -202,9 +202,7 @@ test('hero links use the card art rather than a skill icon, and profile labels o
   assert.equal(hero.name, 'Aether');
   assert.equal(hero.art, '/juggernaut.jpg');
   assert.equal(hero.image, '');
-  const player = loadingTarget(node({text: 'PDK 54 AR Active now', children: {
-    'strong, .profile-ranked-name': node({text: 'PDK'})
-  }}), '/player/2');
+  const player = loadingTarget(node({text: '#2 PDK 1682 382 77% 6', attrs: {'data-profile-username': 'PDK'}}), '/player/2');
   assert.equal(player.name, 'PDK');
   assert.deepEqual(player, {name: 'PDK', simple: true});
 });
@@ -219,7 +217,7 @@ test('local actions never borrow the current profile identity', t => {
 
 test('profile transitions show only the username and clear richer previous targets', t => {
   const page = setup(t);
-  const control = node({text: 'PDK', attrs: {href: 'http://localhost/player/2', 'data-phx-link': 'redirect'}});
+  const control = node({text: 'PDK', attrs: {href: 'http://localhost/player/2', 'data-phx-link': 'redirect', 'data-profile-username': 'PDK'}});
   page.click(control);
   page.emit('phx:page-loading-start', {kind: 'redirect', to: '/player/2'});
   assert.equal(page.nodes['game-loading-title'].textContent, 'PDK');
@@ -229,4 +227,12 @@ test('profile transitions show only the username and clear richer previous targe
   assert.equal(page.nodes['game-loading-opponent'].hidden, true);
   page.emit('phx:page-loading-start', {kind: 'redirect', to: '/tavern'});
   assert.equal(page.nodes['game-loading-screen'].dataset.simple, 'false');
+});
+
+test('profile links without identity metadata never copy rankings or other numeric stats', t => {
+  setup(t);
+  for (const path of ['/player/2', '/user/2']) {
+    assert.deepEqual(loadingTarget(node({text: '#2 PDK 1682 382 77% 6'}), path), {name: '', simple: true});
+    assert.deepEqual(loadingTarget(node({text: '#2 PDK 1682', attrs: {'data-profile-username': 'Player2026'}}), path), {name: 'Player2026', simple: true});
+  }
 });

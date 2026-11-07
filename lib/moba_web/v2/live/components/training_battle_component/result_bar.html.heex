@@ -1,0 +1,88 @@
+<% won? = @battle.winner_player_id == -1
+target_battle? = @replay.kind == :farm
+rewards = Map.get(@replay, :reward_totals, %{gold: @replay.reward, xp: @replay.reward})
+
+result =
+  cond do
+    is_nil(@battle.winner_id) -> "draw"
+    won? -> "victory"
+    true -> "defeat"
+  end %>
+<section
+  id="training-battle-result"
+  class={[
+    "league-outcome",
+    target_battle? && "is-target-result",
+    won? && "is-stage-victory",
+    result == "defeat" && "is-defeat"
+  ]}
+  aria-labelledby="training-result-title"
+  data-result={result}
+  style={won? && "--victory-scene: url(/images/tutorial/arena-of-ascension.jpg)"}
+>
+  <img
+    :if={result == "defeat"}
+    class="league-defeat-art"
+    src={GH.background_url(@battle.winner)}
+    alt=""
+    aria-hidden="true"
+  />
+  <div class="league-outcome-heading">
+    <div :if={won? && !@earned_league} class="league-victory-seal" aria-hidden="true"><.icon name="game-trophy" /></div>
+    <img
+      :if={@earned_league}
+      class="team-promotion-emblem"
+      src={"/images/league/#{@earned_league}.png"}
+      alt={Moba.leagues()[@earned_league]}
+    />
+    <div :if={result == "defeat"} class="league-defeat-emblem" aria-hidden="true">
+      <img src={GH.image_url(@battle.winner.avatar)} alt="" />
+    </div>
+    <div class="league-outcome-copy">
+      <p :if={!target_battle?} class="league-outcome-eyebrow">
+        {if @engagement_complete, do: "Battle complete", else: "Turn #{@replay.turn} · #{@replay.label}"}
+      </p>
+      <h3 id="training-result-title">
+        {if @earned_league,
+          do: "#{String.replace(Moba.leagues()[@earned_league], " League", "")} reached",
+          else: String.capitalize(result)}
+      </h3>
+      <p
+        :if={@engagement_complete && @replay.winner == :radiant && (rewards.gold > 0 || rewards.xp > 0)}
+        class="team-result-spoils"
+      >
+        <span :if={rewards.gold > 0} class="text-warning">+{rewards.gold} Gold</span>
+        <span :if={rewards.xp > 0} class="text-info">+{rewards.xp} XP</span>
+      </p>
+      <p :if={!target_battle?} class={if won?, do: "league-stage-cleared", else: "league-outcome-description"}>
+        Battle {@index} {if won?, do: "cleared", else: "complete"}{if @battle.winner, do: " · #{@combat_scene.status}"}
+      </p>
+    </div>
+    <.link
+      id={@continue_id}
+      navigate={@continue_path}
+      class={if @engagement_complete, do: "btn league-return base-secondary", else: "btn league-continue"}
+      data-battle-continue="true"
+      aria-keyshortcuts="Space"
+    >
+      {@continue_label} <span aria-hidden="true">→</span>
+      <kbd class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>
+    </.link>
+  </div>
+  <ol
+    :if={!target_battle?}
+    class="league-challenge-steps team-opponent-steps"
+    aria-label="Opposing team"
+  >
+    <li
+      :for={opponent <- opponent_steps(@replay, @battle, @index)}
+      id={"team-opponent-step-#{opponent.id}"}
+      data-state={opponent.state}
+      aria-current={opponent.state == "next" && "step"}
+      aria-disabled={to_string(opponent.state == "defeated")}
+    >
+      <img src={GH.image_url(opponent.hero.avatar)} alt={opponent.hero.avatar.name} />
+      <span><strong>{opponent.hero.avatar.name}</strong><small>{opponent.label}</small></span>
+    </li>
+  </ol>
+</section>

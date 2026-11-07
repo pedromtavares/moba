@@ -1,9 +1,11 @@
 defmodule MobaWeb.V2.LibraryLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
   import MobaWeb.V2.Components.ManualComponents
 
   def mount(_, _session, socket) do
+    socket = assign_new(socket, :current_scope, fn -> Game.TeamRuns.scope(socket.assigns.current_player) end)
     {:ok, socket_init(socket)}
   end
 
@@ -20,6 +22,7 @@ defmodule MobaWeb.V2.LibraryLive do
     assign(socket,
       avatars: avatars,
       skills: skills,
+      items: Moba.cached_items(),
       sidebar_code: "library"
     )
   end

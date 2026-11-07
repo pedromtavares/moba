@@ -607,17 +607,33 @@ defmodule MobaWeb.V2.Components.CreateComponents do
 
     ~H"""
     <.form for={@form} id="invoke-name-form">
+      <.creation_name field={@form[:name]} label="Hero name" error={@error} error_id="invoke-name-error" />
+    </.form>
+    """
+  end
+
+  attr :field, Phoenix.HTML.FormField, required: true
+  attr :label, :string, required: true
+  attr :error, :string, default: nil
+  attr :error_id, :string, required: true
+  attr :maxlength, :integer, default: 15
+  attr :inline_label, :boolean, default: false
+
+  def creation_name(assigns) do
+    ~H"""
+    <div class={["creation-name-field", @inline_label && "creation-name-field--inline"]}>
       <.input
-        field={@form[:name]}
-        label="Hero name"
+        field={@field}
+        label={@label}
         type="text"
         minlength="3"
-        maxlength="15"
+        maxlength={@maxlength}
         class="invoke-name-input"
-        aria-describedby={@error && "invoke-name-error"}
+        aria-describedby={@error && @error_id}
+        aria-invalid={@error && "true"}
       />
-      <p id="invoke-name-error" role="alert" hidden={is_nil(@error)}>{@error}</p>
-    </.form>
+      <p id={@error_id} class="creation-name-error" role="alert" hidden={is_nil(@error)}>{@error}</p>
+    </div>
     """
   end
 
@@ -627,9 +643,11 @@ defmodule MobaWeb.V2.Components.CreateComponents do
         %{
           id: to_string(avatar.id),
           name: avatar.name,
+          code: avatar.code,
           role: avatar.role,
           description: avatar.description,
           art: GH.background_url(avatar),
+          portrait: GH.image_url(avatar),
           ultimate: invoke_skill_data(avatar.ultimate),
           stats: %{
             health: avatar.total_hp,
@@ -661,7 +679,9 @@ defmodule MobaWeb.V2.Components.CreateComponents do
       skills: Enum.map(assigns.skills, &invoke_skill_data/1),
       builds: builds,
       storage_key: "invoke:#{assigns.cache_key}",
-      named: !is_nil(assigns.current_player.user_id),
+      draft_mode: Map.get(assigns, :draft_mode, false),
+      draft_picks: Map.get(assigns, :draft_picks, []),
+      named: !is_nil(assigns.current_player.user_id) && !Map.get(assigns, :draft_mode, false),
       initial: %{
         avatar: to_string(assigns.selected_avatar.id),
         skills: Enum.map(assigns.selected_skills, &to_string(&1.id)),
@@ -695,9 +715,16 @@ defmodule MobaWeb.V2.Components.CreateComponents do
 
   defp builds_for(role), do: Game.skill_builds_for(role)
 
-  defp invoke_build_art(title) do
+  @doc false
+  def invoke_build_art(title) do
     slug = title |> String.downcase() |> String.replace(" ", "-")
-    "/images/builds/#{slug}.jpg"
+
+    extension =
+      if slug in ~w(destroyer purifier blink-striker undying ninja-carry ninja-bruiser fury-bruiser stomper),
+        do: "webp",
+        else: "jpg"
+
+    "/images/builds/#{slug}.#{extension}"
   end
 
   defp role(%{role: role}) when not is_nil(role), do: String.capitalize(role)

@@ -1,7 +1,10 @@
 defmodule MobaWeb.V2.TavernLive do
   use MobaWeb, :v2_live_view
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
   def mount(_params, _session, socket) do
+    socket = assign_new(socket, :current_scope, fn -> Game.TeamRuns.scope(socket.assigns.current_player) end)
     {:ok, socket}
   end
 
@@ -13,54 +16,37 @@ defmodule MobaWeb.V2.TavernLive do
     {:noreply, assign(socket, active_tab: "avatars")}
   end
 
-  def handle_event("show-skills", _, socket) do
-    {:noreply, assign(socket, active_tab: "skills")}
-  end
-
   def handle_event("show-skins", _, socket) do
     {:noreply, assign(socket, active_tab: "skins")}
   end
 
-  def handle_event("previous-skin", _, socket) do
-    index = socket.assigns.current_index - 1
-    skin = Enum.at(socket.assigns.current_skins, index)
-    {:noreply, assign(socket, current_skin: skin, current_index: index)}
+  def handle_event("browse-avatar", %{"code" => code}, socket) do
+    avatar = Enum.find(socket.assigns.avatars, &(&1.code == code))
+    {:noreply, if(avatar, do: assign(socket, selected_avatar: avatar), else: socket)}
   end
 
-  def handle_event("next-skin", _, socket) do
-    index = socket.assigns.current_index + 1
-    skin = Enum.at(socket.assigns.current_skins, index)
-    {:noreply, assign(socket, current_skin: skin, current_index: index)}
+  def handle_event(event, _, socket) when event in ["previous-skin", "next-skin"] do
+    step = if event == "next-skin", do: 1, else: -1
+    index = socket.assigns.current_index + step
+    skin = if index >= 0, do: Enum.at(socket.assigns.current_skins, index)
+    {:noreply, if(skin, do: assign(socket, current_skin: skin, current_index: index), else: socket)}
   end
 
-  def handle_event("set-avatar", %{"code" => code}, %{assigns: %{all_avatars: all_avatars}} = socket) do
-    avatar = Enum.find(all_avatars, &(&1.code == code))
-    skins = Game.list_avatar_skins(code)
-    skin = List.first(skins)
+  def handle_event("set-avatar", %{"code" => code}, socket) do
+    case Enum.find(socket.assigns.all_avatars, &(&1.code == code)) do
+      nil ->
+        {:noreply, socket}
 
-    {:noreply, assign(socket, current_avatar: avatar, current_skins: skins, current_skin: skin, current_index: 0)}
-  end
+      avatar ->
+        skins = Game.list_avatar_skins(code)
 
-  def handle_event("set-skin", %{"code" => code}, socket) do
-    skin = Enum.find(socket.assigns.current_skins, &(&1.code == code))
-    {:noreply, assign(socket, current_skin: skin)}
+        {:noreply,
+         assign(socket, current_avatar: avatar, current_skins: skins, current_skin: List.first(skins), current_index: 0)}
+    end
   end
 
   def handle_event("unlock-avatar", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
     resource = Game.get_avatar_by_code!(code)
-    player = create_unlock!(player, resource)
-    socket = assign(socket, current_player: player)
-
-    socket =
-      if socket.assigns.preview && unlocked?(resource, player),
-        do: put_flash(socket, :info, "#{resource.name} unlocked. It's now in your collection."),
-        else: socket
-
-    {:noreply, socket}
-  end
-
-  def handle_event("unlock-skill", %{"code" => code}, %{assigns: %{current_player: player}} = socket) do
-    resource = Game.get_current_skill!(code, 1)
     player = create_unlock!(player, resource)
     socket = assign(socket, current_player: player)
 
@@ -100,26 +86,25 @@ defmodule MobaWeb.V2.TavernLive do
     avatars = Game.list_unlockable_avatars()
     all_avatars = Game.list_avatars() |> Enum.sort_by(& &1.level_requirement, :desc)
     user = Accounts.get_user_with_unlocks!(current_player.user_id)
-    skills = Game.list_unlockable_skills()
     current_avatar = Enum.find(all_avatars, &(&1.code == avatar_code)) || List.first(all_avatars)
     current_player = Map.put(current_player, :user, user)
-    current_skins = Game.list_avatar_skins(current_avatar.code)
+    current_skins = if current_avatar, do: Game.list_avatar_skins(current_avatar.code), else: []
     current_skin = List.first(current_skins)
     featured_avatar = featured_avatar_for(current_player, avatars)
+    avatars = if featured_avatar, do: [featured_avatar | List.delete(avatars, featured_avatar)], else: avatars
 
     assign(socket,
       active_tab: active_tab,
       all_avatars: all_avatars,
-      avatars: avatars -- [featured_avatar],
-      avatar_code: avatar_code,
+      avatars: avatars,
+      selected_avatar: List.first(avatars),
       current_avatar: current_avatar,
       current_index: 0,
       current_player: current_player,
       current_skins: current_skins,
       current_skin: current_skin,
       featured_avatar: featured_avatar,
-      sidebar_code: "tavern",
-      skills: skills
+      sidebar_code: "tavern"
     )
   end
 
@@ -198,240 +183,110 @@ defmodule MobaWeb.V2.TavernLive do
 
   defp tavern_unlock_actions(assigns) do
     ~H"""
-    <%= if assigns[:preview] do %>
-      <div class="tavern-unlock" data-available={to_string(!!can_unlock?(@resource, @player))}>
-        <%= if can_unlock?(@resource, @player) do %>
-          <button
-            type="button"
-            class="btn tavern-unlock-button"
-            phx-click={@action}
-            phx-value-code={@resource.code}
-            phx-disable-with="Unlocking…"
-            id={"unlock-#{@resource.code}"}
-          >
-            <span>Unlock</span>
-            <span class="tavern-unlock-cost">◆ {price_to_unlock(@resource)} <small>Shards</small></span>
-          </button>
-        <% else %>
-          <button type="button" class="btn tavern-unlock-button" disabled>
-            <span>Locked</span>
-            <span class="tavern-unlock-cost">◆ {price_to_unlock(@resource)} <small>Shards</small></span>
-          </button>
-          <p class="tavern-unlock-requirement">
-            <%= if has_enough_shards?(@resource, @player) do %>
-              {unlock_error_message(@resource, @player)}
-            <% else %>
-              {price_to_unlock(@resource) - @player.user.shard_count} more Shards needed
-            <% end %>
-          </p>
-        <% end %>
-      </div>
-    <% else %>
-      <div class="text-center my-2">
-        <%= if can_unlock?(@resource, @player) do %>
-          <a
-            href="javascript:;"
-            class="btn btn-outline-warning btn-lg"
-            phx-click={@action}
-            phx-value-code={@resource.code}
-            phx-hook="Loading"
-            id={"unlock-#{@resource.code}"}
-          >
-            <span class="loading-text">
-              <i class="ui-icon ui-shard mr-1"></i>Unlock for {price_to_unlock(@resource)} Shards
-            </span>
-          </a>
-        <% else %>
-          <a href="javascript:;" class="btn btn-secondary no-action">
-            <i class="ui-icon ui-lock mr-1"></i>{unlock_error_message(@resource, @player)}
-          </a>
-        <% end %>
-      </div>
-    <% end %>
+    <div class="tavern-unlock" data-available={to_string(!!can_unlock?(@resource, @player))}>
+      <%= if can_unlock?(@resource, @player) do %>
+        <button
+          type="button"
+          class="btn tavern-unlock-button"
+          phx-click={@action}
+          phx-value-code={@resource.code}
+          phx-disable-with="Unlocking…"
+          id={"unlock-#{@resource.code}"}
+        >
+          <span>Unlock</span>
+          <span class="tavern-unlock-cost">◆ {price_to_unlock(@resource)} <small>Shards</small></span>
+        </button>
+      <% else %>
+        <button type="button" class="btn tavern-unlock-button" disabled>
+          <span>Locked</span>
+          <span class="tavern-unlock-cost">◆ {price_to_unlock(@resource)} <small>Shards</small></span>
+        </button>
+        <p class="tavern-unlock-requirement">
+          <%= if has_enough_shards?(@resource, @player) do %>
+            {unlock_error_message(@resource, @player)}
+          <% else %>
+            {price_to_unlock(@resource) - @player.user.shard_count} more Shards needed
+          <% end %>
+        </p>
+      <% end %>
+    </div>
     """
   end
 
-  defp tavern_avatar_stats(assigns) do
+  defp tavern_roster(assigns) do
     ~H"""
-    <div class="row align-items-center tavern-role">
-      <div class="col text-center font-weight-bold border-bottom">
-        <h4 class="m-0">
-          <img src={"/images/#{@avatar.role}_icon.png"} style="width: 30px" class="text-center mr-1" />{role(@avatar)}
-          <br />
-          <small class="font-italic d-block mb-2 mt-1">
-            {role_description(@avatar)}
-          </small>
-        </h4>
-      </div>
-    </div>
-    <div class="tavern-attributes">
-      <div class="row align-items-center tavern-attribute tavern-attribute-offense">
-        <div class="col-6 text-right border-bottom border-right text-danger font-weight-bold stat-col">
-          <i class="ui-icon ui-dagger mr-1"></i>Offense
-        </div>
-        <div class="col">
-          <div class="progress progress-fixed">
-            <div style={"width:#{display_percentage(:offense, @avatar, @avatars)}%"} class="progress-bar bg-danger">
-              <span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row align-items-center tavern-attribute tavern-attribute-defense">
-        <div class="col-6 text-right border-bottom border-right text-warning font-weight-bold stat-col">
-          <i class="ui-icon ui-shield mr-1"></i>Defense
-        </div>
-        <div class="col">
-          <div class="progress progress-fixed">
-            <div style={"width:#{display_percentage(:defense, @avatar, @avatars)}%"} class="progress-bar bg-warning">
-              <span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row align-items-center tavern-attribute tavern-attribute-magic">
-        <div class="col-6 text-right border-bottom border-right text-primary font-weight-bold stat-col">
-          <i class="ui-icon ui-wand mr-1"></i>Magic
-        </div>
-        <div class="col">
-          <div class="progress progress-fixed">
-            <div style={"width:#{display_percentage(:magic, @avatar, @avatars)}%"} class="progress-bar bg-primary">
-              <span></span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="row align-items-center tavern-attribute tavern-attribute-speed">
-        <div class="col-6 text-right border-bottom border-right text-success font-weight-bold stat-col">
-          <i class="ui-icon ui-runner mr-1"></i>Speed
-        </div>
-        <div class="col">
-          <div class="progress progress-fixed">
-            <div style={"width:#{display_percentage(:speed, @avatar, @avatars)}%"} class="progress-bar bg-success">
-              <span></span>
-            </div>
-          </div>
-        </div>
+    <div :if={@avatars != []} class="manual-roster">
+      <div class="manual-avatar-grid" role="group" aria-label="Choose an avatar">
+        <button
+          :for={avatar <- @avatars}
+          id={"#{@event}-#{avatar.code}"}
+          type="button"
+          phx-click={@event}
+          phx-value-code={avatar.code}
+          aria-pressed={to_string(@selected && @selected.id == avatar.id)}
+        >
+          <img src={GH.image_url(avatar)} alt="" />
+          <span>{avatar.name}</span>
+        </button>
       </div>
     </div>
     """
   end
 
   defp tavern_avatar_card(assigns) do
-    assigns = assign_new(assigns, :featured, fn -> false end)
-
     ~H"""
-    <div class="col-xl-4 col-lg-6 col-sm-12 mb-2 tavern-hero-column" id={"avatar-#{@avatar.id}"}>
-      <div class="hero-card card ribbon-box hero-card-avatar tavern-hero-card">
-        <%= if @featured do %>
-          <div class="ribbon-two ribbon-two-purple"><span>Free</span></div>
-        <% else %>
-          <%= if unlocked?(@avatar, @player) do %>
-            <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
-          <% end %>
-        <% end %>
-        <div class="card-body text-center p-0" style={"background-image: url(#{GH.background_url(@avatar)})"}>
-          <div class="name">
-            <h3 class="m-0 text-center p-2 text-white f-rpg">{@avatar.name}</h3>
-          </div>
-          <div class="ultimate" tabindex="0" data-toggle="tooltip" title={TT.skill_tooltip(@avatar.ultimate)}>
-            <h4 class="mt-0">Ultimate</h4>
-            <img src={GH.image_url(@avatar.ultimate)} alt={@avatar.ultimate.name} style="width: 70px" class="img-border-sm" />
-            <h5 class="mb-0">{@avatar.ultimate.name}</h5>
-            <small><em>(mouse over for info)</em></small>
+    <div class="tavern-avatar-stage" id={"avatar-#{@avatar.id}"} style={"--avatar-art: url(#{GH.background_url(@avatar)})"}>
+      <div class="tavern-avatar-identity">
+        <p class="tavern-avatar-role">
+          <img src={"/images/#{@avatar.role}_icon.png"} alt="" /> {role(@avatar)}
+        </p>
+        <h2>{@avatar.name}</h2>
+        <p>{@avatar.description}</p>
+      </div>
+      <div class="tavern-catalog-readout">
+        <div
+          :if={@avatar.ultimate}
+          class="tavern-avatar-ultimate"
+          tabindex="0"
+          data-toggle="tooltip"
+          title={TT.skill_tooltip(@avatar.ultimate)}
+        >
+          <img src={GH.image_url(@avatar.ultimate)} alt="" />
+          <div><small>Ultimate</small><strong>{@avatar.ultimate.name}</strong></div>
+        </div>
+        <div class="tavern-avatar-attributes" aria-label={role_description(@avatar)}>
+          <div
+            :for={
+              {stat, label, icon} <- [
+                {:offense, "Offense", "game-offense"},
+                {:defense, "Defense", "game-defense"},
+                {:magic, "Magic", "game-magic"},
+                {:speed, "Speed", "game-speed"}
+              ]
+            }
+            class="tavern-avatar-attribute"
+            data-stat={stat}
+          >
+            <span><.icon name={icon} />{label}</span>
+            <progress value={display_percentage(stat, @avatar, @avatars)} max="100" aria-label={label}></progress>
           </div>
         </div>
-
-        <div class="transparent card-footer text-center">
-          <.tavern_avatar_stats avatar={@avatar} avatars={@avatars} />
-          <div class="row mt-3 tavern-gameplay">
-            <div class="col">
-              <h4 class="mt-0 d-none d-lg-block">Gameplay</h4>
-              <div class="description">
-                <em>{@avatar.description}</em>
-              </div>
-              <div :if={@featured || !unlocked?(@avatar, @player)} class="tavern-card-action">
-                <%= if @featured do %>
-                  <%= if assigns[:preview] do %>
-                    <a id="tavern-discord-unlock" href="/auth?origin=tavern" class="tavern-discord-unlock">
-                      <i class="ui-icon ui-chat-controller" aria-hidden="true"></i>
-                      <span>Unlock with Discord</span><span aria-hidden="true">↗</span>
-                    </a>
-                    <p class="tavern-discord-note">Free avatar · Connect your Discord account</p>
-                  <% else %>
-                    <div class="text-center my-2">
-                      <a href="/auth?origin=tavern" class="btn btn-purple btn-lg btn-block">
-                        <i class="ui-icon ui-chat-controller"></i> Connect with Discord to Unlock
-                      </a>
-                    </div>
-                  <% end %>
-                <% else %>
-                  <%= unless unlocked?(@avatar, @player) do %>
-                    <.tavern_unlock_actions
-                      preview={assigns[:preview]}
-                      resource={@avatar}
-                      player={@player}
-                      action="unlock-avatar"
-                    />
-                  <% end %>
-                <% end %>
-              </div>
+        <%= cond do %>
+          <% @featured -> %>
+            <div>
+              <a id="tavern-discord-unlock" href="/auth?origin=tavern" class="tavern-discord-unlock">
+                <i class="ui-icon ui-chat-controller" aria-hidden="true"></i>
+                <span>Unlock with Discord</span><span aria-hidden="true">↗</span>
+              </a>
+              <p class="tavern-discord-note">Free avatar · Connect your Discord account</p>
             </div>
-          </div>
-        </div>
+          <% unlocked?(@avatar, @player) -> %>
+            <div class="tavern-owned"><i class="ui-icon ui-unlock" aria-hidden="true"></i> Unlocked</div>
+          <% true -> %>
+            <.tavern_unlock_actions resource={@avatar} player={@player} action="unlock-avatar" />
+        <% end %>
       </div>
     </div>
-    """
-  end
-
-  defp tavern_skill_card(assigns) do
-    ~H"""
-    <%= if assigns[:preview] do %>
-      <div class="col-12 col-md-6 col-lg-4 tavern-skill-column" id={"skill-#{@skill.id}"}>
-        <article class="tavern-skill-card" data-unlocked={to_string(unlocked?(@skill, @player))}>
-          <header>
-            <img src={GH.image_url(@skill)} alt="" />
-            <div>
-              <span class="tavern-eyebrow">{if @skill.passive, do: "Passive", else: "Active skill"}</span>
-              <h2>{@skill.name}</h2>
-            </div>
-            <span :if={unlocked?(@skill, @player)} class="tavern-owned">Owned ✓</span>
-          </header>
-          <p class="tavern-skill-description">{Moba.Game.SkillDescriptions.summary(@skill)}</p>
-          <details class="tavern-skill-details" id={"skill-details-#{@skill.id}"}>
-            <summary>Skill details <span aria-hidden="true">+</span></summary>
-            <div class="tavern-skill-readout">{Phoenix.HTML.raw(TT.skill_details(@skill))}</div>
-          </details>
-          <footer :if={!unlocked?(@skill, @player)}>
-            <.tavern_unlock_actions preview={true} resource={@skill} player={@player} action="unlock-skill" />
-          </footer>
-        </article>
-      </div>
-    <% else %>
-      <div class="col-12 col-md-6 col-lg-4 col-xl-3" id={"skill-#{@skill.id}"}>
-        <div class="card ribbon-box">
-          <%= if unlocked?(@skill, @player) do %>
-            <div class="ribbon-two ribbon-two-secondary"><span>Unlocked</span></div>
-          <% end %>
-          <div class="card-body text-center">
-            <img
-              src={GH.image_url(@skill)}
-              class={["skill-img img-border", @skill.passive && "passive"]}
-              data-toggle="tooltip"
-              title={TT.skill_tooltip(@skill)}
-            />
-            <br />
-            <h3 class="f-rpg">
-              {@skill.name}<br />
-              <small class="font-italic text-muted">(mouse over image for info)</small>
-            </h3>
-          </div>
-          <%= unless unlocked?(@skill, @player) do %>
-            <.tavern_unlock_actions resource={@skill} player={@player} action="unlock-skill" />
-          <% end %>
-        </div>
-      </div>
-    <% end %>
     """
   end
 end

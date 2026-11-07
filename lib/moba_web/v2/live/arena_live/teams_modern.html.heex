@@ -1,33 +1,79 @@
-<div id="teams-hud" class="arena arena-edit squad-page teams-modern" data-editing-hero={to_string(!is_nil(@hero))}>
-  <header class="squad-page-heading">
+<main
+  id="teams-hud"
+  class="arena arena-edit teams-cinematic"
+  phx-hook="HeroReviewViewport"
+  data-editing-hero={to_string(!is_nil(@hero))}
+>
+  <% heroes_per_page = heroes_per_page(@hero) %>
+  <% teams_per_page = if @hero, do: 3, else: 5 %>
+  <header class="team-workshop-heading" style="--workshop-scene: url(/images/tutorial/arena-of-ascension.jpg)">
     <div>
-      <span class="squad-eyebrow">Arena · Lineup builder</span>
+      <span class="squad-eyebrow">Arena · 3v3</span>
       <h1>Your teams</h1>
     </div>
-    <.link id="teams-return-button" navigate={preview_path(assigns, if(@return_match_id, do: ~p"/matches/#{@return_match_id}", else: ~p"/arena"))} class="btn base-secondary">
-      {if @return_match_id, do: "Return to match", else: "Return to arena"} →
-    </.link>
+    <div class="team-workshop-actions">
+      <button
+        :if={@hero}
+        id="close-team-customization"
+        type="button"
+        phx-click="close-customization"
+        class="btn base-secondary"
+      >
+        Done customizing ×
+      </button>
+      <.link
+        id="teams-return-button"
+        navigate={preview_path(assigns, if(@return_match_id, do: ~p"/matches/#{@return_match_id}", else: ~p"/arena"))}
+        class="btn base-secondary"
+      >
+        {if @return_match_id, do: "Return to match", else: "Return to arena"} →
+      </.link>
+    </div>
   </header>
-  <div class="squad-columns teams-columns">
-    <section class="squad-panel saved-teams" id="teams-container" aria-labelledby="saved-teams-title">
-      <div class="squad-panel-heading">
-        <h2 id="saved-teams-title">Saved teams</h2>
-        <strong>{length(@teams)}</strong>
-      </div>
-      <.form for={@team_form} id="arena-team-form" phx-submit="new-team" class="squad-create-team">
+  <div
+    id="team-workshop-layout"
+    class="team-workshop-layout"
+    phx-hook="LineupOrder"
+    data-lineup-id={@selected_team && @selected_team.id}
+  >
+    <section id="teams-container" class="squad-panel workshop-saved" aria-labelledby="saved-teams-title">
+      <header class="workshop-panel-heading">
+        <h2 id="saved-teams-title">Saved teams <small>{length(@teams)}</small></h2>
+        <div :if={length(@teams) > teams_per_page} class="workshop-pagination">
+          <button
+            :for={{direction, symbol} <- [{"previous", "←"}, {"next", "→"}]}
+            id={"teams-page-#{direction}"}
+            type="button"
+            phx-click="source-page"
+            phx-value-source="teams"
+            phx-value-direction={direction}
+            disabled={
+              if direction == "previous",
+                do: @teams_page == 0,
+                else: (@teams_page + 1) * teams_per_page >= length(@teams)
+            }
+            aria-label={"#{String.capitalize(direction)} teams"}
+          >
+            {symbol}
+          </button>
+        </div>
+      </header>
+      <.form for={@team_form} id="arena-team-form" phx-submit="new-team" class="workshop-create">
         <.input
           field={@team_form[:name]}
           type="text"
           id="team-name"
           maxlength="20"
-          class="squad-team-input"
+          class="workshop-team-input"
           placeholder="Team name"
           aria-label="Team name"
           required
         />
-        <button type="submit" class="btn base-secondary" id="create-team-button">Create team +</button>
+        <button type="submit" id="create-team-button" aria-label="Create team" title="Create team">
+          <.icon name="game-plus" />
+        </button>
       </.form>
-      <div class="squad-scroll">
+      <div class="workshop-team-grid">
         <.hud_notice
           :if={@teams == []}
           id="arena-no-teams"
@@ -35,117 +81,130 @@
           description="Name your first team above."
         />
         <button
-          :for={team <- @teams}
+          :for={team <- Enum.slice(@teams, @teams_page * teams_per_page, teams_per_page)}
           type="button"
           id={"team-row-#{team.id}"}
-          class={["squad-team-choice", @selected_team && @selected_team.id == team.id && "active"]}
+          class={["workshop-team-card", @selected_team && @selected_team.id == team.id && "active"]}
           phx-click="select-team"
           phx-value-id={team.id}
           aria-pressed={to_string((@selected_team && @selected_team.id == team.id) || false)}
         >
-          <span class="squad-team-name">{team.name}<small>{length(team.picks)} / 5</small></span>
-          <.lineup_preview heroes={team.picks} />
-          <span class="squad-team-meta">
-            <span>{if team.defensive, do: "◆ Defensive", else: "Offensive"}</span><span>{team.used_count} uses</span>
+          <div class="workshop-team-art">
+            <img :for={hero <- team.picks} src={GH.image_url(hero.avatar)} alt={hero.avatar.name} />
+          </div>
+          <span class="workshop-team-count">{length(team.picks)} / 3</span>
+          <span class="workshop-team-caption">
+            <strong>{team.name}</strong><small>{if team.defensive, do: "Defensive", else: "Offensive"}</small>
           </span>
         </button>
       </div>
     </section>
-    <section class="squad-panel team-lineup" id="current-team-container" aria-labelledby="current-team-title">
-      <%= if @selected_team do %>
-        <div class="squad-panel-heading">
-          <h2 id="current-team-title">{@selected_team.name}</h2>
-          <strong>{length(@selected_team.picks)} / 5</strong>
-        </div>
-        <div class="team-settings">
-          <label class="squad-defensive" for="toggle-defensive">
+    <section id="current-team-container" class="squad-panel workshop-lineup" aria-labelledby="current-team-title">
+      <header class="workshop-panel-heading">
+        <h2 id="current-team-title">
+          {if @selected_team, do: @selected_team.name, else: "Your lineup"}
+          <small>{if @selected_team, do: length(@selected_team.picks), else: 0} / 3</small>
+        </h2>
+        <div :if={@selected_team} class="workshop-team-settings">
+          <label class="workshop-defense" for="toggle-defensive">
             <input
               type="checkbox"
+              role="switch"
               id="toggle-defensive"
               phx-click="toggle-defensive"
               checked={@selected_team.defensive}
-            /><span>Defensive lineup</span>
+            />
+            <span class="workshop-switch" aria-hidden="true"></span><span>Defensive lineup</span>
           </label>
           <button
             type="button"
-            class="btn squad-remove"
+            class="workshop-delete"
             id="remove-selected-team"
             phx-click="remove-team"
             data-confirm={"Delete #{@selected_team.name}? Its saved lineup will be removed. Your heroes will stay in your collection."}
             data-confirm-title="Delete team?"
             data-confirm-accept="Delete team"
+            aria-label={"Delete #{@selected_team.name}"}
+            title="Delete team"
           >
-            Delete team
+            <.icon name="game-trash" />
           </button>
         </div>
-        <div class="squad-scroll lineup-list">
-          <.hud_notice
-            :if={@selected_team.picks == []}
-            id="arena-team-empty"
-            title="Choose your lineup"
-            description="Add up to 5 heroes from your collection."
-          />
-          <%= for position <- 1..5 do %>
+      </header>
+      <%= if @selected_team do %>
+        <div
+          class="workshop-lineup-grid"
+          id={if @selected_team.picks == [], do: "arena-team-empty", else: "saved-team-lineup"}
+        >
+          <%= for position <- 1..3 do %>
             <%= if pick = Enum.at(@selected_team.picks, position - 1) do %>
-              <div id={"team-hero-#{pick.id}"}>
-                <.roster_hero hero={pick} position={position}>
-                  <:actions>
+              <article class="workshop-hero" id={"team-hero-#{pick.id}"} data-lineup-hero={pick.id}>
+                <img class="workshop-hero-art" src={GH.background_url(pick)} alt={pick.avatar.name} />
+                <span class="roster-position">0{position}</span>
+                <div class="workshop-hero-identity">
+                  <strong>{pick.name}</strong><small>{pick.avatar.name}</small>
+                  <span
+                    class="workshop-level"
+                    tabindex="0"
+                    data-toggle="tooltip"
+                    title={TT.arena_stats_tooltip(pick, @current_player)}
+                    aria-label={"Level #{pick.level}, view combat stats"}
+                  >
+                    Level {pick.level} <.icon name="game-battle-log" />
+                  </span>
+                </div>
+                <div class="workshop-build">
+                  <.hero_skill_strip skills={pick.skills} container_class="skills-container" />
+                  <.hero_item_strip
+                    items={pick.items}
+                    container_class="items-container"
+                    item_container_class="item-container"
+                  />
+                </div>
+                <div class="workshop-hero-actions">
+                  <button
+                    :if={@selected_team.player_id == pick.player_id}
+                    type="button"
+                    id={"edit-hero-#{pick.id}"}
+                    phx-click="edit-hero"
+                    phx-value-id={pick.id}
+                    aria-label={"Customize #{pick.name}"}
+                    class={["workshop-customize", @hero && @hero.id == pick.id && "active"]}
+                  >
+                    <.icon name="game-hero" /> <span>Customize</span>
+                  </button>
+                  <div class="workshop-order">
                     <button
+                      :if={length(@selected_team.picks) > 1}
                       type="button"
-                      class="btn squad-order"
-                      phx-click="move-up"
-                      phx-value-id={pick.id}
-                      id={"move-up-#{pick.id}"}
-                      disabled={position == 1}
-                      aria-label={"Move #{pick.name} up"}
+                      class="lineup-grip"
+                      data-lineup-grip
+                      aria-label={"Reorder #{pick.name}, slot #{position}"}
+                      aria-keyshortcuts="ArrowUp ArrowDown"
+                      title="Drag to reorder or use the up and down keys"
                     >
-                      ↑
+                      <span aria-hidden="true"></span>
                     </button>
                     <button
                       type="button"
-                      class="btn squad-order"
-                      phx-click="move-down"
-                      phx-value-id={pick.id}
-                      id={"move-down-#{pick.id}"}
-                      disabled={position == length(@selected_team.picks)}
-                      aria-label={"Move #{pick.name} down"}
-                    >
-                      ↓
-                    </button>
-                    <button
-                      :if={@selected_team.player_id == pick.player_id}
-                      type="button"
-                      class="btn base-secondary"
-                      phx-click="edit-hero"
-                      phx-value-id={pick.id}
-                      id={"edit-hero-#{pick.id}"}
-                    >
-                      Edit hero
-                    </button>
-                    <button
-                      type="button"
-                      class="btn squad-remove"
+                      id={"remove-hero-#{pick.id}"}
                       phx-click="remove-hero"
                       phx-value-id={pick.id}
-                      id={"remove-hero-#{pick.id}"}
+                      aria-label={"Remove #{pick.name} from lineup"}
                     >
-                      Remove
+                      ×
                     </button>
-                  </:actions>
-                </.roster_hero>
-              </div>
+                  </div>
+                </div>
+              </article>
             <% else %>
-              <div class="squad-empty-slot" id={"team-empty-slot-#{position}"}>
-                <span>{position}</span><strong>Open slot</strong>
+              <div class="workshop-empty-slot" id={"team-empty-slot-#{position}"} data-lineup-empty>
+                <strong>0{position}</strong><span>Choose a hero</span>
               </div>
             <% end %>
           <% end %>
         </div>
       <% else %>
-        <div class="squad-panel-heading">
-          <h2 id="current-team-title">Your lineup</h2>
-          <strong>0 / 5</strong>
-        </div>
         <.hud_notice
           id="arena-no-selected-team"
           title="Build your lineup"
@@ -153,75 +212,72 @@
         />
       <% end %>
     </section>
-    <section class="squad-panel team-library" id="heroes-container" aria-labelledby="team-library-title">
-      <div class="squad-panel-heading">
-        <h2 id="team-library-title">Hero collection</h2>
-        <strong>{length(@heroes)}</strong>
-      </div>
-      <nav class="squad-tabs" aria-label="Hero source">
-        <button
-          :for={{type, label} <- [{"trained", "Trained heroes"}, {"available", "Available heroes"}]}
-          type="button"
-          id={"#{type}-heroes-button"}
-          phx-click="hero-list"
-          phx-value-type={type}
-          class={@heroes_tab == type && "active"}
-          aria-pressed={to_string(@heroes_tab == type)}
-        >
-          {label}
-        </button>
-      </nav>
-      <div :if={@heroes_tab == "trained"} class="team-library-sort">
-        <button type="button" class="btn" phx-click="sort" id="hero-sort">
-          Sorted by {if @sort == :recent, do: "Recent", else: "Rank"} ↕
-        </button>
-      </div>
-      <div class="squad-scroll">
+    <section id="heroes-container" class="squad-panel workshop-collection" aria-labelledby="team-library-title">
+      <header class="workshop-panel-heading">
+        <h2 id="team-library-title">Hero collection <small>{length(@heroes)}</small></h2>
+        <div class="workshop-library-controls">
+          <button type="button" phx-click="sort" id="hero-sort">
+            {if @sort == :recent, do: "Recent", else: "Rank"} ↕
+          </button>
+          <div :if={length(@heroes) > heroes_per_page} class="workshop-pagination">
+            <button
+              :for={{direction, symbol} <- [{"previous", "←"}, {"next", "→"}]}
+              id={"heroes-page-#{direction}"}
+              type="button"
+              phx-click="source-page"
+              phx-value-source="heroes"
+              phx-value-direction={direction}
+              disabled={
+                if direction == "previous",
+                  do: @heroes_page == 0,
+                  else: (@heroes_page + 1) * heroes_per_page >= length(@heroes)
+              }
+              aria-label={"#{String.capitalize(direction)} heroes"}
+            >
+              {symbol}
+            </button>
+          </div>
+        </div>
+      </header>
+      <div class="workshop-collection-grid">
         <.hud_notice
           :if={@heroes == []}
           id="arena-no-heroes"
-          title={if @heroes_tab == "trained", do: "No trained heroes yet", else: "No available heroes"}
-          description={if @heroes_tab == "trained", do: "Heroes that reach Platinum League appear here."}
+          title="No trained heroes yet"
+          description="Heroes that reach Platinum League appear here."
         >
-          <:actions :if={@heroes_tab == "trained"}>
+          <:actions><.link navigate={~p"/new"} class="btn base-secondary">Start training →</.link></:actions>
+        </.hud_notice>
+        <%= for hero <- Enum.slice(@heroes, @heroes_page * heroes_per_page, heroes_per_page) do %>
+          <% picked? = @selected_team && hero.id in @selected_team.pick_ids %>
+          <% can_add? = @selected_team && !picked? && length(@selected_team.picks) < 3 %>
+          <div id={"available-hero-#{hero.id}"} class={["workshop-collection-hero", picked? && "selected"]}>
             <button
               type="button"
-              class="btn base-secondary"
-              phx-click="hero-list"
-              phx-value-type="available"
-              id="arena-browse-available"
+              id={"add-button-#{hero.id}"}
+              class={picked? && "roster-picked"}
+              phx-click="add-hero"
+              phx-value-id={hero.id}
+              disabled={!can_add?}
+              data-lineup-add={can_add? && hero.id}
+              aria-label={if picked?, do: "#{hero.avatar.name} in lineup", else: "Add #{hero.avatar.name} to lineup"}
             >
-              Available heroes →
+              <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} /><strong>{hero.avatar.name}</strong><span>Lv {hero.level}</span>
             </button>
-          </:actions>
-        </.hud_notice>
-        <%= for hero <- @heroes do %>
-          <% picked? = @selected_team && hero.id in @selected_team.pick_ids %>
-          <div id={"available-hero-#{hero.id}"}>
-            <.roster_hero hero={hero} picked={picked? || false}>
-              <:actions>
-                <%= cond do %>
-                  <% picked? -> %>
-                    <span class="squad-selected-label">In lineup ✓</span>
-                  <% @selected_team -> %>
-                    <button
-                      type="button"
-                      class="btn squad-add"
-                      phx-click="add-hero"
-                      phx-value-id={hero.id}
-                      id={"add-button-#{hero.id}"}
-                      disabled={length(@selected_team.picks) >= 5}
-                    >
-                      {if length(@selected_team.picks) >= 5, do: "Lineup full", else: "Add to lineup +"}
-                    </button>
-                  <% true -> %>
-                    <span class="squad-selected-label">Create a team to add heroes</span>
-                <% end %>
-              </:actions>
-            </.roster_hero>
+            <button
+              :if={picked?}
+              id={"collection-remove-#{hero.id}"}
+              class="workshop-collection-remove"
+              type="button"
+              phx-click="remove-hero"
+              phx-value-id={hero.id}
+              aria-label={"Remove #{hero.avatar.name} from lineup"}
+            >
+              ×
+            </button>
           </div>
         <% end %>
       </div>
     </section>
   </div>
-</div>
+</main>

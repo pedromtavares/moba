@@ -25,7 +25,11 @@
             <img src={"/images/pve/#{opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
             <div style="width: 70%">
               <h4 class="mt-2">
-                <.link navigate={preview_path(assigns, ~p"/player/#{opponent.id}")} class="text-white">
+                <.link
+                  navigate={preview_path(assigns, ~p"/player/#{opponent.id}")}
+                  data-profile-username={Moba.Utils.username(opponent)}
+                  class="text-white"
+                >
                   {username(opponent)}
                 </.link>
                 <span :if={@preview} class={[duel_badge_class(duel), "history-detail"]}>

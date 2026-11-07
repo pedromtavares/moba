@@ -88,4 +88,34 @@ defmodule Moba.Game.QuestsTest do
       assert updated.user.shard_count == player.user.shard_count
     end
   end
+
+  test "one qualifying run awards every unlocked rank and its prizes exactly once" do
+    avatars = Game.list_avatars()
+    previous = avatars |> Enum.take(19) |> Enum.map(& &1.code)
+
+    player =
+      create_player!(%{
+        pve_tier: 4,
+        pve_progression: %{master_codes: previous, grandmaster_codes: previous, invoker_codes: previous}
+      })
+
+    before = Moba.Accounts.get_user!(player.user_id).shard_count
+
+    hero = %{
+      player: player,
+      avatar: Enum.at(avatars, 19),
+      league_tier: 6,
+      total_xp_farm: 30_000,
+      total_gold_farm: 30_000
+    }
+
+    Game.Quests.track_pve_progression!(hero)
+    updated = Game.get_player!(player.id)
+    assert updated.pve_tier == 7
+    assert Map.keys(updated.pve_progression.history) |> Enum.sort() == ["5", "6", "7"]
+    prize = Enum.sum(Enum.map(5..7, &Game.get_quest(&1).prize))
+    assert updated.user.shard_count == before + prize
+    Game.Quests.track_pve_progression!(hero)
+    assert Game.get_player!(player.id).user.shard_count == updated.user.shard_count
+  end
 end

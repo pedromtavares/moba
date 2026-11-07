@@ -1,30 +1,49 @@
 defmodule MobaWeb.V2.BattleLive do
   use MobaWeb, :v2_live_view
+  on_mount MobaWeb.V2.Hooks.TeamAccess
 
   import MobaWeb.CoreComponents, only: [icon: 1]
 
-  alias MobaWeb.V2.TutorialComponent
   alias Moba.Game
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
   alias MobaWeb.V2.Components.CombatScene
 
   embed_templates "battle_live/*"
 
-  def mount(_, _, %{assigns: %{current_player: player}} = socket) do
-    {:ok, assign(socket, tutorial_step: player.tutorial_step, show_combat_log: false)}
+  def mount(_, session, socket) do
+    {:ok,
+     assign(socket,
+       show_combat_log: false,
+       training_record: nil,
+       arena_match_id: nil,
+       arena_battle_id: nil,
+       access_session: session
+     )}
   end
 
   def handle_params(params, _uri, socket) do
     with_battle(socket, params["id"], fn battle ->
-      socket = battle_assigns(battle, params, socket)
+      cond do
+        battle.training_team_id ->
+          data = Game.TrainingEncounters.for_battle!(socket.assigns.current_scope, battle.id)
+          assign(socket, training_record: data.record, training_battle_index: data.index, arena_match_id: nil)
 
-      if connected?(socket) do
-        MobaWeb.subscribe("battle-#{battle.id}")
+        battle.match_id && battle.match.interactive ->
+          assign(socket, arena_match_id: battle.match_id, arena_battle_id: battle.id, training_record: nil)
+
+        true ->
+          socket = battle_assigns(battle, params, assign(socket, training_record: nil, arena_match_id: nil))
+          if connected?(socket), do: MobaWeb.subscribe("battle-#{battle.id}")
+          socket
       end
-
-      socket
     end)
   end
+
+  def handle_event(_, _, %{assigns: %{arena_match_id: id}} = socket) when not is_nil(id),
+    do: {:noreply, socket}
+
+  def handle_event(_, _, %{assigns: %{training_record: record}} = socket) when not is_nil(record),
+    do: {:noreply, socket}
 
   def handle_event("toggle-combat-log", _, socket),
     do: {:noreply, assign(socket, show_combat_log: !socket.assigns.show_combat_log)}
@@ -48,10 +67,7 @@ defmodule MobaWeb.V2.BattleLive do
           active_defender?(battle, last_turn, socket.assigns.current_player)
 
       if valid_attacker? do
-        socket =
-          next_turn(socket, battle, %{skill: skill, item: item, player_id: socket.assigns.current_player.id}, last_turn)
-
-        check_tutorial(socket, socket.assigns.battle)
+        next_turn(socket, battle, %{skill: skill, item: item, player_id: socket.assigns.current_player.id}, last_turn)
       else
         socket
       end
@@ -88,6 +104,9 @@ defmodule MobaWeb.V2.BattleLive do
     {:noreply, assign(socket, skill: skill)}
   end
 
+  def handle_info(_, %{assigns: %{training_record: record}} = socket) when not is_nil(record),
+    do: {:noreply, socket}
+
   def handle_info(
         {:turn, %{battle_id: battle_id, turn_number: turn_number}},
         %{assigns: %{battle: %{id: current_id}}} = socket
@@ -103,8 +122,11 @@ defmodule MobaWeb.V2.BattleLive do
 
   defp with_battle(socket, id, callback) do
     case Engine.get_battle(id) do
-      nil -> {:noreply, assign(socket, battle: nil, hide_sidebar: false, sidebar_code: "training")}
-      battle -> {:noreply, callback.(battle)}
+      nil ->
+        {:noreply, assign(socket, battle: nil, training_record: nil, hide_sidebar: false, sidebar_code: "training")}
+
+      battle ->
+        {:noreply, callback.(battle)}
     end
   end
 
@@ -121,7 +143,7 @@ defmodule MobaWeb.V2.BattleLive do
       hide_sidebar: !battle.finished,
       sidebar_code: "training",
       last_turn: last_turn,
-      skill: preselected_skill(turn.attacker, turn),
+      skill: Engine.preselected_skill(turn),
       snapshot: battle.attacker_snapshot,
       turn: turn,
       turn_timer: turn_timer(last_turn, battle)
@@ -141,16 +163,6 @@ defmodule MobaWeb.V2.BattleLive do
   end
 
   defp check_stuck(socket), do: socket
-
-  defp check_tutorial(socket, %{attacker_snapshot: %{league_step: 0}, type: "league"} = battle) do
-    if battle.winner_id == battle.attacker_id do
-      TutorialComponent.next_step(socket, 11)
-    else
-      socket
-    end
-  end
-
-  defp check_tutorial(socket, _), do: socket
 
   defp next_turn(socket, battle, battle_opts, last_turn) do
     battle = Engine.continue_battle!(battle, battle_opts)
@@ -173,7 +185,7 @@ defmodule MobaWeb.V2.BattleLive do
       initial_turn: if(socket.assigns.preview, do: initial_turn(battle)),
       last_turn: last_turn,
       snapshot: battle.attacker_snapshot,
-      skill: preselected_skill(turn.attacker, turn),
+      skill: Engine.preselected_skill(turn),
       turn: turn,
       turn_timer: turn_timer(last_turn, battle)
     )
@@ -236,15 +248,6 @@ defmodule MobaWeb.V2.BattleLive do
   defp can_use?(_, %Game.Schema.Item{active: false}), do: false
   defp can_use?(_, %Game.Schema.Skill{passive: true}), do: false
   defp can_use?(turn, resource), do: Engine.can_use_resource?(turn, resource)
-
-  defp preselected_skill(%{double_skill: skill}, _) when not is_nil(skill), do: skill
-
-  defp preselected_skill(attacker, turn) do
-    attacker.skill_order
-    |> Enum.filter(fn skill -> can_use?(turn, skill) end)
-    |> Enum.take(1)
-    |> List.first()
-  end
 
   defp skill_name(%{name: name}), do: name
   defp skill_name(skill), do: (skill && skill["name"]) || "Basic Attack"

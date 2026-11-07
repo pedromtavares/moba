@@ -55,7 +55,7 @@
   .duel-final-status .btn { min-height: 34px; padding: 6px 10px; font-size: 13px; }
 
   .duel-chat { overflow: hidden; display: flex; flex-direction: column; border: 1px solid #baa98a30; border-radius: 8px; background: #0c131dcf; }
-  .duel-messages { height: 104px; overflow-y: auto; overscroll-behavior: contain; padding: 10px 14px; }
+  .duel-messages { height: 104px; overflow: hidden auto; overscroll-behavior: contain; padding: 10px 14px; }
   .duel-chat-empty { display: grid; place-items: center; height: 100%; margin: 0; color: #7d899a; font-size: 16px; }
   .duel-message { display: flex; align-items: baseline; gap: 7px; padding: 3px 0; font-size: 15px; }
   .duel-message > img { width: 20px; height: 20px; align-self: center; object-fit: contain; }
@@ -181,7 +181,7 @@
 
 .duel-challenge-overlay {
   position: fixed; inset: 0; z-index: 1200; display: grid; place-items: center; padding: 20px; background: #03070dda; backdrop-filter: blur(9px); font-family: 'Nunito', sans-serif;
-  .duel-challenge-dialog { width: 100%; max-width: 580px; max-height: calc(100dvh - 40px); overflow-y: auto; overscroll-behavior: contain; padding: 32px; border: 1px solid #c9a96988; border-radius: 12px; background: radial-gradient(ellipse at 50% 0, #7754303b, transparent 65%), #0f1723; box-shadow: 0 22px 100px #000b, inset 0 1px #ffe4b326; outline: none; animation: duel-challenge-entrance 200ms ease-out; }
+  .duel-challenge-dialog { width: 100%; max-width: 580px; max-height: calc(100dvh - 40px); overflow: hidden auto; overscroll-behavior: contain; padding: 32px; border: 1px solid #c9a96988; border-radius: 12px; background: radial-gradient(ellipse at 50% 0, #7754303b, transparent 65%), #0f1723; box-shadow: 0 22px 100px #000b, inset 0 1px #ffe4b326; outline: none; animation: duel-challenge-entrance 200ms ease-out; }
   .duel-challenge-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; color: #cbb58c; font-size: 15px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
   .duel-challenge-heading > span:first-child { display: inline-flex; align-items: center; gap: 8px; }
   h2 { margin: 20px 0 24px; color: #f0e5d2; font-family: 'Nunito', sans-serif; font-size: 36px; font-weight: 900; line-height: 1.15; }

@@ -202,21 +202,24 @@ defmodule Moba.Game.Training do
       total_gold_farm: attacker.total_gold_farm + total_gold
     }
 
-    score_updates =
-      if winner && winner.id == defender.id do
-        state = if attacker.pve_tier < 1, do: "alive", else: "dead"
-
-        %{losses: attacker.losses + 1, pve_state: state, pve_current_turns: attacker.pve_current_turns + 1}
-      else
-        wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
-
-        %{wins: wins}
-      end
+    score_updates = pve_score_updates(attacker, defender, winner)
 
     attacker
     |> update_attacker!(Map.merge(reward_updates, score_updates))
     |> maybe_generate_boss()
     |> maybe_finish_pve()
+  end
+
+  @doc "Shared target-battle results, including loss-turn refunds and beginner death protection."
+  def pve_score_updates(attacker, defender, winner) do
+    if winner && winner.id == defender.id do
+      state = if attacker.pve_tier < 1, do: "alive", else: "dead"
+
+      %{losses: attacker.losses + 1, pve_state: state, pve_current_turns: attacker.pve_current_turns + 1}
+    else
+      wins = if winner && winner.id == attacker.id, do: attacker.wins + 1, else: attacker.wins
+      %{wins: wins}
+    end
   end
 
   def finish_farming!(hero) do

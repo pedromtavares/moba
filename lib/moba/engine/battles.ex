@@ -137,7 +137,8 @@ defmodule Moba.Engine.Battles do
         %{turn | skill: Moba.load_resource(turn.skill_code), item: Moba.load_resource(turn.item_code)}
       end)
 
-    Map.put(battle, :turns, turns)
+    battle = Map.put(battle, :turns, turns)
+    if battle.training_team_id, do: Game.TrainingEncounters.hydrate(battle), else: battle
   end
 
   defp snapshot_for(hero, battle_hero) do

@@ -21,13 +21,13 @@
                     </div>
                     <div class="progress mt-1" style="height:50px;" id="daily-progression">
                       <div
-                        style={"width:#{manual_matches_percentage(@manual_matches)}%;"}
+                        style={"width:#{match_progress_percentage(@manual_matches, @auto_matches)}%;"}
                         class="progress-bar manual-bar"
                         title={"Manual matches played: #{length(@manual_matches)}"}
                       >
                       </div>
                       <div
-                        style={"width:#{auto_matches_percentage(@auto_matches)}%;"}
+                        style={"width:#{match_progress_percentage(@auto_matches, @manual_matches)}%;"}
                         class="progress-bar auto-bar"
                         title={"Auto matches played: #{length(@auto_matches)}"}
                       >
@@ -64,10 +64,11 @@
                               Resume match <span aria-hidden="true">→</span>
                             </.link>
                           <% else %>
-                            <%= if length(@manual_matches) < Moba.daily_match_limit() do %>
+                            <%= if !manual_match_limit_reached?(@current_player, @manual_matches) do %>
                               <button
                                 type="button"
-                                data-game-fullscreen phx-click="matchmaking"
+                                data-game-fullscreen
+                                phx-click="matchmaking"
                                 class="btn btn-lg btn-primary margin-auto matchmaking-button dark-button shadow-fx"
                                 id="enter-arena-button"
                               >
@@ -76,7 +77,10 @@
                                   <br :if={!@preview} /> Enter the Arena
                                 </span>
                                 <br :if={!@preview} />
-                                <span :if={!@preview} class="badge badge-light-primary">
+                                <span
+                                  :if={!@preview && @reward_games < Moba.daily_match_limit()}
+                                  class="badge badge-light-primary"
+                                >
                                   <i class="ui-icon ui-shard"></i> +{Moba.matchmaking_shards()} Shards
                                 </span>
                               </button>
@@ -97,7 +101,7 @@
                           <% end %>
                         </div>
                         <p
-                          :if={@preview && !@pending_match && length(@manual_matches) < Moba.daily_match_limit()}
+                          :if={@preview && !@pending_match && @reward_games < Moba.daily_match_limit()}
                           class="arena-entry-reward"
                           id="arena-entry-reward"
                         >
@@ -115,11 +119,11 @@
                         </h3>
                         <h3
                           class="info-box text-primary"
-                          title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}
+                          title={GH.win_rate_summary(@recent_results)}
                         >
-                          <span class="f-rpg">{total_win_rate(@current_player)}</span>
+                          <span class="f-rpg">{GH.win_rate(@recent_results)}</span>
                           <br />
-                          <small class="text-muted">Total Win Rate</small>
+                          <small class="text-muted">3v3 Win Rate</small>
                         </h3>
                         <h3 class="info-box text-success">
                           <span class="f-rpg">{@current_player.daily_wins}</span>
@@ -139,15 +143,28 @@
             <div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".arena .ranking">
               <div class="card-body p-0">
                 <div class="arena-history-switcher" role="group" aria-label="Battle history">
-                  <button :for={{tab, label} <- [{"matches", "5v5"}, {"duels", "1v1"}]} id={"arena-history-#{tab}-tab"} type="button" phx-click="history-tab" phx-value-type={tab} aria-pressed={to_string(@history_tab == tab)} aria-controls={if tab == "matches", do: "arena-history-matches", else: "arena-duel-history-section"}>
+                  <button
+                    :for={{tab, label} <- [{"matches", "3v3"}, {"duels", "1v1"}]}
+                    id={"arena-history-#{tab}-tab"}
+                    type="button"
+                    phx-click="history-tab"
+                    phx-value-type={tab}
+                    aria-pressed={to_string(@history_tab == tab)}
+                    aria-controls={if tab == "matches", do: "arena-history-matches", else: "arena-duel-history-section"}
+                  >
                     {label}
                   </button>
                 </div>
-                <div :if={@history_tab == "matches"} id="arena-history-matches" class="history arena-history" aria-labelledby="arena-history-matches-tab">
+                <div
+                  :if={@history_tab == "matches"}
+                  id="arena-history-matches"
+                  class="history arena-history"
+                  aria-labelledby="arena-history-matches-tab"
+                >
                   <.hud_notice
                     :if={@preview && @matches == []}
                     id="arena-no-matches"
-                    title="Your first 5v5 awaits"
+                    title="Your first 3v3 awaits"
                     description="Completed matches and rewards will appear here."
                   >
                     <.icon name="game-strategy" />
@@ -162,6 +179,7 @@
                             <h4 class="mt-2">
                               <.link
                                 navigate={preview_path(assigns, ~p"/player/#{match.opponent.id}")}
+                                data-profile-username={Moba.Utils.username(match.opponent)}
                                 class="text-white"
                               >
                                 {username(match.opponent)}
@@ -199,23 +217,47 @@
           <div :if={@current_player.status != "silenced"} class="col">
             <div class="card duels arena-live-column" id="pvp_duels" phx-hook="EqualHeight" phx-target=".arena .ranking">
               <section id="arena-live-section" class="arena-live-section" aria-labelledby="arena-live-heading">
-                <label id="arena-live-pvp" class="arena-live-pvp" for="set-status" data-available={to_string(@current_player.status == "available")}>
-                  <input type="checkbox" role="switch" id="set-status" class="arena-live-pvp-input" phx-click="set-status" checked={@current_player.status == "available"} disabled={!is_nil(@pending_duel)} aria-label="Accept live 1v1 duel challenges" />
+                <label
+                  id="arena-live-pvp"
+                  class="arena-live-pvp"
+                  for="set-status"
+                  data-available={to_string(@current_player.status == "available")}
+                >
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    id="set-status"
+                    class="arena-live-pvp-input"
+                    phx-click="set-status"
+                    checked={@current_player.status == "available"}
+                    disabled={!is_nil(@pending_duel)}
+                    aria-label="Accept live 1v1 duel challenges"
+                  />
                   <span class="arena-live-pvp-icon"><.icon name="game-swords" /></span>
                   <span class="arena-live-pvp-copy">
                     <span class="arena-live-pvp-heading">
                       <strong id="arena-live-heading">Live 1v1</strong>
-                      <span class="arena-live-pvp-status"><%= cond do %>
-                        <% @pending_duel -> %>In duel
-                        <% @current_player.status == "available" -> %>Ready
-                        <% true -> %>Off
-                      <% end %></span>
+                      <span class="arena-live-pvp-status">
+                        <%= cond do %>
+                          <% @pending_duel -> %>
+                            In duel
+                          <% @current_player.status == "available" -> %>
+                            Ready
+                          <% true -> %>
+                            Off
+                        <% end %>
+                      </span>
                     </span>
-                    <span><%= cond do %>
-                      <% @pending_duel -> %>Resume your 1v1 above to continue
-                      <% @current_player.status == "available" -> %>Accepting live duel challenges
-                      <% true -> %>Go live to receive duel challenges
-                    <% end %></span>
+                    <span>
+                      <%= cond do %>
+                        <% @pending_duel -> %>
+                          Resume your 1v1 above to continue
+                        <% @current_player.status == "available" -> %>
+                          Accepting live duel challenges
+                        <% true -> %>
+                          Go live to receive duel challenges
+                      <% end %>
+                    </span>
                   </span>
                   <span class="arena-live-pvp-switch" aria-hidden="true"></span>
                 </label>
@@ -227,5 +269,4 @@
       </div>
     </div>
   </div>
-  <.live_component :if={!@preview} module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} preview={@preview} id="tutorial-step" />
 </Layouts.app>

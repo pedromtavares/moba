@@ -15,9 +15,15 @@ defmodule MobaWeb.V2.TavernLiveTest do
 
       assert html =~ "Skins"
       assert has_element?(view, "#tavern-heading")
-      assert has_element?(view, "#show-avatars-link")
-      assert has_element?(view, "#show-skills-link")
-      assert has_element?(view, "#show-skins-link")
+      assert has_element?(view, "#show-avatars-link[aria-selected=true] .nav-emblem")
+      assert has_element?(view, "#tavern-avatars .tavern-avatar-stage h2", "Tinker")
+      assert has_element?(view, "#tavern-discord-unlock")
+
+      view |> element("#browse-avatar-bloodseeker") |> render_click()
+      assert has_element?(view, "#tavern-avatars .tavern-avatar-stage h2", "Bloodseeker")
+      assert has_element?(view, "#browse-avatar-bloodseeker[aria-pressed=true]")
+      refute has_element?(view, "#show-skills-link, .tavern-skill-card, [phx-click=unlock-skill]")
+      assert has_element?(view, "#show-skins-link .nav-emblem")
     end
   end
 
@@ -32,12 +38,12 @@ defmodule MobaWeb.V2.TavernLiveTest do
 
       {:ok, view, _html} = live(conn, "/tavern")
 
-      render_click(view, "show-skills")
-      assert has_element?(view, "#show-skills-link.active")
-
       render_click(view, "show-skins")
-      html = render_click(view, "set-avatar", %{"code" => "phantom_assassin"})
-      assert html =~ "Skins"
+      assert has_element?(view, "#show-skins-link.active")
+      view |> element("#set-avatar-phantom_assassin") |> render_click()
+      assert has_element?(view, "#tavern-skins #set-avatar-phantom_assassin[aria-pressed=true]")
+      render_click(view, "show-avatars")
+      assert has_element?(view, "#tavern-avatars")
     end
   end
 end

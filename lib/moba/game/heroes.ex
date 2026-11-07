@@ -224,6 +224,19 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
+  def list_solo_training(scope, status, limit \\ Moba.base_hero_count()) do
+    query = HeroQuery.latest(scope.player_id, limit) |> HeroQuery.solo()
+
+    query =
+      case scope.user do
+        %{id: user_id} -> from(h in query, join: p in assoc(h, :player), where: p.user_id == ^user_id)
+        nil -> from(h in query, join: p in assoc(h, :player), where: is_nil(p.user_id))
+      end
+
+    query = if status == "finished", do: HeroQuery.finished(query), else: HeroQuery.unfinished(query)
+    Repo.all(query)
+  end
+
   def latest_finished_heroes(player_id) do
     HeroQuery.latest(player_id)
     |> HeroQuery.finished()
@@ -253,6 +266,7 @@ defmodule Moba.Game.Heroes do
   def league_ranking(%{id: hero_id, league_tier: tier}, limit) do
     eligible =
       HeroQuery.non_bots()
+      |> HeroQuery.solo()
       |> HeroQuery.finished()
 
     ranked =
@@ -355,6 +369,7 @@ defmodule Moba.Game.Heroes do
     Repo.update_all(Hero, set: [pve_ranking: nil])
 
     HeroQuery.non_bots()
+    |> HeroQuery.solo()
     |> HeroQuery.finished_pve()
     |> HeroQuery.in_current_ranking_date()
     |> Repo.all()

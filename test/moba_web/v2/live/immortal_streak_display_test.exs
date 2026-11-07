@@ -6,7 +6,7 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
   alias Moba.Game.Matches
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
-  test "Arena explains the debuff beneath the title copy, using the manual's wording, including when resuming", %{
+  test "Arena explains the debuff beneath the title copy, including when resuming", %{
     conn: conn
   } do
     player = create_player!(%{current_immortal_streak: 7})
@@ -24,17 +24,14 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
     refute has_element?(view, ".arena-play-actions .immortal-streak-debuff")
     assert_tooltip(view, "#arena-immortal-streak-debuff")
 
-    {:ok, manual, _} = live(conn, "/library")
-    assert has_element?(manual, ".faq-answer", GH.immortal_streak_debuff_description())
-
     match(player, opponent, [], [])
     {:ok, resume, _} = live(conn, "/arena")
-    assert has_element?(resume, ".arena-play-5v5 > #resume-arena-match")
+    assert has_element?(resume, ".arena-play-3v3 > #resume-arena-match")
     assert has_element?(resume, ".arena-banner-intro > #current-pvp-tier + #arena-immortal-streak-debuff")
     assert_tooltip(resume, "#arena-immortal-streak-debuff")
   end
 
-  test "5v5 lineup and picker stats include the streak reduction with the engine's rounding", %{conn: conn} do
+  test "3v3 lineup stats include the streak reduction with the engine's rounding", %{conn: conn} do
     player = create_player!(%{current_immortal_streak: 7})
     opponent = create_player!(%{current_immortal_streak: 3})
     hero = ready_hero(player)
@@ -44,17 +41,16 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
 
     assert has_element?(
              view,
-             ".match-lineup .squad-panel-heading #match-player-streak-debuff",
+             ".match-lineup #match-player-streak-debuff",
              "Immortal Streak · −7.0% Hero Stats"
            )
 
-    assert has_element?(view, ".match-enemy .squad-panel-heading #match-opponent-streak-debuff", "−3.0% Hero Stats")
+    assert has_element?(view, ".match-enemy #match-opponent-streak-debuff", "−3.0% Hero Stats")
     assert_tooltip(view, "#match-player-streak-debuff")
     assert_tooltip(view, "#match-opponent-streak-debuff")
 
     assert_stats(view, "#hero-#{hero.id}", hero, 7)
     assert_stats(view, "#opponent-hero-#{enemy.id}", enemy, 3)
-    assert_stats(view, "#available-hero-#{hero.id}", hero, 7)
     assert Game.get_hero!(hero.id).total_hp == hero.total_hp
   end
 
@@ -161,8 +157,32 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
         ] do
       total = Map.fetch!(hero, base) + Map.fetch!(hero, item)
       expected = total - round(Moba.immortal_streak_multiplier() * streak * total)
-      value = view |> element("#{selector} .game-stat[title='#{label}'] .stat-value") |> render()
-      assert value |> LazyHTML.from_fragment() |> LazyHTML.text() |> String.trim() == to_string(expected)
+
+      if has_element?(view, "#{selector} .arena-draft-level") do
+        title =
+          view
+          |> element("#{selector} .arena-draft-level")
+          |> render()
+          |> LazyHTML.from_fragment()
+          |> LazyHTML.attribute("title")
+          |> hd()
+
+        key =
+          %{
+            "Health" => "hp",
+            "Energy" => "mp",
+            "Attack" => "atk",
+            "Power" => "power",
+            "Armor" => "armor",
+            "Speed" => "speed"
+          }[label]
+
+        value = title |> LazyHTML.from_fragment() |> LazyHTML.query("[data-stat='#{key}'] strong") |> LazyHTML.text()
+        assert value == to_string(expected)
+      else
+        value = view |> element("#{selector} .game-stat[title='#{label}'] .stat-value") |> render()
+        assert value |> LazyHTML.from_fragment() |> LazyHTML.text() |> String.trim() == to_string(expected)
+      end
     end
   end
 end

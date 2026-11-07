@@ -1,3 +1,7 @@
+.game-page #battle-page[data-finished=true] #battle-bar:has([data-battle-continue=true], #league-next-battle, #load-training, #load-battles) {
+  cursor: pointer;
+}
+
 .game-page #battle-page:has(.combat-stage) {
   display: flex; flex-direction: column; gap: 14px; padding: 4px 0 20px;
   #hero-battle { order: 3; padding: 0; margin: 0 !important; }
@@ -21,16 +25,7 @@
   #battle-bar .item-img, #battle-bar .empty-item { max-height: 50px; }
   #battle-bar #attack-button { min-height: 74px; background: linear-gradient(115deg, #80352f, #5d2228); border: 1px solid #dab37588; box-shadow: inset 0 1px #ffd2a533, 0 5px 24px #8b302229; color: #fff0d7; font-size: 20px; }
   &:has([data-presenting=true]) #attack-button { opacity: .6; cursor: wait; }
-  .battle-review-actions { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-top: 18px; padding-top: 12px; border-top: 1px solid #b6a38226; }
-  .battle-review-actions > .row { margin: 0 !important; }
-  .battle-review-actions .col-12 { padding: 0; }
-  .battle-review-actions #share-battle { min-width: 0; min-height: 40px; padding: 8px 12px; color: #a8b5c4; font-size: 13px; }
-  .battle-review-actions .battle-share:hover { color: #f4dfb3; background: #d9bd7b0c; }
-  .battle-review-actions button:focus-visible { outline: 2px solid #dfbd80; outline-offset: 3px; }
-  @media (max-width: 575px) {
-    .battle-review-actions { gap: 4px; flex-wrap: wrap; }
-    .battle-review-actions #share-battle { padding-right: 6px; padding-left: 6px; font-size: 12px; }
-  }
+  .battle-lineup-footer { order: 2; }
   #combat-log-panel { padding-top: 16px; }
   #combat-log-panel[hidden] { display: none !important; }
   #hero-battle .combat-turn { min-height: 0; }
@@ -329,21 +324,16 @@
 .game-page #battle-page:has(.combat-stage) #battle-bar:has(.battle-outcome) {
   padding: 28px 32px;
   .battle-outcome-heading h3 { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.25; }
-  .battle-result-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; min-height: 76px; margin-top: 20px; }
+  .battle-result-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 20px; min-height: 76px; margin-top: 20px; }
   .battle-level-up { grid-column: 1; grid-row: 1; margin: 0; }
-  .battle-result-footer > .row { grid-column: 2; grid-row: 1; justify-self: center; margin: 0 !important; }
-  .battle-result-footer > .row > .col-12 { padding: 0; }
-  .battle-result-actions { grid-column: 3; grid-row: 1; justify-self: end; }
-  #share-battle { min-width: 0; min-height: 40px; padding: 8px 12px; font-size: 14px; }
+  .battle-result-actions { grid-column: 2; grid-row: 1; justify-self: end; }
 }
 @media (max-width: 767px) {
   .game-page #battle-page:has(.combat-stage) #battle-bar:has(.battle-outcome) {
     padding: 18px 16px;
     .battle-result-footer { grid-template-columns: minmax(0, 1fr) auto; gap: 16px 8px; margin-top: 16px; }
     .battle-level-up > span { font-size: 17px; }
-    .battle-result-actions { grid-column: 1 / -1; grid-row: 2; justify-self: stretch; }
-    .battle-result-footer:not(:has(.battle-level-up)) > .row { grid-column: 1 / -1; }
-    #share-battle { padding: 8px 4px; font-size: 12px; }
+    .battle-result-actions { grid-column: 1 / -1; grid-row: auto; justify-self: stretch; }
   }
 }
 
@@ -369,3 +359,29 @@
 @media (prefers-reduced-motion: reduce) {
   .game-page .combat-stage .stage-combat-stat { transition: none; }
 }
+
+/* Effects occupy a bounded panel beside the last action, never another footer row. */
+.game-page .combat-stage {
+  .stage-action-side { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: center; align-content: center; gap: 14px; min-height: 128px; }
+  .stage-action-side:has(.stage-effect-icons:empty) { grid-template-columns: minmax(0, 1fr); }
+  .stage-latest-action { grid-column: 1; grid-row: 1; gap: 12px; }
+  .stage-action-right .stage-latest-action { grid-column: 2; }
+  .stage-action-right:has(.stage-effect-icons:empty) .stage-latest-action { grid-column: 1; }
+  .stage-effect-icons { --effect-size: 40px; --effect-columns: 3; grid-column: 2; grid-row: 1; display: grid; grid-template-columns: repeat(var(--effect-columns), var(--effect-size)); grid-auto-rows: var(--effect-size); align-content: center; justify-content: start; width: 100%; height: 108px; min-width: 0; max-width: 100%; gap: 6px; padding: 4px 0 4px 12px; }
+  .stage-action-right .stage-effect-icons { grid-column: 1; justify-content: end; padding: 4px 12px 4px 0; }
+  .stage-effect-icons:empty { display: none; }
+  .stage-effect-icon { width: var(--effect-size); height: var(--effect-size); min-width: 0; min-height: 0; padding: 2px; border-radius: 5px; }
+  .stage-effect-icon img { width: 100%; height: 100%; min-width: 0; object-fit: cover; }
+  .stage-effect-icon .stage-effect-duration { right: -2px; bottom: -2px; min-width: 0; width: clamp(12px, calc(var(--effect-size) * .35), 23px); height: clamp(12px, calc(var(--effect-size) * .35), 23px); padding: 0; font-size: clamp(8px, calc(var(--effect-size) * .23), 13px); }
+}
+@media (max-width: 767px) {
+  .game-page .combat-stage {
+    .stage-action-side { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); gap: 8px; }
+    .stage-latest-action { flex-direction: column; align-items: flex-start; }
+    .stage-action-right .stage-latest-action { flex-direction: column; align-items: flex-end; }
+    .stage-effect-icons { height: 110px; padding-left: 5px; }
+    .stage-action-right .stage-effect-icons { padding-right: 5px; }
+  }
+}
+.game-page .combat-stage .stage-action-right { grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); }
+.game-page .combat-stage .stage-action-right:has(.stage-effect-icons:empty) { grid-template-columns: minmax(0, 1fr); }

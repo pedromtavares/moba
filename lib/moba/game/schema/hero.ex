@@ -81,6 +81,7 @@ defmodule Moba.Game.Schema.Hero do
     belongs_to :boss, Game.Schema.Hero
     belongs_to :skin, Game.Schema.Skin
     belongs_to :player, Game.Schema.Player
+    belongs_to :training_team, Game.Schema.TrainingTeam
 
     timestamps()
   end
@@ -136,7 +137,7 @@ defmodule Moba.Game.Schema.Hero do
 
   def create_changeset(hero, attrs, player, avatar, skills, items) do
     pve_tier = (player && player.pve_tier) || 0
-    skill_order = Enum.filter(skills, &(!&1.passive)) |> Enum.map(& &1.code)
+    skill_order = Game.Skills.default_skill_order(skills)
     item_order = Enum.filter(items, & &1.active) |> Enum.map(& &1.code)
 
     hero

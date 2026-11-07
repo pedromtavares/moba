@@ -2,7 +2,9 @@ defmodule MobaWeb.V2.ShopComponent do
   use MobaWeb, :v2_live_component
 
   import MobaWeb.V2.Components.HeroBarComponents
-  alias MobaWeb.V2.TutorialComponent
+  import MobaWeb.V2.Components.Shop, only: [categories: 0, rarity_filter: 2]
+
+  alias MobaWeb.V2.Components.Shop
 
   embed_templates "shop_component/*"
 
@@ -11,7 +13,7 @@ defmodule MobaWeb.V2.ShopComponent do
      assign(socket,
        items: [],
        transmute: nil,
-       selected_category: "normal",
+       selected_category: "inventory",
        detail_tab: "overview",
        item_inspected: false,
        selected_shop: nil,
@@ -20,7 +22,7 @@ defmodule MobaWeb.V2.ShopComponent do
      )}
   end
 
-  def update(%{current_hero: hero, tutorial_step: step} = assigns, socket) do
+  def update(%{current_hero: hero} = assigns, socket) do
     previous = socket.assigns[:current_hero]
     hero_changed? = is_nil(previous) || previous.id != hero.id || inventory_ids(previous) != inventory_ids(hero)
 
@@ -29,14 +31,33 @@ defmodule MobaWeb.V2.ShopComponent do
       |> assign(
         items: Moba.cached_items(),
         current_hero: hero,
-        tutorial_step: step,
         current_player: hero.player,
         reorderable: Map.get(assigns, :reorderable, false),
-        event_target: Map.get(assigns, :event_target)
+        event_target: Map.get(assigns, :event_target),
+        id_prefix: Map.get(assigns, :id_prefix, ""),
+        hero_id: Map.get(assigns, :hero_id)
       )
       |> reset_selection_if_hero_changed(hero_changed?)
 
     {:ok, socket}
+  end
+
+  def update(%{inspect_inventory: code}, socket) do
+    case Enum.find(socket.assigns.current_hero.items, &(&1.code == code)) do
+      nil ->
+        {:ok, socket}
+
+      item ->
+        {:ok,
+         assign(socket,
+           selected_inventory: item,
+           selected_shop: nil,
+           selected_category: "inventory",
+           transmute: nil,
+           recipe: [],
+           detail_tab: "overview"
+         )}
+    end
   end
 
   def handle_event("select-shop", %{"code" => code}, socket) do
@@ -111,8 +132,7 @@ defmodule MobaWeb.V2.ShopComponent do
        selected_inventory: nil,
        selected_category: "inventory",
        recipe: []
-     )
-     |> TutorialComponent.next_step(8)}
+     )}
   end
 
   def handle_event("cancel-transmute", _, %{assigns: %{transmute: nil}} = socket), do: {:noreply, socket}
@@ -124,7 +144,7 @@ defmodule MobaWeb.V2.ShopComponent do
 
   def render(assigns) do
     item = assigns.transmute || assigns.selected_shop || assigns.selected_inventory
-    assigns = assign(assigns, detail_item: item, detail_info: item && GH.item_info(item))
+    assigns = assign(assigns, detail_item: item)
     shop(assigns)
   end
 
@@ -146,20 +166,6 @@ defmodule MobaWeb.V2.ShopComponent do
 
     Enum.take(updated, Game.item_ingredients_count(current_transmute))
   end
-
-  defp categories, do: ["normal", "rare", "epic", "legendary"]
-
-  defp category_price("normal"), do: Moba.normal_items_price()
-  defp category_price("rare"), do: Moba.rare_items_price()
-  defp category_price("epic"), do: Moba.epic_items_price()
-  defp category_price("legendary"), do: Moba.legendary_items_price()
-
-  defp stat_label(:hp), do: {"Health", "heart"}
-  defp stat_label(:mp), do: {"Energy", "bolt"}
-  defp stat_label(:atk), do: {"Attack", "dagger"}
-  defp stat_label(:power), do: {"Power", "vortex"}
-  defp stat_label(:armor), do: {"Armor", "shield"}
-  defp stat_label(:speed), do: {"Speed", "runner"}
 
   defp purchase_hint(hero, item) do
     cond do
@@ -197,41 +203,33 @@ defmodule MobaWeb.V2.ShopComponent do
 
   defp price(item), do: Game.item_price(item)
 
-  defp sell_price(hero, item), do: Game.item_sell_price(hero, item)
-
   defp ingredients_count_for(item), do: Game.item_ingredients_count(item)
 
-  defp rarity_filter(items, rarity) do
-    items
-    |> Enum.filter(&(&1.rarity == rarity))
-    |> Enum.sort_by(&shop_item_priority/1)
-  end
-
-  defp shop_item_priority(%{rarity: "normal", code: "boots_of_speed"}), do: 0
-  defp shop_item_priority(%{rarity: "normal", code: "sages_mask"}), do: 1
-  defp shop_item_priority(%{rarity: "rare", code: "tranquil_boots"}), do: 0
-  defp shop_item_priority(%{rarity: "rare", code: "arcane_boots"}), do: 1
-
-  defp shop_item_priority(%{rarity: rarity, code: code}) when rarity in ["epic", "legendary"],
-    do: if(String.contains?(code, "boots"), do: 0, else: 2)
-
-  defp shop_item_priority(_), do: 2
-
   defp reset_selection_if_hero_changed(socket, true) do
-    item =
-      socket.assigns.transmute || socket.assigns.selected_shop ||
-        List.first(rarity_filter(socket.assigns.items, "normal"))
-
     inventory = socket.assigns.selected_inventory
     inventory = inventory && Enum.find(socket.assigns.current_hero.items, &(&1.code == inventory.code))
 
-    assign(socket,
-      selected_shop: if(inventory, do: nil, else: item),
-      selected_inventory: inventory,
-      selected_category: if(inventory, do: "inventory", else: item.rarity),
-      transmute: nil,
-      recipe: []
-    )
+    if socket.assigns.selected_category == "inventory" && is_nil(socket.assigns.transmute) do
+      assign(socket,
+        selected_shop: nil,
+        selected_inventory: inventory || List.first(Game.inventory_items(socket.assigns.current_hero)),
+        selected_category: "inventory",
+        transmute: nil,
+        recipe: []
+      )
+    else
+      item =
+        socket.assigns.transmute || socket.assigns.selected_shop ||
+          List.first(rarity_filter(socket.assigns.items, "normal"))
+
+      assign(socket,
+        selected_shop: if(inventory, do: nil, else: item),
+        selected_inventory: inventory,
+        selected_category: if(inventory, do: "inventory", else: item.rarity),
+        transmute: nil,
+        recipe: []
+      )
+    end
   end
 
   defp reset_selection_if_hero_changed(socket, false), do: socket

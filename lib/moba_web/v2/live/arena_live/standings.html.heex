@@ -1,11 +1,11 @@
 <section id="arena-standings" class="card ranking arena-standings" aria-labelledby="arena-standings-title">
   <header class="arena-standings-heading">
     <h2 id="arena-standings-title" class="sr-only">
-      {if @ranking_tab == "5v5", do: "Daily ranking", else: "Arena Rating"}
+      {if @ranking_tab == "3v3", do: "Daily ranking", else: "Arena Rating"}
     </h2>
     <div id="arena-standings-switcher" class="arena-history-switcher" role="group" aria-label="Leaderboard mode">
       <button
-        :for={mode <- ["5v5", "1v1"]}
+        :for={mode <- ["3v3", "1v1"]}
         id={"arena-standings-#{mode}"}
         type="button"
         phx-click="standings-tab"
@@ -20,7 +20,7 @@
   <ol
     id="arena-standings-list"
     class="arena-standings-list"
-    aria-label={if @ranking_tab == "5v5", do: "Daily ranking", else: "Arena Rating descending"}
+    aria-label={if @ranking_tab == "3v3", do: "Daily ranking", else: "Arena Rating descending"}
   >
     <li
       :for={{player, index} <- Enum.with_index(@ranking, 1)}
@@ -31,7 +31,7 @@
         player={player}
         index={index}
         mode={@ranking_tab}
-        movement={if @ranking_tab == "5v5", do: arena_movement(player, @ranking)}
+        movement={if @ranking_tab == "3v3", do: arena_movement(player, @ranking)}
         current_player={@current_player}
         preview={@preview}
       />
@@ -44,7 +44,7 @@
       player={@current_player}
       index={nil}
       mode={@ranking_tab}
-      movement={if @ranking_tab == "5v5", do: arena_movement(@current_player, @ranking)}
+      movement={if @ranking_tab == "3v3", do: arena_movement(@current_player, @ranking)}
       current_player={@current_player}
       preview={@preview}
     />

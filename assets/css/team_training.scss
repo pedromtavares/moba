@@ -1,0 +1,429 @@
+.game-page {
+  .training-mode { display: inline-flex; width: max-content; max-width: 100%; gap: 0; margin: 12px auto; padding: 0; border: 0; background: none; }
+  .training-mode a { padding: 6px 11px; border: 1px solid #c7ae7840; color: #a8b7c9; background: #0a142099; font: 800 14px/1.3 'Nunito', sans-serif; transition: color .2s, background .2s; }
+  .training-mode a:first-child { border-radius: 5px 0 0 5px; }
+  .training-mode a:last-child { border-left: 0; border-radius: 0 5px 5px 0; }
+  .training-mode a[aria-current=page] { color: #f1d89e; border-color: #d6bb7d66; background: #b89a5220; }
+  .training-mode a:hover { color: #fff0cf; }
+  .team-draft-page, .team-draft-creator { min-width: 0; }
+  .team-draft-roster { margin: 0 24px 24px; padding: 22px 26px; border-top: 1px solid #c3ad7945; background: linear-gradient(180deg, #101d2b99, #0a121d00); }
+  .team-draft-picks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .team-draft-pick { position: relative; display: grid; grid-template-columns: 106px minmax(0, 1fr); align-items: center; gap: 10px 16px; min-width: 0; min-height: 108px; padding: 14px; border: 1px solid #bca5715c; border-radius: 7px; background: linear-gradient(120deg, #1e2d3dbb, #0b1421aa); animation: team-pick-in .3s ease-out; }
+  .team-draft-portrait { display: block; width: 106px; height: auto; border-radius: 4px; grid-row: span 2; }
+  .team-draft-pick strong { display: block; color: #f2e7d1; font-size: 19px; font-weight: 900; }
+  .team-draft-pick small { color: #99adbf; font-size: 13px; }
+  .team-draft-pick > button { position: absolute; right: 7px; top: 5px; padding: 3px 7px; border: 0; color: #b2becb; background: none; font-size: 25px; line-height: 1; }
+  .team-draft-skills { display: flex; gap: 7px; }
+  .team-draft-skills img { width: 32px; height: 32px; border: 1px solid #b6a47745; border-radius: 3px; }
+  .team-draft-pick.is-empty { display: flex; justify-content: center; gap: 16px; border-style: dashed; border-color: #93a8bd33; background: #09121d55; color: #91a5b8; font-size: 15px; }
+  .team-draft-empty-index { font-size: 30px; color: #cbb47f88; font-weight: 900; }
+  .team-draft-roster footer { display: flex; margin-top: 16px; }
+  .team-draft-roster footer button { display: flex; align-items: center; justify-content: center; min-width: 290px; min-height: 54px; padding: 12px 24px; border: 1px solid #c4a16f; border-radius: 6px; background: linear-gradient(115deg, #6f292e, #9a4135); color: #fff0d6; font-size: 20px; font-weight: 900; transition: background .2s, box-shadow .2s; }
+  .team-draft-roster footer button:hover:enabled { box-shadow: 0 0 24px #ad54383b; }
+  .team-draft-roster footer button:disabled { opacity: .35; cursor: default; }
+  .team-training { padding-top: 8px; padding-bottom: var(--team-hud-space, 260px); }
+  .team-training .team-targets { display: grid !important; grid-template-columns: repeat(var(--team-target-count, 3), minmax(0, 1fr)); gap: 24px; margin: 24px 0 0; }
+  .team-targets > div { width: 100%; max-width: none; padding: 0; }
+  .team-targets .training-target { margin-bottom: 0; }
+  .team-reward-mode { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; padding: 0; border: 0; background: none; color: #97a5b4; font: 800 13px/1.3 'Nunito', sans-serif; cursor: pointer; }
+  .team-reward-option { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; transition: color .2s; }
+  .team-reward-option .ui-icon { width: 18px; height: 18px; }
+  .team-reward-option.is-active { color: #e8d2a7; }
+  .team-reward-track { position: relative; flex: 0 0 48px; height: 28px; border: 1px solid #dbb87588; border-radius: 999px; background: linear-gradient(115deg, #826237, #53432c); box-shadow: inset 0 2px 6px #0006; transition: border-color .2s, box-shadow .2s; }
+  .team-reward-track::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #ffe9bd; box-shadow: 0 2px 5px #0007; transition: transform .2s; }
+  .team-reward-mode[aria-checked=true] .team-reward-track::after { transform: translateX(20px); }
+  .team-reward-mode:hover:enabled .team-reward-track { border-color: #f1d39e; box-shadow: inset 0 2px 6px #0006, 0 0 12px #d7ab4926; }
+  .team-reward-mode:focus-visible { outline: none; }
+  .team-reward-mode:focus-visible .team-reward-track { outline: 2px solid #edcc90; outline-offset: 4px; }
+  .team-reward-mode:disabled { opacity: .5; cursor: default; }
+  .team-encounter-log { display: grid; gap: 4px; max-height: 280px; overflow: hidden auto; padding: 18px 24px; margin-top: 16px; border: 1px solid #c0ab7840; border-radius: 8px; background: #0b1725; }
+  .team-encounter-log a { display: flex; justify-content: space-between; padding: 9px; color: #d5c090; font-size: 16px; }
+  .team-pending { margin-top: 20px; }
+  .team-last-result { display: flex; gap: 16px; align-items: center; padding: 18px 24px; color: #e2c48e; border: 1px solid #b5a16e44; border-radius: 8px; background: #11203099; margin-top: 20px; }
+  .team-last-result strong { display: block; margin-bottom: 12px; }
+  .team-training-complete { text-align: center; padding: 36px 28px; border: 1px solid #c3ab744d; border-radius: 12px; background: radial-gradient(ellipse at top, #b3984b19, transparent 60%), linear-gradient(145deg, #172536, #0a1320); }
+  .team-training-complete > img { width: 110px; height: 110px; object-fit: contain; }
+  .team-eyebrow { display: block; color: #cfb781; font: 900 13px/1.4 'Nunito', sans-serif; letter-spacing: .12em; text-transform: uppercase; }
+  .team-training-complete h1 { color: #f2ddb3; font-size: clamp(32px, 4vw, 54px); font-weight: 900; }
+  .team-completed-roster { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 18px; margin: 24px 0; }
+  .team-completed-roster article { display: flex; flex-direction: column; justify-content: flex-end; min-height: 240px; padding: 24px; border-radius: 8px; background: linear-gradient(0deg, #07111ff5, transparent 85%), var(--team-hero-art) center 25%/cover; }
+  .team-completed-roster strong { color: #eee1c9; font-size: 26px; font-weight: 900; }
+  .team-completed-roster span { color: #b4c2d2; font-size: 16px; }
+  .team-training-complete > a { margin: 6px; }
+  .team-auto-buy { display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; margin-left: 7px; border: 1px solid #70ae8d66; border-radius: 5px; background: #204e3e44; color: #a0dac3; font-size: 14px; font-weight: 800; }
+  .team-auto-buy::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: currentColor; box-shadow: 0 0 9px #85d7b344; }
+  .team-auto-buy[aria-checked=false] { color: #9aa9ba; border-color: #93a8bb44; background: #13202c; }
+  .team-hero-selector { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; height: 100%; }
+  .team-hero-selector button { position: relative; min-width: 0; overflow: hidden; padding: 0; border: 1px solid #91a7bd45; border-radius: 6px 6px 2px 2px; background: #0c1723; color: #e1e9f0; text-align: left; transition: border-color .2s, box-shadow .2s; }
+  .team-hero-selector button[aria-selected=true] { border-color: #e3c58c; box-shadow: 0 0 15px #ceb27024, inset 0 -2px #dabe80; }
+  .team-hero-selector button:hover { border-color: #e6ce9b; }
+  .team-hero-selector img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; }
+  .team-hero-selector button > span { position: absolute; display: flex; align-items: baseline; justify-content: space-between; gap: 5px; inset: auto 0 0; padding: 16px 7px 5px; background: linear-gradient(transparent, #030b17f2); text-shadow: 0 1px 3px #000; }
+  .team-hero-selector strong { font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .team-hero-selector small { color: #c2ccd9; font-size: 16px; white-space: nowrap; }
+  .team-tab-skill-points {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    min-width: 30px;
+    padding: 3px 6px;
+    border: 1px solid #fff0b8;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #fff0bc, #eeb75d);
+    color: #2c1808;
+    font: 900 16px/1.15 'Nunito', sans-serif;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+    box-shadow: 0 0 0 1px #43240d, 0 0 10px #ffcd7588;
+    animation: team-skill-point-pulse 1.7s ease-in-out infinite;
+  }
+  .team-hero-selector [data-dead=true] img { filter: grayscale(1); opacity: .5; }
+  .team-hero-selector [data-dead=true] small { color: #efa3ab; font-size: 12px; }
+  .team-draft-page button:focus-visible, .team-training button:focus-visible { outline: 2px solid #e5c78c; outline-offset: 3px; }
+}
+@keyframes team-pick-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@media (max-width: 767px) {
+  .game-page {
+    .training-mode { margin: 10px auto; }
+    .training-mode a { padding: 6px 11px; font-size: 14px; }
+    .team-draft-roster { margin: 0 12px 20px; padding: 18px 8px; }
+    .team-draft-picks { gap: 7px; }
+    .team-draft-pick { display: flex; flex-direction: column; gap: 6px; padding: 25px 7px 10px; min-height: 155px; text-align: center; }
+    .team-draft-pick .team-draft-portrait { width: 100%; max-width: 106px; }
+    .team-draft-pick strong { font-size: 15px; }
+    .team-draft-pick small { font-size: 11px; }
+    .team-draft-skills { flex-wrap: wrap; justify-content: center; gap: 3px; }
+    .team-draft-skills img { width: 24px; height: 24px; }
+    .team-draft-pick.is-empty { font-size: 13px; }
+    .team-draft-roster footer button { width: 100%; min-width: 0; }
+    .team-training .team-targets { grid-template-columns: minmax(0, 1fr); gap: 18px; margin-top: 0; }
+    .team-hero-selector strong { font-size: 13px; }
+    .team-hero-selector small { font-size: 15px; }
+    .team-hero-selector [data-dead=true] small { font-size: 11px; }
+    .team-completed-roster { gap: 7px; }
+    .team-completed-roster article { min-height: 160px; padding: 12px 7px; }
+    .team-completed-roster strong { font-size: 17px; }
+    .team-completed-roster span { font-size: 13px; }
+  }
+}
+@keyframes team-skill-point-pulse {
+  50% { box-shadow: 0 0 0 1px #6a3d13, 0 0 0 3px #ffce7844, 0 0 18px #ffce78cc; }
+}
+@media (prefers-reduced-motion: reduce) { .game-page .team-draft-pick, .game-page .team-tab-skill-points { animation: none; } .game-page .team-hero-selector button, .game-page .team-reward-option, .game-page .team-reward-track, .game-page .team-reward-track::after { transition: none; } }
+.game-page .team-battle-page {
+  padding: 8px 12px 18px;
+  .training-battle-navigation { display: flex; align-items: center; gap: 16px; }
+  .training-battle-navigation a { color: #bbd1e2; font-size: 15px; font-weight: 800; }
+  .training-header-location { display: none; }
+  .training-play-controls { display: flex; justify-content: flex-end; gap: 9px; margin-top: 12px; }
+  .training-play-controls button { padding: 9px 16px; border: 1px solid #c7af7959; border-radius: 5px; background: #142334; color: #dfc995; font: 800 15px/1.3 'Nunito', sans-serif; }
+  .training-play-controls button:disabled { opacity: .45; }
+  .combat-stage-shell { position: relative; }
+  .combat-stage-shell.has-stage-automation {
+    --auto-height: 56px;
+    --auto-gap: 16px;
+    --auto-count: 1;
+    --auto-top: 18px;
+    --auto-log-height: 40px;
+    --auto-width: clamp(240px, 18vw, 280px);
+  }
+  .combat-stage-shell.has-stage-automation:has(#training-auto-match) { --auto-count: 2; }
+  .combat-stage-shell.has-stage-automation .stage-footer { min-height: calc(var(--auto-top) * 2 + var(--auto-log-height) + (var(--auto-height) + var(--auto-gap)) * var(--auto-count)); }
+  .combat-stage-shell.has-stage-automation .stage-divider-log { top: var(--auto-top); height: var(--auto-log-height); min-height: 0; transform: translateX(-50%); }
+  .stage-automation { position: absolute; z-index: 4; left: 50%; top: calc(100% - var(--auto-top) - (var(--auto-height) + var(--auto-gap)) * var(--auto-count) + var(--auto-gap)); transform: translateX(-50%); width: var(--auto-width); }
+  .stage-automation .training-play-controls { display: flex; flex-direction: column; gap: var(--auto-gap); margin: 0; }
+  .stage-automation .training-play-controls button { min-height: var(--auto-height); width: 100%; padding: 10px 14px; font-size: 18px; }
+  .combat-stage-shell.has-stage-automation .stage-footer .stage-action-left { padding-right: calc(var(--auto-width) / 2 + 14px); }
+  .combat-stage-shell.has-stage-automation .stage-footer .stage-action-right { padding-left: calc(var(--auto-width) / 2 + 14px); }
+  .battle-active-turn[aria-busy=true] .battle-skills-row, .battle-active-turn[aria-busy=true] .battle-items-row { opacity: .65; }
+  .team-result-spoils { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 22px; font-weight: 900; }
+  #battle-page #battle-bar #training-battle-result.is-stage-victory.is-target-result { grid-template-rows: auto; }
+  #battle-page #battle-bar #training-battle-result.is-stage-victory.is-target-result :is(.league-victory-seal, .league-continue, .league-return) { grid-row: 1; }
+  #training-battle-result.is-target-result .team-result-spoils { margin-bottom: 0; }
+  #training-battle-result :is(.league-continue, .league-return) { font-family: 'Nunito', sans-serif; font-weight: 900; letter-spacing: 0; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps { gap: 10px; max-width: none; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps li { flex-direction: row; align-items: center; gap: 12px; min-height: 68px; padding: 10px 12px; border: 1px solid #91a7bd33; border-radius: 6px; background: #0a1421a6; color: #c0ccda; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps li::after { display: none; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps img { flex: none; width: 64px; height: 48px; border-radius: 4px; object-fit: cover; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps strong { font-size: 14px; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps small { display: block; font-size: 12px; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps [data-state=next] { color: #f1d8a7; border-color: #d9b97c88; background: #b99a5014; }
+  #battle-page #battle-bar #training-battle-result .team-opponent-steps [aria-disabled=true] { opacity: .45; filter: grayscale(1); pointer-events: none; }
+  .training-combat-log-heading { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; color: #e4cc9c; }
+  #training-combat-log-close { border: 0; background: transparent; color: #d3bd91; font-size: 28px; }
+}
+@media (max-width: 767px) {
+  .game-page .team-battle-page { padding: 4px 0 12px; }
+  .game-page .team-battle-page .training-battle-navigation { flex-basis: 100%; }
+  .game-page .team-battle-page .combat-stage-shell.has-stage-automation { --auto-width: 190px; --auto-height: 48px; --auto-log-height: 40px; --auto-gap: 14px; }
+  .game-page .team-battle-page .stage-automation .training-play-controls button { padding: 9px; font-size: 14px; }
+  .game-page .team-battle-page .combat-stage-shell.has-stage-automation .stage-divider-log { width: auto; flex-direction: row; padding: 7px 13px; }
+  .game-page .team-battle-page .combat-stage-shell.has-stage-automation .stage-divider-log [data-stage-log-label] { display: inline; }
+  .game-page .team-battle-page #battle-page #battle-bar #training-battle-result .team-opponent-steps { flex-wrap: wrap; }
+  .game-page .team-battle-page #battle-page #battle-bar #training-battle-result .team-opponent-steps li { flex: 1 1 120px; gap: 8px; padding: 8px; }
+  .game-page .team-battle-page #battle-page #battle-bar #training-battle-result .team-opponent-steps img { width: 48px; height: 36px; }
+  .game-page .team-battle-page #battle-page #battle-bar #training-battle-result.is-stage-victory.is-target-result :is(.league-continue, .league-return) { grid-row: 2; }
+}
+.game-page .team-draft-page .invoke-portrait[data-drafted=true] { opacity: .45; filter: saturate(.4); cursor: default; }
+.game-page .team-draft-page .invoke-portrait[data-drafted=true]::after { content: '✓'; position: absolute; top: 3px; right: 5px; color: #e7d19b; text-shadow: 0 1px 4px #000; font-size: 20px; font-weight: 900; }
+.game-page :is(#hero-bar, .hero-bar).has-team-roster .hud-inventory h3 { display: flex; align-items: center; justify-content: center; flex-wrap: nowrap; gap: 6px; width: 100%; min-width: 0; white-space: nowrap; }
+.game-page :is(#hero-bar, .hero-bar).has-team-roster .hud-inventory h3 > * { flex-shrink: 0; }
+.game-page :is(#hero-bar, .hero-bar).has-team-roster .team-auto-buy { margin-left: 0; }
+@media (min-width: 1200px) {
+  .game-page :is(#hero-bar, .hero-bar).has-team-roster .hero-hud-row { grid-template-columns: 150px minmax(280px, 1fr) minmax(304px, .8fr) minmax(248px, max-content); }
+  .game-page :is(#hero-bar, .hero-bar).has-team-roster .hud-inventory { width: auto !important; }
+  .game-page :is(#hero-bar, .hero-bar).has-team-roster .hud-inventory .inventory { margin-left: auto; margin-right: auto; }
+}
+// The draft stays below the avatar choices and shares the creation viewport.
+.game-page #create-new .invoke-identity .training-mode { margin: 0 0 24px; max-width: 100%; text-shadow: none; }
+.game-page #create-new .invoke-identity .training-mode a { padding: 6px 11px; font-size: 14px; white-space: nowrap; }
+
+@media (min-width: 1000px) {
+  // Reserve the switcher's original space so only the control moves.
+  .game-page #create-new .invoke-identity:has(> .training-mode)::before { content: ''; display: block; height: calc(14px * 1.3 + 14px + 24px); }
+  .game-page #create-new .invoke-modern .invoke-identity .training-mode { position: absolute; top: 18px; margin: 0; }
+}
+@media (min-width: 1000px) and (max-height: 1000px) {
+  .game-page .team-draft-page #create-new .invoke-identity:has(> .training-mode)::before { height: calc(14px * 1.3 + 12px + 12px); }
+}
+.game-page .team-draft-name { display: flex; align-items: center; gap: 8px; min-width: 0; padding-right: 16px; }
+.game-page .team-draft-name > img { width: 25px; height: 25px; object-fit: contain; }
+.game-page .team-draft-skills .is-ultimate { border-color: #dabd7c; box-shadow: 0 0 12px #c5a15c20; }
+.game-page .team-battle-page .team-promotion-emblem { width: 96px; height: 96px; object-fit: contain; filter: drop-shadow(0 0 18px #d7b26633); }
+@media (min-width: 1000px) {
+  .game-page .team-draft-page { display: grid; grid-template-rows: minmax(0, 1fr) auto; height: var(--draft-height, calc(100dvh - 24px)); min-height: 0; }
+  .game-page .team-draft-creator { min-height: 0; }
+  .game-page .team-draft-creator .invoke-modern { height: 100% !important; min-height: 0 !important; }
+  .game-page .team-draft-roster { display: grid; grid-template-columns: minmax(0, 1fr) 220px; align-items: stretch; gap: 18px; margin: 0; padding: 10px clamp(24px, 3vw, 64px) 4px; border: 0; }
+  .game-page .team-draft-roster footer { margin: 0; }
+  .game-page .team-draft-roster footer button { width: 100%; min-width: 0; min-height: 54px; font-size: 18px; }
+  .game-page .team-draft-picks { gap: 10px; }
+  .game-page .team-draft-pick { grid-template-columns: clamp(64px, 22%, 112px) minmax(0, 1fr); min-height: 108px; padding: 10px; gap: 8px 12px; }
+  .game-page .team-draft-pick .team-draft-portrait { width: 100%; }
+  .game-page .team-draft-pick strong { font-size: 16px; }
+  .game-page .team-draft-skills img { display: block; width: 100%; height: auto; aspect-ratio: 1; max-width: 72px; justify-self: center; }
+  .game-page .team-draft-skills { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; width: 100%; }
+  .game-page .team-draft-page .invoke-roster { padding-bottom: 0; }
+}
+@media (min-width: 1000px) and (max-width: 1350px) {
+  .game-page .team-draft-pick { grid-template-columns: 40px minmax(0, 1fr); gap: 6px 10px; }
+  .game-page .team-draft-pick .team-draft-portrait { width: 40px; grid-row: auto; }
+  .game-page .team-draft-skills { grid-column: 1 / -1; justify-content: center; }
+  .game-page .team-draft-name { gap: 4px; }
+  .game-page .team-draft-name > img { width: 20px; height: 20px; }
+  .game-page .team-draft-name strong { font-size: 15px; }
+}
+@media (min-width: 1000px) and (max-height: 1000px) {
+  .game-page .team-draft-page #create-new .invoke-stage-content { padding-top: 20px; padding-bottom: 8px; }
+  .game-page .team-draft-page #create-new .invoke-identity .training-mode { padding: 0; margin-bottom: 12px; }
+  .game-page .team-draft-page #create-new .invoke-identity .training-mode a { padding: 5px 10px; font-size: 14px; }
+  .game-page .team-draft-page #create-new .invoke-modern[data-mode=presets] .invoke-identity { width: clamp(280px, 27vw, 365px); padding-bottom: 0; }
+  .game-page .team-draft-page #create-new h1 { font-size: clamp(32px, 3vw, 44px); }
+  .game-page .team-draft-page #create-new .invoke-role { margin-bottom: 4px; }
+  .game-page .team-draft-page #create-new .invoke-gameplay { font-size: 16px; line-height: 1.4; max-width: 100%; }
+  .game-page .team-draft-page #create-new .invoke-signature { margin-top: 10px; }
+  .game-page .team-draft-page #create-new .invoke-signature img { width: 48px; height: 48px; }
+  .game-page .team-draft-page #create-new .invoke-details { margin-top: 8px; }
+  .game-page .team-draft-page #create-new .invoke-attributes { margin-top: 8px; margin-bottom: 8px; }
+  .game-page .team-draft-page #create-new .invoke-base-stats { padding-top: 10px; gap: 6px; }
+  .game-page .team-draft-page #create-new .invoke-filters { padding: 2px 0 4px; }
+  .game-page .team-draft-page #create-new .invoke-filters button { padding: 4px 8px; }
+  .game-page .team-draft-page #create-new .invoke-portrait > img { max-height: 58px; }
+  .game-page .team-draft-pick { min-height: 96px; padding-top: 7px; padding-bottom: 7px; }
+  .game-page .team-draft-skills img { max-width: 48px; }
+}
+
+.game-page .team-draft-pick.has-preset { background-image: linear-gradient(105deg, #07101bde, #07101b80), var(--draft-build-art); background-size: cover; background-position: center 38%; }
+.game-page .team-draft-name strong { line-height: 1.2; text-shadow: 0 2px 8px #000; }
+
+@media (min-width: 1000px) {
+  .game-page #create-new .invoke-modern .invoke-stage-content { align-items: safe center; }
+  .game-page #create-new .invoke-modern .invoke-identity { align-self: safe center; }
+}
+
+// Keep the build panel at its original scale; only compact it on short displays.
+@media (min-width: 1000px) and (max-height: 850px) {
+  .game-page .team-draft-page #create-new .invoke-build-panel { padding: 12px 16px; }
+  .game-page .team-draft-page #create-new .invoke-build-pick { padding: 8px 10px; }
+  .game-page .team-draft-page #create-new .invoke-section-heading { margin-bottom: 10px; }
+  .game-page .team-draft-page #create-new .invoke-loadout-slot img { max-width: 48px; }
+  .game-page .team-draft-page #create-new #create-bar.invoke-loadout { margin-top: 8px; padding-top: 8px; }
+  .game-page .team-draft-page #create-new .invoke-launch { margin-top: 8px; }
+}
+
+.game-page #create-new .invoke-launch-label { display: flex; align-items: center; gap: 12px; }
+.game-page #create-new .invoke-launch-icon { width: 26px; height: 26px; font-size: 26px; flex-shrink: 0; object-fit: contain; }
+.game-page #team-draft-launch { display: flex; flex-direction: column; gap: 8px; width: 100%; min-width: 0; margin: 0; }
+.game-page #team-draft-submit { display: flex; flex: 1; min-height: 0; }
+.game-page #team-draft-launch .creation-name-field--inline {
+  > div { margin-bottom: 0 !important; }
+  label { position: relative; }
+  label > span { position: absolute; top: 50%; right: 11px; width: auto; margin: 0; transform: translateY(-50%); color: #9daec1; font-size: 11px; pointer-events: none; }
+  .invoke-name-input { height: 36px; margin: 0; padding-right: 88px; }
+}
+@media (min-width: 1000px) {
+  .game-page .team-draft-pick { height: 116px; min-height: 0; grid-template-rows: 30px minmax(0, 1fr); }
+  .game-page .team-draft-skills img { max-width: 56px; max-height: 56px; }
+  .game-page #team-draft-launch { min-height: 116px; }
+}
+.game-page #team-draft-begin {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex: 1;
+  width: 100%;
+  min-width: 0;
+  min-height: 72px;
+  padding: 3px 8px;
+  border-color: #e2bc7b;
+  background: radial-gradient(ellipse at 25% 0%, #e49b4d38, transparent 70%), linear-gradient(125deg, #65262c, #a7493b 62%, #762b30);
+  box-shadow: inset 0 1px #ffedba55, inset 0 -2px #3d101b66, 0 6px 24px #66252b44;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.game-page #team-draft-begin::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(115deg, transparent 20%, #ffe5ad14 48%, transparent 75%); transform: translateX(-100%); transition: transform .5s ease; }
+.game-page #team-draft-begin:hover:enabled { transform: translateY(-2px); box-shadow: inset 0 1px #fff0c980, inset 0 -2px #3d101b66, 0 0 30px #e6aa4b35, 0 8px 24px #0004; }
+.game-page #team-draft-begin:hover:enabled::before { transform: translateX(100%); }
+.game-page #team-draft-begin .team-begin-emblem { width: 64px; height: 64px; object-fit: contain; flex-shrink: 0; filter: drop-shadow(0 0 12px #efc47766); }
+.game-page #team-draft-begin .team-begin-label { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; line-height: 1; text-transform: uppercase; }
+.game-page #team-draft-begin .team-begin-label strong { color: #fff0cf; font-size: 36px; font-weight: 900; letter-spacing: .04em; text-shadow: 0 2px 10px #3e0f24aa; }
+.game-page #team-draft-begin .team-begin-label > span { color: #e6c898; font-size: 16px; font-weight: 800; letter-spacing: .18em; }
+@media (prefers-reduced-motion: reduce) {
+  .game-page #team-draft-begin, .game-page #team-draft-begin::before { transition: none; }
+  .game-page #team-draft-begin:hover:enabled { transform: none; }
+}
+
+// The roster floats above the unchanged HUD, outside its border and background.
+.game-page #hero-team-tabs { position: fixed; z-index: 100; height: 65px; min-width: 0; visibility: hidden; }
+
+.game-page #hero-team-tabs .team-hero-selector { gap: 6px; }
+.game-page #hero-team-tabs .team-tab-hotkey { position: absolute; top: 5px; left: 5px; padding: 2px 5px; border: 1px solid #dfbf7c66; border-radius: 3px; background: #09101de6; color: #f2dba5; font: 800 11px/1.2 'Nunito', sans-serif; }
+.game-page #hero-team-tabs .team-hero-selector button { border-radius: 8px 8px 0 0; border-bottom: 0; background: #111b27; }
+.game-page #hero-team-tabs .team-hero-selector button > span { background: linear-gradient(transparent, #111b27 88%); padding-bottom: 8px; }
+.game-page #hero-team-tabs .team-hero-selector button[aria-selected=true] { box-shadow: inset 0 2px #e3c58c, 0 -3px 18px #ceb2701c; }
+@media (min-width: 768px) {
+  body:has(#team-training-page.content-with-hero-bar) { padding-bottom: 0; }
+  .game-page .team-training.content-with-hero-bar { display: flex; flex-direction: column; height: var(--team-page-height, 100dvh); min-height: 0; margin-bottom: 0; position: relative; }
+  .game-page .team-training.content-with-hero-bar .team-hero-panel > .training-ascent { flex-shrink: 0; margin-bottom: 0; }
+  .game-page .team-training.content-with-hero-bar .team-targets { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); align-items: stretch; align-content: stretch; margin-top: 24px; }
+  .game-page .team-training.content-with-hero-bar .team-targets > div { display: flex; min-height: 0; height: auto; max-height: 100%; align-self: start; align-items: stretch; }
+  .game-page .team-training.content-with-hero-bar .training-target { flex: 1; min-height: 0; height: auto; align-self: stretch; }
+  .game-page .team-training.content-with-hero-bar .training-target > .card-header { flex-shrink: 0; }
+  .game-page .team-training.content-with-hero-bar .training-target > .card-body { flex: 1 1 220px; min-height: 0; }
+  .game-page .team-training.content-with-hero-bar .training-target > .card-footer { flex-shrink: 0; }
+  .game-page .team-training.content-with-hero-bar .team-hero-panel > .training-ascent.is-challenge-stage { flex: 1; height: auto; min-height: 0; margin-bottom: 18px; grid-template-rows: auto minmax(0, 1fr) auto auto; }
+  .game-page .team-training .team-hero-panel > .roshan-challenge { flex: 1; min-height: 0; margin: 24px 0 18px; }
+  .game-page .team-training .roshan-portrait { min-height: 0; }
+}
+@media (min-width: 768px) and (max-height: 850px) {
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) { gap: 12px 24px; padding: 8px 12px; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-emblem { width: 36px; height: 36px; margin-bottom: 6px; font-size: 24px; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-option { gap: 12px; padding: 12px 0; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .btn { min-height: 40px; padding: 8px 12px; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-alternatives { gap: 16px; padding-top: 10px; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-alternative small { margin-top: 4px; }
+  .game-page .team-training.content-with-hero-bar .team-hero-panel > .training-ascent { padding: 12px 20px 0; }
+  .game-page .team-training .training-ascent h2 { font-size: 26px; }
+  .game-page .team-training .training-ascent .ascent-track { margin: 8px 0 6px; }
+  .game-page .team-training .training-ascent .ascent-emblem { height: 50px; }
+  .game-page .team-training .training-ascent .ascent-rank .league-logo { height: 38px; }
+  .game-page .team-training .training-ascent .ascent-rank.is-current .league-logo { height: 50px; }
+  .game-page .team-training .training-ascent .ascent-rank.is-next .league-logo { height: 46px; }
+  .game-page .team-training .training-ascent .ascent-rank::before { top: 25px; }
+  .game-page .team-training .training-ascent .ascent-utilities { min-height: 44px; }
+  .game-page .team-training .training-ascent.is-challenge-stage .ascent-emblem { height: 100px; }
+  .game-page .team-training .training-ascent.is-challenge-stage .ascent-rank .league-logo { height: 58px; }
+  .game-page .team-training .training-ascent.is-challenge-stage .ascent-rank.is-current .league-logo { height: 76px; }
+  .game-page .team-training .training-ascent.is-challenge-stage .ascent-rank.is-next .league-logo { height: 90px; }
+  .game-page .team-training .training-ascent.is-challenge-stage .ascent-rank::before { top: 50px; }
+  .game-page .team-training .training-ascent.is-challenge-stage .ascent-objective { padding-bottom: 16px; gap: 12px; }
+  .game-page .team-training .training-ascent.is-challenge-stage :is(#training-ascent-status, [id$="-training-ascent-status"]) { font-size: 22px; }
+  .game-page .team-training .roshan-briefing { gap: 8px; padding: 16px; }
+  .game-page .team-training .team-hero-panel:has(> .roshan-challenge) > .training-ascent .ascent-track { display: none; }
+  .game-page .team-training .roshan-heading h2 { font-size: 30px; }
+  .game-page .team-training .roshan-ability { width: 52px; }
+  .game-page .team-training .roshan-mechanic, .game-page .team-training .roshan-recovery { font-size: 15px; line-height: 1.4; }
+  .game-page .team-training .roshan-promotion { display: none; }
+  .game-page .team-training .roshan-challenge .roshan-begin { min-height: 46px; padding: 10px 16px; font-size: 20px; }
+}
+
+@media (min-width: 768px) and (max-height: 850px) {
+  .game-page .team-training.content-with-hero-bar .training-target > .card-body { min-height: 0; }
+  .game-page .team-training.content-with-hero-bar .training-target > .card-header { padding: 8px 10px 15px !important; }
+  .game-page .team-training .training-target .gank-button { bottom: 8px; width: 140px; }
+  .game-page .team-training .training-target .target-battle { min-height: 44px; padding: 8px 12px; font-size: 18px; }
+}
+
+@media (min-width: 768px) and (max-height: 760px) {
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) { row-gap: 8px; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-option { padding: 8px 0; }
+  .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-alternative small, .game-page :is(#team-death-panel, [id$="-team-death-panel"]) .death-alternatives p { display: none; }
+  .game-page .team-training .training-target .target-performance { padding: 6px 10px 2px; }
+  .game-page .team-training .training-target .target-loadout .skills-container { grid-template-columns: repeat(4, minmax(0, 48px)); justify-content: start; }
+  .game-page .team-training .training-target .target-loadout .skill-img { height: 48px; }
+}
+
+.game-page .team-hero-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; }
+
+// Lime-green surfaces identify battle automation, separate from primary attacks and rewards.
+.game-page .training-play-controls button.battle-auto-control {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid #9ad66299;
+  border-radius: 8px;
+  background: radial-gradient(ellipse at 15% 0%, #b2eb6b24, transparent 75%), linear-gradient(135deg, #264719, #355c22);
+  color: #e5fad4;
+  box-shadow: inset 0 1px #dcffb526, 0 0 20px #83c6491c;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 900;
+  white-space: nowrap;
+  transition: background .18s, border-color .18s, box-shadow .18s, transform .18s;
+}
+.game-page .training-play-controls .battle-auto-control:hover:not(:disabled) { background: linear-gradient(135deg, #365f22, #497b2e); border-color: #b8ec87; box-shadow: inset 0 1px #e0ffc23d, 0 0 26px #91ce5433; transform: translateY(-1px); }
+.game-page .training-play-controls .battle-auto-control:focus-visible { outline: 2px solid #c9f99b; outline-offset: 4px; }
+.game-page .training-play-controls .battle-auto-control:disabled { opacity: .45; }
+.game-page .training-play-controls .battle-auto-control kbd { margin-left: auto; padding: 4px 6px; border: 1px solid #c3ec924d; border-radius: 4px; background: #101f1280; color: #d5efb7; font: 800 12px/1 'Nunito', sans-serif; }
+.game-page .battle-auto-icon, .game-page .battle-auto-forward { color: #bced8b; font-size: 22px; flex-shrink: 0; }
+.game-page .battle-auto-forward { display: inline-flex; width: 30px; }
+.game-page .battle-auto-forward .ui-icon + .ui-icon { margin-left: -10px; }
+@media (prefers-reduced-motion: reduce) { .game-page .training-play-controls button.battle-auto-control { transition: none; } .game-page .training-play-controls .battle-auto-control:hover:not(:disabled) { transform: none; } }
+
+@media (max-width: 767px) {
+  .game-page .team-battle-page .stage-automation .battle-auto-control { gap: 7px; }
+  .game-page .team-battle-page .stage-automation .battle-auto-control kbd { padding: 3px 4px; font-size: 10px; }
+  .game-page .team-battle-page .stage-automation .battle-auto-icon, .game-page .team-battle-page .stage-automation .battle-auto-forward { font-size: 18px; }
+  .game-page .team-battle-page .stage-automation .battle-auto-forward { width: 26px; }
+  .game-page .team-battle-page .stage-automation .battle-auto-forward .ui-icon + .ui-icon { margin-left: -8px; }
+}
+
+.game-page .ascent-challenge-action { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.game-page .ascent-challenge:disabled { cursor: not-allowed; opacity: .5; filter: saturate(.45); box-shadow: none; }
+.game-page .league-skill-warning { display: flex; align-items: center; justify-content: center; gap: 9px; margin: 0; padding: 10px 16px; border: 1px solid #edc46955; border-radius: 7px; background: linear-gradient(110deg, #98702826, #edb94e0d); color: #ffda8a; font: 900 17px/1.35 'Nunito', sans-serif; text-shadow: 0 0 15px #ffc45d44; animation: league-skill-glow 1.8s ease-in-out infinite; }
+.game-page .league-skill-warning:hover { background-color: #edb94e1a; }
+.game-page .league-skill-warning:focus-visible { outline: 2px solid #ffda8a; outline-offset: 3px; }
+.game-page .league-skill-warning kbd { padding: 4px 6px; border: 1px solid #edc46955; border-radius: 4px; background: #080d154d; color: inherit; font: 800 11px/1 'Nunito', sans-serif; }
+.game-page .skill-guidance-arrow { position: absolute; z-index: 6; display: block; width: 40px; height: 36px; pointer-events: none; transform: translateX(-50%); filter: drop-shadow(0 0 8px #ffc45dcc); animation: league-skill-point 1.2s ease-in-out infinite; }
+.game-page .skill-guidance-arrow::after { content: ''; position: absolute; top: 0; left: 9px; width: 22px; height: 22px; border-right: 5px solid #ffda8a; border-bottom: 5px solid #ffda8a; transform: rotate(45deg); }
+.game-page #hero-team-tabs .team-hero-selector { position: relative; }
+.game-page :is(.league-hero-skill-arrow, .first-battle-hero-arrow) { bottom: calc(100% + 9px); }
+.game-page .team-hero-selector:has([data-battle-guide][aria-selected=true]) .first-battle-hero-arrow { display: none; }
+.game-page #team-training-page:has(.team-hero-panel.has-pending-skill-points:not(.d-none)) .league-hero-skill-arrow { display: none; }
+.game-page .league-hud-skill-arrow { bottom: calc(100% + 8px); left: 50%; }
+.game-page :is(#hero-bar, .hero-bar) .hud-build:has(.league-hud-skill-arrow) { position: relative; }
+@keyframes league-skill-point { 0%, 100% { transform: translate(-50%, -5px); } 50% { transform: translate(-50%, 4px); } }
+@keyframes league-skill-glow { 0%, 100% { border-color: #edc46955; box-shadow: 0 0 12px #ffc45d0d; } 50% { border-color: #ffdc8caa; box-shadow: 0 0 22px #ffc45d33; } }
+@media (max-width: 767px) {
+  .game-page .team-hero-panel .hud-build:has(.league-hud-skill-arrow) { display: block !important; }
+  .game-page .league-skill-warning { font-size: 15px; padding: 9px 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .game-page .skill-guidance-arrow, .game-page .league-skill-warning { animation: none; } }
+
+.game-page .training-play-controls button.battle-auto-control.is-running { border-color: #c2ec91; box-shadow: inset 0 0 18px #b2eb6b1a, 0 0 20px #83c64926; }
+.game-page .battle-auto-pause { display: inline-flex; align-items: center; justify-content: center; gap: 5px; width: 24px; height: 24px; }
+.game-page .battle-auto-pause::before, .game-page .battle-auto-pause::after { content: ''; width: 5px; height: 18px; border-radius: 1px; background: currentColor; }
+

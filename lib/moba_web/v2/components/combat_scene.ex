@@ -40,7 +40,7 @@ defmodule MobaWeb.V2.Components.CombatScene do
 
     %{
       id: battle.id,
-      context: context(battle.type),
+      context: battle_context(battle),
       initiator: Map.get(battle.initiator, :name, ""),
       finished: battle.finished || false,
       winner: winner_side(battle),
@@ -366,8 +366,11 @@ defmodule MobaWeb.V2.Components.CombatScene do
         else: "right"
       )
 
+  defp battle_context(%{type: "match", match: %{team_size: size}}), do: "Arena · #{size}v#{size}"
+  defp battle_context(battle), do: context(battle.type)
+
   defp context("league"), do: "League challenge"
   defp context("duel"), do: "Arena · 1v1"
-  defp context("match"), do: "Arena · 5v5"
+  defp context("match"), do: "Arena · 3v3"
   defp context(_), do: "Training battle"
 end

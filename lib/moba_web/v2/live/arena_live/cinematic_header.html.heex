@@ -1,7 +1,7 @@
 <header id="pvp-progression" class="arena-cinematic" style="--arena-scene: url(/images/tutorial/arena-of-ascension.jpg)">
   <div class="arena-cinematic-heading">
     <div class="arena-banner-intro">
-      <p class="arena-eyebrow">The proving ground · 1v1 &amp; 5v5</p>
+      <p class="arena-eyebrow">The proving ground · 1v1 &amp; 3v3</p>
       <h1>Arena</h1>
       <p id="current-pvp-tier">{tier_title(@current_player)}</p>
       <.immortal_streak_debuff id="arena-immortal-streak-debuff" player={@current_player} />
@@ -10,7 +10,7 @@
   <div class="arena-cinematic-command">
     <div class="arena-daily-progress">
       <div class="arena-progress-label" id="arena-progress-label">
-        <span>Daily 5v5 matches</span>
+        <span>Daily 3v3 matches</span>
         <strong>{@current_player.daily_matches}<span> / {Moba.daily_match_limit()}</span></strong>
       </div>
       <div
@@ -20,16 +20,16 @@
         aria-labelledby="arena-progress-label"
         aria-valuemin="0"
         aria-valuemax={Moba.daily_match_limit()}
-        aria-valuenow={@current_player.daily_matches}
+        aria-valuenow={min(@current_player.daily_matches, Moba.daily_match_limit())}
       >
         <div
-          style={"width:#{manual_matches_percentage(@manual_matches)}%;"}
+          style={"width:#{match_progress_percentage(@manual_matches, @auto_matches)}%;"}
           class="progress-bar manual-bar"
           title={"Manual matches played: #{length(@manual_matches)}"}
         >
         </div>
         <div
-          style={"width:#{auto_matches_percentage(@auto_matches)}%;"}
+          style={"width:#{match_progress_percentage(@auto_matches, @manual_matches)}%;"}
           class="progress-bar auto-bar"
           title={"Auto matches played: #{length(@auto_matches)}"}
         >
@@ -42,14 +42,14 @@
     </div>
     <div class="arena-cinematic-action">
       <div class="arena-play-actions" aria-label="Play in the Arena">
-        <div class="arena-play-mode arena-play-5v5">
+        <div class="arena-play-mode arena-play-3v3">
           <%= if @pending_match do %>
             <.link
               id="resume-arena-match"
               navigate={preview_path(assigns, ~p"/matches/#{@pending_match}")}
               class="btn battle-primary arena-play-button"
             >
-              <.icon name="game-strategy" /><span>Resume 5v5</span><span aria-hidden="true">→</span>
+              <.icon name="game-arena-3v3" /><span>Resume 3v3</span><span aria-hidden="true">→</span>
             </.link>
           <% else %>
             <button
@@ -58,10 +58,10 @@
               data-game-fullscreen
               phx-click="matchmaking"
               class="btn battle-primary arena-play-button"
-              disabled={length(@manual_matches) >= Moba.daily_match_limit()}
+              disabled={manual_match_limit_reached?(@current_player, @manual_matches)}
             >
               <span class="loading-text">
-                <.icon name="game-strategy" /><span>Play 5v5</span><span aria-hidden="true">→</span>
+                <.icon name="game-arena-3v3" /><span>Play 3v3</span><span aria-hidden="true">→</span>
               </span>
             </button>
           <% end %>
@@ -102,12 +102,12 @@
         <dt>Arena Rating</dt>
         <dd class="arena-stat-gold">{@current_player.pvp_points}</dd>
       </div>
-      <div title={"Total Matches: #{@current_player.total_matches}. Total Wins: #{@current_player.total_wins}"}>
-        <dt>5v5 Win Rate</dt>
-        <dd class="arena-stat-blue">{total_win_rate(@current_player)}<small>%</small></dd>
+      <div title={GH.win_rate_summary(@recent_results)}>
+        <dt>3v3 Win Rate</dt>
+        <dd class="arena-stat-blue">{GH.win_rate(@recent_results)}<small>%</small></dd>
       </div>
       <div>
-        <dt>Daily 5v5 wins</dt>
+        <dt>Daily 3v3 wins</dt>
         <dd class="arena-stat-green">{@current_player.daily_wins}</dd>
       </div>
     </dl>

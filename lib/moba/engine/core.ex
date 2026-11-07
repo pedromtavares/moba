@@ -13,6 +13,7 @@ defmodule Moba.Engine.Core do
   """
   def auto_finish_battle!({:error, _}, _), do: nil
   def auto_finish_battle!(nil, _), do: nil
+  def auto_finish_battle!(%{training_team_id: id} = battle, _) when not is_nil(id), do: battle
   def auto_finish_battle!(%{finished: true} = battle, _), do: battle
   def auto_finish_battle!(battle, orders), do: battle |> continue_battle!(orders) |> auto_finish_battle!(orders)
 
@@ -37,6 +38,13 @@ defmodule Moba.Engine.Core do
 
   def can_use_resource?(%{attacker: attacker}, resource), do: Helper.can_use?(attacker, resource, :active)
 
+  @doc "Preselects a forced continuation or the first castable skill in the hero's saved priority."
+  def preselected_skill(%{attacker: %{double_skill: skill}}) when not is_nil(skill), do: skill
+
+  def preselected_skill(%{attacker: attacker}) do
+    Enum.find(attacker.skill_order, &(&1 && !&1.passive && Helper.can_use?(attacker, &1, :active)))
+  end
+
   def create_duel_battle!(attrs), do: Duel.create_battle!(attrs)
 
   def create_league_battle!(attrs), do: League.create_battle!(attrs)
@@ -49,6 +57,7 @@ defmodule Moba.Engine.Core do
   Continues an existing battle by creating a new turn from where it left off
   """
   def continue_battle!(%{finished: true} = battle, _), do: battle
+  def continue_battle!(%{training_team_id: id} = battle, _) when not is_nil(id), do: battle
 
   def continue_battle!(battle, orders) do
     {:ok, result} =
@@ -79,6 +88,10 @@ defmodule Moba.Engine.Core do
       nil -> 0
       turn -> turn.number
     end
+  end
+
+  defp action_allowed?(%{type: "match", match: %{interactive: true, player_id: owner}} = battle, %{player_id: id}) do
+    id == owner && build_turn(battle, %{}).attacker.player_id == id
   end
 
   defp action_allowed?(%{type: "match"}, %{player_id: _}), do: false
@@ -129,7 +142,7 @@ defmodule Moba.Engine.Core do
   end
 
   # Uses the attacker's speed to calculate if they will initiate the battle. 1 speed = 1% chance
-  defp determine_initiator(%{attacker: attacker, defender: defender} = battle) do
+  def determine_initiator(%{attacker: attacker, defender: defender} = battle) do
     roll = if attacker.pve_tier > 0, do: attacker.speed + attacker.item_speed, else: 100
 
     {initiator, initiator_player} =
@@ -169,7 +182,12 @@ defmodule Moba.Engine.Core do
   defp maybe_finalize_battle(%{finished: true, type: "duel"} = battle), do: Duel.finalize_battle(battle)
   defp maybe_finalize_battle(battle), do: battle
 
-  # All match battles are automated
+  # Interactive Arena turns are advanced individually after their animation finishes.
+  defp maybe_skip_next_turn(%{match: %{interactive: true}} = battle, _) do
+    Repo.preload(battle, turns: Engine.ordered_turns_query())
+  end
+
+  # Daily automatic matches and historical matches retain their original simulation.
   defp maybe_skip_next_turn(%{match_id: match_id} = battle, opts) when not is_nil(match_id) do
     battle = Repo.preload(battle, :turns)
     create_turn!(battle, Map.merge(opts, %{auto: true}))

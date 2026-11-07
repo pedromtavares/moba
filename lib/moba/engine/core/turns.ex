@@ -53,10 +53,12 @@ defmodule Moba.Engine.Core.Turns do
     end
   end
 
-  def build_turn(battle, orders) do
+  # Supplying a resource lookup keeps frozen replay/fixture catalogs independent
+  # of the current season. Normal gameplay uses the existing catalog resolver.
+  def build_turn(battle, orders, resolve_resource \\ &Moba.load_resource/2) do
     last_turn = List.last(battle.turns)
 
-    {attacker, defender} = prepare_battlers(battle, last_turn, orders)
+    {attacker, defender} = prepare_battlers(battle, last_turn, orders, resolve_resource)
     attacker = %{attacker | starting_hp: round(attacker.current_hp), starting_mp: round(attacker.current_mp)}
     defender = %{defender | starting_hp: round(defender.current_hp), starting_mp: round(defender.current_mp)}
 
@@ -80,17 +82,18 @@ defmodule Moba.Engine.Core.Turns do
   end
 
   # Heroes in initial pve_tiers are constantly buffed for league battles
-  defp buffed_total(%{pve_tier: pve_tier, league_tier: league_tier, bot_difficulty: diff}, %{type: "league"}, total)
-       when is_nil(diff) do
+  @doc false
+  def buffed_total(%{pve_tier: pve_tier, league_tier: league_tier, bot_difficulty: diff}, %{type: "league"}, total)
+      when is_nil(diff) do
     total + round(Moba.league_buff_multiplier(pve_tier, league_tier) * total)
   end
 
   # Players with an immortal streak will have their heroes nerfed for match battles, aka "Arrogance" debuff
-  defp buffed_total(%{player: %{current_immortal_streak: streak}}, %{type: "match"}, total) when streak > 0 do
+  def buffed_total(%{player: %{current_immortal_streak: streak}}, %{type: "match"}, total) when streak > 0 do
     total - round(Moba.immortal_streak_multiplier() * streak * total)
   end
 
-  defp buffed_total(_, _, total), do: total
+  def buffed_total(_, _, total), do: total
 
   defp codes_to_resources(codes, pool) do
     Enum.map(codes, fn code ->
@@ -99,7 +102,7 @@ defmodule Moba.Engine.Core.Turns do
   end
 
   # flushes necessary stats for an attacker on a new turn (was a defender last turn)
-  defp flush_attacker(battle, %{defender: battler}) do
+  defp flush_attacker(battle, %{defender: battler}, resolve_resource) do
     hero = hero_from_battler(battle, battler)
 
     %{
@@ -118,11 +121,11 @@ defmodule Moba.Engine.Core.Turns do
         next_power_normal: 0,
         next_power_magic: 0
     }
-    |> flush(hero)
+    |> flush(hero, resolve_resource)
   end
 
   # flushes necessary stats for a defender on a new turn (was an attacker last turn)
-  defp flush_defender(battle, %{attacker: battler}) do
+  defp flush_defender(battle, %{attacker: battler}, resolve_resource) do
     hero = hero_from_battler(battle, battler)
 
     %{
@@ -139,10 +142,10 @@ defmodule Moba.Engine.Core.Turns do
         disarmed: false,
         immortal: false
     }
-    |> flush(hero)
+    |> flush(hero, resolve_resource)
   end
 
-  defp flush(battler, %{items: items, skills: skills} = hero) do
+  defp flush(battler, %{items: items, skills: skills} = hero, resolve_resource) do
     %{
       battler
       | damage: 0,
@@ -162,14 +165,15 @@ defmodule Moba.Engine.Core.Turns do
         skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
         item_order: codes_to_resources(hero.item_order, items),
         last_skill: load_resource(battler.last_skill_code, skills),
-        double_skill: load_resource(battler.double_skill_code, battler.double_skill_level, skills),
-        delayed_skill: load_resource(battler.delayed_skill_code, battler.delayed_skill_level, skills),
-        permanent_skill: load_resource(battler.permanent_skill_code, battler.permanent_skill_level, skills),
-        pulse_nova: load_resource(battler.pulse_nova_code, battler.pulse_nova_level),
-        buffs: load_buffs(battler.buffs),
-        debuffs: load_buffs(battler.debuffs),
-        defender_buffs: load_buffs(battler.defender_buffs),
-        attacker_debuffs: load_buffs(battler.attacker_debuffs)
+        double_skill: load_resource(battler.double_skill_code, battler.double_skill_level, skills, resolve_resource),
+        delayed_skill: load_resource(battler.delayed_skill_code, battler.delayed_skill_level, skills, resolve_resource),
+        permanent_skill:
+          load_resource(battler.permanent_skill_code, battler.permanent_skill_level, skills, resolve_resource),
+        pulse_nova: resolve_resource.(battler.pulse_nova_code, battler.pulse_nova_level),
+        buffs: load_buffs(battler.buffs, resolve_resource),
+        debuffs: load_buffs(battler.debuffs, resolve_resource),
+        defender_buffs: load_buffs(battler.defender_buffs, resolve_resource),
+        attacker_debuffs: load_buffs(battler.attacker_debuffs, resolve_resource)
     }
   end
 
@@ -194,7 +198,7 @@ defmodule Moba.Engine.Core.Turns do
 
   def keys_to_atoms(value), do: value
 
-  defp load_buffs(buffs) do
+  defp load_buffs(buffs, resolve_resource) do
     Enum.map(buffs, fn buff ->
       buff =
         if Map.get(buff, "duration") do
@@ -204,7 +208,7 @@ defmodule Moba.Engine.Core.Turns do
         end
 
       level = Map.get(buff, :level, nil)
-      Map.put(buff, :resource, load_resource(buff.resource_code, level))
+      Map.put(buff, :resource, resolve_resource.(buff.resource_code, level))
     end)
     |> Enum.reject(&(&1.duration <= 0))
   end
@@ -213,17 +217,15 @@ defmodule Moba.Engine.Core.Turns do
     Enum.find(resources, &(&1.code == code))
   end
 
-  defp load_resource(code, level), do: Moba.load_resource(code, level)
+  defp load_resource(nil, _level, _skills, _resolve_resource), do: nil
 
-  defp load_resource(nil, _level, _skills), do: nil
-
-  defp load_resource(code, level, skills) do
-    Enum.find(skills, &(&1.code == code && (is_nil(level) || &1.level == level))) || load_resource(code, level)
+  defp load_resource(code, level, skills, resolve_resource) do
+    Enum.find(skills, &(&1.code == code && (is_nil(level) || &1.level == level))) || resolve_resource.(code, level)
   end
 
-  defp prepare_battlers(battle, last_turn, orders) do
+  defp prepare_battlers(battle, last_turn, orders, resolve_resource) do
     if last_turn do
-      {flush_attacker(battle, last_turn), flush_defender(battle, last_turn)}
+      {flush_attacker(battle, last_turn, resolve_resource), flush_defender(battle, last_turn, resolve_resource)}
     else
       {attacker, attacker_player} = {battle.initiator, battle.initiator_player}
 
@@ -277,7 +279,7 @@ defmodule Moba.Engine.Core.Turns do
   end
 
   defp prepare_stat(player, battle, orders, stat) do
-    hero_stat = Map.get(orders, stat)
+    hero_stat = Map.get(orders, stat) || Map.get(battle, stat)
     player_id = player && Map.get(player, :id, nil)
 
     if player_id && player_id == battle.attacker_player_id && hero_stat do

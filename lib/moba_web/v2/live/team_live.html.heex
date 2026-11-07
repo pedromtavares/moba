@@ -1,0 +1,128 @@
+<Layouts.app
+  flash={@flash}
+  current_scope={@current_scope}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  preview={@preview}
+  sidebar_code={@sidebar_code}
+  hide_footer
+>
+  <main id="hero-review" class="team-review" phx-hook="HeroReviewViewport">
+    <div id="hero-detail" class="hero-detail">
+      <div class="hero-detail-overview">
+        <nav id="team-profile-roster" class="team-profile-roster" role="tablist" aria-label="Team heroes">
+          <button
+            :for={{hero, index} <- Enum.with_index(@team.heroes)}
+            id={"team-profile-tab-#{hero.id}"}
+            class="team-profile-tab"
+            type="button"
+            role="tab"
+            aria-selected={to_string(index == 0)}
+            aria-controls={"team-profile-hero-#{hero.id}"}
+            phx-click={select_hero(hero.id)}
+          >
+            <img src={GH.image_url(hero.avatar)} alt="" />
+            <span>{hero.avatar.name}</span>
+          </button>
+        </nav>
+        <article
+          :for={{hero, index} <- Enum.with_index(@team.heroes)}
+          id={"team-profile-hero-#{hero.id}"}
+          data-team-profile-card
+          class={["hero-card card hero-detail-card", index != 0 && "d-none"]}
+          role="tabpanel"
+          aria-labelledby={"team-profile-tab-#{hero.id}"}
+        >
+          <div class="card-header">
+            <div class="hero-detail-identity">
+              <div>
+                <h2>{Game.TeamTraining.hero_name(hero, @team)}</h2>
+                <span class="hero-detail-avatar-name">{hero.avatar.name}</span>
+              </div>
+              <div class="hero-detail-level"><span>Level</span><strong>{hero.level}</strong></div>
+            </div>
+          </div>
+          <div class="card-body"><img src={GH.background_url(hero)} alt={hero.avatar.name} /></div>
+          <div class="card-footer">
+            <div class="hero-detail-stats"><.hero_stat_group hero={hero} /></div>
+            <div class="row">
+              <div class="col-12 hero-detail-loadout">
+                <.hero_skill_strip
+                  skills={MobaWeb.V2.Components.HeroBarComponents.sorted_skills(hero)}
+                  id_prefix="team-profile-skill"
+                  id_suffix={hero.id}
+                />
+                <.hero_item_strip items={Game.sort_items(hero.items)} id_prefix="team-profile-item" id_suffix={hero.id} />
+              </div>
+            </div>
+            <nav class="hero-detail-actions" aria-label={"#{hero.avatar.name} actions"}>
+              <.link id={"team-profile-view-hero-#{hero.id}"} navigate={~p"/hero/#{hero.id}"}>View hero →</.link>
+              <.link
+                :if={@team.player.user_id}
+                id={"team-profile-player-#{hero.id}"}
+                navigate={~p"/player/#{@team.player_id}"}
+                data-profile-username={Moba.Utils.username(@team.player)}
+              >
+                Player profile →
+              </.link>
+              <.link
+                :if={@team.player_id == @current_player.id && !@current_scope.user}
+                id={"team-save-account-#{hero.id}"}
+                navigate={~p"/users/register"}
+              >
+                Save your team →
+              </.link>
+            </nav>
+          </div>
+        </article>
+      </div>
+      <section id="team-profile-performance" class="hero-detail-performance" aria-labelledby="team-league-title">
+        <div class="hero-detail-section-heading">
+          <h2 id="team-league-title">{Moba.leagues()[@team.league_tier]}</h2>
+        </div>
+        <ol class="hero-league-path" aria-label="League progression">
+          <li
+            :for={{tier, name} <- Enum.sort(Moba.leagues())}
+            class={tier_class(tier, @team.league_tier)}
+            aria-current={if tier == @team.league_tier, do: "step"}
+            title={name}
+          >
+            <img src={"/images/league/#{tier}.png"} alt={name} />
+          </li>
+        </ol>
+        <dl class="hero-detail-metrics">
+          <div>
+            <dt>
+              Total avg farm
+              <.perfect_indicator :if={Game.Training.PerfectRun.completed_team?(@team)} id="team-perfect-run" finished />
+            </dt>
+            <dd class="hero-farm-total" title={Float.round(@team.total_farm / 3, 2)}>
+              {GH.farming_amount_label(div(@team.total_farm, 3))}
+            </dd>
+          </div>
+          <div>
+            <dt>Avg XP farm</dt>
+            <dd class="hero-farm-xp" title={Float.round(@xp_farm / 3, 2)}>
+              {GH.farming_amount_label(div(@xp_farm, 3))}
+            </dd>
+          </div>
+          <div>
+            <dt>Avg Gold farm</dt>
+            <dd class="hero-farm-gold" title={Float.round(@gold_farm / 3, 2)}>
+              {GH.farming_amount_label(div(@gold_farm, 3))}
+            </dd>
+          </div>
+          <div id="team-profile-duration">
+            <dt>Training time</dt>
+            <dd>{GH.minutes_label(div(@team.duration_seconds, 60), true)} <small>min</small></dd>
+          </div>
+        </dl>
+      </section>
+      <div class="hero-detail-rankings">
+        <.training_completion :if={@show_completion} team={@team} player={@team.player} quest={@completed_quest} />
+        <MobaWeb.V2.Components.TeamComponents.ranking entries={@team_ranking} current_id={@team.id} />
+      </div>
+    </div>
+  </main>
+  <.progression_rewards :if={@completed_quest && @current_scope.user} tier={@team.player.pve_tier} earned />
+</Layouts.app>

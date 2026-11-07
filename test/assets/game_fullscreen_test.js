@@ -14,8 +14,10 @@ function environment(path = '/training', options = {}) {
     addEventListener: (event, listener) => { listeners[event] = listener; }
   };
   let requests = 0;
+  let fullscreenOptions;
   document.documentElement = {
-    requestFullscreen() {
+    requestFullscreen(options) {
+      fullscreenOptions = options;
       requests++;
       if (options.throw) throw new Error('Not supported');
       if (options.deny) return Promise.reject(new Error('Denied'));
@@ -54,7 +56,7 @@ function environment(path = '/training', options = {}) {
     location.href = `https://browsermoba.com${path}`;
     listeners['phx:page-loading-stop']();
   }
-  return {document, listeners, activation, click, control, navigate, requests: () => requests};
+  return {document, listeners, activation, click, control, navigate, requests: () => requests, fullscreenOptions: () => fullscreenOptions};
 }
 
 test('battle launch controls synchronously fullscreen the persistent document root', () => {
@@ -62,6 +64,7 @@ test('battle launch controls synchronously fullscreen the persistent document ro
   env.click(env.control({launch: true}));
   assert.equal(env.requests(), 1);
   assert.equal(env.document.fullscreenElement, env.document.documentElement);
+  assert.equal(env.fullscreenOptions().keyboardLock, 'browser');
 });
 
 test('training, duel and 5v5 links including resumes and reviews enter fullscreen', () => {

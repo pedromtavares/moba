@@ -1,4 +1,7 @@
 .training{
+  .training-target:has(.target-battle[phx-click="battle"]:not(:disabled)) { cursor: pointer; transition: border-color .18s, box-shadow .18s; }
+  .training-target.is-keyboard-selected { border-color: #e3c185; box-shadow: 0 0 0 1px #e3c18566, 0 0 22px #d9ac4a26; }
+  .training-target:hover:has(.target-battle[phx-click="battle"]:not(:disabled)) { border-color: #edcf95; }
   margin-bottom: 150px;
 
   @media (max-width: 992px) {
@@ -68,7 +71,7 @@
 
     .farming-history{
       max-height: 500px;
-      overflow: auto;
+      overflow: hidden auto;
     }
 
     .card-box {
@@ -183,7 +186,7 @@
     .card-body{
       padding: 0 !important;
       max-height: 87vh;
-      overflow: auto;
+      overflow: hidden auto;
 
       thead th {
         position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
@@ -258,4 +261,42 @@
       border: 3px solid white !important;
     }
   }
+}
+.game-page .first-battle-arrow {
+  position: absolute;
+  top: calc(50% - 21px);
+  right: calc(100% + 12px);
+  width: 58px;
+  height: 42px;
+  z-index: 3;
+  pointer-events: none;
+  color: #fff5d4;
+  border: 2px solid #ffce73;
+  border-radius: 99px;
+  background: #100e1b;
+  box-shadow: 0 0 0 2px #140d1b, 0 0 14px #ffb646aa, 0 3px 8px #000c;
+  animation: first-battle-nudge 1.4s ease-in-out infinite;
+}
+.game-page .first-battle-arrow::before { content: ''; position: absolute; left: 9px; top: 16px; width: 32px; height: 6px; border-radius: 3px; background: currentColor; }
+.game-page .first-battle-arrow::after { content: ''; position: absolute; left: 21px; top: 9px; width: 20px; height: 20px; border-right: 6px solid currentColor; border-bottom: 6px solid currentColor; transform: rotate(-45deg); }
+@keyframes first-battle-nudge {
+  0%, 100% { transform: translateX(-3px); }
+  50% { transform: translateX(5px); box-shadow: 0 0 0 2px #140d1b, 0 0 0 6px #ffb64644, 0 0 26px #ffce73, 0 3px 8px #000c; }
+}
+@media (min-width: 768px) and (max-width: 1050px) {
+  .game-page .first-battle-arrow {
+    top: auto;
+    right: calc(50% - 29px);
+    bottom: calc(100% + 14px);
+    rotate: 90deg;
+  }
+}
+@media (prefers-reduced-motion: reduce) { .game-page .first-battle-arrow { animation: none; } }
+.game-page .first-battle-arrow.onboarding-cta-arrow {
+  position: relative;
+  inset: auto;
+  flex: 0 0 58px;
+  margin: -7px -6px;
+  rotate: none;
+  scale: .7;
 }

@@ -1,0 +1,52 @@
+<div id="training-encounter-footer" class="training-encounter-footer">
+  <div class="training-encounter-lineups">
+    <section
+      :for={{side, heroes} <- [{:radiant, @replay.radiant}, {:dire, @replay.dire}]}
+      aria-label={"#{side} lineup"}
+    >
+      <strong>
+        {String.capitalize(to_string(side))}
+      </strong>
+      <div :for={h <- heroes} class="training-film-hero">
+        <% name = TeamTraining.hero_name(h.hero, @team_record) %>
+        <% state =
+          Enum.find_value(Enum.reverse(Enum.take(@replay.battles, @index - 1) ++ [@battle]), fn battle ->
+            turn = List.last(battle.turns)
+            if turn, do: Enum.find([turn.attacker, turn.defender], &(&1.hero_id == h.id))
+          end) %>
+        <img src={GH.image_url(h.hero.avatar)} alt={name} title={name} />
+        <div>
+          <small>{name}</small>
+          <.resource_bar
+            tone="health"
+            current={if state, do: max(0, round(state.current_hp)), else: h.hp}
+            total={Loadouts.max_hp(h)}
+            label={"#{name} health"}
+          /><.resource_bar
+            tone="energy"
+            current={if state, do: max(0, round(state.current_mp)), else: h.energy}
+            total={Loadouts.max_energy(h)}
+            label={"#{name} energy"}
+          />
+        </div>
+      </div>
+    </section>
+  </div>
+  <details id="training-match-battles" class="training-encounter-history">
+    <summary>Inspect battles · {length(@replay.battles)}</summary>
+    <div class="training-encounter-links">
+      <.link
+        :for={{battle, position} <- Enum.with_index(@replay.battles, 1)}
+        id={"training-battle-link-#{position}"}
+        navigate={battle_path(@replay, position)}
+      >
+        Battle {position} · {TeamTraining.hero_name(battle.attacker, @team_record)} vs {TeamTraining.hero_name(
+          battle.defender,
+          @team_record
+        )} · {if battle.finished,
+          do: if(battle.winner, do: TeamTraining.hero_name(battle.winner, @team_record) <> " wins", else: "Draw"),
+          else: "Fight / Auto"} ↗
+      </.link>
+    </div>
+  </details>
+</div>

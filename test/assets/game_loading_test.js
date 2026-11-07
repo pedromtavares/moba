@@ -140,7 +140,7 @@ test('guests do not install the authenticated loading screen', () => {
 test('each destination uses its navigation emblem, falling back to the sidebar helmet', () => {
   const env = environment();
   for (const [path, emblem] of [
-    ['/base', 'base'], ['/training', 'training'], ['/invoke', 'training'],
+    ['/base', 'base'], ['/training', 'training'], ['/new', 'training'],
     ['/battles/123', 'training'], ['/arena', 'arena'], ['/matches/123', 'arena'],
     ['/tavern?tab=skills', 'tavern'], ['/community', 'community'], ['/library', 'manual'],
     ['/admin/players', 'admin'], ['/player/2', 'profile'], ['/hero/123', 'profile'],

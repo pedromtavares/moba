@@ -1,6 +1,9 @@
 defmodule MobaWeb.V2.CreateLive do
   use MobaWeb, :v2_live_view
 
+  def mount(_, _, %{view: __MODULE__, assigns: %{current_player: %{user_id: nil}}} = socket),
+    do: {:ok, push_navigate(socket, to: "/new")}
+
   def mount(_params, _session, %{assigns: %{current_player: player}} = socket) when not is_nil(player) do
     {:ok, socket_player_init(player.id, socket)}
   end
@@ -103,7 +106,7 @@ defmodule MobaWeb.V2.CreateLive do
 
         case Game.invoke_hero(player, %{name: hero_name}, avatar.id, skill_ids) do
           {:ok, _} ->
-            {:reply, %{ok: true}, push_navigate(socket, to: preview_path(socket, "/training"))}
+            {:reply, %{ok: true}, push_navigate(socket, to: preview_path(socket, "/training?solo=true"))}
 
           {:error, _} ->
             {:reply, %{error: "Unable to create your hero. Choose three unlocked skills and try again."}, socket}
@@ -121,7 +124,7 @@ defmodule MobaWeb.V2.CreateLive do
       hero_name = hero_name(player, avatar, name, socket)
 
       case Game.invoke_hero(player, %{name: hero_name}, avatar.id, Enum.map(selected_skills, & &1.id)) do
-        {:ok, _} -> {:noreply, push_navigate(socket, to: preview_path(socket, "/training"))}
+        {:ok, _} -> {:noreply, push_navigate(socket, to: preview_path(socket, "/training?solo=true"))}
         {:error, _} -> {:noreply, assign(socket, error: "Choose an unlocked hero and three unlocked skills.")}
       end
     else
@@ -156,7 +159,12 @@ defmodule MobaWeb.V2.CreateLive do
     skill_ids = MapSet.new(skills, & &1.id)
 
     if avatar && Enum.all?(cached.selected_skills, &MapSet.member?(skill_ids, &1.id)) do
-      %{cached | selected_avatar: avatar}
+      selected_skills =
+        if is_integer(cached.selected_build_index),
+          do: Game.skill_build_for(avatar.role, cached.selected_build_index) |> elem(0),
+          else: cached.selected_skills
+
+      %{cached | selected_avatar: avatar, selected_skills: selected_skills}
     else
       avatar = Enum.find(avatars, &(&1.code == "juggernaut")) || List.first(avatars)
       {selected_skills, _} = Game.skill_build_for(avatar.role, 0)

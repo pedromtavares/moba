@@ -49,6 +49,8 @@ defmodule Moba.Engine do
 
   defdelegate can_use_resource?(turn, resource), to: Core
 
+  defdelegate preselected_skill(turn), to: Core
+
   defdelegate continue_battle!(battle, orders), to: Core
 
   defdelegate create_duel_battle!(attrs), to: Core

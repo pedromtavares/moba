@@ -1,29 +1,49 @@
 defmodule MobaWeb.V2.TrainingLive do
   use MobaWeb, :v2_live_view
+  on_mount MobaWeb.V2.Hooks.TeamAccess
 
   import MobaWeb.V2.Components.HeroBarComponents
 
   alias MobaWeb.V2.Components.TrainingComponents
-  alias MobaWeb.V2.TutorialComponent
+  alias __MODULE__.Team
 
   embed_templates "training_live/*"
 
-  def mount(_, _, socket) do
+  def render(%{training_mode: :team} = assigns), do: Team.render(assigns)
+  def render(assigns), do: solo(assigns)
+
+  def mount(params, session, socket) do
+    player = socket.assigns.current_player
+    scope = socket.assigns.current_scope
+    team = if params["run"], do: Game.TeamRuns.get!(scope, params["run"]), else: Game.TeamRuns.active(scope, player.id)
+
+    socket =
+      assign(socket, current_team: team, training_mode: if(team && params["solo"] != "true", do: :team, else: :solo))
+
+    cond do
+      socket.assigns.training_mode == :team -> Team.init(socket)
+      is_nil(socket.assigns.current_hero) -> {:ok, push_navigate(socket, to: "/base")}
+      true -> mount_solo(params, session, socket)
+    end
+  end
+
+  defp mount_solo(_, _, socket) do
     with %{assigns: %{current_hero: hero}} = socket = socket_init(socket) do
       if hero && connected?(socket) do
         Game.subscribe_to_hero(hero.id)
-        TutorialComponent.subscribe(hero.player_id)
       end
 
       {:ok, socket}
     end
   end
 
-  def handle_params(_params, _uri, %{assigns: %{current_hero: hero}} = socket) do
-    socket = if hero.gold >= 400 && length(hero.items) > 0, do: TutorialComponent.next_step(socket, 6), else: socket
+  def handle_params(params, uri, %{assigns: %{training_mode: :team}} = socket),
+    do: Team.handle_params(params, uri, socket)
 
-    {:noreply, socket}
-  end
+  def handle_params(_, _, socket), do: {:noreply, socket}
+
+  def handle_event(event, params, %{assigns: %{training_mode: :team}} = socket),
+    do: Team.handle_event(event, params, socket)
 
   def handle_event("battle", %{"id" => id}, %{assigns: %{current_hero: hero}} = socket) do
     target = Game.get_target!(id)
@@ -31,8 +51,7 @@ defmodule MobaWeb.V2.TrainingLive do
     if target.attacker_id == hero.id && target.attacker.player_id == socket.assigns.current_player.id do
       case Game.start_pve_battle!(target) do
         %{id: id} ->
-          {:noreply,
-           socket |> TutorialComponent.next_step(2) |> push_navigate(to: preview_path(socket, ~p"/battles/#{id}"))}
+          {:noreply, socket |> push_navigate(to: preview_path(socket, ~p"/battles/#{id}"))}
 
         _ ->
           {:noreply, socket}
@@ -50,8 +69,7 @@ defmodule MobaWeb.V2.TrainingLive do
   end
 
   def handle_event("league", _, %{assigns: %{current_hero: hero}} = socket) do
-    with socket = TutorialComponent.next_step(socket, 10),
-         %{id: id} <- Game.start_league_battle!(hero) do
+    with %{id: id} <- Game.start_league_battle!(hero) do
       {:noreply, socket |> push_navigate(to: preview_path(socket, ~p"/battles/#{id}"))}
     else
       _ -> {:noreply, socket}
@@ -100,18 +118,6 @@ defmodule MobaWeb.V2.TrainingLive do
 
   def handle_event("show-gank", _, socket) do
     {:noreply, assign(socket, farm_tab: "gank")}
-  end
-
-  def handle_event("tutorial3", _, socket) do
-    {:noreply, socket |> TutorialComponent.next_step(3) |> assign(show_shop: true)}
-  end
-
-  def handle_event("tutorial5", _, socket) do
-    {:noreply, socket |> TutorialComponent.next_step(5)}
-  end
-
-  def handle_event("finish-tutorial", _, socket) do
-    {:noreply, TutorialComponent.finish_training(socket)}
   end
 
   def handle_event("level", _, %{assigns: %{current_hero: current}} = socket) do
@@ -174,11 +180,15 @@ defmodule MobaWeb.V2.TrainingLive do
   end
 
   def handle_event("close-shop", _, socket) do
-    {:noreply, assign(socket, show_shop: false) |> TutorialComponent.next_step(10)}
+    {:noreply, assign(socket, show_shop: false)}
   end
 
   def handle_event("toggle-shop", _, socket) do
     {:noreply, assign(socket, show_shop: !socket.assigns.show_shop)}
+  end
+
+  def handle_event("open-shop-item", %{"code" => code}, socket) do
+    {:noreply, open_shop_item(socket, socket.assigns.current_hero, code)}
   end
 
   def handle_event("buy", %{"code" => code}, %{assigns: %{current_hero: hero}} = socket) do
@@ -186,7 +196,7 @@ defmodule MobaWeb.V2.TrainingLive do
     updated_hero = Game.buy_item!(hero, item)
     Game.broadcast_to_hero(updated_hero.id)
 
-    {:noreply, socket |> after_training_shop_update(updated_hero) |> assign(current_hero: updated_hero)}
+    {:noreply, assign(socket, current_hero: updated_hero)}
   end
 
   def handle_event("sell", %{"code" => code}, %{assigns: %{current_hero: hero}} = socket) do
@@ -207,7 +217,7 @@ defmodule MobaWeb.V2.TrainingLive do
     updated_hero = Game.transmute_item!(hero, recipe, transmute)
     Game.broadcast_to_hero(updated_hero.id)
 
-    {:noreply, socket |> TutorialComponent.next_step(9) |> assign(current_hero: updated_hero)}
+    {:noreply, assign(socket, current_hero: updated_hero)}
   end
 
   def handle_event("select-turns", params, %{assigns: %{current_hero: hero}} = socket) do
@@ -245,10 +255,7 @@ defmodule MobaWeb.V2.TrainingLive do
     end
   end
 
-  def handle_info({:tutorial, %{step: step}}, socket) do
-    show_shop = if Enum.member?([3, 7, 8, 9], step), do: true, else: socket.assigns.show_shop
-    {:noreply, assign(socket, tutorial_step: step, show_shop: show_shop)}
-  end
+  def handle_info(message, %{assigns: %{training_mode: :team}} = socket), do: Team.handle_info(message, socket)
 
   def handle_info({"hero", %{id: id}}, socket) do
     {:noreply, assign(socket, current_hero: Game.get_hero!(id))}
@@ -322,11 +329,10 @@ defmodule MobaWeb.V2.TrainingLive do
         farm_rewards: farm_rewards,
         farm_tab: farm_tab,
         show_build: false,
-        show_shop: Enum.member?([3, 7, 8, 9], hero.player.tutorial_step),
+        show_shop: false,
         selected_turns: hero.pve_current_turns,
         sidebar_code: "training",
-        targets: targets,
-        tutorial_step: hero.player.tutorial_step
+        targets: targets
       )
     end
   end
@@ -361,7 +367,6 @@ defmodule MobaWeb.V2.TrainingLive do
     end
   end
 
-  defp display_farm_tabs?(%{tutorial_step: 1}), do: false
   defp display_farm_tabs?(%{preview: true, current_hero: %{pve_current_turns: 0}}), do: false
 
   defp display_farm_tabs?(%{current_hero: %{league_tier: tier}, current_player: player}) do
@@ -479,16 +484,6 @@ defmodule MobaWeb.V2.TrainingLive do
     |> Enum.map(fn {code, _} ->
       code
     end)
-  end
-
-  defp after_training_shop_update(%{assigns: %{tutorial_step: 3}} = socket, hero) when length(hero.items) > 1 do
-    socket
-    |> assign(show_shop: false)
-    |> TutorialComponent.next_step(4)
-  end
-
-  defp after_training_shop_update(socket, _hero) do
-    TutorialComponent.next_step(socket, 7)
   end
 
   defp cached_item!(code) do

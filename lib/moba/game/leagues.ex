@@ -17,14 +17,20 @@ defmodule Moba.Game.Leagues do
   """
   def league_defender_for(%{league_tier: tier} = attacker) when tier == @master_league_tier, do: boss_defender(attacker)
 
-  def league_defender_for(%{league_step: step} = attacker) do
+  def league_defender_for(%{id: id, league_tier: tier, league_step: step}) do
+    {level, difficulty} = defender_profile(tier, step)
+    HeroQuery.league_defender(id, level, difficulty) |> Repo.one()
+  end
+
+  def defender_profile(tier, step) do
+    level = base_level(tier)
+
     case step do
-      0 -> easiest_defender(attacker)
-      1 -> easy_defender(attacker)
-      2 -> moderate_defender(attacker)
-      3 -> moderate_defender(attacker)
-      4 -> hard_defender(attacker)
-      5 -> hardest_defender(attacker)
+      0 -> {level, "moderate"}
+      1 -> {level + 1, "moderate"}
+      step when step in [2, 3] -> {level + 2, "moderate"}
+      4 -> {level + 3, "moderate"}
+      5 -> {level + 3, "strong"}
     end
   end
 
@@ -48,35 +54,6 @@ defmodule Moba.Game.Leagues do
   def league_level_range_for(tier), do: base_level(tier)..(base_level(tier) + 3)
 
   # --------------------------------
-
-  defp get_first(query) do
-    query |> Repo.all() |> List.first()
-  end
-
-  defp easiest_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier), "moderate")
-    |> get_first()
-  end
-
-  defp easy_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 1, "moderate")
-    |> get_first()
-  end
-
-  defp moderate_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 2, "moderate")
-    |> get_first()
-  end
-
-  defp hard_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 3, "moderate")
-    |> get_first()
-  end
-
-  defp hardest_defender(%{id: id, league_tier: league_tier}) do
-    HeroQuery.league_defender(id, base_level(league_tier) + 3, "strong")
-    |> get_first()
-  end
 
   defp boss_defender(%{boss_id: boss_id}), do: Game.get_hero!(boss_id)
 

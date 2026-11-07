@@ -8,6 +8,8 @@ defmodule Moba.Accounts.Unlocks do
   alias Accounts.Schema.User
   import Ecto.Query
 
+  def buy_unlock!(user, %Game.Schema.Skill{}), do: Accounts.get_user_with_unlocks!(user.id)
+
   def buy_unlock!(user, resource) do
     {:ok, user} =
       Repo.transaction(fn ->
@@ -45,7 +47,7 @@ defmodule Moba.Accounts.Unlocks do
   end
 
   def price_to_unlock(%Game.Schema.Avatar{}), do: 150
-  def price_to_unlock(%Game.Schema.Skill{}), do: 100
+  def price_to_unlock(%Game.Schema.Skill{}), do: 0
   def price_to_unlock(%Game.Schema.Skin{league_tier: 5}), do: 500
   def price_to_unlock(%Game.Schema.Skin{league_tier: 6}), do: 1000
   def price_to_unlock(_), do: 100

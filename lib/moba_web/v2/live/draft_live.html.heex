@@ -1,0 +1,61 @@
+<Layouts.app
+  flash={@flash}
+  current_scope={@current_scope}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  preview={@preview}
+  sidebar_code="training"
+  hide_footer
+>
+  <main id="team-draft-page" class="team-draft-page">
+    <div class="team-draft-creator" id="create-new">
+      {MobaWeb.V2.Components.CreateComponents.invoke_modern(assigns)}
+    </div>
+    <section id="team-draft-roster" class="team-draft-roster" aria-label="Your drafted roster">
+      <div id="team-draft-picks" class="team-draft-picks" phx-update="ignore">
+        <article :for={index <- 0..2} id={"team-draft-slot-#{index}"} class="team-draft-pick is-empty">
+          <span class="team-draft-empty-index" aria-label={"Empty roster slot #{index + 1}"}>0{index + 1}</span>
+        </article>
+        <template id="team-draft-pick-template">
+          <img class="team-draft-portrait" />
+          <div class="team-draft-name"><img alt="" /><strong></strong></div>
+          <button type="button" data-remove-pick>×</button>
+          <div class="team-draft-skills"></div>
+        </template>
+      </div>
+      <footer>
+        <.form
+          for={@team_form}
+          id="team-draft-launch"
+          action={if !@draft_record, do: "/start"}
+          phx-submit={if @draft_record, do: "begin-training"}
+        >
+          <input :if={!@draft_record} type="hidden" name="team" value="true" />
+          <MobaWeb.V2.Components.CreateComponents.creation_name
+            :if={@current_scope.user}
+            field={@team_form[:name]}
+            label="Team name"
+            inline_label
+            maxlength={30}
+            error={@team_name_error}
+            error_id="team-name-error"
+          />
+          <div id="team-draft-submit" phx-update="ignore">
+            <input type="hidden" name="roster" value="[]" />
+            <button
+              id="team-draft-begin"
+              type="submit"
+              class="invoke-primary"
+              disabled
+              phx-disable-with="Preparing team…"
+              aria-label="Begin training"
+            >
+              <.icon name="nav-training" class="team-begin-emblem" />
+              <span class="team-begin-label"><strong>Begin</strong><span>training</span></span>
+            </button>
+          </div>
+        </.form>
+      </footer>
+    </section>
+  </main>
+</Layouts.app>

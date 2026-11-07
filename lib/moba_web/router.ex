@@ -61,7 +61,7 @@ defmodule MobaWeb.Router do
     live_session :v2_guest_create,
       session: %{"preview" => true},
       root_layout: {MobaWeb.V2.Layouts, :root} do
-      live "/start", CreateLive, :start
+      live "/start", DraftLive, :start
     end
   end
 
@@ -84,7 +84,8 @@ defmodule MobaWeb.Router do
       root_layout: {MobaWeb.V2.Layouts, :root} do
       live "/base", DashboardLive
 
-      live "/invoke", CreateLive
+      live "/new", DraftLive
+      live "/new/solo", CreateLive
       live "/training", TrainingLive
       live "/battles", BattlesLive
       live "/battles/:id", BattleLive
@@ -97,6 +98,7 @@ defmodule MobaWeb.Router do
       live "/user/:id", PlayerLive
       live "/player/:player_id", PlayerLive, :show, as: :player
       live "/hero/:id", HeroLive
+      live "/teams/:id", TeamLive
       live "/tavern", TavernLive
     end
   end
@@ -104,7 +106,6 @@ defmodule MobaWeb.Router do
   # Keep bookmarked preview URLs and forms working after the rollout.
   scope "/new", MobaWeb do
     pipe_through [:browser]
-    get "/", GameController, :redirect_preview
     get "/*path", GameController, :redirect_preview
     post "/start", GameController, :create
     post "/users/log_in", UserSessionController, :create

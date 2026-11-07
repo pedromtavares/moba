@@ -15,15 +15,16 @@ import {initTooltips, hideTooltips} from "./tooltips";
 import {initAnalytics} from "./analytics";
 import {initReturnInvitation} from "./return_invitation";
 import {initGameFullscreen} from "./game_fullscreen";
-import {initSidebarHotkeys} from "./sidebar_hotkeys";
+import {initTrainingControls} from "./training_controls";
 import {initGameLoading} from "./game_loading";
 
 initGameConfirmations();
 initAnalytics();
 initReturnInvitation();
-initGameFullscreen();
-initSidebarHotkeys();
+const requestGameFullscreen = initGameFullscreen();
+initTrainingControls(requestGameFullscreen);
 initGameLoading();
+document.addEventListener("team:hero-switched", hideTooltips);
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})

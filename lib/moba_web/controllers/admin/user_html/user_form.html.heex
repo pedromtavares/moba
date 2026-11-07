@@ -8,79 +8,71 @@
     <% end %>
 
     <div class="torch-form-group">
-      <%= label(f, :username) %>
+      {label(f, :username)}
       <div class="torch-form-group-input">
-        <%= text_input(f, :username) %>
-        <%= error_tag(f, :username) %>
+        {text_input(f, :username)}
+        {error_tag(f, :username)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :email) %>
+      {label(f, :email)}
       <div class="torch-form-group-input">
-        <%= text_input(f, :email) %>
-        <%= error_tag(f, :email) %>
+        {text_input(f, :email)}
+        {error_tag(f, :email)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :is_admin) %>
+      {label(f, :is_admin)}
       <div class="torch-form-group-input">
-        <%= checkbox(f, :is_admin) %>
-        <%= error_tag(f, :is_admin) %>
+        {checkbox(f, :is_admin)}
+        {error_tag(f, :is_admin)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :level) %>
+      {label(f, :level)}
       <div class="torch-form-group-input">
-        <%= number_input(f, :level) %>
-        <%= error_tag(f, :level) %>
+        {number_input(f, :level)}
+        {error_tag(f, :level)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :shard_count) %>
+      {label(f, :shard_count)}
       <div class="torch-form-group-input">
-        <%= number_input(f, :shard_count) %>
-        <%= error_tag(f, :shard_count) %>
+        {number_input(f, :shard_count)}
+        {error_tag(f, :shard_count)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :medal_count) %>
+      {label(f, :medal_count)}
       <div class="torch-form-group-input">
-        <%= number_input(f, :medal_count) %>
-        <%= error_tag(f, :medal_count) %>
+        {number_input(f, :medal_count)}
+        {error_tag(f, :medal_count)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :experience) %>
+      {label(f, :experience)}
       <div class="torch-form-group-input">
-        <%= number_input(f, :experience) %>
-        <%= error_tag(f, :experience) %>
+        {number_input(f, :experience)}
+        {error_tag(f, :experience)}
       </div>
     </div>
 
     <div class="torch-form-group">
-      <%= label(f, :tutorial_step) %>
+      {label(f, :status)}
       <div class="torch-form-group-input">
-        <%= number_input(f, :tutorial_step) %>
-        <%= error_tag(f, :tutorial_step) %>
-      </div>
-    </div>
-
-    <div class="torch-form-group">
-      <%= label(f, :status) %>
-      <div class="torch-form-group-input">
-        <%= text_input(f, :status) %>
-        <%= error_tag(f, :status) %>
+        {text_input(f, :status)}
+        {error_tag(f, :status)}
       </div>
     </div>
 
     <div class="torch-submit-form">
-      <%= submit("Submit", class: "torch-submit-button") %>
+      {submit("Submit", class: "torch-submit-button")}
     </div>
   </fieldset>
 <% end %>

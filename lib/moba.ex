@@ -58,7 +58,7 @@ defmodule Moba do
         case Repo.one(from p in Game.Schema.Player, where: p.id == ^player_id, lock: "FOR UPDATE") do
           %{user_id: nil} ->
             player = player_id |> Game.get_player!() |> Game.update_player!(%{user_id: user.id}) |> Map.put(:user, user)
-            Game.update_hero!(player.current_pve_hero, %{name: user.username})
+            if player.current_pve_hero, do: Game.update_hero!(player.current_pve_hero, %{name: user.username})
             if player.pve_tier > 0, do: reward_shards!(player, Game.get_quest(1).prize)
 
           _ ->

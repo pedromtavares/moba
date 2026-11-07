@@ -1,6 +1,8 @@
 <%= if @preview do %>
   <.league_challenge {assigns} />
 <% else %>
+  <% next_battle? =
+    @battle.winner_id == @battle.attacker_id && @snapshot.league_step != 0 && @battle.attacker.league_step != 0 %>
   <.battle_result_header title={battle_result(@battle, @snapshot)} class="col center victory-title margin-auto mt-2" />
 
   <%= if @battle.winner && @battle.winner_id == @battle.attacker_id do %>
@@ -44,8 +46,15 @@
             <.league_step hero={@snapshot} step={4} label="Hard" variant="winner" />
             <.league_step hero={@snapshot} step={5} label="Hardest" variant="winner" />
           </ul>
-          <%= unless @battle.attacker.league_step == 0 do %>
-            <a href="javascript:;" data-game-fullscreen phx-click="next-battle" phx-value-id={@battle.id} class="btn btn-primary mt-2">
+          <%= if next_battle? do %>
+            <a
+              id="league-next-battle"
+              href="javascript:;"
+              data-game-fullscreen
+              phx-click="next-battle"
+              phx-value-id={@battle.id}
+              class="btn btn-primary mt-2"
+            >
               <i class="ui-icon ui-arrow-right mr-1"></i> Proceed to Battle #{@snapshot.league_step}
             </a>
           <% end %>
@@ -69,8 +78,8 @@
       </div>
     </div>
   <% end %>
-  <%= if @current_player do %>
-    <%= if Game.master_league?(@snapshot) || @snapshot.league_step == 0 || @battle.attacker.league_step == 0 do %>
+  <%= unless next_battle? do %>
+    <%= if @current_player do %>
       <.battle_action_row class="row battle-border-top pt-1 mt-2">
         <div class="col">
           <.battle_nav_action
@@ -82,17 +91,17 @@
           />
         </div>
       </.battle_action_row>
+    <% else %>
+      <.battle_action_row>
+        <div class="col">
+          <.battle_guest_create_action
+            preview={Map.get(assigns, :preview, false)}
+            class="btn btn-primary btn-block btn-lg"
+            icon="ui-icon ui-user-plus"
+            label="Create your Hero"
+          />
+        </div>
+      </.battle_action_row>
     <% end %>
-  <% else %>
-    <.battle_action_row>
-      <div class="col">
-        <.battle_guest_create_action
-          preview={Map.get(assigns, :preview, false)}
-          class="btn btn-primary btn-block btn-lg"
-          icon="ui-icon ui-user-plus"
-          label="Create your Hero"
-        />
-      </div>
-    </.battle_action_row>
   <% end %>
 <% end %>

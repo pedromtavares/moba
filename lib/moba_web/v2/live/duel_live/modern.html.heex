@@ -3,7 +3,12 @@
     <div class="duel-contestant">
       <img src={"/images/pve/#{@duel.player.pve_tier}.png"} alt={"Training tier #{@duel.player.pve_tier}"} />
       <div>
-        <.link navigate={preview_path(assigns, ~p"/player/#{@duel.player}")}>{username(@duel.player)}</.link>
+        <.link
+          navigate={preview_path(assigns, ~p"/player/#{@duel.player}")}
+          data-profile-username={Moba.Utils.username(@duel.player)}
+        >
+          {username(@duel.player)}
+        </.link>
         <span>{if @duel.player_id == @current_player.id, do: "You", else: "Challenger"}</span>
       </div>
     </div>
@@ -31,7 +36,10 @@
         alt={"Training tier #{@duel.opponent_player.pve_tier}"}
       />
       <div>
-        <.link navigate={preview_path(assigns, ~p"/player/#{@duel.opponent_player}")}>
+        <.link
+          navigate={preview_path(assigns, ~p"/player/#{@duel.opponent_player}")}
+          data-profile-username={Moba.Utils.username(@duel.opponent_player)}
+        >
           {username(@duel.opponent_player)}
         </.link>
         <span>{if @duel.opponent_player_id == @current_player.id, do: "You", else: "Opponent"}</span>
@@ -39,7 +47,10 @@
     </div>
   </header>
 
-  <div :if={!duel_finished?(@duel) || !@duel.auto} class={["duel-command-row", @duel.auto && "duel-solo-command", duel_finished?(@duel) && "duel-finished-chat"]}>
+  <div
+    :if={!duel_finished?(@duel) || !@duel.auto}
+    class={["duel-command-row", @duel.auto && "duel-solo-command", duel_finished?(@duel) && "duel-finished-chat"]}
+  >
     <section
       :if={!duel_finished?(@duel)}
       id="duel-status"

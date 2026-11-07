@@ -17,6 +17,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
       assert html =~ hero.player.user.username
       assert has_element?(view, "#user-profile")
+      refute has_element?(view, "#profile-cinematic .profile-eyebrow")
       assert has_element?(view, "#profile-ranking-header")
       assert has_element?(view, "#profile-cinematic strong[title='Arena Rating'][data-toggle=tooltip]", "0 AR")
       assert has_element?(view, "#profile-cinematic .profile-metric-label", "Arena Rating")
@@ -110,16 +111,36 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     end
   end
 
-  test "1v1 history identifies season and live duels beneath the opponent name", %{conn: conn} do
+  test "profile history switches between 3v3 matches and 1v1 duels with ratings and replays", %{conn: conn} do
     hero = create_base_hero()
     opponent = create_player!()
     season = Game.Duels.create!(hero.player, opponent, true)
     Game.Duels.finish!(season, %{winner: hero.player, attacker_pvp_points: 5, defender_pvp_points: 0})
     live_duel = Game.Duels.create!(opponent, hero.player, false)
     Game.Duels.finish!(live_duel, %{winner: hero.player, attacker_pvp_points: -5, defender_pvp_points: 5})
+
+    match =
+      Game.Matches.create!(%{
+        player_id: hero.player_id,
+        opponent_id: opponent.id,
+        winner_id: opponent.id,
+        type: "manual",
+        phase: "scored",
+        rewards: %{attacker_pvp_points: -2}
+      })
+
     {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
-    assert has_element?(view, "#matches-btn")
+    assert has_element?(view, "#matches-btn[aria-pressed=true]")
+    assert has_element?(view, "#profile-matches-table .opponent .history-detail", "Manual match")
+    assert has_element?(view, "#profile-matches-table [data-result=Defeat] small", "-2 Arena Rating")
+    assert has_element?(view, "#profile-matches-table a[href='/matches/#{match.id}'][aria-label]")
+
+    view |> element("#duels-btn") |> render_click()
+
+    assert has_element?(view, "#duels-btn[aria-pressed=true]")
+    assert has_element?(view, "#profile-duels-table [data-result=Victory] small", "+5 Arena Rating")
+    assert has_element?(view, "#profile-duels-table a[href='/arena/#{live_duel.id}'][aria-label]")
     refute has_element?(view, "#profile-arena-debut")
     assert has_element?(view, "#profile-duels-table .opponent a[href='/player/#{opponent.id}']")
     assert has_element?(view, "#profile-duels-table .opponent .history-detail", "Season duel")
@@ -217,7 +238,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       {:ok, view, _} = live(conn, "/player/#{player.id}")
       assert has_element?(view, "#profile-ranking-header", "Season score")
       assert has_element?(view, "#player-#{player.id} h1", "#3")
-      assert has_element?(view, "#season-player-#{player.id}", "425")
+      assert has_element?(view, "#season-player-#{player.id}", "185")
       assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season Rank")
       assert has_element?(view, "#profile-ranking-hero", "Hero Rank")
       refute has_element?(view, "#profile-hero-ranking-table, #daily-player-#{player.id}")
@@ -226,7 +247,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       updated = Game.update_player!(Game.get_player!(player.id), %{pvp_points: 35})
       Cachex.put(:game_cache, "season_ranking", [updated])
       send(view.pid, {"ranking", %{}})
-      assert has_element?(view, "#season-player-#{player.id}", "435")
+      assert has_element?(view, "#season-player-#{player.id}", "195")
       assert has_element?(view, "#profile-ranking-header", "Season score")
     end
 
@@ -259,7 +280,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
                hero.player.user.username
              )
 
-      assert has_element?(view, "#profile-ranking-table tfoot h3", "425")
+      assert has_element?(view, "#profile-ranking-table tfoot h3", "185")
     end
   end
 

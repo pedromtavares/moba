@@ -1,46 +1,76 @@
+const navigationKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'];
+
 const ManualCodex = {
   mounted() {
-    this.choices = [...this.el.querySelectorAll('[data-manual-pick]')];
-    this.details = [...this.el.querySelectorAll('[data-manual-detail]')];
+    this.tabs = [...this.el.querySelectorAll('[data-library-tab]')];
     this.animations = new Set();
-    this.selectedRank = 1;
+    this.selectedRanks = new Map();
     this.reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.select = event => {
-      const control = event.target.closest('[data-manual-pick], [data-manual-rank]');
+      const control = event.target.closest('[data-library-tab], [data-manual-pick], [data-manual-rank]');
       if (!control || !this.el.contains(control)) return;
-      if (control.dataset.manualPick) this.pick(control.dataset.code, true);
+      if (control.hasAttribute('data-library-tab')) this.tab(control);
+      else if (control.dataset.manualPick) this.pick(control);
       else this.rank(control);
       event.preventDefault();
     };
     this.keyboard = event => {
-      if (!event.target.dataset.manualRank || event.altKey || event.ctrlKey || event.metaKey ||
-          !['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
-      const controls = [...event.target.closest('[data-manual-ranked]').querySelectorAll('[data-manual-rank]')];
-      const index = controls.indexOf(event.target);
-      const next = event.key === 'Home' ? 0 : event.key === 'End' ? controls.length - 1 :
-        (index + (['ArrowUp', 'ArrowLeft'].includes(event.key) ? -1 : 1) + controls.length) % controls.length;
-      event.preventDefault();
-      event.stopPropagation();
-      this.rank(controls[next]);
-      controls[next].focus({preventScroll: true});
+      if (event.altKey || event.ctrlKey || event.metaKey || !navigationKeys.includes(event.key)) return;
+      const control = event.target;
+      if (control.hasAttribute('data-library-tab')) {
+        if (['ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        this.move(event, this.tabs, tab => this.tab(tab));
+      } else if (control.dataset.manualRank) {
+        const ranks = [...control.closest('[data-manual-ranked]').querySelectorAll('[data-manual-rank]')];
+        this.move(event, ranks, rank => this.rank(rank));
+      }
     };
     this.el.addEventListener('click', this.select);
     this.el.addEventListener('keydown', this.keyboard);
   },
-  pick(code, scroll = false) {
-    const detail = this.details.find(panel => panel.dataset.code === code);
+  move(event, controls, activate) {
+    const index = controls.indexOf(event.target);
+    const next = event.key === 'Home' ? 0 : event.key === 'End' ? controls.length - 1 :
+      (index + (['ArrowUp', 'ArrowLeft'].includes(event.key) ? -1 : 1) + controls.length) % controls.length;
+    event.preventDefault();
+    event.stopPropagation();
+    activate(controls[next]);
+    controls[next].focus({preventScroll: true});
+  },
+  tab(button) {
+    if (button.getAttribute('aria-selected') === 'true') return;
+    this.hideTooltips?.();
+    this.tabs.forEach(tab => {
+      const selected = tab === button;
+      tab.setAttribute('aria-selected', String(selected));
+      tab.tabIndex = selected ? 0 : -1;
+      this.el.querySelector('#' + tab.getAttribute('aria-controls')).hidden = !selected;
+    });
+    this.reveal(this.el.querySelector('#' + button.getAttribute('aria-controls')));
+  },
+  pick(button) {
+    const panel = button.closest('.manual-reference-section');
+    const details = [...panel.querySelectorAll('[data-manual-detail]')];
+    const detail = details.find(entry => entry.dataset.code === button.dataset.code);
     if (!detail) return;
     this.hideTooltips?.();
-    this.details.forEach(panel => { panel.hidden = panel !== detail; });
-    this.choices.forEach(choice => choice.setAttribute('aria-pressed', String(choice.dataset.code === code)));
+    details.forEach(entry => { entry.hidden = entry !== detail; });
+    panel.querySelectorAll('[data-manual-pick]').forEach(choice => {
+      const selected = choice.dataset.manualRarity ?
+        choice.dataset.manualRarity === detail.dataset.rarity : choice.dataset.code === detail.dataset.code;
+      choice.setAttribute('aria-pressed', String(selected));
+    });
     const ranks = [...detail.querySelectorAll('[data-manual-rank]')];
-    const rank = ranks.find(button => Number(button.dataset.manualRank) === this.selectedRank) || ranks.at(-1);
+    const rank = ranks.find(button => Number(button.dataset.manualRank) === (this.selectedRanks.get(panel) ?? 1)) || ranks.at(-1);
     if (rank) this.rank(rank, false);
+    if (button.dataset.manualPick === 'item') {
+      const detailsView = panel.querySelector('#manual-item-view-details');
+      if (detailsView) detailsView.checked = true;
+    }
     this.reveal(detail);
-    if (scroll && window.innerWidth < 768) detail.scrollIntoView({block: 'start', behavior: this.reducedMotion ? 'auto' : 'smooth'});
   },
   rank(button, remember = true) {
-    if (remember) this.selectedRank = Number(button.dataset.manualRank);
+    if (remember) this.selectedRanks.set(button.closest('.manual-reference-section'), Number(button.dataset.manualRank));
     const group = button.closest('[data-manual-ranked]');
     group.querySelectorAll('[data-manual-rank]').forEach(control => {
       control.setAttribute('aria-selected', String(control === button));
@@ -55,7 +85,7 @@ const ManualCodex = {
     this.animations.forEach(animation => animation.cancel());
     this.animations.clear();
     if (this.reducedMotion) return;
-    const animation = element.animate([{opacity: .3, transform: 'translateY(8px)'}, {opacity: 1, transform: 'none'}], {duration: 320, easing: 'cubic-bezier(.2,.7,.2,1)'});
+    const animation = element.animate([{opacity: .35}, {opacity: 1}], {duration: 260, easing: 'ease-out'});
     this.animations.add(animation);
     animation.onfinish = () => this.animations.delete(animation);
   },

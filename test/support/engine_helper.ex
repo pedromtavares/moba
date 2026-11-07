@@ -1,5 +1,5 @@
 defmodule Test.EngineHelper do
-  alias Moba.{Engine, Game, Repo}
+  alias Moba.{Engine, Repo}
 
   def build_basic_battle(attacker, defender) do
     %Engine.Schema.Battle{
@@ -15,15 +15,6 @@ defmodule Test.EngineHelper do
     |> Engine.begin_battle!()
     |> Repo.preload(:winner)
     |> Repo.preload(:winner_player)
-  end
-
-  def equip_random_items(hero, items) do
-    items
-    |> Enum.shuffle()
-    |> Enum.take(6)
-    |> Enum.reduce(hero, fn item, acc ->
-      acc |> Game.update_hero!(%{gold: 99_999}) |> Game.buy_item!(item)
-    end)
   end
 
   def previous_turn_for(target, turns) do

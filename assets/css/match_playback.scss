@@ -60,7 +60,7 @@
   .squad-panel-heading { min-height: 44px; padding: 10px 12px; }
   .squad-panel-heading h2 { font-size: 18px; }
   .squad-panel-heading > strong { font-size: 16px; }
-  .lineup-list { flex: 1; min-height: 0; overflow-y: auto; }
+  .lineup-list { flex: 1; min-height: 0; overflow: hidden auto; }
   .match-picker { flex: 1; }
   .match-picker > .squad-scroll { flex: 1; max-height: none; }
   .match-command { flex-shrink: 0; padding: 10px 12px; }
@@ -72,7 +72,7 @@
   #match-battles { flex: 1; min-height: 0; max-height: none; }
   #match-battles.match-summary-list { display: grid; grid-template-rows: repeat(var(--match-battle-rows), minmax(0, 1fr)); gap: 8px; padding: 10px; max-height: calc(var(--match-battle-rows) * 64px + 12px); overflow: hidden; }
   .match-return-to-arena { display: flex; align-items: center; justify-content: center; gap: 12px; flex-shrink: 0; min-height: 44px; margin: 0 10px 10px; font-size: 16px; }
-  #match-battles:has(#match-resolving) { display: flex; align-items: center; justify-content: center; max-height: none; padding: 24px; overflow-y: auto; }
+  #match-battles:has(#match-resolving) { display: flex; align-items: center; justify-content: center; max-height: none; padding: 24px; overflow: hidden auto; }
   #match-resolving { margin: 0; padding: 20px; border: 0; background: none; text-align: center; }
   #match-resolving h3 { color: #d8c6a6; font-size: 18px; font-weight: 800; line-height: 1.4; }
   #match-resolving p { margin-top: 6px; color: #98a6b8; font-size: 14px; }

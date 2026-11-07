@@ -450,6 +450,26 @@ defmodule Moba.Engine.CombatEffectsTest do
     assert result.attacker.current_hp == 1000
   end
 
+  test "auto item use saves Tranquil Boots at full Health and tries the next item" do
+    boots = Combat.item("tranquil_boots")
+    fallback = Combat.item("magic_stick")
+
+    full =
+      resolve([boots, fallback], [], nil, nil, fn turn ->
+        %{turn | attacker: %{turn.attacker | current_hp: 1000}, orders: %{auto: true}}
+      end)
+
+    assert full.item.code == fallback.code
+    refute Map.has_key?(full.attacker.cooldowns, boots.code)
+
+    injured = resolve([boots, fallback], [], nil, nil, &put_in(&1.orders.auto, true))
+    assert injured.item.code == boots.code
+    assert injured.attacker.current_hp > 500
+
+    manual = resolve([boots], [], nil, boots, &put_in(&1.attacker.current_hp, 1000))
+    assert manual.item.code == boots.code
+  end
+
   defp resolve(left, right \\ [], skill \\ nil, item \\ nil, prepare \\ &Function.identity/1) do
     stats = %{total_hp: 1000, total_mp: 200, atk: 100}
 

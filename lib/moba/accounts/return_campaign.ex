@@ -18,6 +18,7 @@ defmodule Moba.Accounts.ReturnCampaign do
 
   def audience(opts \\ []) do
     excluded = Enum.map(Keyword.get(opts, :exclude_emails, []), &normalize_email/1)
+    score = Moba.Game.SeasonScore.expression()
 
     players =
       from p in Player,
@@ -31,9 +32,9 @@ defmodule Moba.Accounts.ReturnCampaign do
           email: u.email,
           username: u.username,
           last_online_at: u.last_online_at,
-          score: 100 * coalesce(p.best_immortal_streak, 0) + 100 * coalesce(p.pve_tier, 0) + coalesce(p.pvp_points, 0),
           wins: coalesce(p.total_wins, 0)
-        }
+        },
+        select_merge: ^%{score: score}
 
     players =
       case Keyword.get(opts, :user_ids) do
@@ -179,13 +180,11 @@ defmodule Moba.Accounts.ReturnCampaign do
   end
 
   defp player_id(user_id) do
+    score = Moba.Game.SeasonScore.expression()
+
     from(p in Player,
       where: p.user_id == ^user_id and is_nil(p.bot_options),
-      order_by: [
-        desc: 100 * coalesce(p.best_immortal_streak, 0) + 100 * coalesce(p.pve_tier, 0) + coalesce(p.pvp_points, 0),
-        desc: p.total_wins,
-        asc: p.id
-      ],
+      order_by: ^[desc: score, desc: dynamic([p], p.total_wins), asc: dynamic([p], p.id)],
       select: p.id,
       limit: 1
     )

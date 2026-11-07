@@ -18,7 +18,7 @@
   .squad-panel-heading h2 { margin: 0; color: #e7dfd0; font-size: 23px; font-weight: 800; overflow-wrap: anywhere; }
   .squad-panel-heading > strong { flex-shrink: 0; color: #d8bb88; font-size: 22px; }
   .match-enemy .squad-panel-heading > strong { color: #9fc4dd; }
-  .squad-scroll { min-height: 0; overflow-y: auto; padding: 12px; scrollbar-width: thin; scrollbar-color: #b49a6b55 transparent; }
+  .squad-scroll { min-height: 0; overflow: hidden auto; padding: 12px; scrollbar-width: thin; scrollbar-color: #b49a6b55 transparent; }
   .squad-scroll > div + div { margin-top: 12px; }
   .squad-scroll > .tab-pane { margin-top: 0; }
   .squad-scroll > .hud-notice { margin: 0 0 12px; }
@@ -59,7 +59,7 @@
   .squad-add:hover { color: #d0f8e9; border-color: #a7dfcb; background: #28655355; }
   .squad-selected-label { display: block; width: 100%; padding: 7px; color: #ddc28e; font-size: 16px; font-weight: 800; text-align: center; }
 
-  .lineup-preview { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .lineup-preview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; }
   .lineup-preview img, .lineup-preview > span { display: grid; place-items: center; width: 100%; aspect-ratio: 1.25; border: 1px solid #c6b38d30; border-radius: 3px; object-fit: cover; background: #080d15; color: #8c929e; font-size: 18px; }
   .squad-team-choice { display: block; width: 100%; padding: 13px; margin-bottom: 12px; border: 1px solid #a0adc02e; border-radius: 6px; background: #151e2a; color: #e5dccc; text-align: left; transition: background 160ms ease, border-color 160ms ease; }
   .squad-team-choice:hover { background: #1c2836; border-color: #d9b97a88; }

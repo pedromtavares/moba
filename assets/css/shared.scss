@@ -24,7 +24,7 @@
   animation: 1s ultimate-glow infinite;
 }
 
-#hero-bar{
+:is(#hero-bar, .hero-bar){
   background: #38414a;
   border: 0;
   border-top: 3px solid;
@@ -45,7 +45,7 @@
     border-color: rgba(0, 0, 0, 0.5) !important;
   }
 
-  #small-shop{
+  :is(#small-shop, .hud-small-shop){
     position: absolute;
     bottom: 0px;
     right: 10px;

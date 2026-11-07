@@ -4,6 +4,7 @@ defmodule MobaWeb.V2.HeroLive do
   import MobaWeb.CoreComponents, only: [icon: 1]
 
   import MobaWeb.V2.Components.ProgressionComponents
+  import MobaWeb.V2.Components.TrainingComponents, only: [perfect_indicator: 1]
 
   import MobaWeb.V2.Components.HeroBarComponents
 
@@ -12,7 +13,7 @@ defmodule MobaWeb.V2.HeroLive do
   def mount(_params, _session, socket) do
     socket =
       attach_hook(socket_init(socket), :authorize_hero_changes, :handle_event, fn event, _, socket ->
-        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit reorder-items buy sell finish-transmute) do
+        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit reorder-items open-shop-item buy sell finish-transmute) do
           hero = Game.get_hero!(socket.assigns.hero.id)
 
           if hero.player_id == socket.assigns.current_player.id do
@@ -143,6 +144,10 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply, assign(socket, show_shop: !socket.assigns.show_shop)}
   end
 
+  def handle_event("open-shop-item", %{"code" => code}, socket) do
+    {:noreply, open_shop_item(socket, socket.assigns.hero, code)}
+  end
+
   def handle_event("buy", %{"code" => code}, %{assigns: %{hero: hero}} = socket) do
     updated_hero = Game.buy_item!(hero, cached_item!(code))
     Game.broadcast_to_hero(updated_hero.id)
@@ -214,7 +219,6 @@ defmodule MobaWeb.V2.HeroLive do
     |> assign(:editing, false)
     |> assign(:show_build, false)
     |> assign(:show_shop, false)
-    |> assign(:tutorial_step, player.tutorial_step)
   end
 
   defp maybe_assign_current_hero(%{assigns: %{current_hero: %{id: current_hero_id}}} = socket, %{id: hero_id} = hero)
@@ -275,9 +279,23 @@ defmodule MobaWeb.V2.HeroLive do
 
   defp league_assigns(%{assigns: %{hero: hero}} = socket) do
     socket = if hero.league_tier >= 6, do: assign(socket, :ranking_tab, "global"), else: socket
+    team_ranking = if hero.training_team_id, do: Game.TeamRuns.ranking(hero.training_team_id), else: []
+
+    perfect_run =
+      if hero.training_team_id do
+        entry = Enum.find(team_ranking, &(&1.team.id == hero.training_team_id))
+        entry && Game.Training.PerfectRun.completed_team?(entry.team)
+      else
+        Game.Training.PerfectRun.solo?(hero)
+      end
 
     socket
-    |> assign(league_ranking: Game.league_ranking(hero), league_milestone: league_milestone(hero))
+    |> assign(
+      league_ranking: Game.league_ranking(hero),
+      league_milestone: if(hero.finished_at && perfect_run, do: nil, else: league_milestone(hero)),
+      team_ranking: team_ranking,
+      perfect_run: !!perfect_run
+    )
     |> leaderboard_assigns()
   end
 
@@ -316,20 +334,12 @@ defmodule MobaWeb.V2.HeroLive do
     }
   end
 
-  defp league_milestone(hero) do
-    if Game.max_farm?(hero) do
-      %{
-        tier: 6,
-        title: "Master another avatar",
-        description: "Build your Grandmaster collection with a different avatar."
-      }
-    else
-      %{
-        tier: 6,
-        title: "Aim for a perfect 60K",
-        description: "Finish a Grandmaster run with 30K XP farm and 30K gold farm."
-      }
-    end
+  defp league_milestone(_hero) do
+    %{
+      tier: 6,
+      title: "Aim for a perfect 60K",
+      description: "Finish a Grandmaster run with 30K XP farm and 30K gold farm."
+    }
   end
 
   defp maybe_reset_shop(%{assigns: %{hero: %{id: shown_id}, current_hero: %{id: current_id}}} = socket)

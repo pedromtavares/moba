@@ -3,7 +3,7 @@ defmodule MobaWeb.GuestCreationTest do
   import Phoenix.LiveViewTest
 
   alias Moba.Repo
-  alias Moba.Game.Schema.{Hero, Player}
+  alias Moba.Game.Schema.{Hero, Player, TrainingTeam}
 
   test "replayed submissions from the same pre-response session create one guest and hero", %{conn: conn} do
     session = conn |> get("/start") |> recycle()
@@ -44,31 +44,44 @@ defmodule MobaWeb.GuestCreationTest do
     Game.archive_hero!(original)
     players = Repo.aggregate(Player, :count)
 
-    {:ok, view, _} = first |> recycle() |> live("/invoke")
-    avatar = base_avatar()
-    {skills, _} = Game.skill_build_for(avatar.role, 0)
-    assert has_element?(view, "#create-button[data-invoke-action=create]")
+    {:ok, view, _} = first |> recycle() |> live("/new")
 
-    render_hook(view, "create", %{
-      avatar: to_string(avatar.id),
-      skills: Enum.map(skills, &to_string(&1.id)),
-      name: avatar.name
-    })
-
+    roster = Jason.encode!(Test.TeamHelper.team_picks(%{user: nil}))
+    view |> form("#team-draft-launch") |> render_submit(%{roster: roster})
     assert_redirect(view, "/training")
-
     player = Game.get_player!(player_id)
-    refute player.current_pve_hero_id == original.id
-    assert player.current_pve_hero.player_id == player_id
+    run = Game.TeamRuns.latest(Game.TeamRuns.scope(player), player_id)
+    assert length(Game.TeamRuns.state(run).heroes |> Map.keys()) == 3
+    assert player.current_pve_hero_id == nil
     assert Repo.aggregate(Player, :count) == players
   end
 
-  test "a first-time guest still submits the normal signup form", %{conn: conn} do
-    {:ok, view, _} = live(conn, "/start")
-    render_click(view, "pick-avatar", %{"id" => base_avatar().id})
-    render_click(view, "pick-build", %{"number" => "0"})
-    assert has_element?(view, "form[action='/start'] #create-button[type=submit]")
-    refute has_element?(view, "#create-button[data-invoke-action=create]")
+  test "a first-time guest submits the entire roster once", %{conn: conn} do
+    counts = {Repo.aggregate(Player, :count), Repo.aggregate(TrainingTeam, :count)}
+    session = conn |> get("/start") |> recycle()
+    {:ok, view, _} = live(session, "/start")
+    assert has_element?(view, "#create-button[type=button][data-invoke-action=create]", "Add to roster")
+    assert has_element?(view, "#team-draft-launch[action='/start'] #team-draft-begin[disabled]")
+    assert {Repo.aggregate(Player, :count), Repo.aggregate(TrainingTeam, :count)} == counts
+
+    picks = Test.TeamHelper.team_picks(%{user: nil})
+    [first | _] = picks
+    invalid = post(session, "/start", %{team: "true", roster: Jason.encode!([first, first, first])})
+    assert redirected_to(invalid) == "/start"
+    assert {Repo.aggregate(Player, :count), Repo.aggregate(TrainingTeam, :count)} == counts
+
+    params = %{team: "true", roster: Jason.encode!(picks)}
+    first = post(session, "/start", params)
+    retry = post(session, "/start", params)
+    assert redirected_to(first) == "/training"
+    assert redirected_to(retry) == "/training"
+    assert get_session(first, :player_id) == get_session(retry, :player_id)
+
+    assert {Repo.aggregate(Player, :count), Repo.aggregate(TrainingTeam, :count)} ==
+             {elem(counts, 0) + 1, elem(counts, 1) + 1}
+
+    player = Game.get_player!(get_session(first, :player_id))
+    assert Game.TeamRuns.active(Game.TeamRuns.scope(player), player.id).phase == "playing"
   end
 
   test "an old form restores the original guest session after its hero was archived", %{conn: conn} do

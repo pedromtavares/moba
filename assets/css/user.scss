@@ -63,7 +63,7 @@
   .ranking{
     margin-bottom: 0;
     max-height: 110vh;
-    overflow: auto;
+    overflow: hidden auto;
 
     .selected-player{
       background: rgba(0,0,0,0.2)
@@ -102,7 +102,7 @@
 
   .duels, .matches{
     height: 51vh;
-    overflow: auto;
+    overflow: hidden auto;
 
     h5{
       margin: 0;

@@ -7,7 +7,12 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
   <div class="squad-columns match-columns">
     <section class="squad-panel match-lineup" aria-labelledby="match-your-lineup">
       <div class="squad-panel-heading">
-        <.link navigate={preview_path(assigns, ~p"/player/#{@match.player}")} class="match-player" id="player-card">
+        <.link
+          navigate={preview_path(assigns, ~p"/player/#{@match.player}")}
+          data-profile-username={Moba.Utils.username(@match.player)}
+          class="match-player"
+          id="player-card"
+        >
           <img src={"/images/pve/#{@match.player.pve_tier}.png"} alt="" />
           <span>
             {username(@match.player)}<small id="match-your-lineup">{if owner?, do: "Your lineup", else: "Challenger lineup"}</small>
@@ -22,7 +27,7 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
           >
             <.icon name="game-team" /> Edit Teams
           </.link>
-          <strong>{length(@picked_heroes)} / 5</strong>
+          <strong>{length(@picked_heroes)} / {@match.team_size}</strong>
         </div>
         <.immortal_streak_debuff
           id="match-player-streak-debuff"
@@ -32,7 +37,7 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
         />
       </div>
       <div class="squad-scroll lineup-list">
-        <%= for position <- 1..5 do %>
+        <%= for position <- 1..@match.team_size do %>
           <%= if hero = Enum.at(@picked_heroes, position - 1) do %>
             <div id={"hero-#{hero.id}"}>
               <.roster_hero
@@ -89,7 +94,7 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
     <section class="squad-panel match-center" aria-label={if picking?, do: "Choose heroes", else: "Match battles"}>
       <header id="match-scoreboard" class="match-scoreboard" data-complete={to_string(complete?)}>
         <div class="match-score" aria-label="Heroes defeated">
-          <span class="squad-eyebrow">Arena · 5v5</span>
+          <span class="squad-eyebrow">Arena · {@match.team_size}v{@match.team_size}</span>
           <strong>
             {Enum.count(revealed, &(&1.winner_player_id == @match.player_id))}<span>—</span>{Enum.count(
               revealed,
@@ -105,15 +110,18 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
             <div id="match-pick-status">
               <div class="match-pick-heading">
                 <h2 id="match-pick-status-title">
-                  {if length(@picked_heroes) >= 5, do: "Lineup ready", else: "Choose your lineup"}
+                  {if length(@picked_heroes) >= @match.team_size, do: "Lineup ready", else: "Choose your lineup"}
                 </h2>
-                <strong class="hud-notice-counter">{length(@picked_heroes)}<small> / 5</small></strong>
+                <strong class="hud-notice-counter">{length(@picked_heroes)}<small> / {@match.team_size}</small></strong>
               </div>
-              <div class="match-pick-progress" aria-label={"#{length(@picked_heroes)} of 5 heroes selected"}>
-                <span :for={slot <- 1..5} data-filled={to_string(slot <= length(@picked_heroes))}></span>
+              <div
+                class="match-pick-progress"
+                aria-label={"#{length(@picked_heroes)} of #{@match.team_size} heroes selected"}
+              >
+                <span :for={slot <- 1..@match.team_size} data-filled={to_string(slot <= length(@picked_heroes))}></span>
               </div>
               <button
-                :if={length(@picked_heroes) >= 5}
+                :if={length(@picked_heroes) >= @match.team_size}
                 type="button"
                 class="btn battle-primary"
                 data-game-fullscreen
@@ -124,7 +132,7 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
                 Start match →
               </button>
               <button
-                :if={length(@picked_heroes) < 5 && @latest_match}
+                :if={length(@picked_heroes) < @match.team_size && @latest_match}
                 type="button"
                 class="btn base-secondary"
                 phx-click="repeat"
@@ -198,13 +206,14 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
       <div class="squad-panel-heading">
         <.link
           navigate={preview_path(assigns, ~p"/player/#{@match.opponent}")}
+          data-profile-username={Moba.Utils.username(@match.opponent)}
           class="match-player match-player-opponent"
           id="opponent-card"
         >
           <img src={"/images/pve/#{@match.opponent.pve_tier}.png"} alt="" />
           <span>{username(@match.opponent)}<small id="match-opponent-lineup">Opponent lineup</small></span>
         </.link>
-        <strong>{length(@match.opponent_picks)} / 5</strong>
+        <strong>{length(@match.opponent_picks)} / {@match.team_size}</strong>
         <.immortal_streak_debuff
           id="match-opponent-streak-debuff"
           player={@match.opponent}

@@ -177,7 +177,7 @@ defmodule MobaWeb.BackendSecurityTest do
     assert new_hero.avatar.code == locked.code
   end
 
-  test "5v5 refuses foreign unfinished heroes, duplicates, and spectator changes", %{conn: conn} do
+  test "3v3 refuses foreign unfinished heroes, duplicates, and spectator changes", %{conn: conn} do
     owner = create_base_hero(%{finished_at: Timex.now(), league_tier: 6})
     opponent = create_base_hero()
     foreign = create_base_hero()
@@ -198,7 +198,7 @@ defmodule MobaWeb.BackendSecurityTest do
     render_click(view, "pick-hero", %{"id" => "#{owner.id}"})
     render_click(view, "pick-hero", %{"id" => "#{owner.id}"})
     assert has_element?(view, "#hero-#{owner.id}")
-    assert has_element?(view, "#match-pick-status .hud-notice-counter", "1")
+    assert has_element?(view, ".match-lineup header > span", "1 / 3")
     assert Game.start_match(match, owner.player, List.duplicate(owner.id, 5)) == {:error, :invalid_lineup}
     assert Game.start_match(match, foreign.player, [owner.id]) == {:error, :invalid_lineup}
     {:ok, visitor, _} = conn |> log_in_player(player_id: foreign.player_id) |> live("/matches/#{match.id}")

@@ -5,7 +5,7 @@ export function initialSelection(data, saved = data.initial) {
   const avatar = data.avatars.find(avatar => avatar.id === choice.avatar) || data.avatars[0];
   const preset = Number.isInteger(choice.preset) && data.builds[avatar.role][choice.preset] ? choice.preset : null;
   return {
-    avatar: avatar.id, skills: [...new Set(choice.skills)].filter(id => allowed.has(id)).slice(0, 3),
+    avatar: avatar.id, skills: [...new Set(preset !== null && choice.custom !== true ? data.builds[avatar.role][preset].skills : choice.skills)].filter(id => allowed.has(id)).slice(0, 3),
     preset, custom: choice.custom === true,
     name: typeof choice.name === 'string' ? choice.name : data.initial.name,
     filter: ['tank', 'bruiser', 'carry', 'nuker', 'support'].includes(choice.filter) ? choice.filter : null
@@ -38,4 +38,24 @@ export function selectBuild(state, action, data) {
 
 export function nameError(name, named) {
   return named && (typeof name !== 'string' || name.trim().length < 3 || name.trim().length > 15) ? 'Use 3–15 characters for your hero name.' : '';
+}
+
+export function nextDraftAvatar(avatars, drafted) {
+  const available = avatars.filter(avatar => !drafted.has(avatar.id));
+  return ['juggernaut', 'lina', 'tusk'].map(code => available.find(avatar => avatar.code === code)).find(Boolean) || available[0];
+}
+
+export function restoreDraftPicks(data, picks) {
+  const roster = [];
+  const skills = new Set(data.skills.map(skill => skill.id));
+  for (const pick of Array.isArray(picks) ? picks : []) {
+    const avatar = data.avatars.find(avatar => avatar.id === pick?.avatar);
+    if (!avatar || roster.some(entry => entry.avatar === pick.avatar) || !Array.isArray(pick.skills) ||
+        new Set(pick.skills).size !== 3 || pick.skills.length !== 3 || !pick.skills.every(id => skills.has(id))) continue;
+    const build = Number.isInteger(pick.preset) ? data.builds[avatar.role][pick.preset] : null;
+    const preset = build?.skills.every(id => pick.skills.includes(id)) ? pick.preset : null;
+    roster.push({avatar: pick.avatar, skills: pick.skills, preset});
+    if (roster.length === 3) break;
+  }
+  return roster;
 }

@@ -91,9 +91,9 @@ Reveal readable titles beneath icons on hover or keyboard focus. Reserve the tit
 
 ## 11. Teach the action where it happens
 
-The tutorial has two chapters: Training and Base. Keep the guide anchored to the exact target, purchase, transmutation, or control the player needs. Shopping steps prioritize a clear click target over decorative presentation.
+Onboarding uses a single arrow pointing to the first battle target after roster creation. Remove it after that roster starts its first battle. Keep all other controls available for players to discover without guided steps or overlays.
 
-Call the place to buy or transmute hero items **Shop** in gameplay and tutorial instructions. Keep account unlocks in the **Tavern**. Evocative terms such as “forge” can appear in marketing copy when they do not obscure an action's location.
+Call the place to buy or transmute hero items **Shop** in gameplay. Keep account unlocks in the **Tavern**. Evocative terms such as “forge” can appear in marketing copy when they do not obscure an action's location.
 
 Use short, purposeful instructions and consistent action names. The Space shortcut belongs to a ready Claim XP / Claim Gold action in farming tabs, with a visible key hint. It must not trigger while typing, using another control, or interacting with a dialog. Battle Attack has no global Space shortcut.
 

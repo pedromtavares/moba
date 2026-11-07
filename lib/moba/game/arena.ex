@@ -84,6 +84,8 @@ defmodule Moba.Game.Arena do
     updated
   end
 
+  def continue_match!(%{training_team_id: id} = match, _) when not is_nil(id), do: match
+
   def continue_match!(match, player_picks) do
     case start_match(match, Players.get_player!(match.player_id), player_picks) do
       {:ok, result} -> result
@@ -91,7 +93,7 @@ defmodule Moba.Game.Arena do
     end
   end
 
-  def start_match(match, player, picks) do
+  def start_match(match, player, picks, opts \\ []) do
     Repo.transaction(fn ->
       Repo.one!(from m in Match, where: m.id == ^match.id, lock: "FOR UPDATE")
       stored = Matches.get_match!(match.id)
@@ -100,10 +102,13 @@ defmodule Moba.Game.Arena do
            !Matches.valid_picks?(stored, player, picks),
          do: Repo.rollback(:invalid_lineup)
 
-      Matches.update!(stored, %{player_picks: picks})
+      interactive = Keyword.get(opts, :interactive, false) && stored.type == "manual" && stored.team_size == 3
+      Matches.update!(stored, %{player_picks: picks, interactive: interactive})
       stored.id |> Matches.get_match!() |> advance_match!()
     end)
   end
+
+  def continue_match!(%{training_team_id: id} = match) when not is_nil(id), do: match
 
   def continue_match!(match) do
     {:ok, result} =
@@ -124,6 +129,15 @@ defmodule Moba.Game.Arena do
 
   defp advance_match!(match) do
     latest_battle = Engine.latest_match_battle(match.id)
+
+    if match.interactive && latest_battle && !latest_battle.finished do
+      match
+    else
+      create_next_match_battle!(match, latest_battle)
+    end
+  end
+
+  defp create_next_match_battle!(match, latest_battle) do
     last_turn = if latest_battle, do: List.last(latest_battle.turns), else: nil
 
     {attacker, defender} = Matches.get_latest_battlers(match, latest_battle, last_turn)
@@ -140,10 +154,68 @@ defmodule Moba.Game.Arena do
           match: match
         })
 
-      match
-      |> Matches.finish!(battle)
-      |> advance_match!()
+      if match.interactive do
+        Matches.update!(match, %{phase: "started"})
+      else
+        match |> Matches.finish!(battle) |> advance_match!()
+      end
     end
+  end
+
+  @doc "Advances one owned Arena turn, or explicitly starts the next pairing. Stale frames are ignored."
+  def play_match(scope, match_id, battle_id, turn_count, action) do
+    Repo.transaction(fn ->
+      Repo.one!(from m in Match, where: m.id == ^match_id, lock: "FOR UPDATE")
+      match = Matches.get_match!(match_id)
+
+      unless scope.user && match.player.user_id == scope.user.id && match.interactive &&
+               is_nil(match.training_team_id),
+             do: Repo.rollback(:unauthorized)
+
+      battle = Engine.latest_match_battle(match.id)
+
+      if battle && battle.id == battle_id && length(battle.turns) == turn_count && match.phase != "scored" do
+        cond do
+          battle.finished && action == :next ->
+            advance_match!(match)
+
+          !battle.finished && is_map(action) ->
+            turn = Engine.build_turn(battle)
+            automatic = Map.get(action, :auto, false)
+
+            if turn.attacker.player_id != match.player_id || automatic do
+              Engine.continue_battle!(battle, %{auto: true})
+            else
+              skills = turn.attacker.active_skills ++ turn.attacker.passive_skills
+              items = turn.attacker.active_items ++ turn.attacker.passive_items
+              selected = Enum.find(skills, &(to_string(&1.id) == action[:skill_id]))
+              item = Enum.find(items, &(to_string(&1.id) == action[:item_id]))
+              skill = turn.attacker.double_skill || selected
+              valid_skill = action[:skill_id] in [nil, ""] || !is_nil(selected)
+              valid_item = action[:item_id] in [nil, ""] || !is_nil(item)
+
+              if valid_skill && valid_item && (is_nil(skill) || Engine.can_use_resource?(turn, skill)) &&
+                   (is_nil(item) || Engine.can_use_resource?(turn, item)) do
+                Engine.continue_battle!(battle, %{skill: skill, item: item, player_id: match.player_id})
+              end
+            end
+
+            battle = Engine.get_battle!(battle.id)
+
+            if battle.finished do
+              match = Matches.finish!(match, battle)
+              if match.winner_id, do: advance_match!(match), else: match
+            else
+              match
+            end
+
+          true ->
+            match
+        end
+      else
+        match
+      end
+    end)
   end
 
   def create_duel!(player, opponent, auto) do
@@ -241,7 +313,7 @@ defmodule Moba.Game.Arena do
     if update_tiers?, do: Players.update_ranking_tiers!(), else: Players.update_ranking!()
   end
 
-  defp create_match!(%{daily_matches: count} = player, opponent, "manual") when count >= @daily_match_limit do
+  defp create_match!(%{daily_matches: @daily_match_limit} = player, opponent, "manual") do
     manual_matches = Matches.list_manual(player)
 
     if length(manual_matches) >= @daily_match_limit do
@@ -289,7 +361,7 @@ defmodule Moba.Game.Arena do
 
     pick_ids =
       if team_has_heroes? do
-        Enum.take(team.pick_ids, 5)
+        Enum.take(team.pick_ids, 3)
       else
         Heroes.trained_pvp_heroes(player_id) |> Enum.map(& &1.id)
       end
@@ -303,7 +375,7 @@ defmodule Moba.Game.Arena do
 
     pick_ids =
       if team_has_heroes? do
-        Enum.take(team.pick_ids, 5)
+        Enum.take(team.pick_ids, 3)
       else
         trained = Heroes.trained_pvp_heroes(player_id)
         first = List.first(trained)
@@ -322,7 +394,8 @@ defmodule Moba.Game.Arena do
   end
 
   defp match_pick_auto_fill_ids(pick_ids, bot_ids) do
-    diff = 5 - length(pick_ids)
+    pick_ids = Enum.take(pick_ids, 3)
+    diff = 3 - length(pick_ids)
 
     if diff > 0 do
       generated_ids = Enum.shuffle(bot_ids) |> Enum.take(diff)
@@ -335,7 +408,7 @@ defmodule Moba.Game.Arena do
   defp valid_saved_team?(nil, _), do: false
 
   defp valid_saved_team?(team, player_id) do
-    Matches.valid_picks?(%{generated_picks: []}, Players.get_player!(player_id), Enum.take(team.pick_ids, 5))
+    Matches.valid_picks?(%{generated_picks: []}, Players.get_player!(player_id), Enum.take(team.pick_ids, 3))
   end
 
   defp score_duel!(%{phase: "opponent_battle", player: player, opponent_player: opponent, auto: auto} = duel) do

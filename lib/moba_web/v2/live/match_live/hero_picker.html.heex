@@ -27,7 +27,7 @@
         </:actions>
       </.hud_notice>
       <%= for team <- @teams do %>
-        <% selected? = Enum.map(@picked_heroes, & &1.id) == Enum.take(team.pick_ids, 5) %>
+        <% selected? = Enum.map(@picked_heroes, & &1.id) == Enum.take(team.pick_ids, @match.team_size) %>
         <button
           type="button"
           id={"pick-team-#{team.id}"}
@@ -84,7 +84,7 @@
                     phx-click="pick-hero"
                     phx-value-id={hero.id}
                     id={"pick-hero-#{hero.id}-#{type}"}
-                    disabled={length(@picked_heroes) >= 5}
+                    disabled={length(@picked_heroes) >= @match.team_size}
                   >
                     Add to lineup +
                   </button>

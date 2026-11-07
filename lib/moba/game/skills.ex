@@ -11,6 +11,12 @@ defmodule Moba.Game.Skills do
 
   # -------------------------------- PUBLIC API
 
+  @doc "New heroes open with their active ultimate, then their chosen normal skills. Display order is independent."
+  def default_skill_order(skills) do
+    {ultimates, normals} = skills |> Enum.reject(& &1.passive) |> Enum.split_with(& &1.ultimate)
+    Enum.map(ultimates ++ normals, & &1.code)
+  end
+
   @doc """
   A Basic Attack is a 'virtual' Skill that all Heroes can use in a battle
   at any time. It requires no MP and has no cooldown, but only deals your Aattack
@@ -128,16 +134,12 @@ defmodule Moba.Game.Skills do
     |> Repo.all()
   end
 
-  def list_creation_skills(level, codes \\ []) do
-    base_list =
-      SkillQuery.base_current()
-      |> SkillQuery.normals()
-      |> SkillQuery.with_level(level)
-      |> SkillQuery.no_level_requirement()
-      |> Repo.all()
-
-    (unlocked_list(codes, level) ++ base_list)
-    |> Enum.sort_by(fn skill -> skill.mp_cost end)
+  def list_creation_skills(level, _codes \\ []) do
+    SkillQuery.base_current()
+    |> SkillQuery.normals()
+    |> SkillQuery.with_level(level)
+    |> SkillQuery.by_mp_cost()
+    |> Repo.all()
   end
 
   def list_normal_skills do
@@ -152,14 +154,7 @@ defmodule Moba.Game.Skills do
     |> Repo.all()
   end
 
-  def list_unlockable_skills do
-    SkillQuery.canon()
-    |> SkillQuery.enabled()
-    |> SkillQuery.normals()
-    |> SkillQuery.with_level_requirement()
-    |> SkillQuery.with_level(5)
-    |> Repo.all()
-  end
+  def list_unlockable_skills, do: []
 
   def max_leveled_skills(skills), do: Enum.map(skills, &get_skill_by_code!(&1.code, true, max_skill_level(&1)))
 
@@ -173,14 +168,4 @@ defmodule Moba.Game.Skills do
   # --------------------------------
 
   defp max_level?(skill), do: skill.level >= max_skill_level(skill)
-
-  defp unlocked_list(codes, level) when length(codes) > 0 do
-    SkillQuery.base_current()
-    |> SkillQuery.normals()
-    |> SkillQuery.with_codes(codes)
-    |> SkillQuery.with_level(level)
-    |> Repo.all()
-  end
-
-  defp unlocked_list(_, _), do: []
 end

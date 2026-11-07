@@ -6,7 +6,7 @@ const source = fs.readFileSync('assets/js/inventory_order.js', 'utf8')
   .replace('export function ', 'function ').replace('export default InventoryOrder;', '({InventoryOrder, moveInventoryItem});');
 
 function environment({columns = 3, statusId = 'hero-inventory-status', codes = ['boots', 'dagon', 'mask'], reducedMotion = false} = {}) {
-  const classes = () => { const values = new Set(); return {add: name => values.add(name), remove: name => values.delete(name), has: name => values.has(name)}; };
+  const classes = () => { const values = new Set(); return {add: name => values.add(name), remove: name => values.delete(name), has: name => values.has(name), contains: name => values.has(name)}; };
   let items, hit, request, hidden = 0, requestedStatus;
   const listeners = new Map(), documentListeners = new Map(), captured = new Set(), status = {}, flying = [];
   const el = {id: statusId === 'shop-inventory-status' ? 'shop-inventory-order' : 'hero-inventory', dataset: {reorderable: 'true', heroId: '123', orderStatus: statusId}, classList: classes(),
@@ -14,6 +14,7 @@ function environment({columns = 3, statusId = 'hero-inventory-status', codes = [
     querySelectorAll: () => items, contains: item => items.includes(item),
     addEventListener: (type, fn) => listeners.set(type, fn), removeEventListener: type => listeners.delete(type),
     setPointerCapture: id => captured.add(id), hasPointerCapture: id => captured.has(id), releasePointerCapture: id => captured.delete(id)};
+  if (statusId === 'hero-inventory-status') el.classList.add('hud-inventory-items');
   const makeItem = (code, rarity = 'normal') => ({dataset: {itemCode: code, itemName: code, rarity}, classList: classes(),
     animate(frames, options) { this.animation = {frames, options, cancel() { this.cancelled = true; }}; return this.animation; },
     style: {removeProperty(name) { delete this[name]; }}, focus() { this.focused = true; },

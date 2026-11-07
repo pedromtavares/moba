@@ -1,5 +1,5 @@
 defmodule MobaWeb.V2.BattleDesignLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
   test "preview keeps usable skills, items and basic attacks keyboard selectable", %{conn: conn} do
@@ -101,6 +101,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     assert has_element?(view, "#stage-duel-clock [data-stage-clock-owner]", "Your turn")
     assert has_element?(view, "#battle-ready[hidden]")
     assert has_element?(view, "#battle-bar .battle-turn-clock.d-none #turn-timer")
+    refute has_element?(view, "#training-auto-battle, #training-auto-match, [phx-hook=BattleAutoHotkeys]")
 
     render_click(view, "next-turn", %{"skill_id" => "", "item_id" => "", "hero_id" => "#{hero.id}"})
     assert combat_scene(view)["turnDeadline"] > initial_deadline
@@ -108,6 +109,20 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
 
     {:ok, waiting, _} = live(log_in_player(conn, player_id: opponent.id), "/battles/#{battle.id}")
     assert has_element?(waiting, "#stage-duel-clock:not([hidden]) [data-stage-clock-owner]", "Your turn")
+  end
+
+  test "season duel battles have no combat automation controls", %{conn: conn} do
+    player = create_player!()
+    opponent = create_player!()
+    hero = create_base_hero(%{name: "Challenger"}, player)
+    create_base_hero(%{finished_at: Timex.now(), league_tier: Moba.platinum_league_tier()}, opponent)
+    duel = Game.create_duel!(player, opponent, true)
+    Game.continue_duel!(duel, hero)
+    battle = duel.id |> Game.get_duel!() |> Engine.first_duel_battle()
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
+    assert has_element?(view, "#battle-page[data-finished=false]")
+    refute has_element?(view, "#training-auto-battle, #training-auto-match, [phx-hook=BattleAutoHotkeys]")
   end
 
   test "footer keeps both heroes' latest actions and complete effect icon lists on their own sides", %{conn: conn} do
@@ -217,7 +232,7 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
     refute has_element?(view, "#battle-bar a[href='/battles']")
     refute has_element?(view, "#battle-over-training")
     refute has_element?(view, "#battle-replay-actions")
-    assert has_element?(view, "#battle-outcome .battle-result-footer #share-battle")
+    refute has_element?(view, "#battle-bar #share-battle")
     assert has_element?(view, "#combat-stage .stage-footer #combat-log-toggle[aria-expanded=false]", "Battle log")
     refute has_element?(view, "#battle-review-actions")
     refute has_element?(view, ".stage-result button")

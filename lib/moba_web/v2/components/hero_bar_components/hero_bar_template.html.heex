@@ -1,27 +1,44 @@
-<div id="hero-bar" phx-hook="ShopViewport">
+<div :if={@roster != []} id={GH.dom_id(@id_prefix, "hero-team-tabs")} class="hud-team-roster">
+  {render_slot(@roster)}
+</div>
+<div
+  id={GH.dom_id(@id_prefix, "hero-bar")}
+  class={["hero-bar", (@roster != [] || @team_roster) && "has-team-roster"]}
+  phx-hook="ShopViewport"
+>
   <div class="container-fluid">
-    <form phx-submit="finalize-edit" {target_attrs(@event_target)}>
+    <.form
+      for={@orders_form}
+      id={GH.dom_id(@id_prefix, "hero-loadout-form")}
+      phx-submit="finalize-edit"
+      {target_attrs(@event_target, @hero_id)}
+    >
       <div class="row hero-hud-row">
         <div class="hud-identity d-none d-md-block col-3 col-md-2 col-lg-2 col-xl-2 center">
-          <div class="row mt-2">
-            <div
-              class="col"
-              data-toggle="tooltip"
-              data-tooltip-artwork={@preview && "hero"}
-              tabindex={@preview && "0"}
-              title={"<img src='#{GH.background_url(@current_hero)}' style='max-width:500px'/>"}
-            >
-              <div class="avatar-container">
-                <img src={GH.image_url(@current_hero.avatar)} class="avatar img-border" />
+          <%= if @identity != [] do %>
+            {render_slot(@identity)}
+          <% else %>
+            <div class="row mt-2">
+              <div
+                class="col"
+                data-toggle="tooltip"
+                data-tooltip-artwork={@preview && !@resource_tooltip && "hero"}
+                tabindex={@preview && "0"}
+                title={@resource_tooltip || "<img src='#{GH.background_url(@current_hero)}' style='max-width:500px'/>"}
+              >
+                <div class="avatar-container">
+                  <img src={GH.image_url(@current_hero.avatar)} class="avatar img-border" />
+                </div>
               </div>
             </div>
-          </div>
-          <h3 class="mb-0 mt-1 hero-name" phx-click="level" {target_attrs(@event_target)}>
-            {@current_hero.name}
-          </h3>
+            <h3 class="mb-0 mt-1 hero-name" phx-click="level" {target_attrs(@event_target, @hero_id)}>
+              {@display_name || @current_hero.name}
+            </h3>
+          <% end %>
         </div>
         <div class={"hud-progress col col-md-5 col-lg-5 col-xl-4 #{if @show_build, do: "d-none"}"}>
           <div class="flex-column">
+            {render_slot(@resources)}
             <div class="row  d-none d-md-block">
               <div class="col">
                 <%= if @preview do %>
@@ -39,7 +56,10 @@
                 <% end %>
               </div>
             </div>
-            <div class="row d-none d-md-block no-gutters" id="current-hero-stats">
+            <div
+              class="row d-none d-md-block no-gutters hud-current-stats"
+              id={GH.dom_id(@id_prefix, "current-hero-stats")}
+            >
               <div class="col flex no-wrap pl-0" style="overflow: visible;">
                 <.hero_bar_stats current_hero={@current_hero} />
               </div>
@@ -47,11 +67,15 @@
           </div>
         </div>
         <div class={"hud-build col-lg-5 col-xl-4 d-none d-md-block col-md-4 #{if @show_build, do: "d-block"}"}>
+          {render_slot(@skill_guidance)}
           <div class="row">
             <div class="col center">
               <div class={"skills-container #{if @editing, do: "editing"}"}>
-                <%= for skill <- sorted_skills(@current_hero) do %>
-                  <div class={"skill-container #{if skill.passive, do: "passive", else: "active"}"}>
+                <%= for {skill, index} <- Enum.with_index(sorted_skills(@current_hero)) do %>
+                  <div
+                    class={"skill-container #{if skill.passive, do: "passive", else: "active"}"}
+                    data-hud-skill-index={index}
+                  >
                     <%= if can_level_skill?(@current_hero, skill) do %>
                       <a
                         href="javascript:;"
@@ -59,7 +83,8 @@
                         aria-label={"Level up #{skill.name} to rank #{skill.level + 1}"}
                         phx-click="skill"
                         phx-value-code={skill.code}
-                        {target_attrs(@event_target)}
+                        aria-keyshortcuts={@preview && Enum.at(~w(Q W E R), index)}
+                        {target_attrs(@event_target, @hero_id)}
                       >
                         <img
                           src={GH.image_url(skill)}
@@ -68,6 +93,9 @@
                           class={"skill-img can-level img-border #{if skill.passive, do: "passive"} #{if skill.ultimate, do: "ultimate"}"}
                         />
                         <span :if={@preview} class="hud-upgrade-plus" aria-hidden="true">+</span>
+                        <kbd :if={@preview} class="hud-skill-hotkey" aria-hidden="true">
+                          {Enum.at(~w(Q W E R), index)}
+                        </kbd>
                       </a>
                     <% else %>
                       <img
@@ -111,7 +139,11 @@
             <div class="col center">
               <%= if @current_hero.skill_levels_available > 0 do %>
                 <%= if @preview do %>
-                  <div id="hud-skill-points" class="hud-skill-points" role="status">
+                  <div
+                    id={GH.dom_id(@id_prefix, "hud-skill-points")}
+                    class="hud-skill-points"
+                    role="status"
+                  >
                     <strong>+{@current_hero.skill_levels_available}</strong>
                     <span>Skill point{if @current_hero.skill_levels_available > 1, do: "s"} available</span>
                   </div>
@@ -124,28 +156,33 @@
                 <% end %>
               <% else %>
                 <%= if @editing do %>
-                  <button type="submit" id="save-button" class="btn btn-sm btn-warning mt-2" phx-loading="Saving...">
+                  <button
+                    type="submit"
+                    id={GH.dom_id(@id_prefix, "save-button")}
+                    class="btn btn-sm btn-warning mt-2"
+                    phx-loading="Saving..."
+                  >
                     Save
                   </button>
                   <button
                     :if={@preview}
                     type="button"
-                    id="cancel-orders-button"
+                    id={GH.dom_id(@id_prefix, "cancel-orders-button")}
                     class="btn btn-sm btn-outline-light mt-2 ml-2"
                     phx-click="cancel-edit"
-                    {target_attrs(@event_target)}
+                    {target_attrs(@event_target, @hero_id)}
                   >
                     Cancel
                   </button>
                 <% else %>
                   <a
                     href="javascript:;"
-                    id="edit-button"
+                    id={GH.dom_id(@id_prefix, "edit-button")}
                     phx-click="start-edit"
                     data-toggle="tooltip"
                     title={edit_orders_label(@current_hero)}
                     class="badge badge-pill badge-light-warning py-1 px-2 font-13 d-none d-md-inline"
-                    {target_attrs(@event_target)}
+                    {target_attrs(@event_target, @hero_id)}
                   >
                     <i class="ui-icon ui-edit mr-1"></i>Edit Orders
                   </a>
@@ -156,7 +193,7 @@
         </div>
         <div
           class={["hud-inventory col-lg-2 d-none d-xl-block", @show_build && "hud-inventory-open"]}
-          id="current-hero-gold"
+          id={GH.dom_id(@id_prefix, "current-hero-gold")}
         >
           <div class="row">
             <div class="col center">
@@ -164,32 +201,38 @@
                 <span class="text-warning mr-1"><i class="ui-icon ui-coins"></i> {@current_hero.gold}</span>
                 <a
                   href="javascript:;"
-                  id="toggle-shop"
+                  id={GH.dom_id(@id_prefix, "toggle-shop")}
+                  aria-keyshortcuts={@preview && "F"}
                   class={"badge badge-light-warning border border-warning toggle-shop #{if @show_shop, do: "active-shop"}"}
                   phx-click="toggle-shop"
                   phx-hook="ToggleShop"
-                  {target_attrs(@event_target)}
+                  {target_attrs(@event_target, @hero_id)}
                 >
-                  SHOP
+                  SHOP<kbd :if={@preview} class="hud-skill-hotkey hud-shop-hotkey" aria-hidden="true">F</kbd>
                 </a>
+                {render_slot(@shop_actions)}
               </h3>
               <div
-                class={"inventory #{if @editing, do: "editing"}"}
-                id="hero-inventory"
+                class={"inventory hud-inventory-items #{if @editing, do: "editing"}"}
+                id={GH.dom_id(@id_prefix, "hero-inventory")}
                 phx-hook="InventoryOrder"
                 data-hero-id={@current_hero.id}
                 data-reorderable={to_string(@reorderable && !@editing)}
                 data-inventory-order="true"
+                data-order-status={GH.dom_id(@id_prefix, "hero-inventory-status")}
                 role="group"
                 aria-label="Hero inventory"
               >
                 <%= for item <- sorted_items(@current_hero) do %>
                   <div
                     class={"item-container #{if !item.active, do: "passive", else: "active"}"}
-                    id={"inventory-#{item.id}"}
+                    id={GH.dom_id(@id_prefix, "inventory-#{item.id}")}
                     data-item-code={item.code}
                     data-item-name={item.name}
                     data-rarity={item.rarity}
+                    phx-click={!@editing && "open-shop-item"}
+                    phx-value-code={item.code}
+                    {target_attrs(@event_target, @hero_id)}
                     role={@reorderable && "button"}
                     tabindex={if @reorderable, do: "0"}
                     aria-label={if @reorderable, do: "#{item.name}. Drag to reorder, or use Alt and arrow keys."}
@@ -227,7 +270,13 @@
                   <% end %>
                 <% end %>
               </div>
-              <span id="hero-inventory-status" class="sr-only" role="status" aria-live="polite" phx-update="ignore">
+              <span
+                id={GH.dom_id(@id_prefix, "hero-inventory-status")}
+                class="sr-only"
+                role="status"
+                aria-live="polite"
+                phx-update="ignore"
+              >
               </span>
             </div>
           </div>
@@ -256,28 +305,31 @@
             <% end %>
           </div>
           <div class="col-7">
-            <h3 class="mb-1 mt-0 pt-1 text-right" id="tiny-shop">
+            <h3 class="mb-1 mt-0 pt-1 text-right" id={GH.dom_id(@id_prefix, "tiny-shop")}>
               <span class="text-warning mr-1"><i class="ui-icon ui-coins"></i> {@current_hero.gold}</span>
               <a
                 href="javascript:;"
                 phx-click="toggle-shop"
-                id="toggle-tiny-shop"
+                id={GH.dom_id(@id_prefix, "toggle-tiny-shop")}
                 phx-hook="ToggleShop"
                 class={"badge badge-light-warning border border-warning toggle-shop #{if @show_shop, do: "active-shop"}"}
-                {target_attrs(@event_target)}
+                {target_attrs(@event_target, @hero_id)}
               >
-                SHOP
+                SHOP<kbd :if={@preview} class="hud-skill-hotkey hud-shop-hotkey" aria-hidden="true">F</kbd>
               </a>
             </h3>
           </div>
         <% end %>
+        <div :if={@mobile_shop_actions != []} class="col-12 mobile-shop-actions">
+          {render_slot(@mobile_shop_actions)}
+        </div>
         <div class="col-12 mobile-nav-buttons">
           <%= if @show_build do %>
             <button
               type="button"
               class="btn btn-block btn-outline-info text-primary rounded-0"
               phx-click="show-navigation"
-              {target_attrs(@event_target)}
+              {target_attrs(@event_target, @hero_id)}
             >
               <i class="ui-icon ui-circle-arrow-left mr-1"></i>Show Navigation
             </button>
@@ -287,7 +339,7 @@
                 type="button"
                 class="btn btn-block btn-outline-warning text-warning can-level rounded-0"
                 phx-click="show-build"
-                {target_attrs(@event_target)}
+                {target_attrs(@event_target, @hero_id)}
               >
                 You have an available skill point!<i class="ui-icon ui-circle-arrow-right ml-1"></i>
               </button>
@@ -296,7 +348,7 @@
                 type="button"
                 class="btn btn-block btn-outline-info text-primary rounded-0 btn-xs"
                 phx-click="show-build"
-                {target_attrs(@event_target)}
+                {target_attrs(@event_target, @hero_id)}
               >
                 Show Build<i class="ui-icon ui-circle-arrow-right ml-1"></i>
               </button>
@@ -304,39 +356,40 @@
           <% end %>
         </div>
       </div>
-    </form>
+    </.form>
   </div>
-  <h3 class="mb-1 mt-0 d-none d-md-block d-xl-none" id="small-shop">
+  <h3 class="mb-1 mt-0 d-none d-md-block d-xl-none hud-small-shop" id={GH.dom_id(@id_prefix, "small-shop")}>
     <span class="text-warning mr-1"><i class="ui-icon ui-coins"></i> {@current_hero.gold}</span>
     <a
       href="javascript:;"
-      id="toggle-small-shop"
+      id={GH.dom_id(@id_prefix, "toggle-small-shop")}
+      aria-keyshortcuts={@preview && "F"}
       phx-click="toggle-shop"
       phx-hook="ToggleShop"
       class={"badge badge-light-warning border border-warning toggle-shop #{if @show_shop, do: "active-shop"}"}
-      {target_attrs(@event_target)}
+      {target_attrs(@event_target, @hero_id)}
     >
-      SHOP
+      SHOP<kbd :if={@preview} class="hud-skill-hotkey hud-shop-hotkey" aria-hidden="true">F</kbd>
     </a>
   </h3>
 
   <div
     class={"shop-modal #{if @show_shop, do: "d-block", else: "d-none"}"}
-    phx-window-keydown="close-shop"
-    phx-key="Escape"
-    {target_attrs(@event_target)}
-    id="shop-modal"
+    phx-hook="ShopEscape"
+    {target_attrs(@event_target, @hero_id)}
+    id={GH.dom_id(@id_prefix, "shop-modal")}
     role="dialog"
     aria-modal="true"
-    aria-labelledby="shop-title"
+    aria-labelledby={GH.dom_id(@id_prefix, "shop-title")}
   >
     <.live_component
       module={ShopComponent}
+      id_prefix={@id_prefix}
+      hero_id={@hero_id}
       current_hero={@current_hero}
-      tutorial_step={@tutorial_step}
       event_target={@event_target}
       reorderable={@reorderable && !@editing}
-      id="shop"
+      id={GH.dom_id(@id_prefix, "shop")}
     />
   </div>
 </div>

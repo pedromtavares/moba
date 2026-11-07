@@ -1,19 +1,14 @@
 defmodule Moba.Engine.OpposingResourceMatrixTest do
-  use Moba.DataCase
+  use ExUnit.Case, async: true
 
   alias Test.CombatCase, as: Combat
   alias Moba.Engine.Core.Logger
 
   @moduletag :interaction_matrix
 
-  setup do
-    Combat.install_catalog()
-    :ok
-  end
-
   for first <- Combat.resources() do
     @first first
-    test "#{first.code} against every skill/item over six saved turns" do
+    test "#{first.code} against every skill/item over six turns" do
       for second <- Combat.resources(),
           first_outcome <- Combat.outcomes(@first),
           second_outcome <- Combat.outcomes(second) do
@@ -26,7 +21,7 @@ defmodule Moba.Engine.OpposingResourceMatrixTest do
         Enum.reduce(1..6, battle, fn number, battle ->
           resource = if rem(number, 2) == 1, do: first, else: second
           {skill, item} = Combat.chosen(resource)
-          {battle, result} = Combat.step(battle, skill, item)
+          {battle, result} = Combat.step_in_memory(battle, skill, item)
 
           for battler <- [result.attacker, result.defender] do
             assert is_integer(battler.current_hp) && battler.current_hp <= battler.total_hp, inspect({label, number})

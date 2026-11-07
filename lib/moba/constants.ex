@@ -57,7 +57,7 @@ defmodule Moba.Constants do
       @base_xp 600
       @xp_increment 50
       @veteran_pve_tier 2
-      @initial_gold 800
+      @initial_gold 1200
       @veteran_initial_gold 2000
       @items_base_price 400
       @buyback_multiplier 10
@@ -78,14 +78,14 @@ defmodule Moba.Constants do
       # PVP
       @max_pvp_tier 18
       @match_timeout_in_hours 24
-      @matchmaking_shards 20
+      @matchmaking_shards 30
       @minimum_duel_points 2
       @maximum_points_difference 200
       @duel_timer_in_seconds 60
       @turn_timer_in_seconds 30
       @daily_ranking_limit 50
       @season_ranking_limit 50
-      @daily_match_limit 30
+      @daily_match_limit 20
       @immortal_streak_multiplier 0.01
       @available_hero_days 30
 

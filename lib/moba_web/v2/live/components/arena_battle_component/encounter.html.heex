@@ -1,0 +1,145 @@
+<section id={@id} class="team-manual-encounter arena-encounter" data-training-encounter>
+  <MobaWeb.V2.BattleLive.show {assigns}>
+    <:header_navigation>
+      <nav class="training-battle-navigation" aria-label="Arena navigation">
+        <.link navigate={~p"/arena"} id="arena-fight-return">← Arena</.link>
+      </nav>
+    </:header_navigation>
+    <:stage_controls :if={@active && !@battle.finished}>
+      <MobaWeb.V2.TrainingBattleComponent.play_controls {assigns} />
+    </:stage_controls>
+    <:actions>
+      <div class="row battle-actions">
+        <div class="col battle-action-side">
+          <MobaWeb.V2.BattleLive.active_turn {assigns} turn={@control_turn} hero={@control_hero} skill={@skill} />
+        </div>
+      </div>
+    </:actions>
+    <:result>
+      <% result_won? = if @match_over, do: @won, else: @battle.winner_player_id == @match.player_id
+      rating = if @match.rewards, do: @match.rewards.attacker_pvp_points, else: 0
+      winner = if @battle.winner_id == @battle.attacker_id, do: @battle.attacker, else: @battle.defender %>
+      <section
+        id="arena-fight-result"
+        class={[
+          "league-outcome arena-fight-result",
+          @match_over && "is-match-result",
+          result_won? && "is-stage-victory",
+          !result_won? && "is-defeat"
+        ]}
+        data-result={if result_won?, do: "victory", else: "defeat"}
+        aria-labelledby="arena-result-title"
+        style="--victory-scene: url(/images/tutorial/arena-of-ascension.jpg)"
+      >
+        <img
+          class="arena-result-art"
+          src={GH.background_url(winner)}
+          alt=""
+          aria-hidden="true"
+        />
+        <div class="league-outcome-heading">
+          <div class="arena-result-emblem" aria-hidden="true">
+            <.icon :if={@match_over && result_won?} name="game-trophy" />
+            <img
+              :if={!@match_over || !result_won?}
+              src={GH.image_url(winner.avatar)}
+              alt=""
+            />
+          </div>
+          <div class="league-outcome-copy">
+            <p class="league-outcome-eyebrow">
+              {if @match_over,
+                do: if(@won, do: "Arena victory", else: "Match complete"),
+                else:
+                  "Battle #{Enum.find_index(@battles, &(&1.id == @battle.id)) + 1} · #{if result_won?, do: "Victory", else: "Defeat"}"}
+            </p>
+            <h3 :if={@match_over} id="arena-result-title" class="arena-result-rating">
+              <strong>{if rating > 0, do: "+"}{rating}</strong><span>Arena Rating</span>
+            </h3>
+            <h3 :if={!@match_over} id="arena-result-title">{@battle.winner.name} wins</h3>
+          </div>
+          <button
+            :if={@active}
+            id="arena-next-battle"
+            type="button"
+            class="btn battle-primary league-continue"
+            phx-click="next-battle"
+            phx-target={@myself}
+            data-battle-continue="true"
+            aria-keyshortcuts="Space"
+          >
+            Next battle <span aria-hidden="true">→</span><kbd>SPACE</kbd>
+          </button>
+          <button
+            :if={!@active && @following}
+            id="arena-next-recorded-battle"
+            type="button"
+            class="btn battle-primary league-continue"
+            phx-click="inspect-battle"
+            phx-value-id={@following.id}
+            phx-target={@myself}
+            data-battle-continue="true"
+            aria-keyshortcuts="Space"
+          >
+            Next battle <span aria-hidden="true">→</span><kbd>SPACE</kbd>
+          </button>
+          <.link
+            :if={!@active && !@following}
+            id="arena-return-complete"
+            navigate={~p"/arena"}
+            class="btn battle-primary league-return"
+            data-battle-continue="true"
+            aria-keyshortcuts="Space"
+          >
+            Return to arena <span aria-hidden="true">→</span><kbd>SPACE</kbd>
+          </.link>
+        </div>
+      </section>
+    </:result>
+    <:footer>
+      <div id="arena-roster-summary" class="arena-roster-summary">
+        <section :for={lineup <- @lineups} aria-label={"#{lineup.name} lineup"}>
+          <strong>{lineup.name}</strong>
+          <div :for={unit <- lineup.units} class={["arena-summary-unit", unit.fallen && "is-fallen"]}>
+            <img src={GH.image_url(unit.hero.avatar)} alt={unit.hero.avatar.name} />
+            <div
+              class="arena-summary-health"
+              role="meter"
+              aria-label={"#{unit.hero.avatar.name} health"}
+              aria-valuemin="0"
+              aria-valuemax={unit.total}
+              aria-valuenow={min(unit.hp, unit.total)}
+            >
+              <span style={"width: #{min(100, round(unit.hp / max(1, unit.total) * 100))}%"}></span><small>{unit.hp}</small>
+            </div>
+          </div>
+        </section>
+        <div class="arena-battle-chapters" aria-label="Match battles">
+          <button
+            :for={{fight, index} <- Enum.with_index(@battles, 1)}
+            id={"arena-inspect-#{fight.id}"}
+            type="button"
+            phx-click="inspect-battle"
+            phx-value-id={fight.id}
+            phx-target={@myself}
+            aria-pressed={to_string(@battle.id == fight.id)}
+            title={"#{fight.attacker.avatar.name} vs #{fight.defender.avatar.name}"}
+          >
+            {index}
+          </button>
+        </div>
+      </div>
+    </:footer>
+    <:log_header>
+      <div class="training-combat-log-heading">
+        <strong>Battle log</strong><button
+          id="arena-combat-log-close"
+          type="button"
+          phx-click="toggle-combat-log"
+          phx-target={@myself}
+          aria-label="Close battle log"
+        >×</button>
+      </div>
+    </:log_header>
+  </MobaWeb.V2.BattleLive.show>
+</section>

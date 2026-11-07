@@ -1,6 +1,7 @@
 <Layouts.app
   preview={@preview}
   flash={@flash}
+  current_scope={@current_scope}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
@@ -14,79 +15,79 @@
             <%= if @preview do %>
               <.progression_header current_player={@current_player} />
             <% else %>
-            <div class="card dark-bg mb-3" id="pve-progression">
-              <div class="card-body pb-0">
-                <div class="row mt-3 mb-3 d-flex justify-content-center">
-                  <%= if next = next_pve_tier(@current_player) do %>
-                    <div class="col pve-tier-container text-center">
-                      <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="pve-rank" />
-                      <h4 class="text-uppercase text-white my-0 f-rpg">
-                        {Moba.pve_tiers()[@current_player.pve_tier]}
-                      </h4>
-                    </div>
-                    <div class="col-8">
-                      <h4 class="text-center mb-0 mt-0" id="base-quest-description">
-                        {current_quest_description(@current_player)}
-                      </h4>
-                      <div
-                        class="progress mt-3"
-                        style="height:50px;"
-                        data-toggle="tooltip"
-                        title={quest_avatars_title(@current_player)}
-                        role="progressbar"
-                        aria-labelledby="base-quest-description"
-                        aria-valuemin="0"
-                        aria-valuemax="100"
-                        aria-valuenow={quest_progression_pct(@current_player)}
-                        aria-valuetext={quest_progression_label(@current_player)}
-                      >
+              <div class="card dark-bg mb-3" id="pve-progression">
+                <div class="card-body pb-0">
+                  <div class="row mt-3 mb-3 d-flex justify-content-center">
+                    <%= if next = next_pve_tier(@current_player) do %>
+                      <div class="col pve-tier-container text-center">
+                        <img src={"/images/pve/#{@current_player.pve_tier}.png"} class="pve-rank" />
+                        <h4 class="text-uppercase text-white my-0 f-rpg">
+                          {Moba.pve_tiers()[@current_player.pve_tier]}
+                        </h4>
+                      </div>
+                      <div class="col-8">
+                        <h4 class="text-center mb-0 mt-0" id="base-quest-description">
+                          {current_quest_description(@current_player)}
+                        </h4>
                         <div
-                          style={"width:#{quest_progression_pct(@current_player)}%;"}
-                          class="progress-bar pve-bar"
+                          class="progress mt-3"
+                          style="height:50px;"
+                          data-toggle="tooltip"
+                          title={quest_avatars_title(@current_player)}
+                          role="progressbar"
+                          aria-labelledby="base-quest-description"
+                          aria-valuemin="0"
+                          aria-valuemax="100"
+                          aria-valuenow={quest_progression_pct(@current_player)}
+                          aria-valuetext={quest_progression_label(@current_player)}
                         >
-                        </div>
-                        <h5
-                          class="justify-content-center d-flex position-absolute w-100 text-white"
-                          style="margin-top: 18px"
-                        >
-                          {quest_progression_label(@current_player)}
-                        </h5>
-                      </div>
-                      <div class="mt-4 text-center">
-                        <%= unless @current_player.pvp_tier == Moba.max_pvp_tier() do %>
-                          <button
-                            type="button"
-                            class="btn btn-sm btn-light"
-                            data-toggle="modal"
-                            data-target="#pve-tier-rewards"
-                            id="base-rewards-btn"
+                          <div
+                            style={"width:#{quest_progression_pct(@current_player)}%;"}
+                            class="progress-bar pve-bar"
                           >
-                            <i class="ui-icon ui-crown mr-1"></i>Progression Rewards
-                          </button>
-                        <% end %>
+                          </div>
+                          <h5
+                            class="justify-content-center d-flex position-absolute w-100 text-white"
+                            style="margin-top: 18px"
+                          >
+                            {quest_progression_label(@current_player)}
+                          </h5>
+                        </div>
+                        <div class="mt-4 text-center">
+                          <%= unless @current_player.pvp_tier == Moba.max_pvp_tier() do %>
+                            <button
+                              type="button"
+                              class="btn btn-sm btn-light"
+                              data-toggle="modal"
+                              data-target="#pve-tier-rewards"
+                              id="base-rewards-btn"
+                            >
+                              <i class="ui-icon ui-crown mr-1"></i>Progression Rewards
+                            </button>
+                          <% end %>
+                        </div>
                       </div>
-                    </div>
-                    <div class="col pve-tier-container text-center">
-                      <img src={"/images/pve/#{next}.png"} class="pve-rank" />
-                      <h4 class="text-uppercase text-white my-0 f-rpg">
-                        {Moba.pve_tiers()[next]}
-                      </h4>
-                    </div>
-                  <% else %>
-                    <div class="col text-center mb-2">
-                      <img
-                        src={"/images/pve/#{@current_player.pve_tier}.png"}
-                        style="width: 150px"
-                        class="user-rank"
-                      />
-                      <h4 class="my-0 text-uppercase text-white f-rpg">
-                        {Moba.pve_tiers()[@current_player.pve_tier]}
-                      </h4>
-                    </div>
-                  <% end %>
+                      <div class="col pve-tier-container text-center">
+                        <img src={"/images/pve/#{next}.png"} class="pve-rank" />
+                        <h4 class="text-uppercase text-white my-0 f-rpg">
+                          {Moba.pve_tiers()[next]}
+                        </h4>
+                      </div>
+                    <% else %>
+                      <div class="col text-center mb-2">
+                        <img
+                          src={"/images/pve/#{@current_player.pve_tier}.png"}
+                          style="width: 150px"
+                          class="user-rank"
+                        />
+                        <h4 class="my-0 text-uppercase text-white f-rpg">
+                          {Moba.pve_tiers()[@current_player.pve_tier]}
+                        </h4>
+                      </div>
+                    <% end %>
+                  </div>
                 </div>
               </div>
-            </div>
             <% end %>
           </div>
         </div>
@@ -97,14 +98,16 @@
             <div class="card">
               <div class="card-body p-0 text-center" id="hero-list-container">
                 <.link
-                  navigate={preview_path(assigns, ~p"/invoke")}
+                  navigate={preview_path(assigns, training_cta_path(assigns))}
                   class={[
                     "btn p-2 btn-block btn-lg col-xl-4 margin-auto mt-2 dark-button base-invoke",
                     !@preview && "btn-outline-success"
                   ]}
                   id="base-invoke-btn"
                 >
-                  <i class="ui-icon ui-plus mr-1"></i>Train a new Hero
+                  <.onboarding_cta_arrow :if={@guide_training_cta} />
+                  <i :if={!@guide_training_cta} class="ui-icon ui-plus mr-1"></i>
+                  {training_cta_label(@register_to_train)}
                 </.link>
 
                 <%!-- Hero collection --%>
@@ -191,17 +194,18 @@
                   <%!-- Hero grid --%>
                   <div class="w-100 hero-list darker" id={"hero-list-#{@filter}"}>
                     <.hud_notice
-                      :if={@preview && @visible_heroes == []}
+                      :if={@preview && @visible_heroes == [] && @visible_teams == []}
                       id="base-no-heroes"
                       title={if @filter == "finished", do: "No trained heroes yet", else: "No heroes in training"}
                     >
                       <:actions>
-                        <.link navigate={preview_path(assigns, ~p"/invoke")} class="btn base-secondary">
-                          Train a new hero <span aria-hidden="true">→</span>
+                        <.link navigate={preview_path(assigns, training_cta_path(assigns))} class="btn base-secondary">
+                          {training_cta_label(@register_to_train)} <span aria-hidden="true">→</span>
                         </.link>
                       </:actions>
                     </.hud_notice>
                     <div class="row no-gutters">
+                      <.team_card :for={team <- @visible_teams} team={team} />
                       <%= for hero <- @visible_heroes do %>
                         <div class="col-lg-4 col-md-6" id={"visible-hero-#{hero.id}"}>
                           <div
@@ -429,5 +433,4 @@
       </div>
     </div>
   </div>
-  <.live_component module={MobaWeb.V2.TutorialComponent} step={@tutorial_step} preview={@preview} id="tutorial-step" />
 </Layouts.app>

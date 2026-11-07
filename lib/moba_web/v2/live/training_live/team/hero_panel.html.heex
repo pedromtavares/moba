@@ -1,0 +1,283 @@
+<section
+  id={"team-hero-panel-#{@selected.id}"}
+  class={[
+    "team-hero-panel",
+    @selected.id != @initial_hero && "d-none",
+    @selected.hero.skill_levels_available > 0 && "has-pending-skill-points"
+  ]}
+  data-team-hero={@selected.id}
+>
+  <TrainingComponents.training_header
+    :if={@run.phase != :finished}
+    current_hero={@selected.hero}
+    current_player={@current_player}
+    preview={true}
+    team_mode={true}
+    training_team={@run}
+    id_prefix={@id_prefix}
+    hero_id={@selected.id}
+    skill_guidance={@skill_guidance}
+    goal_override={@run.goal}
+    battle_pending={@run.phase == :engagement}
+    show_controls={@run.phase == :playing && TeamTraining.roster_alive?(@run)}
+  >
+    <:history_controls>
+      <button
+        id={GH.dom_id(@id_prefix, "team-battle-log")}
+        type="button"
+        class="ascent-tool"
+        phx-click="show-log"
+        phx-value-hero_id={@selected.id}
+        aria-expanded={to_string(@show_log)}
+      >
+        <.icon name="game-battle-log" /> Battle log <small>{length(@encounters)}</small>
+      </button>
+    </:history_controls>
+    <:reward_controls>
+      <button
+        id={GH.dom_id(@id_prefix, "team-reward-mode")}
+        class="team-reward-mode"
+        type="button"
+        role="switch"
+        aria-label="Focus rewards"
+        aria-checked={to_string(@run.reward_mode == :focus)}
+        phx-click="reward-mode"
+        phx-value-hero_id={@selected.id}
+        phx-value-mode={if @run.reward_mode == :shared, do: :focus, else: :shared}
+        disabled={@run.phase != :playing}
+        data-toggle="tooltip"
+        title="Shared rewards will equally distribute all rewards gained from training battles. Focus rewards will reward only the hero who engaged. League challenge rewards remain equally split always."
+      >
+        <span class={["team-reward-option", @run.reward_mode == :shared && "is-active"]}>
+          <.icon name="game-team" /> Shared
+        </span>
+        <span class="team-reward-track" aria-hidden="true"></span>
+        <span class={["team-reward-option", @run.reward_mode == :focus && "is-active"]}>
+          <.icon name="game-hero" /> Focus
+        </span>
+      </button>
+    </:reward_controls>
+  </TrainingComponents.training_header>
+
+  <nav
+    :if={@show_log}
+    id={GH.dom_id(@id_prefix, "team-encounter-log")}
+    class="team-encounter-log"
+    aria-label="Team battle history"
+  >
+    <p :if={@encounters == []}>Your battles will appear here.</p>
+    <.link
+      :for={e <- Enum.reverse(@encounters)}
+      id={GH.dom_id(@id_prefix, "team-replay-#{e.id}")}
+      navigate={TrainingEncounters.path(e)}
+    >
+      Turn {e.turn} · {e.label} <span aria-hidden="true">↗</span>
+    </.link>
+  </nav>
+
+  <section
+    :if={TeamTraining.dead?(@selected)}
+    id={GH.dom_id(@id_prefix, "team-death-panel")}
+    class="death-panel"
+    aria-labelledby={GH.dom_id(@id_prefix, "team-death-title")}
+  >
+    <div class="death-overview">
+      <span class="death-emblem" aria-hidden="true"><.icon name="game-skull" /></span>
+      <p class="death-eyebrow">Buyback required</p>
+      <h2 id={GH.dom_id(@id_prefix, "team-death-title")}>{@selected.hero.avatar.name} has fallen.</h2>
+      <p class="death-description">Buy back this hero to fight again. Your surviving heroes can still battle.</p>
+    </div>
+    <div class="death-buybacks" aria-label="Buyback options">
+      <div class="death-option">
+        <div class="death-currency death-gold">
+          <.icon name="game-gold" />
+          <div>
+            <h3>Gold buyback</h3>
+            <p>{@selected.hero.gold} Gold available</p>
+          </div>
+        </div>
+        <strong class="death-price death-gold" id={GH.dom_id(@id_prefix, "team-buyback-price")}>
+          {Moba.Game.buyback_price(@selected.hero)}<small>Gold</small>
+        </strong>
+        <button
+          id={GH.dom_id(@id_prefix, "buyback-hero")}
+          type="button"
+          class="btn death-revive"
+          phx-click="buyback"
+          phx-value-hero_id={@selected.id}
+          disabled={@selected.hero.gold < Moba.Game.buyback_price(@selected.hero)}
+          phx-disable-with="Reviving…"
+          aria-describedby={
+            if @selected.hero.gold < Moba.Game.buyback_price(@selected.hero),
+              do: GH.dom_id(@id_prefix, "team-buyback-help")
+          }
+        >
+          Buy back <span aria-hidden="true">→</span>
+        </button>
+        <TrainingComponents.buyback_farm_impact
+          id={GH.dom_id(@id_prefix, "team-buyback-farm-impact")}
+          total={TrainingComponents.team_farm(@run)}
+          cost={Moba.Game.buyback_price(@selected.hero)}
+          size={3}
+        />
+        <p
+          :if={@selected.hero.gold < Moba.Game.buyback_price(@selected.hero)}
+          id={GH.dom_id(@id_prefix, "team-buyback-help")}
+          class="death-buyback-help"
+        >
+          You need {Moba.Game.buyback_price(@selected.hero) - @selected.hero.gold} more Gold. Sell an item in the Shop to buy back.
+        </p>
+      </div>
+      <div :if={@shard_buyback_count} class="death-option">
+        <div class="death-currency death-shards">
+          <.icon name="game-shard" />
+          <div>
+            <h3>Shard buyback</h3>
+            <p>{@shard_buyback_count} Shards available</p>
+          </div>
+        </div>
+        <strong class="death-price death-shards" id={GH.dom_id(@id_prefix, "team-shard-cost")}>
+          {Moba.shard_buyback_price(@shard_buyback_count)}<small>Shards</small>
+        </strong>
+        <button
+          type="button"
+          class="btn base-secondary"
+          id={GH.dom_id(@id_prefix, "shard-buyback-hero")}
+          phx-click="shard-buyback"
+          phx-value-hero_id={@selected.id}
+          phx-disable-with="Reviving…"
+        >
+          Use Shards <span aria-hidden="true">→</span>
+        </button>
+      </div>
+    </div>
+    <div class="death-alternatives">
+      <div>
+        <h3>Begin again</h3>
+        <p>Choose your next journey.</p>
+      </div>
+      <div class="death-alternative">
+        <button
+          type="button"
+          phx-click="restart"
+          phx-value-hero_id={@selected.id}
+          id={GH.dom_id(@id_prefix, "restart-team")}
+          class="btn base-secondary"
+          data-confirm="Restart all three heroes at level 1 with the same builds?"
+          data-confirm-title="Restart team training?"
+          data-confirm-accept="Restart team"
+        >
+          <.icon name="game-refresh" />Restart Team
+        </button>
+        <small>Level 1 · Same builds</small>
+      </div>
+      <div class="death-alternative">
+        <.link id={GH.dom_id(@id_prefix, "team-death-new-team")} navigate={~p"/new"} class="btn base-secondary">
+          <.icon name="game-team" />New Team
+        </.link>
+        <small>Your current team is saved</small>
+      </div>
+    </div>
+  </section>
+  <section
+    :if={@run.turns_left == 0 && !TeamTraining.roster_alive?(@run)}
+    id={GH.dom_id(@id_prefix, "team-league-buyback")}
+    class="team-last-result"
+    role="status"
+  >
+    <div>
+      <strong>Buy back fallen heroes before the next roster fight.</strong>
+      <button
+        :for={h <- Enum.filter(TeamTraining.team(@run), &TeamTraining.dead?/1)}
+        id={GH.dom_id(@id_prefix, "team-buyback-select-#{h.id}")}
+        class="btn base-secondary"
+        type="button"
+        phx-click={select_hero(h.id)}
+      >
+        {h.hero.avatar.name} · {Moba.Game.buyback_price(h.hero)} Gold
+      </button>
+    </div>
+  </section>
+  <%= if @run.turns_left > 0 && !TeamTraining.dead?(@selected) do %>
+    <div
+      class="row d-flex align-items-center targets team-targets"
+      id={GH.dom_id(@id_prefix, "team-targets")}
+      data-hero={@run.selected}
+      style={"--team-target-count: #{length(@run.targets[@run.selected])}"}
+    >
+      <MobaWeb.V2.TrainingLive.target
+        :for={target <- @run.targets[@run.selected]}
+        target={target}
+        targets={@run.targets[@run.selected]}
+        current_hero={@selected.hero}
+        reward={target.reward}
+        reward_mode={@run.reward_mode}
+        hero_id={@selected.id}
+        first_battle_hint={@battle_guide_hero == @selected.id && target.id == hd(@run.targets[@selected.id]).id}
+      />
+    </div>
+  <% end %>
+  <TrainingComponents.boss_challenge
+    :if={@roshan && TeamTraining.roster_alive?(@run)}
+    boss={@roshan.hero}
+    current_hp={@roshan.hp}
+    max_hp={Moba.Game.Training.Loadouts.max_hp(@roshan)}
+    attempt={@run.boss_attempts + 1}
+    id_prefix={@id_prefix}
+    hero_id={@selected.id}
+    skill_guidance={@skill_guidance}
+  />
+  <.hero_bar
+    :if={@run.phase == :playing}
+    preview={true}
+    reorderable={true}
+    id_prefix={@id_prefix}
+    hero_id={@selected.id}
+    team_roster={true}
+    current_hero={@selected.hero}
+    display_name={TeamTraining.hero_name(@selected.hero, @run)}
+    editing={@editing}
+    show_build={@show_build}
+    show_shop={@show_shop}
+  >
+    <:skill_guidance :if={@skill_guide_hero && @selected.hero.skill_levels_available > 0}>
+      <span
+        id={GH.dom_id(@id_prefix, "league-hud-skill-arrow")}
+        class="skill-guidance-arrow league-hud-skill-arrow"
+        aria-hidden="true"
+      >
+      </span>
+    </:skill_guidance>
+    <:shop_actions>
+      <button
+        id={GH.dom_id(@id_prefix, "team-auto-buy")}
+        class="team-auto-buy"
+        type="button"
+        phx-click="auto-buy"
+        phx-value-hero_id={@selected.id}
+        role="switch"
+        aria-checked={to_string(@selected.auto_buy)}
+        data-toggle="tooltip"
+        title="Automatically buys Rare items and transmutes into better items when possible"
+      >
+        AUTO
+      </button>
+    </:shop_actions>
+    <:mobile_shop_actions>
+      <button
+        id={GH.dom_id(@id_prefix, "team-mobile-auto-buy")}
+        class="team-auto-buy"
+        type="button"
+        phx-click="auto-buy"
+        phx-value-hero_id={@selected.id}
+        role="switch"
+        aria-checked={to_string(@selected.auto_buy)}
+        aria-label="Auto-buy items"
+        data-toggle="tooltip"
+        title="Automatically buys Rare items and transmutes into better items when possible"
+      >
+        AUTO
+      </button>
+    </:mobile_shop_actions>
+  </.hero_bar>
+</section>

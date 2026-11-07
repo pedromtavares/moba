@@ -7,6 +7,16 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   - Returns strings or structured data that components render
   """
 
+  def dom_id("", id), do: id
+  def dom_id(prefix, id), do: "#{prefix}-#{id}"
+
+  def win_rate(%{matches: 0}), do: 0
+  def win_rate(%{wins: wins, matches: matches}), do: round(wins * 100 / matches)
+
+  def win_rate_summary(%{wins: wins, matches: matches}) do
+    "Last #{Moba.Game.Matches.win_rate_window()} completed 3v3 matches. Wins: #{wins} / #{matches}."
+  end
+
   def duel_mode_label(%{auto: true}), do: "Season duel"
   def duel_mode_label(_), do: "Live duel"
 
@@ -16,7 +26,7 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def immortal_streak_debuff_percent(_), do: nil
 
   def immortal_streak_debuff_description do
-    "If you have an active Immortal Streak, your heroes will receive a debuff that lowers their stats in 5v5 matches by #{Float.round(Moba.immortal_streak_multiplier() * 100, 1)}% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak."
+    "If you have an active Immortal Streak, your heroes will receive a debuff that lowers their stats in 3v3 matches by #{Float.round(Moba.immortal_streak_multiplier() * 100, 1)}% per streak. The higher the streak, the higher the nerf and the harder it is to keep the streak."
   end
 
   def match_immortal_streak(player, battles) do

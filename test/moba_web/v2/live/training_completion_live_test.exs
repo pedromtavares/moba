@@ -10,7 +10,9 @@ defmodule MobaWeb.V2.TrainingCompletionLiveTest do
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
     assert has_element?(view, "#training-completion[data-outcome='rank-up']")
+    assert has_element?(view, ".hero-detail-rankings > #training-completion + #hero-leaderboard")
     assert has_element?(view, "#training-completion-title", "Novice")
+    assert has_element?(view, "#training-completion", "Finish a training on Platinum League or higher")
     assert has_element?(view, "#completion-shards", "+200")
     assert has_element?(view, "#completion-continue[href='/base']")
     assert has_element?(view, "#completion-view-rewards[data-target='#pve-tier-rewards']")
@@ -39,18 +41,19 @@ defmodule MobaWeb.V2.TrainingCompletionLiveTest do
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
     assert has_element?(view, "#training-completion[data-outcome='retry']")
-    assert has_element?(view, "#completion-continue[href='/invoke']")
+    assert has_element?(view, "#completion-continue[href='/new']")
     refute has_element?(view, "#completion-shards")
   end
 
-  test "guest rank-up continues to the arena", %{conn: conn} do
+  test "guest rank-up guides the player to Base", %{conn: conn} do
     guest = Game.create_player!(%{user_id: nil, tutorial_step: 19})
     hero = completed_hero(Moba.platinum_league_tier(), guest)
     player = rank_up(hero)
     conn = log_in_player(conn, player_id: player.id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
-    assert has_element?(view, "#completion-continue[href='/arena']")
+    assert has_element?(view, "#completion-continue[href='/base'] .first-battle-arrow")
+    refute has_element?(view, "#completion-shards, #completion-view-rewards, #pve-tier-rewards")
   end
 
   test "an active hero does not show a completion screen", %{conn: conn} do
@@ -81,6 +84,8 @@ defmodule MobaWeb.V2.TrainingCompletionLiveTest do
 
     assert has_element?(view, "#pve-tier-rewards[data-tier='2'][data-earned='false']")
     assert has_element?(view, "#pve-tier-rewards-label", "Adept")
+    assert has_element?(view, "#base-quest-description", "Finish a training on Master League or higher")
+    assert has_element?(view, "#base-rank-progress[aria-valuetext='0/1 Training runs'][aria-valuenow='0']")
     assert has_element?(view, "#progression-shards", "+300")
     assert has_element?(view, "#progression-difficulty", Game.get_quest(2).difficulty)
     refute has_element?(view, "#progression-bonus")

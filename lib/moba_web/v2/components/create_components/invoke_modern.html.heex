@@ -20,7 +20,10 @@
   <div class="invoke-atmosphere" aria-hidden="true"></div>
   <div class="invoke-stage-content">
     <div class="invoke-identity" id={"avatar-#{@selected_avatar.id}"} data-invoke-identity>
-      <header id="invoke-start-header" class="invoke-eyebrow">Your legend starts here</header>
+      <nav :if={@current_player.user_id} id="training-mode" class="training-mode" aria-label="Training mode">
+        <.link navigate="/new" aria-current={Map.get(assigns, :draft_mode, false) && "page"}>Team 3v3</.link>
+        <.link navigate="/new/solo" aria-current={!Map.get(assigns, :draft_mode, false) && "page"}>Solo 1v1</.link>
+      </nav>
       <div class="invoke-role">
         <img src={"/images/#{@selected_avatar.role}_icon.png"} alt="" />
         <span data-invoke-role>{role(@selected_avatar)}</span>
@@ -39,12 +42,15 @@
       <div class="invoke-details" id={"invoke-details-#{@selected_avatar.id}"}>
         <.invoke_stats avatar={@selected_avatar} avatars={@all_avatars} />
       </div>
+      <.link :if={is_nil(@current_player.user_id)} href="/users/log_in" id="invoke-guest-sign-in">
+        <i class="ui-icon ui-sign-in" aria-hidden="true"></i>
+        <span>Already registered? <strong>Sign in</strong></span>
+      </.link>
     </div>
 
     <aside class="invoke-build-panel" aria-label="Hero build">
       <header class="invoke-section-heading">
         <div>
-          <span class="invoke-eyebrow">Make it yours</span>
           <h2>{if @custom, do: "Choose 3 skills", else: "Choose your build"}</h2>
         </div>
         <button
@@ -125,7 +131,6 @@
         <section id="create-bar" class="invoke-loadout" aria-label="Selected skill build">
           <header>
             <h3>{build_title(@selected_avatar, @selected_skills, @selected_build_index)}</h3>
-            <strong>{length(@selected_skills)}<small> / 3</small></strong>
           </header>
           <div class="invoke-loadout-skills">
             <div :for={skill <- @selected_skills} class="invoke-loadout-slot">
@@ -173,8 +178,12 @@
         </section>
 
         <div class="invoke-launch">
-          <%= if @current_player && Map.get(@current_player, :id) do %>
-            <.invoke_name :if={@current_player.user_id} name={@name} error={@error} />
+          <%= if Map.get(assigns, :draft_mode, false) || (@current_player && Map.get(@current_player, :id)) do %>
+            <.invoke_name
+              :if={@current_player.user_id && !Map.get(assigns, :draft_mode, false)}
+              name={@name}
+              error={@error}
+            />
             <button
               type="button"
               id="create-button"
@@ -182,16 +191,31 @@
               data-hero-name={@selected_avatar.name}
               data-hero-art={GH.background_url(@selected_avatar)}
               data-invoke-action="create"
-              disabled={length(@selected_skills) != 3 || !is_nil(@error)}
+              disabled={length(@selected_skills) != 3 || (!Map.get(assigns, :draft_mode, false) && !is_nil(@error))}
             >
-              Begin training <span aria-hidden="true">→</span>
+              <span class="invoke-launch-label">
+                <.icon
+                  name={if Map.get(assigns, :draft_mode, false), do: "game-team", else: "nav-training"}
+                  class="invoke-launch-icon"
+                />
+                <span>{Map.get(assigns, :launch_label, "Begin training")}</span>
+              </span>
+              <span aria-hidden="true">→</span>
             </button>
           <% else %>
             <.form for={to_form(%{})} id="invoke-guest-form" action={preview_path(assigns, "/start")} method="post">
               <input type="hidden" name="avatar" value={@selected_avatar.id} />
+              <input type="hidden" name="preset" value={if !@custom, do: @selected_build_index} />
               <input :for={skill <- @selected_skills} type="hidden" name="skills[]" value={skill.id} />
               <button type="submit" id="create-button" class="invoke-primary" disabled={length(@selected_skills) != 3}>
-                Begin training <span aria-hidden="true">→</span>
+                <span class="invoke-launch-label">
+                  <.icon
+                    name={if Map.get(assigns, :draft_mode, false), do: "game-team", else: "nav-training"}
+                    class="invoke-launch-icon"
+                  />
+                  <span>{Map.get(assigns, :launch_label, "Begin training")}</span>
+                </span>
+                <span aria-hidden="true">→</span>
               </button>
             </.form>
           <% end %>
@@ -232,27 +256,59 @@
         ↻ Random
       </button>
     </nav>
-    <div id="invoke-avatars" class="invoke-avatar-grid" style={"--invoke-columns: #{min(12, max(1, length(@avatars)))}"}>
+    <div class="invoke-avatar-strip">
       <button
-        :for={avatar <- Enum.sort_by(Enum.uniq(@avatars), & &1.name)}
-        id={"pick-avatar-#{avatar.id}"}
+        id="invoke-avatars-prev"
         type="button"
-        class="invoke-portrait"
-        data-invoke-action="avatar"
-        data-avatar-id={avatar.id}
-        data-role={avatar.role}
-        aria-pressed={to_string(@selected_avatar.id == avatar.id)}
-        aria-label={"Choose #{avatar.name}"}
+        class="invoke-roster-arrow"
+        data-invoke-action="roster-page"
+        data-direction="-1"
+        aria-label="Previous heroes"
+        aria-controls="invoke-avatars"
+        hidden={length(@avatars) <= 12}
+        disabled
       >
-        <img src={GH.image_url(avatar)} alt="" />
-        <span>{avatar.name}</span>
-        <span
-          :if={Enum.any?(@current_player.hero_collection, &(&1["code"] == avatar.code))}
-          class="invoke-trained"
-          aria-label="Already trained"
+        <span aria-hidden="true">←</span>
+      </button>
+      <div
+        id="invoke-avatars"
+        class="invoke-avatar-grid"
+        style={"--invoke-columns: #{min(12, max(1, length(@avatars)))}"}
+      >
+        <button
+          :for={{avatar, index} <- @avatars |> Enum.uniq() |> Enum.sort_by(& &1.name) |> Enum.with_index()}
+          hidden={index >= 12}
+          id={"pick-avatar-#{avatar.id}"}
+          type="button"
+          class="invoke-portrait"
+          data-invoke-action="avatar"
+          data-avatar-id={avatar.id}
+          data-role={avatar.role}
+          aria-pressed={to_string(@selected_avatar.id == avatar.id)}
+          aria-label={"Choose #{avatar.name}"}
         >
-          ◆
-        </span>
+          <img src={GH.image_url(avatar)} alt="" />
+          <span>{avatar.name}</span>
+          <span
+            :if={Enum.any?(@current_player.hero_collection, &(&1["code"] == avatar.code))}
+            class="invoke-trained"
+            aria-label="Already trained"
+          >
+            ◆
+          </span>
+        </button>
+      </div>
+      <button
+        id="invoke-avatars-next"
+        type="button"
+        class="invoke-roster-arrow"
+        data-invoke-action="roster-page"
+        data-direction="1"
+        aria-label="Next heroes"
+        aria-controls="invoke-avatars"
+        hidden={length(@avatars) <= 12}
+      >
+        <span aria-hidden="true">→</span>
       </button>
     </div>
     <div :if={@avatars == []} class="invoke-no-heroes">No unlocked heroes in this role.</div>

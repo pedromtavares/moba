@@ -1,6 +1,17 @@
 const number = value => Math.round(Number(value) || 0);
 const percent = (value, total) => total > 0 ? Math.max(0, Math.min(100, value / total * 100)) : 0;
 
+// Choose the largest square icons that fit the fixed effects area, preferring one row.
+export const effectGrid = (count, width, height, maxSize = 72, gap = 6) => {
+  let best = {columns: 1, size: 0};
+  for (let columns = count; columns >= 1; columns--) {
+    const rows = Math.ceil(count / columns);
+    const size = Math.floor(Math.min(maxSize, (width - gap * (columns - 1)) / columns, (height - gap * (rows - 1)) / rows));
+    if (size > best.size) best = {columns, size};
+  }
+  return best;
+};
+
 export default {
   mounted() {
     this.epoch = 0;
@@ -23,7 +34,7 @@ export default {
     };
     this.onReplay = () => {
       if (this.busy || !this.scene.events.length) return;
-      this.queue.push(...this.scene.events.slice(-2));
+      this.queue.push(...(this.scene.fullReplay ? this.scene.events : this.scene.events.slice(-2)));
       this.drain();
     };
     this.guard = event => {
@@ -37,6 +48,10 @@ export default {
     this.replayButton.addEventListener('click', this.onReplay);
     document.addEventListener('click', this.guard, true);
     this.soundLabel();
+    this.effectObserver = new ResizeObserver(entries => {
+      entries.forEach(({target, contentRect}) => this.fitEffects(target, contentRect.width, contentRect.height));
+    });
+    this.el.querySelectorAll('[data-stage-effects]').forEach(row => this.effectObserver.observe(row));
     this.reset(JSON.parse(this.el.dataset.scene));
   },
 
@@ -51,11 +66,14 @@ export default {
     this.queue.push(...fresh);
     if (!this.busy && this.queue.length) this.drain();
     else if (!this.busy) this.settle();
+    if (!this.busy) this.trainingReady();
   },
 
   disconnected() { this.cancel(); this.settle(); },
+  reconnected() { this.trainingFrame = null; this.trainingReady(); },
   destroyed() {
     this.cancel();
+    this.effectObserver.disconnect();
     clearInterval(this.turnClockInterval);
     this.soundButton.removeEventListener('click', this.onSound);
     this.replayButton.removeEventListener('click', this.onReplay);
@@ -71,6 +89,20 @@ export default {
     this.seen = Math.max(0, ...scene.events.map(event => event.number));
     scene.units.forEach(unit => this.renderBuild(unit));
     this.settle();
+    this.trainingReady();
+  },
+
+  trainingReady() {
+    const playback = this.scene.trainingPlayback;
+    if (!playback?.enabled || this.busy || playback.frame === this.trainingFrame) return;
+    const frame = playback.frame;
+    this.trainingFrame = frame;
+    const epoch = this.epoch;
+    this.wait(this.scene.finished ? 650 : 160).then(() => {
+      if (epoch !== this.epoch || this.scene.trainingPlayback?.frame !== frame) return;
+      const target = this.el.closest('[data-training-encounter]');
+      if (target) this.pushEventTo(target, 'training-playback-ready', {frame});
+    });
   },
 
   renderBuild(unit) {
@@ -142,7 +174,7 @@ export default {
       }
       if (unit.name) fighter.querySelector('[data-unit-name]').textContent = unit.name;
       fighter.querySelector('[data-unit-allegiance]').textContent = unit.you ? 'Your hero' : unit.avatar;
-      fighter.querySelector('[data-unit-level]').textContent = `Level ${unit.level}${unit.you ? ` · ${unit.avatar}` : ''}`;
+      fighter.querySelector('[data-unit-level]').textContent = `Level ${unit.level}${unit.you && unit.name !== unit.avatar ? ` · ${unit.avatar}` : ''}`;
       fighter.querySelector('.stage-health').setAttribute('aria-label', `${unit.name} health`);
       const action = this.el.querySelector(`[data-action-side="${unit.side}"]`);
       action.setAttribute('aria-label', `${unit.name} last action`);
@@ -340,7 +372,8 @@ export default {
       return ongoing ? {...effect, duration: ongoing.duration, kind: ongoing.kind, tooltip: effect.tooltip + ongoing.tooltip} : effect;
     });
     effects.push(...active.filter(effect => (!event || effect.code !== event.code) && !triggered.some(trigger => trigger.code === effect.code)));
-    action.querySelector('[data-stage-effects]').replaceChildren(...effects.map(effect => {
+    const row = action.querySelector('[data-stage-effects]');
+    row.replaceChildren(...effects.map(effect => {
       const tile = document.createElement('span');
       tile.className = 'stage-effect-icon';
       tile.dataset.kind = effect.kind || 'triggered';
@@ -366,6 +399,20 @@ export default {
       }
       return tile;
     }));
+    this.fitEffects(row);
+  },
+
+  fitEffects(row, width, height) {
+    if (!row.children?.length) return;
+    if (width === undefined) {
+      const styles = getComputedStyle(row);
+      width = row.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingRight);
+      height = row.clientHeight - parseFloat(styles.paddingTop) - parseFloat(styles.paddingBottom);
+    }
+    if (width <= 0 || height <= 0) return;
+    const grid = effectGrid(row.children.length, width, height);
+    row.style.setProperty('--effect-columns', grid.columns);
+    row.style.setProperty('--effect-size', `${grid.size}px`);
   },
 
   async drain() {
@@ -383,6 +430,7 @@ export default {
       if (epoch === this.epoch) {
         this.busy = false;
         this.settle();
+        this.trainingReady();
       }
     }
   },

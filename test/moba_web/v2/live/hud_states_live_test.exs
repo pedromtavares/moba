@@ -39,22 +39,21 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
 
     Game.Matches.update!(pending, %{phase: "scored", winner_id: player.id, rewards: %{attacker_pvp_points: 0}})
     {:ok, finished, _} = live(conn, "/arena")
-    assert has_element?(finished, "#enter-arena-button[disabled]", "Play 5v5")
+    assert has_element?(finished, "#enter-arena-button[disabled]", "Play 3v3")
     refute has_element?(finished, "#arena-entry-reward")
     refute has_element?(finished, "#resume-arena-match")
     refute has_element?(finished, "#arena-daily-limit.btn")
   end
 
-  test "empty team states guide creation and available-hero browsing", %{conn: conn} do
+  test "empty team states guide creation and training", %{conn: conn} do
     hero = create_base_hero()
     conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, view, _} = live(conn, "/arena/edit")
     assert has_element?(view, "#arena-no-teams")
     assert has_element?(view, "#arena-no-selected-team")
-    assert has_element?(view, "#arena-no-heroes #arena-browse-available")
+    assert has_element?(view, "#arena-no-heroes a[href='/new']")
 
-    view |> element("#arena-browse-available") |> render_click()
-    assert has_element?(view, "#available-heroes-button.active")
+    refute has_element?(view, "#available-heroes-button")
 
     view |> form("#arena-team-form", %{"team" => %{"name" => "New lineup"}}) |> render_submit()
     refute has_element?(view, "#arena-no-teams")
@@ -73,16 +72,15 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
 
     match = create_match(hero.player, opponent)
     {:ok, view, _} = live(conn, "/matches/#{match.id}")
-    assert has_element?(view, "#match-pick-status .hud-notice-counter", "0")
-    refute has_element?(view, "#start-match-button")
-    assert has_element?(view, "#match-no-trained-heroes #match-browse-available")
-    assert has_element?(view, "#match-no-teams a[href='/arena/edit?match_id=#{match.id}']")
-    view |> element("#match-browse-available") |> render_click()
-    assert has_element?(view, "#available-heroes.active.show")
+    assert has_element?(view, ".match-lineup header > span", "0 / 3")
+    assert has_element?(view, "#start-match-button[disabled]")
+    assert has_element?(view, ".arena-draft-hero-list a[href='/new']")
+    assert has_element?(view, "#edit-teams-button[href='/arena/edit?match_id=#{match.id}']")
+    refute has_element?(view, "#available-heroes-button")
 
     {:ok, base, _} = live(conn, "/base")
     base |> element("#finished-heroes-btn") |> render_click()
-    assert has_element?(base, "#base-no-heroes a[href='/invoke']")
+    assert has_element?(base, "#base-no-heroes a[href='/new']")
     base |> element("#in-progress-heroes-btn") |> render_click()
     refute has_element?(base, "#base-no-heroes")
   end
@@ -90,11 +88,11 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
   test "a full match lineup shows a clear start action", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
-    picks = for index <- 1..5, do: Game.create_hero!(%{name: "Hero #{index}"}, player, base_avatar(), base_skills())
+    picks = for index <- 1..3, do: Game.create_hero!(%{name: "Hero #{index}"}, player, base_avatar(), base_skills())
     match = create_match(player, opponent, %{player_picks: Enum.map(picks, & &1.id)})
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
 
-    assert has_element?(view, "#match-pick-status-title", "Lineup ready")
+    assert has_element?(view, ".match-lineup header > span", "3 / 3")
     assert has_element?(view, "#start-match-button[phx-click=start].battle-primary")
   end
 

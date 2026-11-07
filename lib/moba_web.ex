@@ -108,6 +108,13 @@ defmodule MobaWeb do
     end
   end
 
+  def v2_html do
+    quote do
+      use Phoenix.Component
+      unquote(v2_html_helpers())
+    end
+  end
+
   def html do
     quote do
       use Phoenix.Component

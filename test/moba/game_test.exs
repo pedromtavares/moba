@@ -42,7 +42,7 @@ defmodule Moba.GameTest do
       hero = Game.get_hero!(hero.id)
       targets = Game.list_targets(hero)
 
-      assert hero.gold == 800
+      assert hero.gold == 1200
       assert length(hero.skills) == 4
       assert length(targets) > 0
 
@@ -163,24 +163,34 @@ defmodule Moba.GameTest do
       assert hero.finished_at
     end
 
-    test "#finish_pve!" do
+    test "#finish_pve! awards Novice for one Platinum finish and Adept for one Master finish" do
       player = create_player!()
-      hero = create_base_hero(%{league_tier: 5}, player)
+      platinum = Moba.platinum_league_tier()
+      master = Moba.master_league_tier()
+
+      create_combat_hero(%{league_tier: platinum - 1}, player) |> Game.finish_pve!()
+      assert Game.get_player!(player.id).pve_tier == 0
+
+      hero = create_combat_hero(%{league_tier: platinum}, player)
       finished = Game.finish_pve!(hero)
 
       assert finished.finished_at
 
       %{pve_progression: progression} = player = Game.get_player!(player.id)
       assert length(progression.season_codes) == 1
-      refute progression.history["1"]
+      assert progression.history["1"]
+      assert player.pve_tier == 1
 
-      create_base_hero(%{league_tier: 5}, player, alternate_avatar()) |> Game.finish_pve!()
+      create_combat_hero(%{league_tier: master - 1}, player, alternate_avatar()) |> Game.finish_pve!()
+      assert Game.get_player!(player.id).pve_tier == 1
+
+      create_combat_hero(%{league_tier: master}, player) |> Game.finish_pve!()
 
       %{pve_progression: progression} = updated = Game.get_player!(player.id)
       assert length(progression.season_codes) == 2
-      assert progression.history["1"]
-
-      assert updated.pve_tier == 1
+      assert progression.history["2"]
+      assert updated.pve_tier == 2
+      assert updated.user.shard_count == player.user.shard_count + Game.get_quest(2).prize
     end
 
     test "#maybe_generate_boss" do
@@ -314,7 +324,7 @@ defmodule Moba.GameTest do
 
     test "#skill_build_for" do
       build = Game.skill_build_for("tank", 0)
-      assert elem(build, 1) == "Balanced Tank"
+      assert elem(build, 1) == "Regenerator"
     end
   end
 
@@ -408,15 +418,17 @@ defmodule Moba.GameTest do
     end
 
     test "#sell_item!" do
-      base_hero = create_base_hero(%{gold: 5000})
+      base_hero = create_base_hero(%{gold: 5000, total_gold_farm: 6000, total_xp_farm: 6000})
 
       hero =
         base_hero
         |> Game.buy_item!(alternate_item())
         |> Game.sell_item!(alternate_item())
 
-      assert hero.gold == 4520
-      refute Enum.member?(hero.items, base_item())
+      assert hero.gold == base_hero.gold
+      assert hero.total_gold_farm == base_hero.total_gold_farm
+      assert hero.total_xp_farm == base_hero.total_xp_farm
+      refute Enum.member?(hero.items, alternate_item())
       assert hero.item_speed == base_hero.item_speed
       assert hero.item_hp == base_hero.item_hp
       assert hero.item_mp == base_hero.item_mp
@@ -591,16 +603,13 @@ defmodule Moba.GameTest do
     end
 
     test "#track_pve_progression completes", %{player: player} do
-      create_base_hero(%{league_tier: 4, finished_at: Timex.now()}, player)
-      |> Game.Quests.track_pve_progression!()
-
       player = Game.get_player!(player.id)
-      player_hero = create_base_hero(%{league_tier: 4, finished_at: Timex.now()}, player, alternate_avatar())
+      player_hero = create_base_hero(%{league_tier: Moba.platinum_league_tier(), finished_at: Timex.now()}, player)
       Game.Quests.track_pve_progression!(player_hero)
 
       %{pve_progression: progression} = updated = Game.get_player!(player.id)
 
-      assert length(progression.season_codes) == 2
+      assert length(progression.season_codes) == 1
       assert progression.history["1"] > player_hero.finished_at
       assert updated.status == "available"
       assert updated.pve_tier == 1

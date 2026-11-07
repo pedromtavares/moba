@@ -3,12 +3,16 @@ defmodule MobaWeb.V2.CreateLiveTest do
   import Phoenix.LiveViewTest
 
   describe "connected mount" do
-    test "guest /start shows the sign in bar", %{conn: conn} do
+    test "guest /start places the sign-in link inside the hero stage", %{conn: conn} do
       conn = get(conn, "/start")
       html = html_response(conn, 200)
 
-      assert html =~ ~s(href="/users/log_in")
-      assert html =~ "Already registered? Sign in"
+      link =
+        html
+        |> LazyHTML.from_fragment()
+        |> LazyHTML.query("#invoke-modern a#invoke-guest-sign-in[href='/users/log_in']")
+
+      assert LazyHTML.text(link) =~ "Already registered? Sign in"
     end
 
     test "renders avatar selection state", %{conn: conn} do
@@ -19,10 +23,11 @@ defmodule MobaWeb.V2.CreateLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/invoke")
+      {:ok, view, _html} = live(conn, "/new")
 
       assert has_element?(view, "#invoke-modern #invoke-avatars")
       assert has_element?(view, "#randomize-button")
+      refute has_element?(view, "#invoke-guest-sign-in")
     end
   end
 
@@ -35,7 +40,7 @@ defmodule MobaWeb.V2.CreateLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/invoke")
+      {:ok, view, _html} = live(conn, "/new")
 
       avatar = Game.list_creation_avatars(Accounts.unlocked_codes_for(hero.player.user)) |> List.first()
 
@@ -57,7 +62,7 @@ defmodule MobaWeb.V2.CreateLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, _html} = live(conn, "/invoke")
+      {:ok, view, _html} = live(conn, "/new")
 
       avatar = Game.list_creation_avatars(Accounts.unlocked_codes_for(hero.player.user)) |> List.first()
 

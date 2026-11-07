@@ -13,7 +13,8 @@
   },
   "per_icon_prompts": {
     "meditate": "Use case: logo-brand. Asset type: one very simple solid raster UI icon for MEDITATE in a fantasy hero-training game, earning experience through calm concentration. Draw the unmistakable silhouette of a HUMAN sitting cross-legged in meditation: one LARGE round solid head, a broad upright solid torso, two gently bent arms extending to hands resting on knees, and two broad crossed legs forming a wide base. A smooth simple cloak/robe shape may connect torso and legs, but keep the round head clearly distinct. Strong iconic human proportions, comparable to a bold universal yoga/meditation pictogram. PURE SOLID WHITE filled masses on genuinely TRANSPARENT background. At most two broad transparent negative-space gaps separating the arms and torso. Absolutely no outlines, inner clothing folds, fine lines, hood points, facial features, fingers, ornaments, brain, circuits, halo, sparkles, text, gradients, texture or shadows. The purpose is maximum clarity at only 20 pixels, not illustration detail. Exactly ONE centered meditation symbol, bold geometric silhouette, square canvas, 10 percent empty safe padding. It should look like a focused fantasy adventurer resting to gain experience, not a statue, tree, lotus flower or brain.",
-    "strategy": "Use case: logo-brand. Asset type: tiny UI pictogram for a fantasy MOBA game, for a Play 5v5 button. One bold flat WHITE silhouette tactical formation symbol: five clear diamond-shaped units arranged in a formation, one at top center, two in middle left and right, two bottom left and right, connected by a few thick clean orthogonal strategy-board paths. Elegant highly legible at 24 pixels. The whole symbol compact square, generous transparent margins, centered. Pure solid white shape, no gray, no gradients, no shadows, no glow, no text, no letters, no background board or frame. Actual fully transparent background. Matches minimal solid silhouette interface pictograms."
+    "strategy": "Use case: logo-brand. Asset type: tiny UI pictogram for a fantasy MOBA game, for a Play 5v5 button. One bold flat WHITE silhouette tactical formation symbol: five clear diamond-shaped units arranged in a formation, one at top center, two in middle left and right, two bottom left and right, connected by a few thick clean orthogonal strategy-board paths. Elegant highly legible at 24 pixels. The whole symbol compact square, generous transparent margins, centered. Pure solid white shape, no gray, no gradients, no shadows, no glow, no text, no letters, no background board or frame. Actual fully transparent background. Matches minimal solid silhouette interface pictograms.",
+    "arena-3v3": "Use case: logo-brand. One minimalist solid UI pictogram representing a three-person fantasy battle team, to sit beside a simple crossed-swords 1v1 icon. Subject: THREE HERALDIC SHIELDS in a compact overlapping formation, central shield forward, one smaller shield behind it on each side. NO humans, helmets, heads, arms, torsos, action figures, swords, spearheads or other objects. Shield silhouette: broad flat top with chamfered upper corners and a strong pointed bottom. The center shield has one broad transparent vertical slash cutout, side shields are plain. Separate the three shield outlines with broad clean TRANSPARENT negative-space gaps so their arrangement reads instantly. Symmetrical compact mark, almost square, bold clean geometric shapes, matching classic solid interface glyph weight and simplicity. PURE FLAT SOLID warm GOLD #E6C283 foreground, genuinely TRANSPARENT background and cutouts. Absolutely no shading, texture, gradients, metallic render, glow, distressed edges, splatter, thin outlines, frame, tile, lettering, numbers, stars or ornaments. The emblem fills 80% of a square canvas with equal safe padding. Readable at 20px. Exactly ONE unified symbol."
   },
   "icons": {
     "heart": "a solid symmetrical heart, health",
@@ -102,6 +103,17 @@
     "user": "one human head-and-shoulders silhouette",
     "ninja": "one masked ninja head-and-shoulders with narrow eye slit and small side headband tails",
     "user-plus": "one head-and-shoulders silhouette with a plus sign at its lower-right",
-    "strategy": "five diamond units connected in a tactical formation"
+    "strategy": "five diamond units connected in a tactical formation",
+    "arena-3v3": "Three overlapping heraldic shields in a compact formation; solid silhouette."
+  },
+  "per_icon_exports": {
+    "arena-3v3": {
+      "path": "/images/emblems/arena-3v3.png",
+      "format": "PNG RGBA",
+      "width": 128,
+      "height": 128,
+      "silhouette_size": 104,
+      "rendering": "CSS alpha mask inheriting currentColor, matching swords"
+    }
   }
 }

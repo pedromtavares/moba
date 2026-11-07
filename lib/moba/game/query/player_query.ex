@@ -65,10 +65,6 @@ defmodule Moba.Game.Query.PlayerQuery do
     from _ in query, order_by: fragment("RANDOM()")
   end
 
-  def finished_training_tutorial(query) do
-    from player in query, where: player.tutorial_step >= 19
-  end
-
   def daily_ranked(limit) do
     from(player in limit_by(current_season(), limit),
       where: not is_nil(player.ranking),
@@ -108,14 +104,12 @@ defmodule Moba.Game.Query.PlayerQuery do
 
   def season_ranking(limit) do
     base = current_season() |> non_bots() |> non_guests() |> limit_by(limit)
+    score = Game.SeasonScore.expression()
 
     from(player in base,
       join: user in assoc(player, :user),
       where: user.last_online_at > ^@current_ranking_date,
-      order_by: [
-        desc: fragment("(100 * ?) + (100 * ?) + ?", player.best_immortal_streak, player.pve_tier, player.pvp_points),
-        desc: player.total_wins
-      ]
+      order_by: ^[desc: score, desc: dynamic([player], player.total_wins)]
     )
   end
 

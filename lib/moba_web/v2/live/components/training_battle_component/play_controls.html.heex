@@ -1,0 +1,52 @@
+<div
+  id="training-play-controls"
+  class="training-play-controls"
+  phx-hook="BattleAutoHotkeys"
+  aria-label="Battle playback controls"
+>
+  <.link
+    :if={@active && !@manual_view}
+    id="training-fight-battle"
+    navigate={battle_path(@replay, @index)}
+    class="btn battle-primary"
+  >
+    Fight manually →
+  </.link>
+  <button
+    id="training-auto-battle"
+    type="button"
+    class={["battle-auto-control", @auto_mode == :battle && "is-running"]}
+    aria-keyshortcuts="T"
+    aria-pressed={to_string(@auto_mode == :battle)}
+    aria-label={if @auto_mode == :battle, do: "Pause auto battle", else: "Auto battle"}
+    phx-click={if @auto_mode == :battle, do: "pause", else: "auto-battle"}
+    phx-target={@myself}
+  >
+    <%= if @auto_mode == :battle do %>
+      <span class="battle-auto-icon battle-auto-pause" aria-hidden="true"></span>
+    <% else %>
+      <.icon name="game-play" class="battle-auto-icon" />
+    <% end %>
+    <span>{if @auto_mode == :battle, do: "Pause", else: "Auto battle"}</span><kbd aria-hidden="true">T</kbd>
+  </button>
+  <button
+    :if={@replay.kind != :farm}
+    id="training-auto-match"
+    type="button"
+    class={["battle-auto-control", @auto_mode == :match && "is-running"]}
+    aria-keyshortcuts="G"
+    aria-pressed={to_string(@auto_mode == :match)}
+    aria-label={if @auto_mode == :match, do: "Pause auto all battles", else: "Auto all battles"}
+    phx-click={if @auto_mode == :match, do: "pause", else: "auto-match"}
+    phx-target={@myself}
+  >
+    <%= if @auto_mode == :match do %>
+      <span class="battle-auto-icon battle-auto-pause" aria-hidden="true"></span>
+    <% else %>
+      <span class="battle-auto-forward" aria-hidden="true">
+        <.icon name="game-play" /><.icon name="game-play" />
+      </span>
+    <% end %>
+    <span>{if @auto_mode == :match, do: "Pause", else: "Auto all battles"}</span><kbd aria-hidden="true">G</kbd>
+  </button>
+</div>

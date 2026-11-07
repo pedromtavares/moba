@@ -1,4 +1,9 @@
-<section class="battle-active-turn" aria-label={"Choose an action for #{@hero.name}"}>
+<section
+  class="battle-active-turn"
+  aria-label={"Choose an action for #{@hero.name}"}
+  aria-busy={to_string(Map.get(assigns, :controls_disabled, false))}
+  inert={Map.get(assigns, :controls_disabled, false)}
+>
   <div class="row mt-2 action-submit">
     <div class="col center">
       <button
@@ -8,9 +13,16 @@
         aria-keyshortcuts="Space"
         data-skill={@skill && @skill.id}
         data-hero={@hero.id}
+        disabled={Map.get(assigns, :controls_disabled, false)}
       >
         <span class="loading-text">
-          Attack with <span id="active-skill-name">{skill_name(@skill)}</span> <span id="active-item-name"></span>
+          <%= if Map.get(assigns, :controls_disabled, false) do %>
+            Resolving turn…
+          <% else %>
+            Attack with
+          <% end %>
+          <span id="active-skill-name" hidden={Map.get(assigns, :controls_disabled, false)}>{skill_name(@skill)}</span>
+          <span id="active-item-name"></span>
           <kbd class="attack-hotkey" aria-hidden="true">SPACE</kbd>
         </span>
       </button>

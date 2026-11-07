@@ -82,7 +82,7 @@ const InventoryOrder = {
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const source = this.acquisition;
     this.acquisition = null;
-    const transfer = this.el.id === 'hero-inventory' && !reduced && source?.code === item.dataset.itemCode &&
+    const transfer = this.el.classList.contains('hud-inventory-items') && !reduced && source?.code === item.dataset.itemCode &&
       source.hero === this.el.dataset.heroId && Date.now() - source.time < 5000 && item.getBoundingClientRect().width > 0;
     if (transfer) this.flyToInventory(item, source.rect, color);
     const animation = item.animate([

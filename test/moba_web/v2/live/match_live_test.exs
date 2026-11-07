@@ -11,7 +11,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
     skills = base_skills()
 
     player_heroes =
-      for index <- 1..5 do
+      for index <- 1..3 do
         Game.create_hero!(
           %{name: "Player #{index}", finished_at: Timex.now(), league_tier: 6},
           player,
@@ -21,7 +21,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
       end
 
     opponent_heroes =
-      for index <- 1..5 do
+      for index <- 1..3 do
         Game.create_hero!(%{name: "Opponent #{index}"}, opponent, weak_avatar(), skills)
       end
 
@@ -42,27 +42,14 @@ defmodule MobaWeb.V2.MatchLiveTest do
     first_hero = List.first(player_heroes)
 
     {:ok, view, _html} = live(conn, "/matches/#{match.id}")
-    assert has_element?(view, "#match-hud #winner-card.match-command")
-    assert has_element?(view, ".match-lineup .squad-panel-heading #player-card #match-your-lineup", "Your lineup")
-
-    assert has_element?(
-             view,
-             ".match-enemy .squad-panel-heading #opponent-card #match-opponent-lineup",
-             "Opponent lineup"
-           )
-
-    assert has_element?(view, ".match-center > #match-scoreboard .match-score", "Picking heroes")
-    refute has_element?(view, "#match-hud > .match-scoreboard")
-
-    assert has_element?(
-             view,
-             ".match-lineup .squad-panel-heading #edit-teams-button[href='/arena/edit?match_id=#{match.id}']"
-           )
-
+    assert has_element?(view, "#match-hud.arena-preparation")
+    assert has_element?(view, ".match-lineup header h2", "Your lineup")
+    assert has_element?(view, ".match-enemy header span", "Opponent lineup")
+    assert has_element?(view, "#edit-teams-button[href='/arena/edit?match_id=#{match.id}']")
     assert has_element?(view, "#picks-card.match-picker")
-    refute has_element?(view, "#match-return-to-arena")
-    refute has_element?(view, ".stats-footer")
-    render_click(view, "hero-tab", %{"type" => "trained"})
+    assert has_element?(view, "#start-match-button[disabled]")
+    refute has_element?(view, "#available-heroes-button")
+    refute has_element?(view, "[aria-label='Hero source']")
     render_click(view, "pick-hero", %{"id" => first_hero.id})
     assert has_element?(view, "#hero-#{first_hero.id}")
   end
@@ -73,7 +60,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
     skills = base_skills()
 
     player_heroes =
-      for index <- 1..5 do
+      for index <- 1..3 do
         Game.create_hero!(
           %{name: "Player #{index}", finished_at: Timex.now(), league_tier: 6},
           player,
@@ -83,7 +70,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
       end
 
     opponent_heroes =
-      for index <- 1..5 do
+      for index <- 1..3 do
         Game.create_hero!(%{name: "Opponent #{index}"}, opponent, weak_avatar(), skills)
       end
 
@@ -122,20 +109,24 @@ defmodule MobaWeb.V2.MatchLiveTest do
       assert has_element?(view, ".match-lineup .lineup-list #hero-#{hero.id} .roster-actions")
     end
 
-    first_hero = List.first(player_heroes)
-    last_hero = List.last(player_heroes)
-    assert has_element?(view, "#move-up-#{first_hero.id}[disabled]")
-    assert has_element?(view, "#move-down-#{last_hero.id}[disabled]")
+    [first_hero, middle_hero, last_hero] = player_heroes
+    assert has_element?(view, "#hero-#{first_hero.id} [data-lineup-grip]")
 
-    view |> element("#move-up-#{last_hero.id}") |> render_click()
-    assert has_element?(view, ".lineup-list > :nth-child(4)#hero-#{last_hero.id}")
+    view
+    |> element("#match-hud")
+    |> render_hook("reorder-lineup", %{
+      "lineup_id" => match.id,
+      "hero_ids" => [first_hero.id, last_hero.id, middle_hero.id]
+    })
+
+    assert has_element?(view, ".lineup-list > :nth-child(2)#hero-#{last_hero.id}")
 
     view
     |> element("#lineup-unpick-#{last_hero.id}[aria-label='Remove #{last_hero.name} from lineup']")
     |> render_click()
 
     refute has_element?(view, ".match-lineup #hero-#{last_hero.id}")
-    assert has_element?(view, "#match-empty-slot-5")
+    assert has_element?(view, "#match-empty-slot-3")
   end
 
   test "selecting a saved team loads its available heroes in order even when incomplete", %{conn: conn} do
@@ -158,10 +149,10 @@ defmodule MobaWeb.V2.MatchLiveTest do
         )
       end
 
-    partial = Game.create_team!(%{name: "Partial", player_id: player.id, pick_ids: [third.id, first.id, second.id]})
+    partial = Game.create_team!(%{name: "Partial", player_id: player.id, pick_ids: [third.id, first.id]})
 
     stale =
-      Game.create_team!(%{name: "Stale", player_id: player.id, pick_ids: [second.id, archived.id, first.id, foreign.id]})
+      Game.create_team!(%{name: "Stale", player_id: player.id, pick_ids: [second.id, archived.id, first.id]})
 
     unavailable = Game.create_team!(%{name: "Unavailable", player_id: player.id, pick_ids: [archived.id]})
 
@@ -179,13 +170,13 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
     view |> element("#pick-team-#{partial.id}") |> render_click()
 
-    for {hero, position} <- Enum.with_index([third, first, second], 1) do
+    for {hero, position} <- Enum.with_index([third, first], 1) do
       assert has_element?(view, ".match-lineup .lineup-list > :nth-child(#{position})#hero-#{hero.id}")
     end
 
-    assert has_element?(view, "#match-empty-slot-4")
-    refute has_element?(view, "#start-match-button")
-    refute Matches.valid_picks?(match, player, [third.id, first.id, second.id])
+    assert has_element?(view, "#match-empty-slot-3")
+    assert has_element?(view, "#start-match-button[disabled]")
+    refute Matches.valid_picks?(match, player, [third.id, first.id])
 
     # Availability must be checked at selection time, not from the mounted team snapshot.
     Game.update_hero!(archived, %{archived_at: Timex.now()})
@@ -306,7 +297,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
     skills = base_skills()
 
     _player_heroes =
-      for index <- 1..5 do
+      for index <- 1..3 do
         Game.create_hero!(
           %{name: "Player #{index}", finished_at: Timex.now(), league_tier: 6},
           player,
@@ -316,7 +307,7 @@ defmodule MobaWeb.V2.MatchLiveTest do
       end
 
     opponent_heroes =
-      for index <- 1..5 do
+      for index <- 1..3 do
         Game.create_hero!(%{name: "Opponent #{index}"}, opponent, weak_avatar(), skills)
       end
 
@@ -339,9 +330,6 @@ defmodule MobaWeb.V2.MatchLiveTest do
     assert has_element?(view, "#picks-card")
     refute has_element?(view, "[phx-hook=TutorialStep]")
 
-    render_click(view, "finish-tutorial", %{})
-
-    assert Game.get_player!(player.id).tutorial_step == 39
-    refute has_element?(view, "[phx-hook=TutorialStep]")
+    assert Game.get_player!(player.id).tutorial_step == 31
   end
 end

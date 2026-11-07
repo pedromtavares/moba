@@ -1,6 +1,41 @@
 defmodule MobaWeb.V2.ShopLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
+
+  test "the detail panel shares item tooltip descriptions, colored effects, and timing icons", %{conn: conn} do
+    hero = create_base_hero(%{gold: 10_000})
+    Game.update_tutorial_step!(hero.player, 39)
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/training")
+    view |> element("#toggle-shop") |> render_click()
+
+    for code <- ["tranquil_boots", "vanguard", "satanic", "octarine_core"] do
+      item = Game.get_item_by_code!(code)
+      content = Game.ItemDescriptions.describe(item)
+      view |> element("#item-#{item.id}") |> render_click()
+
+      assert has_element?(view, "#shop-detail .item-tooltip[data-item-code='#{code}']")
+      assert has_element?(view, "#shop-detail .skill-tooltip-summary", content.summary)
+      refute has_element?(view, "#shop-detail .skill-tooltip-heading, #shop-detail .shop-item-timing")
+
+      for effect <- content.effects do
+        row = "#shop-detail [data-effect='#{effect.key}'][data-tone='#{effect.tone}']"
+        assert has_element?(view, "#{row} dt .skill-tooltip-effect-icon.ui-icon")
+        assert has_element?(view, "#{row} dt", effect.label)
+        assert has_element?(view, "#{row} dd strong")
+      end
+
+      if item.active do
+        assert has_element?(view, "#shop-detail [data-kind=energy] .ui-bolt")
+        assert has_element?(view, "#shop-detail [data-kind=cooldown] .ui-clock")
+      end
+
+      assert has_element?(view, "#buy-button")
+    end
+
+    item = Game.get_item_by_code!("vanguard")
+    view |> element("#item-#{item.id}") |> render_click()
+    assert has_element?(view, "#shop-detail [data-effect=chance] strong", "#{item.roll_number}%")
+  end
 
   test "shelves inspect item details, buy once and sell from inventory", %{conn: conn} do
     hero = create_base_hero(%{gold: 10_000})
@@ -9,6 +44,10 @@ defmodule MobaWeb.V2.ShopLiveTest do
     view |> element("#toggle-shop") |> render_click()
 
     assert has_element?(view, "#shop-modal[role=dialog][aria-modal=true][aria-labelledby=shop-title]")
+    assert has_element?(view, ".shop-shelves > #inventory:first-child.is-current")
+    assert has_element?(view, "#shop-category-inventory[aria-pressed=true]")
+    assert has_element?(view, ".shop-keyboard-hint", "SPACE")
+    assert has_element?(view, "#toggle-shop .hud-shop-hotkey", "F")
     assert has_element?(view, "#inventory", "0 / 6 slots")
 
     for {rarity, boots} <- [
@@ -35,8 +74,14 @@ defmodule MobaWeb.V2.ShopLiveTest do
     item = base_item()
     view |> element("#item-#{item.id}") |> render_click()
     assert has_element?(view, "#shop-detail-name", item.name)
-    assert has_element?(view, "#shop-detail-description", item.description)
-    assert has_element?(view, "#shop-detail .shop-stat[data-stat=speed]", "+#{item.base_speed}")
+
+    assert has_element?(
+             view,
+             "#shop-detail-description .skill-tooltip-notes",
+             hd(Game.ItemDescriptions.describe(item).notes)
+           )
+
+    assert has_element?(view, "#shop-detail .item-tooltip-stat[data-stat=base_speed]", "+#{item.base_speed}")
     view |> element("#buy-button") |> render_click()
 
     assert has_element?(view, "#shop-detail-name", item.name)
@@ -54,6 +99,49 @@ defmodule MobaWeb.V2.ShopLiveTest do
     view |> element("#sell-#{item.id}") |> render_click()
     assert Game.get_hero!(hero.id).items == []
     refute has_element?(view, "#sell-#{item.id}")
+  end
+
+  test "opening the shop starts with the first owned item", %{conn: conn} do
+    hero = create_base_hero(%{gold: 10_000}) |> Game.buy_item!(base_item())
+    Game.update_tutorial_step!(hero.player, 39)
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/training")
+    view |> element("#toggle-shop") |> render_click()
+    assert has_element?(view, ".shop-shelves > #inventory:first-child.is-current")
+    assert has_element?(view, "#shop-detail-name", base_item().name)
+    assert has_element?(view, "#sell-#{base_item().id}")
+    refute has_element?(view, "#buy-button")
+  end
+
+  test "HUD inventory clicks open the shop on that owned item in training and customization", %{conn: conn} do
+    hero =
+      Enum.reduce(["boots_of_speed", "sages_mask", "chainmail"], create_base_hero(%{gold: 10_000}), fn code, hero ->
+        Game.buy_item!(hero, Game.get_item_by_code!(code))
+      end)
+
+    Game.update_tutorial_step!(hero.player, 39)
+    conn = log_in_player(conn, player_id: hero.player_id)
+    item = Game.get_item_by_code!("sages_mask")
+    result = Game.get_item_by_code!("tranquil_boots")
+
+    for path <- ["/training", "/hero/#{hero.id}"] do
+      {:ok, view, _} = live(conn, path)
+      if path != "/training", do: view |> element("#customize-hero") |> render_click()
+      view |> element("#inventory-#{item.id}") |> render_click()
+      assert has_element?(view, "#shop-modal.d-block")
+      assert has_element?(view, "#shop-detail-name", item.name)
+      assert has_element?(view, "#sell-#{item.id}")
+      refute has_element?(view, "#buy-button")
+      refute has_element?(view, ".shop-heading .shop-eyebrow")
+
+      view |> element("#item-#{result.id}") |> render_click()
+      view |> element("#start-transmute") |> render_click()
+      assert has_element?(view, "#shop-transmute-form")
+      view |> element("#inventory-#{item.id}") |> render_click()
+      assert has_element?(view, "#shop-modal.d-block")
+      assert has_element?(view, "#shop-detail-name", item.name)
+      assert has_element?(view, "#sell-#{item.id}")
+      refute has_element?(view, "#shop-transmute-form")
+    end
   end
 
   test "transmute keeps the result visible and requires a complete recipe", %{conn: conn} do

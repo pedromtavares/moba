@@ -5,13 +5,20 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync('assets/js/hooks.js', 'utf8')
   .replace(/^import .*;\n/gm, '')
+  .replace(/^Hooks\.\w+ = \{\.\.\..*;\n/gm, '')
   .replace('export default Hooks;', 'module.exports = Hooks.BattleContinueHotkey;');
 
 function environment() {
   const listeners = {};
   const controls = {};
   const dialogs = [];
-  const root = {dataset: {finished: 'true'}, querySelector: selector => controls[selector]};
+  const root = {
+    dataset: {finished: 'true'},
+    querySelector: selector => controls[selector],
+    addEventListener: (event, handler) => { listeners[event] = handler; },
+    removeEventListener: (event, handler) => { if (listeners[event] === handler) delete listeners[event]; }
+  };
+  const bar = {querySelector: root.querySelector};
   const context = {
     module: {exports: {}},
     window: {
@@ -44,7 +51,14 @@ function environment() {
     listeners.keydown?.(event);
     return event;
   }
-  return {root, controls, dialogs, listeners, control, press, destroy: () => continuation.destroyed.call(hook)};
+  function click({inside = true, interactive = null, ...options} = {}) {
+    listeners.click?.({
+      button: 0,
+      target: {closest: selector => selector === '#battle-bar' ? (inside ? bar : null) : interactive},
+      ...options
+    });
+  }
+  return {root, controls, dialogs, listeners, control, press, click, destroy: () => continuation.destroyed.call(hook)};
 }
 
 test('Space chooses the primary continuation instead of the battle log', () => {
@@ -108,11 +122,39 @@ test('focused continuation links work and focused buttons retain native Space ac
   assert.equal(action.clicks, 1);
 });
 
+test('clicking result content forwards to the existing primary action', () => {
+  const env = environment();
+  const action = env.control('[data-battle-continue=true]', {tagName: 'BUTTON'});
+  env.click();
+  assert.equal(action.clicks, 1);
+  env.click({interactive: action});
+  assert.equal(action.clicks, 1);
+});
+
+test('only a plain click in a finished result bar can forward', () => {
+  const env = environment();
+  const action = env.control('#load-training');
+  env.root.dataset.finished = 'false';
+  env.click();
+  env.root.dataset.finished = 'true';
+  for (const options of [
+    {inside: false}, {interactive: {}}, {button: 1}, {defaultPrevented: true},
+    {altKey: true}, {ctrlKey: true}, {metaKey: true}, {shiftKey: true}
+  ]) env.click(options);
+  action.disabled = true;
+  env.click();
+  action.disabled = false;
+  env.dialogs.push({getClientRects: () => [{}]});
+  env.click();
+  assert.equal(action.clicks, 0);
+});
+
 test('leaving the battle removes the continuation listener', () => {
   const env = environment();
   const action = env.control('[data-battle-continue=true]');
   env.destroy();
   assert.equal(env.listeners.keydown, undefined);
+  assert.equal(env.listeners.click, undefined);
   env.press();
   assert.equal(action.clicks, 0);
 });

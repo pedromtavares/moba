@@ -34,14 +34,7 @@ defmodule Moba.Game.Targets do
   def generate!(%{pve_tier: pve_tier} = hero, unlocked_codes) do
     Repo.delete_all(from t in Target, where: t.attacker_id == ^hero.id)
 
-    {weak_count, moderate_count, strong_count} =
-      cond do
-        pve_tier == 0 -> {3, 3, 0}
-        pve_tier == 1 -> {3, 6, 0}
-        pve_tier == 2 -> {0, 6, 3}
-        pve_tier == 3 -> {0, 3, 6}
-        true -> {0, 0, 9}
-      end
+    {weak_count, moderate_count, strong_count} = difficulty_counts(pve_tier)
 
     weak = create(hero, "weak", unlocked_codes, weak_count)
     moderate = create(hero, "moderate", unlocked_codes, moderate_count, Enum.map(weak, & &1.defender.id))
@@ -51,6 +44,20 @@ defmodule Moba.Game.Targets do
   end
 
   # --------------------------------
+
+  def difficulty_counts(0), do: {3, 3, 0}
+  def difficulty_counts(1), do: {3, 6, 0}
+  def difficulty_counts(2), do: {0, 6, 3}
+  def difficulty_counts(3), do: {0, 3, 6}
+  def difficulty_counts(_), do: {0, 0, 9}
+
+  def candidates(hero, difficulty, unlocked_codes, limit, exclude \\ []) do
+    farm = div(hero.total_xp_farm + hero.total_gold_farm, 2)
+
+    HeroQuery.pve_targets(difficulty, farm_range(farm, difficulty), exclude, unlocked_codes, limit)
+    |> HeroQuery.load()
+    |> Repo.all()
+  end
 
   defp create(hero, difficulty, unlocked_codes, limit, exclude \\ []) do
     exclude_list = [hero.id | exclude]

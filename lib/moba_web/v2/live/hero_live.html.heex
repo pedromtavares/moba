@@ -10,10 +10,8 @@
     id="hero-review"
     phx-hook={if @preview, do: "HeroReviewViewport"}
   >
-    <%= if finished_hero = just_finished_training?(@current_player, @hero) do %>
-      <%= if @preview do %>
-        <.training_completion hero={finished_hero} player={@current_player} quest={@completed_quest} />
-      <% else %>
+    <%= if !@preview do %>
+      <%= if finished_hero = just_finished_training?(@current_player, @hero) do %>
         <div class="row mt-3">
           <%= if @completed_quest do %>
             <div class="col-xl-6 margin-auto">
@@ -74,7 +72,7 @@
                       <strong class="font-20">Proceed to your Base</strong>
                     </.link>
                   <% else %>
-                    <.link navigate={preview_path(assigns, ~p"/invoke")} class="btn btn-success btn-block btn-lg">
+                    <.link navigate={preview_path(assigns, ~p"/new")} class="btn btn-success btn-block btn-lg">
                       <i class="ui-icon ui-user-plus ui-2x mr-1 mt-2"></i>
                       <strong class="font-20 d-block">Try Again</strong>
                     </.link>
@@ -102,6 +100,7 @@
                       <.link
                         class="text-white font-20 f-rpg hero-card-name"
                         navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}
+                        data-profile-username={Moba.Utils.username(@hero.player)}
                       >
                         {@hero.name}
                       </.link>
@@ -230,6 +229,7 @@
                 <.link
                   class="btn btn-block btn-light mb-1 btn-lg"
                   navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}
+                  data-profile-username={Moba.Utils.username(@hero.player)}
                 >
                   <i class="ui-icon ui-user"></i> View Player Profile
                 </.link>
@@ -351,7 +351,7 @@
 
   <%= if @completed_quest do %>
     <%= if @preview do %>
-      <.progression_rewards tier={@current_player.pve_tier} earned />
+      <.progression_rewards :if={@current_player.user_id} tier={@current_player.pve_tier} earned />
     <% else %>
       <div
         id="pve-tier-rewards"
@@ -440,6 +440,5 @@
     editing={@editing}
     show_build={@show_build}
     show_shop={@show_shop}
-    tutorial_step={@tutorial_step}
   />
 </Layouts.app>

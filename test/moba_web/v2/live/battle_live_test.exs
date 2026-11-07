@@ -1,5 +1,5 @@
 defmodule MobaWeb.V2.BattleLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
   alias Moba.Game.Matches
 
@@ -207,7 +207,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     _rewards_html = play_until_finished(view, battle.id, attacker.id, skill_id, 20)
 
     updated_player = Game.get_player!(player.id)
-    assert updated_player.tutorial_step == 11
+    assert updated_player.tutorial_step == 10
   end
 
   test "finished duel battle links back to the duel", %{conn: conn} do
@@ -233,7 +233,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")
     refute has_element?(view, "#battle-over-duel")
     assert has_element?(view, ~s|#load-battles[href="/arena/#{duel.id}"]|)
-    assert has_element?(view, "#battle-bar #battle-review-actions #share-battle")
+    refute has_element?(view, "#battle-bar #share-battle")
   end
 
   test "finished match battle links back to the match", %{conn: conn} do

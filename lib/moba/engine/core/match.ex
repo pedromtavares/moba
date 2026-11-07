@@ -29,10 +29,19 @@ defmodule Moba.Engine.Core.Match do
       defender_player: attrs[:defender_player],
       attacker_pick_position: attrs[:attacker_pick_position],
       defender_pick_position: attrs[:defender_pick_position],
+      attacker_initial_hp: initial_resource(attrs[:attacker], :initial_hp),
+      attacker_initial_mp: initial_resource(attrs[:attacker], :initial_mp),
       match_id: attrs[:match].id,
       type: Engine.battle_types().match,
       match: attrs[:match]
     }
+  end
+
+  defp initial_resource(hero, key) do
+    case Map.get(hero, key) do
+      nil -> nil
+      value -> round(value)
+    end
   end
 
   defp generate_snapshots(%{attacker: attacker, defender: defender} = battle) do

@@ -26,25 +26,34 @@ defmodule Moba.AccountsTest do
   end
 
   describe "unlocks" do
-    test "#buy_unlock! works" do
-      skill = base_skill()
-      user = create_user(%{shard_count: 100}) |> Accounts.buy_unlock!(skill)
+    test "#buy_unlock! works for paid avatars" do
+      avatar = base_avatar()
+      user = create_user(%{shard_count: 150}) |> Accounts.buy_unlock!(avatar)
       assert user.shard_count == 0
-      assert user.unlocks |> List.first() |> Map.get(:resource_code) == skill.code
+      assert user.unlocks |> List.first() |> Map.get(:resource_code) == avatar.code
     end
 
     test "#buy_unlock! not enough shards", %{user: user} do
-      skill = base_skill()
-      user = Accounts.buy_unlock!(user, skill)
+      user = Accounts.buy_unlock!(user, base_avatar())
       assert user.shard_count == 0
       assert length(user.unlocks) == 0
     end
 
     test "#unlocked_codes_for" do
       skill = base_skill()
-      user = create_user(%{shard_count: 100}) |> Accounts.buy_unlock!(skill)
+      user = create_user(%{shard_count: 100}) |> Accounts.Unlocks.create_unlock!(skill.code)
 
       assert Accounts.unlocked_codes_for(user) == [skill.code]
+    end
+
+    test "skills are free without creating purchase records or spending Shards" do
+      user = create_user(%{shard_count: 100})
+      skill = base_skill()
+      updated = Accounts.buy_unlock!(user, skill)
+      assert updated.shard_count == 100
+      assert updated.unlocks == []
+      assert Accounts.price_to_unlock(skill) == 0
+      assert Game.list_unlockable_skills() == []
     end
   end
 

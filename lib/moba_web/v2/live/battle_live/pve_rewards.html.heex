@@ -47,15 +47,6 @@
   </div>
   <%= if @current_player do %>
     <.battle_action_row>
-      <div class="col-4">
-        <.battle_nav_action
-          navigate={preview_path(assigns, ~p"/battles")}
-          class="btn btn-outline-secondary btn-lg btn-block"
-          id="load-battles"
-          icon="ui-icon ui-list"
-          label="View Battle Log"
-        />
-      </div>
       <div class="col">
         <.battle_nav_action
           navigate={preview_path(assigns, ~p"/training")}

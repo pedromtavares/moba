@@ -1,0 +1,34 @@
+<section id="training-team-ranking" class="hero-leaderboard" aria-labelledby="team-ranking-title">
+  <header class="hero-leaderboard-heading">
+    <.icon name="game-trophy" />
+    <div>
+      <h2 id="team-ranking-title">Global rankings</h2>
+      <p>Top 50 training runs</p>
+    </div>
+    <span :if={@standing} id="hero-ranking-standing">
+      <strong>#{@standing.position}</strong><small>Global rank</small>
+    </span>
+  </header>
+  <div
+    id="team-ranking-scroll"
+    class="hero-ranking-scroll"
+    tabindex="0"
+    role="region"
+    aria-labelledby="team-ranking-title"
+  >
+    <table class="hero-ranking-table">
+      <thead>
+        <tr>
+          <th scope="col">Rank</th>
+          <th scope="col">Team</th>
+          <th scope="col">Avg Farm</th>
+          <th scope="col">Time</th>
+        </tr>
+      </thead>
+      <tbody><.team_ranking_entry :for={entry <- @entries} entry={entry} current_id={@current_id} /></tbody>
+      <tfoot :if={@standing && @standing.position > 50}>
+        <.team_ranking_entry entry={@standing} current_id={@current_id} />
+      </tfoot>
+    </table>
+  </div>
+</section>

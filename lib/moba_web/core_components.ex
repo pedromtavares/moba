@@ -281,16 +281,20 @@ defmodule MobaWeb.CoreComponents do
       "energy" => "ui-bolt",
       "xp" => "ui-star",
       "gold" => "ui-coins",
+      "shard" => "ui-shard",
       "damage" => "ui-burst",
       "chance" => "ui-dice",
       "stun" => "ui-star",
       "attack" => "ui-dagger",
       "swords" => "ui-swords",
       "strategy" => "ui-strategy",
+      "arena-3v3" => "ui-arena-3v3",
       "rank-up" => "ui-chevrons-up",
       "rank-down" => "ui-chevrons-down",
       "team" => "ui-users",
+      "plus" => "ui-plus",
       "hero" => "ui-helmet",
+      "item" => "ui-cube",
       "armor" => "ui-shield",
       "power" => "ui-vortex",
       "speed" => "ui-runner",
@@ -298,10 +302,16 @@ defmodule MobaWeb.CoreComponents do
       "defense" => "ui-shield",
       "magic" => "ui-wand",
       "battle-log" => "ui-list",
+      "eye" => "ui-eye",
       "refresh" => "ui-refresh",
       "back" => "ui-arrow-left",
+      "sign-in" => "ui-sign-in",
       "clock" => "ui-clock",
-      "trophy" => "ui-trophy"
+      "trophy" => "ui-trophy",
+      "season-score" => "ui-star",
+      "trash" => "ui-trash",
+      "skull" => "ui-skull",
+      "play" => "ui-play"
     }
 
     assigns = assign(assigns, :icon_class, Map.fetch!(classes, stat))

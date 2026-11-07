@@ -22,7 +22,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
     player = create_player!()
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/player/#{player.id}")
 
-    assert has_element?(view, "#profile-debut-action[href='/invoke']", "Train a new hero")
+    assert has_element?(view, "#profile-debut-action[href='/new']", "Train a new hero")
     refute has_element?(view, "#profile-debut-hero")
   end
 
@@ -31,7 +31,7 @@ defmodule MobaWeb.V2.ProfileDebutLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
     assert has_element?(view, "#profile-arena-debut[data-state=train]")
-    assert has_element?(view, "#profile-debut-action[href='/invoke']", "Train a new hero")
+    assert has_element?(view, "#profile-debut-action[href='/new']", "Train a new hero")
     assert has_element?(view, "#profile-debut-hero", "Gold League")
   end
 

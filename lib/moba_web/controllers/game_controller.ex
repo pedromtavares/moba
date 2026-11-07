@@ -14,10 +14,11 @@ defmodule MobaWeb.GameController do
       end
 
     hero = player && player.current_pve_hero
+    team = player && Game.TeamRuns.active(Game.TeamRuns.scope(player), player.id)
 
     cond do
-      player && player.tutorial_step == 30 ->
-        redirect(conn, to: preview_path(conn, ~p"/arena"))
+      team ->
+        redirect(conn, to: "/training")
 
       hero && is_nil(hero.finished_at) ->
         redirect(conn, to: preview_path(conn, ~p"/training"))
@@ -43,6 +44,32 @@ defmodule MobaWeb.GameController do
     path = preview_path(conn, conn.request_path)
     path = if conn.query_string == "", do: path, else: path <> "?" <> conn.query_string
     conn |> put_status(:moved_permanently) |> redirect(to: path)
+  end
+
+  def create(conn, %{"team" => "true"} = params) do
+    if get_session(conn, :player_id) || conn.assigns.current_user do
+      redirect(conn, to: "/")
+    else
+      with key when is_binary(key) <- get_session(conn, :cache_key),
+           {:ok, picks} <- Game.TeamTraining.decode_roster(params["roster"]),
+           {:ok, player} <- Game.TeamRuns.start_guest_training(key, picks) do
+        if player.user_id do
+          redirect(conn, to: "/users/log_in")
+        else
+          path = if Game.TeamRuns.active(Game.TeamRuns.scope(player), player.id), do: "/training", else: "/"
+
+          conn
+          |> delete_session(:cache_key)
+          |> put_session(:player_id, player.id)
+          |> redirect(to: path)
+        end
+      else
+        _ ->
+          conn
+          |> put_flash(:error, "Choose three different unlocked avatars and valid builds.")
+          |> redirect(to: "/start")
+      end
+    end
   end
 
   def create(conn, %{"skills" => selected_skills, "avatar" => selected_avatar}) do

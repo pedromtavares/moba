@@ -1,10 +1,9 @@
 import $ from 'jquery';
 import swal from 'sweetalert';
-import Tutorial from './tutorial.js';
-import ModernTutorial from './tutorial_modern.js';
 import CombatStage from './combat_stage';
 import {initTooltips, hideTooltips} from './tooltips';
 import InventoryOrder from './inventory_order';
+import LineupOrder from './lineup_order';
 import ManualCodex from './manual_codex';
 import {InvokeStage} from './invoke_stage';
 
@@ -12,30 +11,8 @@ let Hooks = {};
 Hooks.InvokeStage = {...InvokeStage, refreshTooltips: initTooltips, hideTooltips};
 Hooks.CombatStage = {...CombatStage, refreshTooltips: initTooltips};
 Hooks.InventoryOrder = {...InventoryOrder, hideTooltips};
+Hooks.LineupOrder = {...LineupOrder, hideTooltips};
 Hooks.ManualCodex = {...ManualCodex, hideTooltips};
-
-Hooks.TutorialStep = {
-  mounted(){
-    const step = $(this.el).data('step');
-
-    if (this.el.dataset.preview === 'true') {
-      ModernTutorial.start(this, step);
-    } else {
-      Tutorial.start(this, step);
-    }
-  },
-  destroyed(){
-    ModernTutorial.stop(this);
-  }
-}
-
-Hooks.CompleteTutorial = {
-  mounted(){
-    this.el.addEventListener("click", e => {
-      Tutorial.complete(this)
-    });
-  }
-}
 
 Hooks.EqualHeight = {
   mounted(){
@@ -156,7 +133,9 @@ Hooks.Loading = {
       }
       
       if (click){
-        let payload = {number: val, id: id, type: type, page: page, code: code}
+        let payload = {number: val, id: id, type: type, page: page, code: code};
+        const heroId = el.getAttribute("phx-value-hero_id");
+        if (heroId) payload.hero_id = heroId;
         if (target){
           this.pushEventTo(target, click, payload);
         }else{
@@ -236,7 +215,10 @@ Hooks.AttackButton = {
       const heroId = el.dataset.hero;
       $(el).find(".loading-text").html("<i class='ui-icon ui-spinner ui-spin mr-1'></i> Attacking...");
       $(el).prop("disabled", true);
-      this.pushEvent("next-turn", {skill_id: skill, item_id: item, hero_id: heroId});
+      const training = el.closest('[data-training-encounter]');
+      const params = {skill_id: skill, item_id: item, hero_id: heroId};
+      if (training) this.pushEventTo(training, "next-turn", params);
+      else this.pushEvent("next-turn", params);
       e.stopPropagation();
     })
     this.onKeyDown = event => {
@@ -245,7 +227,7 @@ Hooks.AttackButton = {
       if (event.target.closest("input, textarea, select, summary, button, a, [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
       if (el.disabled || !el.getClientRects().length) return;
 
-      const dialogOpen = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
+      const dialogOpen = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal"))
         .some(element => element.getClientRects().length);
       if (dialogOpen) return;
 
@@ -259,24 +241,55 @@ Hooks.AttackButton = {
   }
 }
 
+Hooks.BattleAutoHotkeys = {
+  mounted(){
+    this.onAutoKeyDown = event => {
+      if (event.defaultPrevented || event.repeat || event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
+          event.target.closest("input, textarea, select, [role='textbox'], [contenteditable]:not([contenteditable='false'])")) return;
+      const selector = {t: '#training-auto-battle', g: '#training-auto-match'}[event.key.toLowerCase()];
+      if (!selector) return;
+      const button = this.el.querySelector(selector);
+      if (!button || button.disabled || button.getAttribute('aria-disabled') === 'true' || !button.getClientRects().length) return;
+      const blocked = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal"))
+        .some(dialog => dialog.getClientRects().length && !dialog.contains(this.el));
+      if (blocked) return;
+      event.preventDefault();
+      button.click();
+    };
+    window.addEventListener('keydown', this.onAutoKeyDown);
+  },
+  destroyed(){ window.removeEventListener('keydown', this.onAutoKeyDown); }
+}
+
 Hooks.BattleContinueHotkey = {
   mounted(){
+    const interactiveSelector = "input, textarea, select, label, summary, button, a, [phx-click], [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])";
+    const continuationSelectors = ["[data-battle-continue=true]", "#league-next-battle", "#load-training", "#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training", "#battle-guest-create"];
+    const continuation = root => continuationSelectors
+      .map(selector => root.querySelector(selector))
+      .find(element => element && !element.disabled && element.getAttribute("aria-disabled") !== "true" && element.getClientRects().length);
+    const dialogOpen = () => Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal"))
+      .some(element => element.getClientRects().length);
+
+    this.onResultClick = (event) => {
+      if (this.el.dataset.finished !== "true" || event.defaultPrevented || event.button !== 0 ||
+          event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+
+      const bar = event.target.closest("#battle-bar");
+      if (!bar || event.target.closest(interactiveSelector) || dialogOpen()) return;
+
+      continuation(bar)?.click();
+    };
+
     this.onKeyDown = (event) => {
       if (event.code !== "Space" || event.defaultPrevented || event.repeat || event.isComposing ||
           event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-      if (this.el.dataset.finished !== "true") return;
+      if (this.el.dataset.finished !== "true" || dialogOpen()) return;
 
-      const dialogOpen = Array.from(document.querySelectorAll("dialog[open], [role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
-        .some(element => element.getClientRects().length);
-      if (dialogOpen) return;
-
-      const selectors = ["[data-battle-continue=true]", "#league-next-battle", "#load-training", "#load-battles", "#league-battle-over", "#battle-over-duel", "#battle-over-training", "#battle-guest-create"];
-      const target = selectors
-        .map(selector => this.el.querySelector(selector))
-        .find(element => element && !element.disabled && element.getAttribute("aria-disabled") !== "true" && element.getClientRects().length);
+      const target = continuation(this.el);
       if (!target) return;
 
-      const interactive = event.target.closest("input, textarea, select, summary, button, a, [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])");
+      const interactive = event.target.closest(interactiveSelector);
       if (interactive && interactive !== target) return;
       // Focused buttons already activate natively on Space; links need the shortcut.
       if (interactive === target && target.tagName === "BUTTON") return;
@@ -285,9 +298,11 @@ Hooks.BattleContinueHotkey = {
       target.click();
     };
 
+    this.el.addEventListener("click", this.onResultClick);
     window.addEventListener("keydown", this.onKeyDown);
   },
   destroyed(){
+    this.el.removeEventListener("click", this.onResultClick);
     window.removeEventListener("keydown", this.onKeyDown);
   }
 }
@@ -301,7 +316,7 @@ Hooks.FarmClaimHotkey = {
       if (event.target.closest("input, textarea, select, summary, button, a, [data-toggle='tooltip'], [role='button'], [role='switch'], [contenteditable]:not([contenteditable='false'])")) return;
       if (this.el.disabled || !this.el.getClientRects().length) return;
 
-      const dialogOpen = Array.from(document.querySelectorAll("[role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal, .shepherd-enabled"))
+      const dialogOpen = Array.from(document.querySelectorAll("[role='dialog'], .modal.show, .modal.d-block, .swal-overlay--show-modal"))
         .some(element => element.getClientRects().length);
       if (dialogOpen) return;
 
@@ -385,6 +400,21 @@ Hooks.ExpandEffects = {
   }
 }
 
+Hooks.TeamCompletionArrow = {
+  mounted(){
+    this.link = this.el.closest("a");
+    this.dismiss = () => {
+      this.el.hidden = true;
+      try { localStorage.setItem(this.el.id, "clicked"); } catch {}
+    };
+    try { this.el.hidden = localStorage.getItem(this.el.id) === "clicked"; } catch {}
+    this.link.addEventListener("click", this.dismiss);
+  },
+  destroyed(){
+    this.link.removeEventListener("click", this.dismiss);
+  }
+}
+
 Hooks.HeroReviewViewport = {
   mounted(){
     this.resizeReview = () => this.fitReview();
@@ -430,6 +460,9 @@ Hooks.ShopViewport = {
     if (!this.el.closest(".game-page")) return;
     this.shopViewportObserver = new ResizeObserver(() => this.updateShopViewport());
     this.shopViewportObserver.observe(this.el);
+    this.shopViewportResize = () => requestAnimationFrame(() => this.updateShopViewport());
+    window.addEventListener("resize", this.shopViewportResize);
+    document.addEventListener("team:hero-switched", this.shopViewportResize);
     this.updateShopViewport();
   },
   updated(){
@@ -437,18 +470,166 @@ Hooks.ShopViewport = {
   },
   updateShopViewport(){
     if (!this.el.closest(".game-page")) return;
-    this.el.style.setProperty("--shop-hud-height", `${Math.ceil(this.el.getBoundingClientRect().height)}px`);
+    const bar = this.el.getBoundingClientRect();
+    if (!bar.height) return;
+    this.el.style.setProperty("--shop-hud-height", `${Math.ceil(bar.height)}px`);
+    const tabs = this.el.previousElementSibling?.id === "hero-team-tabs" ? this.el.previousElementSibling :
+      this.el.closest(".team-training")?.querySelector("#hero-team-tabs");
+    if (tabs?.id !== "hero-team-tabs") return;
+
+    const training = this.el.closest(".team-training");
+    const content = this.el.closest(".team-hero-panel")?.querySelector(".training-ascent") || training?.querySelector(".training-ascent") || training;
+    const progress = this.el.querySelector(".hud-progress .hud-experience");
+    const desktop = progress?.getClientRects().length;
+    const start = content ? content.getBoundingClientRect().left : bar.left + 15;
+    const end = desktop ? progress.getBoundingClientRect().right : content ? content.getBoundingClientRect().right : bar.right - 15;
+    tabs.style.left = `${start}px`;
+    tabs.style.width = `${Math.max(0, end - start)}px`;
+    tabs.style.bottom = `${Math.ceil(window.innerHeight - bar.top - 1)}px`;
+    tabs.style.visibility = "visible";
+    if (training) {
+      training.style.setProperty("--team-hud-space", `${Math.ceil(bar.height + tabs.getBoundingClientRect().height + 6)}px`);
+      training.style.setProperty("--team-page-height", `${Math.max(0, window.innerHeight - training.getBoundingClientRect().top - (window.scrollY || 0))}px`);
+    }
   },
   destroyed(){
     if (this.shopViewportObserver) this.shopViewportObserver.disconnect();
+    if (this.shopViewportResize) {
+      window.removeEventListener("resize", this.shopViewportResize);
+      document.removeEventListener("team:hero-switched", this.shopViewportResize);
+    }
+  }
+}
+
+Hooks.ShopEscape = {
+  mounted(){
+    this.escapeLockRequested = false;
+    this.shopEscapeDisposed = false;
+    this.onShopEscape = event => {
+      if (!this.el.getClientRects().length) return;
+      const typing = event.target?.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])");
+      const modified = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
+      const close = event.key === 'Escape' || (event.key.toLowerCase() === 'f' && !typing && !modified && !event.isComposing && !event.defaultPrevented);
+      if (!close) {
+        if (!event.defaultPrevented && !typing && !modified && !event.isComposing) this.navigateShop(event);
+        return;
+      }
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (event.repeat) return;
+      const hero = this.el.getAttribute('phx-value-hero_id');
+      const params = hero ? {hero_id: hero} : {};
+      if (this.el.getAttribute('phx-target')) this.pushEventTo(this.el, 'close-shop', params);
+      else this.pushEvent('close-shop', params);
+    };
+    this.onShopFullscreen = () => this.updateEscapeLock();
+    document.addEventListener('keydown', this.onShopEscape, true);
+    document.addEventListener('fullscreenchange', this.onShopFullscreen);
+    this.updateEscapeLock();
+  },
+  updated(){
+    if (!this.el.getClientRects().length) this.shopCursor = null;
+    this.updateEscapeLock();
+  },
+  navigateShop(event){
+    const arrows = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+    if (!arrows.includes(event.key) && event.code !== 'Space') return;
+    const rows = Array.from(this.el.querySelectorAll('.shop-shelf')).map(row =>
+      Array.from(row.querySelectorAll('.shop-shelf-label, .shop-tile')).filter(button =>
+        button.getClientRects().length && !button.disabled && button.getAttribute('aria-disabled') !== 'true')
+    ).filter(row => row.length);
+    const buttons = rows.flat();
+    if (!buttons.length) return;
+    const actions = Array.from(this.el.querySelectorAll('.shop-detail button')).filter(button =>
+      button.getClientRects().length && !button.disabled && button.getAttribute('aria-disabled') !== 'true');
+    const focused = event.target?.closest('button, a, summary, [role="button"]');
+    if (event.code === 'Space' && focused && !buttons.includes(focused) && !actions.includes(focused)) return;
+    let current = buttons.includes(focused) ? focused : buttons.find(button => button.id === this.shopCursor);
+    current ||= buttons.find(button => button.classList.contains('shop-tile') && button.getAttribute('aria-pressed') === 'true') ||
+      buttons.find(button => button.getAttribute('aria-pressed') === 'true') || buttons[0];
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    if (event.repeat) return;
+    if (event.code === 'Space') {
+      if (this.shopInspectionPending) return;
+      if (actions.includes(focused)) focused.click();
+      else if (this.el.querySelector('.cinematic-shop')?.dataset.recipeRarity && current.getAttribute('phx-click') === 'select-inventory') current.click();
+      else {
+        const primary = Array.from(this.el.querySelectorAll('.shop-detail .shop-primary, .shop-sell, .transmute-button')).find(button =>
+          button.getClientRects().length && !button.disabled && button.getAttribute('aria-disabled') !== 'true');
+        primary?.click();
+      }
+      return;
+    }
+    if (actions.includes(focused)) {
+      const direction = ['ArrowLeft', 'ArrowUp'].includes(event.key) ? -1 : 1;
+      const next = event.key === 'ArrowLeft' ? current : actions[(actions.indexOf(focused) + direction + actions.length) % actions.length];
+      if (buttons.includes(next)) this.inspectShopButton(next);
+      else next.focus({preventScroll: true});
+      return;
+    }
+    const rowIndex = rows.findIndex(row => row.includes(current));
+    const row = rows[rowIndex];
+    const column = row.indexOf(current);
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const direction = event.key === 'ArrowLeft' ? -1 : 1;
+      if (direction === 1 && column === row.length - 1 && actions.length) {
+        this.shopCursor = current.id;
+        actions[0].focus({preventScroll: true});
+        return;
+      }
+      current = row[(column + direction + row.length) % row.length];
+    } else {
+      const direction = event.key === 'ArrowUp' ? -1 : 1;
+      const nextRow = rows[(rowIndex + direction + rows.length) % rows.length];
+      current = nextRow[Math.min(column, nextRow.length - 1)];
+    }
+    this.inspectShopButton(current);
+  },
+  inspectShopButton(button){
+    this.shopCursor = button.id;
+    button.focus({preventScroll: true});
+    const event = button.getAttribute('phx-click');
+    // Browsing ingredients must not add them to a transmutation recipe.
+    if (event === 'select-inventory' && this.el.querySelector('.cinematic-shop')?.dataset.recipeRarity) return;
+    if (!['select-shop', 'select-inventory', 'select-category'].includes(event)) return;
+    const params = event === 'select-category' ? {rarity: button.getAttribute('phx-value-rarity')} : {code: button.getAttribute('phx-value-code')};
+    const version = this.shopInspectionVersion = (this.shopInspectionVersion || 0) + 1;
+    this.shopInspectionPending = true;
+    this.pushEventTo(button.getAttribute('phx-target'), event, params, () => {
+      if (version === this.shopInspectionVersion) this.shopInspectionPending = false;
+    });
+  },
+  updateEscapeLock(){
+    const keyboard = navigator.keyboard;
+    if (!keyboard?.lock) return;
+    if (document.fullscreenElement && this.el.getClientRects().length && !this.shopEscapeDisposed) {
+      if (this.escapeLockRequested) return;
+      this.escapeLockRequested = true;
+      try {
+        Promise.resolve(keyboard.lock(['Escape'])).then(() => {
+          if (this.shopEscapeDisposed || !document.fullscreenElement || !this.el.getClientRects().length) keyboard.unlock();
+        }).catch(() => { this.escapeLockRequested = false; });
+      } catch (_) { this.escapeLockRequested = false; }
+    } else if (this.escapeLockRequested) {
+      this.escapeLockRequested = false;
+      keyboard.unlock();
+    }
+  },
+  destroyed(){
+    this.shopEscapeDisposed = true;
+    document.removeEventListener('keydown', this.onShopEscape, true);
+    document.removeEventListener('fullscreenchange', this.onShopFullscreen);
+    this.updateEscapeLock();
   }
 }
 
 Hooks.ToggleShop = {
   mounted(){
     this.el.addEventListener("click", e => {
-      let modal = $("#shop-modal");
-      let toggle = $(".toggle-shop");
+      const hud = this.el.closest(".hero-bar");
+      let modal = $(hud.querySelector(".shop-modal"));
+      let toggle = $(hud.querySelectorAll(".toggle-shop"));
       if (modal.is(":visible")){
         modal.addClass("d-none").removeClass("d-block");
         toggle.removeClass("active-shop");

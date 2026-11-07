@@ -1,6 +1,8 @@
 <div class="col-xl-4 col-md-6 col-12">
   <div
     class="hero-card card training-target"
+    id={"training-target-#{@target.id}"}
+    data-game-fullscreen={if @current_hero.pve_current_turns > 0, do: ""}
     style={"background-image: url(#{GH.background_url(@target.defender.avatar)})"}
   >
     <div class="card-header pt-0 pb-1">
@@ -14,7 +16,17 @@
           id={"target-rewards-#{@target.id}"}
           aria-label="View target rewards"
           data-toggle="tooltip"
-          title={target_rewards_tooltip(@current_hero, @target.difficulty)}
+          title={
+            if Map.get(assigns, :reward),
+              do:
+                MobaWeb.V2.Components.TrainingComponents.target_rewards_tooltip(
+                  assigns.reward,
+                  String.capitalize(@target.difficulty),
+                  @target.difficulty,
+                  Map.get(assigns, :reward_mode)
+                ),
+              else: target_rewards_tooltip(@current_hero, @target.difficulty)
+          }
         >
           <i class={"ui-icon ui-crown text-#{ difficulty_color(@target.difficulty)}"}></i>
         </span>
@@ -22,11 +34,21 @@
     </div>
     <div class="card-body p-0 d-flex align-items-center justify-content-center">
       <div class="gank-button">
+        <span
+          :if={Map.get(assigns, :first_battle_hint, false)}
+          id={"first-battle-arrow-#{@target.id}"}
+          class="first-battle-arrow"
+          aria-hidden="true"
+        >
+        </span>
         <%= if @current_hero.pve_current_turns > 0 do %>
           <button
-            data-game-fullscreen phx-click="battle"
+            data-game-fullscreen
+            phx-click="battle"
             id={"gank-#{@target.id}"}
+            aria-keyshortcuts="Space"
             phx-value-id={@target.id}
+            phx-value-hero_id={Map.get(assigns, :hero_id)}
             class={"battle-button target-battle btn btn-lg btn-icon loading-text dark-button btn-#{difficulty_color(@target.difficulty)}"}
             phx-hook="Loading"
             loading="Preparing..."
@@ -36,6 +58,7 @@
         <% else %>
           <button
             class={"battle-button target-battle btn btn-icon btn-lg waves-effect btn-#{difficulty_color(@target.difficulty)} disabled f-rpg"}
+            disabled
             data-toggle="tooltip"
             title="You do not have available turns"
           >

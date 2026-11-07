@@ -1,0 +1,52 @@
+<section
+  id={@id}
+  class="team-manual-encounter"
+  data-training-encounter
+  data-active={to_string(@active)}
+>
+  <MobaWeb.V2.BattleLive.show {assigns}>
+    <:header_navigation>
+      <nav
+        :if={Map.get(assigns, :page_navigation, false)}
+        class="training-battle-navigation"
+        aria-label="Training battle navigation"
+      >
+        <.link navigate={home_path(@training_team_id)} id="training-return">
+          ← Return to training
+        </.link>
+        <span class="training-header-location">Turn {@replay.turn} · {@replay.label}</span>
+      </nav>
+    </:header_navigation>
+    <:stage_controls :if={!@battle.finished}>
+      <.play_controls {assigns} />
+    </:stage_controls>
+    <:actions>
+      <div :if={@manual_view} class="row battle-actions">
+        <div class="col battle-action-side">
+          <MobaWeb.V2.BattleLive.active_turn
+            {assigns}
+            turn={@control_turn}
+            hero={@control_hero}
+            skill={@skill}
+          />
+        </div>
+      </div>
+    </:actions>
+    <:result><.result_bar {assigns} /></:result>
+    <:footer :if={!@manual_view}><.encounter_footer {assigns} /></:footer>
+    <:log_header>
+      <div class="training-combat-log-heading">
+        <strong>Battle log</strong>
+        <button
+          id="training-combat-log-close"
+          type="button"
+          phx-click="toggle-combat-log"
+          phx-target={@myself}
+          aria-label="Close battle log"
+        >
+          ×
+        </button>
+      </div>
+    </:log_header>
+  </MobaWeb.V2.BattleLive.show>
+</section>

@@ -23,7 +23,7 @@ export function initGameFullscreen() {
 
     entering = true;
     try {
-      Promise.resolve(document.documentElement.requestFullscreen())
+      Promise.resolve(document.documentElement.requestFullscreen({keyboardLock: 'browser'}))
         .catch(() => {}) // Unsupported/denied fullscreen must never block play.
         .finally(() => { entering = false; });
     } catch (_) {
@@ -65,4 +65,5 @@ export function initGameFullscreen() {
     if (document.fullscreenElement) pendingEntry = false;
   });
   pageChanged();
+  return enter;
 }

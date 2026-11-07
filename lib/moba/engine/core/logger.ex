@@ -20,15 +20,11 @@ defmodule Moba.Engine.Core.Logger do
   Groups effects from both the attacker and defender and properly lists them according to their priority
   """
   def descriptions_for(turn) do
-    attacker_effects =
-      Enum.map(logged_effects(turn.attacker), fn effect -> Map.put(effect, "hero", turn.attacker.name) end)
-
-    defender_effects =
-      Enum.map(logged_effects(turn.defender), fn effect -> Map.put(effect, "hero", turn.defender.name) end)
-
     heroes = %{attacker: turn.attacker.name, defender: turn.defender.name}
 
-    (attacker_effects ++ defender_effects)
+    for side <- [:attacker, :defender], effect <- logged_effects(Map.fetch!(turn, side)) do
+      Map.merge(effect, %{"side" => side, "hero" => Map.fetch!(heroes, side)})
+    end
     |> Enum.reject(fn effect -> Enum.member?(@skipped_effects, key_string(effect["key"])) end)
     |> Enum.reject(fn effect -> Enum.member?(@skipped_resources, key_string(effect["resource"])) end)
     |> Enum.sort_by(fn effect -> effect["priority"] end)
@@ -155,18 +151,18 @@ defmodule Moba.Engine.Core.Logger do
     |> Enum.group_by(fn effect -> effect["resource"] end)
     # order by priority, skill -> item -> rest
     |> Enum.sort_by(fn {_key, value} -> hd(value)["priority"] end)
-    # resource => {key, hero}, so effects with the same key applied to both heroes are separated.
+    # Keep each side's effects separate even when both heroes have the same name.
     |> Enum.map(fn {key, val} ->
       {key,
        Enum.group_by(val, fn effect ->
-         {key_string(effect["key"]), effect["hero"]}
+         {key_string(effect["key"]), effect["side"], effect["hero"]}
        end)}
     end)
     # aggregate multiple effects with same key into one summed up result, differentiated by hero
     |> Enum.map(fn {key, val} ->
       {
         key,
-        Enum.map(val, fn {{key, hero}, val} ->
+        Enum.map(val, fn {{key, _side, hero}, val} ->
           {key,
            Enum.reduce(val, {0, hero}, fn effect, {acc, hero} ->
              {sum_value(acc, effect["value"]), hero}

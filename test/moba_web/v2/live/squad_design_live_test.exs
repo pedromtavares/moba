@@ -7,18 +7,27 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     [first, second | _] = heroes(player, 3)
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena/edit")
     assert has_element?(view, "#teams-hud #team-name")
-    view |> form("#arena-team-form", %{"team" => %{"name" => "Five stack"}}) |> render_submit()
+    assert has_element?(view, "#create-team-button .ui-plus")
+    view |> form("#arena-team-form", %{"team" => %{"name" => "Three stack"}}) |> render_submit()
     team = Game.list_teams(player) |> List.first()
     assert has_element?(view, "#team-row-#{team.id}[aria-pressed=true]")
 
-    for hero <- [first, second] do
-      view |> element("#add-button-#{hero.id}") |> render_click()
-      assert has_element?(view, "#available-hero-#{hero.id} .roster-picked")
-    end
+    lineup = element(view, "#team-workshop-layout")
+    assert has_element?(view, "#add-button-#{first.id}[data-lineup-add]")
+    assert has_element?(view, "#team-empty-slot-1[data-lineup-empty]")
+    render_hook(lineup, "add-hero", %{"id" => "#{first.id}", "lineup_id" => team.id + 1})
+    assert has_element?(view, "#team-empty-slot-1")
+    render_hook(lineup, "add-hero", %{"id" => "#{first.id}", "lineup_id" => team.id})
+    assert has_element?(view, "#available-hero-#{first.id} .roster-picked")
+    assert has_element?(view, "#add-button-#{first.id}[disabled]:not([data-lineup-add])")
+    view |> element("#add-button-#{second.id}") |> render_click()
+    assert has_element?(view, "#available-hero-#{second.id} .roster-picked")
 
     assert has_element?(view, "#team-hero-#{first.id} .roster-position", "1")
-    assert has_element?(view, "#move-up-#{first.id}[disabled]")
-    view |> element("#move-up-#{second.id}") |> render_click()
+    assert has_element?(view, "#team-hero-#{first.id} [data-lineup-grip]")
+    render_hook(lineup, "reorder-lineup", %{"lineup_id" => team.id, "hero_ids" => [second.id, second.id]})
+    assert Game.list_teams(player) |> hd() |> Map.get(:pick_ids) == [first.id, second.id]
+    render_hook(lineup, "reorder-lineup", %{"lineup_id" => team.id, "hero_ids" => [second.id, first.id]})
     assert has_element?(view, "#team-hero-#{second.id} .roster-position", "1")
     assert Game.list_teams(player) |> hd() |> Map.get(:pick_ids) == [second.id, first.id]
     render_click(view, "toggle-defensive", %{"value" => "on"})
@@ -27,33 +36,86 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     view |> element("#edit-hero-#{first.id}") |> render_click()
     assert has_element?(view, "#teams-hud[data-editing-hero=true]")
     assert has_element?(view, "#hero-bar #edit-button")
+    view |> element("#close-team-customization") |> render_click()
+    refute has_element?(view, "#hero-bar")
+    assert has_element?(view, "#teams-hud[data-editing-hero=false]")
     view |> element("#remove-hero-#{second.id}") |> render_click()
     refute has_element?(view, "#team-hero-#{second.id}")
     assert has_element?(view, "#team-empty-slot-2")
   end
 
+  test "team libraries page independently and collection removals update the saved lineup", %{conn: conn} do
+    player = create_player!()
+    picks = heroes(player, 25)
+
+    for index <- 1..7 do
+      Game.create_team!(%{name: "Stack #{index}", player_id: player.id, pick_ids: [hd(picks).id]})
+    end
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena/edit")
+    document = LazyHTML.from_fragment(render(view))
+    assert document |> LazyHTML.query(".workshop-team-card") |> Enum.count() == 5
+    assert document |> LazyHTML.query(".team-workshop-layout > #heroes-container") |> Enum.count() == 1
+    assert document |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 24
+    assert has_element?(view, "#teams-page-previous[disabled]")
+    assert has_element?(view, "#heroes-page-previous[disabled]")
+
+    view |> element("#teams-page-next") |> render_click()
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-team-card") |> Enum.count() == 2
+    assert has_element?(view, "#teams-page-next[disabled]")
+    view |> element("#heroes-page-next") |> render_click()
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 1
+    assert has_element?(view, "#heroes-page-next[disabled]")
+    view |> element("#edit-hero-#{hd(picks).id}") |> render_click()
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 6
+    assert has_element?(view, "#heroes-page-previous[disabled]")
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-team-card") |> Enum.count() == 3
+    view |> element("#close-team-customization") |> render_click()
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 24
+    # Navigating a library never changes the selected team.
+    assert has_element?(view, "#team-hero-#{hd(picks).id}")
+    view |> element("#collection-remove-#{hd(picks).id}") |> render_click()
+    refute has_element?(view, "#team-hero-#{hd(picks).id}")
+    assert has_element?(view, "#team-empty-slot-1")
+
+    view |> form("#arena-team-form", %{"team" => %{"name" => "New stack"}}) |> render_submit()
+    team = Enum.find(Game.list_teams(player), &(&1.name == "New stack"))
+    assert has_element?(view, "#team-row-#{team.id}[aria-pressed=true]")
+    assert has_element?(view, "#current-team-title", "New stack")
+  end
+
   test "match picking keeps the numbered lineup and source selection in sync", %{conn: conn} do
     player = create_player!()
-    picks = heroes(player, 5)
+    picks = heroes(player, 3)
     opponent = create_player!()
     match = match(player, opponent, %{generated_picks: Enum.map(picks, & &1.id)})
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
-    view |> element("#available-heroes-button") |> render_click()
+    refute has_element?(view, "#available-heroes-button")
 
-    for hero <- picks,
-        do: view |> element("#generated-hero-#{hero.id} #pick-hero-#{hero.id}-available") |> render_click()
+    [first, second, third] = picks
+    lineup = element(view, "#match-hud")
+    assert has_element?(view, "#pick-hero-#{first.id}-trained[data-lineup-add]")
+    assert has_element?(view, "#match-empty-slot-1[data-lineup-empty]")
+    render_hook(lineup, "pick-hero", %{"id" => "#{first.id}", "lineup_id" => match.id + 1})
+    assert has_element?(view, "#match-empty-slot-1")
+    render_hook(lineup, "pick-hero", %{"id" => "#{first.id}", "lineup_id" => match.id})
+    assert has_element?(view, "#hero-#{first.id} .roster-actions > span", "1")
+    assert has_element?(view, "#pick-hero-#{first.id}-trained[disabled]:not([data-lineup-add])")
+
+    for hero <- [second, third],
+        do: view |> element("#pick-hero-#{hero.id}-trained") |> render_click()
 
     assert has_element?(view, "#start-match-button")
-    assert has_element?(view, "#match-pick-status-title", "Lineup ready")
+    assert has_element?(view, ".match-lineup header > span", "3 / 3")
     refute has_element?(view, "#match-empty-slot-1")
-    [first, second | _] = picks
-    view |> element("#move-down-#{first.id}") |> render_click()
-    assert has_element?(view, "#hero-#{second.id} .roster-position", "1")
-    assert has_element?(view, "#hero-#{first.id} .roster-position", "2")
+    render_hook(lineup, "reorder-lineup", %{"lineup_id" => match.id, "hero_ids" => [second.id, first.id, third.id]})
+
+    assert has_element?(view, "#hero-#{second.id} .roster-actions > span", "1")
+    assert has_element?(view, "#hero-#{first.id} .roster-actions > span", "2")
     view |> element("#lineup-unpick-#{first.id}") |> render_click()
-    refute has_element?(view, "#start-match-button")
-    assert has_element?(view, "#match-empty-slot-5")
-    refute has_element?(view, "#generated-hero-#{first.id} .roster-picked")
+    assert has_element?(view, "#start-match-button[disabled]")
+    assert has_element?(view, "#match-empty-slot-3")
+    refute has_element?(view, "#collection-unpick-#{first.id}")
     # Picking and reordering remain local until the match is started.
     assert Game.get_match!(match.id).player_picks == []
   end
@@ -97,7 +159,7 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     assert has_element?(view, "#battle-review-#{battle.id} .match-battle-unit:last-child[data-dead=true]", "Challenger")
     assert has_element?(view, "#battle-review-#{battle.id} [role=progressbar][aria-label='Champion health']")
     assert has_element?(view, "#battle-review-#{battle.id} [role=progressbar][aria-label='Champion energy']")
-    refute has_element?(view, "[phx-click=move-up], [phx-click=move-down], #start-match-button")
+    refute has_element?(view, "[data-lineup-grip], #start-match-button")
     refute has_element?(view, "#picks-card")
     assert has_element?(view, "#opponent-hero-#{enemy.id} [data-defeated=true]", "Fallen")
     assert has_element?(view, "#hero-#{hero.id} [data-defeated=false]")

@@ -1,5 +1,5 @@
 defmodule MobaWeb.V2.TrainingLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
   test "orders all-hard targets by level and preserves mixed ordering", %{conn: conn} do
@@ -167,14 +167,36 @@ defmodule MobaWeb.V2.TrainingLiveTest do
 
     assert has_element?(view, "#death-panel[aria-labelledby=death-title]")
     assert has_element?(view, "#death-gold-cost", "#{price}")
+    assert has_element?(view, "#death-buyback-farm-impact", "Total farm −#{price}")
     assert has_element?(view, "#buyback-hero:not([disabled])")
     assert has_element?(view, "#restart-hero[data-confirm]")
-    assert has_element?(view, "#death-new-hero[href='/invoke']")
+    assert has_element?(view, "#death-new-hero[href='/new']")
     view |> element("#buyback-hero") |> render_click()
 
     refute has_element?(view, "#death-panel")
     assert Game.get_hero!(hero.id).pve_state == "alive"
     assert Game.get_hero!(hero.id).gold == hero.gold - price
+  end
+
+  test "Perfect farm indicator survives a target death and disappears after gold buyback", %{conn: conn} do
+    hero =
+      create_base_hero(%{
+        pve_tier: 4,
+        pve_state: "dead",
+        gold: 1000,
+        level: 10,
+        pve_current_turns: 4,
+        pve_total_turns: 25,
+        total_xp_farm: 600,
+        total_gold_farm: 600
+      })
+
+    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
+    {:ok, view, _} = live(conn, "/training")
+    assert has_element?(view, "#training-perfect-run[data-toggle=tooltip]", "Perfect")
+    assert has_element?(view, "#death-buyback-farm-impact", "1200 → 1100")
+    view |> element("#buyback-hero") |> render_click()
+    refute has_element?(view, "#training-perfect-run")
   end
 
   test "preview death panel explains insufficient gold without offering an unavailable buyback", %{conn: conn} do
@@ -215,8 +237,8 @@ defmodule MobaWeb.V2.TrainingLiveTest do
 
     {:ok, view, _html} = live(conn, "/training")
 
-    assert has_element?(view, "#hero-bar .stats-group .text-danger[title*='Health:']")
-    assert has_element?(view, "#hero-bar .stats-group .text-orange[title*='Speed:']")
+    assert has_element?(view, "#hero-bar .stats-group .text-danger[title*='stat-tooltip']")
+    assert has_element?(view, "#hero-bar .stats-group .text-orange[title*='stat-tooltip']")
 
     refute has_element?(view, "#shop-modal.d-block")
 
@@ -276,7 +298,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     assert length(Game.get_hero!(hero.id).items) == 1
   end
 
-  test "transmuting during the tutorial advances to the next step", %{conn: conn} do
+  test "manual transmutation stays available after retired shop tutorial steps", %{conn: conn} do
     hero =
       create_base_hero(%{gold: 10_000})
       |> Game.buy_item!(Game.get_item_by_code!("boots_of_speed"))
@@ -295,7 +317,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
 
     {:ok, view, _html} = live(conn, "/training")
 
-    assert has_element?(view, "#tutorial-step-7[data-step='7']")
+    refute has_element?(view, "[phx-hook=TutorialStep]")
 
     view
     |> element("#hero-bar #toggle-shop")
@@ -309,7 +331,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     |> element(".transmute-button")
     |> render_click()
 
-    assert has_element?(view, "#tutorial-step-8[data-step='8']")
+    refute has_element?(view, "[phx-hook=TutorialStep]")
 
     view
     |> element("#transmute-#{boots.id}")
@@ -330,7 +352,7 @@ defmodule MobaWeb.V2.TrainingLiveTest do
     })
     |> render_submit()
 
-    assert has_element?(view, "#tutorial-step-9[data-step='9']")
+    refute has_element?(view, "[phx-hook=TutorialStep]")
   end
 
   test "preview Roshan intro shows health, attempts and starts the boss battle", %{conn: conn} do

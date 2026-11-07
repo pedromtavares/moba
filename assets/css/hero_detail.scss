@@ -1,5 +1,22 @@
 .game-page #hero-review { margin-bottom: 0; padding-bottom: 24px; }
 .game-page #hero-review.content-with-hero-bar { padding-bottom: calc(var(--hero-review-hud-height, 180px) + 24px); }
+.game-page .team-review #hero-detail .hero-detail-overview { display: flex; flex-direction: column; gap: 12px; }
+.game-page .team-review #hero-detail .hero-detail-actions { justify-content: flex-start; }
+.game-page .team-profile-roster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; flex-shrink: 0; }
+.game-page .team-profile-tab { position: relative; overflow: hidden; min-width: 0; height: 68px; padding: 0; border: 1px solid #bfa77c55; border-radius: 7px; background: #101925; color: #d9dfe7; transition: border-color .18s, box-shadow .18s; }
+.game-page .team-profile-tab img { width: 100%; height: 100%; object-fit: cover; }
+.game-page .team-profile-tab span { position: absolute; inset: auto 0 0; padding: 14px 8px 6px; background: linear-gradient(transparent, #080e1bf2); text-align: left; font: 900 14px/1.2 'Nunito', sans-serif; }
+.game-page .team-profile-tab[aria-selected=true] { border-color: #e6c58e; color: #fff0d5; box-shadow: inset 0 -2px #e6c58e, 0 0 18px #e6c58e22; }
+.game-page .team-profile-tab:hover { border-color: #e6c58e; }
+.game-page .team-ranking-roster { display: flex; flex-shrink: 0; width: 80px; gap: 0; }
+.game-page .team-ranking-roster img { width: 32px; height: 40px; object-fit: cover; border: 1px solid #baa98a40; border-radius: 3px; }
+.game-page .team-ranking-roster img + img { margin-left: -8px; }
+@media (max-width: 600px) {
+  .game-page .team-profile-tab span { font-size: 12px; }
+  .game-page .team-ranking-roster { width: 48px; }
+  .game-page .team-ranking-roster img { width: 24px; height: 32px; }
+  .game-page .team-ranking-roster img + img { margin-left: -12px; }
+}
 .game-page #hero-detail {
   display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: start; gap: 28px;
   grid-template-areas: "overview leaderboard" "performance leaderboard";
@@ -9,7 +26,7 @@
   .hero-detail-card > .card-header { padding: 22px 24px 44px !important; }
   .hero-detail-identity { display: flex; justify-content: space-between; align-items: flex-start; gap: 20px; }
   .hero-detail-identity > div:first-child { min-width: 0; }
-  #hero-detail-name { margin: 0 0 4px; color: #f5f0e6; font: 900 36px/1.15 'Nunito', sans-serif; text-shadow: 0 2px 10px #000; overflow-wrap: anywhere; }
+  .hero-detail-identity h2 { margin: 0 0 4px; color: #f5f0e6; font: 900 36px/1.15 'Nunito', sans-serif; text-shadow: 0 2px 10px #000; overflow-wrap: anywhere; }
   .hero-detail-avatar-name { color: #d3d5d9; font-size: 19px; text-shadow: 0 2px 6px #000; }
   .hero-detail-level { flex-shrink: 0; display: grid; justify-items: center; gap: 3px; min-width: 72px; padding: 8px 12px; border: 1px solid #d4af7973; border-radius: 6px; background: #0a1019d9; }
   .hero-detail-level > span { color: #d2bc95; font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
@@ -45,7 +62,20 @@
   .hero-detail-metrics .hero-farm-total, .hero-detail-metrics .hero-farm-gold { color: #e6c58e; }
   .hero-detail-metrics .hero-farm-xp { color: #8fc8df; }
   .hero-detail-metrics small { color: #a5adbb; font-size: 15px; font-weight: 600; }
-  .hero-leaderboard { grid-area: leaderboard; display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #baa98a33; border-radius: 10px; background: linear-gradient(145deg, #182331bb, #0b111aee 70%); }
+  .hero-detail-rankings { grid-area: leaderboard; display: flex; flex-direction: column; gap: 12px; min-width: 0; min-height: 0; }
+  .hero-leaderboard { display: flex; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #baa98a33; border-radius: 10px; background: linear-gradient(145deg, #182331bb, #0b111aee 70%); }
+  .training-completion { flex-shrink: 0; grid-template-columns: 68px minmax(0, 1fr); gap: 12px 16px; margin: 0; padding: 14px 18px; }
+  .completion-emblem img { width: 68px; height: 74px; }
+  .completion-eyebrow { margin: 0 0 3px; font-size: 12px; }
+  .completion-heading h1 { margin: 0 0 4px; font-size: clamp(28px, 2.3vw, 38px); }
+  .completion-description { font-size: 15px; }
+  .completion-shards { margin-top: 5px; font-size: 21px; }
+  .completion-shards > span:last-child { font-size: 14px; }
+  .completion-actions { grid-column: 1 / -1; flex-direction: row; gap: 8px; }
+  .completion-actions .btn { flex: 1; min-width: 0; min-height: 42px; padding: 7px 12px; font-size: 16px; white-space: normal; }
+  .completion-actions .completion-team-guided { position: relative; margin-left: 76px; }
+  .first-battle-arrow.completion-team-arrow { top: calc(50% - 21px); right: calc(100% + 12px); bottom: auto; rotate: none; }
+  .completion-actions .completion-team-guided:has(.completion-team-arrow[hidden]) { margin-left: 0; }
   .hero-ranking-switcher { display: grid; flex-shrink: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; margin: 12px 12px 0; padding: 4px; border: 1px solid #baa98a33; border-radius: 7px; background: #080f1ac7; }
   .hero-ranking-switcher button { min-width: 0; min-height: 42px; padding: 8px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #aab4c1; font: 800 14px/1.3 'Nunito', sans-serif; cursor: pointer; transition: background .18s, color .18s; }
   .hero-ranking-switcher button:hover:not(:disabled) { color: #edcf98; background: #c7b17b0d; }
@@ -61,7 +91,7 @@
   #hero-ranking-standing strong { display: block; color: #efd3a3; font-size: 26px; font-weight: 900; line-height: 1.2; white-space: nowrap; }
   #hero-ranking-standing small { display: block; color: #a6b3c3; font-size: 11px; }
   .hero-league-placement { flex-shrink: 0; margin: 0; padding: 10px 16px; border-bottom: 1px solid #baa98a1a; color: #a9bbcf; background: #75a6c00a; font-size: 13px; line-height: 1.5; }
-  .hero-ranking-scroll { max-height: 720px; overflow: auto; background: #0b111a66; }
+  .hero-ranking-scroll { max-height: 720px; overflow: hidden auto; background: #0b111a66; }
   .hero-ranking-scroll:has(.hero-league-empty) { display: flex; flex-direction: column; }
   .hero-ranking-scroll:has(.hero-league-empty) .hero-ranking-table { flex-shrink: 0; }
   .hero-league-empty { display: grid; flex: 1; align-content: center; justify-items: center; gap: 10px; min-height: 180px; padding: 32px 20px; text-align: center; }
@@ -101,19 +131,15 @@
   :is(a, button, [tabindex]):focus-visible { outline: 2px solid #e6c58e; outline-offset: 3px; }
 }
 @media (min-width: 1101px) {
+  .game-page #hero-detail .hero-detail-rankings:has(> .training-completion) {
+    align-self: stretch;
+    contain: size;
+    .hero-leaderboard { flex: 1; min-height: 0; }
+    .hero-ranking-scroll { flex: 1; min-height: 0; max-height: none; overscroll-behavior: contain; }
+  }
+
   .game-page #hero-review[data-viewport-fit="true"] {
     display: flex; flex-direction: column; height: var(--hero-review-height); min-height: 0; padding: 8px 0 0;
-    .training-completion { flex-shrink: 0; grid-template-columns: 88px minmax(0, 1fr) 230px; gap: 16px; margin: 0 0 12px; padding: 12px 20px; }
-    .completion-emblem img { width: 84px; height: 88px; }
-    .completion-heading { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 20px; }
-    .completion-eyebrow { grid-column: 1 / -1; margin: 0; font-size: 13px; }
-    .completion-heading h1 { grid-column: 1; margin: 0; font-size: 36px; }
-    .completion-description { grid-column: 1 / -1; margin: 0; font-size: 16px; }
-    .completion-shards { grid-column: 2; grid-row: 2; justify-self: end; margin: 0; gap: 6px; font-size: 24px; }
-    .completion-shards > span:last-child { font-size: 14px; }
-    .completion-actions { gap: 6px; }
-    .completion-actions .btn { min-height: 42px; padding: 10px 14px; font-size: 17px; }
-    .completion-stats { display: none; }
     #hero-detail { flex: 1; min-height: 0; align-items: stretch; grid-template-areas: "overview leaderboard" "performance performance"; grid-template-rows: minmax(0, 1fr) auto; gap: 12px 24px; margin: 0; }
     .hero-detail-overview { display: flex; min-height: 0; }
     .hero-detail-card { flex: 1; }
@@ -131,7 +157,8 @@
     .hero-league-path img { height: 36px; }
     .hero-league-path .current-tier img { width: 48px; height: 50px; }
     .hero-detail-metrics { grid-column: 2; grid-row: 1 / 3; align-self: stretch; align-items: center; padding: 0 0 0 28px; border-top: 0; border-left: 1px solid #baa98a33; }
-    .hero-leaderboard { display: flex; flex-direction: column; min-height: 0; }
+    .hero-detail-rankings { align-self: stretch; }
+    .hero-leaderboard { flex: 1; min-height: 0; }
     .hero-ranking-scroll { flex: 1; min-height: 0; max-height: none; overscroll-behavior: contain; }
   }
 }
@@ -144,7 +171,7 @@
   .game-page #hero-detail {
     gap: 28px; margin-top: 16px;
     .hero-detail-card > .card-header { padding: 18px 16px 36px !important; }
-    #hero-detail-name { font-size: 30px; }
+    .hero-detail-identity h2 { font-size: 30px; }
     .hero-detail-avatar-name { font-size: 17px; }
     .hero-detail-level { min-width: 62px; padding: 8px; }
     .hero-detail-level strong { font-size: 30px !important; }

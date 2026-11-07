@@ -16,6 +16,26 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
 
   def hero_stats_string(hero, show_speed \\ false), do: hero_stats_tooltip(hero, show_speed)
 
+  def season_score_tooltip(player), do: MobaWeb.V2.Components.SeasonScoreTooltip.render(player)
+
+  def arena_stats_tooltip(hero, player) do
+    stats = MobaWeb.V2.Components.GameHelpers.match_hero_stats(hero, player)
+
+    rows =
+      for {label, key, icon, tone} <- [
+            {"Health", :hp, "heart", "danger"},
+            {"Energy", :mp, "bolt", "info"},
+            {"Attack", :atk, "dagger", "success"},
+            {"Power", :power, "vortex", "pink"},
+            {"Armor", :armor, "shield", "warning"},
+            {"Speed", :speed, "runner", "orange"}
+          ] do
+        "<div class='arena-tooltip-stat text-#{tone}' data-stat='#{key}'><i class='ui-icon ui-#{icon}' aria-hidden='true'></i><span>#{label}</span><strong>#{stats[key]}</strong></div>"
+      end
+
+    "<div class='arena-stats-tooltip'><div>#{Enum.join(rows)}</div></div>"
+  end
+
   def skill_tooltip(skill, full_description \\ true, show_name \\ true) do
     MobaWeb.V2.Components.SkillTooltip.render(skill, full: full_description, show_name: show_name)
   end

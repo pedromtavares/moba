@@ -87,8 +87,8 @@
     }
 
     .history{
-    	max-height: 60vh;
-    	overflow: auto;
+      max-height: 60vh;
+      overflow: hidden auto;
 
       h4{
         margin: 0;
@@ -104,7 +104,7 @@
 
     .card-body{
       padding: 0;
-      overflow: auto;
+      overflow: hidden auto;
 
       thead th {
         position: -webkit-sticky; // this is for all Safari (Desktop & iOS), not for Chrome
@@ -146,7 +146,7 @@
 
     .history{
       max-height: 60vh;
-      overflow: auto;
+      overflow: hidden auto;
 
       h4{
         margin: 0;
@@ -167,7 +167,7 @@
   }
 
   .main-card .overflow{
-    overflow: auto;
+    overflow: hidden auto;
   }
 
   .main-card .hero-card{

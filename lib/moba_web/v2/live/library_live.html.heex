@@ -1,252 +1,76 @@
 <Layouts.app
   preview={@preview}
   flash={@flash}
+  current_scope={@current_scope}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
+  hide_footer
 >
-  <div class="content" id="library">
-  <header :if={@preview} class="manual-heading" id="manual-heading" style="--manual-scene: url(/images/training/meditation-dark-fantasy.png)">
-    <div class="manual-heading-copy">
-      <p class="manual-eyebrow">Knowledge is power</p>
-      <h1 id="manual-title">Game Manual</h1>
-      <p class="manual-heading-description">Master the rules. Refine your strategy.</p>
-      <nav aria-label="Manual reference">
-        <a href="#manual-avatars">Explore avatars <span aria-hidden="true">↓</span></a>
-        <a href="#manual-skills">Browse skills <span aria-hidden="true">↓</span></a>
-      </nav>
-    </div>
-    <a id="manual-discord" href="https://discord.gg/QNwEdPS" target="_blank" rel="noopener noreferrer" class="manual-discord"><i class="ui-icon ui-chat-controller" aria-hidden="true"></i><span>Join our Discord</span><span aria-hidden="true">↗</span></a>
-  </header>
-  <div :if={!@preview} class="row mt-2">
-    <div class="col">
+  <main class="content catalog-viewport" id="library" phx-hook="ManualCodex" phx-update="ignore">
+    <header
+      :if={@preview}
+      class="manual-heading"
+      id="manual-heading"
+      style="--manual-scene: url(/images/training/meditation-dark-fantasy.png)"
+    >
+      <div class="manual-heading-copy">
+        <p class="manual-eyebrow">Knowledge is power</p>
+        <h1 id="manual-title">Library</h1>
+        <p class="manual-heading-description">Refine your strategy.</p>
+      </div>
       <a
+        id="manual-discord"
         href="https://discord.gg/QNwEdPS"
         target="_blank"
-        class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"
+        rel="noopener noreferrer"
+        class="manual-discord"
       >
-        <i class="ui-icon ui-chat-controller mr-1"></i>Join our Discord!
+        <i class="ui-icon ui-chat-controller" aria-hidden="true"></i><span>Join our Discord</span><span aria-hidden="true">↗</span>
       </a>
+    </header>
+    <div class="cinematic-catalog-tabs" role="tablist" aria-label="Library reference">
+      <button
+        :for={
+          {key, label, icon, tone} <- [
+            {"avatars", "Avatars", "nav-profile", nil},
+            {"skills", "Skills", "nav-manual", "blue"},
+            {"items", "Items", "nav-catalog-items", "violet"}
+          ]
+        }
+        type="button"
+        id={"library-tab-#{key}"}
+        data-catalog-tone={tone}
+        data-library-tab
+        role="tab"
+        aria-selected={to_string(key == "avatars")}
+        aria-controls={"manual-#{key}"}
+        tabindex={if key == "avatars", do: 0, else: -1}
+      >
+        <.icon name={icon} />{label}
+      </button>
     </div>
-  </div>
 
-  <div class="row mt-2">
-    <div class="col-12">
-      <div class="card-box manual-wiki" id="manual-wiki">
-        <ul class="nav nav-pills navtab-bg manual-navigation" id="manual-navigation" aria-label="Manual sections">
-          <li class="nav-item">
-            <a href="#faq-tab" data-toggle="tab" class="nav-link px-3 py-2 active">
-              <span class="d-inline-block d-sm-none"><i class="ui-icon ui-question mr-1"></i>FAQ</span>
-              <span class="d-none d-sm-inline-block">
-                <i class="ui-icon ui-question mr-1"></i>Frequently Asked Questions
-              </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#training-tab" data-toggle="tab" class="nav-link px-3 py-2">
-              <span class="d-inline-block d-sm-none"><i class="ui-icon ui-sword mr-1"></i>Training</span>
-              <span class="d-none d-sm-inline-block"><i class="ui-icon ui-sword mr-1"></i>Training Guide</span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a href="#arena-tab" data-toggle="tab" class="nav-link px-3 py-2">
-              <span class="d-inline-block d-sm-none"><i class="ui-icon ui-swords mr-1"></i>Arena</span>
-              <span class="d-none d-sm-inline-block"><i class="ui-icon ui-swords mr-1"></i>Arena Guide</span>
-            </a>
-          </li>
-        </ul>
-        <div class="tab-content manual-wiki-content">
-          <div class="tab-pane fade active show" id="faq-tab">
-            <div class="row pt-2">
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is the main game objective, Training or Arena?</h4>
-                    <p class="faq-answer mb-4">
-                      The main game objective, which is the hardest challenge in this game, is to reach the Invoker rank in Training. You will need to not only reach Grandmaster League with <strong class="manual-emphasis-milestone">20 different Avatars</strong> but also do a "perfect run" of <strong class="manual-emphasis-milestone">60K Total Farm</strong> with each of them in order to reach Invoker.<span class="manual-answer-break" aria-hidden="true"></span>However, there is also a <strong class="manual-emphasis-milestone">PvP Season Ranking</strong> which players compete for that you can only score by playing in the Arena and maintaining rank #1 there for multiple days.
-                    </p>
-                  </article>
-
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">
-                      What is the utility of Shards <i class="ui-icon ui-shard"></i> ?
-                    </h4>
-                    <p class="faq-answer mb-4">
-                      <strong class="manual-emphasis-reward">Shards are the in-game currency</strong> that is used to unlock content like avatars, skills and skins in the Tavern. The best way to acquire Shards is to compete in the PvP Arena.
-                    </p>
-                  </article>
-                </div>
-              </div>
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How do stats like Speed, Power and Armor work?</h4>
-                    <p class="faq-answer mb-4">
-                      While Training, you can mouse over your hero's stats in the bottom bar to see details about them, but, in short, Speed is what decides if you attack first (<strong class="manual-emphasis-speed">80 Speed = 80% chance of attacking first</strong>), Power is a multiplier that raises your damage and regeneration (<strong class="manual-emphasis-power">30 Power = 30% extra damage/regen</strong>) and Armor is a multiplier that reduces the damage you take (<strong class="manual-emphasis-milestone">20 Armor = 20% reduction</strong>).
-                    </p>
-                  </article>
-
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How are Heroes ranked?</h4>
-                    <p class="faq-answer mb-4">
-                      Heroes are ranked first by their Total Farm, which is a sum of their total XP farm and total Gold farm, and second by the time it took to finish Training. Since there is a Total Farm limit of <strong class="manual-emphasis-reward">60K (30K XP and 30K gold)</strong>, experienced players compete on who can reach that limit the fastest by leveling skills and buying items in the most optimal order, along with choosing the best targets for their build.
-                    </p>
-                  </article>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="training-tab">
-            <div class="row pt-2">
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is the main objective of Training?</h4>
-                    <p class="faq-answer mb-4">
-                      To reach the Invoker rank: Initiate -> Novice -> Adept -> Veteran -> Expert -> Master -> Grandmaster -> Invoker. The most optimal way to get there is to <strong class="manual-emphasis-milestone">spend all of your turns Battling</strong>. Passive farming by Meditating or Mining will be much faster and can still yield decent results in lower ranks, but it is recommended to Battle on all turns after you've reached Expert.
-                    </p>
-                  </article>
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">Should I battle or meditate/mine?</h4>
-                    <p class="faq-answer mb-4">
-                      Battling will always offer <strong class="manual-emphasis-reward">more rewards</strong> but it comes with more risk as you can die and have to buyback. Meditating/mining is a safe choice but can randomly offer very low rewards. Ideally you should only meditate/mine if you have no good targets to battle or if you have a specific build in mind that needs more XP or gold early on.
-                    </p>
-                  </article>
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How do I get to Grandmaster League?</h4>
-                    <p class="faq-answer mb-4">
-                      <strong class="manual-emphasis-milestone">You must be at least a Veteran</strong> to unlock the Grandmaster League. Level up your hero without losing a single League Challenge and you will be presented with a chance to fight Roshan, the final boss of the Master League. <strong class="manual-emphasis-milestone">You have 2 chances of beating Roshan</strong> and will finish in the Master League if you fail these chances.
-                    </p>
-                  </article>
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is a good strategy for Training?</h4>
-                    <p class="faq-answer mb-4">
-                      Avoid dying as much as possible and <strong class="manual-emphasis-milestone">always buy Normal/Rare items</strong> when you have the gold to do so, remember, you can always Transmute them into better items later. If there aren't any targets you are confident in killing, aim for targets with low Offense to reduce your chances of dying. Aim for Normal and Hard targets only for optimal farming.
-                    </p>
-                  </article>
-                </div>
-              </div>
-
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">Should I make more than one hero?</h4>
-                    <p class="faq-answer mb-4">
-                      Yes! <strong class="manual-emphasis-milestone">Each Avatar has a different playstyle</strong> so it's worth experimenting to see which ones you like most. Training with multiple Avatars will not only give you insights about their strengths and weaknesses (crucial for the Arena) but also unlock higher ranks in the Base progression which will make the game more challenging, interesting and fun!
-                    </p>
-                  </article>
-
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How can I compete for the top 10 in the Hero Ranking?</h4>
-                    <p class="faq-answer mb-4">
-                      Top ranked Heroes have usually finished a "Perfect Run" by beating all Hard targets without buying back with gold, thus guaranteeing the <strong class="manual-emphasis-reward">maximum Total Farm of 60K</strong>. While possible in lower ranks, it becomes more viable once you have an Expert rank (Initiate->Novice->Adept->Veteran->Expert) on the Base progression in order to maximize the amount of farm you can get by always having 9 Hard targets available.<span class="manual-answer-break" aria-hidden="true"></span>When aiming for a Perfect Run, it's also important to have at least 100 Shards in order to use the 'Buyback with Shards' button if you happen to die, this won't affect your Total Farm but will use up 5% of your available Shards. Note that buying back with Shards is not available once on the Master League, and dying is overall less optimal as you waste time with a useless battle, so make sure to always use your Target Refreshes if you're unsure if you can kill a target.
-                    </p>
-                  </article>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tab-pane fade" id="arena-tab">
-            <div class="row pt-2">
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How is the Arena different from Training?</h4>
-                    <p class="faq-answer mb-4">
-                      In the Arena you get to play with the heroes you finished Training with. After Training is finished, you can change your items without any gold penalty for selling in order to adjust your build as much as you like for the Arena.
-                      <span class="manual-answer-break" aria-hidden="true"></span>
-                      Unlike Training in which you battle against another hero 1v1, Arena matches are <strong class="manual-emphasis-milestone">5v5 battles</strong> where you pick a team of 5 heroes to battle against the opponent's team until the last hero standing. Make sure you have at least 5 good heroes trained in order to perform well in the Arena.
-                      <span class="manual-answer-break" aria-hidden="true"></span>
-                      Similar to how in Training you have 30 total turns to train your Hero, in the Arena you have <strong class="manual-emphasis-reward">30 daily matches</strong> that you need to win in order to eventually reach rank #1.
-                    </p>
-                  </article>
-
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is the main objective of the Arena?</h4>
-                    <p class="faq-answer mb-4">
-                      There are 3 player brackets in the Arena: <strong class="manual-emphasis-milestone">Plebs -> Shadows -> Immortals</strong>. The objective is to become The Immortal, which is the best performing player in the Immortals bracket that is also ranked #1 on the Daily Ranking. Every day the Arena will reset and the best performing players of each bracket will move on to the next bracket while the worst performing players will move down.<span class="manual-answer-break" aria-hidden="true"></span>Players who can consistently keep #1 rank on the Daily Ranking will also have a higher rank on the Season Ranking.
-                    </p>
-                  </article>
-
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is the Season Ranking?</h4>
-                    <p class="faq-answer mb-4">
-                      On the Ranking section of the Profile page you can click on the
-                      <i class="ui-icon ui-shuffle mr-1 text-primary"></i>
-                      icon to switch the Daily Ranking to the Season Ranking, which displays the best players of the Season, who are defined by the highest Season Score, which is calculated based on your Training Rank and Arena performance.
-                      <span class="manual-answer-break" aria-hidden="true"></span>
-                      In the Arena, when you become The Immortal your Immortal Streak increases by 1 and you must keep the title in order to further increase your Streak. Each streak will give you <strong class="manual-emphasis-reward">100 Season Score</strong> and will likely define your spot in the Season Ranking.
-                      <span class="manual-answer-break" aria-hidden="true"></span>An important note: {GH.immortal_streak_debuff_description()}
-                    </p>
-                  </article>
-                </div>
-              </div>
-
-              <div class="col-lg-6">
-                <div class="p-lg-2">
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">How is Arena Rating calculated?</h4>
-                    <p class="faq-answer mb-4">
-                      <strong class="manual-emphasis-milestone">Arena Rating changes after 5v5 matches and 1v1 duels.</strong> Gains and losses depend on the game mode, the result, and the difference between your rating and your opponent’s rating.
-                    </p>
-                  </article>
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">
-                      Can I battle against other players in real time?
-                    </h4>
-                    <p class="faq-answer mb-4">
-                      Yes. When there are other players online you can challenge them to a Duel in the right (third) column of the Arena. If they accept, you will both be redirected to the Duel page. <strong class="manual-emphasis-milestone">Duels are a set of two 1v1 battles</strong> with alternating Hero picks, meaning you get to pick first in one battle and your opponent picks first on the second battle. This way, no player has an advantage and must rely on better strategies to beat their opponent.
-                    </p>
-                  </article>
-
-                  <article class="manual-wiki-entry">
-                    <div class="faq-question-q-box">Q.</div>
-                    <h4 class="faq-question text-primary">What is a good strategy for the Arena?</h4>
-                    <p class="faq-answer mb-4">
-                      Having a varied Hero collection with <strong class="manual-emphasis-milestone">at least 5 trained Grandmaster heroes</strong> is the best way to outperform your opponents in the Arena because you will be able to "outpick" and better react to what your opponent throws against you. Remember, you always have the advantage in Matchmaking since you are always the attacker and can see your opponent's picks beforehand, so make use of that advantage and counter-pick accordingly!
-                    </p>
-                  </article>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-    <section
-      id="manual-avatars"
-      class="manual-reference-section"
-      phx-hook="ManualCodex"
-      phx-update="ignore"
-      aria-label="Avatar reference"
-    >
-      <div class="manual-workspace manual-reference-frame"><.avatar_reference avatars={@avatars} /></div>
+    <section id="manual-avatars" class="manual-reference-section" role="tabpanel" aria-labelledby="library-tab-avatars">
+      <div class="manual-reference-frame"><.avatar_reference avatars={@avatars} /></div>
     </section>
     <section
       id="manual-skills"
       class="manual-reference-section"
-      phx-hook="ManualCodex"
-      phx-update="ignore"
-      aria-label="Skill reference"
+      role="tabpanel"
+      aria-labelledby="library-tab-skills"
+      hidden
     >
-      <div class="manual-workspace manual-reference-frame"><.skill_reference skills={@skills} /></div>
+      <div class="manual-reference-frame"><.skill_reference skills={@skills} /></div>
     </section>
-  </div>
+    <section
+      id="manual-items"
+      class="manual-reference-section cinematic-shop library-shop"
+      role="tabpanel"
+      aria-labelledby="library-tab-items"
+      hidden
+    >
+      <.item_reference items={@items} />
+    </section>
+  </main>
 </Layouts.app>

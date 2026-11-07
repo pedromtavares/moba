@@ -8,16 +8,16 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     :ok
   end
 
-  test "5v5 uses the full profile daily ranking across all brackets", %{conn: conn} do
+  test "3v3 uses the full profile daily ranking across all brackets", %{conn: conn} do
     player = create_player!(%{pvp_tier: 0, ranking: 26, daily_wins: 2, daily_matches: 5})
     immortal = create_player!(%{pvp_tier: 2, ranking: 1, daily_wins: 8, daily_matches: 10})
     shadow = create_player!(%{pvp_tier: 1, ranking: 6, daily_wins: 3})
     Cachex.put(:game_cache, "daily_ranking", [immortal, shadow, player])
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
 
-    assert has_element?(view, "#arena-history-matches-tab", "5v5")
+    assert has_element?(view, "#arena-history-matches-tab", "3v3")
     assert has_element?(view, "#arena-history-duels-tab", "1v1")
-    assert has_element?(view, "#arena-standings-5v5[aria-pressed=true]")
+    assert has_element?(view, "#arena-standings-3v3[aria-pressed=true]")
     assert has_element?(view, "#standing-player-#{player.id}.is-you .arena-standing-position", "26")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score strong", "2")
     assert has_element?(view, "#standing-player-#{player.id} a[href='/player/#{player.id}'][aria-current=true]")
@@ -69,7 +69,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     assert has_element?(view, "#arena-standings-1v1[aria-pressed=true]")
     assert has_element?(view, "#arena-history-duels-tab[aria-pressed=true]")
 
-    view |> element("#arena-standings-5v5") |> render_click()
+    view |> element("#arena-standings-3v3") |> render_click()
     assert standings_ids(view) == Enum.map([composite_leader, player], &"standing-player-#{&1.id}")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-position", "26")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score strong", "1")
@@ -84,7 +84,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     refute has_element?(view, "#arena-your-standing .arena-standing-movement")
   end
 
-  test "5v5 projections include the actual promotion and relegation boundaries", %{conn: conn} do
+  test "3v3 projections include the actual promotion and relegation boundaries", %{conn: conn} do
     incumbent = create_player!(%{pvp_tier: 2, ranking: 1, daily_wins: 4, pvp_points: 20})
     leader = create_player!(%{pvp_tier: 2, ranking: 2, daily_wins: 5, pvp_points: 10})
     other_immortal = create_player!(%{pvp_tier: 2, ranking: 5, daily_wins: 1})

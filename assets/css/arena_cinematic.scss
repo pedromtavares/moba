@@ -75,7 +75,7 @@
   .arena-board #arena-standings { display: flex; flex-direction: column; height: auto !important; max-height: 60vh; min-height: 0; overflow: hidden; }
   .arena-standings-heading { display: block; flex-shrink: 0; min-height: 0; margin: 0; }
   .arena-standings-heading h2 { margin: 0; color: #e9dfcd; font-size: 22px; font-weight: 800; }
-  .arena-standings-list { flex: 1; min-height: 0; overflow-y: auto; list-style: none; padding: 0; margin: 0; }
+  .arena-standings-list { flex: 1; min-height: 0; overflow: hidden auto; list-style: none; padding: 0; margin: 0; }
   .arena-standings-list > li + li { border-top: 1px solid #baa98a14; }
   .arena-standing-row { display: grid; grid-template-columns: 64px 36px minmax(0, 1fr) minmax(76px, max-content); align-items: center; gap: 12px; min-height: 84px; padding: 14px 10px; border-radius: 6px; color: #e7e0d1; transition: background .18s; }
   .arena-standing-row:hover, .arena-standing-row:focus-visible { background: #c7b17b0d; color: #fff1d3; }
@@ -128,7 +128,7 @@
   .arena-live-pvp[data-available=true] .arena-live-pvp-switch { border-color: #80cbae; background: #32785e; }
   .arena-live-pvp[data-available=true] .arena-live-pvp-switch::after { background: #d7f7e7; transform: translateX(26px); }
   .arena-live-opponents { flex-shrink: 0; min-width: 0; margin: 0 0 4px; }
-  .arena-live-opponents-list { display: grid; gap: 8px; max-height: 230px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+  .arena-live-opponents-list { display: grid; gap: 8px; max-height: 230px; margin: 0; padding: 0; overflow: hidden auto; list-style: none; }
   .arena-live-opponents-list > li { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 0; padding: 12px; border: 1px solid #75b99c38; border-radius: 7px; background: linear-gradient(115deg, #255b441c, #08172299); }
   .arena-live-opponent-identity { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1; }
   .arena-live-opponent-identity > img { flex-shrink: 0; width: 40px; height: 40px; object-fit: contain; }
@@ -149,7 +149,7 @@
   .arena-board #pvp_duels.arena-live-column { border-color: #77b8a35c; background: linear-gradient(135deg, #18332de0, #0a1822ed 65%) !important; }
   .arena-live-column .arena-live-section { display: flex; flex-direction: column; flex: 1; min-height: 0; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
   .arena-live-column .arena-live-opponents { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-  .arena-live-column .arena-live-opponents-list { max-height: none; min-height: 0; overflow-y: auto; }
+  .arena-live-column .arena-live-opponents-list { max-height: none; min-height: 0; overflow: hidden auto; }
   .arena-live-pvp:has(input:disabled) { cursor: default; }
   .arena-live-pvp:has(input:disabled) .arena-live-pvp-switch { opacity: .4; }
 

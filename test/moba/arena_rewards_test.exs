@@ -3,37 +3,39 @@ defmodule Moba.ArenaRewardsTest do
 
   alias Moba.Game.{Arena, Duels, Matches}
 
-  test "matches and duels share the first thirty daily rewards" do
+  test "matches and duels share the first twenty daily rewards" do
     player = create_player!()
     opponent = create_player!(%{total_matches: 1})
 
-    for _ <- 1..28, do: match(player, opponent)
+    for _ <- 1..18, do: match(player, opponent)
     balance = Accounts.get_user!(player.user_id).shard_count
-    Game.create_duel!(player, opponent, true)
-    assert Arena.daily_reward_games(player) == 29
-    assert Accounts.get_user!(player.user_id).shard_count == balance + 20
+    duel = Game.create_duel!(player, opponent, true)
+    assert Arena.daily_reward_games(player) == 19
+    assert Accounts.get_user!(player.user_id).shard_count == balance + 30
+    duel |> Game.Schema.Duel.changeset(%{phase: "finished"}) |> Repo.update!()
 
     assert Game.manual_matchmaking!(player)
-    assert Arena.daily_reward_games(player) == 30
-    assert Accounts.get_user!(player.user_id).shard_count == balance + 40
+    assert Arena.daily_reward_games(player) == 20
+    assert Accounts.get_user!(player.user_id).shard_count == balance + 60
 
-    Game.create_duel!(player, opponent, true)
-    assert Accounts.get_user!(player.user_id).shard_count == balance + 40
+    assert Game.create_duel!(player, opponent, true)
+    assert Arena.daily_reward_games(player) == 21
+    assert Accounts.get_user!(player.user_id).shard_count == balance + 60
   end
 
   test "live duels reward both participants according to their own allowance" do
     player = create_player!()
     opponent = create_player!()
-    for _ <- 1..30, do: match(player, opponent)
+    for _ <- 1..20, do: match(player, opponent)
     player_balance = Accounts.get_user!(player.user_id).shard_count
     opponent_balance = Accounts.get_user!(opponent.user_id).shard_count
 
     Game.create_duel!(player, opponent, false)
 
-    assert Arena.daily_reward_games(player) == 31
+    assert Arena.daily_reward_games(player) == 21
     assert Arena.daily_reward_games(opponent) == 1
     assert Accounts.get_user!(player.user_id).shard_count == player_balance
-    assert Accounts.get_user!(opponent.user_id).shard_count == opponent_balance + 20
+    assert Accounts.get_user!(opponent.user_id).shard_count == opponent_balance + 30
   end
 
   test "automatic matches, another player's season duels, training and previous days do not use the allowance" do
@@ -60,7 +62,19 @@ defmodule Moba.ArenaRewardsTest do
     duel = Game.create_duel!(player, opponent, true)
     duel |> Game.Schema.Duel.changeset(%{phase: "finished"}) |> Repo.update!()
     Game.create_duel!(player, opponent, true)
-    assert Accounts.get_user!(player.user_id).shard_count == balance + 40
+    assert Accounts.get_user!(player.user_id).shard_count == balance + 60
+  end
+
+  test "lowering the daily cap preserves games already played above the new limit" do
+    player = create_player!(%{daily_matches: 21, total_matches: 21})
+    opponent = create_player!(%{total_matches: 1})
+    auto = match(player, opponent, %{type: "auto"})
+
+    refute Game.manual_matchmaking!(player)
+    refute Arena.auto_matchmaking!(player)
+    assert Game.get_player!(player.id).daily_matches == 21
+    assert [%{id: id}] = Game.list_matches(player)
+    assert id == auto.id
   end
 
   test "no opponent means no game and no reward" do

@@ -1,5 +1,5 @@
 defmodule MobaWeb.V2.TrainingFarmingLiveTest do
-  use MobaWeb.ConnCase
+  use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
   test "preview farming selects turns, starts, reloads, and claims both resources", %{conn: conn} do
@@ -38,7 +38,13 @@ defmodule MobaWeb.V2.TrainingFarmingLiveTest do
 
       {:ok, ready_view, _} = live(conn, "/training")
       assert has_element?(ready_view, "#farm-status", "Ready to collect")
-      assert has_element?(ready_view, "#farm-claim-button[phx-hook=FarmClaimHotkey][aria-keyshortcuts=Space] kbd", "SPACE")
+
+      assert has_element?(
+               ready_view,
+               "#farm-claim-button[phx-hook=FarmClaimHotkey][aria-keyshortcuts=Space] kbd",
+               "SPACE"
+             )
+
       ready_view |> element("#farm-claim-button") |> render_click()
 
       claimed = Game.get_hero!(hero.id)

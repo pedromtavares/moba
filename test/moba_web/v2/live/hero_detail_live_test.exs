@@ -79,7 +79,8 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
-    assert has_element?(view, "#hero-training-status[data-finished='true']")
+    refute has_element?(view, "#hero-training-status")
+    refute has_element?(view, "#hero-detail-performance", "Complete")
     assert has_element?(view, "#hero-detail-duration", "99+")
     assert has_element?(view, "#ranking-#{hero.id} [aria-label='Unranked']")
     assert has_element?(view, "#hero-leaderboard tfoot #ranking-#{hero.id}[data-current='true']")
@@ -123,7 +124,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     assert has_element?(view, "#ranking-#{peer.id} .hero-ranking-position", "#1")
     refute has_element?(view, "#ranking-#{higher.id}")
     assert has_element?(view, "#hero-league-milestone-title", "Unlock Master League")
-    assert has_element?(view, "#hero-league-milestone", "2 different Avatars")
+    assert has_element?(view, "#hero-league-milestone", "Finish a training on Platinum League or higher")
   end
 
   test "an unfinished run has an inviting empty state and ranks when training completes", %{conn: conn} do
@@ -144,14 +145,15 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     refute has_element?(view, "#hero-leaderboard tfoot")
   end
 
-  test "Grandmaster milestones cover imperfect and perfect runs", %{conn: conn} do
+  test "Grandmaster milestones remain for imperfect runs and disappear after a perfect finish", %{conn: conn} do
     hero = create_base_hero(%{finished_at: Timex.now(), league_tier: 6, pve_tier: 2})
     {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
     assert has_element?(view, "#hero-league-milestone-title", "Aim for a perfect 60K")
 
     Game.update_hero!(hero, %{total_xp_farm: 30_000, total_gold_farm: 30_000})
     send(view.pid, {"hero", %{id: hero.id}})
-    assert has_element?(view, "#hero-league-milestone-title", "Master another avatar")
+    assert has_element?(view, "#hero-perfect-run", "Perfect")
+    refute has_element?(view, "#hero-league-milestone")
   end
 
   test "Grandmasters only show global rankings, including after promotion", %{conn: conn} do
@@ -194,7 +196,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/hero/#{hero.id}")
 
     assert has_element?(view, "#hero-league-milestone-title", "Unlock Grandmaster League")
-    assert has_element?(view, "#hero-league-milestone", "5 different Avatars")
+    assert has_element?(view, "#hero-league-milestone", "Finish a training on Master League or higher")
   end
 
   test "a ranked hero is highlighted in the leaderboard without a duplicate footer", %{conn: conn} do

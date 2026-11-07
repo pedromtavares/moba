@@ -23,7 +23,7 @@ export function loadingTarget(control, to, root = document) {
   if (event === 'league') {
     const boss = control.closest('#roshan-challenge');
     if (boss) return {name: text(boss, '#roshan-title'), subtitle: text(boss, '.roshan-attempt'), art: art(boss.querySelector('.roshan-portrait'))};
-    const ascent = control.closest('#training-ascent');
+    const ascent = control.closest('.training-ascent');
     if (ascent) return portrait(ascent, text(ascent, '.is-next .ascent-rank-name'), 'League challenge', '.is-next img');
   }
   if (event === 'challenge') {
@@ -47,7 +47,7 @@ export function loadingTarget(control, to, root = document) {
     if (card) return {name: text(card, '.hero-card-name, .hero-name'), subtitle: 'Continue training', art: art(card)};
   }
   if (event === 'matchmaking' || (event === 'start' && control.closest('#match-hud'))) {
-    return {name: '5v5', subtitle: event === 'start' ? 'Entering the Arena' : 'Finding your match'};
+    return {name: '3v3', subtitle: event === 'start' ? 'Entering the Arena' : 'Finding your match'};
   }
   if (event === 'season-duel') return {name: '1v1', subtitle: 'Finding your opponent'};
   if (event && !to) return null; // Local actions must not inherit the current page's identity.
@@ -65,10 +65,11 @@ export function loadingTarget(control, to, root = document) {
         image: heroArt ? '' : image(card, 'img:not([src*="/league/"]):not([src*="/pve/"])'), art: heroArt};
     }
   }
-  if (/^\/player\/\d+\/?$/.test(path)) {
+  if (/^\/(?:player|user)\/\d+\/?$/.test(path)) {
     if (control) {
-      if (control.closest('#game-sidebar, #topnav')) return null;
-      return {name: text(control, 'strong, .profile-ranked-name') || text(control).replace(text(control, 'small'), '').trim(), simple: true};
+      // A profile link can wrap an entire ranked card, including several stats.
+      // Its rendered username is the only safe identity; never read the whole card.
+      return {name: control.getAttribute('data-profile-username') || '', simple: true};
     }
     const header = samePage && root.querySelector('#profile-cinematic');
     if (header) return {name: text(header, 'h1'), simple: true};
@@ -76,7 +77,7 @@ export function loadingTarget(control, to, root = document) {
   if (/^\/(matches|arena)\/\d+\/?$/.test(path)) {
     const row = control?.closest('tr');
     const player = row?.querySelector('a[href^="/player/"]');
-    if (player) return portrait(row, text(player), path.startsWith('/matches/') ? '5v5 match' : '1v1 duel');
+    if (player) return portrait(row, text(player), path.startsWith('/matches/') ? '3v3 match' : '1v1 duel');
     const challenger = root.querySelector('.duel-challenge-opponent');
     if (challenger && path.startsWith('/arena/')) return portrait(challenger, text(challenger, 'strong'), 'Live 1v1');
   }
@@ -134,7 +135,7 @@ export function initGameLoading() {
     try { section = new URL(to || window.location.href, window.location.href).pathname.split('/')[1]; }
     catch (_) { return 'profile'; }
     return {
-      base: 'base', training: 'training', invoke: 'training', battles: 'training',
+      base: 'base', training: 'training', new: 'training', battles: 'training',
       arena: 'arena', matches: 'arena', tavern: 'tavern', community: 'community',
       library: 'manual', admin: 'admin'
     }[section] || 'profile';

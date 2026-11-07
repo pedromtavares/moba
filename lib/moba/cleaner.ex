@@ -6,7 +6,7 @@ defmodule Moba.Cleaner do
   require Logger
 
   alias Moba.{Repo, Game, Engine}
-  alias Game.Schema.{Duel, Player, Hero, HeroSkill, HeroItem, Skill, Item, Avatar, Match}
+  alias Game.Schema.{Duel, Player, Hero, HeroSkill, HeroItem, Skill, Item, Avatar}
   alias Engine.Schema.Battle
 
   def cleanup_old_records do
@@ -20,7 +20,14 @@ defmodule Moba.Cleaner do
     last_week = Timex.now() |> Timex.shift(days: -7)
 
     # deletes all non-duel battles from over a week ago
-    query = from b in Battle, where: b.inserted_at <= ^last_week, where: b.type != "duel", order_by: b.id, limit: 20
+    query =
+      from b in Battle,
+        where: b.inserted_at <= ^last_week,
+        where: b.type != "duel",
+        where: is_nil(b.training_team_id),
+        order_by: b.id,
+        limit: 20
+
     delete_records(query)
 
     # deletes non-current avatars that are over a week old
@@ -112,14 +119,10 @@ defmodule Moba.Cleaner do
 
     delete_records(query)
 
-    # deletes matches from > a week ago
-
-    query =
-      from m in Match,
-        where: m.inserted_at <= ^last_week,
-        limit: 20
-
-    delete_records(query)
+    # Keep the recent 3v3 results used for win rate, even after their replays expire.
+    Game.Matches.expired_matches(last_week)
+    |> limit(20)
+    |> delete_records()
   end
 
   defp delete_records(query, after_id \\ 0) do

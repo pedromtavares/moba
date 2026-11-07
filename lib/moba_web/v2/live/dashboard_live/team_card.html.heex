@@ -1,0 +1,85 @@
+<div class="col-lg-4 col-md-6 base-team-slot" id={"visible-team-#{@team.id}"}>
+  <article class="card hero-card team-training-card mb-0" aria-label="3v3 training team">
+    <header class="card-header">
+      <h4 class="mb-0 d-flex align-items-center">
+        <span class="hero-card-name">
+          <.league_badge tier={@team.league_tier} variant="legacy" /> {@team.name || "Team 3v3"}
+        </span>
+        <span class="hero-card-meta">
+          {if @team.reward_mode == :focus, do: "Focus", else: "Shared"}
+        </span>
+      </h4>
+    </header>
+    <div class="card-body team-card-roster p-0">
+      <section
+        :for={{hero, index} <- Enum.with_index(@team.heroes, 1)}
+        class="team-card-hero"
+        aria-label={hero.avatar.name}
+      >
+        <.link
+          navigate={if @team.finished_at, do: ~p"/teams/#{@team.id}", else: ~p"/training?#{[run: @team.id]}"}
+          class="team-card-art"
+          aria-label={"#{if @team.finished_at, do: "View", else: "Continue"} team · #{hero.avatar.name}"}
+          style={"background-image: url(#{GH.background_url(hero)})"}
+        >
+          <div class="team-card-identity">
+            <strong>{hero.avatar.name}</strong>
+            <span>Level {hero.level}</span>
+          </div>
+        </.link>
+        <div class="team-card-build">
+          <img
+            :for={skill <- MobaWeb.V2.Components.HeroBarComponents.sorted_skills(hero)}
+            id={"base-team-#{@team.id}-hero-#{index}-skill-#{skill.id}"}
+            src={GH.image_url(skill)}
+            alt={skill.name}
+            class={skill.ultimate && "is-ultimate"}
+            data-toggle="tooltip"
+            title={TT.skill_tooltip(skill)}
+          />
+        </div>
+      </section>
+    </div>
+    <footer class="card-footer">
+      <div class="hero-card-controls team-card-controls">
+        <div class="team-card-actions">
+          <.link
+            id={"base-team-continue-#{@team.id}"}
+            navigate={if @team.finished_at, do: ~p"/teams/#{@team.id}", else: ~p"/training?#{[run: @team.id]}"}
+            class="btn btn-success hero-card-resume"
+          >
+            <.icon name="nav-training" />{if @team.finished_at, do: "View team", else: "Continue"}
+          </.link>
+          <button
+            id={"base-team-delete-#{@team.id}"}
+            type="button"
+            class="btn btn-danger hero-card-delete"
+            aria-label="Delete team"
+            title="Delete team"
+            data-confirm="Are you sure you want to DELETE your team?"
+            data-confirm-title="Delete team?"
+            data-confirm-accept="Delete team"
+            phx-click="archive-team"
+            phx-value-id={@team.id}
+          >
+            <.icon name="game-trash" /><span class="hero-card-delete-label">Delete</span>
+          </button>
+        </div>
+        <div class="team-card-metrics">
+          <span class="team-card-farm">
+            <.icon name="game-trophy" />
+            <strong>{GH.farming_amount_label(@team.avg_farm)}</strong><small>Avg farm</small>
+          </span>
+          <span class="team-card-time">
+            <.icon name="game-clock" />
+            <%= if @team.finished_at do %>
+              <strong>{max(1, div(@team.duration_seconds, 60))}</strong><small>min</small>
+            <% else %>
+              <strong>{@team.turns_left}</strong><small>turns left</small>
+            <% end %>
+          </span>
+        </div>
+      </div>
+    </footer>
+  </article>
+</div>

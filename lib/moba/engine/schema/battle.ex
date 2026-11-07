@@ -20,6 +20,10 @@ defmodule Moba.Engine.Schema.Battle do
 
     belongs_to :duel, Duel
     belongs_to :match, Match
+    belongs_to :training_team, Game.Schema.TrainingTeam
+    belongs_to :training_encounter, Game.Schema.TeamEncounter
+    field :training_index, :integer
+    field :training_state, :binary
 
     field :type, :string
     field :difficulty, :string
@@ -28,6 +32,8 @@ defmodule Moba.Engine.Schema.Battle do
 
     field :attacker_pick_position, :integer
     field :defender_pick_position, :integer
+    field :attacker_initial_hp, :integer
+    field :attacker_initial_mp, :integer
 
     embeds_one :rewards, Engine.Schema.Rewards, on_replace: :update
     embeds_one :attacker_snapshot, Engine.Schema.HeroSnapshot, on_replace: :update

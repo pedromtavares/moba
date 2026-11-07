@@ -19,11 +19,32 @@
   box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 36px rgba(0,0,0,.15);
 
   .ascent-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+  .ascent-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; }
   .ascent-eyebrow { color: #baa77d; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
+  .ascent-guest-sign-in {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 28px;
+    padding: 3px 9px;
+    border: 1px solid #d7b68140;
+    border-radius: 6px;
+    background: #0b1421b3;
+    color: #c4cfdd;
+    font-size: 12px;
+    line-height: 1.3;
+    transition: border-color .18s, background-color .18s;
+  }
+  .ascent-guest-sign-in :is(.ui-icon, strong) { color: #f0d49d; }
+  .ascent-guest-sign-in .ui-icon { width: 14px; height: 14px; flex-shrink: 0; }
+  .ascent-guest-sign-in:hover { color: #e4ebf3; background-color: #192333; border-color: #dfbf8099; text-decoration: none; }
+  .ascent-guest-sign-in:focus-visible { outline: 2px solid #f2d79c; outline-offset: 2px; }
   h2 { margin: 2px 0 0; font-size: 30px; font-weight: 850; line-height: 1.15; color: #efe7d6; }
   h2 > span { color: var(--ascent-goal); }
   .ascent-objective { display: flex; align-items: center; gap: 24px; }
-  #training-ascent-status { margin: 0; color: #e7e2d6; font-size: 19px; font-weight: 750; }
+  :is(#training-ascent-status, .ascent-status) { margin: 0; color: #e7e2d6; font-size: 19px; font-weight: 750; }
+  .ascent-status-league { color: var(--ascent-accent); }
+  .ascent-status-goal { color: var(--ascent-goal); }
   .ascent-rules { margin: 3px 0 0; color: #9cabb9; font-size: 13px; }
   .ascent-track { list-style: none; display: flex; align-items: flex-start; margin: 12px 0 10px; padding: 0; }
   .ascent-rank { position: relative; flex: 1; text-align: center; min-width: 0; }
@@ -61,23 +82,55 @@
   .ascent-switch label:has(.ascent-checkbox:focus-visible)::before { outline: 2px solid #edcc90; outline-offset: 4px; }
   .ascent-checkbox { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; border: 0; }
   .ascent-farm { margin-left: auto; font-size: 12px; color: #97a5b4; white-space: nowrap; }
+  .ascent-controls-hint { flex: 1; min-width: 0; margin: 0; color: #aebdce; font: 600 13px/1.65 'Nunito', sans-serif; text-align: center; }
+  .ascent-controls-hint kbd { display: inline-block; padding: 1px 5px; border: 1px solid #d5bc8255; border-radius: 3px; background: #0a1420a8; color: #efd5a3; font: 800 11px/1.4 'Nunito', sans-serif; vertical-align: middle; }
   .ascent-farm strong { font-size: 20px; font-weight: 850; margin-right: 4px; }
   .ascent-xp strong { color: #88cadf; }
   .ascent-gold strong { color: #e6bd71; }
+  .ascent-total strong { color: #e6bd71; }
   .ascent-time { display: flex; align-items: center; gap: 5px; }
   .ascent-time strong { font-size: 15px; color: #88bfae; }
   .ascent-challenge { border: 1px solid var(--ascent-accent); border-radius: 8px; padding: 12px 22px; color: #0b1822; background: var(--ascent-accent); font-size: 17px; font-weight: 850; cursor: pointer; transition: filter .18s, transform .18s; }
   .ascent-challenge:hover { filter: brightness(1.15); transform: translateY(-1px); }
   .ascent-challenge .loading-text { display: flex; align-items: center; gap: 9px; }
-  &.is-ready #training-ascent-status { color: var(--ascent-accent); }
+  &.is-ready :is(#training-ascent-status, .ascent-status) { color: var(--ascent-accent); }
   &.is-ready::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: -1; background: linear-gradient(110deg, transparent 35%, rgba(163,220,247,.12) 49%, transparent 63%); animation: ascent-unlock 1.4s ease-out both; }
+}
+
+.game-page .farm-perfect {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  color: #f4d38e;
+  font: 850 13px/1.4 'Nunito', sans-serif;
+  white-space: nowrap;
+  text-shadow: 0 0 14px #e8b64c55;
+  vertical-align: middle;
+  cursor: help;
+  .ui-icon { width: 16px; height: 16px; filter: drop-shadow(0 0 5px #f1bb5670); }
+}
+.game-page .buyback-farm-impact {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 5px 16px;
+  margin: 0;
+  color: #c4b6a8;
+  font: 700 15px/1.5 'Nunito', sans-serif;
+  font-variant-numeric: tabular-nums;
+  strong { margin-left: 6px; color: #e39b9d; font-size: 18px; }
+  .buyback-farm-change { color: #b6c4d1; }
+  .buyback-farm-change > span { margin: 0 5px; color: #e39b9d; }
 }
 @keyframes ascent-unlock { from { transform: translateX(-100%); } to { transform: translateX(100%); } }
 @media (max-width: 1000px) {
   .game-page .training-ascent {
     padding: 16px 18px 0;
     h2 { font-size: 26px; }
-    #training-ascent-status { font-size: 16px; }
+    :is(#training-ascent-status, .ascent-status) { font-size: 16px; }
     .ascent-actions, .ascent-farm { gap: 12px; }
     .ascent-utilities { flex-wrap: wrap; gap: 8px 16px; padding: 8px 0; }
   }
@@ -89,7 +142,7 @@
     .ascent-objective { width: 100%; justify-content: space-between; gap: 10px; }
     .ascent-eyebrow { font-size: 10px; }
     h2 { font-size: 25px; }
-    #training-ascent-status { font-size: 14px; }
+    :is(#training-ascent-status, .ascent-status) { font-size: 14px; }
     .ascent-rules { font-size: 11px; }
     .ascent-challenge { padding: 10px; font-size: 13px; }
     .ascent-challenge .loading-text { gap: 4px; }
@@ -109,6 +162,7 @@
     .ascent-switch { font-size: 10px; }
   }
 }
+@media (max-width: 767px) { .game-page .training-ascent .ascent-controls-hint { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   .game-page .training-ascent.is-ready::after { animation: none; display: none; }
   .game-page .training-ascent .ascent-switch label,
@@ -128,6 +182,7 @@
 
   .ascent-heading { display: contents; }
   .ascent-heading > div:first-child { grid-row: 1; text-align: center; }
+  .ascent-kicker { justify-content: center; }
   .ascent-eyebrow { font-size: 12px; letter-spacing: .24em; }
   h2 { margin-top: 8px; font-size: clamp(38px, 4vw, 64px); text-shadow: 0 4px 24px #0009; }
   .ascent-track { grid-row: 2; align-self: center; width: 100%; max-width: 1200px; margin: 24px auto; }
@@ -142,7 +197,7 @@
   .ascent-pip { width: 19px; height: 6px; }
   .ascent-turns small { font-size: 12px; }
   .ascent-objective { grid-row: 3; flex-direction: column; gap: 18px; text-align: center; padding: 0 0 30px; }
-  #training-ascent-status { font-size: clamp(24px, 2.5vw, 36px); font-weight: 850; }
+  :is(#training-ascent-status, .ascent-status) { font-size: clamp(24px, 2.5vw, 36px); font-weight: 850; }
   .ascent-rules { margin-top: 6px; font-size: 17px; }
   .ascent-challenge { min-width: 300px; padding: 18px 32px; font-size: 24px; box-shadow: 0 0 32px #b7d3e329, 0 8px 24px #0006; }
   .ascent-challenge .loading-text { justify-content: center; gap: 14px; }
@@ -179,7 +234,7 @@
     .ascent-pip { width: 7px; height: 5px; }
     .ascent-turns { gap: 3px; }
     .ascent-objective { gap: 20px; padding-bottom: 28px; }
-    #training-ascent-status { font-size: 23px; }
+    :is(#training-ascent-status, .ascent-status) { font-size: 23px; }
     .ascent-rules { font-size: 14px; }
     .ascent-challenge { min-width: 0; width: 100%; max-width: 320px; font-size: 21px; padding: 17px 20px; }
     .ascent-utilities { gap: 6px; }

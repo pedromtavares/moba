@@ -15,12 +15,12 @@
 
   .updates{
     height: 410px;
-    overflow: auto;
+    overflow: hidden auto;
   }
 
   .messages{
     height: 300px;
-    overflow: auto;
+    overflow: hidden auto;
 
     p{
       margin: 0;

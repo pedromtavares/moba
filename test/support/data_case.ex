@@ -6,10 +6,9 @@ defmodule Moba.DataCase do
   You may define functions here to be used as helpers in
   your tests.
 
-  Finally, if the test case interacts with the database,
-  it cannot be async. For this reason, every test runs
-  inside a transaction which is reset at the beginning
-  of the test unless the test case is marked as async.
+  Database tests can run asynchronously in isolated SQL Sandbox transactions.
+  Use synchronous tests when changing shared cache keys, application settings,
+  or other global state; database access alone does not require serialization.
   """
 
   use ExUnit.CaseTemplate

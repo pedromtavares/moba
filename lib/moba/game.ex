@@ -24,6 +24,8 @@ defmodule Moba.Game do
 
   # AVATARS
 
+  defdelegate season_score(player), to: Moba.Game.SeasonScore, as: :total
+
   defdelegate avatar_stat_units, to: Avatars
 
   defdelegate get_avatar!(avatar_id), to: Avatars
@@ -53,6 +55,7 @@ defmodule Moba.Game do
   defdelegate continue_duel!(duel, hero \\ nil), to: Arena
   defdelegate pick_duel_hero(duel, player, hero), to: Arena
   defdelegate start_match(match, player, picks), to: Arena
+  defdelegate start_match(match, player, picks, opts), to: Arena
 
   defdelegate create_duel!(player, opponent, auto \\ false), to: Arena
 

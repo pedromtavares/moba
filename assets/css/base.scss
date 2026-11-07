@@ -7,8 +7,10 @@ body:has(.game-page) {
 
   &:has(> .guest-topbar) { --game-topbar-height: 48px; }
   #topnav.guest-topbar { height: var(--game-topbar-height); }
-  &:has(#battle-page) { --game-topbar-height: 0px; }
-  &:has(#battle-page) #topnav.guest-topbar { display: none; }
+  &:has(#battle-page, #invoke-guest-sign-in, .ascent-guest-sign-in) {
+    --game-topbar-height: 0px;
+    #topnav.guest-topbar { display: none; }
+  }
 
   .sidebar-nav {
     top: var(--game-topbar-height);
@@ -184,6 +186,12 @@ body:has(.game-page) {
     transform: translateY(-1px);
   }
 
+  #base-invoke-btn {
+    font-family: "Nunito", sans-serif;
+    font-weight: 900;
+    letter-spacing: 0;
+  }
+
   .base-secondary, .btn-light, .btn-secondary, .btn-outline-dark, .btn-outline-light {
     position: relative;
     min-height: 46px;
@@ -307,4 +315,42 @@ body:has(.game-page) {
   }
   .game-page .base-embers { display: none; }
   .game-page .pve-bar::after { display: none; }
+}
+
+.game-page .base-page .hero-list {
+  .base-team-slot { padding: 6px; }
+  .team-training-card.card {
+    min-height: 380px;
+    background: #0b121d !important;
+
+    > .card-header { pointer-events: none; }
+    .team-card-roster { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; min-height: 300px; background: #baa98a26; }
+    .team-card-hero { display: flex; flex-direction: column; min-width: 0; background: #0b121d; }
+    .team-card-art { position: relative; display: flex; flex: 1; align-items: flex-end; min-height: 252px; overflow: hidden; background-size: cover; background-position: 62% center; text-decoration: none; isolation: isolate; }
+    .team-card-art::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, #080c1333, transparent 40%, #080c13f2); transition: background-color 220ms ease; }
+    .team-card-art:hover::after { background-color: #d6b47c12; }
+    .team-card-art:focus-visible { outline: 2px solid #e5c58b; outline-offset: -3px; }
+    .team-card-identity { padding: 48px 9px 10px; text-align: left; text-shadow: 0 2px 8px #000; }
+    .team-card-identity strong { display: block; color: #f0e8d9; font-size: clamp(14px, 1.15vw, 19px); font-weight: 900; line-height: 1.2; }
+    .team-card-identity span { display: block; margin-top: 5px; color: #dfc58e; font-size: 13px; font-weight: 800; }
+    .team-card-build { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; padding: 8px 5px; border-top: 1px solid #baa98a26; }
+    .team-card-build img { width: 100%; max-width: 40px; aspect-ratio: 1; justify-self: center; border: 1px solid #b9c4d226; border-radius: 3px; transition: filter 180ms ease, border-color 180ms ease; }
+    .team-card-build img:hover { filter: brightness(1.15); border-color: #dfbf8899; }
+    .team-card-build .is-ultimate { border-color: #d6b47c80; }
+    .team-card-controls { display: flex !important; justify-content: space-between; gap: 12px; padding: 8px; }
+    .team-card-actions { display: flex; align-items: center; gap: 8px; }
+    .hero-card-resume { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+    .hero-card-resume .nav-emblem { width: 24px; height: 24px; }
+    .team-card-metrics { display: flex; gap: 14px; align-items: center; }
+    .team-card-metrics > span { display: grid; grid-template-columns: auto auto; align-items: center; gap: 0 5px; white-space: nowrap; }
+    .team-card-metrics strong { font-size: 18px; font-weight: 900; }
+    .team-card-metrics small { grid-column: 1 / -1; color: #a7b2c0; font-size: 11px; text-align: right; }
+    .team-card-farm { color: #e6c58e; }
+    .team-card-time { color: #a8cdbf; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game-page .team-training-card .team-card-art::after,
+  .game-page .team-training-card .team-card-build img { transition: none; }
 }

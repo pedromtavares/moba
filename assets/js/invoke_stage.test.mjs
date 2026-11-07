@@ -58,7 +58,7 @@ test('planning mode opens at the stage top and measures viewport height independ
   const properties = new Map();
   let scrolls = 0;
   const hook = {...InvokeStage, el: {
-    dataset: {mode: 'presets'},
+    dataset: {mode: 'presets'}, closest: () => null,
     querySelector: () => ({dataset: {}, querySelectorAll: () => []}),
     style: {setProperty: (key, value) => properties.set(key, value)},
     classList: {remove() {}}, addEventListener() {}, removeEventListener() {},
@@ -76,5 +76,11 @@ test('planning mode opens at the stage top and measures viewport height independ
   hook.el.dataset.mode = 'presets';
   hook.updated();
   assert.equal(scrolls, 2);
+  const draftProperties = new Map();
+  hook.el.closest = () => ({style: {setProperty: (key, value) => draftProperties.set(key, value)}, getBoundingClientRect: () => ({top: 12 - window.scrollY})});
+  window.innerWidth = 1600;
+  hook.measure();
+  assert.equal(draftProperties.get('--draft-height'), '696px');
+  assert.equal(properties.get('--invoke-height'), '100%');
   hook.destroyed();
 });

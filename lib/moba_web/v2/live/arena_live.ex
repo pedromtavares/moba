@@ -1,24 +1,22 @@
 defmodule MobaWeb.V2.ArenaLive do
   use MobaWeb, :v2_live_view
+  on_mount MobaWeb.V2.Hooks.TeamAccess
 
   import MobaWeb.CoreComponents, only: [input: 1, icon: 1]
   import MobaWeb.V2.Components.HeroBarComponents
 
   alias MobaWeb.Presence
-  alias MobaWeb.V2.TutorialComponent
 
   embed_templates "arena_live/*"
 
-  def mount(_params, _session, %{assigns: %{current_player: player}} = socket) do
+  def mount(_params, _session, socket) do
     socket =
       socket
-      |> assign(sidebar_code: "arena", tutorial_step: player.tutorial_step)
+      |> assign(sidebar_code: "arena")
       |> assign(team_form: to_form(%{"name" => ""}, as: :team))
       |> assign(hero: nil, editing: false, show_build: false, show_shop: false)
-      |> TutorialComponent.skip_arena()
 
     if connected?(socket) do
-      TutorialComponent.subscribe(player.id)
       MobaWeb.subscribe("online")
       MobaWeb.subscribe("player-ranking")
     end
@@ -35,7 +33,7 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, socket}
   end
 
-  def handle_event("standings-tab", %{"type" => mode}, socket) when mode in ["5v5", "1v1"] do
+  def handle_event("standings-tab", %{"type" => mode}, socket) when mode in ["3v3", "1v1"] do
     {:noreply, assign(socket, ranking: ranking_for(mode), ranking_tab: mode)}
   end
 
@@ -96,17 +94,8 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, assign(socket, current_player: player, duel_opponents: duel_opponents, current_time: Timex.now())}
   end
 
-  def handle_event("finish-tutorial", _, %{assigns: %{preview: true}} = socket) do
-    {:noreply, TutorialComponent.finish_arena(socket)}
-  end
-
-  def handle_event("finish-tutorial", _, socket) do
-    socket = TutorialComponent.next_step(socket, 31)
-    handle_event("matchmaking", %{}, socket)
-  end
-
-  def handle_event("hero-list", %{"type" => heroes_tab}, socket) do
-    {:noreply, assign(socket, heroes: heroes_for(socket, heroes_tab), heroes_tab: heroes_tab)}
+  def handle_event("hero-list", _, socket) do
+    {:noreply, assign(socket, heroes: socket.assigns.trained_heroes, heroes_tab: "trained")}
   end
 
   def handle_event("toggle-defensive", params, %{assigns: %{selected_team: team}} = socket) when not is_nil(team) do
@@ -117,7 +106,15 @@ defmodule MobaWeb.V2.ArenaLive do
 
   def handle_event("new-team", %{"team" => %{"name" => name}}, socket) do
     team = Game.create_team!(%{name: name, player_id: socket.assigns.current_player.id})
-    {:noreply, socket |> assign(teams: socket.assigns.teams ++ [team], selected_team: team) |> reset_team_form()}
+
+    {:noreply,
+     socket
+     |> assign(
+       teams: socket.assigns.teams ++ [team],
+       selected_team: team,
+       teams_page: div(length(socket.assigns.teams), if(socket.assigns.hero, do: 3, else: 5))
+     )
+     |> reset_team_form()}
   end
 
   def handle_event("select-team", %{"id" => id}, socket) do
@@ -130,33 +127,54 @@ defmodule MobaWeb.V2.ArenaLive do
   def handle_event("remove-team", _, %{assigns: %{selected_team: selected_team, teams: teams}} = socket) do
     Game.delete_team!(selected_team)
     teams = teams -- [selected_team]
-    {:noreply, assign(socket, selected_team: List.first(teams), teams: teams)}
+    {:noreply, assign(socket, selected_team: List.first(teams), teams: teams, teams_page: 0)}
   end
 
   def handle_event("edit-hero", %{"id" => id}, %{assigns: %{current_player: current_player}} = socket) do
     hero = Game.get_hero!(id)
 
     if hero.player_id == current_player.id do
-      {:noreply, assign(socket, hero: hero, editing: false, show_build: false, show_shop: false)}
+      {:noreply,
+       assign(socket, hero: hero, editing: false, show_build: false, show_shop: false, heroes_page: 0, teams_page: 0)}
     else
       {:noreply, socket}
     end
   end
 
-  def handle_event("add-hero", %{"id" => _id}, %{assigns: %{selected_team: nil}} = socket), do: {:noreply, socket}
+  def handle_event("close-customization", _, socket) do
+    {:noreply,
+     assign(socket, hero: nil, editing: false, show_build: false, show_shop: false, heroes_page: 0, teams_page: 0)}
+  end
 
-  def handle_event("add-hero", %{"id" => id}, socket) do
-    hero = Game.get_hero!(id)
+  def handle_event("source-page", %{"source" => source, "direction" => direction}, socket)
+      when source in ["teams", "heroes"] and direction in ["previous", "next"] do
+    {items, page_key, page_size} =
+      if source == "teams" do
+        {socket.assigns.teams, :teams_page, if(socket.assigns.hero, do: 3, else: 5)}
+      else
+        {socket.assigns.heroes, :heroes_page, heroes_per_page(socket.assigns.hero)}
+      end
 
-    if valid_addition?(hero, socket) do
-      selected_team = socket.assigns.selected_team
-      pick_ids = sanitize_pick_ids(selected_team.pick_ids ++ [hero.id])
-      team = Game.update_team!(selected_team, %{pick_ids: pick_ids})
+    step = if direction == "next", do: 1, else: -1
+    page = (socket.assigns[page_key] + step) |> max(0) |> min(div(max(length(items) - 1, 0), page_size))
+    {:noreply, assign(socket, page_key, page)}
+  end
+
+  def handle_event(
+        "add-hero",
+        %{"id" => id} = params,
+        %{assigns: %{selected_team: %{id: team_id} = selected_team, current_player: player}} = socket
+      ) do
+    with ^team_id <- Map.get(params, "lineup_id", team_id),
+         {:ok, hero_id} <- Ecto.Type.cast(:integer, id),
+         {:ok, team} <- Game.Teams.add_pick(player, selected_team, hero_id) do
       {:noreply, socket |> assign(selected_team: team) |> update_teams()}
     else
-      {:noreply, socket}
+      _ -> {:noreply, socket}
     end
   end
+
+  def handle_event("add-hero", _, socket), do: {:noreply, socket}
 
   def handle_event("remove-hero", %{"id" => _id}, %{assigns: %{selected_team: nil}} = socket), do: {:noreply, socket}
 
@@ -166,13 +184,23 @@ defmodule MobaWeb.V2.ArenaLive do
     {:noreply, socket |> assign(selected_team: team) |> update_teams()}
   end
 
-  def handle_event("move-up", %{"id" => id}, socket) do
-    {:noreply, move(String.to_integer(id), -1, socket)}
+  def handle_event(
+        "reorder-lineup",
+        %{"lineup_id" => id, "hero_ids" => ids},
+        %{assigns: %{live_action: :edit}} = socket
+      )
+      when is_list(ids) and length(ids) <= 3 do
+    %{selected_team: selected, current_player: player} = socket.assigns
+
+    with %{id: ^id} <- selected,
+         {:ok, team} <- Game.Teams.reorder_lineup(player, selected, ids) do
+      {:noreply, socket |> assign(selected_team: team) |> update_teams()}
+    else
+      _ -> {:noreply, socket}
+    end
   end
 
-  def handle_event("move-down", %{"id" => id}, socket) do
-    {:noreply, move(String.to_integer(id), 1, socket)}
-  end
+  def handle_event("reorder-lineup", _, socket), do: {:noreply, socket}
 
   def handle_event("sort", _, %{assigns: %{sort: sort, trained_heroes: trained_heroes}} = socket) do
     {sort, trained_heroes} =
@@ -183,7 +211,13 @@ defmodule MobaWeb.V2.ArenaLive do
       end
 
     {:noreply,
-     assign(socket, sort: sort, trained_heroes: trained_heroes, heroes: trained_heroes, heroes_tab: "trained")}
+     assign(socket,
+       sort: sort,
+       trained_heroes: trained_heroes,
+       heroes: trained_heroes,
+       heroes_tab: "trained",
+       heroes_page: 0
+     )}
   end
 
   def handle_event("start-edit", _, %{assigns: %{hero: hero}} = socket) when not is_nil(hero) do
@@ -227,6 +261,10 @@ defmodule MobaWeb.V2.ArenaLive do
 
   def handle_event("close-shop", _, socket) do
     {:noreply, assign(socket, show_shop: false)}
+  end
+
+  def handle_event("open-shop-item", %{"code" => code}, socket) do
+    {:noreply, open_shop_item(socket, socket.assigns.hero, code)}
   end
 
   def handle_event("level", _, %{assigns: %{hero: current, current_player: player}} = socket)
@@ -286,10 +324,6 @@ defmodule MobaWeb.V2.ArenaLive do
 
   def handle_event("finish-transmute", _, socket), do: {:noreply, socket}
 
-  def handle_info({:tutorial, %{step: step}}, socket) do
-    {:noreply, assign(socket, tutorial_step: step)}
-  end
-
   def handle_info(%{event: "presence_diff"}, socket), do: {:noreply, refresh_live_opponents(socket)}
 
   def handle_info({"availability", _}, %{assigns: %{live_action: :index, current_player: %{id: id}}} = socket) do
@@ -319,7 +353,7 @@ defmodule MobaWeb.V2.ArenaLive do
     duels = Game.list_duels(player)
     duel_opponents = opponents_from_presence(player)
     pending_duel = Game.Duels.pending_duel(player)
-    ranking_tab = Map.get(socket.assigns, :ranking_tab, "5v5")
+    ranking_tab = Map.get(socket.assigns, :ranking_tab, "3v3")
     ranking = ranking_for(ranking_tab)
 
     socket
@@ -329,14 +363,17 @@ defmodule MobaWeb.V2.ArenaLive do
       duels: duels,
       finished_duels: Enum.filter(duels, &(&1.phase == "finished")),
       reward_games: Game.Arena.daily_reward_games(player),
+      recent_results: Game.Matches.recent_results(player),
       duel_opponents: duel_opponents,
       pending_duel: pending_duel,
       ranking: ranking,
       ranking_tab: ranking_tab
     )
     |> list_matches()
-    |> TutorialComponent.next_step(30)
   end
+
+  defp heroes_per_page(nil), do: 24
+  defp heroes_per_page(_hero), do: 6
 
   defp assign_edit(%{assigns: %{current_player: player}} = socket, params) do
     teams = Game.list_teams(player)
@@ -358,6 +395,8 @@ defmodule MobaWeb.V2.ArenaLive do
       heroes: trained_heroes,
       trained_heroes: trained_heroes,
       teams: teams,
+      teams_page: 0,
+      heroes_page: 0,
       sort: :rank,
       selected_team: List.first(teams),
       return_match_id: return_match_id,
@@ -408,7 +447,7 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp opponents_from_presence(_), do: []
 
-  defp ranking_for("5v5"), do: Moba.daily_ranking()
+  defp ranking_for("3v3"), do: Moba.daily_ranking()
   defp ranking_for("1v1"), do: Game.season_points_ranking(Moba.daily_ranking_limit())
 
   defp arena_bracket(%{pvp_tier: 2}), do: "Immortals"
@@ -435,30 +474,6 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp arena_movement(_, _), do: nil
 
-  defp heroes_for(%{assigns: %{trained_heroes: trained_heroes}}, "trained")
-       when is_list(trained_heroes),
-       do: trained_heroes
-
-  defp heroes_for(%{assigns: %{current_player: player}}, "trained") do
-    Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking)
-  end
-
-  defp heroes_for(_, _), do: Moba.pve_ranking_available()
-
-  defp move(_hero_id, _slide, %{assigns: %{selected_team: nil}} = socket), do: socket
-
-  defp move(hero_id, slide, %{assigns: %{selected_team: selected_team}} = socket) do
-    index = Enum.find_index(selected_team.pick_ids, &(&1 == hero_id))
-
-    if is_nil(index) or index + slide < 0 or index + slide >= length(selected_team.pick_ids) do
-      socket
-    else
-      pick_ids = Enum.slide(selected_team.pick_ids, index, index + slide)
-      team = Game.update_team!(selected_team, %{pick_ids: pick_ids})
-      socket |> assign(selected_team: team) |> update_teams()
-    end
-  end
-
   defp update_teams(%{assigns: %{teams: teams, selected_team: %{id: selected_id} = selected}} = socket) do
     teams =
       Enum.map(teams, fn
@@ -476,7 +491,7 @@ defmodule MobaWeb.V2.ArenaLive do
     trained_heroes = Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking)
     selected_team_id = socket.assigns.selected_team && socket.assigns.selected_team.id
     selected_team = Enum.find(teams, &(&1.id == selected_team_id)) || List.first(teams)
-    heroes = if socket.assigns.heroes_tab == "trained", do: trained_heroes, else: Moba.pve_ranking_available()
+    heroes = trained_heroes
 
     assign(socket,
       hero: hero,
@@ -489,16 +504,7 @@ defmodule MobaWeb.V2.ArenaLive do
     )
   end
 
-  defp valid_addition?(hero, %{assigns: %{selected_team: selected_team, current_player: current_player}})
-       when not is_nil(selected_team) do
-    Moba.Game.Matches.selectable_heroes(%{generated_picks: []}, current_player, [hero.id]) != [] &&
-      length(selected_team.picks) < 5 &&
-      not Enum.member?(selected_team.pick_ids, hero.id)
-  end
-
-  defp valid_addition?(_, _), do: false
-
-  defp sanitize_pick_ids(pick_ids), do: Enum.uniq(pick_ids)
+  defp sanitize_pick_ids(pick_ids), do: pick_ids |> Enum.uniq() |> Enum.take(3)
 
   defp reset_team_form(socket), do: assign(socket, team_form: to_form(%{"name" => ""}, as: :team))
 
@@ -508,10 +514,14 @@ defmodule MobaWeb.V2.ArenaLive do
     Timex.diff(Timex.shift(time, seconds: 30), current_time) < 0
   end
 
-  defp auto_matches_percentage(auto_matches), do: length(auto_matches) * 100 / Moba.daily_match_limit()
-  defp manual_matches_percentage(manual_matches), do: length(manual_matches) * 100 / Moba.daily_match_limit()
-  defp total_win_rate(%{total_matches: 0}), do: 0
-  defp total_win_rate(player), do: trunc(player.total_wins * 100 / player.total_matches)
+  defp match_progress_percentage(matches, other_matches) do
+    count = length(matches)
+    count * 100 / max(Moba.daily_match_limit(), count + length(other_matches))
+  end
+
+  defp manual_match_limit_reached?(player, manual_matches) do
+    player.daily_matches > Moba.daily_match_limit() || length(manual_matches) >= Moba.daily_match_limit()
+  end
 
   defp params_to_order(nil), do: []
 

@@ -7,10 +7,9 @@ defmodule MobaWeb.ChannelCase do
   import other functionality to make it easier
   to build common data structures and query the data layer.
 
-  Finally, if the test case interacts with the database,
-  it cannot be async. For this reason, every test runs
-  inside a transaction which is reset at the beginning
-  of the test unless the test case is marked as async.
+  Database tests can run asynchronously in isolated SQL Sandbox transactions.
+  Use synchronous tests when changing shared cache keys, application settings,
+  or other global state; database access alone does not require serialization.
   """
 
   use ExUnit.CaseTemplate

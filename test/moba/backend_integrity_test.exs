@@ -107,7 +107,43 @@ defmodule Moba.BackendIntegrityTest do
     assert Moba.reward_shards!(stale, 20).shard_count == 20
   end
 
-  test "a valid 5v5 lineup finishes and can only be scored once" do
+  test "a valid 3v3 lineup finishes and can only be scored once" do
+    player = create_player!()
+    opponent = create_player!()
+
+    picks =
+      for _ <- 1..3 do
+        Game.create_hero!(
+          %{name: "Ready", finished_at: Timex.now(), league_tier: 6},
+          player,
+          strong_avatar(),
+          base_skills()
+        )
+      end
+
+    others = for _ <- 1..3, do: Game.create_hero!(%{name: "Opponent"}, opponent, weak_avatar(), base_skills())
+
+    match =
+      Moba.Game.Matches.create!(%{
+        player_id: player.id,
+        opponent_id: opponent.id,
+        player_picks: [],
+        opponent_picks: Enum.map(others, & &1.id),
+        generated_picks: [],
+        type: "manual"
+      })
+
+    ids = Enum.map(picks, & &1.id)
+    assert {:ok, finished} = Game.start_match(match, player, ids)
+    assert finished.phase == "scored"
+    assert finished.winner_id == player.id
+    assert Game.get_player!(player.id).total_matches == 1
+    assert {:error, :invalid_lineup} = Game.start_match(match, player, ids)
+    Game.continue_match!(match)
+    assert Game.get_player!(player.id).total_matches == 1
+  end
+
+  test "a historical 5v5 match retains its five-hero win condition" do
     player = create_player!()
     opponent = create_player!()
 
@@ -125,6 +161,7 @@ defmodule Moba.BackendIntegrityTest do
 
     match =
       Moba.Game.Matches.create!(%{
+        team_size: 5,
         player_id: player.id,
         opponent_id: opponent.id,
         player_picks: [],

@@ -32,7 +32,7 @@ module.exports = (env, options) => {
               loader: 'css-loader',
               options: {
                 // CopyWebpackPlugin publishes these assets at their public URLs.
-                url: url => !url.startsWith('/images/ui/') && !url.startsWith('/fonts/nunito/')
+                url: url => !url.startsWith('/images/ui/') && !url.startsWith('/images/emblems/') && !url.startsWith('/fonts/nunito/')
               }
             },
             'sass-loader',

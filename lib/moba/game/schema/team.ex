@@ -15,6 +15,7 @@ defmodule Moba.Game.Schema.Team do
     field :used_count, :integer, default: 0
 
     belongs_to :player, Game.Schema.Player
+    belongs_to :training_team, Game.Schema.TrainingTeam
 
     timestamps()
   end
@@ -22,5 +23,6 @@ defmodule Moba.Game.Schema.Team do
   def changeset(team, attrs) do
     team
     |> cast(attrs, [:name, :defensive, :pick_ids, :used_count, :player_id])
+    |> validate_length(:pick_ids, max: 3)
   end
 end

@@ -5,6 +5,7 @@ defmodule Test.CombatCase do
 
   Single turns run without database access. Multi-turn tests use the real turn
   builder and JSON persistence format, with a sandboxed resource version/cache.
+  The exhaustive matrix uses an immutable lookup and checks persistence separately.
   Only proc probabilities are overridden to exercise guaranteed success/failure;
   each scenario also seeds the RNG for random damage ranges.
   """
@@ -80,14 +81,33 @@ defmodule Test.CombatCase do
     }
   end
 
-  def step(battle, skill \\ nil, item \\ nil, prepare \\ &Function.identity/1) do
+  def step(battle, skill \\ nil, item \\ nil, prepare \\ &Function.identity/1),
+    do: step(battle, skill, item, prepare, true, &Moba.load_resource/2)
+
+  def step_in_memory(battle, skill \\ nil, item \\ nil),
+    do: step(battle, skill, item, &Function.identity/1, false, &resource/2)
+
+  def step_saved(battle, skill \\ nil, item \\ nil),
+    do: step(battle, skill, item, &Function.identity/1, true, &resource/2)
+
+  defp step(battle, skill, item, prepare, persist?, resolve_resource) do
     result =
-      battle |> Turns.build_turn(%{auto: false, skill: skill, item: item}) |> prepare.() |> Processor.process_turn()
+      battle
+      |> Turns.build_turn(%{auto: false, skill: skill, item: item}, resolve_resource)
+      |> prepare.()
+      |> Processor.process_turn()
 
     saved = Turns.serialize(result)
-    saved = %{saved | attacker: roundtrip(saved.attacker), defender: roundtrip(saved.defender)}
+
+    saved =
+      if persist?, do: %{saved | attacker: roundtrip(saved.attacker), defender: roundtrip(saved.defender)}, else: saved
+
     {%{battle | turns: battle.turns ++ [saved]}, result}
   end
+
+  defp resource(nil, _), do: nil
+  defp resource("evade", _), do: Moba.evade()
+  defp resource(code, level), do: Enum.find(resources(), &(&1.code == code && (is_nil(level) || &1.level == level)))
 
   def roundtrip(%Battler{} = battler) do
     battler

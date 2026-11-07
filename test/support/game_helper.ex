@@ -21,6 +21,12 @@ defmodule Test.GameHelper do
 
   def build_base_hero(attrs \\ %{}), do: Map.merge(%Game.Schema.Hero{}, attrs)
 
+  # Persist only the combat loadout. Creation/target-generation tests use create_base_hero/3.
+  def create_combat_hero(attrs \\ %{}, player \\ create_player!(), avatar \\ base_avatar()) do
+    Game.Heroes.create!(Map.merge(%{name: "Test"}, attrs), player, avatar, base_skills())
+    |> then(&Game.get_hero!(&1.id))
+  end
+
   def base_avatar, do: Game.get_avatar_by_code!("phantom_assassin")
 
   def weak_avatar do
