@@ -215,7 +215,7 @@ defmodule MobaWeb.V2.TavernLive do
 
   defp tavern_roster(assigns) do
     ~H"""
-    <div :if={@avatars != []} class="manual-roster">
+    <div :if={@avatars != []} class="tavern-roster">
       <div class="manual-avatar-grid" role="group" aria-label="Choose an avatar">
         <button
           :for={avatar <- @avatars}
@@ -224,6 +224,7 @@ defmodule MobaWeb.V2.TavernLive do
           phx-click={@event}
           phx-value-code={avatar.code}
           aria-pressed={to_string(@selected && @selected.id == avatar.id)}
+          title={avatar.name}
         >
           <img src={GH.image_url(avatar)} alt="" />
           <span>{avatar.name}</span>

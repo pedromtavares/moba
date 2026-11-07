@@ -49,6 +49,7 @@
       role="tabpanel"
       aria-labelledby="show-avatars-link"
     >
+      <.tavern_roster avatars={@avatars} selected={@selected_avatar} event="browse-avatar" />
       <.tavern_avatar_card
         :if={@selected_avatar}
         avatar={@selected_avatar}
@@ -57,7 +58,6 @@
         featured={@selected_avatar == @featured_avatar}
       />
       <p :if={!@selected_avatar} class="tavern-catalog-empty">No avatars available to unlock.</p>
-      <.tavern_roster avatars={@avatars} selected={@selected_avatar} event="browse-avatar" />
     </section>
 
     <section
@@ -67,6 +67,7 @@
       role="tabpanel"
       aria-labelledby="show-skins-link"
     >
+      <.tavern_roster avatars={@all_avatars} selected={@current_avatar} event="set-avatar" />
       <%= if @current_skin do %>
         <div class="tavern-skin-stage">
           <div class="tavern-skin-art" style={"--skin-art: url(#{GH.background_url(@current_skin)})"}>
@@ -117,7 +118,6 @@
           {if @current_avatar, do: "No skins available for #{@current_avatar.name}.", else: "No skins available."}
         </p>
       <% end %>
-      <.tavern_roster avatars={@all_avatars} selected={@current_avatar} event="set-avatar" />
     </section>
   </main>
 </Layouts.app>

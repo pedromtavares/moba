@@ -18,7 +18,10 @@ defmodule Moba.Repo.Migrations.CinematicArenaMatchesAndTrainingRosters do
     create unique_index(:teams, [:training_team_id])
 
     # Saved Arena lineups use three slots; historical Match records keep their original sizes.
-    execute "UPDATE teams SET pick_ids = jsonb_path_query_array(pick_ids, '$[0 to 2]') WHERE jsonb_array_length(pick_ids) > 3"
+    execute """
+    UPDATE teams SET pick_ids = jsonb_build_array(pick_ids -> 0, pick_ids -> 1, pick_ids -> 2)
+    WHERE jsonb_array_length(pick_ids) > 3
+    """
 
     execute """
     INSERT INTO teams (name, player_id, training_team_id, pick_ids, defensive, used_count, inserted_at, updated_at)

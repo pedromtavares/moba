@@ -36,7 +36,10 @@ defmodule Moba.Repo.Migrations.IntegratePublicTeamTraining do
       modify :team_size, :integer, default: 3, from: {:integer, default: 5}
     end
 
-    execute "UPDATE teams SET pick_ids = jsonb_path_query_array(pick_ids, '$[0 to 2]') WHERE jsonb_array_length(pick_ids) > 3",
+    execute """
+            UPDATE teams SET pick_ids = jsonb_build_array(pick_ids -> 0, pick_ids -> 1, pick_ids -> 2)
+            WHERE jsonb_array_length(pick_ids) > 3
+            """,
             "SELECT 1"
   end
 end

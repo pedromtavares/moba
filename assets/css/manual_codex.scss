@@ -347,7 +347,7 @@ body:has(.game-page .catalog-viewport) {
 
   .tavern-catalog-panel {
     display: grid;
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
     min-height: 0;
     min-width: 0;
     container-type: size;
@@ -355,13 +355,33 @@ body:has(.game-page .catalog-viewport) {
     border-radius: 12px;
     background: linear-gradient(145deg, #172333eb, #0a121fed);
   }
+  .tavern-catalog-panel:has(> .tavern-roster) {
+    grid-template-columns: clamp(145px, 22%, 320px) minmax(0, 1fr);
+  }
+  .tavern-roster {
+    min-height: 0;
+    padding: clamp(6px, 1.6cqh, 12px);
+    border-right: 1px solid var(--manual-line);
+    border-radius: 11px 0 0 11px;
+    background: #0a1321c7;
+  }
+  .tavern-roster .manual-avatar-grid {
+    height: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(0, 1fr);
+  }
+  .tavern-roster button { min-height: 0; }
+  .tavern-roster img { position: absolute; inset: 0; height: 100%; }
+  .tavern-roster span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tavern-roster button[aria-pressed=true] { z-index: 1; }
   :is(.tavern-avatar-stage, .tavern-skin-stage) {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 34%);
     min-width: 0;
     min-height: 0;
-    border-radius: 11px 11px 0 0;
+    border-radius: 0 11px 11px 0;
   }
+  .tavern-catalog-panel:not(:has(> .tavern-roster)) :is(.tavern-avatar-stage, .tavern-skin-stage) { border-radius: 11px; }
   .tavern-avatar-stage {
     align-items: end;
     gap: clamp(8px, 2vw, 24px);
@@ -434,11 +454,10 @@ body:has(.game-page .catalog-viewport) {
   .tavern-skin-art {
     min-width: 0;
     min-height: 0;
-    border-radius: 11px 0 0;
     background: linear-gradient(#08111cbe, #08111cef), var(--skin-art) center / cover;
   }
   .tavern-skin-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
-  .tavern-skin-stage .tavern-catalog-readout { align-content: center; border-width: 0 0 0 1px; border-radius: 0 11px 0 0; }
+  .tavern-skin-stage .tavern-catalog-readout { align-content: center; border-width: 0 0 0 1px; border-radius: 0 11px 11px 0; }
   .tavern-skin-stage h2 { font-size: clamp(23px, 3vw, 44px); }
   .tavern-skin-league { display: flex; align-items: center; gap: 6px; color: var(--manual-gold); font-weight: 800; }
   .tavern-skin-league img { width: 25px; height: 25px; object-fit: contain; }
@@ -454,7 +473,20 @@ body:has(.game-page .catalog-viewport) {
   .game-page #tavern.catalog-viewport {
     #tavern-heading { grid-template-columns: minmax(0, 1fr) auto; }
     .tavern-heading-guide { display: none; }
-    :is(.tavern-avatar-stage, .tavern-skin-stage) { grid-template-columns: minmax(0, 1fr) minmax(0, 43%); }
+    :is(.tavern-avatar-stage, .tavern-skin-stage) { grid-template-columns: minmax(0, 1fr) minmax(0, max(43%, 188px)); }
+  }
+}
+
+@media (max-width: 767px) {
+  .game-page #tavern.catalog-viewport {
+    .tavern-catalog-panel:has(> .tavern-roster) {
+      grid-template: min(32%, 154px) minmax(0, 1fr) / minmax(0, 1fr);
+    }
+    .tavern-roster { border-width: 0 0 1px; border-style: solid; border-radius: 11px 11px 0 0; }
+    .tavern-roster .manual-avatar-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
+    .tavern-roster span { padding: 4px 2px 2px; }
+    :is(.tavern-avatar-stage, .tavern-skin-stage) { border-radius: 0 0 11px 11px; }
+    .tavern-skin-stage .tavern-catalog-readout { border-radius: 0 0 11px 0; }
   }
 }
 
@@ -469,7 +501,7 @@ body:has(.game-page .catalog-viewport) {
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
       border-width: 1px 0 0;
-      border-radius: 0;
+      border-radius: 0 0 11px 11px;
     }
     .tavern-skin-stage :is(.tavern-unlock, .tavern-owned) { grid-column: 1 / -1; }
     .tavern-skin-nav { gap: 5px; }
