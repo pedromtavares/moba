@@ -4,6 +4,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
   import MobaWeb.CoreComponents, only: [icon: 1]
   import MobaWeb.V2.Components.HeroBarComponents, only: [hero_bar: 1]
   alias Moba.Game.{TeamRuns, TeamTraining, TrainingEncounters}
+  alias Moba.Game.Training.Loadouts
   alias MobaWeb.V2.Components.TrainingComponents
   alias Phoenix.LiveView.JS
 
@@ -223,6 +224,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
         roshan: TeamTraining.boss_preview(run),
         onboarding_guest: onboarding_guest,
         battle_guide_hero: if(onboarding_guest, do: battle_guide_hero(run, encounters)),
+        max_level_guides: max_level_guides(run),
         skill_guide_hero:
           if(run.phase == :playing && run.turns_left == 0 && TeamTraining.roster_alive?(run),
             do: List.first(TeamTraining.pending_skill_heroes(run))
@@ -242,10 +244,29 @@ defmodule MobaWeb.V2.TrainingLive.Team do
     practiced =
       for %{kind: :farm, status: :finished, recipient: id} <- encounters, into: MapSet.new(), do: id
 
-    Enum.find(run.order, fn id -> id not in practiced and not TeamTraining.dead?(run.heroes[id]) end)
+    Enum.find(run.order, fn id -> id not in practiced and TeamTraining.can_battle_target?(run, run.heroes[id]) end)
   end
 
   defp battle_guide_hero(_, _), do: nil
+
+  defp max_level_guides(%{phase: :playing, reward_mode: :focus, turns_left: turns} = run) when turns > 0 do
+    {available, blocked} = Enum.split_with(TeamTraining.team(run), &TeamTraining.can_battle_target?(run, &1))
+
+    for hero <- blocked, not TeamTraining.dead?(hero), into: %{} do
+      next = Enum.min_by(available, &{abs(&1.id - hero.id), -&1.id}, fn -> nil end)
+      {hero.id, next && next.id}
+    end
+  end
+
+  defp max_level_guides(_), do: %{}
+
+  defp tab_level(hero) do
+    cond do
+      TeamTraining.dead?(hero) -> "Dead · Buyback"
+      Loadouts.max_level?(hero.hero) -> "MAX"
+      true -> "Lv #{hero.hero.level}"
+    end
+  end
 
   defp hero_panel(assigns) do
     run = %{assigns.run | selected: assigns.hero.id}
@@ -259,6 +280,8 @@ defmodule MobaWeb.V2.TrainingLive.Team do
     |> assign(
       run: run,
       selected: assigns.hero,
+      focus_target_locked: TeamTraining.focus_target_locked?(run, assigns.hero),
+      max_level: Loadouts.max_level?(assigns.hero.hero),
       skill_guidance: if(assigns.skill_guide_hero, do: select_hero(guide_hero.id)),
       id_prefix: if(assigns.hero.id == 1, do: "", else: "team-#{assigns.hero.id}"),
       editing: Map.get(assigns.ui, :editing, false),

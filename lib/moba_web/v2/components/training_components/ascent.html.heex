@@ -150,7 +150,10 @@
       />
     </div>
     <p
-      :if={!@history && !@battle_pending && @current_hero.pve_state == "alive" && @current_hero.pve_current_turns > 0}
+      :if={
+        !@history && !@battle_pending && !@target_battles_locked && @current_hero.pve_state == "alive" &&
+          @current_hero.pve_current_turns > 0
+      }
       id={GH.dom_id(@id_prefix, "training-controls-hint")}
       class="ascent-controls-hint"
     >

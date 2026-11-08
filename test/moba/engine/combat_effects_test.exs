@@ -100,7 +100,7 @@ defmodule Moba.Engine.CombatEffectsTest do
 
     assert evaded.defender.evaded
     assert evaded.defender.damage == 0
-    assert evaded.defender.future_cooldowns["evade"] == 2
+    assert evaded.defender.future_cooldowns["evade"] == 3
 
     cooling =
       resolve([shuriken], [], shuriken, nil, fn turn ->

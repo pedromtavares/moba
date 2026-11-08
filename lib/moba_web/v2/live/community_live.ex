@@ -173,27 +173,36 @@ defmodule MobaWeb.V2.CommunityLive do
     ~H"""
     <.link
       id={"community-team-#{@team.id}"}
-      class="community-team-card"
+      class="community-player-card community-ranked-card community-team-card"
       data-community-entry
       navigate={preview_path(assigns, ~p"/teams/#{@team.id}")}
     >
-      <div class="community-team-portraits" aria-hidden="true">
-        <div :for={hero <- @team.heroes} style={"background-image: url(#{GH.background_url(hero)})"}></div>
+      <div class="community-player-banner community-team-banner">
+        <header class="community-player-heading">
+          <h3 class="community-player-name">
+            <img
+              src={"/images/league/#{@team.league_tier}.png"}
+              alt={Moba.leagues()[@team.league_tier]}
+              class="community-player-emblem"
+            />
+            <strong>{TeamComponents.display_name(@team)}</strong>
+          </h3>
+          <span class="community-player-rank">#{@entry.position}</span>
+        </header>
+        <div class="community-team-portraits">
+          <div :for={hero <- @team.heroes} style={"--team-hero-art: url(#{GH.background_url(hero)})"}>
+            <span>{hero.avatar.name}</span>
+          </div>
+        </div>
       </div>
-      <header>
-        <img src={"/images/league/#{@team.league_tier}.png"} alt={Moba.leagues()[@team.league_tier]} />
-        <h3>{TeamComponents.display_name(@team)}</h3>
-        <span class="community-player-rank">#{@entry.position}</span>
-      </header>
-      <footer>
-        <p>{Enum.map_join(@team.heroes, " · ", & &1.avatar.name)}</p>
-        <dl>
-          <div>
-            <dt>Avg farm</dt>
+      <footer class="community-ranking-footer">
+        <dl class="player-card-metrics community-team-metrics">
+          <div data-tone="streak">
+            <dt><.icon name="game-gold" /><span>Avg farm</span></dt>
             <dd>{GH.farming_amount_label(div(@team.total_farm, 3))}</dd>
           </div>
-          <div>
-            <dt>Time</dt>
+          <div data-tone="wins">
+            <dt><.icon name="game-clock" /><span>Time</span></dt>
             <dd title={"#{@team.duration_seconds} seconds"}>
               {GH.minutes_label(div(@team.duration_seconds, 60), @preview)} min
             </dd>

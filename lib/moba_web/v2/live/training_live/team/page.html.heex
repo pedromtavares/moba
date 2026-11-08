@@ -35,6 +35,7 @@
           initial_hero={@initial_hero}
           battle_guide_hero={@battle_guide_hero}
           skill_guide_hero={@skill_guide_hero}
+          max_level_guide={@max_level_guides[hero.id]}
           onboarding_guest={@onboarding_guest}
           current_player={@current_player}
           show_log={@show_log}
@@ -148,7 +149,9 @@
           <img src={GH.image_url(h.hero.avatar)} alt={h.hero.avatar.name} />
           <kbd class="team-tab-hotkey" aria-hidden="true">{h.id}</kbd>
           <span>
-            <strong>{h.hero.avatar.name}</strong><small>{if TeamTraining.dead?(h), do: "Dead · Buyback", else: "Lv #{h.hero.level}"}</small>
+            <strong>{h.hero.avatar.name}</strong><small class={
+              Loadouts.max_level?(h.hero) && !TeamTraining.dead?(h) && "team-tab-max"
+            }>{tab_level(h)}</small>
           </span>
           <b
             :if={h.hero.skill_levels_available > 0}
@@ -158,6 +161,17 @@
             +{h.hero.skill_levels_available}
           </b>
         </button>
+        <span
+          :for={{from, to} <- @max_level_guides}
+          :if={to}
+          id={"max-level-hero-arrow-#{from}"}
+          class="skill-guidance-arrow max-level-hero-arrow"
+          data-max-guide-from={from}
+          data-max-guide-to={to}
+          style={"left: #{(to - 0.5) * 100 / 3}%"}
+          aria-hidden="true"
+        >
+        </span>
         <span
           :if={@battle_guide_hero}
           id={"first-battle-hero-arrow-#{@battle_guide_hero}"}

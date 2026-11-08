@@ -265,7 +265,7 @@ defmodule Moba.Game.TeamTrainingTest do
   end
 
   test "gold and XP overflow independently as soon as their own cap is reached", %{scope: scope, run: run} do
-    for {gold, xp} <- [{30_000, 0}, {0, 37_700}, {30_000, 37_700}] do
+    for {gold, xp} <- [{30_000, 0}, {0, 37_699}, {30_000, 37_699}] do
       run = run |> grant(1, gold, xp) |> easy_target(1, 2) |> TeamTraining.reward_mode(:focus)
       target = Enum.at(run.targets[1], 2)
       finished = TeamTraining.battle(run, target.id) |> finish_team(scope)
@@ -275,7 +275,7 @@ defmodule Moba.Game.TeamTrainingTest do
 
       for id <- [2, 3] do
         assert finished.heroes[id].hero.total_gold_farm == if(gold == 30_000, do: 900, else: 0)
-        assert finished.heroes[id].hero.total_xp_farm == if(xp == 37_700, do: 900, else: 0)
+        assert finished.heroes[id].hero.total_xp_farm == if(xp == 37_699, do: if(id == 2, do: 900, else: 899), else: 0)
       end
 
       assert Enum.sum(Enum.map(TeamTraining.team(finished), & &1.hero.total_gold_farm)) == gold + target.reward
@@ -285,7 +285,7 @@ defmodule Moba.Game.TeamTrainingTest do
 
   test "overflow cascades past a nearly capped teammate without losing odd reward amounts", %{scope: scope, run: run} do
     run =
-      run |> grant(1, 30_000, 37_700) |> grant(2, 29_990, 37_695) |> easy_target() |> TeamTraining.reward_mode(:focus)
+      run |> grant(1, 30_000, 37_699) |> grant(2, 29_990, 37_695) |> easy_target() |> TeamTraining.reward_mode(:focus)
 
     target = hd(run.targets[1])
     run = put_in(run.targets[1], [%{target | reward: 1801} | tl(run.targets[1])])
@@ -294,8 +294,14 @@ defmodule Moba.Game.TeamTrainingTest do
     assert finished.heroes[2].hero.total_xp_farm == 37_700
     assert finished.heroes[2].hero.level == 30
     assert finished.heroes[3].hero.total_gold_farm == 1791
-    assert finished.heroes[3].hero.total_xp_farm == 1796
-    assert finished.last_result.rewards == [{2, %{gold: 10, xp: 5}}, {3, %{gold: 1791, xp: 1796}}]
+    assert finished.heroes[3].hero.total_xp_farm == 1795
+
+    assert finished.last_result.rewards == [
+             {1, %{gold: 0, xp: 1}},
+             {2, %{gold: 10, xp: 5}},
+             {3, %{gold: 1791, xp: 1795}}
+           ]
+
     assert hd(finished.encounters).reward_totals == %{gold: 1801, xp: 1801}
   end
 
@@ -479,6 +485,21 @@ defmodule Moba.Game.TeamTrainingTest do
 
     pending = TeamTraining.league(%{run | turns_left: 0, league_tier: 3, goal: 5})
     assert [_, _, %{hero: %{level: 16, bot_difficulty: "strong"}}] = TeamTraining.active_encounter(pending).dire
+  end
+
+  test "league opponents scale with the midpoint of the roster's average and highest farm", %{run: run} do
+    ready = %{run | turns_left: 0}
+
+    for {farm, levels} <- [{[2600, 2600, 2600], [3, 4, 5]}, {[7800, 0, 0], [5, 6, 7]}] do
+      scaled =
+        Enum.zip(ready.order, farm)
+        |> Enum.reduce(ready, fn {id, amount}, acc ->
+          update_in(acc.heroes[id].hero, &%{&1 | total_gold_farm: amount, total_xp_farm: amount})
+        end)
+
+      encounter = scaled |> TeamTraining.league() |> TeamTraining.active_encounter()
+      assert Enum.map(encounter.dire, & &1.hero.level) == levels
+    end
   end
 
   test "a target loss refunds its turn and requires a non-beginner hero to buy back", %{scope: scope, run: run} do

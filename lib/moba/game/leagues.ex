@@ -19,8 +19,11 @@ defmodule Moba.Game.Leagues do
 
   def league_defender_for(%{id: id, league_tier: tier, league_step: step}) do
     {level, difficulty} = defender_profile(tier, step)
-    HeroQuery.league_defender(id, level, difficulty) |> Repo.one()
+    defender_for_level(id, level, difficulty)
   end
+
+  def defender_for_level(attacker_id, level, difficulty),
+    do: HeroQuery.league_defender(attacker_id, level, difficulty) |> Repo.one()
 
   def defender_profile(tier, step) do
     level = base_level(tier)

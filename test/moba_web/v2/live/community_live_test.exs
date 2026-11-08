@@ -31,9 +31,10 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     card = "#community-teams #community-team-#{finished.id}"
     assert has_element?(view, "#{card}[href='/teams/#{finished.id}']", "Moonwatch")
-    assert has_element?(view, "#{card} .community-player-rank", "#1")
-    assert has_element?(view, "#{card} footer", "Avg farm")
-    assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3)")
+    assert has_element?(view, "#{card} header .community-player-rank", "#1")
+    assert has_element?(view, "#{card} .community-ranking-footer dt", "Avg farm")
+    assert has_element?(view, "#{card} .community-ranking-footer dt", "Time")
+    assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3) span")
     refute has_element?(view, "#community-team-#{unfinished.id}")
   end
 

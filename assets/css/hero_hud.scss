@@ -48,6 +48,9 @@
   .hud-level { color: #eff7fa; font-size: 17px; font-weight: 700; white-space: nowrap; }
   .hud-level strong { margin-left: 4px; font-size: 26px; font-weight: 900; }
   .hud-experience-value { color: #d3e1e7; font-size: 14px; font-weight: 700; text-shadow: 0 1px 3px #000; }
+  .hud-experience-max { border-color: #dcba77aa; }
+  .hud-experience-max .hud-experience-fill { background: linear-gradient(90deg, #4c361f, #795a30); border: 0; }
+  .hud-experience-max .hud-experience-value { color: #ffe0a0; font-weight: 900; }
 
   .hud-build .skills-container { display: flex; gap: 8px; width: 100%; max-width: 392px; margin: 0 auto !important; }
   .hud-build .skill-container { float: none; flex: 1; min-width: 0; position: relative; }

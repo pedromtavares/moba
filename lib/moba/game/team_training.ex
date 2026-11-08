@@ -146,6 +146,8 @@ defmodule Moba.Game.TeamTraining do
   def pending_skill_heroes(run), do: Enum.filter(team(run), &(&1.hero.skill_levels_available > 0))
   def dead?(h), do: h.hero.pve_state == "dead" || h.hp <= 0
   def roster_alive?(run), do: Enum.all?(team(run), &(!dead?(&1)))
+  def focus_target_locked?(run, h), do: run.reward_mode == :focus && Loadouts.max_level?(h.hero)
+  def can_battle_target?(run, h), do: !dead?(h) && !focus_target_locked?(run, h)
   def active_encounter(%{phase: :engagement, encounters: encounters}), do: List.last(encounters)
   def active_encounter(_), do: nil
 
@@ -216,7 +218,8 @@ defmodule Moba.Game.TeamTraining do
 
   def battle(%{phase: :playing, turns_left: left} = run, target_id) when left > 0 do
     target =
-      unless dead?(run.heroes[run.selected]), do: Enum.find(run.targets[run.selected] || [], &(&1.id == target_id))
+      if can_battle_target?(run, run.heroes[run.selected]),
+        do: Enum.find(run.targets[run.selected] || [], &(&1.id == target_id))
 
     case target do
       nil ->
@@ -643,12 +646,16 @@ defmodule Moba.Game.TeamTraining do
   defp league_opponents(run) do
     tier = run.league_tier
     last = Leagues.max_league_step_for(tier)
+    {last_level, _} = Leagues.defender_profile(tier, last)
+    level_bonus = max(0, league_farm_level(run) - last_level)
 
     # Solo starts at step 1. The Silver challenge uses step 0 to fill its third slot.
     for {step, id} <- Enum.with_index((last - 2)..last, 2000) do
-      case Leagues.league_defender_for(%{id: -1, league_tier: tier, league_step: step}) do
+      {level, difficulty} = Leagues.defender_profile(tier, step)
+      level = level + level_bonus
+
+      case Leagues.defender_for_level(-1, level, difficulty) do
         nil ->
-          {level, difficulty} = Leagues.defender_profile(tier, step)
           avatar = Enum.random(run.catalog.avatars)
           xp = Enum.sum(Enum.map(2..level, &Game.xp_to_next_hero_level/1))
           league_tier = Leagues.league_tier_for(level)
@@ -663,6 +670,24 @@ defmodule Moba.Game.TeamTraining do
           |> wrap_opponent(id)
       end
     end
+  end
+
+  defp league_farm_level(run) do
+    farms = Enum.map(team(run), &(&1.hero.total_gold_farm + &1.hero.total_xp_farm))
+    average = div(Enum.sum(farms), length(farms))
+    # Use the same Gold/XP scale as normal targets, then anchor the final opponent to that farm.
+    farm = div(Enum.max(farms) + average, 4)
+
+    {level, _} =
+      Enum.reduce_while(2..30, {1, farm}, fn next, {level, remaining} ->
+        cost = Game.xp_to_next_hero_level(next)
+
+        if remaining >= cost,
+          do: {:cont, {next, remaining - cost}},
+          else: {:halt, {level, remaining}}
+      end)
+
+    level
   end
 
   defp boss(run) do

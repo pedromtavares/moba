@@ -78,34 +78,6 @@ body:has(.game-page #community) {
     transition: border-color .18s;
   }
   .community-player-card:is(:hover, :focus-within, [data-current=true]) { border-color: #d7b9789c; }
-  .community-team-card {
-    position: relative;
-    isolation: isolate;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    gap: 6px;
-    min-width: 0;
-    overflow: clip;
-    border: 1px solid var(--community-line);
-    border-radius: 9px;
-    background: #0a1422;
-    color: #f6efdf;
-    transition: border-color .18s;
-  }
-  .community-team-card:is(:hover, :focus-visible) { border-color: #d7b9789c; color: #ffe4aa; }
-  .community-team-portraits { position: absolute; z-index: -1; inset: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; }
-  .community-team-portraits > div { background-size: cover; background-position: center 34%; }
-  .community-team-portraits::after { content: ''; position: absolute; inset: 0; background: linear-gradient(#060c17da, #080f1926 55%, #080f19b3); }
-  .community-team-card > header { display: flex; align-items: center; gap: 7px; padding: 8px 10px; text-shadow: 0 1px 5px #000; }
-  .community-team-card > header img { flex: none; width: 24px; height: 24px; object-fit: contain; }
-  .community-team-card h3 { flex: 1; margin: 0; overflow: hidden; color: inherit; font: 900 clamp(15px, 1.65vw, 25px)/1.15 'Nunito', sans-serif; text-overflow: ellipsis; white-space: nowrap; }
-  .community-team-card > footer { display: grid; gap: 3px; padding: 5px 10px; border-top: 1px solid var(--community-line); background: #0a1422ed; }
-  .community-team-card > footer p { margin: 0; overflow: hidden; color: #d4deea; font-size: 11px; text-overflow: ellipsis; white-space: nowrap; }
-  .community-team-card dl { display: flex; justify-content: space-between; gap: 4px 12px; margin: 0; }
-  .community-team-card dl > div { display: flex; align-items: baseline; gap: 5px; white-space: nowrap; }
-  .community-team-card dt { color: #abb9c8; font-size: 10px; }
-  .community-team-card dd { margin: 0; color: var(--community-gold); font-size: 13px; font-weight: 900; }
   .community-player-banner {
     position: relative;
     display: flex;
@@ -163,6 +135,34 @@ body:has(.game-page #community) {
     position: static;
     background: linear-gradient(180deg, #060a12ec, #060a1245 45%, transparent 72%), var(--player-art) center 38% / cover;
   }
+  .community-team-card .community-team-banner { position: relative; background: none; }
+  .community-team-banner .community-player-heading { position: relative; z-index: 1; }
+  .community-team-banner h3 { margin: 0; }
+  .community-team-card:is(:hover, :focus-visible) .community-player-name { color: #ffdf9d; }
+  .community-team-portraits {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .community-team-portraits > div {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    min-width: 0;
+    padding: 0 4px 9px;
+    background:
+      linear-gradient(180deg, #060a12ec, #060a1233 42%, transparent 55%, #080e18f5),
+      var(--team-hero-art) center 38% / cover;
+  }
+  .community-team-portraits > div + div { border-left: 1px solid #bda77b38; }
+  .community-team-portraits span {
+    color: #f6efdf;
+    font: 800 clamp(10px, 3.25cqw, 16px)/1.15 'Nunito', sans-serif;
+    text-align: center;
+    text-shadow: 0 1px 5px #000;
+    overflow-wrap: anywhere;
+  }
   .community-hero-identity { min-width: 0; }
   .community-hero-meta {
     display: flex;
@@ -186,7 +186,7 @@ body:has(.game-page #community) {
     background: #0b1019;
   }
   .community-ranking-footer > .player-card-metrics:not(.community-hero-metrics) > div { flex-wrap: wrap; text-align: center; }
-  .community-hero-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .community-hero-metrics, .community-team-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .community-hero-build {
     display: grid;
     grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);

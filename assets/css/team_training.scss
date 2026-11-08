@@ -61,6 +61,7 @@
   .team-hero-selector button > span { position: absolute; display: flex; align-items: baseline; justify-content: space-between; gap: 5px; inset: auto 0 0; padding: 16px 7px 5px; background: linear-gradient(transparent, #030b17f2); text-shadow: 0 1px 3px #000; }
   .team-hero-selector strong { font-size: 14px; font-weight: 900; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .team-hero-selector small { color: #c2ccd9; font-size: 16px; white-space: nowrap; }
+  .team-hero-selector .team-tab-max { color: #ffe0a0; font-weight: 900; }
   .team-tab-skill-points {
     position: absolute;
     top: 5px;
@@ -367,6 +368,23 @@
 }
 
 .game-page .team-hero-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; width: 100%; }
+.game-page .team-max-level-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  min-height: 0;
+  margin: 24px 0 18px;
+  padding: clamp(16px, 3vw, 48px);
+  border: 1px solid #d5b37966;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #0d1624 12%, #0d1624e8 42%, #0d162466),
+    var(--team-max-art) right 35% / cover;
+}
+.game-page .team-max-level-panel h2 { margin: 0; color: #f8e7c6; font: 900 clamp(22px, 3vw, 38px)/1.15 'Nunito', sans-serif; }
+.game-page .team-max-level-panel p { margin: 0; color: #d5ddea; font: 700 clamp(14px, 1.4vw, 17px)/1.4 'Nunito', sans-serif; }
+.game-page .team-max-level-panel p:last-child { color: #f5cf87; }
 
 // Lime-green surfaces identify battle automation, separate from primary attacks and rewards.
 .game-page .training-play-controls button.battle-auto-control {
@@ -410,7 +428,14 @@
 .game-page .skill-guidance-arrow { position: absolute; z-index: 6; display: block; width: 40px; height: 36px; pointer-events: none; transform: translateX(-50%); filter: drop-shadow(0 0 8px #ffc45dcc); animation: league-skill-point 1.2s ease-in-out infinite; }
 .game-page .skill-guidance-arrow::after { content: ''; position: absolute; top: 0; left: 9px; width: 22px; height: 22px; border-right: 5px solid #ffda8a; border-bottom: 5px solid #ffda8a; transform: rotate(45deg); }
 .game-page #hero-team-tabs .team-hero-selector { position: relative; }
-.game-page :is(.league-hero-skill-arrow, .first-battle-hero-arrow) { bottom: calc(100% + 9px); }
+.game-page :is(.league-hero-skill-arrow, .first-battle-hero-arrow, .max-level-hero-arrow) { bottom: calc(100% + 9px); }
+.game-page .max-level-hero-arrow { display: none; }
+@for $id from 1 through 3 {
+  .game-page .team-hero-selector:has(#team-select-#{$id}[aria-selected=true]) {
+    > .max-level-hero-arrow[data-max-guide-from="#{$id}"] { display: block; }
+    &:has(> .max-level-hero-arrow[data-max-guide-from="#{$id}"]) > .first-battle-hero-arrow { display: none; }
+  }
+}
 .game-page .team-hero-selector:has([data-battle-guide][aria-selected=true]) .first-battle-hero-arrow { display: none; }
 .game-page #team-training-page:has(.team-hero-panel.has-pending-skill-points:not(.d-none)) .league-hero-skill-arrow { display: none; }
 .game-page .league-hud-skill-arrow { bottom: calc(100% + 8px); left: 50%; }

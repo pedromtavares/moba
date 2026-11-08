@@ -85,7 +85,7 @@ defmodule MobaWeb.V2.Components.StatTooltip do
   defp summary(:speed) do
     [
       "Each point gives a 1% chance to act first.",
-      "When defending, each point above 100 adds a 1% chance to Evade an eligible Normal Damage hit. Evade costs no Energy and has a 2-turn cooldown."
+      "When defending, each point above 100 adds a 1% chance to Evade an eligible Normal Damage hit. Evade costs no Energy and has a #{Moba.evade().cooldown}-turn cooldown."
     ]
   end
 end

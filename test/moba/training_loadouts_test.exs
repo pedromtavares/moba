@@ -41,9 +41,11 @@ defmodule Moba.Game.Training.LoadoutsTest do
       hero = Loadouts.build_loadout(catalog, avatar, :radiant, 1, Moba.initial_gold(%{pve_tier: tier}))
       hero = %{hero | hero: %{hero.hero | pve_tier: tier}, final_build: ~w(maelstrom pipe_of_insight)}
       assert Enum.map(hero.inventory, & &1.item.code) == [boots]
+      assert [%{fixed: true}] = hero.inventory
 
       hero = Loadouts.grant_farm(hero, price - hero.hero.gold, 0, catalog)
       assert Enum.map(hero.inventory, & &1.item.code) == [boots, second]
+      assert [_, %{fixed: false}] = hero.inventory
       assert hero.hero.gold == 0
 
       hero = Loadouts.grant_farm(hero, price, 0, catalog)
@@ -84,45 +86,55 @@ defmodule Moba.Game.Training.LoadoutsTest do
       run = if existing, do: Loadouts.configure(run, 1, :buy, existing), else: run
       run = update_in(run.heroes[1], &Loadouts.grant_farm(&1, 0, 0, run.catalog))
       hero = run.heroes[1]
-      assert length(hero.inventory) == 5
-      assert hero.hero.gold == 0
-      assert Enum.any?(hero.hero.items, &(&1.rarity == "epic" && &1.code not in boots))
+      assert Enum.any?(hero.hero.items, &(&1.code == "satanic"))
       assert Enum.map(Enum.filter(hero.hero.items, &(&1.code in boots)), & &1.code) == [existing || "arcane_boots"]
     end
   end
 
-  test "automatic transmutation never adds another pair of boots but can consume boots in an upgrade", %{
-    run: b,
-    catalog: catalog
-  } do
-    boots = ~w(arcane_boots tranquil_boots phase_boots boots_of_travel boots_of_speed)
-    phase = Enum.find(catalog.items, &(&1.code == "phase_boots"))
-    catalog = %{catalog | items: [phase | Enum.reject(catalog.items, &(&1.code == phase.code))]}
+  test "after completing the build, auto-buy swaps an eligible rare using its full resale value", %{run: run} do
+    [starter] = run.heroes[1].inventory
 
-    for {build, expected} <- [
-          {["arcane_boots", "phase_boots"], "arcane_boots"},
-          {["arcane_boots", "boots_of_travel"], "arcane_boots"},
-          {["phase_boots"], "phase_boots"}
-        ] do
-      run = Loadouts.configure(b, 1, :sell, hd(b.heroes[1].inventory).item.code)
+    run =
+      run
+      |> put_in([:heroes, 1, :final_build], ["shadow_blade", "boots_of_travel"])
+      |> then(&put_in(&1.heroes[1].hero.gold, Moba.rare_items_price()))
+      |> Loadouts.configure(1, :buy, "vanguard")
 
-      run =
-        %{run | catalog: catalog}
-        |> then(&put_in(&1.heroes[1].hero.gold, 7200))
-        |> put_in([:heroes, 1, :final_build], build)
+    # Simulate an older saved run whose starter boot entry predates the fixed flag.
+    run = update_in(run.heroes[1].inventory, &List.update_at(&1, 0, fn entry -> Map.delete(entry, :fixed) end))
+    hero = Loadouts.grant_farm(run.heroes[1], Moba.rare_items_price(), 0, run.catalog)
+    assert Enum.map(hero.hero.items, & &1.code) == [starter.item.code, "vanguard", "shadow_blade"]
 
-      run =
-        Enum.reduce(~w(arcane_boots vanguard maelstrom shadow_blade pipe_of_insight magic_stick), run, fn code, acc ->
-          Loadouts.configure(acc, 1, :buy, code)
-        end)
+    hero = Loadouts.grant_farm(hero, Moba.legendary_items_price() - Moba.rare_items_price(), 0, run.catalog)
+    assert Enum.map(hero.hero.items, & &1.code) |> Enum.take(2) == [starter.item.code, "vanguard"]
+    assert List.last(hero.hero.items).rarity == "legendary"
+    refute Enum.any?(hero.hero.items, &(&1.code == "shadow_blade"))
+    assert hero.hero.gold == 0
+    assert hero.hero.total_gold_farm == Moba.legendary_items_price()
 
-      run = update_in(run.heroes[1], &Loadouts.grant_farm(&1, 0, 0, run.catalog))
-      assert Enum.map(Enum.filter(run.heroes[1].hero.items, &(&1.code in boots)), & &1.code) == [expected]
+    hero = Loadouts.grant_farm(hero, Moba.legendary_items_price(), 0, run.catalog)
+    refute Enum.any?(hero.hero.items, &(&1.code == "shadow_blade"))
+    assert Enum.count(hero.hero.items, &(&1.rarity == "legendary")) == 2
+  end
 
-      if build == ["arcane_boots", "boots_of_travel"] do
-        assert Enum.any?(run.heroes[1].hero.items, &(&1.rarity == "epic" && &1.code not in boots))
-      end
-    end
+  test "after completing the build, auto-buy transmutes its epics but keeps a manually transmuted item", %{run: run} do
+    run =
+      run
+      |> put_in([:heroes, 1, :final_build], ~w(assault_cuirass heavens_halberd))
+      |> then(&put_in(&1.heroes[1].hero.gold, 2 * Moba.rare_items_price()))
+      |> Loadouts.configure(1, :buy, "maelstrom")
+      |> Loadouts.configure(1, :buy, "pipe_of_insight")
+      |> Loadouts.configure(1, :transmute, %{
+        "transmute_code" => "diffusal_blade",
+        "recipe_codes" => ~w(maelstrom pipe_of_insight)
+      })
+
+    assert Enum.any?(run.heroes[1].inventory, &(&1.item.code == "diffusal_blade" && &1.fixed))
+    hero = Loadouts.grant_farm(run.heroes[1], 4 * Moba.rare_items_price(), 0, run.catalog)
+    assert Enum.any?(hero.hero.items, &(&1.rarity == "legendary"))
+    assert Enum.any?(hero.hero.items, &(&1.code == "diffusal_blade"))
+    refute Enum.any?(hero.hero.items, &(&1.code in ~w(assault_cuirass heavens_halberd)))
+    assert hero.hero.gold == 0
   end
 
   test "sales after transmutation refund the full price without changing farm or auto-buy", %{run: b, catalog: c} do

@@ -42,7 +42,7 @@
             <div class="row  d-none d-md-block">
               <div class="col">
                 <%= if @preview do %>
-                  <.hud_experience hero={@current_hero} />
+                  <.hud_experience hero={@current_hero} max_level={@max_level} />
                 <% else %>
                   <div
                     class="progress progress-fixed xp-bar"
@@ -289,7 +289,7 @@
         <% else %>
           <div class="col-5 pr-0">
             <%= if @preview do %>
-              <.hud_experience hero={@current_hero} compact={true} />
+              <.hud_experience hero={@current_hero} compact={true} max_level={@max_level} />
             <% else %>
               <div
                 class="progress progress-fixed xp-bar border border-white tooltip-mobile"

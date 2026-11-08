@@ -387,7 +387,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
 
     assert has_element?(
              view,
-             "#team-auto-buy[title='Automatically buys Rare items and transmutes into better items when possible']",
+             "#team-auto-buy[title*='items you buy or transmute yourself are protected']",
              "AUTO"
            )
 
@@ -735,7 +735,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
               {id, Game.Training.Loadouts.grant_farm(%{unit | auto_buy: false}, gold, 37_700, run.catalog)}
             end)
 
-          run = %{run | heroes: heroes} |> easy_target() |> TeamTraining.reward_mode(:focus)
+          run = %{run | heroes: heroes} |> easy_target()
           run = TeamTraining.battle(run, hd(run.targets[1]).id) |> finish_team(scope)
           %{run | phase: :finished}
         end)
@@ -752,6 +752,57 @@ defmodule MobaWeb.V2.TeamLiveTest do
         refute has_element?(view, "#training-battle-result .team-result-spoils")
       end
     end
+  end
+
+  test "a maxed Focus hero can enter league challenges but cannot battle targets", %{
+    conn: conn,
+    scope: scope,
+    player: player
+  } do
+    record = team_run(scope, player)
+
+    {:ok, record} =
+      TeamRuns.update(scope, record, fn run ->
+        run
+        |> TeamTraining.reward_mode(:focus)
+        |> then(&put_in(&1.heroes[1].hero.level, 30))
+        |> then(&put_in(&1.heroes[2].hero.level, 30))
+      end)
+
+    run = TeamRuns.state(record)
+    target_id = hd(run.targets[1]).id
+    {:ok, view, _} = live(conn, "/training")
+
+    assert has_element?(view, "#team-select-1 .team-tab-max", "MAX")
+    assert has_element?(view, "#team-hero-panel-1 .hud-experience[aria-valuenow='100']", "MAX")
+    assert has_element?(view, "#team-max-level-panel", "can only fight in league challenges")
+    assert has_element?(view, "#max-level-hero-arrow-1[data-max-guide-to='3']")
+    assert has_element?(view, "#team-3-team-targets")
+    refute has_element?(view, "#team-targets, #training-controls-hint")
+
+    render_click(view, "battle", %{"id" => to_string(target_id), "hero_id" => "1"})
+    assert TeamRuns.encounters(scope, record.id) == []
+    assert TeamRuns.state(TeamRuns.get!(scope, record.id)).turns_left == run.turns_left
+
+    view |> element("#team-reward-mode") |> render_click()
+    assert has_element?(view, "#team-targets #gank-#{target_id}")
+    refute has_element?(view, "#team-max-level-panel, #max-level-hero-arrow-1")
+
+    {:ok, _} =
+      TeamRuns.update(scope, TeamRuns.get!(scope, record.id), fn run ->
+        heroes =
+          Map.new(run.heroes, fn {id, unit} ->
+            {id, %{unit | hero: %{unit.hero | pve_current_turns: 0}}}
+          end)
+
+        %{run | turns_left: 0, reward_mode: :focus, heroes: heroes}
+      end)
+
+    {:ok, view, _} = live(conn, "/training")
+    refute has_element?(view, "#max-level-hero-arrow-1")
+    view |> element("#start-league-challenge") |> render_click()
+    [encounter] = TeamRuns.encounters(scope, record.id)
+    assert_redirect(view, TrainingEncounters.path(encounter, 1))
   end
 
   test "manual team controls keep the same hero and layout while the opponent resolves", %{

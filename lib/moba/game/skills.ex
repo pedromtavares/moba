@@ -39,7 +39,7 @@ defmodule Moba.Game.Skills do
       name: "Evade",
       code: "evade",
       mp_cost: 0,
-      cooldown: 2,
+      cooldown: 3,
       passive: true,
       description: "Evade the next non-ultimate normal damage attack",
       damage_type: "normal"

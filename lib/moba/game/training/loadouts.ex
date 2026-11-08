@@ -25,6 +25,8 @@ defmodule Moba.Game.Training.Loadouts do
   def max_hp(h), do: h.hero.total_hp + h.hero.item_hp
   def max_energy(h), do: h.hero.total_mp + h.hero.item_mp
 
+  def max_level?(%{level: level}), do: level >= @max_level
+
   def xp_capacity(%{hero: %{level: level}}) when level >= @max_level, do: 0
 
   def xp_capacity(h) do
@@ -64,19 +66,19 @@ defmodule Moba.Game.Training.Loadouts do
         updated =
           case operation do
             :auto_buy ->
-              %{h | auto_buy: value == true}
+              auto_shop(%{h | auto_buy: value == true}, run.catalog)
 
             :skill ->
               level_skill(h, value, run.catalog)
 
             :buy ->
-              buy_item(h, value, run.catalog)
+              buy_item(h, value, run.catalog, true)
 
             :sell ->
               sell_item(h, value)
 
             :transmute ->
-              transmute(h, value, run.catalog)
+              transmute(h, value, run.catalog, true)
 
             :orders ->
               hero_orders(h, value)
@@ -206,14 +208,12 @@ defmodule Moba.Game.Training.Loadouts do
     end
   end
 
-  defp buy_item(h, code, catalog) do
+  defp buy_item(h, code, catalog, fixed?) do
     item = Enum.find(catalog.items, &(&1.code == code))
 
     if item && length(h.inventory) < 6 && !Enum.any?(h.inventory, &(&1.item.code == code)) &&
          h.hero.gold >= Game.item_price(item) do
-      price = Game.item_price(item)
-      entry = %{item: item}
-      sync_inventory(%{h | hero: %{h.hero | gold: h.hero.gold - price}}, h.inventory ++ [entry])
+      purchase(h, item, [], fixed?)
     else
       h
     end
@@ -232,7 +232,7 @@ defmodule Moba.Game.Training.Loadouts do
     end
   end
 
-  defp transmute(h, %{"transmute_code" => code, "recipe_codes" => codes}, catalog) when is_list(codes) do
+  defp transmute(h, %{"transmute_code" => code, "recipe_codes" => codes}, catalog, fixed?) when is_list(codes) do
     result = Enum.find(catalog.items, &(&1.code == code))
     ingredients = Enum.filter(h.inventory, &(&1.item.code in codes))
 
@@ -243,14 +243,24 @@ defmodule Moba.Game.Training.Loadouts do
         Enum.all?(ingredients, &(&1.item.rarity == Game.previous_item_rarity(result)))
 
     if valid do
-      entry = %{item: result}
-      sync_inventory(h, Enum.reject(h.inventory, &(&1 in ingredients)) ++ [entry])
+      replace_inventory(h, result, ingredients, fixed?)
     else
       h
     end
   end
 
-  defp transmute(h, _, _), do: h
+  defp transmute(h, _, _, _), do: h
+
+  defp purchase(h, item, sold, fixed? \\ false) do
+    gold = h.hero.gold + refund(h, sold) - Game.item_price(item)
+    replace_inventory(put_in(h.hero.gold, gold), item, sold, fixed?)
+  end
+
+  defp refund(h, entries), do: Enum.sum(Enum.map(entries, &Game.item_sell_price(h.hero, &1.item)))
+
+  defp replace_inventory(h, item, removed, fixed?) do
+    sync_inventory(h, (h.inventory -- removed) ++ [%{item: item, fixed: fixed?}])
+  end
 
   defp sync_inventory(h, entries) do
     items = Enum.map(entries, & &1.item)
@@ -279,6 +289,8 @@ defmodule Moba.Game.Training.Loadouts do
 
   defp auto_shop(%{auto_buy: false} = h, _), do: h
 
+  defp auto_shop(%{auto_buy_build_complete: true} = h, catalog), do: auto_finish(h, catalog)
+
   defp auto_shop(h, catalog) do
     {step, opening_item} = next_opening_item(h, catalog)
     h = Map.put(h, :auto_buy_opening_step, step)
@@ -290,26 +302,34 @@ defmodule Moba.Game.Training.Loadouts do
           &missing_rare(h, catalog, &1)
         )
 
+    build = planned_build(h, catalog)
+    missing_build = Enum.reject(build, &owned?(h, &1.code))
+
     cond do
+      missing_build == [] && (is_nil(opening_item) || length(h.inventory) == 6) ->
+        h |> Map.put(:auto_buy_build_complete, true) |> auto_finish(catalog)
+
       length(h.inventory) < 6 && missing && h.hero.gold >= Game.item_price(missing) ->
         step = if opening_item, do: step + 1, else: step
 
         h
         |> Map.put(:auto_buy_opening_step, step)
-        |> buy_item(missing.code, catalog)
+        |> purchase(missing, [], step == 1 && not is_nil(opening_item))
         |> auto_shop(catalog)
 
-      # The boots limit can exhaust useful rares before all six slots are filled.
-      length(h.inventory) == 6 || is_nil(missing) ->
-        auto_upgrade(h, catalog)
+      opening_item && length(h.inventory) < 6 ->
+        h
 
       true ->
-        h
+        auto_upgrade(h, catalog, build, missing_build)
     end
   end
 
+  defp opening_codes(%{hero: %{avatar: %{role: "nuker"}}}), do: ~w(tranquil_boots vanguard)
+  defp opening_codes(_), do: ~w(arcane_boots shadow_blade)
+
   defp next_opening_item(h, catalog) do
-    codes = if h.hero.avatar.role == "nuker", do: ~w(tranquil_boots vanguard), else: ~w(arcane_boots shadow_blade)
+    codes = opening_codes(h)
 
     # Older runs recorded only whether the first automatic purchase had happened.
     step = Map.get(h, :auto_buy_opening_step, if(Map.get(h, :auto_bought_item, false), do: 1, else: 0))
@@ -325,7 +345,7 @@ defmodule Moba.Game.Training.Loadouts do
   defp missing_rare(h, catalog, code) do
     item = Enum.find(catalog.items, &(&1.code == code))
 
-    if item && item.rarity == "rare" && !Enum.any?(h.inventory, &(&1.item.code == code)) &&
+    if item && item.rarity == "rare" && !owned?(h, code) &&
          auto_item_allowed?(h.inventory, item),
        do: item
   end
@@ -334,67 +354,101 @@ defmodule Moba.Game.Training.Loadouts do
     !Game.Items.boots?(item) || !Enum.any?(inventory, &Game.Items.boots?(&1.item))
   end
 
-  defp auto_upgrade(h, catalog) do
-    target =
-      Enum.find_value(h.final_build, fn code ->
-        item = Enum.find(catalog.items, &(&1.code == code))
+  defp owned?(h, code), do: Enum.any?(h.inventory, &(&1.item.code == code))
 
-        if item && item.rarity in ["epic", "legendary"] && !Enum.any?(h.inventory, &(&1.item.code == code)) do
-          ingredients =
-            Enum.filter(
-              h.inventory,
-              &(&1.item.rarity == Game.previous_item_rarity(item) && &1.item.code not in h.final_build)
-            )
-            |> Enum.take(2)
+  defp fixed?(h, entry) do
+    # Snapshots from before fixed items did not track purchase origin.
+    Map.get(entry, :fixed, entry.item.code == hd(opening_codes(h)))
+  end
 
-          if length(ingredients) == 2 && auto_item_allowed?(h.inventory -- ingredients, item),
-            do: {item, ingredients}
-        end
-      end)
+  defp planned_build(h, catalog) do
+    fixed = for entry <- h.inventory, fixed?(h, entry), do: entry
+    fixed_codes = Enum.map(fixed, & &1.item.code)
 
-    case target do
-      {item, ingredients} ->
-        changed =
-          transmute(
-            h,
-            %{"transmute_code" => item.code, "recipe_codes" => Enum.map(ingredients, & &1.item.code)},
-            catalog
-          )
+    h.final_build
+    |> Enum.uniq()
+    |> Enum.reduce(fixed, fn code, planned ->
+      item = Enum.find(catalog.items, &(&1.code == code))
 
-        auto_shop(changed, catalog)
+      if item && length(planned) < 6 && code not in fixed_codes && auto_item_allowed?(planned, item),
+        do: planned ++ [%{item: item}],
+        else: planned
+    end)
+    |> Enum.drop(length(fixed))
+    |> Enum.map(& &1.item)
+  end
 
-      nil ->
-        # Intermediate epics are needed for a legendary even when not part of the final build.
-        rares =
-          Enum.filter(h.inventory, &(&1.item.rarity == "rare" && &1.item.code not in h.final_build)) |> Enum.take(2)
+  defp auto_upgrade(h, catalog, build, missing_build) do
+    build_codes = Enum.map(build, & &1.code)
+    spare = Enum.reject(h.inventory, &(fixed?(h, &1) || &1.item.code in build_codes))
 
-        legendary_missing =
-          Enum.any?(
-            catalog.items,
-            &(&1.code in h.final_build && &1.rarity == "legendary" &&
-                !Enum.any?(h.inventory, fn e -> e.item.code == &1.code end))
-          )
+    changed =
+      try_transmute(h, missing_build, spare) ||
+        build_intermediate(h, catalog, missing_build, spare) ||
+        try_purchase(h, missing_build, if(length(h.inventory) == 6, do: spare, else: []))
 
-        intermediate =
-          Enum.find(
-            catalog.items,
-            &(&1.rarity == "epic" && !Enum.any?(h.inventory, fn e -> e.item.code == &1.code end) &&
-                auto_item_allowed?(h.inventory -- rares, &1))
-          )
+    if changed, do: auto_shop(changed, catalog), else: h
+  end
 
-        if legendary_missing && intermediate && length(rares) == 2 do
-          auto_shop(
-            transmute(
-              h,
-              %{"transmute_code" => intermediate.code, "recipe_codes" => Enum.map(rares, & &1.item.code)},
-              catalog
-            ),
-            catalog
-          )
-        else
-          h
-        end
+  defp build_intermediate(h, catalog, missing_build, spare) do
+    if Enum.any?(missing_build, &(&1.rarity == "legendary")) do
+      epics = Enum.filter(catalog.items, &(&1.rarity == "epic" && !Game.Items.boots?(&1)))
+      try_transmute(h, epics, spare)
     end
+  end
+
+  defp auto_finish(h, catalog) do
+    spare = Enum.filter(h.inventory, &(!fixed?(h, &1) && &1.item.rarity in ["rare", "epic"]))
+    legendary = Enum.filter(catalog.items, &(&1.rarity == "legendary"))
+
+    changed =
+      try_transmute(h, legendary, spare) ||
+        try_purchase(h, legendary, spare) ||
+        finish_intermediate(h, catalog, legendary, spare)
+
+    case changed do
+      nil -> h
+      changed -> auto_finish(changed, catalog)
+    end
+  end
+
+  defp finish_intermediate(h, catalog, legendary, spare) do
+    materials = Enum.sum(Enum.map(spare, &if(&1.item.rarity == "epic", do: 2, else: 1)))
+
+    if materials >= 4 do
+      targets = Enum.filter(legendary, &(!owned?(h, &1.code) && auto_item_allowed?(h.inventory, &1)))
+      build_intermediate(h, catalog, targets, spare)
+    end
+  end
+
+  defp try_transmute(h, items, spare) do
+    Enum.find_value(items, fn item ->
+      if item.rarity in ["epic", "legendary"] && !owned?(h, item.code) do
+        ingredients =
+          spare
+          |> Enum.filter(&(&1.item.rarity == Game.previous_item_rarity(item)))
+          |> Enum.sort_by(&(Game.Items.boots?(item) && !Game.Items.boots?(&1.item)))
+          |> Enum.take(Game.item_ingredients_count(item))
+
+        if length(ingredients) == Game.item_ingredients_count(item) &&
+             auto_item_allowed?(h.inventory -- ingredients, item),
+           do: replace_inventory(h, item, ingredients, false)
+      end
+    end)
+  end
+
+  defp try_purchase(h, items, spare) do
+    sales = Enum.map(Enum.sort_by(spare, &Game.item_price(&1.item)), &[&1])
+    options = if length(h.inventory) < 6, do: [[] | sales], else: sales
+
+    Enum.find_value(items, fn item ->
+      if !owned?(h, item.code) do
+        Enum.find_value(options, fn sold ->
+          if auto_item_allowed?(h.inventory -- sold, item) && h.hero.gold + refund(h, sold) >= Game.item_price(item),
+            do: purchase(h, item, sold)
+        end)
+      end
+    end)
   end
 
   defp level_hero(h) do

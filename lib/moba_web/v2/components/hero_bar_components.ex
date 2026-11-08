@@ -21,6 +21,7 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   attr :id_prefix, :string, default: ""
   attr :hero_id, :integer, default: nil
   attr :team_roster, :boolean, default: false
+  attr :max_level, :boolean, default: false
   attr :resource_tooltip, :string, default: nil
   slot :resources
   slot :skill_guidance
@@ -52,23 +53,28 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
 
   attr :hero, :map, required: true
   attr :compact, :boolean, default: false
+  attr :max_level, :boolean, default: false
 
   def hud_experience(assigns) do
-    assigns = assign(assigns, :percentage, assigns.hero |> xp_percentage() |> max(0) |> min(100))
+    percentage = if assigns.max_level, do: 100, else: assigns.hero |> xp_percentage() |> max(0) |> min(100)
+    assigns = assign(assigns, :percentage, percentage)
 
     ~H"""
     <div
-      class={["hud-experience", @compact && "hud-experience-compact"]}
+      class={["hud-experience", @compact && "hud-experience-compact", @max_level && "hud-experience-max"]}
       role="progressbar"
       aria-label={"Level #{@hero.level} experience"}
       aria-valuemin="0"
-      aria-valuemax={xp_to_next_level(@hero)}
-      aria-valuenow={@hero.experience}
-      title={"Experience: #{@hero.experience}/#{xp_to_next_level(@hero)}"}
+      aria-valuemax={if @max_level, do: 100, else: xp_to_next_level(@hero)}
+      aria-valuenow={if @max_level, do: 100, else: @hero.experience}
+      aria-valuetext={if @max_level, do: "Maximum level"}
+      title={if @max_level, do: "Maximum level", else: "Experience: #{@hero.experience}/#{xp_to_next_level(@hero)}"}
     >
       <div class="hud-experience-fill" style={"width:#{@percentage}%"} aria-hidden="true"></div>
       <span class="hud-level">Level <strong>{@hero.level}</strong></span>
-      <span :if={!@compact} class="hud-experience-value">{@hero.experience} / {xp_to_next_level(@hero)} XP</span>
+      <span :if={@max_level || !@compact} class="hud-experience-value">
+        {if @max_level, do: "MAX", else: "#{@hero.experience} / #{xp_to_next_level(@hero)} XP"}
+      </span>
     </div>
     """
   end

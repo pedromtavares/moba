@@ -16,6 +16,7 @@ defmodule MobaWeb.V2.Components.TrainingComponents do
   attr :history, :boolean, default: false
   attr :show_controls, :boolean, default: true
   attr :battle_pending, :boolean, default: false
+  attr :target_battles_locked, :boolean, default: false
   attr :team_mode, :boolean, default: false
   attr :goal_override, :integer, default: nil
   attr :id_prefix, :string, default: ""

@@ -19,6 +19,7 @@
     skill_guidance={@skill_guidance}
     goal_override={@run.goal}
     battle_pending={@run.phase == :engagement}
+    target_battles_locked={@focus_target_locked}
     show_controls={@run.phase == :playing && TeamTraining.roster_alive?(@run)}
   >
     <:history_controls>
@@ -196,7 +197,23 @@
       </button>
     </div>
   </section>
-  <%= if @run.turns_left > 0 && !TeamTraining.dead?(@selected) do %>
+  <section
+    :if={@run.turns_left > 0 && @focus_target_locked && !TeamTraining.dead?(@selected)}
+    id={GH.dom_id(@id_prefix, "team-max-level-panel")}
+    class="team-max-level-panel"
+    aria-labelledby={GH.dom_id(@id_prefix, "team-max-level-title")}
+    style={"--team-max-art: url(#{GH.background_url(@selected.hero)})"}
+  >
+    <span class="team-eyebrow">Level {@selected.hero.level} · MAX</span>
+    <h2 id={GH.dom_id(@id_prefix, "team-max-level-title")}>{@selected.hero.avatar.name} has reached max level.</h2>
+    <p>This hero can only fight in league challenges while Focus is on.</p>
+    <p>
+      {if @max_level_guide,
+        do: "Select the highlighted teammate to battle targets.",
+        else: "Switch to Shared to battle targets."}
+    </p>
+  </section>
+  <%= if @run.turns_left > 0 && TeamTraining.can_battle_target?(@run, @selected) do %>
     <div
       class="row d-flex align-items-center targets team-targets"
       id={GH.dom_id(@id_prefix, "team-targets")}
@@ -232,6 +249,7 @@
     id_prefix={@id_prefix}
     hero_id={@selected.id}
     team_roster={true}
+    max_level={@max_level}
     current_hero={@selected.hero}
     display_name={TeamTraining.hero_name(@selected.hero, @run)}
     editing={@editing}
@@ -256,7 +274,7 @@
         role="switch"
         aria-checked={to_string(@selected.auto_buy)}
         data-toggle="tooltip"
-        title="Automatically buys Rare items and transmutes into better items when possible"
+        title="Builds and upgrades your loadout. Starter boots and items you buy or transmute yourself are protected."
       >
         AUTO
       </button>
@@ -272,7 +290,7 @@
         aria-checked={to_string(@selected.auto_buy)}
         aria-label="Auto-buy items"
         data-toggle="tooltip"
-        title="Automatically buys Rare items and transmutes into better items when possible"
+        title="Builds and upgrades your loadout. Starter boots and items you buy or transmute yourself are protected."
       >
         AUTO
       </button>
