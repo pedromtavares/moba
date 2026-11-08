@@ -43,9 +43,7 @@ defmodule Moba.Admin.Server do
   defp current_state do
     %{
       players: Admin.current_active_players(),
-      guests: Admin.current_guests(),
       user_stats: Admin.get_user_stats(),
-      duels: Admin.list_recent_duels(),
       match_stats: Admin.match_stats(),
       masters_count: Admin.masters_count(),
       grandmasters_count: Admin.grandmasters_count(),

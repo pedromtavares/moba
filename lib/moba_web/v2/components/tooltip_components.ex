@@ -19,8 +19,18 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
   def season_score_tooltip(player), do: MobaWeb.V2.Components.SeasonScoreTooltip.render(player)
 
   def arena_stats_tooltip(hero, player, battles \\ []) do
-    stats = MobaWeb.V2.Components.GameHelpers.match_hero_stats(hero, player, battles)
+    hero
+    |> MobaWeb.V2.Components.GameHelpers.match_hero_stats(player, battles)
+    |> combat_stats_markup()
+  end
 
+  def combat_stats_tooltip(hero) do
+    hero
+    |> MobaWeb.V2.Components.GameHelpers.hero_stats()
+    |> combat_stats_markup()
+  end
+
+  defp combat_stats_markup(stats) do
     rows =
       for {label, key, icon, tone} <- [
             {"Health", :hp, "heart", "danger"},

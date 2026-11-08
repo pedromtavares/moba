@@ -64,7 +64,7 @@ defmodule Moba.CommunityActivityTest do
     assert CommunityActivity.latest_for_players([]) == %{}
   end
 
-  test "recent players stay ordered by last user activity and have six recent heroes" do
+  test "recent players stay ordered by last user activity and supply artwork from the latest hero" do
     player = create_player!()
     opponent = create_player!()
     Accounts.get_user!(player.user_id) |> change(last_online_at: ago(120)) |> Repo.update!()
@@ -83,8 +83,7 @@ defmodule Moba.CommunityActivityTest do
 
     assert first.id == opponent.id
     assert second.id == player.id
-    assert length(second.latest_heroes) == 6
-    assert Enum.map(second.latest_heroes, & &1.name) == Enum.map(7..2//-1, &"Recent #{&1}")
+    assert second.latest_hero.name == "Recent 7"
     assert second.user.last_online_at == before
     assert second.recent_activity.kind == :training_started
   end

@@ -3,10 +3,11 @@ defmodule MobaWeb.V2.FirstBattleHintLiveTest do
   import Phoenix.LiveViewTest
   import Test.TeamHelper
 
-  test "a new roster guides players through one completed target battle with each hero", %{conn: conn} do
-    {scope, player} = team_account(0)
+  test "a new guest roster guides players through one completed target battle with each hero", %{conn: conn} do
+    player = Game.create_player!(%{})
+    scope = %{user: nil, player_id: player.id}
     record = team_run(scope, player)
-    conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+    conn = log_in_player(conn, player_id: player.id)
 
     for id <- [1, 2, 3] do
       current = Game.TeamRuns.get!(scope, record.id)
@@ -37,6 +38,33 @@ defmodule MobaWeb.V2.FirstBattleHintLiveTest do
     {:ok, returned, _} = live(conn, "/training")
     assert has_element?(returned, ".targets .battle-button")
     refute has_element?(returned, ".first-battle-arrow, .first-battle-hero-arrow, [phx-hook=TutorialStep]")
+  end
+
+  test "a fresh roster on a registered Grandmaster account has no onboarding arrows", %{conn: conn} do
+    {scope, player} = team_account(6)
+    team_run(scope, player)
+    conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+
+    {:ok, view, _} = live(conn, "/training")
+    assert has_element?(view, ".targets .battle-button")
+    refute has_element?(view, ".first-battle-arrow, .first-battle-hero-arrow, [data-battle-guide]")
+  end
+
+  test "a guest's first roster still points to unspent skill points before a challenge", %{conn: conn} do
+    player = Game.create_player!(%{})
+    scope = %{user: nil, player_id: player.id}
+    record = team_run(scope, player)
+
+    {:ok, _} =
+      Game.TeamRuns.update(scope, record, fn run ->
+        run
+        |> Map.put(:turns_left, 0)
+        |> put_in([:heroes, 2, :hero, Access.key(:skill_levels_available)], 1)
+      end)
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/training")
+    assert has_element?(view, "#league-hero-skill-arrow[style='left: 50.0%']")
+    assert has_element?(view, "#team-2-league-hud-skill-arrow")
   end
 
   test "old tutorial states cannot open guides or force the solo Shop open", %{conn: conn} do

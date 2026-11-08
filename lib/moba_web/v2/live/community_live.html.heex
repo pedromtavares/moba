@@ -1,13 +1,13 @@
 <Layouts.app
   preview={@preview}
   flash={@flash}
+  current_scope={@current_scope}
   current_player={@current_player}
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-  <div class="community">
+  <main id="community" class="community catalog-viewport">
     <header
-      :if={@preview}
       id="community-heading"
       class="community-heading"
       style="--community-scene: url(/images/tutorial/hall-of-legends.jpg)"
@@ -15,7 +15,6 @@
       <div class="community-heading-copy">
         <p class="community-eyebrow">The gathering hall</p>
         <h1>Community</h1>
-        <p class="community-heading-description">Share your victories. Shape what comes next.</p>
       </div>
       <a
         href="https://discord.gg/QNwEdPS"
@@ -26,523 +25,169 @@
         <i class="ui-icon ui-chat-controller" aria-hidden="true"></i>Join our Discord <span aria-hidden="true">↗</span>
       </a>
     </header>
-    <div :if={!@preview} class="row mt-2">
-      <div class="col">
-        <a
-          href="https://discord.gg/QNwEdPS"
-          target="_blank"
-          class="btn p-2 btn-block btn-lg btn-purple col-xl-4 margin-auto"
-        >
-          <i class="ui-icon ui-chat-controller mr-1"></i>Join our Discord!
-        </a>
-      </div>
-    </div>
-    <div class="row mt-2 community-hub">
-      <div class="col-lg-6">
-        <div class="card mb-0 community-panel community-board" id="community-board">
-          <h5 class="card-header font-17 text-white community-panel-heading">
-            <i class="ui-icon ui-chat mr-1"></i>
-            <span class="community-panel-title">Message Board</span><span class="text-muted font-italic font-15 ml-2 community-panel-description">Bug reports or any feedback for the devs are deeply appreciated!</span>
-          </h5>
-          <div class="card-body">
-            <div class="inbox-widget messages" id="community-messages">
-              <div :if={@preview && @messages == []} class="community-empty">
-                The message board is quiet. Share your feedback or ask a question below.
-              </div>
-              <%= for message <- @messages do %>
-                <div class="inbox-item" id={"community-message-#{message.id}"}>
-                  <div class="inbox-item-img">
-                    <img src={"/images/pve/#{message.tier}.png"} />
-                  </div>
-                  <p class="inbox-item-author">
-                    <.link
-                      navigate={preview_path(assigns, ~p"/player/#{message.user_id}")}
-                      data-profile-username={message.author}
-                      class={if(message.is_admin, do: "text-danger", else: "text-dark")}
-                    >
-                      {message.author}
-                    </.link>
-                    <%= if message.is_admin do %>
-                      <small class="text-danger community-admin">(admin)</small>
-                    <% end %>
-                  </p>
-                  <div class="inbox-item-text">{formatted_body(message)}</div>
-                  <p class="inbox-item-date">
-                    <%= if @is_admin do %>
-                      <a
-                        href="javascript:void(0)"
-                        phx-click="delete-message"
-                        phx-value-id={message.id}
-                        class="text-left text-danger float-right small ml-3"
-                      >
-                        Delete
-                      </a>
-                    <% end %>
-                  </p>
-                </div>
-              <% end %>
-            </div>
-            <%= unless @current_player.status == "silenced" do %>
-              <hr :if={!@preview} class="my-2" />
-              <.form
-                for={@form}
-                phx-submit="create-message"
-                id="community-message-form"
-                class="form-horizontal community-composer"
-                phx-hook="ResetFormOnEvent"
-                data-reset-event="community-message-sent"
-              >
-                <div class="community-compose-field">
-                  <label :if={@preview} for="community-message-body">Share a message</label>
-                  <input
-                    type="text"
-                    id="community-message-body"
-                    name={@form[:body].name}
-                    class="form-control"
-                    placeholder={
-                      if is_nil(@current_player.user),
-                        do: "Create an account to send messages",
-                        else: "Type and press Enter to send"
-                    }
-                    maxlength="500"
-                    minlength="2"
-                    disabled={is_nil(@current_player.user)}
-                  />
-                </div>
-                <button
-                  :if={@preview}
-                  type="submit"
-                  class="btn base-secondary"
-                  disabled={is_nil(@current_player.user)}
-                  phx-disable-with="Sending…"
-                >
-                  Send
-                </button>
-              </.form>
-            <% end %>
+
+    <nav class="cinematic-catalog-tabs" role="tablist" aria-label="Community">
+      <button
+        :for={
+          {tab, label, icon} <-
+            [
+              {"online", "Recent players", "nav-community"},
+              {"pvp", "Top players", "nav-profile"},
+              {"teams", "Top teams", "nav-base"},
+              {"pve", "Top heroes", "nav-training"}
+            ] ++ if(@is_admin, do: [{"balance", "Arena stats", "nav-arena"}], else: [])
+        }
+        id={"show-#{tab}-link"}
+        type="button"
+        role="tab"
+        class={@active_tab == tab && "active"}
+        aria-label={label}
+        aria-selected={to_string(@active_tab == tab)}
+        aria-controls={"community-#{tab}"}
+        phx-click={if @active_tab != tab, do: "show-#{tab}"}
+      >
+        <.icon name={icon} />
+        <span>{label}</span>
+      </button>
+    </nav>
+
+    <section :if={@active_tab == "online"} id="community-online" role="tabpanel" aria-labelledby="show-online-link">
+      <div :if={@is_admin} id="community-admin-summary" aria-label="Activity metrics">
+        <dl id="community-admin-metrics" class="community-admin-metrics">
+          <div id="community-stat-guests">
+            <dt><.icon name="game-hero" /><span>New guests</span></dt>
+            <dd>{@user_stats.new_guests}</dd>
           </div>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="card mb-0 community-panel community-announcements" id="community-announcements">
-          <h5 class="card-header font-17 text-white community-panel-heading">
-            <i class="ui-icon ui-globe mr-1"></i>
-            <span class="community-panel-title">Updates</span>
-            <span class="text-muted font-italic font-15 ml-2 community-panel-description">
-              Stay up to date with the latest development updates in BrowserMOBA
-            </span>
-          </h5>
-          <div class="card-body updates">
-            <div :if={@preview && @updates == []} class="community-empty">No development updates yet.</div>
-            <ul class="list-unstyled timeline-sm" id="community-updates">
-              <%= for update <- @updates do %>
-                <li class="timeline-sm-item" id={"community-update-#{update.id}"}>
-                  <%= if @is_admin do %>
-                    <a
-                      href="javascript:void(0)"
-                      phx-click="delete-message"
-                      phx-value-id={update.id}
-                      class="text-left text-danger float-right small ml-3"
-                    >
-                      Delete
-                    </a>
-                  <% end %>
-                  <h5 class="mt-0 mb-1">{update.title}</h5>
-                  <div class="text-muted mt-2 community-update-body">{formatted_body(update)}</div>
-                </li>
-              <% end %>
-            </ul>
-            <%= if @is_admin do %>
-              <hr />
-              <.form
-                for={@form}
-                phx-submit="create-update"
-                id="community-update-form"
-                class="form-horizontal"
-                phx-hook="ResetFormOnEvent"
-                data-reset-event="community-update-sent"
-              >
-                <label :if={@preview} for="community-update-title">Update title</label>
-                <input type="text" id="community-update-title" name={@form[:title].name} class="form-control" />
-                <br />
-                <label :if={@preview} for="community-update-body">Announcement</label>
-                <textarea id="community-update-body" name={@form[:body].name} class="form-control" rows="10"></textarea>
-                <br />
-                <button type="submit" class={["btn", if(@preview, do: "base-secondary", else: "btn-primary btn-sm")]}>
-                  Submit
-                </button>
-              </.form>
-            <% end %>
+          <div id="community-stat-accounts">
+            <dt><.icon name="game-trophy" /><span>New accounts</span></dt>
+            <dd>{@user_stats.new_users}</dd>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="row mt-3 community-rankings">
-      <div class="col text-center">
-        <ul
-          class="nav nav-tabs nav-bordered nav-justified community-tabs"
-          role="tablist"
-          aria-label="Community rankings"
-        >
-          <li class="nav-item">
-            <a
-              href="javascript:;"
-              class={"h5 mt-0 nav-link #{if @active_tab == "online", do: "active"}"}
-              phx-click="show-online"
-              phx-hook={if @active_tab != "online", do: "Loading"}
-              id="show-online-link"
-              role="tab"
-              aria-selected={to_string(@active_tab == "online")}
-              aria-controls="community-online"
-            >
-              <span class="loading-text f-rpg">
-                <i class={"ui-icon ui-users ui-2x text-#{if @active_tab == "online", do: "success", else: "white"}"}>
-                </i>
-                <br :if={!@preview} />{if @preview, do: "Recent players", else: "RECENT PLAYERS"}
-              </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              href="javascript:;"
-              class={"h5 mt-0 nav-link #{if @active_tab == "pvp", do: "active"}"}
-              phx-click="show-pvp"
-              phx-hook={if @active_tab != "pvp", do: "Loading"}
-              id="show-pvp-link"
-              role="tab"
-              aria-selected={to_string(@active_tab == "pvp")}
-              aria-controls="community-pvp"
-            >
-              <span class="loading-text f-rpg">
-                <i class={"ui-icon ui-trophy ui-2x text-#{if @active_tab == "pvp", do: "success", else: "white"}"}></i>
-                <br :if={!@preview} />{if @preview, do: "Top players", else: "TOP PLAYERS"}
-              </span>
-            </a>
-          </li>
-          <li class="nav-item">
-            <a
-              href="javascript:;"
-              class={"h5 mt-0 nav-link #{if @active_tab == "pve", do: "active"}"}
-              phx-click="show-pve"
-              phx-hook={if @active_tab != "pve", do: "Loading"}
-              id="show-pve-link"
-              role="tab"
-              aria-selected={to_string(@active_tab == "pve")}
-              aria-controls="community-pve"
-            >
-              <span class="loading-text f-rpg">
-                <i class={"ui-icon ui-helmet ui-2x text-#{if @active_tab == "pve", do: "success", else: "white"}"}></i>
-                <br :if={!@preview} />{if @preview, do: "Top heroes", else: "TOP HEROES"}
-              </span>
-            </a>
-          </li>
-        </ul>
-        <div
-          :if={@active_tab == "online"}
-          class="mt-2 mb-2"
-          id="community-online"
-          role="tabpanel"
-          aria-labelledby="show-online-link"
-        >
-          <div class="row">
-            <div class="col">
-              <table id="community-recent-players" class="community-players-table">
-                <caption class="sr-only">Recently active players, their latest activity and recent heroes</caption>
-                <thead>
-                  <tr>
-                    <th scope="col">
-                      Player
-                    </th>
-                    <th scope="col">Latest activity</th>
-                    <th scope="col">Recent heroes</th>
-                  </tr>
-                </thead>
-                <tbody id="hall-of-training">
-                  <tr :if={@players == []}>
-                    <td colspan="3" class="community-players-empty">
-                      The hall is quiet. Recent players will appear here as they return.
-                    </td>
-                  </tr>
-                  <%= for player <- @players do %>
-                    <.player_row
-                      preview={Map.get(assigns, :preview, false)}
-                      player={player}
-                      current={player.id == @current_player.id}
-                      live={MapSet.member?(@live_player_ids, player.id)}
-                      admin={@current_user && @current_user.is_admin}
-                    />
-                  <% end %>
-                </tbody>
-              </table>
-            </div>
+          <div id="community-stat-active">
+            <dt><.icon name="game-team" /><span>Active players</span></dt>
+            <dd>{@user_stats.online_today}</dd>
           </div>
-          <section
-            :if={@current_user && @current_user.is_admin}
-            id="community-admin-summary"
-            class="community-admin-panel community-admin-summary"
-            aria-labelledby="community-admin-summary-title"
+        </dl>
+        <div class="community-admin-switch" role="group" aria-label="Activity period">
+          <button
+            :for={{period, label} <- [{"daily", "Daily"}, {"weekly", "Weekly"}]}
+            id={"community-period-#{period}"}
+            type="button"
+            phx-click="user-filter"
+            phx-value-period={period}
+            aria-pressed={to_string(Atom.to_string(@user_filter) == period)}
           >
-            <header class="community-admin-heading">
-              <div>
-                <p class="community-admin-eyebrow">Admin only</p>
-                <h2 id="community-admin-summary-title">Community pulse</h2>
-              </div>
-              <div class="community-admin-controls">
-                <div :if={@is_admin} class="community-admin-switch" role="group" aria-label="Activity period">
-                  <button
-                    :for={{period, label} <- [{"daily", "Last 24h"}, {"weekly", "Last 7 days"}]}
-                    id={"community-period-#{period}"}
-                    type="button"
-                    phx-click="user-filter"
-                    phx-value-period={period}
-                    aria-pressed={to_string(Atom.to_string(@user_filter) == period)}
-                  >
-                    {label}
-                  </button>
-                </div>
-                <button
-                  id="community-admin-toggle"
-                  type="button"
-                  class="community-admin-toggle"
-                  phx-click="toggle-admin"
-                  aria-expanded={to_string(@is_admin)}
-                  aria-controls="community-admin-metrics"
-                >
-                  {if @is_admin, do: "Hide stats", else: "Show stats"}
-                </button>
-              </div>
-            </header>
-            <dl :if={@is_admin} id="community-admin-metrics" class="community-admin-metrics">
-              <div id="community-stat-guests">
-                <dt><.icon name="game-team" />New guests</dt>
-                <dd>{@user_stats.new_guests}</dd>
-                <span>Unregistered players</span>
-              </div>
-              <div id="community-stat-accounts">
-                <dt><.icon name="game-trophy" />New accounts</dt>
-                <dd>{@user_stats.new_users}</dd>
-                <span>Registered in this period</span>
-              </div>
-              <div id="community-stat-active">
-                <dt><.icon name="game-team" />Active players</dt>
-                <dd>{@user_stats.online_today}</dd>
-                <span>Seen in this period</span>
-              </div>
-              <div id="community-stat-heroes">
-                <dt><.icon name="game-magic" />New heroes</dt>
-                <dd>{@user_stats.new_heroes}</dd>
-                <span>
-                  {if @user_stats.online_today > 0,
-                    do: "#{Float.round(@user_stats.new_heroes / @user_stats.online_today, 1)} per active player",
-                    else: "Training activity"}
-                </span>
-              </div>
-            </dl>
-            <section
-              :if={@is_admin}
-              id="community-guests"
-              class="community-guests"
-              aria-labelledby="community-guests-title"
-            >
-              <header class="community-guests-heading">
-                <h3 id="community-guests-title">Recent guests</h3>
-                <span>{length(@guests)}</span>
-              </header>
-              <div class="community-guest-grid">
-                <.guest
-                  :for={%{player: player, heroes: heroes, last_online_at: last_online_at} <- @guests}
-                  player={player}
-                  heroes={heroes}
-                  last_online_at={last_online_at}
-                  current={player.id == @current_player.id}
-                />
-              </div>
-              <p :if={@guests == []} class="community-balance-empty">No recent guests.</p>
-            </section>
-          </section>
-          <section
-            :if={@is_admin}
-            id="community-arena-stats"
-            class="community-admin-panel community-balance"
-            aria-labelledby="community-arena-stats-title"
-          >
-            <header class="community-arena-stats-heading">
-              <h2 id="community-arena-stats-title">Arena Stats</h2>
-              <p id="community-balance-baseline">
-                Avg Winrate: <strong>{Float.round(@match_stats.winrate * 1.0, 1)}%</strong>
-                <small>({@match_stats.total} total matches)</small>
-              </p>
-              <div class="community-admin-switch" role="group" aria-label="Balance bracket">
-                <button
-                  :for={
-                    {filter, label, id} <- [
-                      {"pvp", "All", "immortal-ranking-button"},
-                      {"plebs", "Plebs", "pleb-ranking-button"},
-                      {"elite", "Elite", "elite-ranking-button"}
-                    ]
-                  }
-                  id={id}
-                  type="button"
-                  phx-click="match-filter"
-                  phx-value-type={filter}
-                  aria-pressed={to_string(@match_filter == filter)}
-                >
-                  {label}
-                </button>
-              </div>
-            </header>
-            <div class="community-arena-stats-grid">
-              <section
-                :for={{key, label} <- [{:avatars, "Heroes"}, {:skills, "Skills"}]}
-                class="community-arena-stats-category"
-                aria-labelledby={"community-balance-#{key}-title"}
-              >
-                <h3 id={"community-balance-#{key}-title"}>{label}</h3>
-                <div class="community-arena-stats-tables">
-                  <.arena_stats
-                    records={top_performing(@match_stats, key)}
-                    key={key}
-                    side="highest"
-                    title="Highest win rates"
-                    match_filter={@match_filter}
-                  />
-                  <.arena_stats
-                    records={bottom_performing(@match_stats, key)}
-                    key={key}
-                    side="lowest"
-                    title="Lowest win rates"
-                    match_filter={@match_filter}
-                  />
-                </div>
-              </section>
-            </div>
-            <div class="community-arena-items">
-              <p class="community-arena-items-average">
-                Avg Winrate: <strong>{Float.round(@match_stats.winrate * 1.0, 1)}%</strong>
-                <small>({@match_stats.total} total matches)</small>
-              </p>
-              <section class="community-arena-stats-category" aria-labelledby="community-balance-items-title">
-                <h3 id="community-balance-items-title">Items</h3>
-                <div class="community-arena-stats-tables">
-                  <.arena_stats
-                    records={top_performing(@match_stats, :items)}
-                    key={:items}
-                    side="highest"
-                    title="Highest win rates"
-                    match_filter={@match_filter}
-                  />
-                  <.arena_stats
-                    records={bottom_performing(@match_stats, :items)}
-                    key={:items}
-                    side="lowest"
-                    title="Lowest win rates"
-                    match_filter={@match_filter}
-                  />
-                </div>
-              </section>
-            </div>
-          </section>
-          <div :if={@is_admin} class="row mt-3" id="community-duel-history">
-            <div class="col-xl-6 col-lg-8 margin-auto col-xs-12 community-duels-column">
-              <div class="community-duels-frame" role="region" aria-label="Community duel history" tabindex="0">
-                <table class="table table-dark mb-0 text-center community-duels-table">
-                  <caption class="sr-only">Recent duels: replay, time, players, result, points and mode</caption>
-                  <%= for duel <- @duels do %>
-                    <tr id={"community-duel-#{duel.id}"}>
-                      <td class="community-duel-replay">
-                        <h5><.link navigate={preview_path(assigns, ~p"/arena/#{duel}")}>Duel {duel.id}</.link></h5>
-                      </td>
-                      <td class="community-duel-time">
-                        {duel.inserted_at |> Timex.format("{relative}", :relative) |> elem(1)}
-                      </td>
-                      <td class="community-duel-player">
-                        <img src={"/images/pve/#{duel.player.pve_tier}.png"} alt="" />
-                        <span>{username(duel.player)}</span>
-                      </td>
-                      <td class="community-duel-versus">
-                        vs
-                      </td>
-                      <td class="community-duel-player">
-                        <img src={"/images/pve/#{duel.opponent_player.pve_tier}.png"} alt="" />
-                        <span>{username(duel.opponent_player)}</span>
-                      </td>
-                      <td class="community-duel-result">
-                        <%= if duel.phase == "finished" do %>
-                          <%= if duel.winner_player do %>
-                            <span class="text-success">Winner: {username(duel.winner_player)}</span>
-                          <% else %>
-                            <span class="text-muted">Tie</span>
-                          <% end %>
-                          <br />
-                          <%= if duel.rewards.attacker_pvp_points > 0 do %>
-                            <span class="badge badge-pill badge-light-success">
-                              {username(duel.player)}: +{duel.rewards.attacker_pvp_points}
-                            </span>
-                          <% else %>
-                            <span class="badge badge-pill badge-light-dark">
-                              {username(duel.player)}: {duel.rewards.attacker_pvp_points}
-                            </span>
-                          <% end %>
-                          <%= if duel.rewards.defender_pvp_points != 0 do %>
-                            <%= if duel.rewards.defender_pvp_points > 0 do %>
-                              <span class="badge badge-pill badge-light-success">
-                                {username(duel.opponent_player)}: +{duel.rewards.defender_pvp_points}
-                              </span>
-                            <% else %>
-                              <span class="badge badge-pill badge-light-dark">
-                                {username(duel.opponent_player)}: {duel.rewards.defender_pvp_points}
-                              </span>
-                            <% end %>
-                          <% end %>
-                        <% else %>
-                          <span class="text-danger">In progress</span>
-                        <% end %>
-                      </td>
-                      <td class="community-duel-mode" data-mode={if duel.auto, do: "auto", else: "live"}>
-                        <%= if duel.auto do %>
-                          <span class="text-muted">Auto</span>
-                        <% else %>
-                          <span class="text-danger">Live</span>
-                        <% end %>
-                      </td>
-                    </tr>
-                  <% end %>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div
-          :if={@active_tab == "pvp"}
-          class="mt-1 mb-1"
-          id="community-pvp"
-          role="tabpanel"
-          aria-labelledby="show-pvp-link"
-        >
-          <div class="row">
-            <%= for player <- @pvp_ranking do %>
-              <.player_card
-                preview={Map.get(assigns, :preview, false)}
-                player={player}
-                recent_results={Map.get(@pvp_recent_results, player.id, %{wins: 0, matches: 0})}
-              />
-            <% end %>
-          </div>
-        </div>
-        <div
-          :if={@active_tab == "pve"}
-          class="mt-1 mb-1"
-          id="community-pve"
-          role="tabpanel"
-          aria-labelledby="show-pve-link"
-        >
-          <div class="row">
-            <%= for hero <- @pve_ranking do %>
-              <.pve_hero_card preview={Map.get(assigns, :preview, false)} hero={hero} />
-            <% end %>
-          </div>
+            {label}
+          </button>
         </div>
       </div>
-    </div>
-  </div>
+      <.recent_players
+        id="community-recent-players"
+        label="Recent players"
+        empty="The hall is quiet. Recent players will appear here as they return."
+        players={@players}
+        guests={@guests}
+        preview={@preview}
+        current_player={@current_player}
+        live_player_ids={@live_player_ids}
+        admin={@is_admin}
+      />
+    </section>
+
+    <section :if={@active_tab == "pvp"} id="community-pvp" role="tabpanel" aria-labelledby="show-pvp-link">
+      <.community_pager id="community-pvp-pages" label="Top players">
+        <div class="community-player-grid" data-community-page-group>
+          <.player_card
+            :for={player <- @pvp_ranking}
+            preview={@preview}
+            player={player}
+            recent_results={Map.get(@pvp_recent_results, player.id, %{wins: 0, matches: 0})}
+          />
+          <p :if={@pvp_ranking == []} class="community-players-empty">No ranked players yet.</p>
+        </div>
+      </.community_pager>
+    </section>
+
+    <section :if={@active_tab == "teams"} id="community-teams" role="tabpanel" aria-labelledby="show-teams-link">
+      <.community_pager id="community-teams-pages" label="Top teams">
+        <div class="community-player-grid" data-community-page-group>
+          <.team_card :for={entry <- @team_ranking} preview={@preview} entry={entry} />
+          <p :if={@team_ranking == []} class="community-players-empty">No ranked teams yet.</p>
+        </div>
+      </.community_pager>
+    </section>
+
+    <section :if={@active_tab == "pve"} id="community-pve" role="tabpanel" aria-labelledby="show-pve-link">
+      <.community_pager id="community-pve-pages" label="Top heroes">
+        <div class="community-player-grid" data-community-page-group>
+          <.pve_hero_card :for={hero <- @pve_ranking} preview={@preview} hero={hero} />
+          <p :if={@pve_ranking == []} class="community-players-empty">No ranked heroes yet.</p>
+        </div>
+      </.community_pager>
+    </section>
+
+    <section
+      :if={@is_admin && @active_tab == "balance"}
+      id="community-balance"
+      role="tabpanel"
+      aria-labelledby="show-balance-link"
+    >
+      <div id="community-arena-stats" class="community-admin-panel">
+        <header class="community-arena-stats-heading">
+          <h2 id="community-arena-stats-title">Arena Stats</h2>
+          <p id="community-balance-baseline">
+            Avg Winrate: <strong>{Float.round(@match_stats.winrate * 1.0, 1)}%</strong>
+            <small>({@match_stats.total} total matches)</small>
+          </p>
+          <div class="community-admin-switch" role="group" aria-label="Balance bracket">
+            <button
+              :for={
+                {filter, label, id} <- [
+                  {"pvp", "All", "immortal-ranking-button"},
+                  {"plebs", "Plebs", "pleb-ranking-button"},
+                  {"elite", "Elite", "elite-ranking-button"}
+                ]
+              }
+              id={id}
+              type="button"
+              phx-click="match-filter"
+              phx-value-type={filter}
+              aria-pressed={to_string(@match_filter == filter)}
+            >
+              {label}
+            </button>
+          </div>
+        </header>
+
+        <div class="community-admin-switch community-balance-categories" role="group" aria-label="Arena stats category">
+          <button
+            :for={{key, label} <- [{:avatars, "Heroes"}, {:skills, "Skills"}, {:items, "Items"}]}
+            id={"community-balance-category-#{key}"}
+            type="button"
+            phx-click="balance-category"
+            phx-value-category={key}
+            aria-pressed={to_string(@balance_category == key)}
+          >
+            {label}
+          </button>
+        </div>
+        <.community_pager id={"community-balance-pages-#{@balance_category}-#{@match_filter}"} label="Win rates">
+          <div class="community-arena-stats-tables">
+            <.arena_stats
+              :for={
+                {side, title, records} <- [
+                  {"highest", "Highest win rates", top_performing(@match_stats, @balance_category)},
+                  {"lowest", "Lowest win rates", bottom_performing(@match_stats, @balance_category)}
+                ]
+              }
+              records={records}
+              key={@balance_category}
+              side={side}
+              title={title}
+              match_filter={@match_filter}
+            />
+          </div>
+        </.community_pager>
+      </div>
+    </section>
+  </main>
 </Layouts.app>

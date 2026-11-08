@@ -11,18 +11,18 @@ defmodule MobaWeb.V2.BrowserTitleTest do
 
     for path <- ["/new", "/new/solo", "/base", "/training", "/arena", "/community", "/tavern", "/library"] do
       response = conn |> get(path) |> html_response(200) |> LazyHTML.from_document()
-      assert LazyHTML.text(LazyHTML.query(response, "title")) == "Browser MOBA – Free Strategy Game"
+      assert LazyHTML.text(LazyHTML.query(response, "title")) == "Browser MOBA - Free PvP Auto-Battler"
       {:ok, view, _} = live(conn, path)
-      assert page_title(view) == "Browser MOBA – Free Strategy Game"
+      assert page_title(view) == "Browser MOBA - Free PvP Auto-Battler"
     end
 
     {:ok, record} = TeamRuns.update(scope, record, &TeamTraining.battle(&1, hd(&1.targets[1]).id))
     encounter = TeamTraining.active_encounter(TeamRuns.state(record))
     {:ok, battle, _} = live(conn, TrainingEncounters.path(encounter, 1))
-    assert page_title(battle) == "Browser MOBA – Free Strategy Game"
+    assert page_title(battle) == "Browser MOBA - Free PvP Auto-Battler"
 
     {:ok, record} = TeamRuns.update(scope, record, &%{&1 | phase: :finished})
     {:ok, profile, _} = live(conn, "/teams/#{record.id}")
-    assert page_title(profile) == "Browser MOBA – Free Strategy Game"
+    assert page_title(profile) == "Browser MOBA - Free PvP Auto-Battler"
   end
 end

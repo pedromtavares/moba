@@ -78,19 +78,22 @@ defmodule MobaWeb.V2.Components.GameHelpers do
       # borrowed heroes. Preview the same combined base + item totals and rounding.
       streak = if hero.player, do: hero.player.current_immortal_streak, else: 0
 
-      Map.new([hp: :total_hp, mp: :total_mp, atk: :atk, power: :power, armor: :armor, speed: :speed], fn {key, field} ->
-        total = Map.fetch!(hero, field) + Map.fetch!(hero, item_stat_field(key))
+      Map.new(hero_stats(hero), fn {key, total} ->
         {key, total - round(Moba.immortal_streak_multiplier() * streak * total)}
       end)
     end
   end
 
-  defp item_stat_field(:hp), do: :item_hp
-  defp item_stat_field(:mp), do: :item_mp
-  defp item_stat_field(:atk), do: :item_atk
-  defp item_stat_field(:power), do: :item_power
-  defp item_stat_field(:armor), do: :item_armor
-  defp item_stat_field(:speed), do: :item_speed
+  def hero_stats(hero) do
+    %{
+      hp: hero.total_hp + hero.item_hp,
+      mp: hero.total_mp + hero.item_mp,
+      atk: hero.atk + hero.item_atk,
+      power: hero.power + hero.item_power,
+      armor: hero.armor + hero.item_armor,
+      speed: hero.speed + hero.item_speed
+    }
+  end
 
   @league_names %{
     0 => "Bronze",

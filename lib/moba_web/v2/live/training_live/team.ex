@@ -215,12 +215,14 @@ defmodule MobaWeb.V2.TrainingLive.Team do
   defp assign_run(socket, record, run) do
     player = Game.get_player!(record.player_id)
     encounters = TeamRuns.encounters(socket.assigns.current_scope, record.id)
+    onboarding_guest = is_nil(player.user_id) && player.hero_collection == []
 
     socket =
       assign(socket,
         current_player: player,
         roshan: TeamTraining.boss_preview(run),
-        battle_guide_hero: battle_guide_hero(run, encounters),
+        onboarding_guest: onboarding_guest,
+        battle_guide_hero: if(onboarding_guest, do: battle_guide_hero(run, encounters)),
         skill_guide_hero:
           if(run.phase == :playing && run.turns_left == 0 && TeamTraining.roster_alive?(run),
             do: List.first(TeamTraining.pending_skill_heroes(run))

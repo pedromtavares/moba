@@ -166,55 +166,7 @@
   #library .manual-stat-row small { display: block; color: #a5a4a2; font-size: 11px; margin-bottom: 8px; }
   #library .page-title { scroll-margin-top: 24px; }
 
-  .community-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; padding: 32px 0; }
-  .community-heading h1 { margin: 0; color: #e9dfcd; font-size: 36px; font-weight: 600; letter-spacing: -.03em; }
-  .community-heading .base-secondary, .community-composer .base-secondary,
-  #community-update-form .base-secondary { padding: 12px 18px; font-family: 'Nunito', sans-serif; font-size: 15px; letter-spacing: 0; }
-  .community-hub { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px; margin: 0 0 32px !important; }
-  .community-hub > .col-lg-6 { width: auto; max-width: none; padding: 0; min-width: 0; }
-  .community .community-panel { height: clamp(460px, 56vh, 600px); display: flex; flex-direction: column; border-bottom: 1px solid var(--base-line); }
-  .community .community-panel-heading { display: grid; grid-template-columns: 24px 1fr; column-gap: 12px; row-gap: 8px; margin: 0; padding: 0 0 20px !important; border-bottom: 1px solid var(--base-line); }
-  .community-panel-heading > i { align-self: center; color: #d6b47c; font-size: 20px; }
-  .community-panel-title { color: #e9dfcd; font-size: 24px; line-height: 1.3; font-weight: 600; }
-  .community .community-panel-description { grid-column: 2; margin: 0 !important; font-style: normal !important; font-size: 14px; font-weight: 400; line-height: 1.65; max-width: 60ch; }
-  .community-panel > .card-body { flex: 1; min-height: 0; padding: 0 !important; }
-  .community-board > .card-body { display: flex; flex-direction: column; }
-  .community .messages { flex: 1; min-height: 0; height: auto; padding-right: 12px; }
-  .community .messages .inbox-item { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 6px 14px; padding: 18px 0; border-bottom: 1px solid #baa98a14; overflow: visible; }
-  .community .messages .inbox-item:last-child { border-bottom: 0; }
-  .community .messages .inbox-item-img { grid-column: 1; grid-row: 1 / span 2; float: none; width: auto; margin: 0; }
-  .community .messages .inbox-item-img img { width: 36px; height: 36px; object-fit: contain; }
-  .community .messages .inbox-item-author { grid-column: 2; grid-row: 1; line-height: 1.4; font-size: 16px; }
-  .community .messages .inbox-item-author a { color: #e2d9c9 !important; font-weight: 700; }
-  .community .messages .inbox-item-author a:hover { color: #f0d7aa !important; }
-  .community .community-admin { margin-left: 6px; color: #c7ae80 !important; font-size: 11px; font-weight: 400; }
-  .community .messages .inbox-item-text { grid-column: 2 / -1; color: #c4c6cb; font-size: 15px; line-height: 1.65; overflow-wrap: anywhere; }
-  .community .messages .inbox-item-date { grid-column: 3; grid-row: 1; position: static; margin: 0; line-height: 1.4; }
-  .community .inbox-item-date a, .community .timeline-sm-item > a { color: #b38288 !important; margin: 0 !important; font-size: 12px; }
-  .community .inbox-item-date a:hover, .community .timeline-sm-item > a:hover { color: #e3a6ae !important; }
-  .community-composer { display: flex; align-items: flex-end; gap: 12px; padding: 18px 0; border-top: 1px solid var(--base-line); }
-  .community-compose-field { flex: 1; min-width: 0; }
-  .community-compose-field label, #community-update-form label { display: block; margin: 0 0 8px; color: #bcb5a8; font-size: 13px; font-weight: 600; }
-  .community-composer .form-control { min-height: 46px; font-size: 14px; }
-  .community-composer .base-secondary { min-height: 46px; }
-  .community .updates { height: auto; min-height: 0; padding-right: 12px !important; }
-  .community .timeline-sm { margin: 0; padding: 0; }
-  .community .timeline-sm-item { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; margin: 0; padding: 24px 0; border-left: 0; border-bottom: 1px solid #baa98a14; }
-  .community .timeline-sm-item::before, .community .timeline-sm-item::after { display: none; }
-  .community .timeline-sm-item > h5 { grid-column: 1; grid-row: 1; margin: 0 !important; color: #e7dcc7; font-size: 20px; line-height: 1.4; font-weight: 600; }
-  .community .timeline-sm-item > a { grid-column: 2; grid-row: 1; align-self: start; }
-  .community .community-update-body { grid-column: 1 / -1; margin: 0 !important; color: #b9bdc5 !important; font-size: 16px; line-height: 1.8; overflow-wrap: anywhere; }
-  .community-update-body p { margin: 0 0 16px; max-width: 70ch; }
-  .community-update-body p:last-child { margin-bottom: 0; }
-  .community-update-body a, .community .inbox-item-text a { color: #d6b47c !important; text-decoration: underline; text-underline-offset: 3px; }
-  .community-empty { padding: 36px 12px; color: #969da9; font-size: 15px; line-height: 1.7; }
-  #community-update-form { padding: 8px 0 24px; }
-  #community-update-form .form-control { font-size: 15px; }
-  .community .community-tabs { gap: 24px; margin: 0 0 24px; }
-  .community .community-tabs .nav-link { margin: 0; padding: 18px 12px; line-height: 1.4; }
-  .community-tabs .loading-text { display: inline-flex; align-items: center; justify-content: center; gap: 10px; font-family: 'Nunito', sans-serif; font-size: 16px; font-weight: 600; letter-spacing: 0; text-transform: capitalize; }
-  .community .community-tabs .nav-link i { color: #8f96a4 !important; font-size: 18px; transition: color 180ms ease, filter 180ms ease; }
-  .community .community-tabs .nav-link.active i, .community .community-tabs .nav-link:hover i { color: #dfbf88 !important; filter: drop-shadow(0 0 8px #d6ad6a33); }
+
 }
 
 @media (min-width: 1200px) {
@@ -273,26 +225,8 @@
   .game-page .arena .arena-history { max-height: 420px; }
 }
 
-@media (max-width: 991px) {
-  .game-page .community-hub { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-  .game-page .community .community-panel { height: 500px; }
-}
-
 @media (max-width: 767px) {
   .game-page {
-    .community-heading { padding: 24px 0; gap: 12px; }
-    .community-heading h1 { font-size: 28px; }
-    .community-heading .base-secondary { font-size: 13px; padding: 10px 12px; }
-    .community .community-panel-heading { grid-template-columns: 20px 1fr; column-gap: 10px; }
-    .community-panel-title { font-size: 22px; }
-    .community-composer { gap: 8px; }
-    .community-composer .base-secondary { padding: 12px; }
-    .community .messages .inbox-item { grid-template-columns: 30px minmax(0, 1fr) auto; gap: 6px 10px; }
-    .community .messages .inbox-item-img img { width: 28px; height: 28px; }
-    .community .community-tabs { gap: 0; }
-    .community .community-tabs .nav-link { display: flex; align-items: center; justify-content: center; height: 64px; padding: 12px 6px; }
-    .community-tabs .loading-text { font-size: 13px; gap: 6px; }
-    .community .community-tabs .nav-link i { font-size: 15px; }
     .tavern-nav { gap: 0; margin-bottom: 16px; }
     .tavern .tavern-nav .nav-link { padding: 14px 6px; font-size: 13px; }
     .tavern-nav .loading-text { gap: 7px; }

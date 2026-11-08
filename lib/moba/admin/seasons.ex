@@ -72,7 +72,7 @@ defmodule Moba.Admin.Seasons do
 
     player_ids = Enum.map(players, & &1.id)
     activities = Game.CommunityActivity.latest_for_players(player_ids)
-    heroes = recent_player_heroes(player_ids)
+    heroes = latest_player_heroes(player_ids)
 
     best_heroes =
       from(h in HeroQuery.top_ranked_for_players(player_ids),
@@ -84,63 +84,64 @@ defmodule Moba.Admin.Seasons do
     players
     |> Enum.map(fn player ->
       player
-      |> Map.put(:latest_heroes, Map.get(heroes, player.id, []))
+      |> Map.put(:latest_hero, Map.get(heroes, player.id))
       |> Map.put(:recent_activity, Map.get(activities, player.id))
       |> Map.put(:best_ranked_hero, Map.get(best_heroes, player.id))
     end)
   end
 
-  defp recent_player_heroes(player_ids) do
-    ranked =
-      from(h in Hero,
-        where: h.player_id in ^player_ids and is_nil(h.archived_at),
-        windows: [per_player: [partition_by: h.player_id, order_by: [desc: h.inserted_at, desc: h.id]]],
-        select: %{id: h.id, position: over(row_number(), :per_player)}
-      )
-
+  defp latest_player_heroes(player_ids) do
     from(h in Hero,
-      join: r in subquery(ranked),
-      on: h.id == r.id,
-      where: r.position <= 6,
+      where: h.player_id in ^player_ids and is_nil(h.archived_at),
+      distinct: h.player_id,
       order_by: [desc: h.inserted_at, desc: h.id],
       preload: [:avatar]
     )
     |> Repo.all()
-    |> Enum.group_by(& &1.player_id)
+    |> Map.new(&{&1.player_id, &1})
   end
 
   def current_guests do
-    players =
-      PlayerQuery.non_bots()
-      |> PlayerQuery.guests()
-      |> PlayerQuery.recently_created()
-      |> Repo.all()
-      |> Repo.preload(current_pve_hero: [:avatar, skills: SkillQuery.ordered()])
+    PlayerQuery.non_bots()
+    |> PlayerQuery.guests()
+    |> PlayerQuery.recently_created()
+    |> guest_cards()
+    |> Enum.reject(&(&1.heroes == []))
+  end
 
+  def current_guest(player_id) do
+    from(p in Player, where: p.id == ^player_id and is_nil(p.user_id))
+    |> guest_cards()
+    |> List.first()
+  end
+
+  defp guest_cards(query) do
+    players = query |> Repo.all() |> Repo.preload(current_pve_hero: [:avatar, skills: SkillQuery.ordered()])
     teams = recent_guest_teams(Enum.map(players, & &1.id))
 
-    players
-    |> Enum.flat_map(fn player ->
+    Enum.map(players, fn player ->
       team = teams[player.id]
 
-      case guest_roster(team) do
-        [_ | _] = heroes ->
-          [
-            %{
-              player: player,
-              heroes: heroes,
-              last_online_at: Enum.max([player.updated_at, team.updated_at], NaiveDateTime)
-            }
-          ]
+      {heroes, league_tier} =
+        case guest_roster(team) do
+          {[], _} when not is_nil(player.current_pve_hero) ->
+            hero = player.current_pve_hero
+            {[guest_hero(hero)], hero.league_tier}
 
-        [] when not is_nil(player.current_pve_hero) ->
-          [%{player: player, heroes: [guest_hero(player.current_pve_hero)], last_online_at: player.updated_at}]
+          roster ->
+            roster
+        end
 
-        [] ->
-          []
-      end
+      last_online_at =
+        if team, do: Enum.max([player.updated_at, team.updated_at], NaiveDateTime), else: player.updated_at
+
+      %{
+        player: Map.take(player, [:id, :pve_tier, :inserted_at]),
+        heroes: heroes,
+        league_tier: league_tier,
+        last_online_at: last_online_at
+      }
     end)
-    |> Enum.sort_by(fn guest -> Enum.max_by(guest.heroes, & &1.league_tier).league_tier end, :desc)
   end
 
   defp recent_guest_teams([]), do: %{}
@@ -156,20 +157,24 @@ defmodule Moba.Admin.Seasons do
     |> Map.new(&{&1.player_id, &1})
   end
 
-  defp guest_roster(nil), do: []
+  defp guest_roster(nil), do: {[], nil}
 
   defp guest_roster(team) do
     case Game.TeamRuns.read_state(team) do
       {:ok, %{phase: :draft, picks: picks}} ->
-        for %{avatar: avatar, skills: skills} <- picks do
-          %{avatar: avatar, skills: skills ++ List.wrap(avatar.ultimate), level: 1, league_tier: 0, fallen: false}
-        end
+        heroes =
+          for %{avatar: avatar, skills: skills} <- picks do
+            %{avatar: avatar, skills: skills ++ List.wrap(avatar.ultimate), level: 1, league_tier: 0, fallen: false}
+          end
+
+        {heroes, if(heroes != [], do: 0)}
 
       {:ok, run} ->
-        for %{hero: hero} <- Game.TeamTraining.team(run), do: guest_hero(hero)
+        heroes = for %{hero: hero} <- Game.TeamTraining.team(run), do: guest_hero(hero)
+        {heroes, run.league_tier}
 
       {:error, :invalid_snapshot} ->
-        []
+        {[], nil}
     end
   end
 

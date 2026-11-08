@@ -2,6 +2,27 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
   use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
+  test "guests see Community only in the sidebar after finishing a training run", %{conn: conn} do
+    guest = Game.create_player!(%{})
+    hero = create_base_hero(%{}, guest)
+    conn = log_in_player(conn, player_id: guest.id)
+
+    html = conn |> get("/training") |> html_response(200)
+    refute html =~ ~s(href="/community")
+    {:ok, training, _} = live(conn, "/training")
+    assert has_element?(training, "#training-guest-sign-in[href='/users/log_in']")
+    refute has_element?(training, "a[href='/community']")
+
+    hero
+    |> Game.update_hero!(%{finished_at: Timex.now()})
+    |> Game.update_hero_collection!()
+
+    {:ok, community, _} = live(conn, "/community")
+    assert has_element?(community, "#game-sidebar a[aria-label=Community][href='/community']")
+    html = conn |> get("/community") |> html_response(200)
+    assert Enum.count(LazyHTML.query(LazyHTML.from_fragment(html), "a[href='/community']")) == 1
+  end
+
   test "alive, dead, farming and history share the same training overview", %{conn: conn} do
     hero = create_base_hero(%{pve_tier: 4, pve_current_turns: 3, refresh_targets_count: 2})
     conn = log_in_player(conn, player_id: hero.player_id)

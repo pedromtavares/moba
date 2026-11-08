@@ -3,7 +3,6 @@
     --cinematic-header-height: 242px;
 
     .user-profile #profile-cinematic,
-    .community #community-heading,
     #tavern-heading,
     #manual-heading {
       height: var(--cinematic-header-height);
@@ -31,11 +30,10 @@
   .game-page {
     --cinematic-header-height: 192px;
 
-    .community #community-heading,
     #tavern-heading,
     #manual-heading { padding-top: 18px; padding-bottom: 18px; }
 
-    #community-heading h1, #tavern-heading h1, #manual-heading h1 { font-size: 42px; }
+    #tavern-heading h1, #manual-heading h1 { font-size: 42px; }
     .tavern-heading-description, .manual-heading-description { margin-top: 8px; font-size: 14px; }
     #manual-heading nav { margin-top: 12px; }
   }

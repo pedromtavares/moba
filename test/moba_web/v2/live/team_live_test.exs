@@ -608,9 +608,8 @@ defmodule MobaWeb.V2.TeamLiveTest do
              &match?(["remove_class", %{"to" => "#team-hero-panel-2", "names" => ["d-none"]}], &1)
            )
 
-    assert has_element?(view, "#league-hero-skill-arrow[style='left: 50.0%']")
-    refute has_element?(view, "#team-hero-panel-1.has-pending-skill-points, #league-hud-skill-arrow")
-    assert has_element?(view, "#team-hero-panel-2.has-pending-skill-points #team-2-league-hud-skill-arrow")
+    refute has_element?(view, ".skill-guidance-arrow, #team-hero-panel-1.has-pending-skill-points")
+    assert has_element?(view, "#team-hero-panel-2.has-pending-skill-points")
     render_click(view, "league", %{"hero_id" => "1"})
     assert TeamRuns.encounters(scope, record.id) == []
     view |> element("#team-2-hero-bar [data-hud-skill-index='0'] .hud-upgrade") |> render_click()

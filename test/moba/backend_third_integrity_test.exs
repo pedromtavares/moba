@@ -175,19 +175,13 @@ defmodule Moba.BackendThirdIntegrityTest do
     assert Accounts.get_user!(user.id).chat_burst_count == 1
   end
 
-  test "chat UI rejects a fourth message without clearing the draft", %{conn: conn} do
+  test "removed community chat cannot receive messages through a LiveView event", %{conn: conn} do
     player = create_player!()
     {:ok, view, _} = conn |> log_in_player(player_id: player.id) |> live("/community")
 
-    for _ <- 1..3 do
-      view |> form("#community-message-form", message: %{body: "hello"}) |> render_submit()
-      assert_push_event(view, "community-message-sent", %{})
-    end
-
-    view |> form("#community-message-form", message: %{body: "keep this draft"}) |> render_submit()
-    refute_push_event(view, "community-message-sent", %{})
-    assert render(view) =~ "Please wait 5 seconds"
-    assert Repo.aggregate(from(m in Accounts.Schema.Message, where: m.user_id == ^player.user_id), :count) == 3
+    render_submit(view, "create-message", %{"message" => %{"body" => "Forged message"}})
+    refute has_element?(view, "#community-message-form")
+    assert Repo.aggregate(from(m in Accounts.Schema.Message, where: m.user_id == ^player.user_id), :count) == 0
   end
 
   test "current rankings exclude past-season players and preserve their stored ranks" do

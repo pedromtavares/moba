@@ -23,6 +23,18 @@ defmodule Moba do
     end
   end
 
+  def recent_community_guests do
+    case Cachex.get(:game_cache, "community_guests") do
+      {:ok, nil} ->
+        guests = Moba.Admin.current_guests()
+        Cachex.put(:game_cache, "community_guests", guests, ttl: 30_000)
+        guests
+
+      {:ok, guests} ->
+        guests
+    end
+  end
+
   def cached_items do
     %{resource_uuid: uuid} = Game.current_season()
 

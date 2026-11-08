@@ -91,6 +91,7 @@ defmodule Moba.Admin do
   defdelegate current_active_players, to: Seasons
 
   defdelegate current_guests, to: Seasons
+  defdelegate current_guest(player_id), to: Seasons
 
   defdelegate players_count, to: Seasons
 

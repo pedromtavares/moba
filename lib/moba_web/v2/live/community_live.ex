@@ -4,19 +4,34 @@ defmodule MobaWeb.V2.CommunityLive do
   alias Moba.Admin
   alias Moba.Game.CommunityActivity
   alias MobaWeb.Presence
+  alias MobaWeb.V2.Components.TeamComponents
   import MobaWeb.CoreComponents, only: [icon: 1]
 
   def mount(_, _session, socket) do
-    %{assigns: %{channel: channel}} = socket = socket_init(socket)
+    socket = assign_new(socket, :current_scope, fn -> %{user: socket.assigns[:current_user]} end)
+    is_admin = match?(%{is_admin: true}, socket.assigns.current_scope.user)
+
+    socket =
+      assign(socket,
+        active_tab: "online",
+        sidebar_code: "community",
+        pvp_ranking: nil,
+        pve_ranking: nil,
+        is_admin: is_admin,
+        user_filter: :weekly,
+        match_filter: "elite",
+        balance_category: :avatars
+      )
+      |> refresh_players()
+      |> stats_assigns()
 
     socket =
       if connected?(socket) do
-        MobaWeb.subscribe(channel)
-        MobaWeb.subscribe("stats")
+        if socket.assigns.is_admin, do: MobaWeb.subscribe("stats")
         MobaWeb.subscribe("online")
         MobaWeb.subscribe("player-ranking")
         Process.send_after(self(), :refresh_recent_players, 30_000)
-        tick_user(socket, socket.assigns.current_user)
+        socket
       else
         socket
       end
@@ -36,105 +51,45 @@ defmodule MobaWeb.V2.CommunityLive do
     {:noreply, socket |> load_ranking("pve") |> assign(active_tab: "pve")}
   end
 
-  def handle_event("create-message", params, %{assigns: %{current_player: %{user: user} = player}} = socket) do
-    body = params["message"]["body"]
-    length = String.length(body)
-
-    if length > 1 && length <= 500 do
-      case Accounts.create_message(%{
-             body: body,
-             author: user.username,
-             tier: player.pve_tier,
-             channel: "community",
-             topic: "general",
-             is_admin: user.is_admin,
-             user_id: user.id
-           }) do
-        {:ok, _message} ->
-          {:noreply,
-           socket
-           |> clear_flash(:error)
-           |> assign(form: to_form(Accounts.change_message()))
-           |> push_event("community-message-sent", %{})}
-
-        {:error, :rate_limited} ->
-          {:noreply, put_flash(socket, :error, "Please wait 5 seconds before sending another message.")}
-      end
-    else
-      {:noreply, socket}
-    end
+  def handle_event("show-teams", _, socket) do
+    {:noreply, assign(socket, active_tab: "teams", team_ranking: Game.TeamRuns.ranking(nil, 30))}
   end
 
-  def handle_event("create-update", params, %{assigns: %{current_user: user}} = socket) do
-    if user.is_admin do
-      case Accounts.create_message(%{
-             title: params["message"]["title"],
-             body: params["message"]["body"],
-             author: user.username,
-             channel: "community",
-             topic: "updates",
-             is_admin: true,
-             user_id: user.id
-           }) do
-        {:ok, _message} ->
-          {:noreply,
-           socket
-           |> clear_flash(:error)
-           |> assign(form: to_form(Accounts.change_message()))
-           |> push_event("community-update-sent", %{})}
-
-        {:error, :rate_limited} ->
-          {:noreply, put_flash(socket, :error, "Please wait 5 seconds before sending another message.")}
-      end
-    else
-      {:noreply, socket}
-    end
+  def handle_event("show-balance", _, %{assigns: %{is_admin: true}} = socket) do
+    {:noreply, assign(socket, active_tab: "balance")}
   end
 
-  def handle_event(
-        "delete-message",
-        %{"id" => id},
-        %{assigns: %{current_user: user, messages: messages, updates: updates}} = socket
-      ) do
-    message = Accounts.get_message!(id)
-
-    if user.is_admin do
-      Accounts.delete_message(message)
-      {:noreply, assign(socket, messages: messages -- [message], updates: updates -- [message])}
-    else
-      {:noreply, socket}
-    end
+  def handle_event("balance-category", %{"category" => category}, %{assigns: %{is_admin: true}} = socket)
+      when category in ["avatars", "skills", "items"] do
+    {:noreply, assign(socket, balance_category: String.to_existing_atom(category))}
   end
 
-  def handle_event("user-filter", %{"period" => period}, %{assigns: %{current_user: %{is_admin: true}}} = socket)
+  def handle_event("user-filter", %{"period" => period}, %{assigns: %{is_admin: true}} = socket)
       when period in ["daily", "weekly"] do
     new_filter = if period == "daily", do: :daily, else: :weekly
     {:noreply, assign(socket, user_filter: new_filter) |> stats_assigns()}
   end
 
-  def handle_event("match-filter", %{"type" => filter}, %{assigns: %{current_user: %{is_admin: true}}} = socket)
+  def handle_event("match-filter", %{"type" => filter}, %{assigns: %{is_admin: true}} = socket)
       when filter in ["pvp", "plebs", "elite"] do
     {:noreply, assign(socket, match_filter: filter) |> stats_assigns()}
   end
 
-  def handle_event("toggle-admin", _, %{assigns: %{current_user: %{is_admin: true}}} = socket) do
-    {:noreply, assign(socket, is_admin: !socket.assigns.is_admin)}
-  end
+  def handle_event(event, _, socket)
+      when event in [
+             "user-filter",
+             "match-filter",
+             "show-pulse",
+             "show-balance",
+             "balance-category",
+             "toggle-admin",
+             "create-message",
+             "create-update",
+             "delete-message"
+           ],
+      do: {:noreply, socket}
 
-  def handle_event(event, _, socket) when event in ["user-filter", "match-filter", "toggle-admin"],
-    do: {:noreply, socket}
-
-  def handle_info({"server", _}, socket) do
-    {:noreply, stats_assigns(socket)}
-  end
-
-  def handle_info({"general", message}, %{assigns: %{messages: messages, current_player: player}} = socket) do
-    {:noreply, assign(socket, messages: messages ++ [message]) |> tick_user(player.user)}
-  end
-
-  def handle_info({"updates", message}, %{assigns: %{updates: updates}} = socket) do
-    {:noreply, assign(socket, updates: [message] ++ updates)}
-  end
+  def handle_info({"server", _}, socket), do: {:noreply, stats_assigns(socket)}
 
   def handle_info(%{event: "presence_diff"}, socket) do
     {:noreply, assign(socket, live_player_ids: live_player_ids())}
@@ -152,7 +107,7 @@ defmodule MobaWeb.V2.CommunityLive do
 
   def handle_info(:refresh_recent_players, socket) do
     Process.send_after(self(), :refresh_recent_players, 30_000)
-    {:noreply, assign(socket, players: Moba.recent_community_players(), live_player_ids: live_player_ids())}
+    {:noreply, refresh_players(socket)}
   end
 
   # Private function components
@@ -161,58 +116,44 @@ defmodule MobaWeb.V2.CommunityLive do
     assigns = assign(assigns, :arena_title, player_card_title(assigns.player))
 
     ~H"""
-    <div class="col-lg-4 col-md-6" id={"player-card-#{@player.id}"}>
-      <.link
-        class="hero-card card mb-3 community-player-card"
-        data-arena-title={@arena_title && @arena_title.key}
-        style={"background-image: url(#{GH.background_url(@player.top_hero)})"}
-        navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
-        data-profile-username={Moba.Utils.username(@player)}
-      >
-        <div class="card-header">
-          <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-            <span class="hero-card-rank">#{@player.season_ranking}</span>
-            <div class="hero-card-name">
-              <img src={"/images/pve/#{@player.pve_tier}.png"} alt={Moba.pve_tiers()[@player.pve_tier]} />
-              <span>{@player.user.username}</span>
-            </div>
-            <div class="hero-card-summary">
-              <span
-                id={"player-season-score-#{@player.id}"}
-                class="player-season-score"
-                data-toggle="tooltip"
-                title={TT.season_score_tooltip(@player)}
-                tabindex="0"
-                aria-label={"#{Game.season_score(@player)} Season Score"}
-              >
-                <.icon name="game-season-score" /><strong>{Game.season_score(@player)}</strong><small>Season Score</small>
-              </span>
-            </div>
-          </h4>
-        </div>
-        <div class="card-body">
-          <span :if={@arena_title} class="player-card-arena-title" data-title={@arena_title.key}>
-            <.icon name={@arena_title.icon} /><span>{@arena_title.label}</span>
-          </span>
-        </div>
-        <div class="card-footer player-card-footer">
-          <dl class="player-card-metrics">
-            <div data-metric="arena-rating" data-tone="rating">
-              <dt><.icon name="game-swords" /><span>Arena Rating</span></dt>
-              <dd>{@player.pvp_points}</dd>
-            </div>
-            <div data-metric="win-rate" data-tone="wins">
-              <dt><.icon name="game-arena-3v3" /><span>3v3 win rate</span></dt>
-              <dd title={GH.win_rate_summary(@recent_results)}>{GH.win_rate(@recent_results)}%</dd>
-            </div>
-            <div data-metric="immortal-streak" data-tone="streak">
-              <dt><.icon name="game-trophy" /><span>Best Immortal Streak</span></dt>
-              <dd>{@player.best_immortal_streak}</dd>
-            </div>
-          </dl>
-        </div>
-      </.link>
-    </div>
+    <.player_banner id={"player-card-#{@player.id}"} player={@player} hero={@player.top_hero} preview={@preview} linked>
+      <:ranks>
+        <span class="community-player-rank">#{@player.season_ranking}</span>
+      </:ranks>
+      <:summary>
+        <span
+          id={"player-season-score-#{@player.id}"}
+          class="player-season-score"
+          data-toggle="tooltip"
+          title={TT.season_score_tooltip(@player)}
+          tabindex="0"
+          aria-label={"#{Game.season_score(@player)} Season Score"}
+        >
+          <.icon name="game-season-score" /><strong>{Game.season_score(@player)}</strong><small>Season Score</small>
+        </span>
+      </:summary>
+      <:banner_bottom>
+        <span :if={@arena_title} class="player-card-arena-title" data-title={@arena_title.key}>
+          <.icon name={@arena_title.icon} /><span>{@arena_title.label}</span>
+        </span>
+      </:banner_bottom>
+      <:footer>
+        <dl class="player-card-metrics">
+          <div data-metric="arena-rating" data-tone="rating">
+            <dt><.icon name="game-swords" /><span>Arena Rating</span></dt>
+            <dd>{@player.pvp_points}</dd>
+          </div>
+          <div data-metric="win-rate" data-tone="wins">
+            <dt><.icon name="game-arena-3v3" /><span>3v3 win rate</span></dt>
+            <dd title={GH.win_rate_summary(@recent_results)}>{GH.win_rate(@recent_results)}%</dd>
+          </div>
+          <div data-metric="immortal-streak" data-tone="streak">
+            <dt><.icon name="game-trophy" /><span>Best Streak</span></dt>
+            <dd>{@player.best_immortal_streak}</dd>
+          </div>
+        </dl>
+      </:footer>
+    </.player_banner>
     """
   end
 
@@ -223,122 +164,242 @@ defmodule MobaWeb.V2.CommunityLive do
   defp player_card_title(%{pvp_tier: 1}), do: %{key: "shadow", label: "Shadow", icon: "game-hero"}
   defp player_card_title(_), do: nil
 
+  attr :entry, :map, required: true
+  attr :preview, :boolean, required: true
+
+  defp team_card(assigns) do
+    assigns = assign(assigns, :team, assigns.entry.team)
+
+    ~H"""
+    <.link
+      id={"community-team-#{@team.id}"}
+      class="community-team-card"
+      data-community-entry
+      navigate={preview_path(assigns, ~p"/teams/#{@team.id}")}
+    >
+      <div class="community-team-portraits" aria-hidden="true">
+        <div :for={hero <- @team.heroes} style={"background-image: url(#{GH.background_url(hero)})"}></div>
+      </div>
+      <header>
+        <img src={"/images/league/#{@team.league_tier}.png"} alt={Moba.leagues()[@team.league_tier]} />
+        <h3>{TeamComponents.display_name(@team)}</h3>
+        <span class="community-player-rank">#{@entry.position}</span>
+      </header>
+      <footer>
+        <p>{Enum.map_join(@team.heroes, " · ", & &1.avatar.name)}</p>
+        <dl>
+          <div>
+            <dt>Avg farm</dt>
+            <dd>{GH.farming_amount_label(div(@team.total_farm, 3))}</dd>
+          </div>
+          <div>
+            <dt>Time</dt>
+            <dd title={"#{@team.duration_seconds} seconds"}>
+              {GH.minutes_label(div(@team.duration_seconds, 60), @preview)} min
+            </dd>
+          </div>
+        </dl>
+      </footer>
+    </.link>
+    """
+  end
+
+  attr :hero, :map, required: true
+  attr :preview, :boolean, required: true
+
   defp pve_hero_card(assigns) do
     ~H"""
-    <div class="col-lg-4 col-md-6">
-      <.link
-        class="hero-card card mb-3"
-        style={"background-image: url(#{GH.background_url(@hero)})"}
-        navigate={preview_path(assigns, ~p"/hero/#{@hero}")}
-      >
-        <div class="card-header pt-0 pb-1" style="background:rgba(0,0,0,0.8)">
-          <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-            <span class="font-italic f-rpg hero-card-rank" style="font-size: 30px;">#{@hero.pve_ranking}</span>
-            <div class="hero-card-name" data-toggle="tooltip" title={"Level #{@hero.level} #{@hero.avatar.name}"}>
-              <img src={"/images/pve/#{@hero.player.pve_tier}.png"} style="max-height: 40px" />
-              {@hero.name}
-            </div>
-            <div class="btn-group hero-card-summary">
-              <span
-                tabindex="0"
-                class="game-stat btn btn-icon btn-outline-light text-white"
-                data-toggle="tooltip"
-                title={"Total farm: #{@hero.total_xp_farm + @hero.total_gold_farm}. Gold farm: #{@hero.total_gold_farm}. XP farm: #{@hero.total_xp_farm}<br/>"}
-              >
-                <i class="ui-icon ui-crown"></i>
-                {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
-              </span>
-              <span
-                tabindex="0"
-                class="game-stat btn btn-icon btn-outline-light text-white"
-                data-toggle="tooltip"
-                title="Time it took to finish Training"
-              >
-                <i class="ui-icon ui-clock"></i>
-                {GH.minutes_label(GH.finished_time(@hero), @preview)} min
-              </span>
-            </div>
-          </h4>
-        </div>
-        <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
-        <div class="card-footer transparent p-1">
-          <div class="row">
-            <div class="col justify-content-center d-flex hero-card-stats">
-              <.hero_stat_group hero={@hero} />
-            </div>
-          </div>
-          <div class="row mt-1">
-            <div class="col-12">
-              <.hero_skill_strip skills={@hero.skills} id_prefix="skill" id_suffix={@hero.id} />
-              <.hero_item_strip
-                items={Game.sort_items(@hero.items)}
-                container_class="items-container row no-gutters float-right"
-                id_prefix="item"
-                id_suffix={@hero.id}
+    <article
+      id={"community-hero-#{@hero.id}"}
+      class="community-player-card community-ranked-card"
+      data-community-entry
+      style={"--player-art: url(#{GH.background_url(@hero)})"}
+    >
+      <div class="community-player-banner">
+        <header class="community-player-heading">
+          <div class="community-hero-identity">
+            <.link
+              navigate={preview_path(assigns, ~p"/hero/#{@hero}")}
+              class="community-player-name community-player-name-stretched"
+            >
+              <img
+                src={"/images/pve/#{@hero.player.pve_tier}.png"}
+                alt={Moba.pve_tiers()[@hero.player.pve_tier]}
+                class="community-player-emblem"
               />
+              <strong>{@hero.name}</strong>
+            </.link>
+            <div class="community-hero-meta">
+              <span class="community-hero-avatar">{@hero.avatar.name}</span>
+              <span aria-hidden="true">·</span>
+              <span
+                class="community-hero-level tooltip-mobile"
+                data-toggle="tooltip"
+                title={TT.combat_stats_tooltip(@hero)}
+                tabindex="0"
+                aria-label={"Level #{@hero.level}, view combat stats"}
+              >
+                Level {@hero.level}
+              </span>
             </div>
           </div>
+          <span class="community-player-rank">#{@hero.pve_ranking}</span>
+        </header>
+      </div>
+      <footer class="community-ranking-footer">
+        <dl class="player-card-metrics community-hero-metrics">
+          <div data-tone="streak">
+            <dt><.icon name="game-gold" /><span>Farm</span></dt>
+            <dd
+              class="tooltip-mobile"
+              tabindex="0"
+              data-toggle="tooltip"
+              title={"#{@hero.total_xp_farm} XP · #{@hero.total_gold_farm} Gold"}
+            >
+              {GH.farming_amount_label(@hero.total_xp_farm + @hero.total_gold_farm)}
+            </dd>
+          </div>
+          <div data-tone="wins">
+            <dt><.icon name="game-clock" /><span>Time</span></dt>
+            <dd>{GH.minutes_label(GH.finished_time(@hero), @preview)} min</dd>
+          </div>
+        </dl>
+        <div class="community-hero-build">
+          <.hero_skill_strip
+            skills={@hero.skills}
+            container_class="community-hero-skills"
+            id_prefix="skill"
+            id_suffix={@hero.id}
+          />
+          <.hero_item_strip
+            :if={@hero.items != []}
+            items={Game.sort_items(@hero.items)}
+            container_class="community-hero-items"
+            item_container_class="community-hero-item"
+            id_prefix="item"
+            id_suffix={@hero.id}
+          />
         </div>
-      </.link>
+      </footer>
+    </article>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :label, :string, required: true
+  slot :inner_block, required: true
+
+  defp community_pager(assigns) do
+    ~H"""
+    <div id={@id} class="community-pager" phx-hook="CommunityPager">
+      {render_slot(@inner_block)}
+      <nav class="community-pager-controls" aria-label={"#{@label} pages"} hidden>
+        <button type="button" data-community-direction="-1" aria-label={"Previous page of #{@label}"}>←</button>
+        <span data-community-page-label aria-live="polite"></span>
+        <button type="button" data-community-direction="1" aria-label={"Next page of #{@label}"}>→</button>
+      </nav>
     </div>
     """
   end
 
   defp arena_stats(assigns) do
     ~H"""
-    <div id={"community-balance-#{@key}-#{@side}"} class="community-arena-stats-list">
-      <table class="community-arena-stats-table">
-        <caption class="sr-only">{@title}</caption>
-        <tbody>
-          <tr :for={{record, {winrate, total, diff}} <- @records} id={"community-#{@key}-#{@side}-#{record.id}"}>
-            <td><img src={GH.image_url(record)} alt="" /></td>
-            <td>
-              <h4>{record.name}</h4>
-            </td>
-            <td>
-              <h3 class={winrate_class(diff, @match_filter)}>{round(winrate)}%<small>({total})</small></h3>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <p :if={@records == []} class="community-balance-empty">No appearances recorded.</p>
-    </div>
+    <section id={"community-balance-#{@key}-#{@side}"} class="community-arena-stats-list">
+      <h3>{@title}</h3>
+      <div class="community-balance-entries" data-community-page-group>
+        <article
+          :for={{record, {winrate, total, diff}} <- @records}
+          data-community-entry
+          id={"community-#{@key}-#{@side}-#{record.id}"}
+        >
+          <img src={GH.image_url(record)} alt="" />
+          <h4>{record.name}</h4>
+          <h3 class={winrate_class(diff, @match_filter)}>{round(winrate)}%<small>({total})</small></h3>
+        </article>
+        <p :if={@records == []} class="community-balance-empty">No appearances recorded.</p>
+      </div>
+    </section>
+    """
+  end
+
+  defp recent_players(assigns) do
+    ~H"""
+    <.community_pager id={@id <> "-pages"} label={@label}>
+      <div id={@id} class="community-recent-grid" data-community-page-group>
+        <.recent_player_card
+          :for={player <- @players}
+          preview={@preview}
+          player={player}
+          current={player.id == @current_player.id}
+          live={MapSet.member?(@live_player_ids, player.id)}
+          admin={@admin}
+        />
+        <.guest
+          :for={guest <- @guests}
+          guest={guest}
+          current={guest.player.id == @current_player.id}
+          preview={@preview}
+          admin={@admin}
+        />
+        <p :if={@players == [] && @guests == []} class="community-players-empty">{@empty}</p>
+      </div>
+    </.community_pager>
     """
   end
 
   defp guest(assigns) do
+    %{player: player, heroes: heroes, last_online_at: last_online_at} = assigns.guest
+
+    rank = "PvE rank: #{Moba.pve_tiers()[player.pve_tier || 0]}"
+    tooltip = if assigns.admin, do: "#{rank}<br/>Last online: #{relative_time(last_online_at)}", else: rank
+
+    assigns =
+      assign(assigns,
+        player: player,
+        heroes: heroes,
+        last_online_at: last_online_at,
+        league_tier: Map.get(assigns.guest, :league_tier),
+        tooltip: tooltip
+      )
+
     ~H"""
-    <article id={"guest-#{@player.id}"} class="community-guest-card" data-current={to_string(@current)}>
-      <header>
-        <strong>{if @current, do: "You", else: "Guest"}<small>#{@player.id}</small></strong>
-      </header>
-      <ul class="community-guest-roster" aria-label="Training heroes">
-        <li :for={hero <- @heroes}>
-          <div class="community-guest-hero" data-fallen={to_string(hero.fallen)}>
-            <img src={GH.image_url(hero.avatar)} alt="" loading="lazy" />
-            <strong>{hero.avatar.name}</strong>
-            <span class="community-guest-level">
-              <img src={"/images/league/#{hero.league_tier}.png"} alt={GH.league_name(hero.league_tier)} />Lv {hero.level}
-            </span>
-          </div>
-          <div class="community-guest-skills" aria-label="Skills">
-            <img :for={skill <- hero.skills} src={GH.image_url(skill)} alt={skill.name} title={skill.name} loading="lazy" />
-          </div>
-        </li>
-      </ul>
-      <footer
-        class="tooltip-mobile"
-        tabindex="0"
-        data-toggle="tooltip"
-        title={"Last online: #{relative_time(@last_online_at)}"}
-      >
-        Joined {relative_time(@player.inserted_at)}
-      </footer>
-    </article>
+    <.player_banner
+      id={"guest-#{@player.id}"}
+      player={@player}
+      hero={List.first(@heroes)}
+      preview={@preview}
+      current={@current}
+      guest_name={if @current, do: "You", else: "Guest ##{@player.id}"}
+    >
+      <:summary>
+        <span class="community-player-status" data-activity={activity_recency(@last_online_at)}>
+          <span class="community-status-dot" aria-hidden="true"></span>
+          {activity_status(@last_online_at)}
+        </span>
+      </:summary>
+      <:banner_bottom>
+        <ul :if={@heroes != []} class="community-guest-roster" aria-label="Training heroes">
+          <li :for={hero <- @heroes}>
+            <img src={GH.image_url(hero.avatar)} alt="" loading="lazy" data-fallen={to_string(hero.fallen)} />
+            <strong title={Enum.map_join([hero.avatar | hero.skills], " · ", & &1.name)}>{hero.avatar.name}</strong>
+            <span class="community-guest-level" title={GH.league_name(hero.league_tier)}>Lv {hero.level}</span>
+          </li>
+        </ul>
+      </:banner_bottom>
+      <:footer>
+        <span class="community-guest-joined tooltip-mobile" data-toggle="tooltip" tabindex="0" title={@tooltip}>
+          <span><.icon name="game-clock" /> Joined {relative_time(@player.inserted_at)}</span>
+          <span :if={is_integer(@league_tier)} class="community-guest-league">
+            <img src={"/images/league/#{@league_tier}.png"} alt="" />
+            {GH.league_name(@league_tier)} League
+          </span>
+        </span>
+      </:footer>
+    </.player_banner>
     """
   end
 
-  defp player_row(assigns) do
+  defp recent_player_card(assigns) do
     assigns =
       assign(assigns,
         activity: Map.get(assigns.player, :recent_activity),
@@ -346,71 +407,57 @@ defmodule MobaWeb.V2.CommunityLive do
       )
 
     ~H"""
-    <tr id={"user-#{@player.id}"} class="community-player-row" data-current={to_string(@current)}>
-      <td class="community-player-cell">
-        <div class="community-player-summary">
-          <div class="community-player-identity">
-            <.link
-              navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
-              data-profile-username={Moba.Utils.username(@player)}
-              aria-label={"View #{@player.user.username}'s profile"}
-            >
-              <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" class="community-player-emblem" />
-            </.link>
-            <span>
-              <strong>
-                <.link
-                  navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
-                  data-profile-username={Moba.Utils.username(@player)}
-                >
-                  {@player.user.username}
-                </.link>
-                <small :if={@current}>You</small>
-              </strong>
-              <span class="community-player-meta">
-                <span
-                  class="community-player-status"
-                  data-activity={activity_recency(@player.user.last_online_at)}
-                  data-toggle={if @admin, do: "tooltip"}
-                  title={if @admin, do: player_activity_tooltip(@player.user)}
-                  tabindex={if @admin, do: "0"}
-                >
-                  <span class="community-status-dot" aria-hidden="true"></span>
-                  {activity_status(@player.user.last_online_at)}
-                </span>
-                <.link
-                  :if={@live}
-                  navigate={preview_path(assigns, ~p"/arena")}
-                  class="community-player-live"
-                  aria-label={"#{@player.user.username} is accepting live 1v1 challenges"}
-                >
-                  <.icon name="game-swords" />Live 1v1
-                </.link>
-              </span>
-            </span>
-          </div>
-          <div :if={@player.season_ranking || @best_hero} class="community-player-ranks" aria-label="Player accomplishments">
-            <.link
-              :if={@player.season_ranking}
-              navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
-              data-profile-username={Moba.Utils.username(@player)}
-              class="community-season-rank"
-              aria-label={"Season rank #{@player.season_ranking}"}
-            >
-              <span>Season</span><strong>#{@player.season_ranking}</strong>
-            </.link>
-            <.link
-              :if={@best_hero}
-              navigate={preview_path(assigns, ~p"/hero/#{@best_hero.id}")}
-              class="community-best-hero-rank"
-              aria-label={"Best hero rank #{@best_hero.pve_ranking}, #{@best_hero.avatar.name}"}
-            >
-              <span>Hero</span><strong>#{@best_hero.pve_ranking}</strong>
-            </.link>
-          </div>
+    <.player_banner
+      id={"user-#{@player.id}"}
+      player={@player}
+      hero={Map.get(@player, :latest_hero)}
+      preview={@preview}
+      current={@current}
+    >
+      <:summary>
+        <div class="community-player-meta">
+          <span
+            class="community-player-status"
+            data-activity={activity_recency(@player.user.last_online_at)}
+            data-toggle={if @admin, do: "tooltip"}
+            title={if @admin, do: player_activity_tooltip(@player.user)}
+            tabindex={if @admin, do: "0"}
+          >
+            <span class="community-status-dot" aria-hidden="true"></span>
+            {activity_status(@player.user.last_online_at)}
+          </span>
+          <.link
+            :if={@live}
+            navigate={preview_path(assigns, ~p"/arena")}
+            class="community-player-live"
+            aria-label={"#{@player.user.username} is accepting live 1v1 challenges"}
+          >
+            <.icon name="game-swords" />Live 1v1
+          </.link>
         </div>
-      </td>
-      <td class="community-player-activity">
+      </:summary>
+      <:ranks>
+        <div :if={@player.season_ranking || @best_hero} class="community-player-ranks" aria-label="Player accomplishments">
+          <.link
+            :if={@player.season_ranking}
+            navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
+            data-profile-username={Moba.Utils.username(@player)}
+            class="community-season-rank"
+            aria-label={"Season rank #{@player.season_ranking}"}
+          >
+            <span>Season</span><strong>#{@player.season_ranking}</strong>
+          </.link>
+          <.link
+            :if={@best_hero}
+            navigate={preview_path(assigns, ~p"/hero/#{@best_hero.id}")}
+            class="community-best-hero-rank"
+            aria-label={"Best hero rank #{@best_hero.pve_ranking}, #{@best_hero.avatar.name}"}
+          >
+            <span>Hero</span><strong>#{@best_hero.pve_ranking}</strong>
+          </.link>
+        </div>
+      </:ranks>
+      <:footer>
         <%= if @activity do %>
           <.link
             navigate={preview_path(assigns, activity_path(@activity))}
@@ -430,37 +477,65 @@ defmodule MobaWeb.V2.CommunityLive do
         <% else %>
           <span class="community-activity-empty">No recent activity</span>
         <% end %>
-      </td>
-      <td class="community-player-heroes">
-        <div class="community-hero-strip">
-          <.link
-            :for={hero <- Enum.take(@player.latest_heroes, 6)}
-            navigate={preview_path(assigns, ~p"/hero/#{hero}")}
-            class="community-recent-hero"
-            data-undefeated={to_string(Game.max_farm?(hero))}
-            data-toggle={if @admin, do: "tooltip"}
-            title={
-              if @admin,
-                do: "Started training: #{relative_time(hero.inserted_at)}"
-            }
-            aria-label={"#{hero.avatar.name}, level #{hero.level}#{if Game.max_farm?(hero), do: ", undefeated", else: ""}"}
-          >
-            <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} class="community-hero-portrait" />
-            <strong :if={hero.pve_ranking} class="community-hero-rank" aria-label={"Hero rank #{hero.pve_ranking}"}>
-              #{hero.pve_ranking}
-            </strong>
-            <span>
-              <img src={"/images/league/#{hero.league_tier}.png"} alt={GH.league_name(hero.league_tier)} />Lv {hero.level}
-            </span>
-          </.link>
-          <span :if={@player.latest_heroes == []} class="community-activity-empty">No heroes yet</span>
-        </div>
-      </td>
-    </tr>
+      </:footer>
+    </.player_banner>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :player, :map, required: true
+  attr :hero, :any, required: true
+  attr :preview, :boolean, required: true
+  attr :current, :boolean, default: false
+  attr :linked, :boolean, default: false
+  attr :guest_name, :string, default: nil
+  slot :ranks
+  slot :summary, required: true
+  slot :banner_bottom
+  slot :footer
+
+  defp player_banner(assigns) do
+    ~H"""
+    <article
+      id={@id}
+      class={["community-player-card", @linked && "community-ranked-card"]}
+      data-community-entry
+      data-current={to_string(@current)}
+      style={"--player-art: url(#{GH.background_url(@hero)})"}
+    >
+      <div class="community-player-banner">
+        <header class="community-player-heading">
+          <div class="community-player-identity">
+            <span :if={@guest_name} class="community-player-name"><strong>{@guest_name}</strong></span>
+            <.link
+              :if={is_nil(@guest_name)}
+              navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
+              class={["community-player-name", @linked && "community-player-name-stretched"]}
+              data-profile-username={Moba.Utils.username(@player)}
+            >
+              <img
+                src={"/images/pve/#{@player.pve_tier}.png"}
+                alt={Moba.pve_tiers()[@player.pve_tier]}
+                class="community-player-emblem"
+              />
+              <strong>{@player.user.username}</strong>
+            </.link>
+            <small :if={@current && is_nil(@guest_name)}>You</small>
+          </div>
+          {render_slot(@ranks)}
+        </header>
+        <div class="community-player-summary">{render_slot(@summary)}</div>
+        {render_slot(@banner_bottom)}
+      </div>
+      <footer :if={@footer != []} class={if @linked, do: "community-ranking-footer", else: "community-player-activity"}>
+        {render_slot(@footer)}
+      </footer>
+    </article>
     """
   end
 
   defp activity_recency(nil), do: "offline"
+  defp activity_recency(%NaiveDateTime{} = at), do: at |> DateTime.from_naive!("Etc/UTC") |> activity_recency()
 
   defp activity_recency(at) do
     seconds = DateTime.diff(DateTime.utc_now(), at)
@@ -554,17 +629,6 @@ defmodule MobaWeb.V2.CommunityLive do
 
   # Private helper functions
 
-  defp formatted_body(%{body: body}) do
-    body
-    |> PhoenixHTMLHelpers.Format.text_to_html([])
-    |> Phoenix.HTML.safe_to_string()
-    |> String.replace(
-      ~r/https:\/\/browsermoba.com\/battles\/([0-9]+)/,
-      "<a href='/battles/\\1' data-phx-link='redirect' data-phx-link-state='push' class='text-primary'>Battle #\\1</a>"
-    )
-    |> Phoenix.HTML.raw()
-  end
-
   defp bottom_performing(stats, key) do
     limit = if key == :items, do: 6, else: 10
 
@@ -613,48 +677,29 @@ defmodule MobaWeb.V2.CommunityLive do
 
   defp load_ranking(socket, _), do: socket
 
-  defp socket_init(%{assigns: %{current_player: %{user: user}}} = socket) do
-    channel = "community"
-    messages = Accounts.latest_messages(channel, "general", 20) |> Enum.reverse()
-    updates = Accounts.latest_messages(channel, "updates", 20)
+  defp refresh_players(socket) do
+    guests = Moba.recent_community_guests()
+    current = socket.assigns.current_player
 
-    assign(socket,
-      active_tab: "online",
-      form: to_form(Accounts.change_message()),
-      channel: channel,
-      pve_ranking: nil,
-      messages: messages,
-      sidebar_code: channel,
-      updates: updates,
-      pvp_ranking: nil,
-      current_user: user,
-      notifications: 0
-    )
-    |> stats_assigns()
+    guests =
+      if is_nil(current.user_id) do
+        others = Enum.reject(guests, &(&1.player.id == current.id))
+        List.wrap(Admin.current_guest(current.id)) ++ others
+      else
+        guests
+      end
+
+    assign(socket, players: Moba.recent_community_players(), guests: guests, live_player_ids: live_player_ids())
   end
 
-  defp tick_user(socket, nil), do: socket
-
-  defp tick_user(socket, user) do
-    user = Accounts.update_user!(user, %{community_seen_at: DateTime.utc_now()})
-    assign(socket, user: user)
-  end
-
-  defp stats_assigns(%{assigns: %{current_player: %{user: user}}} = socket) do
+  defp stats_assigns(%{assigns: %{is_admin: true, user_filter: period, match_filter: bracket}} = socket) do
     data = Admin.get_server_data()
-    user_filter = socket.assigns[:user_filter] || :weekly
-    match_filter = socket.assigns[:match_filter] || "elite"
 
     assign(socket,
-      players: Moba.recent_community_players(),
-      live_player_ids: live_player_ids(),
-      guests: data.guests,
-      user_filter: user_filter,
-      user_stats: data.user_stats[user_filter],
-      match_filter: match_filter,
-      match_stats: data.match_stats[match_filter],
-      duels: data.duels,
-      is_admin: user && user.is_admin && Map.get(socket.assigns, :is_admin, true)
+      user_stats: data.user_stats[period],
+      match_stats: data.match_stats[bracket]
     )
   end
+
+  defp stats_assigns(socket), do: socket
 end

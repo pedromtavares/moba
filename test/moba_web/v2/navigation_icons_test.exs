@@ -39,7 +39,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
              []
   end
 
-  test "guest navigation shows the locked Arena and registration action without Community or Library" do
+  test "guest navigation offers Community alongside the locked Arena and registration action" do
     player = %{id: 42, user_id: nil, user: nil}
 
     document =
@@ -57,7 +57,8 @@ defmodule MobaWeb.V2.NavigationIconsTest do
            ]
 
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar a[aria-label=Admin]"), "href") == []
-    assert Enum.empty?(LazyHTML.query(document, "#game-sidebar a:is([aria-label=Community], [aria-label=Library])"))
+    assert [_] = Enum.to_list(LazyHTML.query(document, "#game-sidebar a[aria-label=Community][href='/community']"))
+    assert Enum.empty?(LazyHTML.query(document, "#game-sidebar a[aria-label=Library]"))
   end
 
   test "mobile navigation distinguishes Training from Base with named raster controls" do

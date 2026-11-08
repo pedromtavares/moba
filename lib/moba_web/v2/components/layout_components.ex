@@ -125,36 +125,37 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
               <span>Tavern</span>
             </span>
           </.link>
-          <.link
-            navigate={preview_path(assigns, ~p"/community")}
-            aria-label="Community"
-            data-toggle={if !@preview, do: "tooltip"}
-            data-tippy-placement="right"
-            data-tippy-arrow={false}
-            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Community</h3>"}
-            class={sidebar_class("community", %{sidebar_code: @sidebar_code})}
-          >
-            <.icon name="nav-community" class="" />
-            <span :if={@preview} class="sidebar-label">
-              <span class="sidebar-long-title">Community</span>
-            </span>
-          </.link>
-          <.link
-            navigate={preview_path(assigns, ~p"/library")}
-            aria-label="Library"
-            data-toggle={if !@preview, do: "tooltip"}
-            data-tippy-placement="right"
-            data-tippy-arrow={false}
-            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Library</h3>"}
-            class={sidebar_class("library", %{sidebar_code: @sidebar_code})}
-            id="game-manual"
-          >
-            <.icon name="nav-manual" class="" />
-            <span :if={@preview} class="sidebar-label">
-              <span>Library</span>
-            </span>
-          </.link>
         <% end %>
+        <.link
+          navigate={preview_path(assigns, ~p"/community")}
+          aria-label="Community"
+          data-toggle={if !@preview, do: "tooltip"}
+          data-tippy-placement="right"
+          data-tippy-arrow={false}
+          title={if !@preview, do: "<h3 class='ml-2 mr-2'>Community</h3>"}
+          class={sidebar_class("community", %{sidebar_code: @sidebar_code})}
+        >
+          <.icon name="nav-community" class="" />
+          <span :if={@preview} class="sidebar-label">
+            <span class="sidebar-long-title">Community</span>
+          </span>
+        </.link>
+        <.link
+          :if={!guest?(@current_player)}
+          navigate={preview_path(assigns, ~p"/library")}
+          aria-label="Library"
+          data-toggle={if !@preview, do: "tooltip"}
+          data-tippy-placement="right"
+          data-tippy-arrow={false}
+          title={if !@preview, do: "<h3 class='ml-2 mr-2'>Library</h3>"}
+          class={sidebar_class("library", %{sidebar_code: @sidebar_code})}
+          id="game-manual"
+        >
+          <.icon name="nav-manual" class="" />
+          <span :if={@preview} class="sidebar-label">
+            <span>Library</span>
+          </span>
+        </.link>
         <%= if @current_player.user && @current_player.user.is_admin do %>
           <a href="/admin" class={@preview && "sidebar-utility"} aria-label="Admin">
             <.icon name="nav-admin" class="" />

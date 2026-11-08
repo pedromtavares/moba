@@ -128,10 +128,17 @@ defmodule Moba.Game.TeamRuns do
         select: %{id: r.id, position: over(row_number(), :ranking)}
       )
 
+    visible_ranks =
+      if current_id do
+        dynamic([r, rank], rank.position <= ^limit or r.id == ^current_id)
+      else
+        dynamic([_r, rank], rank.position <= ^limit)
+      end
+
     from(r in TrainingTeam,
       join: rank in subquery(ranked),
       on: rank.id == r.id,
-      where: rank.position <= ^limit or r.id == ^current_id,
+      where: ^visible_ranks,
       order_by: rank.position,
       select: %{
         team: struct(r, [:id, :name, :player_id, :total_farm, :duration_seconds, :league_tier, :hero_ids]),

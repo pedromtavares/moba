@@ -11,32 +11,3 @@
   .season-score-tooltip-total { display: flex; align-items: center; justify-content: space-between; margin-top: 15px; padding-top: 13px; border-top: 1px solid #c9ad704f; color: #e2ca9b; font: 800 16px/1.3 'Nunito', sans-serif; }
   .season-score-tooltip-total strong { color: #8cd8bb; font-size: 30px; font-weight: 900; font-variant-numeric: tabular-nums; }
 }
-.game-page .community .community-player-card {
-  min-height: 0; height: clamp(315px, 25vw, 370px); background-size: cover; background-position: center 30%;
-  > .card-header { padding: 17px 18px 32px !important; }
-  .hero-card-name { flex: 1; gap: 9px; font-size: clamp(28px, 2.65vw, 42px) !important; font-weight: 900; line-height: 1.05; }
-  .hero-card-name > img { flex: none; width: 1.25em; max-width: none; height: 1.1em !important; }
-  .hero-card-summary { margin-top: 3px; }
-  .player-season-score { display: inline-flex; align-items: center; gap: 8px; color: #9bdfc6; cursor: help; font-family: 'Nunito', sans-serif; }
-  .player-season-score > .ui-icon { font-size: 21px; color: #d8bf87; }
-  .player-season-score strong { padding: 0; border: 0; background: transparent; color: inherit; font-size: 24px !important; line-height: 1.2; font-weight: 900; }
-  .player-season-score small { color: #b7c3cf; font: 700 12px/1.3 'Nunito', sans-serif; }
-  > .card-body { display: flex; align-items: flex-end; justify-content: flex-start; padding: 16px !important; }
-  .player-card-arena-title { display: inline-flex; align-items: center; gap: 9px; padding: 8px 12px; border: 1px solid #c4b18266; border-radius: 5px; background: linear-gradient(110deg, #0a1421ee, #1f2423d9); color: #e2cfa8; font: 900 18px/1.2 'Nunito', sans-serif; box-shadow: 0 3px 20px #0006; text-shadow: 0 1px 6px #000; }
-  .player-card-arena-title .ui-icon { font-size: 24px; }
-  .player-card-arena-title[data-title=the-immortal] { border-color: #f0cd83a6; background: linear-gradient(110deg, #422c13e8, #14202aef); color: #ffe3a2; box-shadow: 0 0 20px #edc36526, inset 0 1px #ffe7a933; }
-  .player-card-arena-title[data-title=the-immortal] .ui-icon { filter: drop-shadow(0 0 7px #edb34e88); }
-  .player-card-arena-title[data-title=shadow] { border-color: #aa95d56b; color: #c9b6ef; background: linear-gradient(110deg, #231a35eb, #0d1823f2); }
-  > .player-card-footer { padding: 0 !important; border-top: 1px solid #d5bc7855; background: linear-gradient(110deg, #192738f5, #0a1421fa) !important; box-shadow: inset 0 1px #ebd6a40d; }
-  .player-card-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; padding: 15px 8px; }
-  .player-card-metrics > div { --metric-color: #8dcde5; display: flex; flex-direction: column; align-items: center; gap: 7px; min-width: 0; padding: 0 7px; }
-  .player-card-metrics > div + div { border-left: 1px solid #c5af7540; }
-  .player-card-metrics > [data-tone=wins] { --metric-color: #97d8bc; }
-  .player-card-metrics > [data-tone=streak] { --metric-color: #e9ca86; }
-  .player-card-metrics dt { display: flex; align-items: center; justify-content: center; gap: 6px; margin: 0; color: #bbc8d5; font: 700 12px/1.3 'Nunito', sans-serif; }
-  .player-card-metrics dt .ui-icon { flex: none; color: var(--metric-color); font-size: 19px; }
-  .player-card-metrics dd { margin: auto 0 0; color: var(--metric-color); font: 900 clamp(26px, 2vw, 34px)/1.1 'Nunito', sans-serif; font-variant-numeric: tabular-nums; text-shadow: 0 0 18px color-mix(in srgb, var(--metric-color) 17%, transparent); }
-}
-@media (max-width: 767px) {
-  .game-page .community .community-player-card { height: 335px; }
-}

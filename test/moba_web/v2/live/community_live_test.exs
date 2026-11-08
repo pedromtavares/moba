@@ -4,13 +4,37 @@ defmodule MobaWeb.V2.CommunityLiveTest do
   import Phoenix.LiveViewTest
 
   setup do
-    for key <- ["pve_ranking", "season_ranking", "community_players"], do: Cachex.del(:game_cache, key)
+    for key <- ["pve_ranking", "season_ranking", "community_players", "community_guests"],
+        do: Cachex.del(:game_cache, key)
 
     on_exit(fn ->
-      for key <- ["pve_ranking", "season_ranking", "community_players"], do: Cachex.del(:game_cache, key)
+      for key <- ["pve_ranking", "season_ranking", "community_players", "community_guests"],
+          do: Cachex.del(:game_cache, key)
     end)
 
     :ok
+  end
+
+  test "Top Teams sits between the rankings and links to finished training teams", %{conn: conn} do
+    owner = create_base_hero().player
+    scope = Game.TeamRuns.scope(owner)
+    run = Test.TeamHelper.team_run(scope, owner)
+    {:ok, finished} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished, name: "Moonwatch"})
+    unfinished = Test.TeamHelper.team_run(scope, owner)
+
+    viewer = create_base_hero().player
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/community")
+
+    assert has_element?(view, "#show-pvp-link + #show-teams-link + #show-pve-link")
+    assert has_element?(view, "#show-teams-link img.nav-emblem[src='/images/navigation/base.webp']")
+    view |> element("#show-teams-link") |> render_click()
+
+    card = "#community-teams #community-team-#{finished.id}"
+    assert has_element?(view, "#{card}[href='/teams/#{finished.id}']", "Moonwatch")
+    assert has_element?(view, "#{card} .community-player-rank", "#1")
+    assert has_element?(view, "#{card} footer", "Avg farm")
+    assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3)")
+    refute has_element?(view, "#community-team-#{unfinished.id}")
   end
 
   test "top player cards show direct score contributions, Arena titles and prominent footer metrics", %{conn: conn} do
@@ -57,7 +81,13 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     refute has_element?(view, "#player-card-#{pleb.id} .player-card-arena-title")
     assert has_element?(view, "#player-season-score-#{holder.id}", "1080")
-    assert has_element?(view, "#player-card-#{holder.id} [data-metric=arena-rating] dd", "120")
+
+    assert has_element?(
+             view,
+             "#player-card-#{holder.id} .community-ranking-footer [data-metric=arena-rating] dd",
+             "120"
+           )
+
     assert has_element?(view, "#player-card-#{holder.id} [data-metric=win-rate] dd", "75%")
     assert has_element?(view, "#player-card-#{holder.id} [data-metric=immortal-streak] dd", "3")
 
@@ -91,42 +121,10 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#player-season-score-#{holder.id}", "880")
   end
 
-  test "shared battle links navigate within the game without reloading", %{conn: conn} do
-    hero = create_base_hero()
-
-    Accounts.create_message!(%{
-      body: "Review https://browsermoba.com/battles/123",
-      tier: hero.player.pve_tier,
-      author: hero.player.user.username,
-      channel: "community",
-      topic: "general",
-      user_id: hero.player.user_id
-    })
-
-    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/community")
-    assert has_element?(view, "a[href='/battles/123'][data-phx-link=redirect][data-phx-link-state=push]", "Battle #123")
-  end
-
-  test "recent player rows show activity and six heroes without repeating Arena rankings", %{conn: conn} do
+  test "recent player cards show activity and ranks with no recent hero strip", %{conn: conn} do
     hero = create_base_hero(%{pve_ranking: 15})
     player = Game.update_player!(hero.player, %{season_ranking: 3})
     opponent = create_player!()
-
-    for index <- 1..6 do
-      perfect_farm = div(Moba.max_total_farm(), 2)
-
-      Game.create_hero!(
-        %{
-          name: "Recent #{index}",
-          pve_ranking: 20 + index,
-          total_gold_farm: perfect_farm,
-          total_xp_farm: if(index == 6, do: perfect_farm, else: perfect_farm - 1)
-        },
-        player,
-        base_avatar(),
-        base_skills()
-      )
-    end
 
     match =
       Game.Matches.create!(%{
@@ -145,39 +143,24 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     conn = conn |> log_in_user(player.user) |> put_session(:player_id, player.id)
     {:ok, view, _} = live(conn, "/community")
 
-    assert has_element?(view, "#community-recent-players th", "Latest activity")
-    refute has_element?(view, "#community-recent-players th", "Arena")
+    assert has_element?(view, "#community-recent-players > article[data-community-entry]")
+    refute has_element?(view, "#community-recent-players .community-recent-hero, #community-recent-players table")
     assert has_element?(view, "#user-#{player.id}[data-current=true] .community-player-identity", player.user.username)
     assert has_element?(view, "#user-#{player.id} .community-player-status", "Online")
     assert has_element?(view, "#user-#{player.id} .community-season-rank", "#3")
     assert has_element?(view, "#user-#{player.id} .community-best-hero-rank[href='/hero/#{hero.id}']", "#15")
-    assert has_element?(view, "#user-#{player.id} .community-recent-hero .community-hero-rank", "#26")
 
     assert has_element?(
              view,
-             "#user-#{player.id} .community-recent-hero[data-undefeated=true][aria-label*='undefeated'] .community-hero-rank",
-             "#26"
+             "#user-#{player.id}.community-player-card > footer .community-activity-link[href='/matches/#{match.id}']",
+             "Won a 3v3"
            )
-
-    assert has_element?(
-             view,
-             "#user-#{player.id} .community-recent-hero[data-undefeated=false] .community-hero-rank",
-             "#25"
-           )
-
-    assert has_element?(view, "#user-#{player.id} .community-activity-link[href='/matches/#{match.id}']", "Won a 3v3")
 
     assert has_element?(
              view,
              "#user-#{player.id} .community-activity-link small",
              Accounts.get_user!(opponent.user_id).username
            )
-
-    assert view
-           |> render()
-           |> LazyHTML.from_fragment()
-           |> LazyHTML.query("#user-#{player.id} .community-recent-hero")
-           |> Enum.count() == 6
   end
 
   test "presence labels and dots follow the two-hour and one-day boundaries", %{conn: conn} do
@@ -252,19 +235,17 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#user-#{live_player.id} .community-player-live")
   end
 
-  test "only admins receive player activity and hero training timestamp tooltips", %{conn: conn} do
+  test "only admins receive player activity timestamp tooltips", %{conn: conn} do
     hero = create_base_hero()
     now = DateTime.utc_now() |> DateTime.truncate(:second)
     active_at = DateTime.add(now, -3_600)
     registered_at = now |> DateTime.add(-7 * 86_400) |> DateTime.to_naive()
-    trained_at = now |> DateTime.add(-2 * 86_400) |> DateTime.to_naive()
 
     user =
       hero.player.user
       |> Ecto.Changeset.change(last_online_at: active_at, inserted_at: registered_at)
       |> Moba.Repo.update!()
 
-    hero |> Ecto.Changeset.change(inserted_at: trained_at) |> Moba.Repo.update!()
     cache_recent_players([hero.player_id])
     viewer = create_base_hero()
     viewer_conn = conn |> log_in_user(viewer.player.user) |> put_session(:player_id, viewer.player_id)
@@ -272,7 +253,6 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     refute has_element?(view, "#user-#{hero.player_id} .community-player-status[data-toggle=tooltip]")
     refute has_element?(view, "#user-#{hero.player_id} .community-player-status[title]")
-    refute has_element?(view, "#user-#{hero.player_id} .community-recent-hero[title]")
 
     admin = viewer.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
     admin_conn = conn |> log_in_user(admin) |> put_session(:player_id, viewer.player_id)
@@ -281,11 +261,6 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(
              view,
              "#user-#{hero.player_id} .community-player-status[data-toggle=tooltip][tabindex='0'][title='Last active: 1h ago<br/>Registered: 7 days ago']"
-           )
-
-    assert has_element?(
-             view,
-             "#user-#{hero.player_id} .community-recent-hero[data-toggle=tooltip][title='Started training: 2d ago']"
            )
 
     {:ok, players} = Cachex.get(:game_cache, "community_players")
@@ -353,7 +328,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#show-online-link[aria-selected=true]")
   end
 
-  test "admin pulse follows recent players and Arena Stats keeps the original table information", %{conn: conn} do
+  test "admin metrics appear in Recent Players and Arena Stats keeps the original table information", %{conn: conn} do
     hero = create_base_hero()
     user = hero.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
     unused = Game.get_avatar_by_code!("juggernaut")
@@ -378,34 +353,38 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     conn = conn |> log_in_user(user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/community")
 
-    assert has_element?(view, "#community-period-weekly[aria-pressed=true]", "Last 7 days")
+    assert has_element?(view, "#community-period-weekly[aria-pressed=true]", "Weekly")
     assert has_element?(view, "#community-stat-accounts dd", "8")
-    assert has_element?(view, "#community-online > .row:first-child #community-recent-players")
-    assert has_element?(view, "#community-online > .row:first-child + #community-admin-summary #community-guests")
+    assert has_element?(view, "#show-online-link[aria-selected=true]")
+    assert has_element?(view, "#community-online #community-admin-metrics > div:nth-child(3)")
+    refute has_element?(view, "#show-pulse-link, #community-admin-metrics > div:nth-child(4)")
+    refute has_element?(view, "#community-arena-stats, #community-duel-history")
     view |> element("#community-period-daily") |> render_click()
     assert has_element?(view, "#community-period-daily[aria-pressed=true]")
     assert has_element?(view, "#community-stat-accounts dd", "2")
-    assert has_element?(view, "#community-stat-heroes > span", "2.0 per active player")
+    assert has_element?(view, "#community-stat-guests dd", "4")
+    assert has_element?(view, "#community-stat-active dd", "5")
 
+    view |> element("#show-balance-link") |> render_click()
+    refute has_element?(view, "#community-online")
     assert has_element?(view, "#community-balance-baseline", "55.0%")
     assert has_element?(view, "#community-arena-stats-title", "Arena Stats")
     assert has_element?(view, "#community-avatars-highest-#{hero.avatar_id} h3.text-warning", "60%")
     assert has_element?(view, "#community-avatars-highest-#{hero.avatar_id} h3 small", "(20)")
     assert has_element?(view, "#community-avatars-lowest-#{hero.avatar_id}")
     assert has_element?(view, "#community-avatars-lowest-#{unused.id} h3", "0%")
-    assert has_element?(view, "#community-arena-stats .community-arena-items #community-balance-items-highest table")
-    refute has_element?(view, ".community-balance-result")
+    view |> element("#community-balance-category-items") |> render_click()
+    assert has_element?(view, "#community-balance-items-highest .community-balance-empty")
+    view |> element("#community-balance-category-skills") |> render_click()
     assert has_element?(view, "#community-balance-skills-highest .community-balance-empty")
 
     view |> element("#pleb-ranking-button") |> render_click()
     assert has_element?(view, "#pleb-ranking-button[aria-pressed=true]")
     assert has_element?(view, "#community-balance-baseline", "50.0%")
 
-    view |> element("#community-admin-toggle") |> render_click()
-    refute has_element?(view, "#community-admin-metrics, #community-arena-stats")
+    view |> element("#show-online-link") |> render_click()
+    refute has_element?(view, "#community-arena-stats")
     send(view.pid, {"server", %{}})
-    assert has_element?(view, "#community-admin-toggle[aria-expanded=false]", "Show stats")
-    view |> element("#community-admin-toggle") |> render_click()
     assert has_element?(view, "#community-stat-accounts dd", "2")
   end
 
@@ -417,8 +396,8 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     cache_admin_stats(%{daily: users, weekly: users}, Map.new(["pvp", "plebs", "elite"], &{&1, balance}))
     conn = conn |> log_in_user(user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/community")
-    assert has_element?(view, "#community-stat-heroes dd", "0")
-    assert has_element?(view, "#community-stat-heroes > span", "Training activity")
+    assert has_element?(view, "#community-stat-guests dd", "0")
+    view |> element("#show-balance-link") |> render_click()
     assert has_element?(view, "#community-balance-baseline", "0.0%")
     assert has_element?(view, "#community-balance-avatars-lowest .community-balance-empty")
   end
@@ -427,18 +406,23 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     hero = create_base_hero()
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/community")
-    render_click(view, "toggle-admin")
+    render_click(view, "show-balance")
+    render_click(view, "show-pulse")
     render_click(view, "user-filter", %{"period" => "daily"})
     render_click(view, "match-filter", %{"type" => "pvp"})
-    refute has_element?(view, "#community-admin-summary, #community-admin-metrics, #community-arena-stats")
+
+    refute has_element?(
+             view,
+             "#community-pulse, #show-pulse-link, #community-admin-summary, #community-arena-stats, #show-balance-link"
+           )
   end
 
-  test "recent guests show solo heroes and complete training rosters inside the admin pulse", %{conn: conn} do
+  test "guests can browse Recent Players and see their own card after registered players", %{conn: conn} do
     viewer = create_base_hero()
-    user = viewer.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
+    Accounts.set_online_now(viewer.player.user)
 
     guest = Game.create_player!(%{})
-    hero = create_base_hero(%{level: 8}, guest) |> Game.buy_item!(base_item())
+    hero = create_base_hero(%{level: 8, league_tier: 1}, guest) |> Game.buy_item!(base_item())
     joined_at = NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second) |> NaiveDateTime.add(-7_200)
 
     Game.get_player!(guest.id)
@@ -447,7 +431,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     roster_guest =
       Game.create_player!(%{})
-      |> Ecto.Changeset.change(inserted_at: joined_at, updated_at: joined_at)
+      |> Ecto.Changeset.change(inserted_at: joined_at, updated_at: joined_at, pve_tier: 1)
       |> Moba.Repo.update!()
 
     scope = %{user: nil, player_id: roster_guest.id}
@@ -456,6 +440,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     {:ok, record} =
       Game.TeamRuns.update(scope, record, fn run ->
         run
+        |> Map.put(:league_tier, 3)
         |> put_in([:heroes, 1, :hero, Access.key(:level)], 3)
         |> put_in([:heroes, 2, :hero, Access.key(:level)], 6)
         |> put_in([:heroes, 3, :hero, Access.key(:level)], 9)
@@ -465,34 +450,34 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     assert is_nil(Game.get_player!(roster_guest.id).current_pve_hero_id)
 
-    balance = %{winrate: 0.0, total: 0, avatars: %{}, skills: %{}, items: %{}}
-    cache_admin_stats(Admin.get_user_stats(), Map.new(["pvp", "plebs", "elite"], &{&1, balance}))
-    Cachex.put(:game_cache, "match_stats", Map.put(Admin.get_server_data(), :guests, Admin.current_guests()))
+    guest_conn = log_in_player(conn, player_id: roster_guest.id)
+    {:ok, view, html} = live(guest_conn, "/community")
 
-    conn = conn |> log_in_user(user) |> put_session(:player_id, viewer.player_id)
-    {:ok, view, _} = live(conn, "/community")
-
-    assert has_element?(view, "#community-stat-guests dd", "3")
-    assert has_element?(view, "#community-guests .community-guests-heading > span", "3")
-    assert has_element?(view, "#community-admin-summary #community-guests #guest-#{guest.id}.community-guest-card")
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-hero strong", hero.avatar.name)
+    refute html =~ ~s(href="/community")
+    assert has_element?(view, "#community-recent-players > #user-#{viewer.player_id} + #guest-#{roster_guest.id}")
+    assert has_element?(view, "#guest-#{roster_guest.id}[data-current=true] .community-player-name", "You")
+    assert has_element?(view, "#guest-#{guest.id}.community-player-card .community-player-name", "Guest ##{guest.id}")
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-roster strong", hero.avatar.name)
     assert has_element?(view, "#guest-#{guest.id} .community-guest-level", "Lv 8")
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-skills img[alt='#{hd(hero.skills).name}']")
-    refute has_element?(view, "#guest-#{guest.id} img[alt='#{base_item().name}']")
-    assert has_element?(view, "#guest-#{guest.id} footer[title='Last online: 2h ago']", "Joined 2h ago")
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-joined", "Joined 2h ago")
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-joined[title='PvE rank: Initiate']")
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-league", "Silver League")
+    assert has_element?(view, "#guest-#{roster_guest.id} .community-guest-joined[title='PvE rank: Novice']")
+    assert has_element?(view, "#guest-#{roster_guest.id} .community-guest-league", "Platinum League")
+    refute has_element?(view, "#community-admin-summary")
 
     for {%{hero: member}, index} <-
           record |> Game.TeamRuns.state() |> Game.TeamTraining.team() |> Enum.with_index(1) do
       row = "#guest-#{roster_guest.id} .community-guest-roster > li:nth-child(#{index})"
-      assert has_element?(view, "#{row} .community-guest-hero strong", member.avatar.name)
+      assert has_element?(view, "#{row} strong", member.avatar.name)
       assert has_element?(view, "#{row} .community-guest-level", "Lv #{member.level}")
     end
 
-    assert has_element?(view, "#guest-#{roster_guest.id} footer[title='Last online: just now']", "Joined 2h ago")
     assert has_element?(view, "#guest-#{draft_guest.id} .community-guest-level", "Lv 1")
+    assert has_element?(view, "#guest-#{draft_guest.id} .community-guest-league", "Bronze League")
 
-    view |> element("#community-admin-toggle") |> render_click()
-    refute has_element?(view, "#community-guests")
+    view |> element("#show-pvp-link") |> render_click()
+    refute has_element?(view, "#guest-#{guest.id}")
   end
 
   test "rankings load only when selected and inactive panels are not rendered", %{conn: conn} do
@@ -507,7 +492,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert Cachex.get(:game_cache, "season_ranking") == {:ok, nil}
 
     view |> element("#show-pve-link") |> render_click()
-    assert has_element?(view, "#community-pve .hero-stats")
+    assert has_element?(view, "#community-pve #community-hero-#{hero.id}")
     refute has_element?(view, "#community-online")
     refute has_element?(view, "#community-pvp")
     assert {:ok, [_ | _]} = Cachex.get(:game_cache, "pve_ranking")
@@ -522,25 +507,27 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert is_list(ranking)
   end
 
-  test "renders community and switches ranking tabs", %{conn: conn} do
-    hero = create_base_hero(%{finished_at: Timex.now(), pve_ranking: 1})
+  test "top hero cards show rank, combat stats and the current loadout tooltips", %{conn: conn} do
+    item = base_item()
+
+    hero =
+      create_base_hero(%{pve_ranking: 1, total_gold_farm: 30_000, total_xp_farm: 30_000})
+      |> Game.buy_item!(item)
+      |> Game.update_hero!(%{finished_at: Timex.now()})
 
     conn =
       conn
       |> log_in_user(hero.player.user)
       |> put_session(:player_id, hero.player_id)
 
-    {:ok, view, html} = live(conn, "/community")
+    {:ok, view, _} = live(conn, "/community")
 
-    assert html =~ "Message Board"
-
-    assert has_element?(
+    refute has_element?(
              view,
-             "#community-message-form[phx-hook='ResetFormOnEvent'][data-reset-event='community-message-sent']"
+             "#community-board, #community-announcements, #community-message-form, #community-update-form"
            )
 
-    assert html =~ "Updates"
-    assert has_element?(view, "#community-message-form")
+    assert has_element?(view, "#community-recent-players-pages[phx-hook=CommunityPager]")
     assert has_element?(view, "#show-online-link")
 
     render_click(view, "show-pvp", %{})
@@ -548,123 +535,29 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     render_click(view, "show-pve", %{})
     assert has_element?(view, "#show-pve-link.active")
-    assert has_element?(view, ".hero-stats .text-danger[title='Health']")
-    assert has_element?(view, ".hero-stats .text-orange[title='Speed']")
-    assert has_element?(view, "#skill-#{hero.skills |> List.first() |> Map.fetch!(:id)}-#{hero.id}")
-    assert has_element?(view, ".items-container")
-  end
 
-  test "creates a community message", %{conn: conn} do
-    hero = create_base_hero()
+    card = "#community-hero-#{hero.id}"
+    assert has_element?(view, "#{card} .community-player-name[href='/hero/#{hero.id}']", hero.name)
+    assert has_element?(view, "#{card} .community-player-heading > .community-player-rank", "#1")
+    assert has_element?(view, "#{card} .community-hero-meta > .community-hero-avatar", hero.avatar.name)
+    assert has_element?(view, "#{card} .community-hero-meta > .community-hero-level", "Level #{hero.level}")
+    assert has_element?(view, "#{card} .community-hero-metrics dd", "60K")
 
-    conn =
-      conn
-      |> log_in_user(hero.player.user)
-      |> put_session(:player_id, hero.player_id)
+    document = view |> element(card) |> render() |> LazyHTML.from_fragment()
+    [stats] = document |> LazyHTML.query(".community-hero-level") |> LazyHTML.attribute("title")
+    stats = LazyHTML.from_fragment(stats)
+    assert LazyHTML.text(LazyHTML.query(stats, "[data-stat=hp] span")) == "Health"
+    assert LazyHTML.text(LazyHTML.query(stats, "[data-stat=speed] span")) == "Speed"
 
-    {:ok, view, _html} = live(conn, "/community")
-
-    html =
-      view
-      |> form("#community-message-form", %{"message" => %{"body" => "Parity audit message"}})
-      |> render_submit()
-
-    assert html =~ "Message Board"
-
-    [message | _] = Accounts.latest_messages("community", "general", 1)
-    assert message.body == "Parity audit message"
-    assert_push_event(view, "community-message-sent", %{})
-    refute_push_event(view, "community-update-sent", %{})
-  end
-
-  test "does not clear a rejected message", %{conn: conn} do
-    hero = create_base_hero()
-    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
-    {:ok, view, _} = live(conn, "/community")
-
-    view |> form("#community-message-form", %{"message" => %{"body" => "x"}}) |> render_submit()
-
-    refute_push_event(view, "community-message-sent", %{})
-  end
-
-  test "clears the admin update title and body only after posting an update", %{conn: conn} do
-    hero = create_base_hero()
-    user = hero.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
-    conn = conn |> log_in_user(user) |> put_session(:player_id, hero.player_id)
-    {:ok, view, _} = live(conn, "/community")
-
-    assert has_element?(
-             view,
-             "#community-update-form[phx-hook='ResetFormOnEvent'][data-reset-event='community-update-sent']"
-           )
-
-    assert has_element?(view, "#community-update-form input[type=text]")
-    assert has_element?(view, "#community-update-form textarea")
-
-    view
-    |> form("#community-update-form", %{"message" => %{"title" => "New update", "body" => "Development news"}})
-    |> render_submit()
-
-    assert_push_event(view, "community-update-sent", %{})
-    refute_push_event(view, "community-message-sent", %{})
-    [update] = Accounts.latest_messages("community", "updates", 1)
-    assert update.title == "New update"
-    assert update.body == "Development news"
-    assert has_element?(view, "#community-update-#{update.id}", "New update")
-  end
-
-  test "preview keeps message and update content, sends messages, and switches tabs", %{conn: conn} do
-    hero = create_base_hero(%{finished_at: Timex.now(), pve_ranking: 1})
-
-    attrs = %{
-      channel: "community",
-      author: hero.player.user.username,
-      user_id: hero.player.user_id,
-      tier: hero.player.pve_tier
-    }
-
-    message =
-      Accounts.create_message!(
-        Map.merge(attrs, %{topic: "general", body: "A community question\nWith another paragraph"})
-      )
-
-    update =
-      Accounts.create_message!(
-        Map.merge(attrs, %{
-          topic: "updates",
-          title: "Development news",
-          body: "All announcement details remain readable."
-        })
-      )
-
-    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
-    {:ok, view, _} = live(conn, "/community")
-
-    assert has_element?(view, "#community-message-#{message.id} .inbox-item-text", "A community question")
-    assert has_element?(view, "#community-message-#{message.id} .inbox-item-text", "With another paragraph")
-    assert has_element?(view, "#community-update-#{update.id}", "Development news")
-    assert has_element?(view, "#community-update-#{update.id} .community-update-body", update.body)
-    assert has_element?(view, "#community-message-form button[type=submit]")
-    assert has_element?(view, "#show-online-link[aria-selected=true]")
-
-    view
-    |> form("#community-message-form", %{"message" => %{"body" => "Sent from the new composer"}})
-    |> render_submit()
-
-    [sent] = Accounts.latest_messages("community", "general", 1)
-    assert sent.body == "Sent from the new composer"
-    assert has_element?(view, "#community-message-#{sent.id} .inbox-item-text", sent.body)
-
-    view |> element("#show-pvp-link") |> render_click()
-    assert has_element?(view, "#show-pvp-link[aria-selected=true]")
-    refute has_element?(view, "#community-pvp.d-none")
-    assert has_element?(view, "#show-online-link[aria-selected=false]")
-
-    view |> element("#show-pve-link") |> render_click()
-    assert has_element?(view, "#show-pve-link[aria-selected=true]")
-    assert has_element?(view, "#community-pve .hero-stats")
-    assert has_element?(view, "#community-pve span.game-stat[title^='Total farm:']")
-    refute has_element?(view, "#community-pve button, #community-pvp button")
+    for {resource, kind, selector} <- [
+          {List.first(hero.skills), "skill", ".skill-tooltip"},
+          {item, "item", ".item-tooltip"}
+        ] do
+      image = LazyHTML.query(document, "img##{kind}-#{resource.id}-#{hero.id}[data-toggle=tooltip]")
+      assert LazyHTML.attribute(image, "src") == [MobaWeb.V2.Components.GameHelpers.image_url(resource)]
+      [tooltip] = LazyHTML.attribute(image, "title")
+      assert tooltip |> LazyHTML.from_fragment() |> LazyHTML.query(selector) |> LazyHTML.text() =~ resource.name
+    end
   end
 
   defp cache_recent_players(ids) do

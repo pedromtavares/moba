@@ -238,7 +238,7 @@
     show_build={@show_build}
     show_shop={@show_shop}
   >
-    <:skill_guidance :if={@skill_guide_hero && @selected.hero.skill_levels_available > 0}>
+    <:skill_guidance :if={@onboarding_guest && @skill_guide_hero && @selected.hero.skill_levels_available > 0}>
       <span
         id={GH.dom_id(@id_prefix, "league-hud-skill-arrow")}
         class="skill-guidance-arrow league-hud-skill-arrow"
