@@ -80,7 +80,6 @@ next_battle? = won? && !promoted? && @battle.attacker.league_step != 0 %>
           data-game-fullscreen
           phx-click="next-battle"
           phx-value-id={@battle.id}
-          phx-disable-with="Loading…"
         >
           Battle {current_step} <span aria-hidden="true">→</span>
           <kbd class="battle-continue-hotkey" aria-hidden="true">SPACE</kbd>

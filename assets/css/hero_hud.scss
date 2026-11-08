@@ -163,7 +163,6 @@
   :is(#hero-inventory, .hud-inventory-items) [data-item-code]:focus-visible { outline: 2px solid #efd29b; outline-offset: 3px; border-radius: 4px; }
   :is(#hero-inventory, .hud-inventory-items) .is-dragging { z-index: 15; opacity: .85; pointer-events: none; cursor: grabbing; filter: drop-shadow(0 5px 10px #0009); }
   :is(#hero-inventory, .hud-inventory-items) .is-drop-target::after { content: ''; position: absolute; inset: -3px; border: 2px solid #f2cf8a; border-radius: 5px; background: #e2b86a22; pointer-events: none; }
-  :is(#hero-inventory, .hud-inventory-items).is-saving { opacity: .7; }
   @media (max-width: 767px) {
     .hud-inventory-open { display: block !important; flex: 0 0 100%; max-width: 100%; padding-top: 9px; }
     .hud-inventory-open h3 { display: none; }

@@ -41,11 +41,16 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
 
     assert has_element?(
              view,
-             ".match-lineup #match-player-streak-debuff",
-             "Immortal Streak · −7.0% Hero Stats"
+             ".match-lineup .arena-lineup-heading h2 + #match-player-streak-debuff strong",
+             "−7.0% Hero Stats"
            )
 
-    assert has_element?(view, ".match-enemy #match-opponent-streak-debuff", "−3.0% Hero Stats")
+    assert has_element?(
+             view,
+             ".match-enemy .arena-lineup-heading h2 + #match-opponent-streak-debuff",
+             "−3.0% Hero Stats"
+           )
+
     assert_tooltip(view, "#match-player-streak-debuff")
     assert_tooltip(view, "#match-opponent-streak-debuff")
 

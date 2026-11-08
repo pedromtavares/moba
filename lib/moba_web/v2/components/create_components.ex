@@ -357,7 +357,6 @@ defmodule MobaWeb.V2.Components.CreateComponents do
                 class="btn btn-outline-danger dark-bg p-3 btn-block btn-lg"
                 phx-click="create"
                 phx-hook="Loading"
-                loading="Creating..."
                 id="create-button"
               >
                 <img src={GH.image_url(@selected_avatar)} class="avatar img-border" />

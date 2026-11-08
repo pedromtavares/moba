@@ -122,16 +122,16 @@ Hooks.Loading = {
     let code = $(el).attr("phx-value-code");
     let type = $(el).attr("phx-value-type");
     let page = $(el).attr("phx-value-page");
-    let loading = $(el).attr("loading") || $(el).attr("data-loading") || "<span class='d-none d-md-inline'>Loading...</span>"
+    const community = el.closest('.community');
     el.addEventListener("click", e => {
-      const loadingText = $(el).find(".loading-text");
-      
-      if (loadingText.find(".ui-2x")[0]){
-        loadingText.html("<i class='ui-icon ui-spinner ui-spin ui-2x'></i><br/>"+loading);
-      }else{
-        loadingText.html("<i class='ui-icon ui-spinner ui-spin mr-1'></i>"+loading);
+      if (community) {
+        const loading = "<span class='d-none d-md-inline'>Loading...</span>";
+        const loadingText = $(el).find(".loading-text");
+        const spinner = loadingText.find(".ui-2x").length
+          ? "<i class='ui-icon ui-spinner ui-spin ui-2x'></i><br/>"
+          : "<i class='ui-icon ui-spinner ui-spin mr-1'></i>";
+        loadingText.html(spinner + loading);
       }
-      
       if (click){
         let payload = {number: val, id: id, type: type, page: page, code: code};
         const heroId = el.getAttribute("phx-value-hero_id");
@@ -141,7 +141,7 @@ Hooks.Loading = {
         }else{
           this.pushEvent(click, payload);
         }
-        $(el).prop("disabled", true);
+        if (community) $(el).prop("disabled", true);
         e.stopPropagation();
       }
 
@@ -213,8 +213,6 @@ Hooks.AttackButton = {
       let skill = $(el).attr("data-skill") || "";
       let item = $(el).attr("data-item") || "";
       const heroId = el.dataset.hero;
-      $(el).find(".loading-text").html("<i class='ui-icon ui-spinner ui-spin mr-1'></i> Attacking...");
-      $(el).prop("disabled", true);
       const training = el.closest('[data-training-encounter]');
       const params = {skill_id: skill, item_id: item, hero_id: heroId};
       if (training) this.pushEventTo(training, "next-turn", params);
@@ -501,15 +499,13 @@ Hooks.ShopViewport = {
   }
 }
 
-Hooks.ShopEscape = {
+Hooks.ShopKeyboard = {
   mounted(){
-    this.escapeLockRequested = false;
-    this.shopEscapeDisposed = false;
-    this.onShopEscape = event => {
+    this.onShopKeydown = event => {
       if (!this.el.getClientRects().length) return;
       const typing = event.target?.closest("input, textarea, select, [contenteditable]:not([contenteditable='false'])");
       const modified = event.altKey || event.ctrlKey || event.metaKey || event.shiftKey;
-      const close = event.key === 'Escape' || (event.key.toLowerCase() === 'f' && !typing && !modified && !event.isComposing && !event.defaultPrevented);
+      const close = event.key.toLowerCase() === 'f' && !typing && !modified && !event.isComposing && !event.defaultPrevented;
       if (!close) {
         if (!event.defaultPrevented && !typing && !modified && !event.isComposing) this.navigateShop(event);
         return;
@@ -522,14 +518,10 @@ Hooks.ShopEscape = {
       if (this.el.getAttribute('phx-target')) this.pushEventTo(this.el, 'close-shop', params);
       else this.pushEvent('close-shop', params);
     };
-    this.onShopFullscreen = () => this.updateEscapeLock();
-    document.addEventListener('keydown', this.onShopEscape, true);
-    document.addEventListener('fullscreenchange', this.onShopFullscreen);
-    this.updateEscapeLock();
+    document.addEventListener('keydown', this.onShopKeydown, true);
   },
   updated(){
     if (!this.el.getClientRects().length) this.shopCursor = null;
-    this.updateEscapeLock();
   },
   navigateShop(event){
     const arrows = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
@@ -596,31 +588,14 @@ Hooks.ShopEscape = {
     const params = event === 'select-category' ? {rarity: button.getAttribute('phx-value-rarity')} : {code: button.getAttribute('phx-value-code')};
     const version = this.shopInspectionVersion = (this.shopInspectionVersion || 0) + 1;
     this.shopInspectionPending = true;
+    button.dataset.shopInspecting = String(version);
     this.pushEventTo(button.getAttribute('phx-target'), event, params, () => {
+      if (button.dataset.shopInspecting === String(version)) delete button.dataset.shopInspecting;
       if (version === this.shopInspectionVersion) this.shopInspectionPending = false;
     });
   },
-  updateEscapeLock(){
-    const keyboard = navigator.keyboard;
-    if (!keyboard?.lock) return;
-    if (document.fullscreenElement && this.el.getClientRects().length && !this.shopEscapeDisposed) {
-      if (this.escapeLockRequested) return;
-      this.escapeLockRequested = true;
-      try {
-        Promise.resolve(keyboard.lock(['Escape'])).then(() => {
-          if (this.shopEscapeDisposed || !document.fullscreenElement || !this.el.getClientRects().length) keyboard.unlock();
-        }).catch(() => { this.escapeLockRequested = false; });
-      } catch (_) { this.escapeLockRequested = false; }
-    } else if (this.escapeLockRequested) {
-      this.escapeLockRequested = false;
-      keyboard.unlock();
-    }
-  },
   destroyed(){
-    this.shopEscapeDisposed = true;
-    document.removeEventListener('keydown', this.onShopEscape, true);
-    document.removeEventListener('fullscreenchange', this.onShopFullscreen);
-    this.updateEscapeLock();
+    document.removeEventListener('keydown', this.onShopKeydown, true);
   }
 }
 

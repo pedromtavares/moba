@@ -198,7 +198,7 @@ defmodule MobaWeb.BackendSecurityTest do
     render_click(view, "pick-hero", %{"id" => "#{owner.id}"})
     render_click(view, "pick-hero", %{"id" => "#{owner.id}"})
     assert has_element?(view, "#hero-#{owner.id}")
-    assert has_element?(view, ".match-lineup header > span", "1 / 3")
+    assert has_element?(view, "#match-empty-slot-2")
     assert Game.start_match(match, owner.player, List.duplicate(owner.id, 5)) == {:error, :invalid_lineup}
     assert Game.start_match(match, foreign.player, [owner.id]) == {:error, :invalid_lineup}
     {:ok, visitor, _} = conn |> log_in_player(player_id: foreign.player_id) |> live("/matches/#{match.id}")

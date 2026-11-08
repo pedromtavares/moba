@@ -190,7 +190,6 @@ defmodule MobaWeb.V2.TavernLive do
           class="btn tavern-unlock-button"
           phx-click={@action}
           phx-value-code={@resource.code}
-          phx-disable-with="Unlocking…"
           id={"unlock-#{@resource.code}"}
         >
           <span>Unlock</span>

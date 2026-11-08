@@ -5,22 +5,17 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync('assets/js/hooks.js', 'utf8')
   .replace(/^import .*;\n/gm, '')
-  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|ManualCodex) = .*;\n/gm, '')
-  .replace('export default Hooks;', 'module.exports = Hooks.ShopEscape;');
+  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|LineupOrder|ManualCodex) = .*;\n/gm, '')
+  .replace('export default Hooks;', 'module.exports = Hooks.ShopKeyboard;');
 
 function environment(options = {}) {
   const listeners = new Map();
-  const state = {visible: false, closed: 0, locks: [], unlocks: 0, inspected: []};
+  const state = {visible: false, closed: 0, inspected: []};
   const document = {
-    fullscreenElement: options.fullscreen ? {} : null,
     addEventListener: (name, callback) => listeners.set(name, callback),
     removeEventListener: name => listeners.delete(name)
   };
-  const keyboard = options.unsupported ? undefined : {
-    lock(keys) { state.locks.push(Array.from(keys)); return options.denied ? Promise.reject(new Error('Denied')) : Promise.resolve(); },
-    unlock() { state.unlocks++; }
-  };
-  const context = {module: {exports: {}}, document, navigator: {keyboard}, Promise};
+  const context = {module: {exports: {}}, document};
   vm.createContext(context); vm.runInContext(source, context);
   const hook = {...context.module.exports,
     el: {getClientRects: () => state.visible ? [{}] : [], getAttribute: () => options.component ? '7' : null,
@@ -37,37 +32,8 @@ function environment(options = {}) {
     const event = {key, code: key === ' ' ? 'Space' : key, preventDefault() { this.prevented = true; }, stopImmediatePropagation() { this.stopped = true; }, ...extra};
     listeners.get('keydown')(event); return event;
   };
-  state.escape = repeat => state.press('Escape', {repeat});
   return {state, hook, document, listeners};
 }
-
-test('Escape closes the visible shop and releases its Escape lock when it hides', async () => {
-  const {state} = environment({fullscreen: true});
-  state.show(true); await Promise.resolve();
-  assert.deepEqual(state.locks, [['Escape']]);
-  const event = state.escape();
-  assert.equal(state.closed, 1); assert.equal(event.prevented, true); assert.equal(event.stopped, true);
-  state.show(false); assert.equal(state.unlocks, 1);
-  assert.equal(state.escape().prevented, undefined);
-});
-
-test('the shop locks only in fullscreen, closes via its component, and cleans up on navigation', async () => {
-  const {state, document, listeners, hook} = environment({component: true});
-  state.show(true); assert.equal(state.locks.length, 0);
-  document.fullscreenElement = {}; listeners.get('fullscreenchange')(); await Promise.resolve();
-  assert.equal(state.locks.length, 1);
-  state.escape(true); assert.equal(state.closed, 0);
-  state.escape(); assert.equal(state.component, true);
-  hook.destroyed(); assert.equal(state.unlocks, 1); assert.equal(listeners.size, 0);
-});
-
-test('unsupported or denied keyboard locking still lets Escape close the shop', async () => {
-  for (const options of [{unsupported: true}, {denied: true}]) {
-    const {state} = environment({...options, fullscreen: true});
-    state.show(true); await new Promise(resolve => setImmediate(resolve));
-    state.escape(); assert.equal(state.closed, 1);
-  }
-});
 
 test('F closes only the visible shop, without capturing typing, modifiers or held keys', () => {
   const {state} = environment({component: true});
@@ -83,7 +49,7 @@ test('F closes only the visible shop, without capturing typing, modifiers or hel
 test('arrows inspect items immediately; Space activates actions and skips unavailable ingredients', () => {
   const {state} = environment();
   const button = (id, selected = false, unavailable = false) => ({
-    id, clicks: 0, classList: {contains: () => id.includes('item')},
+    id, dataset: {}, clicks: 0, classList: {contains: () => id.includes('item')},
     getClientRects: () => [{}], getAttribute: name => ({'aria-pressed': String(selected), 'aria-disabled': String(unavailable),
       'phx-click': id.includes('item') ? 'select-inventory' : 'select-category', 'phx-value-code': id,
       'phx-value-rarity': id, 'phx-target': '7'})[name],

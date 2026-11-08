@@ -13,6 +13,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   attr :id, :string, required: true
   attr :class, :string, default: nil
   attr :streak, :integer, default: nil
+  attr :compact, :boolean, default: false
 
   def immortal_streak_debuff(assigns) do
     player = if is_integer(assigns.streak), do: %{current_immortal_streak: assigns.streak}, else: assigns.player
@@ -27,7 +28,12 @@ defmodule MobaWeb.V2.Components.PvpComponents do
       title={GH.immortal_streak_debuff_description()}
       tabindex="0"
     >
-      Immortal Streak · −{@percent}% Hero Stats
+      <%= if @compact do %>
+        <span class="immortal-streak-label">Immortal Streak</span>
+        <strong>−{@percent}% Hero Stats</strong>
+      <% else %>
+        Immortal Streak · −{@percent}% Hero Stats
+      <% end %>
     </span>
     """
   end

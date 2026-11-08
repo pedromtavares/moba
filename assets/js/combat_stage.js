@@ -174,7 +174,8 @@ export default {
       }
       if (unit.name) fighter.querySelector('[data-unit-name]').textContent = unit.name;
       fighter.querySelector('[data-unit-allegiance]').textContent = unit.you ? 'Your hero' : unit.avatar;
-      fighter.querySelector('[data-unit-level]').textContent = `Level ${unit.level}${unit.you && unit.name !== unit.avatar ? ` · ${unit.avatar}` : ''}`;
+      fighter.querySelector('[data-unit-level]').textContent = unit.level;
+      fighter.querySelector('[data-unit-avatar]').textContent = unit.you && unit.name !== unit.avatar ? ` · ${unit.avatar}` : '';
       fighter.querySelector('.stage-health').setAttribute('aria-label', `${unit.name} health`);
       const action = this.el.querySelector(`[data-action-side="${unit.side}"]`);
       action.setAttribute('aria-label', `${unit.name} last action`);

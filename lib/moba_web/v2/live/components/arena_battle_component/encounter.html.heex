@@ -1,5 +1,5 @@
 <section id={@id} class="team-manual-encounter arena-encounter" data-training-encounter>
-  <MobaWeb.V2.BattleLive.show {assigns}>
+  <MobaWeb.V2.BattleLive.show {assigns} log_modal={true}>
     <:header_navigation>
       <nav class="training-battle-navigation" aria-label="Arena navigation">
         <.link :if={@match.phase in ["finished", "scored"]} navigate={~p"/matches/#{@match.id}"} id="arena-fight-return">
@@ -139,15 +139,24 @@
       </div>
     </:footer>
     <:log_header>
-      <div class="training-combat-log-heading">
-        <strong>Battle log</strong><button
+      <header :if={@show_combat_log} class="arena-combat-log-heading">
+        <span class="arena-combat-log-emblem" aria-hidden="true"><.icon name="game-battle-log" /></span>
+        <h2 id="arena-combat-log-title">Battle log</h2>
+        <span class="arena-combat-log-count">
+          {length(@battle.turns)} {if length(@battle.turns) == 1, do: "turn", else: "turns"}
+        </span>
+        <button
           id="arena-combat-log-close"
           type="button"
           phx-click="toggle-combat-log"
+          data-close-on-escape
           phx-target={@myself}
+          phx-mounted={Phoenix.LiveView.JS.focus()}
           aria-label="Close battle log"
-        >×</button>
-      </div>
+        >
+          ×
+        </button>
+      </header>
     </:log_header>
   </MobaWeb.V2.BattleLive.show>
 </section>

@@ -106,7 +106,6 @@
           phx-click="buyback"
           phx-value-hero_id={@selected.id}
           disabled={@selected.hero.gold < Moba.Game.buyback_price(@selected.hero)}
-          phx-disable-with="Reviving…"
           aria-describedby={
             if @selected.hero.gold < Moba.Game.buyback_price(@selected.hero),
               do: GH.dom_id(@id_prefix, "team-buyback-help")
@@ -145,7 +144,6 @@
           id={GH.dom_id(@id_prefix, "shard-buyback-hero")}
           phx-click="shard-buyback"
           phx-value-hero_id={@selected.id}
-          phx-disable-with="Reviving…"
         >
           Use Shards <span aria-hidden="true">→</span>
         </button>

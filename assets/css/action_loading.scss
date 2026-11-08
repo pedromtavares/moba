@@ -1,0 +1,56 @@
+:where([data-action-loading]) { position: relative; }
+
+[data-action-loading] { cursor: wait !important; }
+
+:is([data-action-loading=""], [data-item-code].is-saving, [data-lineup-saving], [data-shop-inspecting]),
+label:has(> input[data-action-loading=""]) {
+  outline: 1px solid #e4c58a99;
+  outline-offset: -1px;
+  opacity: .75;
+}
+
+[data-action-loading]:not([data-action-loading=""]) {
+  color: transparent !important;
+  text-shadow: none !important;
+
+  > * { visibility: hidden; }
+
+  &::after {
+    content: attr(data-action-loading);
+    position: absolute;
+    inset: 0 3px;
+    z-index: 5;
+    display: block;
+    align-content: center;
+    overflow: hidden;
+    color: #f7e5bf;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 1;
+    background: none;
+    border: 0;
+    box-shadow: none;
+    transform: none;
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .game-page .combat-stage #combat-log-toggle[data-action-loading] {
+    color: #e7c994 !important;
+
+    > * { visibility: visible; }
+
+    &::after {
+      inset: auto auto calc(100% + 6px) 50%;
+      overflow: visible;
+      padding: 4px 7px;
+      transform: translateX(-50%);
+      border: 1px solid #d8b77d66;
+      border-radius: 4px;
+      background: #111c2b;
+    }
+  }
+}

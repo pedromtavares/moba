@@ -66,23 +66,23 @@ complete? = @match.phase in ["finished", "scored"] %>
       <header>
         <div class="arena-lineup-heading">
           <h2>{if reviewing?, do: username(@match.player), else: "Your lineup"}</h2>
-          <button
-            :if={can_edit_lineup? && @latest_match}
-            id="repeat-picks-button"
-            type="button"
-            phx-click="repeat"
-            class="arena-repeat-lineup"
-          >
-            <.icon name="game-refresh" /> Repeat last
-          </button>
+          <.immortal_streak_debuff
+            id="match-player-streak-debuff"
+            player={@match.player}
+            streak={GH.match_immortal_streak(@match.player, battles)}
+            class="arena-lineup-debuff"
+            compact
+          />
         </div>
-        <span>{length(@picked_heroes)} / 3</span>
-        <.immortal_streak_debuff
-          id="match-player-streak-debuff"
-          player={@match.player}
-          streak={GH.match_immortal_streak(@match.player, battles)}
-          class="match-streak-debuff"
-        />
+        <button
+          :if={can_edit_lineup? && @latest_match}
+          id="repeat-picks-button"
+          type="button"
+          phx-click="repeat"
+          class="arena-repeat-lineup"
+        >
+          <.icon name="game-refresh" /> Repeat last
+        </button>
       </header>
       <div id="arena-player-lineup" class="arena-preparation-cards lineup-list">
         <%= for position <- 1..3 do %>
@@ -104,16 +104,18 @@ complete? = @match.phase in ["finished", "scored"] %>
         <% end %>
       </div>
     </section>
-    <section class="arena-preparation-side match-enemy">
+    <section class="arena-preparation-side match-enemy" aria-label="Opponent lineup">
       <header>
-        <h2>{username(@match.opponent)}</h2>
-        <span>Opponent lineup</span>
-        <.immortal_streak_debuff
-          id="match-opponent-streak-debuff"
-          player={@match.opponent}
-          streak={GH.match_immortal_streak(@match.opponent, battles)}
-          class="match-streak-debuff"
-        />
+        <div class="arena-lineup-heading">
+          <h2>{username(@match.opponent)}</h2>
+          <.immortal_streak_debuff
+            id="match-opponent-streak-debuff"
+            player={@match.opponent}
+            streak={GH.match_immortal_streak(@match.opponent, battles)}
+            class="arena-lineup-debuff"
+            compact
+          />
+        </div>
       </header>
       <div class="arena-preparation-cards">
         <.lineup_card

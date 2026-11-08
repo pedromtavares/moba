@@ -42,7 +42,7 @@ defmodule MobaWeb.UserResetPasswordLive do
               autocomplete="new-password"
               required
             />
-            <button type="submit" id="reset-account-password" class="account-primary" phx-disable-with="Resetting…">
+            <button type="submit" id="reset-account-password" class="account-primary">
               Reset password
             </button>
           </.form>
@@ -113,7 +113,7 @@ defmodule MobaWeb.UserResetPasswordLive do
                       />
                     </div>
                     <div class="form-group mb-0 text-center">
-                      <button class="btn btn-primary btn-block" type="submit" phx-disable-with="Resetting...">
+                      <button class="btn btn-primary btn-block" type="submit">
                         Reset Password
                       </button>
                     </div>

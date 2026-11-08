@@ -73,9 +73,12 @@
           </span>
         </h2>
         <div class="stage-meta">
-          <span class="stage-unit-level" data-unit-level>
-            Level {unit.level}{if unit.you && unit.name != unit.avatar, do: " · #{unit.avatar}"}
-          </span><strong data-build-difficulty>{unit.build.difficulty}</strong>
+          <span class="stage-unit-level">
+            Level
+            <strong data-unit-level>{unit.level}</strong><span data-unit-avatar>{if unit.you && unit.name != unit.avatar,
+                do: " · #{unit.avatar}"}</span>
+          </span>
+          <strong data-build-difficulty>{unit.build.difficulty}</strong>
         </div>
       </div>
       <div class="stage-vitals">

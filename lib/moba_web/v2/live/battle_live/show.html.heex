@@ -1,6 +1,9 @@
+<% log_modal? = @preview && Map.get(assigns, :log_modal, false)
+log_modal_open? = log_modal? && @show_combat_log %>
 <div id="battle-page" phx-hook="BattleContinueHotkey" data-finished={to_string(@battle.finished)}>
   <div
     :if={@preview}
+    inert={log_modal_open?}
     class={[
       "combat-stage-shell",
       !@battle.finished && Map.get(assigns, :stage_controls, []) != [] && "has-stage-automation"
@@ -19,7 +22,14 @@
     />
   <% end %>
 
-  <div id="hero-battle" class="battle mt-3" hidden={@preview && !@show_combat_log}>
+  <div
+    id="hero-battle"
+    class={["battle mt-3", log_modal? && "arena-combat-log"]}
+    hidden={@preview && !@show_combat_log}
+    role={if log_modal?, do: "dialog"}
+    aria-modal={if log_modal?, do: "true"}
+    aria-labelledby={if log_modal?, do: "arena-combat-log-title"}
+  >
     <div id="combat-log-panel" hidden={@preview && !@show_combat_log}>
       {render_slot(Map.get(assigns, :log_header, []))}
       <div :if={!@preview} class="row battle-matchup">
@@ -102,7 +112,7 @@
     </div>
   </div>
 
-  <div id="battle-bar">
+  <div id="battle-bar" inert={log_modal_open?}>
     <div class="container-fluid">
       <div class="row">
         <.turn_hero
@@ -197,7 +207,11 @@
       <% end %>
     </div>
   </div>
-  <div :if={@battle.finished && Map.get(assigns, :footer, []) != []} class="battle-lineup-footer">
+  <div
+    :if={@battle.finished && Map.get(assigns, :footer, []) != []}
+    class="battle-lineup-footer"
+    inert={log_modal_open?}
+  >
     {render_slot(@footer)}
   </div>
 </div>

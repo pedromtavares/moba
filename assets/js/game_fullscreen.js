@@ -5,6 +5,36 @@ export function initGameFullscreen() {
   let entering = false;
   let pendingEntry = false;
   let currentBattle = null;
+  let escapeLock = null;
+
+  function modalCloseButton() {
+    return Array.from(document.querySelectorAll('[data-close-on-escape]'))
+      .reverse().find(button => button.getClientRects().length);
+  }
+
+  function updateEscapeLock() {
+    const keyboard = navigator.keyboard;
+    if (!keyboard?.lock || !keyboard.unlock) return;
+
+    if (!document.fullscreenElement || !modalCloseButton()) {
+      if (escapeLock) {
+        escapeLock = null;
+        keyboard.unlock();
+      }
+      return;
+    }
+
+    if (escapeLock) return;
+    const request = escapeLock = {};
+    try {
+      Promise.resolve(keyboard.lock(['Escape'])).then(() => {
+        // A modal may close before the browser finishes granting the lock.
+        if (escapeLock !== request && !escapeLock) keyboard.unlock();
+      }, () => {});
+    } catch (_) {
+      // Fullscreen keyboard handling still works when the browser supports it directly.
+    }
+  }
 
   function battlePath(href) {
     try {
@@ -54,6 +84,15 @@ export function initGameFullscreen() {
   }, true);
 
   document.addEventListener('keydown', event => {
+    if (event.key === 'Escape') {
+      const close = modalCloseButton();
+      if (close) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        if (!event.repeat && !close.hasAttribute('data-phx-ref-loading')) close.click();
+      }
+      return;
+    }
     if (!pendingEntry || event.isTrusted === false || event.defaultPrevented || event.repeat ||
         event.isComposing || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey ||
         event.target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"])')) return;
@@ -61,9 +100,13 @@ export function initGameFullscreen() {
   }, true);
 
   window.addEventListener('phx:page-loading-stop', pageChanged);
+  document.addEventListener('phx:update', updateEscapeLock);
+  document.addEventListener('team:hero-switched', updateEscapeLock);
   document.addEventListener('fullscreenchange', () => {
     if (document.fullscreenElement) pendingEntry = false;
+    updateEscapeLock();
   });
   pageChanged();
+  updateEscapeLock();
   return enter;
 }

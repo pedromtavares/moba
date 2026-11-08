@@ -22,6 +22,7 @@
     <button
       type="button"
       aria-label="Close shop"
+      data-close-on-escape
       id={GH.dom_id(@id_prefix, "close-button")}
       phx-click="close-shop"
       {target_attrs(@event_target, @hero_id)}
@@ -184,7 +185,6 @@
                     type="submit"
                     class="shop-primary"
                     disabled={!proper_recipe(@recipe, @transmute)}
-                    phx-disable-with="Transmuting..."
                     id={GH.dom_id(@id_prefix, "finish-transmute")}
                     data-acquire-code={@transmute.code}
                     data-hero-id={@current_hero.id}
@@ -233,7 +233,6 @@
                   phx-click="buy"
                   phx-value-code={@selected_shop.code}
                   disabled={!can_buy?(@current_hero, @selected_shop)}
-                  phx-disable-with="Buying..."
                   id={GH.dom_id(@id_prefix, "buy-button")}
                   data-acquire-code={@selected_shop.code}
                   data-hero-id={@current_hero.id}

@@ -198,6 +198,21 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     assert has_element?(replay, "#arena-fight-result.is-match-result")
     refute has_element?(replay, "#training-auto-battle, #attack-button:not([disabled])")
 
+    replay |> element("#combat-log-toggle") |> render_click()
+
+    assert has_element?(
+             replay,
+             "#hero-battle[role=dialog][aria-modal=true]:not([hidden]) #arena-combat-log-title",
+             "Battle log"
+           )
+
+    assert has_element?(replay, "#hero-battle #turn-1")
+    assert has_element?(replay, "#battle-bar[inert] #arena-fight-result")
+
+    replay |> element("#arena-combat-log-close") |> render_click()
+    assert has_element?(replay, "#hero-battle[hidden]")
+    assert has_element?(replay, "#battle-bar:not([inert]) #arena-fight-result")
+
     replay |> element("#arena-inspect-#{first.id}") |> render_click()
     assert_patch(replay, first_path)
     assert has_element?(replay, "#arena-inspect-#{first.id}[aria-current=step]")

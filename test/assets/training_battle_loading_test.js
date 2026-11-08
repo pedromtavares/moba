@@ -5,13 +5,13 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync('assets/js/hooks.js', 'utf8')
   .replace(/^import .*;\n/gm, '')
-  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|ManualCodex) = .*;\n/gm, '')
+  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|LineupOrder|ManualCodex) = .*;\n/gm, '')
   .replace('export default Hooks;', 'module.exports = Hooks.Loading;');
 
 function launch(attrs) {
   const listeners = {};
   const sent = [];
-  const el = {getAttribute: key => attrs[key] || null, addEventListener: (name, fn) => { listeners[name] = fn; }};
+  const el = {closest: () => null, getAttribute: key => attrs[key] || null, addEventListener: (name, fn) => { listeners[name] = fn; }};
   const loading = {find: () => [], html: text => { el.loading = text; }};
   const $ = () => ({attr: key => attrs[key], find: () => loading, prop: (key, value) => { el[key] = value; }});
   const context = {module: {exports: {}}, $};
@@ -29,7 +29,7 @@ test('the battle loading hook forwards the clicked target and hero together, exa
     assert.equal(sent[0].name, 'battle');
     assert.equal(sent[0].payload.id, '7');
     assert.equal(sent[0].payload.hero_id, hero);
-    assert.equal(el.disabled, true);
+    assert.equal(el.loading, undefined);
   }
 });
 

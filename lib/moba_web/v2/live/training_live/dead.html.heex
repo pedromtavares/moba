@@ -24,7 +24,6 @@
           id="buyback-hero"
           phx-click="buyback"
           disabled={!enough_gold?}
-          phx-disable-with="Reviving…"
           aria-describedby={if !enough_gold?, do: "death-gold-help"}
         >
           Buy back <span aria-hidden="true">→</span>
@@ -55,7 +54,6 @@
             class="btn base-secondary"
             id="shard-buyback-hero"
             phx-click="shard-buyback"
-            phx-disable-with="Reviving…"
           >
             Use Shards <span aria-hidden="true">→</span>
           </button>
@@ -101,7 +99,6 @@
         <button
           class="btn btn-warning btn-lg"
           phx-hook="Loading"
-          loading="Respawning..."
           phx-click="buyback"
           id="buyback-hero"
         >
@@ -126,7 +123,6 @@
         <button
           class="btn btn-primary btn-lg"
           phx-hook="Loading"
-          loading="Respawning..."
           phx-click="shard-buyback"
           id="shard-buyback-hero"
         >

@@ -30,7 +30,7 @@ defmodule MobaWeb.UserForgotPasswordLive do
             autocomplete="email"
             required
           />
-          <button type="submit" id="send-reset-link" class="account-primary" phx-disable-with="Sending…">
+          <button type="submit" id="send-reset-link" class="account-primary">
             {if Phoenix.Flash.get(@flash, :info), do: "Send another link", else: "Send reset link"}
           </button>
         </.form>
@@ -90,7 +90,7 @@ defmodule MobaWeb.UserForgotPasswordLive do
                       />
                     </div>
                     <div class="form-group mb-0 text-center">
-                      <button class="btn btn-primary btn-block" type="submit" phx-disable-with="Sending...">
+                      <button class="btn btn-primary btn-block" type="submit">
                         Send password reset instructions
                       </button>
                     </div>

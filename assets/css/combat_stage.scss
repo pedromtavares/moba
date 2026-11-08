@@ -57,6 +57,7 @@
   .stage-allegiance { display: block; margin-bottom: 3px; color: var(--unit-color); font-size: 10px; font-weight: 900; letter-spacing: .17em; text-transform: uppercase; }
   h2 { margin: 0; color: #fff0d6; font-size: clamp(22px, 2.7vw, 42px); font-weight: 900; line-height: 1.1; letter-spacing: -.025em; overflow-wrap: anywhere; }
   .stage-unit-level { display: block; margin-top: 7px; color: #b4c0ce; font-size: 12px; }
+  .stage-unit-level strong { color: #fff0d6; font-size: clamp(16px, 1.6vw, 24px); line-height: 1; font-weight: 900; font-variant-numeric: tabular-nums; }
   .stage-vitals { position: absolute; z-index: 2; bottom: 20px; left: 28px; right: 56px; }
   .stage-right .stage-vitals { left: 56px; right: 28px; }
   .stage-health-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; margin-bottom: 7px; }

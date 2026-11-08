@@ -8,10 +8,12 @@ const source = fs.readFileSync('assets/js/game_fullscreen.js', 'utf8')
 
 function environment(path = '/training', options = {}) {
   const listeners = {};
+  const modals = [];
   const document = {
     fullscreenElement: options.fullscreen ? {tagName: 'HTML'} : null,
     fullscreenEnabled: true,
-    addEventListener: (event, listener) => { listeners[event] = listener; }
+    addEventListener: (event, listener) => { listeners[event] = listener; },
+    querySelectorAll: () => modals
   };
   let requests = 0;
   let fullscreenOptions;
@@ -29,7 +31,7 @@ function environment(path = '/training', options = {}) {
   const location = {href: `https://browsermoba.com${path}`, origin: 'https://browsermoba.com'};
   const activation = {isActive: false};
   vm.runInNewContext(source, {
-    URL, Promise, document, navigator: {userActivation: activation},
+    URL, Promise, document, navigator: {userActivation: activation, keyboard: options.keyboard},
     window: {location, addEventListener: (event, listener) => { listeners[event] = listener; }}
   });
 
@@ -56,7 +58,17 @@ function environment(path = '/training', options = {}) {
     location.href = `https://browsermoba.com${path}`;
     listeners['phx:page-loading-stop']();
   }
-  return {document, listeners, activation, click, control, navigate, requests: () => requests, fullscreenOptions: () => fullscreenOptions};
+  function escape(repeat = false) {
+    const event = {
+      key: 'Escape', repeat,
+      preventDefault() { this.defaultPrevented = true; },
+      stopImmediatePropagation() { this.stopped = true; }
+    };
+    listeners.keydown(event);
+    return event;
+  }
+  return {document, listeners, activation, click, control, navigate, escape, modals,
+    requests: () => requests, fullscreenOptions: () => fullscreenOptions};
 }
 
 test('battle launch controls synchronously fullscreen the persistent document root', () => {
@@ -84,6 +96,57 @@ test('already fullscreen stays fullscreen through game navigation without anothe
     assert.equal(env.document.fullscreenElement, root);
   }
   assert.equal(env.requests(), 0);
+});
+
+test('Escape closes only the visible modal and releases the fullscreen lock after the LiveView update', async () => {
+  const locks = [];
+  let unlocks = 0;
+  const keyboard = {
+    lock(keys) { locks.push(Array.from(keys)); return Promise.resolve(); },
+    unlock() { unlocks++; }
+  };
+  const env = environment('/training', {fullscreen: true, keyboard});
+  const closeButton = () => ({
+    visible: false, closing: false, clicks: 0,
+    getClientRects() { return this.visible ? [{}] : []; },
+    hasAttribute(name) { return name === 'data-phx-ref-loading' && this.closing; },
+    click() { this.clicks++; this.closing = true; }
+  });
+  const shop = closeButton();
+  const battleLog = closeButton();
+  env.modals.push(shop, battleLog);
+
+  for (const modal of [shop, battleLog]) {
+    modal.visible = true;
+    env.listeners['phx:update']();
+    await Promise.resolve();
+    assert.equal(env.escape(true).defaultPrevented, true);
+    assert.equal(modal.clicks, 0);
+    assert.equal(env.escape().stopped, true);
+    env.escape();
+    assert.equal(modal.clicks, 1);
+    modal.visible = false;
+    env.listeners['phx:update']();
+    assert.equal(env.escape().defaultPrevented, undefined);
+  }
+  assert.deepEqual(locks, [['Escape'], ['Escape']]);
+  assert.equal(unlocks, 2);
+});
+
+test('Escape closes a modal in windowed mode or when keyboard lock is denied', async () => {
+  for (const fullscreen of [false, true]) {
+    let requests = 0;
+    let clicks = 0;
+    const keyboard = {lock() { requests++; return Promise.reject(new Error('Denied')); }, unlock() {}};
+    const env = environment('/training', {fullscreen, keyboard});
+    env.modals.push({getClientRects: () => [{}], hasAttribute: () => false, click: () => { clicks++; }});
+    env.listeners['phx:update']();
+    await Promise.resolve();
+    env.listeners['phx:update']();
+    assert.equal(requests, fullscreen ? 1 : 0);
+    assert.equal(env.escape().defaultPrevented, true);
+    assert.equal(clicks, 1);
+  }
 });
 
 test('direct visits wait for an interaction and Esc is respected afterwards', async () => {

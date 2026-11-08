@@ -17,6 +17,7 @@ import {initReturnInvitation} from "./return_invitation";
 import {initGameFullscreen} from "./game_fullscreen";
 import {initTrainingControls} from "./training_controls";
 import {initGameLoading} from "./game_loading";
+import {initActionLoading} from "./action_loading";
 
 initGameConfirmations();
 initAnalytics();
@@ -24,6 +25,7 @@ initReturnInvitation();
 const requestGameFullscreen = initGameFullscreen();
 initTrainingControls(requestGameFullscreen);
 initGameLoading();
+initActionLoading();
 document.addEventListener("team:hero-switched", hideTooltips);
 
 // Show progress bar on live navigation and form submits

@@ -98,9 +98,11 @@ const LineupOrder = {
 
     if (adding) {
       this.pending = true;
+      source.dataset.lineupSaving = '';
       const eventName = this.el.dataset.lineupAddEvent || 'add-hero';
       this.pushEvent(eventName, {id: source.dataset.lineupAdd, lineup_id: Number(lineupId)}, () => {
         this.pending = false;
+        delete source.dataset.lineupSaving;
       });
     } else {
       this.saveOrder(source, target);
@@ -140,8 +142,10 @@ const LineupOrder = {
     heroIds.splice(to, 0, ...heroIds.splice(from, 1));
 
     this.pending = true;
+    source.dataset.lineupSaving = '';
     this.pushEvent('reorder-lineup', {lineup_id: Number(lineupId), hero_ids: heroIds}, () => {
       this.pending = false;
+      delete source.dataset.lineupSaving;
       if (restoreFocus && this.el.dataset.lineupId === lineupId && source.isConnected) {
         source.querySelector('[data-lineup-grip]')?.focus({preventScroll: true});
       }

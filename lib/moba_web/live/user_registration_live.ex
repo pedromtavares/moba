@@ -74,7 +74,7 @@ defmodule MobaWeb.UserRegistrationLive do
                     <input type="email" id={@form[:email].id} name={@form[:email].name} value={@form[:email].value} class="form-control" required />
                   </div>
                   <div class="form-group mb-0 text-center">
-                    <button class="btn btn-primary btn-block" type="submit" phx-disable-with="Creating account...">Sign Up</button>
+                    <button class="btn btn-primary btn-block" type="submit">Sign Up</button>
                   </div>
                 </.form>
               </div>

@@ -47,7 +47,7 @@ defmodule MobaWeb.UserSettingsLive do
               autocomplete="new-password"
             />
           </div>
-          <button type="submit" id="save-account-settings" class="account-primary" phx-disable-with="Saving…">
+          <button type="submit" id="save-account-settings" class="account-primary">
             Save changes
           </button>
         </.form>
@@ -149,7 +149,7 @@ defmodule MobaWeb.UserSettingsLive do
                       />
                     </div>
                     <div class="form-group mb-0 text-center">
-                      <button class="btn btn-primary btn-block" type="submit" phx-disable-with="Updating...">Update</button>
+                      <button class="btn btn-primary btn-block" type="submit">Update</button>
                     </div>
                   </.form>
                 </div>

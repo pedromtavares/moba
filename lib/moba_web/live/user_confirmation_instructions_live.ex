@@ -21,7 +21,7 @@ defmodule MobaWeb.UserConfirmationInstructionsLive do
             autocomplete="email"
             required
           />
-          <button type="submit" id="resend-confirmation" class="account-primary" phx-disable-with="Sending…">
+          <button type="submit" id="resend-confirmation" class="account-primary">
             Send confirmation link
           </button>
         </.form>
@@ -41,7 +41,7 @@ defmodule MobaWeb.UserConfirmationInstructionsLive do
         <.simple_form for={@form} id="resend_confirmation_form" phx-submit="send_instructions">
           <.input field={@form[:email]} type="email" placeholder="Email" required />
           <:actions>
-            <.button phx-disable-with="Sending..." class="w-full">
+            <.button class="w-full">
               Resend confirmation instructions
             </.button>
           </:actions>

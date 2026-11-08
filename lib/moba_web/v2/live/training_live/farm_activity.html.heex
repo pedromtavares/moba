@@ -62,7 +62,6 @@ duration = if seconds < 60, do: "#{seconds}s", else: "#{div(seconds, 60)}m #{rem
           class="btn farm-start"
           phx-hook="FarmClaimHotkey"
           phx-click="finish-farming"
-          phx-disable-with="Collecting…"
           aria-keyshortcuts="Space"
         >
           Claim {resource} <kbd class="farm-claim-hotkey" aria-hidden="true">SPACE</kbd>
@@ -109,7 +108,6 @@ duration = if seconds < 60, do: "#{seconds}s", else: "#{div(seconds, 60)}m #{rem
           phx-click="start-farming"
           phx-value-state={@activity}
           disabled={@selected_turns < 1}
-          phx-disable-with="Starting…"
         >
           {if mining?, do: "Mine", else: "Meditate"} for {@selected_turns} turn{if @selected_turns != 1, do: "s"}
         </button>

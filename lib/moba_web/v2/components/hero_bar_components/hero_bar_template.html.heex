@@ -160,7 +160,6 @@
                     type="submit"
                     id={GH.dom_id(@id_prefix, "save-button")}
                     class="btn btn-sm btn-warning mt-2"
-                    phx-loading="Saving..."
                   >
                     Save
                   </button>
@@ -375,7 +374,7 @@
 
   <div
     class={"shop-modal #{if @show_shop, do: "d-block", else: "d-none"}"}
-    phx-hook="ShopEscape"
+    phx-hook="ShopKeyboard"
     {target_attrs(@event_target, @hero_id)}
     id={GH.dom_id(@id_prefix, "shop-modal")}
     role="dialog"

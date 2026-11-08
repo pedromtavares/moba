@@ -106,7 +106,6 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
         do: view |> element("#pick-hero-#{hero.id}-trained") |> render_click()
 
     assert has_element?(view, "#start-match-button")
-    assert has_element?(view, ".match-lineup header > span", "3 / 3")
     refute has_element?(view, "#match-empty-slot-1")
     render_hook(lineup, "reorder-lineup", %{"lineup_id" => match.id, "hero_ids" => [second.id, first.id, third.id]})
 

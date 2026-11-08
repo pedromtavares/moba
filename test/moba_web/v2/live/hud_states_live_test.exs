@@ -72,7 +72,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
 
     match = create_match(hero.player, opponent)
     {:ok, view, _} = live(conn, "/matches/#{match.id}")
-    assert has_element?(view, ".match-lineup header > span", "0 / 3")
+    assert has_element?(view, "#match-empty-slot-1")
     assert has_element?(view, "#start-match-button[disabled]")
     assert has_element?(view, ".arena-draft-hero-list a[href='/new']")
     assert has_element?(view, "#edit-teams-button[href='/arena/edit?match_id=#{match.id}']")
@@ -92,7 +92,7 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     match = create_match(player, opponent, %{player_picks: Enum.map(picks, & &1.id)})
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
 
-    assert has_element?(view, ".match-lineup header > span", "3 / 3")
+    refute has_element?(view, "#arena-player-lineup .arena-draft-empty")
     assert has_element?(view, "#start-match-button[phx-click=start].battle-primary")
   end
 

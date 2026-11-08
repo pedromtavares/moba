@@ -163,12 +163,13 @@ const InventoryOrder = {
     const codes = moveInventoryItem(items.map(item => item.dataset.itemCode), from, to);
     const code = items[from].dataset.itemCode, name = items[from].dataset.itemName;
     const heroId = this.el.dataset.heroId;
+    const movedItem = items[from];
     this.pending = true;
-    this.el.classList.add('is-saving');
+    movedItem.classList.add('is-saving');
     this.pushEvent('reorder-items', {hero_id: heroId, codes}, () => {
       if (this.disposed) return;
       this.pending = false;
-      this.el.classList.remove('is-saving');
+      movedItem.classList.remove('is-saving');
       if (this.el.dataset.heroId !== heroId) return;
       const ordered = this.items();
       const item = ordered.find(item => item.dataset.itemCode === code);
