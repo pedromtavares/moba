@@ -120,12 +120,16 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     assert Game.get_match!(match.id).player_picks == []
   end
 
-  test "completed match reviews keep player perspective and never expose reorder controls", %{conn: conn} do
+  test "historical 5v5 reviews keep player perspective and never expose reorder controls", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
     hero = Game.create_hero!(%{name: "Champion"}, player, strong_avatar(), base_skills())
     enemy = Game.create_hero!(%{name: "Challenger"}, opponent, weak_avatar(), base_skills())
-    match = match(player, opponent, %{player_picks: [hero.id], opponent_picks: [enemy.id]})
+
+    match =
+      match(player, opponent, %{player_picks: [hero.id], opponent_picks: [enemy.id]})
+      |> Ecto.Changeset.change(team_size: 5)
+      |> Moba.Repo.update!()
 
     battle =
       Engine.create_match_battle!(%{

@@ -21,6 +21,16 @@ defmodule MobaWeb.V2.BattleLive do
      )}
   end
 
+  def handle_params(%{"match_id" => id} = params, _uri, %{assigns: %{live_action: :match_battles}} = socket) do
+    case Engine.latest_match_battle(id) do
+      %{match: %{team_size: 3, training_team_id: nil}} ->
+        {:noreply, assign(socket, arena_match_id: id, arena_battle_id: params["battle"])}
+
+      _ ->
+        {:noreply, push_navigate(socket, to: ~p"/matches/#{id}")}
+    end
+  end
+
   def handle_params(params, _uri, socket) do
     with_battle(socket, params["id"], fn battle ->
       cond do
@@ -28,8 +38,8 @@ defmodule MobaWeb.V2.BattleLive do
           data = Game.TrainingEncounters.for_battle!(socket.assigns.current_scope, battle.id)
           assign(socket, training_record: data.record, training_battle_index: data.index, arena_match_id: nil)
 
-        battle.match_id && battle.match.interactive ->
-          assign(socket, arena_match_id: battle.match_id, arena_battle_id: battle.id, training_record: nil)
+        battle.match_id && battle.match.team_size == 3 ->
+          push_navigate(socket, to: ~p"/matches/#{battle.match_id}/battles?#{[battle: battle.id]}")
 
         true ->
           socket = battle_assigns(battle, params, assign(socket, training_record: nil, arena_match_id: nil))
@@ -322,9 +332,11 @@ defmodule MobaWeb.V2.BattleLive do
 
   defp xp_to_next_level(hero), do: Game.xp_to_next_hero_level(hero.level + 1)
 
-  defp initial_turn(%{turns: []}), do: nil
+  def initial_turn(battle, match_battles \\ nil)
 
-  defp initial_turn(battle) do
+  def initial_turn(%{turns: []}, _), do: nil
+
+  def initial_turn(battle, match_battles) do
     first = hd(battle.turns)
 
     initial = %{
@@ -336,8 +348,7 @@ defmodule MobaWeb.V2.BattleLive do
     # carried-over health and energy from the preceding match battle.
     if battle.type == "match" && is_nil(first.attacker.starting_hp) do
       previous =
-        battle.match_id
-        |> Engine.list_match_battles()
+        (match_battles || Engine.list_match_battles(battle.match_id))
         |> Enum.filter(&(&1.id < battle.id && &1.winner_id == battle.attacker_id))
         |> List.last()
 

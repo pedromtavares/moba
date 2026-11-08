@@ -106,6 +106,14 @@ defmodule Moba.Game.Matches do
 
   def get_match!(id), do: load() |> Repo.get!(id) |> load_picks()
 
+  def get_match(id) do
+    with {:ok, id} when is_integer(id) and id > 0 and id <= 9_223_372_036_854_775_807 <- Ecto.Type.cast(:id, id) do
+      load() |> Repo.get(id) |> load_picks()
+    else
+      _ -> nil
+    end
+  end
+
   def latest_manual_match(%{id: player_id}) do
     from(m in list_query(player_id, "manual"), limit: 1, where: fragment("? != '[]'", m.player_picks))
     |> Repo.all()

@@ -1,0 +1,45 @@
+<section id="match-battles" class="arena-match-timeline" aria-labelledby="arena-timeline-title">
+  <header>
+    <h2 id="arena-timeline-title">Battle results</h2>
+    <div :if={@battles != []} class="arena-timeline-legend">
+      <span><.icon name="game-health" /> Health</span>
+      <span><.icon name="game-energy" /> Energy</span>
+    </div>
+  </header>
+  <p :if={@battles == []} class="arena-timeline-empty">
+    {if @complete, do: "Battle replays are no longer available.", else: "Waiting for the first battle result."}
+  </p>
+  <div :if={@battles != []} class="arena-timeline-battles">
+    <.link
+      :for={{battle, index} <- Enum.with_index(@battles, 1)}
+      navigate={~p"/matches/#{@match.id}/battles?#{[battle: battle.id]}"}
+      id={"battle-summary-#{battle.id}"}
+      class="arena-timeline-battle"
+      aria-label={"Review battle #{index}: #{battle.attacker.avatar.name} vs #{battle.defender.avatar.name}"}
+    >
+      <strong class="arena-timeline-chapter">Battle {index}<span aria-hidden="true">↗</span></strong>
+      <div
+        :for={{hero, battler} <- result_battlers(battle, @match.player_id)}
+        class="arena-timeline-fighter"
+        data-winner={to_string(battler.player_id == battle.winner_player_id)}
+        data-defeated={to_string(battler.current_hp <= 0)}
+      >
+        <img src={GH.image_url(hero.avatar)} alt={hero.avatar.name} />
+        <div class="arena-timeline-resources">
+          <.resource_bar
+            tone="health"
+            current={battler.current_hp}
+            total={battler.total_hp}
+            label={"#{hero.name} health"}
+          />
+          <.resource_bar
+            tone="energy"
+            current={battler.current_mp}
+            total={battler.total_mp}
+            label={"#{hero.name} energy"}
+          />
+        </div>
+      </div>
+    </.link>
+  </div>
+</section>

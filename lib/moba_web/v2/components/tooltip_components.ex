@@ -18,8 +18,8 @@ defmodule MobaWeb.V2.Components.TooltipComponents do
 
   def season_score_tooltip(player), do: MobaWeb.V2.Components.SeasonScoreTooltip.render(player)
 
-  def arena_stats_tooltip(hero, player) do
-    stats = MobaWeb.V2.Components.GameHelpers.match_hero_stats(hero, player)
+  def arena_stats_tooltip(hero, player, battles \\ []) do
+    stats = MobaWeb.V2.Components.GameHelpers.match_hero_stats(hero, player, battles)
 
     rows =
       for {label, key, icon, tone} <- [

@@ -3,30 +3,18 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
   use MobaWeb, :v2_live_component
   import MobaWeb.CoreComponents, only: [icon: 1]
   alias Moba.Game.Arena
+  alias MobaWeb.V2.BattleLive
   alias MobaWeb.V2.Components.CombatScene
   embed_templates "arena_battle_component/*"
 
-  def mount(socket), do: {:ok, assign(socket, auto_mode: :none, mode_token: 0, show_combat_log: false, view_id: nil)}
+  def mount(socket), do: {:ok, assign(socket, auto_mode: :none, mode_token: 0, show_combat_log: false)}
 
   def update(assigns, socket) do
-    requested = Map.get(assigns, :battle_id)
-
-    socket =
-      if requested && requested != socket.assigns[:requested_battle_id],
-        do: assign(socket, view_id: requested, requested_battle_id: requested),
-        else: socket
-
     {:ok, socket |> assign(assigns) |> load()}
   end
 
   def handle_event("toggle-combat-log", _, socket),
     do: {:noreply, assign(socket, show_combat_log: !socket.assigns.show_combat_log)}
-
-  def handle_event("inspect-battle", %{"id" => id}, socket) do
-    if Enum.any?(socket.assigns.battles, &(to_string(&1.id) == id)),
-      do: {:noreply, socket |> assign(view_id: String.to_integer(id), auto_mode: :none) |> load()},
-      else: {:noreply, socket}
-  end
 
   def handle_event(event, params, socket) do
     scope = MobaWeb.V2.Hooks.TeamAccess.authorize(socket.assigns.access_session)
@@ -84,7 +72,10 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
   defp mutate(socket, action) do
     a = socket.assigns
     Arena.play_match(a.current_scope, a.match.id, a.battle.id, length(a.battle.turns), action)
-    socket |> assign(view_id: nil) |> load()
+
+    if action == :next && a.battle_id,
+      do: push_patch(socket, to: ~p"/matches/#{a.match.id}/battles"),
+      else: load(socket)
   end
 
   defp load(socket) do
@@ -92,13 +83,13 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
     match = Game.get_match!(a.match_id)
     battles = Engine.list_match_battles(match.id)
     latest = List.last(battles)
-    battle = Enum.find(battles, &(&1.id == a.view_id)) || latest
+    battle = Enum.find(battles, &(to_string(&1.id) == a.battle_id)) || latest
     battle = Engine.get_battle!(battle.id)
     following = Enum.at(battles, Enum.find_index(battles, &(&1.id == battle.id)) + 1)
     turn = Engine.build_turn(battle)
     player = %{id: match.player_id}
     owner? = a.current_scope.user && match.player.user_id == a.current_scope.user.id
-    active = !!owner? && battle.id == latest.id && match.phase != "scored"
+    active = !!owner? && match.interactive && battle.id == latest.id && match.phase == "started"
     mode = if !active || (battle.finished && a.auto_mode == :battle), do: :none, else: a.auto_mode
 
     control_turn =
@@ -108,19 +99,9 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
 
     hero = Enum.find([battle.attacker, battle.defender], &(&1.id == control_turn.attacker.hero_id))
     # Controls and tooltips use the same frozen loadout as the engine, even if the collection is edited elsewhere.
-    snapshot = battle.loadouts[to_string(hero.id)]
+    hero = GH.match_hero_loadout(hero, [battle])
 
-    hero =
-      if snapshot,
-        do: %{
-          hero
-          | skills: Enum.map(snapshot["skills"], &Ecto.embedded_load(Game.Schema.Skill, &1, :json)),
-            items: Enum.map(snapshot["items"], &Ecto.embedded_load(Game.Schema.Item, &1, :json))
-        },
-        else: hero
-
-    first = List.first(battle.turns) || turn
-    initial = %{attacker: starting(first.attacker), defender: starting(first.defender)}
+    initial = BattleLive.initial_turn(battle, battles) || turn
     frame = "arena-#{battle.id}:#{length(battle.turns)}:#{a.mode_token}"
 
     enabled =
@@ -138,6 +119,7 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
       })
 
     can_act = active && !battle.finished && turn.attacker.player_id == player.id && mode == :none
+    recorded_battles = battles |> Enum.take_while(&(&1.id <= battle.id)) |> Enum.reverse()
 
     lineups =
       for {side, picks, name} <- [
@@ -147,9 +129,9 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
         owner = if side == :player, do: match.player_id, else: match.opponent_id
 
         units =
-          for pick <- picks do
+          for pick <- Enum.reject(picks, &is_nil/1) do
             state =
-              Enum.find_value(Enum.reverse(battles), fn fight ->
+              Enum.find_value(recorded_battles, fn fight ->
                 last = List.last(fight.turns)
 
                 if last,
@@ -172,7 +154,7 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
       battles: battles,
       battle: battle,
       following: following,
-      match_over: match.phase == "scored" && battle.id == latest.id,
+      match_over: match.phase in ["finished", "scored"] && battle.id == latest.id,
       turn: turn,
       initial_turn: initial,
       combat_scene: scene,
@@ -201,6 +183,9 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
     )
   end
 
-  defp starting(h), do: %{h | current_hp: h.starting_hp || h.total_hp, current_mp: h.starting_mp || h.total_mp}
+  defp chapter_path(match, battle) do
+    ~p"/matches/#{match.id}/battles?#{[battle: battle.id]}"
+  end
+
   def render(assigns), do: encounter(assigns)
 end

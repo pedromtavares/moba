@@ -63,11 +63,21 @@ defmodule Moba.Engine.Battles do
     |> List.first()
   end
 
-  def latest_match_battle(match_id) do
+  def latest_match_battle(match_id) when is_binary(match_id) do
+    case Integer.parse(match_id) do
+      {id, ""} -> latest_match_battle(id)
+      _ -> nil
+    end
+  end
+
+  def latest_match_battle(match_id)
+      when is_integer(match_id) and match_id > 0 and match_id <= 9_223_372_036_854_775_807 do
     from(b in load(), where: b.match_id == ^match_id, order_by: [desc: :id], limit: 1)
     |> Repo.all()
     |> List.first()
   end
+
+  def latest_match_battle(_id), do: nil
 
   def list_duel_battles(duel_ids) do
     from(b in load(), where: b.duel_id in ^duel_ids)

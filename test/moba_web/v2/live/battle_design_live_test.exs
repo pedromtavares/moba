@@ -317,14 +317,14 @@ defmodule MobaWeb.V2.BattleDesignLiveTest do
       [battle.id]
     )
 
-    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/battles/#{battle.id}")
-    assert has_element?(view, "#combat-stage #battle-initiated", "Started by")
-    assert has_element?(view, "#battle-competitive-result[data-result=victory]")
+    Moba.Game.Matches.update!(match, %{phase: "scored", winner_id: player.id})
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}/battles")
+    assert has_element?(view, "#arena-fight-result[data-result=victory]")
 
     assert has_element?(
              view,
-             "#load-battles[href='/matches/#{match.id}'][data-battle-continue=true][aria-keyshortcuts=Space]",
-             "Back to match"
+             "#arena-return-complete[href='/matches/#{match.id}'][data-battle-continue=true][aria-keyshortcuts=Space]",
+             "Match summary"
            )
 
     assert has_element?(view, "#turn-1 .health[data-before='#{min(round(hp), winner.total_hp)}']")

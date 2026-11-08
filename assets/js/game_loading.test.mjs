@@ -135,15 +135,15 @@ test('unrelated destinations, rejected launches and modified clicks cannot reuse
   assert.equal(page.nodes['game-loading-title'].hidden, true);
 });
 
-test('replays show both known heroes and clear them for the next ordinary destination', t => {
+test('Arena battle replays show both heroes and clear them for the next destination', t => {
   const page = setup(t);
-  const row = node({children: {'.match-summary-hero img, .duel-survivor img, .match-battle-hero img': [
+  const row = node({children: {'.arena-timeline-fighter img, .match-summary-hero img, .duel-survivor img, .match-battle-hero img': [
     node({attrs: {src: '/axe.png', alt: 'Axe'}}), node({attrs: {src: '/puck.png', alt: 'Puck'}})
   ]}});
-  const control = node({attrs: {href: 'http://localhost/battles/7', 'data-phx-link': 'redirect'},
-    closest: {'.match-summary-row, .duel-round-battle, .match-battle': row}});
+  const control = node({attrs: {href: 'http://localhost/matches/4/battles?battle=7', 'data-phx-link': 'redirect'},
+    closest: {'.arena-timeline-battle, .match-summary-row, .duel-round-battle, .match-battle': row}});
   page.click(control);
-  const navigation = {kind: 'redirect', to: '/battles/7'};
+  const navigation = {kind: 'redirect', to: '/matches/4/battles?battle=7'};
   page.emit('phx:page-loading-start', navigation);
   assert.equal(page.nodes['game-loading-title'].textContent, 'Axe vs Puck');
   assert.equal(page.nodes['game-loading-opponent'].src, '/puck.png');

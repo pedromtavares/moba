@@ -81,10 +81,10 @@ export function loadingTarget(control, to, root = document) {
     const challenger = root.querySelector('.duel-challenge-opponent');
     if (challenger && path.startsWith('/arena/')) return portrait(challenger, text(challenger, 'strong'), 'Live 1v1');
   }
-  if (/^\/battles\/\d+\/?$/.test(path)) {
-    const row = control?.closest('.match-summary-row, .duel-round-battle, .match-battle');
+  if (/^\/(?:battles\/\d+|matches\/\d+\/battles)\/?$/.test(path)) {
+    const row = control?.closest('.arena-timeline-battle, .match-summary-row, .duel-round-battle, .match-battle');
     if (row) {
-      const heroes = [...row.querySelectorAll('.match-summary-hero img, .duel-survivor img, .match-battle-hero img')];
+      const heroes = [...row.querySelectorAll('.arena-timeline-fighter img, .match-summary-hero img, .duel-survivor img, .match-battle-hero img')];
       const names = heroes.map(hero => hero.alt || text(hero.parentElement, 'strong')).filter(Boolean);
       if (heroes.length) return {name: names.join(' vs ') || 'Battle replay', subtitle: 'Battle replay', image: heroes[0]?.getAttribute('src'), opponent: heroes[1]?.getAttribute('src')};
     }

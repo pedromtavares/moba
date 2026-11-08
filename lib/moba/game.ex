@@ -210,6 +210,7 @@ defmodule Moba.Game do
   defdelegate continue_match!(match), to: Arena
 
   defdelegate get_match!(id), to: Matches
+  defdelegate get_match(id), to: Matches
 
   defdelegate latest_manual_match(player), to: Matches
 

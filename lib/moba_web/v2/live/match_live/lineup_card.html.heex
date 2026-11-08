@@ -1,0 +1,59 @@
+<% hero = GH.match_hero_loadout(@hero, @battles)
+fallen? = eliminated?(hero, @player, @battles) %>
+<article
+  id={if @opponent, do: "opponent-hero-#{hero.id}", else: "hero-#{hero.id}"}
+  class={["arena-draft-hero", @opponent && "arena-draft-enemy"]}
+  data-lineup-hero={@picking && hero.id}
+  data-defeated={to_string(fallen?)}
+>
+  <img class="arena-draft-art" src={GH.background_url(hero)} alt={hero.avatar.name} />
+  <div class="arena-draft-title">
+    <img :if={!@opponent} src={"/images/league/#{hero.league_tier}.png"} alt={Moba.leagues()[hero.league_tier]} />
+    <div>
+      <strong>{hero.name}</strong>
+      <small class="arena-draft-avatar">
+        {hero.avatar.name}<span :if={fallen?} class="arena-fallen-label"> · Fallen</span>
+      </small>
+      <span
+        class="arena-draft-level"
+        tabindex="0"
+        data-toggle="tooltip"
+        title={TT.arena_stats_tooltip(hero, @player, @battles)}
+        aria-label={"Level #{hero.level}, view combat stats"}
+      >
+        Level {hero.level} <.icon name="game-battle-log" />
+      </span>
+    </div>
+  </div>
+  <div class="arena-draft-build">
+    <.hero_skill_strip skills={hero.skills} container_class="skills-container" /><.hero_item_strip
+      items={hero.items}
+      container_class="items-container"
+      item_container_class="item-container"
+    />
+  </div>
+  <div :if={@picking} class="roster-actions">
+    <button
+      :if={@can_reorder}
+      type="button"
+      class="lineup-grip"
+      data-lineup-grip
+      aria-label={"Reorder #{hero.name}, slot #{@position}"}
+      aria-keyshortcuts="ArrowUp ArrowDown"
+      title="Drag to reorder or use the up and down keys"
+    >
+      <span aria-hidden="true"></span>
+    </button>
+    <span>{@position}</span>
+    <button
+      id={"lineup-unpick-#{hero.id}"}
+      class="arena-draft-remove"
+      type="button"
+      phx-click="unpick-hero"
+      phx-value-id={hero.id}
+      aria-label={"Remove #{hero.name} from lineup"}
+    >
+      ×
+    </button>
+  </div>
+</article>

@@ -39,6 +39,22 @@ defmodule MobaWeb.V2.Components.GameHelpers do
     end) || player.current_immortal_streak
   end
 
+  def match_hero_loadout(hero, battles) do
+    key = to_string(hero.id)
+
+    case Enum.find_value(battles, & &1.loadouts[key]) do
+      nil ->
+        hero
+
+      snapshot ->
+        %{
+          hero
+          | skills: Enum.map(snapshot["skills"], &Ecto.embedded_load(Moba.Game.Schema.Skill, &1, :json)),
+            items: Enum.map(snapshot["items"], &Ecto.embedded_load(Moba.Game.Schema.Item, &1, :json))
+        }
+    end
+  end
+
   def match_hero_stats(hero, player, battles \\ []) do
     battler =
       Enum.find_value(battles, fn battle ->

@@ -1,4 +1,4 @@
-.game-page #battle-page .battle-resource-bar {
+.game-page :is(#battle-page, .arena-match-timeline) .battle-resource-bar {
   display: flex;
   align-items: center;
   gap: 8px;

@@ -236,7 +236,7 @@ defmodule MobaWeb.V2.BattleLiveTest do
     refute has_element?(view, "#battle-bar #share-battle")
   end
 
-  test "finished match battle links back to the match", %{conn: conn} do
+  test "finished historical 5v5 battle links back to the match", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
     skills = base_skills()
@@ -253,6 +253,8 @@ defmodule MobaWeb.V2.BattleLiveTest do
         generated_picks: [],
         type: "manual"
       })
+      |> Ecto.Changeset.change(team_size: 5)
+      |> Moba.Repo.update!()
 
     battle =
       Engine.create_match_battle!(%{

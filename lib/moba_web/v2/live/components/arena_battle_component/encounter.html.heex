@@ -2,7 +2,12 @@
   <MobaWeb.V2.BattleLive.show {assigns}>
     <:header_navigation>
       <nav class="training-battle-navigation" aria-label="Arena navigation">
-        <.link navigate={~p"/arena"} id="arena-fight-return">← Arena</.link>
+        <.link :if={@match.phase in ["finished", "scored"]} navigate={~p"/matches/#{@match.id}"} id="arena-fight-return">
+          ← Match summary
+        </.link>
+        <.link :if={@match.phase not in ["finished", "scored"]} navigate={~p"/arena"} id="arena-fight-return">
+          ← Arena
+        </.link>
       </nav>
     </:header_navigation>
     <:stage_controls :if={@active && !@battle.finished}>
@@ -18,7 +23,13 @@
     <:result>
       <% result_won? = if @match_over, do: @won, else: @battle.winner_player_id == @match.player_id
       rating = if @match.rewards, do: @match.rewards.attacker_pvp_points, else: 0
-      winner = if @battle.winner_id == @battle.attacker_id, do: @battle.attacker, else: @battle.defender %>
+
+      winner =
+        cond do
+          @battle.winner_id == @battle.attacker_id -> @battle.attacker
+          @battle.winner_id == @battle.defender_id -> @battle.defender
+          true -> nil
+        end %>
       <section
         id="arena-fight-result"
         class={[
@@ -32,6 +43,7 @@
         style="--victory-scene: url(/images/tutorial/arena-of-ascension.jpg)"
       >
         <img
+          :if={winner}
           class="arena-result-art"
           src={GH.background_url(winner)}
           alt=""
@@ -41,7 +53,7 @@
           <div class="arena-result-emblem" aria-hidden="true">
             <.icon :if={@match_over && result_won?} name="game-trophy" />
             <img
-              :if={!@match_over || !result_won?}
+              :if={winner && (!@match_over || !result_won?)}
               src={GH.image_url(winner.avatar)}
               alt=""
             />
@@ -56,7 +68,7 @@
             <h3 :if={@match_over} id="arena-result-title" class="arena-result-rating">
               <strong>{if rating > 0, do: "+"}{rating}</strong><span>Arena Rating</span>
             </h3>
-            <h3 :if={!@match_over} id="arena-result-title">{@battle.winner.name} wins</h3>
+            <h3 :if={!@match_over} id="arena-result-title">{if winner, do: "#{winner.name} wins", else: "Draw"}</h3>
           </div>
           <button
             :if={@active}
@@ -70,28 +82,26 @@
           >
             Next battle <span aria-hidden="true">→</span><kbd>SPACE</kbd>
           </button>
-          <button
+          <.link
             :if={!@active && @following}
             id="arena-next-recorded-battle"
-            type="button"
             class="btn battle-primary league-continue"
-            phx-click="inspect-battle"
-            phx-value-id={@following.id}
-            phx-target={@myself}
+            patch={chapter_path(@match, @following)}
             data-battle-continue="true"
             aria-keyshortcuts="Space"
           >
             Next battle <span aria-hidden="true">→</span><kbd>SPACE</kbd>
-          </button>
+          </.link>
           <.link
             :if={!@active && !@following}
             id="arena-return-complete"
-            navigate={~p"/arena"}
+            navigate={if @match_over, do: ~p"/matches/#{@match.id}", else: ~p"/arena"}
             class="btn battle-primary league-return"
             data-battle-continue="true"
             aria-keyshortcuts="Space"
           >
-            Return to arena <span aria-hidden="true">→</span><kbd>SPACE</kbd>
+            {if @match_over, do: "Match summary", else: "Return to arena"}
+            <span aria-hidden="true">→</span><kbd>SPACE</kbd>
           </.link>
         </div>
       </section>
@@ -115,18 +125,16 @@
           </div>
         </section>
         <div class="arena-battle-chapters" aria-label="Match battles">
-          <button
+          <.link
             :for={{fight, index} <- Enum.with_index(@battles, 1)}
             id={"arena-inspect-#{fight.id}"}
-            type="button"
-            phx-click="inspect-battle"
-            phx-value-id={fight.id}
-            phx-target={@myself}
-            aria-pressed={to_string(@battle.id == fight.id)}
+            patch={chapter_path(@match, fight)}
+            aria-current={if @battle.id == fight.id, do: "step"}
+            aria-label={"Battle #{index}"}
             title={"#{fight.attacker.avatar.name} vs #{fight.defender.avatar.name}"}
           >
             {index}
-          </button>
+          </.link>
         </div>
       </div>
     </:footer>

@@ -73,8 +73,8 @@
   .arena-summary-health > span { position: absolute; inset: 0 auto 0 0; background: #b4546a; }
   .arena-summary-health small { position: relative; display: block; text-align: center; color: #fff1df; font-size: 11px; line-height: 16px; }
   .arena-battle-chapters { grid-column: 2; grid-row: 1; display: flex; gap: 5px; align-items: center; }
-  .arena-battle-chapters button { width: 28px; height: 28px; border: 1px solid #b49c6266; border-radius: 5px; background: #081523; color: #d2c4a1; font-weight: 800; }
-  .arena-battle-chapters button[aria-pressed=true] { background: #c1a15833; border-color: #dbb973; color: #ffe3a5; }
+  .arena-battle-chapters a { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid #b49c6266; border-radius: 5px; background: #081523; color: #d2c4a1; font-weight: 800; }
+  .arena-battle-chapters a:is(:hover, :focus-visible, [aria-current=step]) { background: #c1a15833; border-color: #dbb973; color: #ffe3a5; }
   #hero-battle:not([hidden]) { position: fixed; z-index: 140; inset: 4vh 5vw; overflow: hidden auto; background: #0a1420; border: 1px solid #c6ae76; border-radius: 12px; box-shadow: 0 20px 120px #000e; }
   .training-combat-log-heading { position: sticky; top: 0; z-index: 4; background: #132132; }
   #arena-combat-log-close { background: transparent; border: 0; color: #e2cf9f; font-size: 28px; }
@@ -102,7 +102,7 @@
   .game-page #arena-battle-page {
     .arena-roster-summary { gap: 8px; grid-template-columns: 1fr 1fr; }
     .arena-roster-summary > section:nth-child(2) { grid-column: 2; }
-    .arena-battle-chapters { display: none; }
+    .arena-battle-chapters { grid-column: 1 / -1; grid-row: 2; justify-content: center; }
     .arena-roster-summary > section > strong, .arena-summary-health { display: none; }
     .stage-heading .training-battle-navigation { flex-basis: auto; }
     .stage-meta { font-size: 11px; }
@@ -286,6 +286,55 @@
   .item-container { width: 100%; min-width: 0; max-width: none; max-height: none; margin: 0; }
   .skill-img, .item-img { display: block; width: 100%; max-width: none; height: auto; max-height: none; margin: 0; aspect-ratio: 1; object-fit: cover; border: 1px solid #ffffff1a !important; border-image: none !important; border-radius: 3px; transition: filter .18s, border-color .18s; }
   .skill-img:hover, .item-img:hover { border-color: #d6b47c99 !important; filter: brightness(1.15); }
+}
+
+.game-page #match-hud.arena-match-review {
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  .arena-preparation-heading { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+  .arena-preparation-actions { grid-column: 3; justify-self: end; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+  .arena-preparation-actions .btn { white-space: nowrap; }
+  .arena-match-score { display: flex; align-items: center; gap: clamp(8px, 1.4vw, 22px); color: #d3aa7e; font: 900 clamp(24px, 3vw, 45px)/1 'Nunito', sans-serif; font-variant-numeric: tabular-nums; }
+  .arena-match-score > span { color: #8494a5; }
+  .arena-match-score strong:last-child { color: #a0c9df; }
+  .arena-draft-hero[data-defeated=true] { border-color: #a6a6a64d; }
+  .arena-draft-hero[data-defeated=true] .arena-draft-art { filter: grayscale(.5) brightness(.83); }
+  .arena-draft-hero[data-defeated=true] .arena-draft-build img { filter: grayscale(.2); }
+  .arena-fallen-label { color: #e0a4ac; }
+
+  .arena-match-timeline { min-width: 0; padding: clamp(8px, 1.2vw, 16px); border: 1px solid #bca16c45; border-radius: 12px; background: linear-gradient(120deg, #18283ae6, #0b1520ec); }
+  .arena-match-timeline > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  .arena-timeline-legend { display: flex; gap: 12px; color: #df9aab; font-size: 13px; font-weight: 800; }
+  .arena-timeline-legend span:last-child { color: #8dc7e4; }
+  .arena-timeline-empty { color: #acbacb; }
+  .arena-timeline-battles { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 140px), 1fr)); gap: 8px; }
+  .arena-timeline-battle { display: grid; gap: 6px; min-width: 0; padding: 7px 9px; border: 1px solid #93adc238; border-radius: 7px; background: #0a1320bd; color: #edd6a6; }
+  .arena-timeline-battle:is(:hover, :focus-visible) { border-color: #dcb877; background: #172535; color: #ffedbf; }
+  .arena-timeline-chapter { display: flex; justify-content: space-between; font-size: 13px; }
+  .arena-timeline-fighter { display: grid; grid-template-columns: clamp(30px, 3.1vw, 52px) minmax(0, 1fr); align-items: center; gap: 6px; min-width: 0; }
+  .arena-timeline-fighter + .arena-timeline-fighter { padding-top: 6px; border-top: 1px solid #99b4cc26; }
+  .arena-timeline-fighter > img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border: 1px solid #90a6ba48; border-radius: 4px; }
+  .arena-timeline-fighter[data-winner=true] > img { border-color: #8fcdb483; }
+  .arena-timeline-fighter[data-defeated=true] > img { filter: grayscale(.5) brightness(.83); }
+  .arena-timeline-resources { display: grid; gap: 3px; min-width: 0; }
+  .battle-resource-bar { margin: 0; }
+  .resource-gauge { height: 17px; }
+  .resource-value { font-size: clamp(11px, 1vw, 14px); }
+  .resource-value small { margin-left: 2px; font-size: .9em; }
+}
+
+@media (max-width: 899px) {
+  .game-page #match-hud.arena-match-review {
+    height: auto; min-height: calc(100dvh - 36px); grid-template-rows: auto minmax(300px, 1fr) auto;
+    .arena-preparation-heading { grid-template-columns: minmax(0, 1fr) auto; }
+    .arena-preparation-actions { grid-column: 1 / -1; }
+    .arena-draft-hero { display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; }
+    .arena-draft-title { padding: 0; }
+    .arena-draft-title strong { font-size: clamp(14px, 2vw, 18px); }
+    .arena-draft-level { font-size: 14px; margin-top: 2px; }
+    .arena-draft-level .ui-icon { font-size: 13px; }
+    .arena-draft-build { width: min(100%, 185px); }
+    .arena-timeline-battle { padding: 5px 6px; }
+  }
 }
 
 /* Arena outcomes use the training result hierarchy, with Rating as the final reward. */

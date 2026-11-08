@@ -73,7 +73,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     assert has_element?(profile, "#profile-3v3-win-rate", "50%")
   end
 
-  test "a retained interactive match with an expired replay returns to Arena", %{conn: conn} do
+  test "a retained match keeps its summary when its battle replay expires", %{conn: conn} do
     player = create_player!()
     opponent = create_player!()
 
@@ -87,8 +87,12 @@ defmodule MobaWeb.V2.ArenaLiveTest do
         interactive: true
       })
 
-    assert {:error, {:live_redirect, %{to: "/arena"}}} =
-             live(log_in_player(conn, player_id: player.id), "/matches/#{match.id}")
+    conn = log_in_player(conn, player_id: player.id)
+    path = "/matches/#{match.id}"
+    {:ok, summary, _} = live(conn, path)
+    assert has_element?(summary, "#match-battles", "Battle replays are no longer available.")
+    refute has_element?(summary, "#arena-match-details")
+    assert {:error, {:live_redirect, %{to: ^path}}} = live(conn, "#{path}/battles")
   end
 
   test "direct teams links return to the latest own match and ignore invalid or other players' ids", %{conn: conn} do

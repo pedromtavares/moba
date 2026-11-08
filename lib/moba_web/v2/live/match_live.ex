@@ -9,22 +9,26 @@ defmodule MobaWeb.V2.MatchLive do
   @tick_timeout 500
   @max_tick 15
 
-  def mount(%{"id" => match_id} = params, session, socket) do
+  def mount(%{"id" => match_id}, session, socket) do
     socket = assign(socket, training_record: nil, access_session: session)
-    match = Game.get_match!(match_id)
 
-    if match.training_team_id do
-      data = Game.TrainingEncounters.for_match!(socket.assigns.current_scope, match.id)
-      {:ok, assign(socket, training_record: data.record, training_battle_index: nil)}
-    else
-      mount_pvp(params, session, socket)
+    case Game.get_match(match_id) do
+      nil ->
+        {:ok, match_unavailable(socket)}
+
+      %{training_team_id: nil} = match ->
+        mount_pvp(match, socket)
+
+      match ->
+        data = Game.TrainingEncounters.for_match!(socket.assigns.current_scope, match.id)
+        {:ok, assign(socket, training_record: data.record, training_battle_index: nil)}
     end
   end
 
-  defp mount_pvp(%{"id" => match_id}, _session, socket) do
-    case socket_init(match_id, @max_tick, socket) do
-      %{assigns: %{match: %{interactive: true, phase: "scored"}, battles: []}} = socket ->
-        {:ok, socket |> put_flash(:info, "This match replay has expired.") |> push_navigate(to: ~p"/arena")}
+  defp mount_pvp(match, socket) do
+    case socket_init(match, @max_tick, socket) do
+      %{assigns: %{match: %{interactive: true, phase: "started"}, battles: [_ | _]}} = socket ->
+        {:ok, push_navigate(socket, to: ~p"/matches/#{match.id}/battles")}
 
       socket ->
         {:ok, subscribe_to_match(socket)}
@@ -35,11 +39,13 @@ defmodule MobaWeb.V2.MatchLive do
     socket =
       attach_hook(socket, :authorize_match_changes, :handle_event, fn event, _, socket ->
         if event in ~w(repeat pick-hero unpick-hero pick-team clear-lineup move-up move-down reorder-lineup start) do
-          match = Game.get_match!(socket.assigns.match.id)
+          player_id = socket.assigns.current_player.id
 
-          if match.player_id == socket.assigns.current_player.id && is_nil(match.phase) && is_nil(match.winner_id),
-            do: {:cont, assign(socket, match: match)},
-            else: {:halt, socket}
+          case Game.get_match(socket.assigns.match.id) do
+            %{player_id: ^player_id, phase: nil, winner_id: nil} = match -> {:cont, assign(socket, match: match)}
+            nil -> {:halt, match_unavailable(socket)}
+            _ -> {:halt, socket}
+          end
         else
           {:cont, socket}
         end
@@ -180,10 +186,10 @@ defmodule MobaWeb.V2.MatchLive do
   def handle_info(_, %{assigns: %{training_record: record}} = socket) when not is_nil(record),
     do: {:noreply, socket}
 
-  def handle_info(:tick, %{assigns: %{tick: tick, match: %{id: match_id, winner_id: winner_id}}} = socket)
+  def handle_info(:tick, %{assigns: %{tick: tick, match: %{winner_id: winner_id}}} = socket)
       when is_nil(winner_id) and tick < @max_tick do
     schedule_tick()
-    {:noreply, socket_init(match_id, tick + 1, socket)}
+    {:noreply, reload_match(socket, tick + 1)}
   end
 
   def handle_info(:tick, %{assigns: %{tick: tick, battles: battles}} = socket) when tick < length(battles) do
@@ -194,10 +200,10 @@ defmodule MobaWeb.V2.MatchLive do
   def handle_info(:tick, socket), do: {:noreply, socket}
 
   def handle_info({:DOWN, ref, :process, _, _reason}, %{assigns: %{match_task_ref: ref}} = socket) do
-    socket = socket_init(socket.assigns.match.id, @max_tick, assign(socket, starting: false, match_task_ref: nil))
+    socket = socket |> assign(starting: false, match_task_ref: nil) |> reload_match(@max_tick)
 
     socket =
-      if socket.assigns.match.phase == "scored" do
+      if socket.redirected || socket.assigns.match.phase == "scored" do
         socket
       else
         put_flash(socket, :error, "The match could not start. Please try again.")
@@ -211,7 +217,7 @@ defmodule MobaWeb.V2.MatchLive do
   def handle_info({ref, {:error, _}}, %{assigns: %{match_task_ref: ref}} = socket) when is_reference(ref) do
     Process.demonitor(ref, [:flush])
     socket = assign(socket, starting: false, match_task_ref: nil)
-    {:noreply, socket_init(socket.assigns.match.id, @max_tick, socket)}
+    {:noreply, reload_match(socket, @max_tick)}
   end
 
   def handle_info({ref, {:ok, match}}, %{assigns: %{match_task_ref: ref}} = socket) when is_reference(ref) do
@@ -219,10 +225,9 @@ defmodule MobaWeb.V2.MatchLive do
     socket = assign(socket, starting: false, match_task_ref: nil)
 
     if match.interactive do
-      battle = Engine.latest_match_battle(match.id)
-      {:noreply, push_navigate(socket, to: ~p"/battles/#{battle.id}")}
+      {:noreply, push_navigate(socket, to: ~p"/matches/#{match.id}/battles")}
     else
-      {:noreply, socket_init(match.id, socket.assigns.tick, socket)}
+      {:noreply, reload_match(socket, socket.assigns.tick)}
     end
   end
 
@@ -231,22 +236,31 @@ defmodule MobaWeb.V2.MatchLive do
   def render(%{training_record: record} = assigns) when not is_nil(record),
     do: MobaWeb.V2.Components.TrainingBattle.page(assigns)
 
-  def render(%{match: %{interactive: true, phase: phase}} = assigns) when not is_nil(phase),
-    do: MobaWeb.V2.Components.ArenaBattle.page(Map.put(assigns, :arena_match_id, assigns.match.id))
-
   def render(assigns), do: show(assigns)
 
-  defp socket_init(match_id, tick, %{assigns: %{current_player: player}} = socket) do
-    match = Game.get_match!(match_id)
+  defp reload_match(socket, tick) do
+    case Game.get_match(socket.assigns.match.id) do
+      nil -> match_unavailable(socket)
+      match -> socket_init(match, tick, socket)
+    end
+  end
+
+  defp match_unavailable(socket) do
+    socket
+    |> put_flash(:info, "This match is no longer available.")
+    |> push_navigate(to: ~p"/arena")
+  end
+
+  defp socket_init(match, tick, %{assigns: %{current_player: player}} = socket) do
     latest_match = Game.latest_manual_match(player)
-    battles = Engine.list_match_battles(match_id)
+    battles = Engine.list_match_battles(match.id)
     teams = Game.list_teams(player) |> Enum.sort_by(&{-&1.used_count, -&1.id})
     trained_heroes = Game.trained_pvp_heroes(player.id, [], 200)
     hero_tab = if length(teams) > 0, do: "teams", else: "trained"
 
     assign(socket,
       sidebar_code: "arena",
-      channel: "match-#{match_id}",
+      channel: "match-#{match.id}",
       match: match,
       match_task_ref: Map.get(socket.assigns, :match_task_ref),
       battles: battles,
@@ -284,6 +298,17 @@ defmodule MobaWeb.V2.MatchLive do
   end
 
   defp schedule_tick, do: Process.send_after(self(), :tick, @tick_timeout)
+
+  defp finished_battles(battles), do: Enum.filter(battles, &(&1.finished && &1.turns != []))
+
+  defp result_battlers(battle, player_id) do
+    sides = [
+      {battle.attacker, turn_hero_for(battle, %{id: battle.attacker_player_id})},
+      {battle.defender, turn_hero_for(battle, %{id: battle.defender_player_id})}
+    ]
+
+    if battle.attacker_player_id == player_id, do: sides, else: Enum.reverse(sides)
+  end
 
   defp eliminated?(hero, player, battles) do
     Enum.any?(battles, fn battle ->

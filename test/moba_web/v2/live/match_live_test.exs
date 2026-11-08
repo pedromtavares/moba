@@ -5,6 +5,35 @@ defmodule MobaWeb.V2.MatchLiveTest do
 
   alias Moba.Game.Matches
 
+  test "deleted and invalid match links send the player back to Arena with a notice", %{conn: conn} do
+    player = create_player!()
+    opponent = create_player!()
+    match = Matches.create!(%{player_id: player.id, opponent_id: opponent.id, type: "manual"})
+    conn = log_in_player(conn, player_id: player.id)
+    Moba.Repo.delete!(match)
+
+    for id <- [match.id, "not-a-match", "9223372036854775808"] do
+      path = "/matches/#{id}"
+      assert {:error, {:live_redirect, %{to: ^path}}} = live(conn, "#{path}/battles")
+      assert {:error, {:live_redirect, %{to: "/arena"}}} = missing = live(conn, path)
+      assert {:ok, arena, _} = follow_redirect(missing, conn)
+      assert has_element?(arena, "#game-feedback-info", "This match is no longer available.")
+    end
+  end
+
+  test "changing a lineup after its match is deleted returns to Arena", %{conn: conn} do
+    player = create_player!()
+    opponent = create_player!()
+    match = Matches.create!(%{player_id: player.id, opponent_id: opponent.id, type: "manual"})
+    conn = log_in_player(conn, player_id: player.id)
+    {:ok, view, _} = live(conn, "/matches/#{match.id}")
+    Moba.Repo.delete!(match)
+
+    result = render_click(view, "start", %{})
+    assert {:ok, arena, _} = follow_redirect(result, conn, "/arena")
+    assert has_element?(arena, "#game-feedback-info", "This match is no longer available.")
+  end
+
   test "renders the v2 match and lets the player pick heroes", %{conn: conn} do
     player = create_player!(%{pvp_tier: 1})
     opponent = create_player!(%{pvp_tier: 1})
@@ -243,50 +272,34 @@ defmodule MobaWeb.V2.MatchLiveTest do
     player_avatar = MobaWeb.V2.Components.GameHelpers.image_url(player_hero.avatar)
     opponent_avatar = MobaWeb.V2.Components.GameHelpers.image_url(opponent_hero.avatar)
 
-    assert has_element?(view, ".match-center > #match-scoreboard[data-complete=true]", "Heroes defeated")
+    assert has_element?(view, "#match-hud.arena-preparation.arena-match-review")
+    assert has_element?(view, "#arena-match-score[aria-label='Battles won']")
+    refute has_element?(view, "#picks-card, #start-match-button, #edit-teams-button, [data-lineup-grip]")
 
     defeated_card =
       if battle.winner_player_id == player.id,
         do: "#opponent-hero-#{opponent_hero.id}",
         else: "#hero-#{player_hero.id}"
 
-    assert has_element?(view, "#{defeated_card} .roster-hero[data-defeated=true][data-falling=false]")
+    assert has_element?(view, "#{defeated_card}[data-defeated=true] .arena-fallen-label", "Fallen")
+    assert has_element?(view, "#{defeated_card} .arena-draft-build .skill-img")
 
-    assigns = %{
-      preview: true,
-      current_player: player,
-      match: Game.get_match!(match.id),
-      picked_heroes: [player_hero],
-      battles: [battle],
-      starting: false,
-      show_battle_details: false
-    }
+    assert has_element?(
+             view,
+             ~s|#battle-summary-#{battle.id} .arena-timeline-fighter:nth-child(2) img[src="#{player_avatar}"]|
+           )
 
-    for {tick, defeated, falling} <- [{0, false, false}, {1, true, true}, {15, true, false}] do
-      document =
-        render_component(&MobaWeb.V2.MatchLive.modern/1, Map.put(assigns, :tick, tick))
-        |> LazyHTML.from_fragment()
+    assert has_element?(
+             view,
+             ~s|#battle-summary-#{battle.id} .arena-timeline-fighter:last-child img[src="#{opponent_avatar}"]|
+           )
 
-      assert document
-             |> LazyHTML.query("#{defeated_card} .roster-hero[data-defeated=#{defeated}][data-falling=#{falling}]")
-             |> Enum.count() == 1
+    for name <- [player_hero.name, opponent_hero.name], resource <- ["health", "energy"] do
+      assert has_element?(view, "#battle-summary-#{battle.id} [role=progressbar][aria-label='#{name} #{resource}']")
     end
 
-    assert has_element?(
-             view,
-             ~s|#battle-summary-#{battle.id} .match-summary-hero:first-child img[src="#{player_avatar}"]|
-           )
-
-    assert has_element?(
-             view,
-             ~s|#battle-summary-#{battle.id} .match-summary-hero:last-child img[src="#{opponent_avatar}"]|
-           )
-
-    assert has_element?(view, ".match-center #match-battles + #match-return-to-arena[href='/arena']", "Return to arena")
-
-    view |> element("#match-details-toggle") |> render_click()
-    assert has_element?(view, ".match-center #match-return-to-arena[href='/arena']")
-
+    assert has_element?(view, "#arena-match-details[href='/matches/#{match.id}/battles']")
+    assert has_element?(view, "#battle-summary-#{battle.id}[href='/matches/#{match.id}/battles?battle=#{battle.id}']")
     view |> element("#match-return-to-arena") |> render_click()
     assert_redirect(view, "/arena")
   end

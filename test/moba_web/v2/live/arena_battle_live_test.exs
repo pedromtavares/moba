@@ -45,8 +45,7 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
   test "manual actions, pause buttons, next pairing and reload retain the cinematic layout", a do
     {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
     conn = log_in_player(a.conn, player_id: a.player.id)
-    battle = Engine.latest_match_battle(match.id)
-    {:ok, view, _} = live(conn, "/battles/#{battle.id}")
+    {:ok, view, _} = live(conn, "/matches/#{match.id}/battles")
     assert has_element?(view, "#arena-battle-page #combat-stage")
     assert has_element?(view, "#training-auto-battle[aria-keyshortcuts='T']", "Auto battle")
     assert has_element?(view, "#training-auto-match[aria-keyshortcuts='G']", "Auto all battles")
@@ -71,7 +70,9 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     view |> element("#arena-next-battle") |> render_click()
     assert length(Engine.list_match_battles(match.id)) == 2
     assert has_element?(view, "#attack-button:not([disabled])")
-    {:ok, resumed, _} = live(conn, "/matches/#{match.id}")
+    details_path = "/matches/#{match.id}/battles"
+    assert {:error, {:live_redirect, %{to: ^details_path}}} = live(conn, "/matches/#{match.id}")
+    {:ok, resumed, _} = live(conn, details_path)
     assert has_element?(resumed, "#arena-battle-page #attack-button")
     assert has_element?(resumed, "#arena-roster-summary")
     assert LazyHTML.from_fragment(render(resumed)) |> LazyHTML.query(".arena-summary-unit") |> Enum.count() == 6
@@ -82,7 +83,7 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
     spectator = create_player!()
     conn = log_in_player(a.conn, player_id: spectator.id)
-    {:ok, view, _} = live(conn, "/matches/#{match.id}")
+    {:ok, view, _} = live(conn, "/matches/#{match.id}/battles")
     refute has_element?(view, "#training-auto-battle")
     assert has_element?(view, "#attack-button[disabled]")
 
@@ -133,7 +134,8 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
 
   test "auto all battles advances frames through the whole match and stops at its result", a do
     {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
-    {:ok, view, _} = live(log_in_player(a.conn, player_id: a.player.id), "/matches/#{match.id}")
+    conn = log_in_player(a.conn, player_id: a.player.id)
+    {:ok, view, _} = live(conn, "/matches/#{match.id}/battles")
     view |> element("#training-auto-match") |> render_click()
 
     Enum.reduce_while(1..100, nil, fn _, _ ->
@@ -159,7 +161,7 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     end)
 
     assert Matches.get_match!(match.id).phase == "scored"
-    assert has_element?(view, "#arena-return-complete", "Return to arena")
+    assert has_element?(view, "#arena-return-complete[href='/matches/#{match.id}']", "Match summary")
     refute has_element?(view, "#training-auto-match")
     assert has_element?(view, "#arena-fight-result", "Arena Rating")
     assert has_element?(view, "#arena-fight-result.is-match-result[data-result=victory] .arena-result-emblem .ui-icon")
@@ -170,13 +172,48 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
              view,
              "#arena-fight-result .league-outcome-heading #arena-return-complete[aria-keyshortcuts=Space]"
            )
+
+    assert {:ok, summary, _} = view |> element("#arena-return-complete") |> render_click() |> follow_redirect(conn)
+
+    assert has_element?(summary, "#match-hud.arena-match-review #match-battles")
+    assert has_element?(summary, "#arena-match-details[href='/matches/#{match.id}/battles']")
+  end
+
+  test "automatic results open the final cinematic battle and chapters have stable links", a do
+    match = Matches.update!(a.match, %{type: "auto"})
+    {:ok, match} = Game.start_match(match, a.player, Enum.map(a.picks, & &1.id))
+    [first | _] = battles = Engine.list_match_battles(match.id)
+    last = List.last(battles)
+    assert first.id != last.id
+
+    conn = log_in_player(a.conn, player_id: a.player.id)
+    details = "/matches/#{match.id}/battles"
+    first_path = "#{details}?battle=#{first.id}"
+    {:ok, summary, _} = live(conn, "/matches/#{match.id}")
+    assert has_element?(summary, "#match-hud.arena-match-review #match-battles")
+    assert has_element?(summary, "#battle-summary-#{first.id}[href='#{first_path}']")
+
+    {:ok, replay, _} = summary |> element("#arena-match-details") |> render_click() |> follow_redirect(conn)
+    assert has_element?(replay, "#arena-inspect-#{last.id}[aria-current=step]")
+    assert has_element?(replay, "#arena-fight-result.is-match-result")
+    refute has_element?(replay, "#training-auto-battle, #attack-button:not([disabled])")
+
+    replay |> element("#arena-inspect-#{first.id}") |> render_click()
+    assert_patch(replay, first_path)
+    assert has_element?(replay, "#arena-inspect-#{first.id}[aria-current=step]")
+    assert has_element?(replay, "#arena-next-recorded-battle[href='#{details}?battle=#{Enum.at(battles, 1).id}']")
+    refute has_element?(replay, "#arena-fight-result.is-match-result")
+    assert {:error, {:live_redirect, %{to: ^first_path}}} = live(conn, "/battles/#{first.id}")
+
+    {:ok, selected, _} = live(conn, first_path)
+    assert has_element?(selected, "#arena-inspect-#{first.id}[aria-current=step]")
   end
 
   defp assert_patch_or_redirect(view, match_id) do
     # Await the task through LiveView's redirect assertion, without arbitrary sleeps.
     path = assert_redirect(view)
     battle = Engine.latest_match_battle(match_id)
-    assert elem(path, 0) == "/battles/#{battle.id}"
+    assert elem(path, 0) == "/matches/#{match_id}/battles"
     assert battle.turns == []
   end
 end

@@ -473,7 +473,7 @@ body:has(.game-page .catalog-viewport) {
   .game-page #tavern.catalog-viewport {
     #tavern-heading { grid-template-columns: minmax(0, 1fr) auto; }
     .tavern-heading-guide { display: none; }
-    :is(.tavern-avatar-stage, .tavern-skin-stage) { grid-template-columns: minmax(0, 1fr) minmax(0, max(43%, 188px)); }
+    :is(.tavern-avatar-stage, .tavern-skin-stage) { grid-template-columns: minmax(0, 1fr) minmax(0, max(43%, 205px)); }
   }
 }
 
