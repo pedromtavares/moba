@@ -30,7 +30,7 @@ body:has(.game-page .base-page) {
   .hero-list {
     flex: 1;
     min-height: 0;
-    overflow: auto;
+    overflow-y: auto;
     overscroll-behavior: contain;
   }
 
@@ -39,25 +39,26 @@ body:has(.game-page .base-page) {
     .hero-card.card > .card-body { min-height: 74px; }
     .team-training-card.card .team-card-art { min-height: 86px; }
     .team-card-identity { padding: 10px 6px 6px; }
+    .team-card-build { padding: 4px; }
+    .team-card-build img { display: block; width: min(100%, 32px); height: auto; min-width: 0; }
+    .team-training-card.card .team-card-controls { flex-wrap: wrap; gap: 4px 8px; padding: 2px 4px; }
+    .team-training-card.card .team-card-metrics { gap: 8px; }
+    .hero-card.card .hero-card-controls :is(.hero-card-resume, .hero-card-customize) {
+      min-height: 32px;
+      padding: 5px 8px;
+    }
     .hero-card.card .col-12:has(> .skills-container) {
-      width: min(100%, 310px);
+      width: min(100%, 265px);
       margin-inline: auto !important;
       padding: 4px 8px;
     }
+    .hero-card.card .skill-img { height: auto; }
+    .hero-card.card .item-img { height: auto; aspect-ratio: 16 / 10; }
   }
 }
 
 @media (min-width: 992px) {
   .game-page #base-page.base-page .base-run-grid:not(:empty) { min-height: 100%; }
-}
-
-@media (max-height: 510px) {
-  .game-page #base-page.base-page {
-    overflow: auto;
-    overscroll-behavior: contain;
-    > .row { height: auto; }
-    .hero-list { overflow: visible; }
-  }
 }
 
 .game-page #pve-progression.base-ascent {
@@ -184,7 +185,7 @@ body:has(.game-page .base-page) {
   }
   #base-ascent-complete { margin: 0; color: #e4cea3; text-align: center; font-size: 18px; }
 }
-@media (max-width: 1199px) {
+@media (max-width: 991px) {
   .game-page #pve-progression.base-ascent .base-ascent-footer .collection {
     grid-template-columns: repeat(8, minmax(0, 1fr));
   }
@@ -208,6 +209,9 @@ body:has(.game-page .base-page) {
 }
 @media (max-width: 575px) {
   .game-page #pve-progression.base-ascent {
+    h2 { font-size: 23px; }
+    .base-ascent-footer { padding-block: 10px 4px; }
+    .base-ascent-footer .collection { grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 12px 4px; }
     .base-ascent-track { --rank-emblem-size: 50px; margin-top: 10px; }
     .base-ascent-emblem img { height: 26px; }
     .is-current .base-ascent-emblem img { height: 38px; }
@@ -222,6 +226,29 @@ body:has(.game-page .base-page) {
     }
     .base-ascent-milestone { display: grid; justify-items: center; }
     .base-ascent-mobile-ranks { display: block; color: #ffe5ad; font-weight: 800; }
+  }
+}
+
+@media (min-width: 992px) and (max-height: 700px) {
+  .game-page #base-page.base-page .hero-list > .base-run-grid {
+    padding-block: 1px;
+
+    > :is(.base-team-slot, [id^="visible-hero-"]) { padding-block: 2px; }
+  }
+
+  .game-page #pve-progression.base-ascent {
+    .base-ascent-track { --rank-emblem-size: clamp(42px, 8dvh, 56px); margin-block: 6px 8px; }
+    .base-ascent-footer { padding-block: 8px 0; }
+    .base-ascent-footer .collection { row-gap: 14px; padding-bottom: 12px; }
+    .base-ascent-footer .collection .avatar { max-height: 6dvh; }
+  }
+}
+
+@media (max-height: 510px), (max-width: 575px) and (max-height: 690px) {
+  .game-page #pve-progression.base-ascent {
+    max-height: 42dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
 }
 @media (prefers-reduced-motion: reduce) {

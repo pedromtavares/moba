@@ -5,7 +5,7 @@ defmodule Moba.Admin.Seasons do
 
   alias Moba.{Repo, Game}
   alias Game.Schema.{Player, Hero, Match, Season, TrainingTeam}
-  alias Game.Query.{PlayerQuery, HeroQuery, SkillQuery}
+  alias Game.Query.{PlayerQuery, HeroQuery}
 
   import Ecto.Query
   import Torch.Helpers, only: [sort: 1, paginate: 4]
@@ -169,7 +169,7 @@ defmodule Moba.Admin.Seasons do
   end
 
   defp guest_cards(query) do
-    players = query |> Repo.all() |> Repo.preload(current_pve_hero: [:avatar, skills: SkillQuery.ordered()])
+    players = query |> Repo.all() |> Repo.preload(current_pve_hero: [:avatar, :skin])
     teams = recent_guest_teams(Enum.map(players, & &1.id))
 
     Enum.map(players, fn player ->
@@ -216,8 +216,8 @@ defmodule Moba.Admin.Seasons do
     case Game.TeamRuns.read_state(team) do
       {:ok, %{phase: :draft, picks: picks}} ->
         heroes =
-          for %{avatar: avatar, skills: skills} <- picks do
-            %{avatar: avatar, skills: skills ++ List.wrap(avatar.ultimate), level: 1, league_tier: 0, fallen: false}
+          for %{avatar: avatar} <- picks do
+            %{avatar: avatar, level: 1, fallen: false}
           end
 
         {heroes, if(heroes != [], do: 0)}
@@ -234,9 +234,8 @@ defmodule Moba.Admin.Seasons do
   defp guest_hero(hero) do
     %{
       avatar: hero.avatar,
-      skills: hero.skills,
+      skin: hero.skin,
       level: hero.level,
-      league_tier: hero.league_tier,
       fallen: hero.pve_state == "dead"
     }
   end

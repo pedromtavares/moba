@@ -56,7 +56,9 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#{card}.community-recent-team-card")
 
     for {%{hero: hero}, position} <- Enum.with_index(Game.TeamTraining.team(Game.TeamRuns.state(run)), 1) do
-      assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(#{position})", hero.avatar.name)
+      portrait = "#{card} .community-team-portraits > div:nth-child(#{position})"
+      assert has_element?(view, ~s(#{portrait}[role=img][aria-label="#{hero.avatar.name}"][style*="--team-hero-art"]))
+      refute has_element?(view, "#{portrait} span")
     end
 
     assert has_element?(view, "#{card} .community-activity-metrics dt", "Started training")
@@ -504,24 +506,29 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#community-recent-players > #user-#{viewer.player_id} + #guest-#{roster_guest.id}")
     assert has_element?(view, "#guest-#{roster_guest.id}[data-current=true] .community-player-name", "You")
     assert has_element?(view, "#guest-#{guest.id}.community-player-card .community-player-name", "Guest ##{guest.id}")
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-roster strong", hero.avatar.name)
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-level", "Lv 8")
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-joined", "Joined 2h ago")
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-joined[title='PvE rank: Initiate']")
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-league", "Silver League")
-    assert has_element?(view, "#guest-#{roster_guest.id} .community-guest-joined[title='PvE rank: Novice']")
-    assert has_element?(view, "#guest-#{roster_guest.id} .community-guest-league", "Platinum League")
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-solo-caption", hero.avatar.name)
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-solo-caption .community-guest-level", "Lv 8")
+    solo_footer = "#guest-#{guest.id} > footer.community-ranking-footer"
+    roster_footer = "#guest-#{roster_guest.id} > footer.community-ranking-footer"
+    assert has_element?(view, "#{solo_footer} .community-activity-time dt", "Joined")
+    assert has_element?(view, "#{solo_footer} .community-activity-metrics time[datetime]", "2h ago")
+    assert has_element?(view, "#{solo_footer} [data-toggle=tooltip][title='PvE rank: Initiate']")
+    assert has_element?(view, "#{solo_footer} .community-activity-metrics dt", "Silver League")
+    assert has_element?(view, "#{roster_footer} [data-toggle=tooltip][title='PvE rank: Novice']")
+    assert has_element?(view, "#{roster_footer} .community-activity-metrics dt", "Platinum League")
     refute has_element?(view, "#community-admin-summary")
 
     for {%{hero: member}, index} <-
           record |> Game.TeamRuns.state() |> Game.TeamTraining.team() |> Enum.with_index(1) do
-      row = "#guest-#{roster_guest.id} .community-guest-roster > li:nth-child(#{index})"
-      assert has_element?(view, "#{row} strong", member.avatar.name)
-      assert has_element?(view, "#{row} .community-guest-level", "Lv #{member.level}")
+      portrait = "#guest-#{roster_guest.id} .community-team-portraits > div:nth-child(#{index})"
+      label = "#{member.avatar.name}, level #{member.level}"
+      assert has_element?(view, ~s(#{portrait}[role=img][aria-label="#{label}"][style*="--team-hero-art"]))
+      assert has_element?(view, "#{portrait} .community-guest-level", "Lv #{member.level}")
+      refute has_element?(view, "#{portrait} span", member.avatar.name)
     end
 
     assert has_element?(view, "#guest-#{draft_guest.id} .community-guest-level", "Lv 1")
-    assert has_element?(view, "#guest-#{draft_guest.id} .community-guest-league", "Bronze League")
+    assert has_element?(view, "#guest-#{draft_guest.id} .community-activity-metrics dt", "Bronze League")
 
     view |> element("#show-pvp-link") |> render_click()
     refute has_element?(view, "#guest-#{guest.id}")

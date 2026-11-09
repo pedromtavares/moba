@@ -210,16 +210,28 @@ defmodule MobaWeb.V2.CommunityLive do
   end
 
   attr :heroes, :list, required: true
+  attr :show_names, :boolean, default: true
+  attr :show_levels, :boolean, default: false
 
   defp team_portraits(assigns) do
     ~H"""
     <div class="community-team-portraits">
-      <div :for={hero <- @heroes} style={"--team-hero-art: url(#{GH.background_url(hero)})"}>
-        <span>{hero.avatar.name}</span>
+      <div
+        :for={hero <- @heroes}
+        style={"--team-hero-art: url(#{GH.background_url(hero)})"}
+        data-fallen={if Map.get(hero, :fallen), do: "true"}
+        role={unless @show_names, do: "img"}
+        aria-label={unless @show_names, do: portrait_label(hero, @show_levels)}
+      >
+        <span :if={@show_names}>{hero.avatar.name}</span>
+        <span :if={@show_levels} class="community-guest-level" aria-hidden="true">Lv {hero.level}</span>
       </div>
     </div>
     """
   end
+
+  defp portrait_label(hero, true), do: "#{hero.avatar.name}, level #{hero.level}"
+  defp portrait_label(hero, false), do: hero.avatar.name
 
   attr :hero, :map, required: true
   attr :preview, :boolean, required: true
@@ -374,7 +386,9 @@ defmodule MobaWeb.V2.CommunityLive do
       assign(assigns,
         player: player,
         heroes: heroes,
+        solo_hero: if(match?([_], heroes), do: hd(heroes)),
         last_online_at: last_online_at,
+        joined_at: DateTime.from_naive!(player.inserted_at, "Etc/UTC"),
         league_tier: Map.get(assigns.guest, :league_tier),
         tooltip: tooltip
       )
@@ -384,6 +398,7 @@ defmodule MobaWeb.V2.CommunityLive do
       id={"guest-#{@player.id}"}
       player={@player}
       hero={List.first(@heroes)}
+      roster={if length(@heroes) > 1, do: @heroes, else: []}
       preview={@preview}
       current={@current}
       guest_name={if @current, do: "You", else: "Guest ##{@player.id}"}
@@ -395,22 +410,22 @@ defmodule MobaWeb.V2.CommunityLive do
         </span>
       </:summary>
       <:banner_bottom>
-        <ul :if={@heroes != []} class="community-guest-roster" aria-label="Training heroes">
-          <li :for={hero <- @heroes}>
-            <img src={GH.image_url(hero.avatar)} alt="" loading="lazy" data-fallen={to_string(hero.fallen)} />
-            <strong title={Enum.map_join([hero.avatar | hero.skills], " · ", & &1.name)}>{hero.avatar.name}</strong>
-            <span class="community-guest-level" title={GH.league_name(hero.league_tier)}>Lv {hero.level}</span>
-          </li>
-        </ul>
+        <span :if={@solo_hero} class="community-guest-solo-caption">
+          {@solo_hero.avatar.name} <span class="community-guest-level">Lv {@solo_hero.level}</span>
+        </span>
       </:banner_bottom>
       <:footer>
-        <span class="community-guest-joined tooltip-mobile" data-toggle="tooltip" tabindex="0" title={@tooltip}>
-          <span><.icon name="game-clock" /> Joined {relative_time(@player.inserted_at)}</span>
-          <span :if={is_integer(@league_tier)} class="community-guest-league">
-            <img src={"/images/league/#{@league_tier}.png"} alt="" />
-            {GH.league_name(@league_tier)} League
-          </span>
-        </span>
+        <div class="community-activity-link tooltip-mobile" data-toggle="tooltip" tabindex="0" title={@tooltip}>
+          <.activity_metrics
+            label={if is_integer(@league_tier), do: "#{GH.league_name(@league_tier)} League"}
+            at={@joined_at}
+            time_label="Joined"
+          >
+            <:emblem :if={is_integer(@league_tier)}>
+              <img class="community-guest-league-emblem" src={"/images/league/#{@league_tier}.png"} alt="" />
+            </:emblem>
+          </.activity_metrics>
+        </div>
       </:footer>
     </.player_banner>
     """
@@ -429,7 +444,7 @@ defmodule MobaWeb.V2.CommunityLive do
       id={"user-#{@player.id}"}
       player={@player}
       hero={Map.get(@player, :latest_hero)}
-      training_team={Map.get(@player, :latest_training_team)}
+      roster={get_in(@player, [Access.key(:latest_training_team), :heroes]) || []}
       preview={@preview}
       current={@current}
     >
@@ -500,37 +515,48 @@ defmodule MobaWeb.V2.CommunityLive do
 
   defp recent_activity(assigns) do
     assigns = assign(assigns, :path, activity_path(assigns.activity))
+    assigns = assign(assigns, :result, Map.get(assigns.activity, :result))
 
     ~H"""
-    <%= if @path do %>
-      <.link
-        navigate={preview_path(assigns, @path)}
-        class="community-activity-link"
-        data-result={Map.get(@activity, :result)}
-      >
-        <.activity_metrics activity={@activity} />
-        <span class="community-activity-arrow" aria-hidden="true">↗</span>
-      </.link>
-    <% else %>
-      <div class="community-activity-link">
-        <.activity_metrics activity={@activity} />
-      </div>
-    <% end %>
+    <.activity_container path={@path} preview={@preview} result={@result}>
+      <.activity_metrics label={activity_title(@activity)} detail={activity_detail(@activity)} at={@activity.at}>
+        <:emblem><.icon name={activity_icon(@activity)} /></:emblem>
+      </.activity_metrics>
+    </.activity_container>
     """
   end
 
-  attr :activity, :map, required: true
+  attr :path, :string, required: true
+  attr :preview, :boolean, required: true
+  attr :result, :atom, required: true
+  slot :inner_block, required: true
+
+  defp activity_container(assigns) do
+    ~H"""
+    <.link :if={@path} navigate={preview_path(assigns, @path)} class="community-activity-link" data-result={@result}>
+      {render_slot(@inner_block)}
+      <span class="community-activity-arrow" aria-hidden="true">↗</span>
+    </.link>
+    <div :if={!@path} class="community-activity-link">{render_slot(@inner_block)}</div>
+    """
+  end
+
+  attr :label, :string, required: true
+  attr :at, :any, required: true
+  attr :detail, :string, default: nil
+  attr :time_label, :string, default: nil
+  slot :emblem
 
   defp activity_metrics(assigns) do
     ~H"""
     <dl class="player-card-metrics community-team-metrics community-activity-metrics">
-      <div data-tone="streak">
-        <dt><.icon name={activity_icon(@activity)} /><strong>{activity_title(@activity)}</strong></dt>
-        <dd><small>{activity_detail(@activity)}</small></dd>
+      <div :if={@label} data-tone="streak">
+        <dt>{render_slot(@emblem)}<strong>{@label}</strong></dt>
+        <dd :if={@detail}><small>{@detail}</small></dd>
       </div>
-      <div data-tone="wins">
-        <dt><.icon name="game-clock" /><span class="sr-only">Time</span></dt>
-        <dd><time datetime={DateTime.to_iso8601(@activity.at)}>{relative_time(@activity.at)}</time></dd>
+      <div class="community-activity-time" data-tone="wins">
+        <dt><.icon name="game-clock" /><span class={unless @time_label, do: "sr-only"}>{@time_label || "Time"}</span></dt>
+        <dd><time datetime={DateTime.to_iso8601(@at)}>{relative_time(@at)}</time></dd>
       </div>
     </dl>
     """
@@ -539,7 +565,7 @@ defmodule MobaWeb.V2.CommunityLive do
   attr :id, :string, required: true
   attr :player, :map, required: true
   attr :hero, :any, required: true
-  attr :training_team, :map, default: nil
+  attr :roster, :list, default: []
   attr :preview, :boolean, required: true
   attr :current, :boolean, default: false
   attr :linked, :boolean, default: false
@@ -556,17 +582,20 @@ defmodule MobaWeb.V2.CommunityLive do
       class={[
         "community-player-card",
         @linked && "community-ranked-card",
-        @training_team && "community-team-card community-recent-team-card"
+        @roster != [] && "community-team-card community-recent-team-card"
       ]}
       data-community-entry
       data-current={to_string(@current)}
-      style={if !@training_team, do: "--player-art: url(#{GH.background_url(@hero)})"}
+      style={if @roster == [], do: "--player-art: url(#{GH.background_url(@hero)})"}
     >
-      <div class={["community-player-banner", @training_team && "community-team-banner"]}>
-        <.team_portraits :if={@training_team} heroes={@training_team.heroes} />
+      <div class={["community-player-banner", @roster != [] && "community-team-banner"]}>
+        <.team_portraits :if={@roster != []} heroes={@roster} show_names={false} show_levels={not is_nil(@guest_name)} />
         <header class="community-player-heading">
           <div class="community-player-identity">
-            <span :if={@guest_name} class="community-player-name"><strong>{@guest_name}</strong></span>
+            <span :if={@guest_name} class="community-player-name">
+              <img src={"/images/pve/#{@player.pve_tier || 0}.png"} alt="" class="community-player-emblem" />
+              <strong>{@guest_name}</strong>
+            </span>
             <.link
               :if={is_nil(@guest_name)}
               navigate={preview_path(assigns, ~p"/player/#{@player.id}")}
@@ -590,7 +619,7 @@ defmodule MobaWeb.V2.CommunityLive do
       <footer
         :if={@footer != []}
         class={[
-          is_nil(@guest_name) && "community-ranking-footer",
+          "community-ranking-footer",
           !@linked && "community-player-activity"
         ]}
       >

@@ -125,7 +125,8 @@ body:has(.game-page #community) {
     position: absolute;
     inset: 0;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
   }
   .community-team-portraits > div {
     display: flex;
@@ -145,7 +146,8 @@ body:has(.game-page #community) {
     text-shadow: 0 1px 5px #000;
     overflow-wrap: anywhere;
   }
-  .community-recent-team-card .community-team-portraits span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .community-team-portraits > [data-fallen=true] { filter: grayscale(.65); }
+  .community-team-portraits .community-guest-level { color: var(--community-gold); }
   .community-hero-identity { min-width: 0; }
   .community-hero-meta {
     display: flex;
@@ -217,31 +219,9 @@ body:has(.game-page #community) {
   .community-admin-metrics dt .ui-icon { flex: none; color: var(--community-gold); font-size: 14px; }
   .community-admin-metrics dd { margin: 0; color: var(--community-gold); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; }
   #community-stat-active dd { color: #9ad2b9; }
-  .community-guest-roster { display: flex; flex-wrap: wrap; gap: 4px; margin: auto 0 0; padding: 0; list-style: none; }
-  .community-guest-roster > li {
-    display: flex;
-    flex: 0 1 auto;
-    align-items: center;
-    gap: 4px;
-    min-width: 0;
-    max-width: 100%;
-    padding: 2px 5px;
-    border: 1px solid #bda77b38;
-    border-radius: 4px;
-    background: #081320eb;
-    color: #dfebf6;
-    font-size: 10px;
-    line-height: 1.2;
-  }
-  .community-guest-roster img { flex: none; width: 18px; height: 16px; border-radius: 3px; object-fit: cover; }
-  .community-guest-roster img[data-fallen=true] { filter: grayscale(1); opacity: .65; }
-  .community-guest-roster strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .community-guest-solo-caption { margin-top: auto; color: #f6efdf; font-weight: 800; text-shadow: 0 1px 5px #000; }
   .community-guest-level { color: var(--community-gold); white-space: nowrap; }
-  .community-guest-joined { display: flex; align-items: center; justify-content: space-between; gap: 2px 8px; flex-wrap: wrap; color: #b9c6d4; font-size: 12px; cursor: help; }
-  .community-guest-joined > span { display: inline-flex; align-items: center; gap: 5px; }
-  .community-guest-joined .ui-icon { color: var(--community-gold); font-size: 14px; }
-  .community-guest-league { color: var(--community-gold); font-weight: 800; }
-  .community-guest-league img { width: 16px; height: 16px; object-fit: contain; }
+  .community-guest-league-emblem { flex: none; width: 17px; height: 17px; object-fit: contain; }
 
   #community-arena-stats { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 8px; }
   #community-balance-baseline { margin: 0; color: #b8c5d3; font-size: 13px; }
@@ -281,12 +261,13 @@ body:has(.game-page #community) {
   .community-player-live:hover { color: #c6f4e1; }
   .community-player-live .ui-icon { width: 16px; height: 16px; font-size: 16px; }
   .community-activity-link { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .community-activity-link[data-toggle=tooltip] { cursor: help; }
   .community-activity-metrics { flex: 1; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; }
-  .community-activity-metrics > div:first-child { flex-direction: column; align-items: flex-start; gap: 2px; padding: 0; }
+  .community-activity-metrics > [data-tone=streak] { flex-direction: column; align-items: flex-start; gap: 2px; padding: 0; }
   .community-activity-metrics dt strong { color: var(--metric-color); font-size: clamp(11px, 3.2cqw, 15px); }
-  .community-activity-metrics > div:first-child dd { width: 100%; color: #a5b3c3; font: 700 11px/1.2 'Nunito', sans-serif; }
+  .community-activity-metrics > [data-tone=streak] dd { width: 100%; color: #a5b3c3; font: 700 11px/1.2 'Nunito', sans-serif; }
   .community-activity-metrics small { display: block; font-size: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .community-activity-metrics > div + div { padding-inline: 10px 3px; }
+  .community-activity-metrics > .community-activity-time { grid-column: 2; padding-inline: 10px 3px; }
   .community-activity-metrics time { white-space: nowrap; }
   .community-activity-link[data-result=lost] dt strong { color: #e5a1ad; }
   .community-activity-link[data-result=won] dt strong { color: #97d8bc; }
@@ -298,7 +279,7 @@ body:has(.game-page #community) {
   .community-admin-switch button:hover { background: #c7b17b10; color: #f0d7a6; }
   .community-admin-switch button[aria-pressed=true] { background: linear-gradient(120deg, #cbb17b23, #cbb17b09); border-color: #c7b17b55; color: #f0d7a6; }
 
-  .community-ranking-footer.community-player-activity { padding-block: 6px; background: #0b1019; }
+  .community-ranking-footer.community-player-activity { min-height: 44px; padding-block: 6px; background: #0b1019; }
   :is(.community-admin-panel, #community-admin-summary) .community-admin-switch { padding: 2px; gap: 2px; }
   :is(.community-admin-panel, #community-admin-summary) .community-admin-switch button { padding: 4px 6px; white-space: nowrap; }
 }
