@@ -222,7 +222,6 @@ body:has(.game-page) {
     transform: translateY(-1px);
   }
 
-  .base-load-all { width: 100%; max-width: 320px; margin: 20px auto; }
   .base-secondary i { color: #d6b47c; }
 
   .collection .avatar {
@@ -234,10 +233,35 @@ body:has(.game-page) {
   .collection .blank-avatar { opacity: .5; }
   .collection .avatar:hover { transform: translateY(-3px); box-shadow: 0 0 0 1px #d6b47c99, 0 4px 16px #d6ad6a26; }
   .collection .blank-avatar:hover { filter: grayscale(60%); opacity: .8; }
-  .base-filters { padding: 4px; gap: 8px; }
-  .base-filters .btn { min-width: 112px; border: 0; border-bottom: 2px solid transparent; border-radius: 0 !important; margin: 0 !important; background: transparent; box-shadow: none; }
-  .base-filters .btn:hover { color: #fff1d9; border-bottom-color: #c6a77966; }
-  .base-filters [aria-pressed="true"] { color: #f0d7aa; background: linear-gradient(0deg, #a8803b1a, transparent); border-bottom-color: #d6b47c; }
+  .base-run-toolbar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(220px, 34%) minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 0 6px 12px;
+  }
+  .base-run-toolbar .base-invoke { grid-column: 2; justify-self: center; width: 100%; }
+  .base-run-controls, .base-run-pagination { display: flex; align-items: center; gap: 6px; }
+  .base-run-controls { justify-self: end; }
+  .base-run-controls .btn {
+    min-height: 34px;
+    padding: 4px 10px;
+    font: 800 13px/1.2 'Nunito', sans-serif;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .base-run-pagination span { min-width: 2ch; color: #e5cb99; font: 800 13px 'Nunito', sans-serif; font-variant-numeric: tabular-nums; }
+  .base-run-pagination button:disabled { opacity: .38; }
+
+  @media (max-width: 1023px) {
+    .base-run-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
+    .base-run-toolbar .base-invoke { grid-column: 1; justify-self: start; }
+  }
+
+  @media (max-width: 575px) {
+    .base-run-toolbar { grid-template-columns: minmax(0, 1fr); }
+    .base-run-toolbar .base-invoke { justify-self: stretch; max-width: none; }
+  }
 
   .hero-list > .row.no-gutters { padding: 6px; }
   .hero-list > .row.no-gutters > [id^="visible-hero-"] { padding: 6px; }

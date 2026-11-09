@@ -115,33 +115,52 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       assert has_element?(view, "#visible-team-#{active.id}")
       assert has_element?(view, "#visible-hero-#{solo.id}")
       refute has_element?(view, "#visible-team-#{finished.id}")
-      view |> element("#finished-heroes-btn") |> render_click()
+      view |> element("#base-toggle-runs") |> render_click()
       assert has_element?(view, "#hero-list-finished #visible-team-#{finished.id}")
       assert has_element?(view, "#base-team-continue-#{finished.id}[href='/teams/#{finished.id}']", "View team")
       refute has_element?(view, "#visible-team-#{active.id}")
 
       for id <- finished.hero_ids, do: refute(has_element?(view, "#visible-hero-#{id}"))
 
-      view |> element("#in-progress-heroes-btn") |> render_click()
+      view |> element("#base-toggle-runs") |> render_click()
       view |> element("#visible-hero-#{solo.id} [phx-click=continue]") |> render_click()
       assert_redirect(view, "/training?solo=true")
     end
 
-    test "load all includes older teams without including drafts or abandoned runs", %{conn: conn} do
+    test "paginates teams and solo runs together and recovers when the last page is deleted", %{conn: conn} do
       {scope, player} = team_account()
-      oldest = team_run(scope, player)
-      for _ <- 1..Moba.base_hero_count(), do: team_run(scope, player)
+      teams = for _ <- 1..2, do: team_run(scope, player)
+      oldest = create_base_hero(%{name: "First solo"}, player)
+      newest = create_base_hero(%{name: "Second solo"}, Game.get_player!(player.id))
       abandoned = team_run(scope, player)
       {:ok, _} = Game.TeamRuns.update(scope, abandoned, &%{&1 | phase: :abandoned})
       {:ok, draft} = Game.TeamRuns.draft(scope, player)
       conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
       {:ok, view, _} = live(conn, "/base")
 
-      refute has_element?(view, "#visible-team-#{oldest.id}")
-      view |> element("#load-all-heroes-unfinished") |> render_click()
-      assert has_element?(view, "#visible-team-#{oldest.id}")
+      for team <- teams, do: assert(has_element?(view, "#visible-team-#{team.id}"))
+      assert has_element?(view, "#visible-hero-#{newest.id}")
+      refute has_element?(view, "#visible-hero-#{oldest.id}")
       refute has_element?(view, "#visible-team-#{abandoned.id}, #visible-team-#{draft.id}")
-      refute has_element?(view, "#load-all-heroes-unfinished")
+      assert has_element?(view, "#base-runs-previous[disabled]")
+
+      view |> element("#base-runs-next") |> render_click()
+      assert has_element?(view, "#visible-hero-#{oldest.id}")
+      refute has_element?(view, "#visible-hero-#{newest.id}, [id^='visible-team-']")
+      assert has_element?(view, "#base-runs-next[disabled]")
+
+      view |> element("#base-runs-previous") |> render_click()
+      assert has_element?(view, "#visible-hero-#{newest.id}")
+
+      view |> element("#base-runs-next") |> render_click()
+      view |> element("#base-toggle-runs", "Show Finished Runs") |> render_click()
+      view |> element("#base-toggle-runs", "Show Pending Runs") |> render_click()
+      assert has_element?(view, "#base-runs-previous[disabled]")
+
+      view |> element("#base-runs-next") |> render_click()
+      view |> element("#visible-hero-#{oldest.id} [phx-click=archive]") |> render_click()
+      assert has_element?(view, "#visible-hero-#{newest.id}")
+      refute has_element?(view, "#base-runs-next")
     end
   end
 
@@ -163,8 +182,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       {:ok, view, html} = live(conn, "/base")
 
       assert html =~ "Start training"
-      assert html =~ "In Progress"
-      assert html =~ "Finished"
+      assert html =~ "Show Finished Runs"
       assert html =~ "id=\"pve-progression\""
       assert has_element?(view, "#visible-hero-#{hero.id} .league-logo")
       assert has_element?(view, "#skill-#{hd(hero.skills).id}-#{hero.id}[title]")
@@ -186,7 +204,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       {:ok, view, _html} = live(conn, "/base")
 
-      assert has_element?(view, "#finished-heroes-btn")
+      assert has_element?(view, "#base-toggle-runs")
       assert has_element?(view, "#hero-list-unfinished")
     end
 
@@ -226,7 +244,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       {:ok, view, _html} = live(conn, "/base")
 
-      render_click(view, "show-finished", %{})
+      view |> element("#base-toggle-runs", "Show Finished Runs") |> render_click()
 
       assert has_element?(view, "#hero-list-finished")
       assert has_element?(view, "#visible-hero-#{finished.id}")
@@ -244,8 +262,8 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       {:ok, view, _html} = live(conn, "/base")
 
-      render_click(view, "show-finished", %{})
-      render_click(view, "show-unfinished", %{})
+      view |> element("#base-toggle-runs", "Show Finished Runs") |> render_click()
+      view |> element("#base-toggle-runs", "Show Pending Runs") |> render_click()
 
       assert has_element?(view, "#hero-list-unfinished")
       assert has_element?(view, "#visible-hero-#{unfinished.id}")
@@ -272,14 +290,14 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       assert has_element?(preview, "#skill-#{hd(hero.skills).id}-#{hero.id}[title]")
       assert has_element?(preview, "#item-#{hd(hero.items).id}-#{hero.id}[title]")
 
-      preview |> element("#finished-heroes-btn") |> render_click()
-      assert has_element?(preview, "#active-finished-heroes-btn[aria-pressed=true]")
+      preview |> element("#base-toggle-runs") |> render_click()
+      assert has_element?(preview, "#base-toggle-runs", "Show Pending Runs")
       assert has_element?(preview, "#visible-hero-#{finished.id}")
       refute has_element?(preview, "#visible-hero-#{hero.id}")
 
-      preview |> element("#in-progress-heroes-btn") |> render_click()
+      preview |> element("#base-toggle-runs") |> render_click()
       assert has_element?(preview, "#base-page.base-page #visible-hero-#{hero.id}")
-      assert has_element?(preview, "#active-in-progress-heroes-btn[aria-pressed=true]")
+      assert has_element?(preview, "#base-toggle-runs", "Show Finished Runs")
     end
   end
 
@@ -290,8 +308,17 @@ defmodule MobaWeb.V2.DashboardLiveTest do
     {:ok, view, _} = live(conn, "/base")
 
     assert has_element?(view, "#base-rank-4[aria-current=step]")
-    assert has_element?(view, "#base-rank-5.is-next")
-    assert has_element?(view, "#base-quest-description", "20 different Avatars")
+    assert has_element?(view, "#base-rank-5.is-next[style*='--rank-progress: 0.05']")
+
+    assert has_element?(
+             view,
+             ".base-ascent-heading .base-ascent-milestone #base-quest-description",
+             "20 different Avatars"
+           )
+
+    assert has_element?(view, "#pve-progression .base-ascent-track + footer #base-collection img.avatar")
+    assert has_element?(view, "#hero-list-container > .base-run-toolbar > #base-invoke-btn[href='/new']")
+    refute has_element?(view, "#pve-progression #base-invoke-btn")
     assert has_element?(view, "#base-rank-progress[aria-valuetext='1/20 Avatars'][aria-valuenow='5']")
     assert has_element?(view, "#base-rewards-btn[data-target='#pve-tier-rewards']")
 
@@ -299,6 +326,7 @@ defmodule MobaWeb.V2.DashboardLiveTest do
     {:ok, finished, _} = live(conn, "/base")
     assert has_element?(finished, "#base-rank-7[aria-current=step]")
     assert has_element?(finished, "#base-ascent-complete")
+    assert has_element?(finished, "#pve-progression footer #base-collection img.avatar")
     refute has_element?(finished, "#base-rank-progress, #base-rewards-btn, #base-rank-8")
   end
 

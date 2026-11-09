@@ -234,7 +234,7 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def list_solo_training(scope, status, limit \\ Moba.base_hero_count()) do
+  def list_solo_training(scope, status, limit \\ Moba.base_hero_count(), offset \\ 0) do
     query = HeroQuery.latest(scope.player_id, limit) |> HeroQuery.solo()
 
     query =
@@ -244,7 +244,7 @@ defmodule Moba.Game.Heroes do
       end
 
     query = if status == "finished", do: HeroQuery.finished(query), else: HeroQuery.unfinished(query)
-    Repo.all(query)
+    from(hero in query, order_by: [desc: hero.id], offset: ^offset) |> Repo.all()
   end
 
   def latest_finished_heroes(player_id) do

@@ -79,9 +79,9 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     refute has_element?(view, "#available-heroes-button")
 
     {:ok, base, _} = live(conn, "/base")
-    base |> element("#finished-heroes-btn") |> render_click()
+    base |> element("#base-toggle-runs") |> render_click()
     assert has_element?(base, "#base-no-heroes a[href='/new']")
-    base |> element("#in-progress-heroes-btn") |> render_click()
+    base |> element("#base-toggle-runs") |> render_click()
     refute has_element?(base, "#base-no-heroes")
   end
 

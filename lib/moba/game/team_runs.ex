@@ -43,13 +43,14 @@ defmodule Moba.Game.TeamRuns do
     |> Repo.one()
   end
 
-  def list_training(scope, player_id, status, limit \\ Moba.base_hero_count()) do
+  def list_training(scope, player_id, status, limit \\ Moba.base_hero_count(), offset \\ 0) do
     phases = if status == "finished", do: ["finished"], else: ["playing", "engagement"]
 
     from(r in owned(scope),
       where: r.player_id == ^player_id and r.phase in ^phases,
       order_by: [desc: r.id],
-      limit: ^limit
+      limit: ^limit,
+      offset: ^offset
     )
     |> Repo.all()
   end

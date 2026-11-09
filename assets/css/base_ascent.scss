@@ -1,71 +1,229 @@
+body:has(.game-page .base-page) {
+  overflow: hidden;
+}
+
+.game-page #base-page.base-page {
+  height: 100%;
+  min-height: 0;
+  padding-block: 8px;
+  overflow: hidden;
+
+  > .row,
+  > .row > .col,
+  .base-training-section,
+  .base-training-section > .col,
+  .base-training-section > .col > .card,
+  #hero-list-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    min-width: 0;
+  }
+
+  > .row { height: 100%; }
+  > .row > .col > .row:first-child, .base-run-toolbar { flex: none; }
+  > .row > .col, .base-training-section, .base-training-section > .col,
+  .base-training-section > .col > .card, #hero-list-container { flex: 1; }
+
+  #hero-list-container { padding-top: 0 !important; }
+  .base-run-toolbar { padding-bottom: 6px; }
+  .hero-list {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+  }
+
+  .base-run-grid {
+    .hero-card.card { height: 100%; min-height: 0; }
+    .hero-card.card > .card-body { min-height: 74px; }
+    .team-training-card.card .team-card-art { min-height: 86px; }
+    .team-card-identity { padding: 10px 6px 6px; }
+    .hero-card.card .col-12:has(> .skills-container) {
+      width: min(100%, 310px);
+      margin-inline: auto !important;
+      padding: 4px 8px;
+    }
+  }
+}
+
+@media (min-width: 992px) {
+  .game-page #base-page.base-page .base-run-grid:not(:empty) { min-height: 100%; }
+}
+
+@media (max-height: 510px) {
+  .game-page #base-page.base-page {
+    overflow: auto;
+    overscroll-behavior: contain;
+    > .row { height: auto; }
+    .hero-list { overflow: visible; }
+  }
+}
+
 .game-page #pve-progression.base-ascent {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  margin-bottom: 22px;
-  padding: 24px 32px;
+  margin-bottom: clamp(6px, 1.2dvh, 16px);
+  padding: clamp(10px, 1.8dvh, 24px) clamp(14px, 2vw, 32px);
   border: 1px solid #c7b17b44;
   border-radius: 14px;
   background: linear-gradient(90deg, #09121de8, #101b28a6, #09121de8), var(--base-ascent-scene) center 44% / cover !important;
   box-shadow: inset 0 1px #f4dbab18, 0 12px 40px #0003;
 
-  .base-ascent-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-  .base-ascent-eyebrow { margin: 0 0 4px; color: #cbb483; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .18em; }
-  h2 { margin: 0; color: #f0e8d7; font: 900 clamp(30px, 2.8vw, 42px)/1.15 'Nunito', sans-serif; letter-spacing: -.025em; }
+  .base-ascent-heading {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 8px clamp(12px, 2vw, 28px);
+  }
+  h2 { margin: 0; color: #f0e8d7; font: 900 clamp(26px, 2.8vw, 42px)/1.15 'Nunito', sans-serif; letter-spacing: -.025em; }
   h2 > span { color: #edce8d; }
-  .base-ascent-prize { display: flex; align-items: center; gap: 9px; color: #e5c783; }
-  .base-ascent-prize > span:first-child { font-size: 25px; text-shadow: 0 0 20px #e6bf6466; }
-  .base-ascent-prize strong { font-size: 32px; font-weight: 900; }
-  .base-ascent-prize > span:last-child { color: #d9c9a5; font-size: 13px; line-height: 1.35; }
-  .base-ascent-prize small { color: #9fa9b5; font-size: 11px; }
-  .base-ascent-track { display: flex; list-style: none; margin: 20px 0 24px; padding: 0; }
-  .base-ascent-rank { position: relative; flex: 1; min-width: 0; text-align: center; }
-  .base-ascent-rank::before { content: ''; position: absolute; top: 50px; left: -50%; width: 100%; height: 2px; background: #94a4b133; z-index: -1; }
-  .base-ascent-rank:first-child::before { display: none; }
-  .base-ascent-rank.is-complete::before, .base-ascent-rank.is-current::before { background: linear-gradient(90deg, #786849, #cbb17b); }
-  .base-ascent-emblem { display: grid; place-items: center; height: 100px; }
-  .base-ascent-emblem img { width: auto; max-width: 100%; height: 48px; object-fit: contain; opacity: .4; filter: saturate(.5); transition: filter .2s, opacity .2s; }
+
+  .base-ascent-track {
+    --rank-emblem-size: clamp(50px, 11dvh, 100px);
+    --rank-line-top: calc(var(--rank-emblem-size) + 4px);
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    list-style: none;
+    margin: 12px 0 16px;
+    padding: 0;
+  }
+  .base-ascent-rank { position: relative; min-width: 0; text-align: center; }
+  .base-ascent-rank:not(:first-child)::before,
+  .base-ascent-rank.is-next::after {
+    content: "";
+    position: absolute;
+    top: var(--rank-line-top);
+    left: -50%;
+    width: 100%;
+    height: 2px;
+    z-index: -1;
+  }
+  .base-ascent-rank::before { background: #94a4b144; }
+  .base-ascent-rank.is-complete::before,
+  .base-ascent-rank.is-current::before { background: #c1a26b; }
+  .base-ascent-rank.is-next::after {
+    left: calc(-50% + 4px);
+    width: calc((100% - 8px) * var(--rank-progress));
+    background: #ffe1a1;
+    box-shadow: 0 0 9px #ffcc7380;
+    transition: width .5s ease;
+  }
+  .base-ascent-emblem { display: grid; place-items: center; height: var(--rank-emblem-size); margin-bottom: 14px; }
+  .base-ascent-emblem::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--rank-line-top) - 3px);
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border: 1px solid #8191a0;
+    border-radius: 50%;
+    background: #152131;
+  }
+  .is-complete .base-ascent-emblem::after, .is-current .base-ascent-emblem::after { border-color: #c1a26b; background: #c1a26b; }
+  .is-next .base-ascent-emblem::after { border-color: #ffe1a1; }
+  .is-current .base-ascent-emblem::after { box-shadow: 0 0 10px #ffcc7380; }
+  .base-ascent-emblem img { width: auto; max-width: 100%; height: calc(var(--rank-emblem-size) * .48); object-fit: contain; opacity: .4; filter: saturate(.5); transition: filter .2s, opacity .2s; }
   .is-complete .base-ascent-emblem img { opacity: .8; filter: none; }
-  .is-current .base-ascent-emblem img { height: 78px; opacity: 1; filter: drop-shadow(0 0 16px #ecc57833); }
-  .is-next .base-ascent-emblem img { height: 96px; opacity: 1; filter: drop-shadow(0 0 22px #bdcddf55); }
+  .is-current .base-ascent-emblem img { height: calc(var(--rank-emblem-size) * .78); opacity: 1; filter: drop-shadow(0 0 16px #ecc57833); }
+  .is-next .base-ascent-emblem img { height: calc(var(--rank-emblem-size) * .96); opacity: 1; filter: drop-shadow(0 0 22px #bdcddf55); }
   .base-ascent-rank > strong { display: block; margin-top: 8px; color: #95a1ae; font-size: 13px; font-weight: 800; }
   .is-current > strong { color: #efdcaf; }
   .is-next > strong { color: #f3eee1; }
   .base-ascent-rank > small { display: block; margin-top: 4px; color: #b4a789; font-size: 9px; letter-spacing: .07em; text-transform: uppercase; }
-  .base-ascent-objective { display: flex; align-items: flex-end; gap: 28px; padding-top: 18px; border-top: 1px solid #cbb17b33; }
-  .base-ascent-progress { flex: 1; min-width: 0; }
-  #base-quest-description { margin: 0 0 10px; color: #d6dce2; font-size: 16px; font-weight: 650; line-height: 1.5; }
-  .base-ascent-progress-bar { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 34px; border: 1px solid #cbb17b44; border-radius: 5px; background: #050b13b3; }
-  .base-ascent-progress-fill { position: absolute; inset: 0 auto 0 0; z-index: -1; max-width: 100%; background: linear-gradient(90deg, #725a34, #b99a5a); border-right: 1px solid #f2cf86; box-shadow: 0 0 18px #e4bc5540; transition: width .5s ease; }
-  .base-ascent-progress-bar > strong { color: #f4ead3; font-size: 14px; text-shadow: 0 1px 4px #000; }
-  #base-rewards-btn { display: flex; align-items: center; justify-content: center; gap: 18px; flex-shrink: 0; min-height: 42px; padding: 10px 18px; border: 1px solid #d9bc7d88; border-radius: 6px; background: #cbb17b1a; color: #ebd2a2; font: 800 15px/1.3 'Nunito', sans-serif; letter-spacing: 0; }
-  #base-rewards-btn:hover { color: #fff0cf; background: #cbb17b33; border-color: #edce8d; }
-  #base-ascent-complete { margin: 0; padding-top: 16px; border-top: 1px solid #cbb17b33; color: #e4cea3; text-align: center; font-size: 18px; }
+  .base-ascent-milestone {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px 16px;
+    text-align: center;
+    color: #dfd9cc;
+    font-size: 14px;
+  }
+  .base-ascent-milestone #base-quest-description { margin: 0; color: inherit; font-weight: 750; line-height: 1.4; }
+  .base-ascent-mobile-ranks { display: none; }
+  .base-ascent-milestone-values { display: flex; align-items: baseline; justify-content: center; flex-wrap: wrap; gap: 4px 12px; }
+  #base-rank-progress { color: #ffe5ad; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .base-ascent-prize { color: #ebc983; white-space: nowrap; }
+  .base-ascent-prize > span { margin-right: 2px; font-size: .75em; }
+  #base-rewards-btn { grid-column: 3; white-space: nowrap; min-height: 32px; padding: 5px 10px; border: 1px solid transparent; color: #ebd2a2; font: 800 13px/1.3 'Nunito', sans-serif; letter-spacing: 0; }
+  #base-rewards-btn:hover, #base-rewards-btn:focus-visible { color: #fff0cf; background: #cbb17b1a; border-color: #edce8d66; }
+  .base-ascent-footer {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    padding: 16px 0 8px;
+    border-top: 1px solid #cbb17b33;
+    text-align: center;
+  }
+  .base-ascent-footer > div { width: 100%; min-width: 0; }
+  .base-ascent-footer .collection {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 20px clamp(4px, 1vw, 14px);
+    max-width: 1560px;
+    margin-inline: auto;
+    padding: 0 0 16px;
+  }
+  .base-ascent-footer .collection .avatar-container {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0;
+    margin: 0 !important;
+  }
+  .base-ascent-footer .collection .avatar {
+    width: 100%;
+    max-width: none;
+    max-height: clamp(24px, 7.5dvh, 82px);
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+  }
+  #base-ascent-complete { margin: 0; color: #e4cea3; text-align: center; font-size: 18px; }
+}
+@media (max-width: 1199px) {
+  .game-page #pve-progression.base-ascent .base-ascent-footer .collection {
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
 }
 @media (max-width: 767px) {
   .game-page #pve-progression.base-ascent {
-    padding: 20px 14px 16px;
-    .base-ascent-prize { gap: 5px; }
-    .base-ascent-prize strong { font-size: 24px; }
-    .base-ascent-prize > span:first-child { font-size: 18px; }
-    .base-ascent-prize > span:last-child { font-size: 11px; }
-    .base-ascent-prize small { font-size: 9px; }
-    h2 { font-size: 28px; }
-    .base-ascent-heading { gap: 12px; flex-wrap: wrap; }
-    .base-ascent-track { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 0; margin: 20px 0; }
-    .base-ascent-rank:nth-child(5)::before { display: none; }
-    .base-ascent-rank::before { top: 34px; }
-    .base-ascent-emblem { height: 68px; }
-    .base-ascent-emblem img { height: 36px; }
-    .is-current .base-ascent-emblem img { height: 52px; }
-    .is-next .base-ascent-emblem img { height: 64px; }
-    .base-ascent-rank > strong { font-size: 11px; margin-top: 4px; }
+    padding: 12px 14px 6px;
+    .base-ascent-track { --rank-emblem-size: 64px; }
+    .base-ascent-emblem img { height: 34px; }
+    .is-current .base-ascent-emblem img { height: 48px; }
+    .is-next .base-ascent-emblem img { height: 58px; }
+    .base-ascent-rank > strong { font-size: 10px; margin-top: 4px; }
     .base-ascent-rank > small { font-size: 8px; letter-spacing: 0; }
-    .base-ascent-objective { align-items: stretch; flex-direction: column; gap: 14px; padding-top: 14px; }
-    #base-quest-description { font-size: 14px; }
-    #base-rewards-btn { font-size: 14px; }
+    .base-ascent-heading { grid-template-columns: minmax(0, 1fr) auto; }
+    .base-ascent-milestone, #base-ascent-complete { grid-column: 1 / -1; grid-row: 2; }
+    #base-rewards-btn { grid-column: 2; grid-row: 1; }
+    #base-rewards-btn { font-size: 12px; }
+    .base-ascent-footer .collection { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 5px; }
+    .base-ascent-footer .collection .league-logo { width: 22px; height: 24px; }
+  }
+}
+@media (max-width: 575px) {
+  .game-page #pve-progression.base-ascent {
+    .base-ascent-track { --rank-emblem-size: 50px; margin-top: 10px; }
+    .base-ascent-emblem img { height: 26px; }
+    .is-current .base-ascent-emblem img { height: 38px; }
+    .is-next .base-ascent-emblem img { height: 46px; }
+    .base-ascent-rank > strong, .base-ascent-rank > small {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+    .base-ascent-milestone { display: grid; justify-items: center; }
+    .base-ascent-mobile-ranks { display: block; color: #ffe5ad; font-weight: 800; }
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .game-page #pve-progression .base-ascent-progress-fill { transition: none; }
+  .game-page #pve-progression .base-ascent-rank.is-next::after { transition: none; }
 }

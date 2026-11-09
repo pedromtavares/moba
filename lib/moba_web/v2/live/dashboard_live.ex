@@ -6,7 +6,7 @@ defmodule MobaWeb.V2.DashboardLive do
 
   embed_templates "dashboard_live/*"
 
-  @base_hero_count Moba.base_hero_count()
+  @runs_per_page 3
 
   def mount(_params, _session, socket) do
     %{assigns: %{current_player: player}} = socket
@@ -16,22 +16,19 @@ defmodule MobaWeb.V2.DashboardLive do
     {:ok, socket}
   end
 
-  def handle_event("show-finished", _, socket), do: {:noreply, filter_training(socket, "finished")}
-  def handle_event("show-unfinished", _, socket), do: {:noreply, filter_training(socket, "unfinished")}
+  def handle_event("toggle-runs", _, socket) do
+    filter = if socket.assigns.filter == "unfinished", do: "finished", else: "unfinished"
+    {:noreply, assign(socket, training_page(socket, filter, 0))}
+  end
 
-  def handle_event("load-all", _, socket) do
-    %{filter: filter, current_player: player} = socket.assigns
-    heroes = Game.Heroes.list_solo_training(socket.assigns.current_scope, filter, 100)
-    teams = training_teams(player, filter, 100)
+  def handle_event("page-runs", %{"direction" => direction}, socket) do
+    %{run_page: page, more_runs: more_runs} = socket.assigns
 
-    {:noreply,
-     socket
-     |> assign(
-       all_heroes: Enum.uniq_by(socket.assigns.all_heroes ++ heroes, & &1.id),
-       all_teams: Enum.uniq_by(socket.assigns.all_teams ++ teams, & &1.id),
-       loaded: Enum.uniq(socket.assigns.loaded ++ [filter])
-     )
-     |> filter_training(filter)}
+    case direction do
+      "previous" when page > 0 -> {:noreply, refresh_training_page(socket, page - 1)}
+      "next" when more_runs -> {:noreply, refresh_training_page(socket, page + 1)}
+      _ -> {:noreply, socket}
+    end
   end
 
   def handle_event("continue", %{"id" => id}, socket) do
@@ -61,12 +58,7 @@ defmodule MobaWeb.V2.DashboardLive do
 
       current_hero = if current_hero && hero.id == current_hero.id, do: nil, else: current_hero
 
-      {:noreply,
-       assign(socket,
-         current_hero: current_hero,
-         visible_heroes: Enum.reject(socket.assigns.visible_heroes, &(&1.id == hero.id)),
-         all_heroes: Enum.reject(socket.assigns.all_heroes, &(&1.id == hero.id))
-       )}
+      {:noreply, socket |> assign(current_hero: current_hero) |> refresh_training_page(socket.assigns.run_page)}
     else
       {:noreply, socket}
     end
@@ -74,15 +66,11 @@ defmodule MobaWeb.V2.DashboardLive do
 
   def handle_event("archive-team", %{"id" => id}, socket) do
     case Game.TeamRuns.archive(socket.assigns.current_scope, id) do
-      {:ok, team} ->
-        {:noreply,
-         assign(socket,
-           visible_teams: Enum.reject(socket.assigns.visible_teams, &(&1.id == team.id)),
-           all_teams: Enum.reject(socket.assigns.all_teams, &(&1.id == team.id)),
-           hero_count: socket.assigns.hero_count - 1,
-           has_active_team:
-             not is_nil(Game.TeamRuns.active(socket.assigns.current_scope, socket.assigns.current_player.id))
-         )}
+      {:ok, _team} ->
+        has_active_team =
+          not is_nil(Game.TeamRuns.active(socket.assigns.current_scope, socket.assigns.current_player.id))
+
+        {:noreply, socket |> assign(has_active_team: has_active_team) |> refresh_training_page(socket.assigns.run_page)}
 
       {:error, _} ->
         {:noreply, socket}
@@ -92,36 +80,27 @@ defmodule MobaWeb.V2.DashboardLive do
   # Private functions
 
   defp socket_init(socket, player) do
-    unfinished = Game.Heroes.list_solo_training(socket.assigns.current_scope, "unfinished")
-    finished = Game.Heroes.list_solo_training(socket.assigns.current_scope, "finished")
-    unfinished_teams = training_teams(player, "unfinished", @base_hero_count)
-    finished_teams = training_teams(player, "finished", @base_hero_count)
-    all_teams = unfinished_teams ++ finished_teams
-    all_heroes = unfinished ++ finished
+    pending = training_page(socket, "unfinished", 0)
+    initial_page = if empty_training_page?(pending), do: training_page(socket, "finished", 0), else: pending
     collection_codes = Enum.map(player.hero_collection || [], & &1["code"])
-    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
-    filter = if unfinished != [] || unfinished_teams != [], do: "unfinished", else: "finished"
-    visible = if filter == "unfinished", do: unfinished, else: finished
-    teams = if filter == "unfinished", do: unfinished_teams, else: finished_teams
-    loaded = if length(visible) < @base_hero_count && length(teams) < @base_hero_count, do: [filter], else: []
-    register_to_train = is_nil(player.user_id) && (finished != [] || finished_teams != [])
+    blank_collection = Game.list_avatars() |> Enum.reject(&(&1.code in collection_codes))
 
-    assign(socket,
+    register_to_train =
+      is_nil(player.user_id) &&
+        not empty_training_page?(
+          if initial_page.filter == "finished", do: initial_page, else: training_page(socket, "finished", 0)
+        )
+
+    socket
+    |> assign(initial_page)
+    |> assign(
       sidebar_code: "base",
       register_to_train: register_to_train,
       guide_training_cta:
         register_to_train ||
           (player.user_id != nil && Phoenix.Flash.get(socket.assigns.flash, :training_registered) != nil),
-      all_heroes: all_heroes,
-      all_teams: all_teams,
-      visible_teams: teams,
-      has_active_team: unfinished_teams != [],
-      visible_heroes: visible,
-      filter: filter,
-      loaded: loaded,
-      blank_collection: blank_collection,
-      collection_codes: collection_codes,
-      hero_count: length(all_heroes) + length(all_teams)
+      has_active_team: pending.visible_teams != [],
+      blank_collection: blank_collection
     )
   end
 
@@ -131,41 +110,74 @@ defmodule MobaWeb.V2.DashboardLive do
   defp training_cta_label(true), do: "Register to continue training"
   defp training_cta_label(false), do: "Start training"
 
-  defp filter_training(socket, filter) do
-    heroes = Enum.filter(socket.assigns.all_heroes, &(is_nil(&1.finished_at) == (filter == "unfinished")))
-    teams = Enum.filter(socket.assigns.all_teams, &(is_nil(&1.finished_at) == (filter == "unfinished")))
+  defp refresh_training_page(socket, page) do
+    result = training_page(socket, socket.assigns.filter, page)
 
-    loaded =
-      if length(heroes) < @base_hero_count && length(teams) < @base_hero_count,
-        do: Enum.uniq(socket.assigns.loaded ++ [filter]),
-        else: socket.assigns.loaded
-
-    assign(socket, visible_heroes: heroes, visible_teams: teams, filter: filter, loaded: loaded)
+    if page > 0 and empty_training_page?(result) do
+      refresh_training_page(socket, page - 1)
+    else
+      assign(socket, result)
+    end
   end
 
-  defp training_teams(player, filter, limit) do
-    Game.TeamRuns.list_training(Game.TeamRuns.scope(player), player.id, filter, limit)
-    |> Enum.flat_map(fn record ->
-      with {:ok, run} <- Game.TeamRuns.read_state(record) do
-        heroes = Game.TeamTraining.team(run) |> Enum.map(& &1.hero)
+  defp empty_training_page?(page), do: page.visible_teams == [] and page.visible_heroes == []
 
-        [
-          %{
-            id: record.id,
-            name: record.name,
-            heroes: heroes,
-            league_tier: run.league_tier,
-            reward_mode: run.reward_mode,
-            avg_farm: div(Enum.sum(Enum.map(heroes, &(&1.total_gold_farm + &1.total_xp_farm))), length(heroes)),
-            turns_left: run.turns_left + run.reserve_turns,
-            finished_at: record.finished_at,
-            duration_seconds: record.duration_seconds
-          }
-        ]
+  defp training_page(socket, filter, page) do
+    scope = socket.assigns.current_scope
+    offset = page * @runs_per_page
+
+    # Teams are listed before solo heroes. Fetch one extra run to enable the next arrow.
+    teams = training_teams(scope, filter, offset + @runs_per_page + 1, 0)
+    visible_teams = Enum.slice(teams, offset, @runs_per_page)
+    hero_offset = max(offset - length(teams), 0)
+
+    heroes =
+      if length(teams) <= offset + @runs_per_page do
+        Game.Heroes.list_solo_training(scope, filter, @runs_per_page + 1 - length(visible_teams), hero_offset)
       else
-        {:error, :invalid_snapshot} -> []
+        []
       end
-    end)
+
+    %{
+      filter: filter,
+      run_page: page,
+      visible_teams: visible_teams,
+      visible_heroes: Enum.take(heroes, @runs_per_page - length(visible_teams)),
+      more_runs: length(teams) > offset + @runs_per_page or length(visible_teams) + length(heroes) > @runs_per_page
+    }
+  end
+
+  defp training_teams(scope, filter, limit, offset) do
+    records = Game.TeamRuns.list_training(scope, scope.player_id, filter, limit, offset)
+
+    cards =
+      Enum.flat_map(records, fn record ->
+        with {:ok, run} <- Game.TeamRuns.read_state(record) do
+          heroes = Game.TeamTraining.team(run) |> Enum.map(& &1.hero)
+
+          [
+            %{
+              id: record.id,
+              name: record.name,
+              heroes: heroes,
+              league_tier: run.league_tier,
+              reward_mode: run.reward_mode,
+              avg_farm: div(Enum.sum(Enum.map(heroes, &(&1.total_gold_farm + &1.total_xp_farm))), length(heroes)),
+              turns_left: run.turns_left + run.reserve_turns,
+              finished_at: record.finished_at,
+              duration_seconds: record.duration_seconds
+            }
+          ]
+        else
+          {:error, :invalid_snapshot} -> []
+        end
+      end)
+
+    if length(records) == limit and length(cards) < limit do
+      cards ++ training_teams(scope, filter, limit - length(cards), offset + limit)
+    else
+      cards
+    end
   end
 
   @max_pve_tier Moba.max_pve_tier()
@@ -210,12 +222,10 @@ defmodule MobaWeb.V2.DashboardLive do
       not Game.available_hero?(hero)
   end
 
-  defp all_loaded?(loaded, filter), do: filter in loaded
-
   @max_total_farm Moba.max_total_farm()
 
-  defp collection_avatar_class(%{"total_farm" => farm}) when farm == @max_total_farm, do: "avatar max-farm"
-  defp collection_avatar_class(_), do: "avatar"
+  defp undefeated_avatar?(%{"total_farm" => farm}), do: farm == @max_total_farm
+  defp undefeated_avatar?(_), do: false
 
   defp training_difficulty_for(tier) do
     Map.get(Game.get_quest(tier), :difficulty) || Game.get_quest(7).difficulty

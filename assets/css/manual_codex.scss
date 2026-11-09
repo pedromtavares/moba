@@ -1,4 +1,4 @@
-body:has(.game-page .catalog-viewport) {
+body:has(.game-page :is(.catalog-viewport, .base-page)) {
   display: flex;
   flex-direction: column;
   height: 100dvh;
