@@ -266,7 +266,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
         scope = Game.TeamRuns.scope(player)
         run = Test.TeamHelper.team_run(scope, player)
         {:ok, finished} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished, name: name})
-        finished |> Ecto.Changeset.change(total_farm: farm) |> Moba.Repo.update!()
+        finished |> Ecto.Changeset.change(total_farm: farm, duration_seconds: 840) |> Moba.Repo.update!()
       end
 
     [second, best, leader] = teams
@@ -290,6 +290,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
            )
 
     assert has_element?(view, "#profile-ranked-team-#{best.id} a[href='/teams/#{best.id}']", "Best team")
+    assert has_element?(view, "#profile-ranked-team-#{best.id} .profile-ranked-team-portraits > img:nth-child(3)")
+    assert has_element?(view, "#profile-ranked-team-#{best.id} .profile-training-time h3", "14")
     assert has_element?(view, "#profile-ranked-team-#{second.id}.selected-player td:first-child", "#3")
   end
 
@@ -393,7 +395,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     test "season rank remains the default even with a top-200 hero, and Hero Rank highlights its placement", %{
       conn: conn
     } do
-      hero = create_base_hero() |> Game.update_hero!(%{pve_ranking: 200, total_gold_farm: 100, total_xp_farm: 200})
+      hero = create_base_hero()
+      hero = Game.update_hero!(hero, %{pve_ranking: 200, finished_at: Timex.shift(hero.inserted_at, minutes: 12)})
 
       outside =
         Game.create_hero!(%{name: "Outside top 200"}, hero.player, base_avatar(), base_skills())
@@ -414,7 +417,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
              )
 
       assert has_element?(view, "#profile-ranked-hero-#{hero.id} a[href='/hero/#{hero.id}']")
-      assert has_element?(view, "#profile-ranked-hero-#{hero.id} .profile-hero-farm", "300")
+      assert has_element?(view, "#profile-ranked-hero-#{hero.id} .profile-training-time h3", "12")
       refute has_element?(view, "#profile-ranked-hero-#{outside.id}, #profile-ranking-table")
 
       view |> element("#profile-ranking-season") |> render_click()
@@ -458,10 +461,10 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       refute has_element?(view, "#profile-ranked-hero-#{second.id}[phx-hook=HalfScroll]")
       refute has_element?(view, "#profile-ranked-hero-#{viewer.id}.selected-player")
 
-      updated = Game.update_hero!(profile_hero, %{total_gold_farm: 500})
+      updated = Game.update_hero!(profile_hero, %{finished_at: Timex.shift(profile_hero.inserted_at, minutes: 24)})
       Cachex.put(:game_cache, "pve_ranking", Enum.map([viewer, updated, second], &Game.get_hero!(&1.id)))
       send(view.pid, {"ranking", %{}})
-      assert has_element?(view, "#profile-ranked-hero-#{profile_hero.id} .profile-hero-farm", "500")
+      assert has_element?(view, "#profile-ranked-hero-#{profile_hero.id} .profile-training-time h3", "24")
       assert has_element?(view, "#profile-ranking-hero[aria-pressed=true]")
     end
   end

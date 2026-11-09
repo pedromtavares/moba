@@ -4,7 +4,7 @@
     <tr>
       <th scope="col">Team rank</th>
       <th scope="col">Team</th>
-      <th scope="col">Average farm and time</th>
+      <th scope="col">Training time</th>
     </tr>
   </thead>
   <tbody>
@@ -20,18 +20,20 @@
       </td>
       <td>
         <.link navigate={preview_path(assigns, ~p"/teams/#{team.id}")} class="profile-ranked-identity">
-          <.league_badge tier={team.league_tier} variant="legacy" img_class="profile-ranked-avatar profile-team-league" />
+          <span class="profile-ranked-team-portraits" aria-hidden="true">
+            <img :for={hero <- team.heroes} src={GH.image_url(hero.avatar)} alt="" loading="lazy" />
+          </span>
           <span>
             <strong class="profile-ranked-name">{MobaWeb.V2.Components.TeamComponents.display_name(team)}</strong>
             <small class="profile-ranking-detail">{Enum.map_join(team.heroes, " · ", & &1.avatar.name)}</small>
           </span>
         </.link>
       </td>
-      <td title={"#{team.duration_seconds} seconds"}>
-        <h3 class="text-success">{GH.farming_amount_label(div(team.total_farm, 3))}</h3>
-        <small class="profile-ranking-unit">
-          Avg farm · {GH.minutes_label(div(team.duration_seconds, 60), @preview)} min
-        </small>
+      <td class="profile-training-time" title={if team.duration_seconds, do: "#{team.duration_seconds} seconds"}>
+        <h3 class="text-success" aria-label={if is_nil(team.duration_seconds), do: "Time unavailable"}>
+          {if team.duration_seconds, do: GH.minutes_label(div(team.duration_seconds, 60), @preview), else: "—"}
+        </h3>
+        <small :if={is_integer(team.duration_seconds)} class="profile-ranking-unit">min</small>
       </td>
     </tr>
   </tbody>

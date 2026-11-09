@@ -4,7 +4,7 @@
     <tr>
       <th scope="col">Hero rank</th>
       <th scope="col">Hero and player</th>
-      <th scope="col">Total farm</th>
+      <th scope="col">Training time</th>
     </tr>
   </thead>
   <tbody>
@@ -27,9 +27,12 @@
           </span>
         </.link>
       </td>
-      <td class="profile-hero-farm" title={"#{hero.total_gold_farm + hero.total_xp_farm} total farm"}>
-        <h3 class="text-success">{GH.farming_amount_label(hero.total_gold_farm + hero.total_xp_farm)}</h3>
-        <small class="profile-ranking-unit">farm</small>
+      <td class="profile-training-time">
+        <% minutes = GH.finished_time(hero) %>
+        <h3 class="text-success" aria-label={if is_nil(minutes), do: "Time unavailable"}>
+          {GH.minutes_label(minutes, @preview) || "—"}
+        </h3>
+        <small :if={is_integer(minutes)} class="profile-ranking-unit">min</small>
       </td>
     </tr>
   </tbody>

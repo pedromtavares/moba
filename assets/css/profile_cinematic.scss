@@ -136,7 +136,19 @@
   #user-ranking .profile-leaderboard-table .selected-player h1 { color: #efd096; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-identity { display: flex; align-items: center; gap: 10px; min-width: 0; color: #e9e4db; text-align: left; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-avatar { width: 48px; height: 38px !important; flex-shrink: 0; object-fit: cover; border: 1px solid #baa98a40; border-radius: 4px; }
-  :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-avatar:is(.pvp-rank, .profile-team-league) { object-fit: contain; border-color: transparent; }
+  :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-avatar.pvp-rank { object-fit: contain; border-color: transparent; }
+  .profile-ranked-team-portraits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    flex-shrink: 0;
+    width: min(84px, 42%);
+    height: 38px;
+    overflow: hidden;
+    border: 1px solid #baa98a40;
+    border-radius: 4px;
+  }
+  .profile-ranked-team-portraits > img { width: 100%; height: 100%; object-fit: cover; }
+  .profile-ranked-team-portraits > img + img { border-left: 1px solid #baa98a40; }
   .profile-ranked-identity > span { min-width: 0; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-name { display: block; margin: 0 !important; color: #e9e4db; font-size: 16px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
   .profile-ranking-detail { display: block; margin-top: 4px; color: #9fa8b7; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
