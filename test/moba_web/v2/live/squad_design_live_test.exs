@@ -67,9 +67,12 @@ defmodule MobaWeb.V2.SquadDesignLiveTest do
     assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 1
     assert has_element?(view, "#heroes-page-next[disabled]")
     view |> element("#edit-hero-#{hd(picks).id}") |> render_click()
-    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 6
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 16
     assert has_element?(view, "#heroes-page-previous[disabled]")
     assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-team-card") |> Enum.count() == 3
+    view |> element("#heroes-page-next") |> render_click()
+    assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 9
+    assert has_element?(view, "#heroes-page-next[disabled]")
     view |> element("#close-team-customization") |> render_click()
     assert LazyHTML.from_fragment(render(view)) |> LazyHTML.query(".workshop-collection-hero") |> Enum.count() == 24
     # Navigating a library never changes the selected team.

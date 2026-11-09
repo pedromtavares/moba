@@ -105,9 +105,14 @@ defmodule Moba.Cleaner do
         where: is_nil(player.user_id),
         where: player.updated_at < ^last_week and h.updated_at < ^last_week,
         where: is_nil(h.archived_at),
-        where: is_nil(h.bot_difficulty)
+        where: is_nil(h.bot_difficulty),
+        select: {h.player_id, h.finished_at}
 
-    Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
+    {_, archived} = Repo.update_all(query, set: [archived_at: DateTime.utc_now()])
+
+    for player_id <- MapSet.new(for {id, finished_at} <- archived, finished_at, do: id) do
+      Game.Training.refresh_hero_collection!(player_id)
+    end
 
     # deletes heroes that have been archived for over a week
     query =

@@ -65,21 +65,6 @@ defmodule Moba.Game.Teams do
     ) || Repo.rollback(:not_found)
   end
 
-  def import_training_team!(%{league_tier: tier, hero_ids: ids} = record)
-      when tier >= 3 and length(ids) == 3 do
-    player = Game.get_player!(record.player_id)
-
-    %Team{
-      player_id: player.id,
-      training_team_id: record.id,
-      pick_ids: ids,
-      name: record.name || Moba.Utils.username(player)
-    }
-    |> Repo.insert!(on_conflict: :nothing, conflict_target: :training_team_id)
-  end
-
-  def import_training_team!(_), do: :ok
-
   defp load_picks(teams) when is_list(teams) do
     hero_ids = Enum.map(teams, & &1.pick_ids) |> List.flatten()
     heroes = Game.get_heroes(hero_ids)

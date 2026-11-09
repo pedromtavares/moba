@@ -50,6 +50,45 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     assert has_element?(view, "#teams-return-button[href='/matches/#{source.id}']", "Return to match")
   end
 
+  test "the team editor defaults to farm and uses fastest training time to break ties", %{conn: conn} do
+    player = create_player!()
+    start = DateTime.utc_now() |> DateTime.add(-600) |> DateTime.truncate(:second)
+
+    [slow, fast, recent] =
+      for {gold, xp, seconds, rank} <- [{30_000, 30_000, 300, 1}, {25_000, 35_000, 120, nil}, {20_000, 30_000, 540, 2}] do
+        create_combat_hero(
+          %{
+            league_tier: Moba.master_league_tier(),
+            finished_at: DateTime.add(start, seconds),
+            total_gold_farm: gold,
+            total_xp_farm: xp,
+            pve_ranking: rank
+          },
+          player
+        )
+        |> Ecto.Changeset.change(inserted_at: DateTime.to_naive(start))
+        |> Moba.Repo.update!()
+      end
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena/edit")
+
+    for {label, first, second} <- [
+          {"Farm", fast, slow},
+          {"Recent", recent, slow},
+          {"Rank", slow, recent},
+          {"Farm", fast, slow}
+        ] do
+      assert has_element?(view, "#hero-sort", label)
+
+      assert has_element?(
+               view,
+               ".workshop-collection-grid > #available-hero-#{first.id}:first-child + #available-hero-#{second.id}"
+             )
+
+      view |> element("#hero-sort") |> render_click()
+    end
+  end
+
   test "the arena and profile show the same recent 3v3 rate", %{conn: conn} do
     player = create_player!(%{total_matches: 20, total_wins: 19})
     opponent = create_player!()

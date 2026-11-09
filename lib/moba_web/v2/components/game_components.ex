@@ -6,9 +6,29 @@ defmodule MobaWeb.V2.Components.GameComponents do
   """
   use Phoenix.Component
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
   alias MobaWeb.V2.Components.GameHelpers, as: GH
   alias MobaWeb.V2.Components.StatTooltip
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
+
+  attr :id, :string, required: true
+
+  def catalog_discord_link(assigns) do
+    ~H"""
+    <a
+      id={@id}
+      href="https://discord.gg/QNwEdPS"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="catalog-discord"
+    >
+      <.icon name="game-discord" class="" />
+      <span>Join our Discord</span>
+      <span aria-hidden="true">↗</span>
+    </a>
+    """
+  end
 
   attr :id, :string, required: true
   attr :title, :string, required: true

@@ -95,7 +95,8 @@ defmodule MobaWeb.V2.ArenaLive do
   end
 
   def handle_event("hero-list", _, socket) do
-    {:noreply, assign(socket, heroes: socket.assigns.trained_heroes, heroes_tab: "trained")}
+    %{trained_heroes: heroes, sort: sort} = socket.assigns
+    {:noreply, assign(socket, heroes: sort_team_heroes(heroes, sort), heroes_tab: "trained")}
   end
 
   def handle_event("toggle-defensive", params, %{assigns: %{selected_team: team}} = socket) when not is_nil(team) do
@@ -203,18 +204,17 @@ defmodule MobaWeb.V2.ArenaLive do
   def handle_event("reorder-lineup", _, socket), do: {:noreply, socket}
 
   def handle_event("sort", _, %{assigns: %{sort: sort, trained_heroes: trained_heroes}} = socket) do
-    {sort, trained_heroes} =
-      if sort == :recent do
-        {:rank, Enum.sort_by(trained_heroes, & &1.pve_ranking)}
-      else
-        {:recent, Enum.sort_by(trained_heroes, & &1.finished_at, {:desc, Date})}
+    sort =
+      case sort do
+        :farm -> :recent
+        :recent -> :rank
+        :rank -> :farm
       end
 
     {:noreply,
      assign(socket,
        sort: sort,
-       trained_heroes: trained_heroes,
-       heroes: trained_heroes,
+       heroes: sort_team_heroes(trained_heroes, sort),
        heroes_tab: "trained",
        heroes_page: 0
      )}
@@ -373,12 +373,12 @@ defmodule MobaWeb.V2.ArenaLive do
   end
 
   defp heroes_per_page(nil), do: 24
-  defp heroes_per_page(_hero), do: 6
+  defp heroes_per_page(_hero), do: 16
 
   defp assign_edit(%{assigns: %{current_player: player}} = socket, params) do
     teams = Game.list_teams(player)
     heroes_tab = "trained"
-    trained_heroes = Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking)
+    trained_heroes = Game.trained_pvp_heroes(player.id, [], 200, :farm)
 
     return_match_id =
       case Integer.parse(params["match_id"] || "") do
@@ -397,7 +397,7 @@ defmodule MobaWeb.V2.ArenaLive do
       teams: teams,
       teams_page: 0,
       heroes_page: 0,
-      sort: :rank,
+      sort: :farm,
       selected_team: List.first(teams),
       return_match_id: return_match_id,
       team_form: socket.assigns.team_form
@@ -488,10 +488,9 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp refresh_edit_hero(socket, player, hero) do
     teams = Game.list_teams(player)
-    trained_heroes = Game.trained_pvp_heroes(player.id, [], 200) |> Enum.sort_by(& &1.pve_ranking)
+    trained_heroes = Game.trained_pvp_heroes(player.id, [], 200, :farm)
     selected_team_id = socket.assigns.selected_team && socket.assigns.selected_team.id
     selected_team = Enum.find(teams, &(&1.id == selected_team_id)) || List.first(teams)
-    heroes = trained_heroes
 
     assign(socket,
       hero: hero,
@@ -500,9 +499,13 @@ defmodule MobaWeb.V2.ArenaLive do
       teams: teams,
       selected_team: selected_team,
       trained_heroes: trained_heroes,
-      heroes: heroes
+      heroes: sort_team_heroes(trained_heroes, socket.assigns.sort)
     )
   end
+
+  defp sort_team_heroes(heroes, :farm), do: heroes
+  defp sort_team_heroes(heroes, :recent), do: Enum.sort_by(heroes, & &1.finished_at, {:desc, DateTime})
+  defp sort_team_heroes(heroes, :rank), do: Enum.sort_by(heroes, & &1.pve_ranking)
 
   defp sanitize_pick_ids(pick_ids), do: pick_ids |> Enum.uniq() |> Enum.take(3)
 

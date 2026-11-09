@@ -71,8 +71,10 @@ defmodule Moba.Admin.Seasons do
       |> Repo.preload(:user)
 
     player_ids = Enum.map(players, & &1.id)
-    activities = Game.CommunityActivity.latest_for_players(player_ids)
     heroes = latest_player_heroes(player_ids)
+    teams = latest_player_training_teams(player_ids)
+    activities = Game.CommunityActivity.latest_for_players(player_ids, teams)
+    best_teams = Game.TeamRuns.best_ranks_for_players(player_ids)
 
     best_heroes =
       from(h in HeroQuery.top_ranked_for_players(player_ids),
@@ -83,22 +85,73 @@ defmodule Moba.Admin.Seasons do
 
     players
     |> Enum.map(fn player ->
+      {hero, team} = latest_training(heroes[player.id], teams[player.id])
+
       player
-      |> Map.put(:latest_hero, Map.get(heroes, player.id))
+      |> Map.put(:latest_hero, hero)
+      |> Map.put(:latest_training_team, team)
       |> Map.put(:recent_activity, Map.get(activities, player.id))
       |> Map.put(:best_ranked_hero, Map.get(best_heroes, player.id))
+      |> Map.put(:best_ranked_team, Map.get(best_teams, player.id))
     end)
   end
 
   defp latest_player_heroes(player_ids) do
-    from(h in Hero,
+    from(h in HeroQuery.solo(),
       where: h.player_id in ^player_ids and is_nil(h.archived_at),
       distinct: h.player_id,
       order_by: [desc: h.inserted_at, desc: h.id],
-      preload: [:avatar]
+      preload: [:avatar, :skin]
     )
     |> Repo.all()
     |> Map.new(&{&1.player_id, &1})
+  end
+
+  defp latest_player_training_teams([]), do: %{}
+
+  defp latest_player_training_teams(player_ids) do
+    from(team in TrainingTeam,
+      where: team.player_id in ^player_ids and is_nil(team.archived_at),
+      where: team.phase in ["playing", "engagement", "finished"],
+      distinct: team.player_id,
+      order_by: [desc: team.id]
+    )
+    |> Repo.all()
+    |> Repo.preload(heroes: [:avatar, :skin])
+    |> Enum.flat_map(&training_team_card/1)
+    |> Map.new(&{&1.player_id, &1})
+  end
+
+  defp training_team_card(%{phase: "finished", heroes: [_ | _]} = team) do
+    heroes = Enum.map(team.hero_ids, fn id -> Enum.find(team.heroes, &(&1.id == id)) end) |> Enum.reject(&is_nil/1)
+    training_team_card(team, heroes)
+  end
+
+  defp training_team_card(team) do
+    case Game.TeamRuns.read_state(team) do
+      {:ok, run} -> training_team_card(team, Enum.map(Game.TeamTraining.team(run), & &1.hero))
+      {:error, :invalid_snapshot} -> []
+    end
+  end
+
+  defp training_team_card(_team, []), do: []
+
+  defp training_team_card(team, [first | _] = heroes) do
+    [
+      team
+      |> Map.take([:id, :player_id, :name, :finished_at])
+      |> Map.merge(%{
+        heroes: Enum.map(heroes, &Map.take(&1, [:avatar, :skin])),
+        started_at: first.inserted_at || team.inserted_at
+      })
+    ]
+  end
+
+  defp latest_training(hero, nil), do: {hero, nil}
+  defp latest_training(nil, team), do: {nil, team}
+
+  defp latest_training(hero, team) do
+    if NaiveDateTime.compare(hero.inserted_at, team.started_at) == :gt, do: {hero, nil}, else: {nil, team}
   end
 
   def current_guests do

@@ -34,7 +34,7 @@
   .profile-featured-loadout .item-container { width: 100%; }
   .profile-featured-loadout :is(.skill-img, .item-img) { display: block; width: 100%; height: 100%; min-width: 0; margin: 0; object-fit: cover; border: 1px solid #9faec344; border-radius: 3px; }
   .profile-featured-loadout .skill-img { aspect-ratio: 1; }
-  #profile-cinematic .profile-metrics { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(6, minmax(0, 1fr)); margin: 0; padding: 16px 0 !important; border-top: 1px solid #ccb07c44; border-bottom: 0; }
+  #profile-cinematic .profile-metrics { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(7, minmax(0, 1fr)); margin: 0; padding: 16px 0 !important; border-top: 1px solid #ccb07c44; border-bottom: 0; }
   #profile-cinematic .profile-metrics > .col { min-width: 0; padding: 0 12px; }
   #profile-cinematic .profile-metrics strong { color: #ead2a1; font-size: 25px; font-weight: 900; }
   #profile-cinematic .profile-metrics i { color: #bda779 !important; font-size: 13px; }
@@ -102,6 +102,7 @@
   .profile-ranking-switch button:hover { color: #f4dfb4; background: #c7b17b0d; }
   .profile-ranking-switch button[aria-pressed="true"] { border-color: #d1b57c55; background: #c7b17b24; color: #f4dfb4; }
   .profile-ranking-switch button:focus-visible { outline: 2px solid #dfc18b; outline-offset: 2px; }
+  .profile-leaderboard-switch { grid-template-columns: repeat(3, minmax(0, 1fr)); flex-basis: min(210px, 100%); }
   .profile-history-tabs { max-width: none; }
   .profile-history-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; }
   .profile-history-tabs button[aria-pressed="true"] { cursor: default; }
@@ -135,7 +136,7 @@
   #user-ranking .profile-leaderboard-table .selected-player h1 { color: #efd096; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-identity { display: flex; align-items: center; gap: 10px; min-width: 0; color: #e9e4db; text-align: left; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-avatar { width: 48px; height: 38px !important; flex-shrink: 0; object-fit: cover; border: 1px solid #baa98a40; border-radius: 4px; }
-  :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-avatar.pvp-rank { object-fit: contain; border-color: transparent; }
+  :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-avatar:is(.pvp-rank, .profile-team-league) { object-fit: contain; border-color: transparent; }
   .profile-ranked-identity > span { min-width: 0; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-name { display: block; margin: 0 !important; color: #e9e4db; font-size: 16px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
   .profile-ranking-detail { display: block; margin-top: 4px; color: #9fa8b7; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
@@ -222,9 +223,9 @@
     .profile-cinematic h1 { font-size: 42px; }
     .profile-cinematic .discord-avatar { width: 34px; }
     .profile-rank-title { font-size: 14px; }
-    #profile-cinematic .profile-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px 0; }
+    #profile-cinematic .profile-metrics { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px 0; }
     #profile-cinematic .profile-metrics > .col { padding: 0 5px; }
-    #profile-cinematic .profile-metrics > .col:nth-child(4) { border-left: 0; }
+    #profile-cinematic .profile-metrics > .col:nth-child(5) { border-left: 0; }
     #profile-cinematic .profile-metrics strong { font-size: 21px; }
     #profile-cinematic .profile-metric-label { font-size: 10px; }
     .profile-board { grid-template-columns: minmax(0, 1fr); }

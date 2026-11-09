@@ -121,13 +121,6 @@ defmodule Moba.Game.TeamRuns do
   def finalize(_, record), do: record
 
   def ranking(current_id, limit \\ 50) do
-    ranked =
-      from(r in TrainingTeam,
-        where: not is_nil(r.finished_at),
-        windows: [ranking: [order_by: [desc: r.total_farm, asc: r.duration_seconds, asc: r.id]]],
-        select: %{id: r.id, position: over(row_number(), :ranking)}
-      )
-
     visible_ranks =
       if current_id do
         dynamic([r, rank], rank.position <= ^limit or r.id == ^current_id)
@@ -136,7 +129,7 @@ defmodule Moba.Game.TeamRuns do
       end
 
     from(r in TrainingTeam,
-      join: rank in subquery(ranked),
+      join: rank in subquery(ranked_runs()),
       on: rank.id == r.id,
       where: ^visible_ranks,
       order_by: rank.position,
@@ -147,6 +140,27 @@ defmodule Moba.Game.TeamRuns do
       preload: [player: :user, heroes: :avatar]
     )
     |> Repo.all()
+  end
+
+  def best_ranks_for_players([]), do: %{}
+
+  def best_ranks_for_players(player_ids) do
+    from(rank in subquery(ranked_runs()),
+      where: rank.player_id in ^player_ids,
+      distinct: rank.player_id,
+      order_by: rank.position,
+      select: {rank.player_id, %{id: rank.id, position: rank.position}}
+    )
+    |> Repo.all()
+    |> Map.new()
+  end
+
+  defp ranked_runs do
+    from(r in TrainingTeam,
+      where: not is_nil(r.finished_at),
+      windows: [ranking: [order_by: [desc: r.total_farm, asc: r.duration_seconds, asc: r.id]]],
+      select: %{id: r.id, player_id: r.player_id, position: over(row_number(), :ranking)}
+    )
   end
 
   def get!(scope, id), do: scope |> owned() |> Repo.get!(id)
@@ -415,7 +429,6 @@ defmodule Moba.Game.TeamRuns do
       )
       |> Repo.update!()
 
-    Game.Teams.import_training_team!(record)
     Game.Quests.track_team_pve_progression!(record)
     Enum.each(heroes, &Game.Players.add_total_farm!(%{&1 | player: Game.get_player!(player.id)}))
     Game.update_hero_collection!(hd(heroes))

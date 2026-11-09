@@ -77,24 +77,59 @@ body:has(.game-page .catalog-viewport) {
 
 }
 
-.game-page #library {
-  [hidden] { display: none !important; }
-  #manual-heading {
+.game-page .catalog-compact {
+  .catalog-heading {
     display: flex;
-    flex-direction: row;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    height: auto;
-    min-height: 0;
-    margin: 0;
-    padding: clamp(10px, 2vh, 25px) clamp(14px, 2.2vw, 34px);
-    background-position: center, center 52%;
+    padding: clamp(12px, 2.4vh, 24px) clamp(12px, 2.6vw, 36px);
+    border: 1px solid #bda77b38;
+    border-radius: 12px;
   }
-  #manual-heading h1 { font-size: clamp(30px, 4vw, 55px); }
-  .manual-eyebrow { margin-bottom: 3px; }
-  .manual-heading-description { margin: 4px 0 0; }
-  .manual-discord { min-height: 38px; padding: 7px 12px; }
+  .catalog-heading h1 { margin: 0; color: #f5edda; font-size: clamp(22px, 4vw, 51px); font-weight: 900; line-height: 1; letter-spacing: -.035em; }
+  .catalog-eyebrow { margin: 0 0 3px; color: #dfc48e; font-size: 10px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+  .cinematic-catalog-tabs button { padding-block: 8px; }
+  .cinematic-catalog-tabs .nav-emblem { flex: none; width: 32px; height: 32px; }
+}
+
+@media (max-width: 840px), (max-height: 530px) {
+  .game-page .catalog-compact .catalog-heading { padding-block: 8px; }
+}
+
+@media (max-width: 560px) {
+  .game-page .catalog-compact {
+    .cinematic-catalog-tabs button { flex-direction: column; gap: 3px; min-height: 59px; padding: 4px 2px; font-size: 10px; }
+    .cinematic-catalog-tabs .nav-emblem { width: 22px; height: 22px; }
+    .manual-heading-description { display: none; }
+  }
+}
+
+@media (max-width: 360px) and (max-height: 640px) {
+  .game-page .catalog-viewport.catalog-compact {
+    padding-bottom: 5px;
+    .catalog-eyebrow { display: none; }
+    .cinematic-catalog-tabs button { gap: 0; min-height: 48px; padding-block: 2px; }
+    .cinematic-catalog-tabs .nav-emblem { width: 18px; height: 18px; }
+  }
+}
+
+@media (min-width: 561px) and (max-height: 460px) {
+  .game-page .catalog-viewport.catalog-compact {
+    padding-block: 4px;
+    .catalog-heading { padding: 4px 8px; }
+    .catalog-heading h1 { font-size: 24px; }
+    .catalog-eyebrow { display: none; }
+    .cinematic-catalog-tabs button { gap: 4px; min-height: 39px; padding: 4px 2px; font-size: 12px; }
+    .cinematic-catalog-tabs .nav-emblem { width: 21px; height: 21px; }
+  }
+}
+
+.game-page #library {
+  [hidden] { display: none !important; }
+  #manual-heading { background: linear-gradient(90deg, #08111eed, #08111e80 50%, #08111e55), var(--manual-scene) center 52% / cover; }
+  .manual-title-row { display: flex; align-items: baseline; gap: clamp(8px, 1.5vw, 20px); }
+  .manual-heading-description { margin: 0; color: #cbd2dc; font-size: 13px; line-height: 1.3; }
 
   .manual-reference-section { min-width: 0; min-height: 0; container-type: size; }
   .manual-reference-frame {
@@ -186,17 +221,15 @@ body:has(.game-page .catalog-viewport) {
 
 @media (max-width: 767px) {
   .game-page .catalog-viewport {
+    .catalog-discord { min-height: 34px; gap: 6px; padding: 5px 7px; font-size: 11px; }
+    .catalog-discord > i { font-size: 15px; }
+    .catalog-discord > span:last-child { display: none; }
     .manual-avatar-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 4px; }
     .manual-avatar-grid img { height: clamp(24px, 6.2cqh, 42px); }
     .manual-avatar-grid span { font-size: 9px; }
   }
   .game-page #library {
     padding-bottom: 6px;
-    .manual-eyebrow { display: none; }
-    .manual-heading-description { font-size: 13px; }
-    .manual-discord { min-height: 34px; gap: 6px; padding: 5px 7px; font-size: 11px; }
-    .manual-discord > i { font-size: 15px; }
-    .manual-discord > span:last-child { display: none; }
     .manual-compact-view { gap: 4px; margin: 0; padding: 5px 8px 0; border: 0; }
     .manual-avatar-view { display: flex; }
     .manual-compact-view label { position: relative; flex: 1; margin: 0; text-align: center; }
@@ -242,8 +275,6 @@ body:has(.game-page .catalog-viewport) {
 @media (max-height: 760px) {
   .game-page .catalog-viewport .manual-avatar-grid img { height: clamp(21px, 6cqh, 42px); }
   .game-page #library {
-    #manual-heading { padding-block: 8px; }
-    .manual-eyebrow, .manual-heading-description { display: none; }
     .manual-resource-grid img { width: min(64px, 100%, 10cqh); }
     .manual-avatar-identity h2 { font-size: clamp(23px, 3vw, 36px); }
     .manual-avatar-identity > p { font-size: 12px; }

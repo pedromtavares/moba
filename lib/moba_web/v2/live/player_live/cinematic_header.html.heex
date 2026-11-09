@@ -107,6 +107,16 @@
       </strong>
       <span :if={@preview} class="profile-metric-label">Season rank</span>
     </div>
+    <div class="col text-center" id="profile-team-rank">
+      <strong>
+        <%= if @best_team_rank do %>
+          <i class="ui-icon ui-hashtag text-white"></i> {@best_team_rank.position}
+        <% else %>
+          <span aria-label="Unranked">—</span>
+        <% end %>
+      </strong>
+      <span :if={@preview} class="profile-metric-label">Team rank</span>
+    </div>
     <div class="col text-center" id="profile-hero-rank">
       <strong>
         <%= if @best_hero_rank do %>

@@ -306,6 +306,7 @@ defmodule MobaWeb.CoreComponents do
       "refresh" => "ui-refresh",
       "back" => "ui-arrow-left",
       "sign-in" => "ui-sign-in",
+      "discord" => "ui-chat-controller",
       "clock" => "ui-clock",
       "trophy" => "ui-trophy",
       "season-score" => "ui-star",

@@ -70,7 +70,9 @@ defmodule Moba.Game.Training do
     )
 
     unless hero.finished_at, do: Players.add_total_farm!(hero)
-    update_hero!(hero, %{archived_at: DateTime.utc_now()})
+    hero = update_hero!(hero, %{archived_at: DateTime.utc_now()})
+    if hero.finished_at, do: refresh_hero_collection!(hero.player_id)
+    hero
   end
 
   def broadcast_to_hero(hero_id) do
@@ -232,6 +234,7 @@ defmodule Moba.Game.Training do
 
     Quests.track_pve_progression!(hero)
     Players.add_total_farm!(hero)
+    refresh_hero_collection!(hero.player_id)
     Moba.rank_finished_heroes()
 
     hero
@@ -373,10 +376,38 @@ defmodule Moba.Game.Training do
   end
 
   def update_hero_collection!(hero) do
-    hero = Repo.preload(hero, :player)
-    collection = Heroes.collection_for(hero.player_id)
-    if length(collection) > 0, do: Players.update_collection!(hero.player, collection)
+    refresh_hero_collection!(hero.player_id)
+    Repo.preload(hero, :player)
+  end
 
-    hero
+  def refresh_hero_collection!(nil), do: :ok
+
+  def refresh_hero_collection!(player_id) do
+    {:ok, player} =
+      Repo.transaction(fn ->
+        if player = Repo.one(from p in Player, where: p.id == ^player_id, lock: "FOR UPDATE") do
+          Players.update_collection!(player, Heroes.collection_for(player_id))
+        end
+      end)
+
+    player
+  end
+
+  def backfill_hero_collections! do
+    finished_players =
+      from(h in Game.Schema.Hero,
+        where: not is_nil(h.finished_at) and is_nil(h.archived_at),
+        select: h.player_id
+      )
+
+    player_ids =
+      from(p in Player,
+        where: p.id in subquery(finished_players) or fragment("jsonb_array_length(?) > 0", p.hero_collection),
+        select: p.id
+      )
+      |> Repo.all()
+
+    Enum.each(player_ids, &refresh_hero_collection!/1)
+    length(player_ids)
   end
 end

@@ -149,8 +149,8 @@ defmodule MobaWeb.V2.PreviewLiveTest do
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/player/#{hero.player_id}")
     assert has_element?(view, "#profile-ranking-header", "Season score")
-    assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season Rank")
-    assert has_element?(view, "#profile-ranking-hero", "Hero Rank")
+    assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season")
+    assert has_element?(view, "#profile-ranking-hero", "Hero")
   end
 
   test "account screens render the redesign and login returns to canonical routes", %{conn: conn} do

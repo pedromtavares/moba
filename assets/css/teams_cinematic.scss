@@ -103,22 +103,22 @@
     .workshop-hero-actions { gap: 5px; }
     .workshop-collection-grid { gap: 7px; }
     &[data-editing-hero=true] {
-      .team-workshop-layout { grid-template-rows: minmax(0, 1.65fr) minmax(0, 1fr); }
+      .team-workshop-layout { grid-template-rows: minmax(0, 2fr) minmax(0, 1fr); }
       .workshop-team-grid { grid-template-rows: repeat(3, minmax(0, 1fr)); }
-      .workshop-hero { grid-template-columns: 24px minmax(0, 1fr) minmax(130px, 1.1fr) auto; padding-block: 5px; }
+      .workshop-hero { container-type: size; padding-block: 5px; }
       .workshop-hero-identity { align-self: center; padding: 0; }
       .workshop-hero-identity strong { font-size: 16px; }
       .workshop-hero-identity small { display: none; }
       .workshop-level { font-size: 14px; line-height: 1.15; }
-      .workshop-build { max-width: 230px; }
+      .workshop-build { width: min(100%, 480px, 450cqh); justify-self: end; }
       .workshop-hero-actions { flex-direction: row; gap: 4px; }
       .workshop-customize { padding: 5px; }
       .workshop-customize span { display: none; }
       .workshop-order { gap: 2px; }
       .workshop-order button { padding-inline: 5px; }
-      .workshop-collection-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); }
-      .workshop-collection-hero strong { font-size: 13px; }
-      .workshop-collection-hero > button:first-child > span { font-size: 15px; top: 3px; right: 3px; }
+      .workshop-collection-grid { grid-template-rows: repeat(2, minmax(0, 1fr)); }
+      .workshop-collection-hero strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+      .workshop-collection-hero > button:first-child > span { font-size: 15px; line-height: 1.2; top: 3px; right: 3px; }
       .workshop-collection-hero > button:first-child { padding: 5px; }
       .workshop-collection-remove { width: 19px; height: 19px; font-size: 17px; }
     }

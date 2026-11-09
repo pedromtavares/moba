@@ -1,0 +1,39 @@
+<table id="profile-team-ranking-table" class="table table-dark ranking-table m-0 profile-leaderboard-table">
+  <colgroup><col class="profile-rank-column" /><col /><col class="profile-score-column" /></colgroup>
+  <thead class="sr-only">
+    <tr>
+      <th scope="col">Team rank</th>
+      <th scope="col">Team</th>
+      <th scope="col">Average farm and time</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr
+      :for={%{team: team, position: position} <- @team_ranking}
+      id={"profile-ranked-team-#{team.id}"}
+      class={team.player_id == @player.id && "selected-player"}
+      phx-hook={if team.id == @best_team_rank[:id], do: "HalfScroll"}
+      phx-container="#user-ranking"
+    >
+      <td>
+        <h1 class="f-rpg">#{position}</h1>
+      </td>
+      <td>
+        <.link navigate={preview_path(assigns, ~p"/teams/#{team.id}")} class="profile-ranked-identity">
+          <.league_badge tier={team.league_tier} variant="legacy" img_class="profile-ranked-avatar profile-team-league" />
+          <span>
+            <strong class="profile-ranked-name">{MobaWeb.V2.Components.TeamComponents.display_name(team)}</strong>
+            <small class="profile-ranking-detail">{Enum.map_join(team.heroes, " · ", & &1.avatar.name)}</small>
+          </span>
+        </.link>
+      </td>
+      <td title={"#{team.duration_seconds} seconds"}>
+        <h3 class="text-success">{GH.farming_amount_label(div(team.total_farm, 3))}</h3>
+        <small class="profile-ranking-unit">
+          Avg farm · {GH.minutes_label(div(team.duration_seconds, 60), @preview)} min
+        </small>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<p :if={@team_ranking == []} id="profile-no-ranked-teams" class="profile-rank-empty">No ranked teams yet.</p>

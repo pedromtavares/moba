@@ -21,10 +21,13 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     run = Test.TeamHelper.team_run(scope, owner)
     {:ok, finished} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished, name: "Moonwatch"})
     unfinished = Test.TeamHelper.team_run(scope, owner)
+    Accounts.set_online_now(owner.user)
+    cache_recent_players([owner.id])
 
     viewer = create_base_hero().player
     {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/community")
 
+    assert has_element?(view, "#user-#{owner.id} .community-best-team-rank[href='/teams/#{finished.id}']", "#1")
     assert has_element?(view, "#show-pvp-link + #show-teams-link + #show-pve-link")
     assert has_element?(view, "#show-teams-link img.nav-emblem[src='/images/navigation/base.webp']")
     view |> element("#show-teams-link") |> render_click()
@@ -36,6 +39,49 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#{card} .community-ranking-footer dt", "Time")
     assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3) span")
     refute has_element?(view, "#community-team-#{unfinished.id}")
+  end
+
+  test "recent players show the latest training roster or solo hero with a compact activity footer", %{conn: conn} do
+    owner = create_base_hero().player
+    scope = Game.TeamRuns.scope(owner)
+    run = Test.TeamHelper.team_run(scope, owner)
+    {:ok, run} = Game.TeamRuns.update(scope, run, &Map.put(&1, :name, "Moonwatch"))
+    Accounts.set_online_now(owner.user)
+    cache_recent_players([owner.id])
+
+    viewer = create_base_hero().player
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/community")
+    card = "#user-#{owner.id}"
+
+    assert has_element?(view, "#{card}.community-recent-team-card")
+
+    for {%{hero: hero}, position} <- Enum.with_index(Game.TeamTraining.team(Game.TeamRuns.state(run)), 1) do
+      assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(#{position})", hero.avatar.name)
+    end
+
+    assert has_element?(view, "#{card} .community-activity-metrics dt", "Started training")
+    assert has_element?(view, "#{card} .community-activity-metrics dd", "Moonwatch")
+    assert has_element?(view, "#{card} .community-activity-metrics time[datetime]")
+    refute has_element?(view, "#{card} a.community-activity-link")
+
+    {:ok, finished} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished})
+    cache_recent_players([owner.id])
+    send(view.pid, :refresh_recent_players)
+    assert has_element?(view, "#{card} .community-activity-link[href='/teams/#{finished.id}']", "Finished training")
+    assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3)")
+
+    solo =
+      Game.create_hero!(%{name: "New solo"}, owner, base_avatar(), base_skills())
+      |> Ecto.Changeset.change(
+        inserted_at: NaiveDateTime.utc_now() |> NaiveDateTime.truncate(:second) |> NaiveDateTime.add(1)
+      )
+      |> Moba.Repo.update!()
+
+    cache_recent_players([owner.id])
+    send(view.pid, :refresh_recent_players)
+    refute has_element?(view, "#{card} .community-team-portraits")
+    assert has_element?(view, "#{card}[style*='--player-art']")
+    assert has_element?(view, "#{card} .community-activity-link[href='/hero/#{solo.id}']", "Started training")
   end
 
   test "top player cards show direct score contributions, Arena titles and prominent footer metrics", %{conn: conn} do
@@ -153,7 +199,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     assert has_element?(
              view,
-             "#user-#{player.id}.community-player-card > footer .community-activity-link[href='/matches/#{match.id}']",
+             "#user-#{player.id} > footer.community-ranking-footer .community-activity-link[href='/matches/#{match.id}']",
              "Won a 3v3"
            )
 
@@ -228,7 +274,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#user-#{live_player.id} .community-player-live[href='/arena']", "Live 1v1")
     refute has_element?(view, "#user-#{offline_player.id} .community-player-live")
     refute has_element?(view, "#user-#{offline_player.id} .community-player-ranks")
-    assert has_element?(view, "#user-#{offline_player.id} .community-activity-empty", "No recent activity")
+    refute has_element?(view, "#user-#{offline_player.id} > footer")
 
     live_player = Game.set_player_unavailable!(live_player)
     refute has_element?(view, "#user-#{live_player.id} .community-player-live")

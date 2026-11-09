@@ -13,24 +13,7 @@ body:has(.game-page #community) {
   --community-line: #bda77b38;
   --community-gold: #dfc48e;
 
-  #community-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    height: auto;
-    min-height: 0;
-    margin: 0;
-    padding: clamp(12px, 2.4vh, 24px) clamp(12px, 2.6vw, 36px);
-    border: 1px solid var(--community-line);
-    border-radius: 12px;
-    background: linear-gradient(90deg, #080e19ec, #08111e60 65%, #08111e9c), var(--community-scene) center 45% / cover;
-  }
-  .community-eyebrow { margin: 0 0 3px; color: var(--community-gold); font-size: 10px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
-  #community-heading h1 { margin: 0; color: #f5edda; font-size: clamp(22px, 4vw, 51px); font-weight: 900; line-height: 1; letter-spacing: -.035em; }
-  #community-heading .community-discord { display: inline-flex; align-items: center; gap: 7px; margin: 0; min-height: 0; padding: 8px 12px; font-size: 13px; white-space: nowrap; }
-  .cinematic-catalog-tabs button { padding-block: 8px; }
-  .cinematic-catalog-tabs .nav-emblem { flex: none; width: 32px; height: 32px; }
+  #community-heading { background: linear-gradient(90deg, #080e19ec, #08111e60 65%, #08111e9c), var(--community-scene) center 45% / cover; }
 
   > [role=tabpanel] { min-height: 0; min-width: 0; }
 
@@ -123,8 +106,6 @@ body:has(.game-page #community) {
   .player-card-metrics dd { margin: 0; color: var(--metric-color); font: 900 clamp(13px, 4.3cqw, 21px)/1.15 'Nunito', sans-serif; font-variant-numeric: tabular-nums; }
   .player-card-metrics dd[title] { position: relative; cursor: help; }
   .community-player-activity { display: grid; align-items: center; min-width: 0; min-height: 35px; padding: 3px 10px; border-top: 1px solid var(--community-line); background: #101c2a; }
-  .community-activity-empty { color: #a2afbd; font-size: 12px; }
-  .community-activity-link[data-result=lost] strong { color: #e5a1ad; }
 
   @container (max-width: 300px) {
     .player-card-metrics dt .ui-icon { display: none; }
@@ -137,6 +118,7 @@ body:has(.game-page #community) {
   }
   .community-team-card .community-team-banner { position: relative; background: none; }
   .community-team-banner .community-player-heading { position: relative; z-index: 1; }
+  .community-recent-team-card :is(.community-player-identity, .community-player-ranks, .community-player-summary) { position: relative; z-index: 1; }
   .community-team-banner h3 { margin: 0; }
   .community-team-card:is(:hover, :focus-visible) .community-player-name { color: #ffdf9d; }
   .community-team-portraits {
@@ -163,6 +145,7 @@ body:has(.game-page #community) {
     text-shadow: 0 1px 5px #000;
     overflow-wrap: anywhere;
   }
+  .community-recent-team-card .community-team-portraits span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .community-hero-identity { min-width: 0; }
   .community-hero-meta {
     display: flex;
@@ -273,9 +256,19 @@ body:has(.game-page #community) {
   .community-balance-entries article h3 { margin: 0; font-size: 15px; font-weight: 900; line-height: 1; text-align: right; }
   .community-balance-entries article h3 small { margin-left: 4px; color: #a9b7c6; font-size: 10px; }
   .community-player-ranks { display: grid; gap: 2px; flex-shrink: 0; }
+  .community-player-banner:has(.community-player-ranks) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto 1fr;
+    column-gap: 8px;
+    .community-player-heading { display: contents; }
+    .community-player-ranks { grid-column: 2; grid-row: 1 / span 2; align-self: start; }
+    .community-player-summary { align-self: start; }
+  }
   .community-player-ranks a { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; color: #d7bd86; font-variant-numeric: tabular-nums; }
   .community-player-ranks span { font-size: 10px; font-weight: 700; opacity: .8; }
-  .community-player-ranks strong { font-size: 16px; font-weight: 900; line-height: 1.2; }
+  .community-player-ranks strong { font-size: clamp(17px, 6cqw, 21px); font-weight: 900; line-height: 1.1; }
+  .community-player-ranks .community-best-team-rank { color: #a9bde6; }
   .community-player-ranks .community-best-hero-rank { color: #8acac1; }
   .community-player-ranks a:hover { color: #f8dfa9; }
   .community-player-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 2px 10px; }
@@ -287,23 +280,25 @@ body:has(.game-page #community) {
   .community-player-live { display: inline-flex; align-items: center; gap: 6px; color: #a4d9c4; font-size: 11px; font-weight: 800; }
   .community-player-live:hover { color: #c6f4e1; }
   .community-player-live .ui-icon { width: 16px; height: 16px; font-size: 16px; }
-  .community-activity-link { display: flex; align-items: center; gap: 12px; color: #bec7d2; }
-  .community-activity-icon { display: grid; place-items: center; flex: 0 0 24px; width: 24px; height: 24px; border-radius: 7px; background: #c7b17b0b; }
-  .community-activity-icon .ui-icon { width: 17px; height: 17px; font-size: 17px; opacity: .8; }
-  .community-activity-link > span:nth-child(2) { min-width: 0; }
-  .community-activity-link strong { display: block; color: #ddd9cf; font-size: 13px; font-weight: 800; line-height: 1.2; }
-  .community-activity-link[data-result=won] strong { color: #92cbb2; }
-  .community-activity-link small { display: block; margin: 0; color: #a5b3c3; font-size: 11px; line-height: 1.2; overflow-wrap: anywhere; }
-  .community-activity-link small > span { margin: 0 3px; color: #647181; }
-  .community-activity-arrow { margin-left: auto; padding-left: 6px; color: #cfb37b; opacity: .4; transition: opacity .18s, transform .18s; }
-  .community-activity-link:hover .community-activity-arrow { opacity: 1; transform: translate(1px, -1px); }
+  .community-activity-link { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .community-activity-metrics { flex: 1; min-width: 0; grid-template-columns: minmax(0, 1fr) auto; }
+  .community-activity-metrics > div:first-child { flex-direction: column; align-items: flex-start; gap: 2px; padding: 0; }
+  .community-activity-metrics dt strong { color: var(--metric-color); font-size: clamp(11px, 3.2cqw, 15px); }
+  .community-activity-metrics > div:first-child dd { width: 100%; color: #a5b3c3; font: 700 11px/1.2 'Nunito', sans-serif; }
+  .community-activity-metrics small { display: block; font-size: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .community-activity-metrics > div + div { padding-inline: 10px 3px; }
+  .community-activity-metrics time { white-space: nowrap; }
+  .community-activity-link[data-result=lost] dt strong { color: #e5a1ad; }
+  .community-activity-link[data-result=won] dt strong { color: #97d8bc; }
+  .community-activity-arrow { color: #cfb37b; opacity: .55; transition: opacity .18s, transform .18s; }
+  a.community-activity-link:is(:hover, :focus-visible) .community-activity-arrow { opacity: 1; transform: translate(1px, -1px); }
 
   .community-admin-switch { display: flex; gap: 4px; padding: 4px; border: 1px solid #bda77b33; border-radius: 7px; background: #080f1ac7; }
   .community-admin-switch button { padding: 9px 14px; border: 1px solid transparent; border-radius: 4px; background: transparent; color: #9fabbc; font: 800 12px/1.3 'Nunito', sans-serif; cursor: pointer; transition: color .18s, background .18s; }
   .community-admin-switch button:hover { background: #c7b17b10; color: #f0d7a6; }
   .community-admin-switch button[aria-pressed=true] { background: linear-gradient(120deg, #cbb17b23, #cbb17b09); border-color: #c7b17b55; color: #f0d7a6; }
 
-  .community-player-activity .community-activity-link small { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .community-ranking-footer.community-player-activity { padding-block: 6px; background: #0b1019; }
   :is(.community-admin-panel, #community-admin-summary) .community-admin-switch { padding: 2px; gap: 2px; }
   :is(.community-admin-panel, #community-admin-summary) .community-admin-switch button { padding: 4px 6px; white-space: nowrap; }
 }
@@ -326,15 +321,8 @@ body:has(.game-page #community) {
   }
 }
 
-@media (max-width: 840px), (max-height: 530px) {
-  .game-page #community #community-heading { padding-block: 8px; }
-}
-
 @media (max-width: 560px) {
   .game-page #community {
-    #community-heading .community-discord { gap: 4px; padding: 5px; font-size: 10px; }
-    .cinematic-catalog-tabs button { flex-direction: column; gap: 3px; padding: 4px 2px; font-size: 10px; }
-    .cinematic-catalog-tabs .nav-emblem { width: 22px; height: 22px; }
     #community-admin-summary { flex-wrap: wrap; justify-content: flex-end; gap: 4px; }
     .community-admin-metrics { flex: 1 1 100%; gap: 4px; }
     .community-admin-metrics > div, .community-admin-metrics dt { gap: 3px; }
@@ -345,24 +333,4 @@ body:has(.game-page #community) {
     .community-balance-entries article h3 small { display: block; margin: 2px 0 0; }
   }
   .game-page #game-content:has(> #community) .community-footer .community-footer-metrics { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-}
-
-@media (max-width: 360px) and (max-height: 640px) {
-  .game-page #community {
-    padding-bottom: 5px;
-    .community-eyebrow { display: none; }
-    .cinematic-catalog-tabs button { gap: 0; padding-block: 2px; }
-    .cinematic-catalog-tabs .nav-emblem { width: 18px; height: 18px; }
-  }
-}
-
-@media (min-width: 561px) and (max-height: 460px) {
-  .game-page #community {
-    padding-block: 4px;
-    #community-heading { padding: 4px 8px; }
-    #community-heading h1 { font-size: 24px; }
-    .community-eyebrow { display: none; }
-    .cinematic-catalog-tabs button { gap: 4px; padding: 4px 2px; font-size: 12px; }
-    .cinematic-catalog-tabs .nav-emblem { width: 21px; height: 21px; }
-  }
 }

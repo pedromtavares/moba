@@ -18,11 +18,11 @@
           <div class="card collection mb-0">
             <div class="card-body pb-1 d-flex">
               <div class="row">
-                <%= for hero <- @player.hero_collection do %>
+                <%= for hero <- @profile_collection do %>
                   <div class="col-3 text-center">
                     <a
                       href="javascript:;"
-                      class={if @featured.id == hero["hero_id"], do: "current-featured"}
+                      class={if @featured && @featured.id == hero["hero_id"], do: "current-featured"}
                       phx-click="set-featured"
                       phx-value-id={hero["hero_id"]}
                       phx-hook="Loading"
@@ -244,13 +244,17 @@
                     title={if @ranking_tab == "season", do: TT.season_score_tooltip(@player)}
                     tabindex={if @ranking_tab == "season", do: "0"}
                   >
-                    {if @ranking_tab == "season", do: "Season score", else: "Top 200 heroes"}
+                    {case @ranking_tab do
+                      "season" -> "Season score"
+                      "team" -> "Top 50 teams"
+                      "hero" -> "Top 200 heroes"
+                    end}
                   </span>
                 </div>
               </div>
-              <div class="profile-ranking-switch" role="group" aria-label="Leaderboard type">
+              <div class="profile-ranking-switch profile-leaderboard-switch" role="group" aria-label="Leaderboard type">
                 <button
-                  :for={{tab, label} <- [{"season", "Season Rank"}, {"hero", "Hero Rank"}]}
+                  :for={{tab, label} <- [{"season", "Season"}, {"team", "Team"}, {"hero", "Hero"}]}
                   id={"profile-ranking-#{tab}"}
                   type="button"
                   phx-click="profile-ranking"
@@ -262,6 +266,7 @@
               </div>
             </div>
             <.season_ranking :if={@ranking_tab == "season"} {assigns} />
+            <.team_ranking :if={@ranking_tab == "team"} {assigns} />
             <.hero_ranking :if={@ranking_tab == "hero"} {assigns} />
           </div>
         </div>

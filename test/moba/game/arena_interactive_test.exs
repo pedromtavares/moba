@@ -1,8 +1,8 @@
 defmodule Moba.Game.ArenaInteractiveTest do
   use Moba.DataCase
   import Test.GameHelper
-  alias Moba.{Game, Engine, Repo}
-  alias Moba.Game.{Arena, Matches, Teams}
+  alias Moba.{Game, Engine}
+  alias Moba.Game.{Arena, Matches}
 
   setup do
     player = create_player!(%{pve_tier: 1})
@@ -63,20 +63,6 @@ defmodule Moba.Game.ArenaInteractiveTest do
     assert {:error, :unauthorized} = Arena.play_match(%{user: other.user}, match.id, battle.id, 0, %{auto: true})
     assert {:error, :unauthorized} = Arena.play_match(%{user: nil}, match.id, battle.id, 0, %{auto: true})
     assert Engine.get_battle!(battle.id).turns == []
-  end
-
-  test "importing a completed roster creates one independently editable Arena team", a do
-    record = %Game.Schema.TrainingTeam{player_id: a.player.id, user_id: a.player.user_id, phase: "finished", league_tier: 6, hero_ids: Enum.map(a.picks, & &1.id), name: "The three", state: <<>>}
-      |> Repo.insert!()
-    Teams.import_training_team!(record)
-    Teams.import_training_team!(record)
-    assert [team] = Teams.list_teams(a.player)
-    assert team.training_team_id == record.id
-    assert team.pick_ids == record.hero_ids
-    Teams.update_team!(team, %{name: "Arena only", pick_ids: Enum.reverse(team.pick_ids)})
-    original = Repo.get!(Game.Schema.TrainingTeam, record.id)
-    assert original.name == "The three"
-    assert original.hero_ids == record.hero_ids
   end
 
   defp complete(scope, id, budget \\ 30)

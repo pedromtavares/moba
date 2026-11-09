@@ -48,13 +48,20 @@ defmodule MobaWeb.V2.PlayerLive do
     {:noreply, assign(socket, ranking_tab: tab)}
   end
 
+  def handle_event("profile-ranking", %{"type" => "team"}, socket) do
+    {:noreply,
+     assign(socket, ranking_tab: "team", team_ranking: Game.TeamRuns.ranking(socket.assigns.best_team_rank[:id]))}
+  end
+
   def handle_info({"ranking", _}, %{assigns: %{player: %{id: id}}} = socket) do
     player = Game.get_player!(id)
     heroes = ranked_heroes()
     best = Enum.find(heroes, &(&1.player_id == player.id))
+    best_team = best_team_rank(player.id)
     matches = player |> Game.list_matches() |> Enum.filter(&(&1.phase == "scored"))
     duels = Game.list_finished_duels(player)
     first_battle? = socket.assigns.matches == [] && socket.assigns.duels == []
+    socket = assign_collection(socket, player, socket.assigns.featured)
 
     {:noreply,
      assign(socket,
@@ -62,6 +69,8 @@ defmodule MobaWeb.V2.PlayerLive do
        hero_ranking: heroes,
        best_ranked_hero_id: best && best.id,
        best_hero_rank: Game.best_hero_rank(player.id),
+       best_team_rank: best_team,
+       team_ranking: if(socket.assigns.ranking_tab == "team", do: Game.TeamRuns.ranking(best_team[:id])),
        player: player,
        recent_results: Game.Matches.recent_results(player),
        matches: matches,
@@ -77,18 +86,31 @@ defmodule MobaWeb.V2.PlayerLive do
     |> Enum.sort_by(& &1.pve_ranking)
   end
 
-  defp featured_hero(%{hero_collection: collection}) when length(collection) > 0 do
-    collection |> List.first() |> Map.fetch!("hero_id") |> Game.get_hero!()
-  end
+  defp best_team_rank(player_id), do: Game.TeamRuns.best_ranks_for_players([player_id])[player_id]
 
-  defp featured_hero(player), do: player.current_pve_hero
+  defp assign_collection(socket, player, selected \\ nil) do
+    collection =
+      (player.hero_collection || [])
+      |> Enum.map(&Map.get(&1, "profile", &1))
+      |> Enum.sort_by(& &1["position"])
+
+    codes = MapSet.new(collection, & &1["code"])
+    blank = Enum.reject(Game.list_avatars(), &MapSet.member?(codes, &1.code))
+
+    featured =
+      cond do
+        selected && Enum.any?(collection, &(&1["hero_id"] == selected.id)) -> selected
+        collection != [] -> List.first(Game.get_heroes([hd(collection)["hero_id"]])) || player.current_pve_hero
+        true -> player.current_pve_hero
+      end
+
+    assign(socket, profile_collection: collection, blank_collection: blank, featured: featured)
+  end
 
   defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do
     user = Accounts.get_user!(user_id)
     player = cached_player || Moba.player_for(user)
-    collection_codes = Enum.map(player.hero_collection, & &1["code"])
-    blank_collection = Game.list_avatars() |> Enum.filter(&(&1.code not in collection_codes))
-    featured = featured_hero(player)
+    socket = assign_collection(socket, player)
     duels = Game.list_finished_duels(player)
     matches = player |> Game.list_matches() |> Enum.filter(&(&1.phase == "scored"))
     ranking = Moba.season_ranking()
@@ -97,9 +119,7 @@ defmodule MobaWeb.V2.PlayerLive do
     sidebar_code = if player.id == current_player.id, do: "user", else: nil
 
     assign(socket,
-      blank_collection: blank_collection,
       duels: duels,
-      featured: featured,
       filter: initial_history_tab(matches, duels),
       matches: matches,
       player: player,
@@ -108,7 +128,9 @@ defmodule MobaWeb.V2.PlayerLive do
       hero_ranking: hero_ranking,
       best_ranked_hero_id: best && best.id,
       best_hero_rank: Game.best_hero_rank(player.id),
-      arena_debut: if(matches == [] && duels == [], do: arena_debut(player, featured)),
+      best_team_rank: best_team_rank(player.id),
+      team_ranking: nil,
+      arena_debut: if(matches == [] && duels == [], do: arena_debut(player, socket.assigns.featured)),
       ranking_tab: "season",
       sidebar_code: sidebar_code,
       user: user

@@ -7,27 +7,21 @@
   sidebar_code={@sidebar_code}
   hide_footer
 >
-  <main class="content catalog-viewport" id="library" phx-hook="ManualCodex" phx-update="ignore">
+  <main class="content catalog-viewport catalog-compact" id="library" phx-hook="ManualCodex" phx-update="ignore">
     <header
       :if={@preview}
-      class="manual-heading"
+      class="catalog-heading"
       id="manual-heading"
       style="--manual-scene: url(/images/training/meditation-dark-fantasy.png)"
     >
       <div class="manual-heading-copy">
-        <p class="manual-eyebrow">Knowledge is power</p>
-        <h1 id="manual-title">Library</h1>
-        <p class="manual-heading-description">Refine your strategy.</p>
+        <p class="catalog-eyebrow">Knowledge is power</p>
+        <div class="manual-title-row">
+          <h1 id="manual-title">Library</h1>
+          <p class="manual-heading-description">Refine your strategy.</p>
+        </div>
       </div>
-      <a
-        id="manual-discord"
-        href="https://discord.gg/QNwEdPS"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="manual-discord"
-      >
-        <i class="ui-icon ui-chat-controller" aria-hidden="true"></i><span>Join our Discord</span><span aria-hidden="true">↗</span>
-      </a>
+      <.catalog_discord_link id="manual-discord" />
     </header>
     <div class="cinematic-catalog-tabs" role="tablist" aria-label="Library reference">
       <button
@@ -47,7 +41,8 @@
         aria-controls={"manual-#{key}"}
         tabindex={if key == "avatars", do: 0, else: -1}
       >
-        <.icon name={icon} />{label}
+        <.icon name={icon} />
+        <span>{label}</span>
       </button>
     </div>
 

@@ -7,12 +7,15 @@ defmodule Moba.Game.CommunityActivity do
   alias Moba.Repo
   alias Moba.Game.Schema.{Duel, Hero, Match, Player}
 
-  def latest_for_players([]), do: %{}
+  def latest_for_players(player_ids, training_teams \\ %{})
 
-  def latest_for_players(player_ids) do
+  def latest_for_players([], _training_teams), do: %{}
+
+  def latest_for_players(player_ids, training_teams) do
     since = DateTime.add(DateTime.utc_now(), -604_800, :second)
 
-    (training_activity(player_ids, since, :finished_at) ++
+    (team_activity(training_teams, since) ++
+       training_activity(player_ids, since, :finished_at) ++
        training_activity(player_ids, since, :inserted_at) ++
        match_activity(player_ids, since) ++
        duel_activity(player_ids, since, :player_id) ++
@@ -20,12 +23,16 @@ defmodule Moba.Game.CommunityActivity do
     |> Enum.map(&Map.update!(&1, :at, fn at -> utc_timestamp(at) end))
     |> Enum.sort_by(
       fn activity ->
-        {DateTime.to_unix(activity.at), if(activity.kind == :training_started, do: 0, else: 1), activity.id}
+        {DateTime.to_unix(activity.at), activity_priority(activity), activity.id}
       end,
       :desc
     )
     |> Enum.reduce(%{}, fn activity, activities -> Map.put_new(activities, activity.player_id, activity) end)
   end
+
+  defp activity_priority(%{kind: :training_started, team_name: _}), do: 1
+  defp activity_priority(%{kind: :training_started}), do: 0
+  defp activity_priority(_), do: 2
 
   def live_player_ids(online_ids) do
     from(p in Player, where: p.id in ^online_ids and p.status == "available", select: p.id)
@@ -35,7 +42,7 @@ defmodule Moba.Game.CommunityActivity do
 
   defp training_activity(player_ids, since, time_field) do
     from(h in Hero,
-      where: h.player_id in ^player_ids and field(h, ^time_field) >= ^since,
+      where: h.player_id in ^player_ids and is_nil(h.training_team_id) and field(h, ^time_field) >= ^since,
       distinct: h.player_id,
       order_by: [asc: h.player_id, desc: field(h, ^time_field), desc: h.id],
       preload: [:avatar]
@@ -50,6 +57,14 @@ defmodule Moba.Game.CommunityActivity do
         avatar: hero.avatar.name
       }
     end)
+  end
+
+  defp team_activity(teams, since) do
+    for {_player_id, team} <- teams,
+        {kind, at} <- [training_started: team.started_at, training_finished: team.finished_at],
+        at && DateTime.compare(utc_timestamp(at), since) != :lt do
+      %{player_id: team.player_id, kind: kind, id: team.id, at: at, team_name: team.name}
+    end
   end
 
   defp match_activity(player_ids, since) do

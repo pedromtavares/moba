@@ -1,6 +1,6 @@
 defmodule Moba.Release do
   @moduledoc """
-  Resource and bot maintenance for Mix tasks and assembled releases.
+  Resource, bot, and collection maintenance for Mix tasks and assembled releases.
 
   Starts the repository and the bot notification dependencies, without starting
   the web endpoint, Discord consumer, or periodic maintenance workers.
@@ -11,6 +11,8 @@ defmodule Moba.Release do
   def resources, do: with_repo(&Conductor.regenerate_resources!/0)
 
   def bots, do: with_repo(fn -> with_pubsub(&Conductor.regenerate_bots!/0) end)
+
+  def rebuild_hero_collections, do: with_repo(&Moba.Game.Training.backfill_hero_collections!/0)
 
   defp with_repo(fun) do
     Application.load(:moba)

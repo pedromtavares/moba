@@ -6,24 +6,17 @@
   current_hero={@current_hero}
   sidebar_code={@sidebar_code}
 >
-  <main id="community" class="community catalog-viewport">
+  <main id="community" class="community catalog-viewport catalog-compact">
     <header
       id="community-heading"
-      class="community-heading"
+      class="catalog-heading"
       style="--community-scene: url(/images/tutorial/hall-of-legends.jpg)"
     >
       <div class="community-heading-copy">
-        <p class="community-eyebrow">The gathering hall</p>
+        <p class="catalog-eyebrow">The gathering hall</p>
         <h1>Community</h1>
       </div>
-      <a
-        href="https://discord.gg/QNwEdPS"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="btn base-secondary community-discord"
-      >
-        <i class="ui-icon ui-chat-controller" aria-hidden="true"></i>Join our Discord <span aria-hidden="true">↗</span>
-      </a>
+      <.catalog_discord_link id="community-discord" />
     </header>
 
     <nav class="cinematic-catalog-tabs" role="tablist" aria-label="Community">

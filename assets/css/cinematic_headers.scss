@@ -3,14 +3,13 @@
     --cinematic-header-height: 242px;
 
     .user-profile #profile-cinematic,
-    #tavern-heading,
-    #manual-heading {
+    #tavern-heading {
       height: var(--cinematic-header-height);
       min-height: var(--cinematic-header-height);
       box-sizing: border-box;
     }
 
-    #tavern-heading, #manual-heading { padding-top: 28px; padding-bottom: 28px; }
+    #tavern-heading { padding-top: 28px; padding-bottom: 28px; }
   }
 }
 
@@ -30,12 +29,10 @@
   .game-page {
     --cinematic-header-height: 192px;
 
-    #tavern-heading,
-    #manual-heading { padding-top: 18px; padding-bottom: 18px; }
+    #tavern-heading { padding-top: 18px; padding-bottom: 18px; }
 
-    #tavern-heading h1, #manual-heading h1 { font-size: 42px; }
-    .tavern-heading-description, .manual-heading-description { margin-top: 8px; font-size: 14px; }
-    #manual-heading nav { margin-top: 12px; }
+    #tavern-heading h1 { font-size: 42px; }
+    .tavern-heading-description { margin-top: 8px; font-size: 14px; }
   }
 }
 

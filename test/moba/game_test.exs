@@ -118,6 +118,11 @@ defmodule Moba.GameTest do
       hero = create_base_hero(%{pve_current_turns: 0, pve_total_turns: 0, pve_state: "dead"}) |> Game.maybe_finish_pve()
 
       assert hero.finished_at
+      assert [%{"profile" => %{"hero_id" => hero_id}}] = Game.get_player!(hero.player_id).hero_collection
+      assert hero_id == hero.id
+
+      Game.archive_hero!(Game.get_hero!(hero.id))
+      assert Game.get_player!(hero.player_id).hero_collection == []
 
       hero =
         create_base_hero(%{

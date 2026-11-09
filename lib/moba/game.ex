@@ -150,6 +150,7 @@ defmodule Moba.Game do
   defdelegate subscribe_to_hero(hero_id), to: Training
 
   defdelegate trained_pvp_heroes(player_id, excluded_hero_ids, limit), to: Heroes
+  defdelegate trained_pvp_heroes(player_id, excluded_hero_ids, limit, sort), to: Heroes
 
   defdelegate update_attacker!(hero, updates), to: Training
 

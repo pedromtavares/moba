@@ -217,7 +217,7 @@
         <h2 id="team-library-title">Hero collection <small>{length(@heroes)}</small></h2>
         <div class="workshop-library-controls">
           <button type="button" phx-click="sort" id="hero-sort">
-            {if @sort == :recent, do: "Recent", else: "Rank"} ↕
+            {String.capitalize(to_string(@sort))} ↕
           </button>
           <div :if={length(@heroes) > heroes_per_page} class="workshop-pagination">
             <button

@@ -58,29 +58,39 @@ defmodule Moba.Game.Heroes do
   def collection_for(nil), do: []
 
   def collection_for(player_id) do
-    HeroQuery.finished_pve()
-    |> HeroQuery.load_avatar()
-    |> HeroQuery.with_player(player_id)
-    |> HeroQuery.unarchived()
-    |> Repo.all()
+    query = HeroQuery.finished_pve() |> HeroQuery.with_player(player_id) |> HeroQuery.unarchived()
+
+    heroes =
+      from(hero in query, order_by: [asc_nulls_last: hero.pve_ranking, asc: hero.id], preload: :avatar)
+      |> Repo.all()
+
+    profile_picks =
+      heroes
+      |> Enum.uniq_by(& &1.avatar.code)
+      |> Enum.with_index()
+      |> Map.new(fn {hero, position} ->
+        entry = collection_entry(hero)
+        avatar = Map.take(entry.avatar, [:code, :image])
+        {entry.code, %{entry | avatar: avatar} |> Map.put(:position, position)}
+      end)
+
+    heroes
     |> Enum.group_by(& &1.avatar.code)
     |> Enum.map(fn {code, heroes} ->
-      {
-        code,
-        Enum.sort_by(heroes, &{is_nil(&1.pve_ranking), &1.pve_ranking, &1.id}, :asc)
-        |> List.first()
-      }
+      {code, Enum.min_by(heroes, &{is_nil(&1.pve_ranking), &1.pve_ranking, &1.id})}
     end)
     |> Enum.sort_by(fn {_code, hero} -> {hero.pve_ranking, hero.league_tier * -1} end, :asc)
-    |> Enum.map(fn {code, hero} ->
-      %{
-        code: code,
-        hero_id: hero.id,
-        tier: hero.league_tier,
-        avatar: hero.avatar,
-        total_farm: total_farm(hero)
-      }
-    end)
+    |> Enum.map(fn {code, hero} -> Map.put(collection_entry(hero), :profile, Map.fetch!(profile_picks, code)) end)
+  end
+
+  defp collection_entry(hero) do
+    %{
+      code: hero.avatar.code,
+      hero_id: hero.id,
+      tier: hero.league_tier,
+      avatar: hero.avatar,
+      total_farm: total_farm(hero)
+    }
   end
 
   def create!(attrs, player, avatar, skills, items \\ []) do
@@ -337,8 +347,8 @@ defmodule Moba.Game.Heroes do
     get_hero!(result.id)
   end
 
-  def trained_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5) do
-    HeroQuery.trained(player_id, excluded_hero_ids, limit) |> Repo.all()
+  def trained_pvp_heroes(player_id, excluded_hero_ids \\ [], limit \\ 5, sort \\ :pvp) do
+    HeroQuery.trained(player_id, excluded_hero_ids, limit, sort) |> Repo.all()
   end
 
   def update!(nil, _), do: nil

@@ -68,6 +68,62 @@ defmodule MobaWeb.V2.PlayerLiveTest do
   end
 
   describe "set-featured event" do
+    test "collection includes finished team heroes and orders avatar picks by farm, time, then solo rank", %{conn: conn} do
+      player = Game.get_player!(create_player!().id)
+      scope = Game.TeamRuns.scope(player)
+      run = Test.TeamHelper.team_run(scope, player)
+      {:ok, team} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished})
+
+      [first, second, third] =
+        team.hero_ids
+        |> Enum.zip([6_000, 3_000, 3_000])
+        |> Enum.map(fn {id, farm} ->
+          Game.update_hero!(Game.get_hero!(id), %{total_gold_farm: farm, total_xp_farm: 0})
+        end)
+
+      ranked_duplicate =
+        create_combat_hero(
+          %{finished_at: first.finished_at, pve_ranking: 1, total_gold_farm: 6_000},
+          player,
+          first.avatar
+        )
+        |> Ecto.Changeset.change(inserted_at: NaiveDateTime.add(first.inserted_at, -60, :second))
+        |> Moba.Repo.update!()
+
+      ranked_tie =
+        create_combat_hero(
+          %{finished_at: second.finished_at, pve_ranking: 2, total_gold_farm: 3_000},
+          player,
+          strong_avatar()
+        )
+        |> Ecto.Changeset.change(inserted_at: second.inserted_at)
+        |> Moba.Repo.update!()
+
+      player.id |> Game.get_player!() |> Game.update_collection!([])
+      Game.Training.backfill_hero_collections!()
+
+      cached = Enum.find(Game.get_player!(player.id).hero_collection, &(&1["code"] == first.avatar.code))
+      assert cached["hero_id"] == ranked_duplicate.id
+      assert cached["profile"]["hero_id"] == first.id
+
+      # The profile uses the saved ordering until the next collection refresh.
+      Game.update_hero!(third, %{total_gold_farm: 9_000})
+      {:ok, view, html} = live(log_in_player(conn, player_id: player.id), "/player/#{player.id}")
+
+      ids =
+        html
+        |> LazyHTML.from_fragment()
+        |> LazyHTML.query("#profile-collection a[id^=set-featured-]")
+        |> LazyHTML.attribute("id")
+
+      assert ids == Enum.map([first, ranked_tie, second, third], &"set-featured-#{&1.id}")
+      refute has_element?(view, "#set-featured-#{ranked_duplicate.id}")
+      assert has_element?(view, "#set-featured-#{first.id}.current-featured")
+
+      view |> element("#set-featured-#{third.id}") |> render_click()
+      assert has_element?(view, "#profile-featured-link[href='/hero/#{third.id}']")
+    end
+
     test "preview selection updates the banner hero and loadout", %{conn: conn} do
       first = create_base_hero(%{finished_at: Timex.now()}) |> Game.buy_item!(base_item())
       Game.update_hero_collection!(first)
@@ -180,7 +236,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     Game.create_hero!(%{name: "Lower placement", pve_ranking: 500}, hero.player, base_avatar(), base_skills())
     {:ok, view, _} = live(log_in_player(conn, player_id: viewer.player_id), "/player/#{hero.player_id}")
 
-    assert has_element?(view, "#profile-season-rank + #profile-hero-rank strong", "405")
+    assert has_element?(view, "#profile-season-rank + #profile-team-rank + #profile-hero-rank strong", "405")
     assert has_element?(view, "#profile-hero-rank .profile-metric-label", "Hero rank")
 
     Game.update_hero!(hero, %{pve_ranking: 300})
@@ -192,6 +248,49 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     hero = create_base_hero()
     {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
     assert has_element?(view, "#profile-hero-rank [aria-label=Unranked]", "—")
+    assert has_element?(view, "#profile-team-rank [aria-label=Unranked]", "—")
+    view |> element("#profile-ranking-team") |> render_click()
+    assert has_element?(view, "#profile-no-ranked-teams")
+  end
+
+  test "profile shows the viewed player's best team rank and opens the team leaderboard", %{conn: conn} do
+    viewer = create_base_hero().player
+    owner = create_base_hero().player
+
+    teams =
+      for {player, name, farm} <- [
+            {owner, "Second team", 30_000},
+            {owner, "Best team", 60_000},
+            {viewer, "Global leader", 90_000}
+          ] do
+        scope = Game.TeamRuns.scope(player)
+        run = Test.TeamHelper.team_run(scope, player)
+        {:ok, finished} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished, name: name})
+        finished |> Ecto.Changeset.change(total_farm: farm) |> Moba.Repo.update!()
+      end
+
+    [second, best, leader] = teams
+    {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/player/#{owner.id}")
+
+    assert has_element?(view, "#profile-team-rank strong", "2")
+
+    assert has_element?(
+             view,
+             "#profile-ranking-season[aria-pressed=true] + #profile-ranking-team + #profile-ranking-hero"
+           )
+
+    view |> element("#profile-ranking-team") |> render_click()
+    assert has_element?(view, "#profile-ranking-team[aria-pressed=true]", "Team")
+    assert has_element?(view, "#profile-ranked-team-#{leader.id} td:first-child", "#1")
+
+    assert has_element?(
+             view,
+             "#profile-ranked-team-#{best.id}.selected-player[phx-hook=HalfScroll] td:first-child",
+             "#2"
+           )
+
+    assert has_element?(view, "#profile-ranked-team-#{best.id} a[href='/teams/#{best.id}']", "Best team")
+    assert has_element?(view, "#profile-ranked-team-#{second.id}.selected-player td:first-child", "#3")
   end
 
   describe "season leaderboard" do
@@ -239,8 +338,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert has_element?(view, "#profile-ranking-header", "Season score")
       assert has_element?(view, "#player-#{player.id} h1", "#3")
       assert has_element?(view, "#season-player-#{player.id}", "185")
-      assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season Rank")
-      assert has_element?(view, "#profile-ranking-hero", "Hero Rank")
+      assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season")
+      assert has_element?(view, "#profile-ranking-hero", "Hero")
       refute has_element?(view, "#profile-hero-ranking-table, #daily-player-#{player.id}")
       refute has_element?(view, "#player-#{daily_player.id}")
 
@@ -304,9 +403,9 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       Cachex.put(:game_cache, "pve_ranking", Enum.map([outside, hero, leader], &Game.get_hero!(&1.id)))
       {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
-      assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season Rank")
+      assert has_element?(view, "#profile-ranking-season[aria-pressed=true]", "Season")
       view |> element("#profile-ranking-hero") |> render_click()
-      assert has_element?(view, "#profile-ranking-hero[aria-pressed=true]", "Hero Rank")
+      assert has_element?(view, "#profile-ranking-hero[aria-pressed=true]", "Hero")
 
       assert has_element?(
                view,

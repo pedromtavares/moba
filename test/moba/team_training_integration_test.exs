@@ -28,7 +28,12 @@ defmodule Moba.TeamTrainingIntegrationTest do
     assert Enum.all?(heroes, &(&1.training_team_id == record.id && &1.finished_at && &1.league_tier == 4))
     assert length(Game.Heroes.collection_for(player.id)) == 3
     assert length(Game.trained_pvp_heroes(player.id, [], 10)) == 3
-    assert Game.get_player!(player.id).pve_tier == 1
+    player = Game.get_player!(player.id)
+    assert Game.list_teams(player) == []
+    assert player.pve_tier == 1
+
+    assert Enum.sort(Enum.map(player.hero_collection, &get_in(&1, ["profile", "hero_id"]))) ==
+             Enum.sort(record.hero_ids)
 
     Game.rank_finished_heroes!()
     assert Enum.all?(Game.get_heroes(record.hero_ids), &is_nil(&1.pve_ranking))
@@ -38,6 +43,11 @@ defmodule Moba.TeamTrainingIntegrationTest do
     assert again.hero_ids == record.hero_ids
     assert Repo.aggregate(Game.Schema.Hero, :count) == before
     assert TeamRuns.ranking(record.id) |> Enum.any?(&(&1.team.id == record.id))
+
+    picks = Enum.reverse(record.hero_ids)
+    arena_team = Game.create_team!(%{player_id: player.id, name: "Arena lineup", pick_ids: picks})
+    assert arena_team.pick_ids == picks
+    assert TeamRuns.profile!(scope, record.id).hero_ids == record.hero_ids
   end
 
   test "a Novice team needs a Master finish to reach Adept" do

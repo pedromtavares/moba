@@ -58,7 +58,6 @@ defmodule MobaWeb.V2.DashboardLive do
 
     if hero.player_id == player.id do
       Game.archive_hero!(hero)
-      if hero.finished_at, do: Game.update_hero_collection!(hero)
 
       current_hero = if current_hero && hero.id == current_hero.id, do: nil, else: current_hero
 

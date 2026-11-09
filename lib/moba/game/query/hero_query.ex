@@ -31,8 +31,14 @@ defmodule Moba.Game.Query.HeroQuery do
     preload(queryable, [:avatar, :skin])
   end
 
-  def trained(player_id, ids, limit) do
-    base = with_player(load(), player_id) |> unarchived() |> finished() |> order_by_pvp() |> exclude_ids(ids)
+  def trained(player_id, ids, limit, sort \\ :pvp) do
+    base = with_player(load(), player_id) |> unarchived() |> finished() |> exclude_ids(ids)
+
+    base =
+      case sort do
+        :farm -> base |> order_by_training_result() |> order_by([hero], asc: hero.id)
+        :pvp -> order_by_pvp(base)
+      end
 
     from(hero in base,
       limit: ^limit,
@@ -164,8 +170,11 @@ defmodule Moba.Game.Query.HeroQuery do
   end
 
   def finished_pve(query \\ Hero) do
+    query |> finished() |> order_by_training_result()
+  end
+
+  defp order_by_training_result(query) do
     from hero in query,
-      where: not is_nil(hero.finished_at),
       order_by: [
         desc: fragment("? + ?", hero.total_xp_farm, hero.total_gold_farm),
         desc: fragment("? - ?", hero.inserted_at, hero.finished_at)
