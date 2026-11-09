@@ -17,6 +17,7 @@ defmodule MobaWeb.V2.Components.TrainingComponents do
   attr :show_controls, :boolean, default: true
   attr :battle_pending, :boolean, default: false
   attr :target_battles_locked, :boolean, default: false
+  attr :target_refreshes, :integer, default: nil
   attr :team_mode, :boolean, default: false
   attr :goal_override, :integer, default: nil
   attr :id_prefix, :string, default: ""
@@ -37,7 +38,13 @@ defmodule MobaWeb.V2.Components.TrainingComponents do
     gold_farm = Enum.sum(Enum.map(farm_heroes, & &1.total_gold_farm))
     goal = assigns.goal_override || max(hero.league_tier, max_available_league(hero))
     next = min(hero.league_tier + 1, goal)
-    ready = hero.pve_current_turns == 0 && hero.league_tier < goal && hero.league_tier < Moba.master_league_tier()
+
+    turns_ready =
+      if assigns.training_team,
+        do: Moba.Game.TeamTraining.league_turns_ready?(assigns.training_team),
+        else: hero.pve_current_turns == 0
+
+    ready = turns_ready && hero.league_tier < goal && hero.league_tier < Moba.master_league_tier()
     challenge_ready = ready && hero.pve_state == "alive" && !assigns.battle_pending
 
     assigns
@@ -60,12 +67,20 @@ defmodule MobaWeb.V2.Components.TrainingComponents do
     )
     |> assign(:goal, goal)
     |> assign(:next, next)
+    |> assign(:turns_ready, turns_ready)
+    |> assign(
+      :refreshes_left,
+      if(assigns.team_mode,
+        do: assigns.target_refreshes || 0,
+        else: if(assigns.show_controls && hero.pve_current_turns > 0, do: hero.refresh_targets_count, else: 0)
+      )
+    )
     |> assign(:spent_turns, max(0, min(5, 5 - hero.pve_current_turns)))
     |> assign(:challenge_ready, challenge_ready)
     |> assign(:challenge_stage, challenge_ready && assigns.show_controls && !assigns.history)
     |> assign(
       :boss_ready,
-      assigns.team_mode && hero.pve_current_turns == 0 && hero.league_tier == Moba.master_league_tier() &&
+      assigns.team_mode && turns_ready && hero.league_tier == Moba.master_league_tier() &&
         hero.league_tier < goal
     )
     |> ascent()
@@ -204,9 +219,9 @@ defmodule MobaWeb.V2.Components.TrainingComponents do
         Training in progress
       <% @hero.league_tier >= @goal -> %>
         <span class="ascent-status-goal">{short_league(@goal)}</span> reached
-      <% @turns == 0 && @hero.boss_id != nil -> %>
+      <% @turns_ready && @hero.boss_id != nil -> %>
         Roshan awaits
-      <% @turns == 0 -> %>
+      <% @turns_ready -> %>
         <span class="ascent-status-league">{short_league(@next)}</span> challenge unlocked
       <% true -> %>
         {if @team_mode,

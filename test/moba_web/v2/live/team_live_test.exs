@@ -15,6 +15,33 @@ defmodule MobaWeb.V2.TeamLiveTest do
     %{conn: conn, scope: scope, player: player}
   end
 
+  test "Expert team training shares its refresh allowance and rerolls only the selected hero", %{conn: conn} do
+    {scope, player} = team_account(4)
+    conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+    record = team_run(scope, player)
+    {:ok, record} = TeamRuns.update(scope, record, &Map.delete(&1, :target_refreshes_used))
+    before = TeamRuns.state(record)
+    {:ok, view, _} = live(conn, "/training?run=#{record.id}")
+
+    button = "#team-2-training-refresh-targets"
+    assert has_element?(view, "#{button}[phx-value-hero_id='2']", "Refresh Targets 5")
+    view |> element(button) |> render_click()
+
+    after_refresh = TeamRuns.state(TeamRuns.get!(scope, record.id))
+    assert length(after_refresh.targets[2]) == 3
+    assert MapSet.disjoint?(MapSet.new(before.targets[2], & &1.id), MapSet.new(after_refresh.targets[2], & &1.id))
+    assert Map.take(after_refresh.targets, [1, 3]) == Map.take(before.targets, [1, 3])
+    assert after_refresh.turns_left == before.turns_left
+    assert has_element?(view, "#training-refresh-targets", "Refresh Targets 4")
+    assert has_element?(view, button, "Refresh Targets 4")
+
+    for _ <- 1..4, do: view |> element(button) |> render_click()
+    refute has_element?(view, "button[phx-click=refresh-targets]")
+    exhausted = TeamRuns.state(TeamRuns.get!(scope, record.id))
+    render_click(view, "refresh-targets", %{"hero_id" => "2"})
+    assert TeamRuns.state(TeamRuns.get!(scope, record.id)) == exhausted
+  end
+
   test "training still loads and starts battles with an unavailable historical replay", %{
     conn: conn,
     scope: scope,
@@ -732,16 +759,18 @@ defmodule MobaWeb.V2.TeamLiveTest do
           heroes =
             Map.new(run.heroes, fn {id, unit} ->
               gold = 30_000 - if(id == 1, do: gold_room, else: 0)
-              {id, Game.Training.Loadouts.grant_farm(%{unit | auto_buy: false}, gold, 37_700, run.catalog)}
+              unit = Game.Training.Loadouts.grant_farm(%{unit | auto_buy: false}, gold, 37_700, run.catalog)
+              {id, put_in(unit.hero.skill_levels_available, 0)}
             end)
 
-          run = %{run | heroes: heroes} |> easy_target()
-          run = TeamTraining.battle(run, hd(run.targets[1]).id) |> finish_team(scope)
-          %{run | phase: :finished}
+          %{run | heroes: heroes, goal: 1}
+          |> TeamTraining.league()
+          |> simple_league()
+          |> finish_team(scope)
         end)
 
       [encounter] = TeamRuns.encounters(scope, record.id)
-      {:ok, view, _} = live(conn, TrainingEncounters.path(encounter, 1))
+      {:ok, view, _} = live(conn, TrainingEncounters.path(encounter, 3))
       assert has_element?(view, "#training-battle-result[data-result=victory]")
       assert has_element?(view, "#training-continue[href='/teams/#{record.id}']", "View team")
       refute has_element?(view, "#training-battle-result .team-result-spoils .text-info")
@@ -754,7 +783,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
     end
   end
 
-  test "a maxed Focus hero can enter league challenges but cannot battle targets", %{
+  test "maxed heroes cannot battle targets in either reward mode and a maxed roster can challenge its league", %{
     conn: conn,
     scope: scope,
     player: player
@@ -785,21 +814,23 @@ defmodule MobaWeb.V2.TeamLiveTest do
     assert TeamRuns.state(TeamRuns.get!(scope, record.id)).turns_left == run.turns_left
 
     view |> element("#team-reward-mode") |> render_click()
-    assert has_element?(view, "#team-targets #gank-#{target_id}")
-    refute has_element?(view, "#team-max-level-panel, #max-level-hero-arrow-1")
+    assert has_element?(view, "#team-reward-mode[aria-checked=false]")
+    assert has_element?(view, "#team-max-level-panel", "can only fight in league challenges")
+    assert has_element?(view, "#max-level-hero-arrow-1[data-max-guide-to='3']")
+    refute has_element?(view, "#team-targets")
+    render_click(view, "battle", %{"id" => to_string(target_id), "hero_id" => "1"})
+    assert TeamRuns.encounters(scope, record.id) == []
+    assert TeamRuns.state(TeamRuns.get!(scope, record.id)).turns_left == run.turns_left
+    refute has_element?(view, "#start-league-challenge")
 
     {:ok, _} =
       TeamRuns.update(scope, TeamRuns.get!(scope, record.id), fn run ->
-        heroes =
-          Map.new(run.heroes, fn {id, unit} ->
-            {id, %{unit | hero: %{unit.hero | pve_current_turns: 0}}}
-          end)
-
-        %{run | turns_left: 0, reward_mode: :focus, heroes: heroes}
+        put_in(run.heroes[3].hero.level, 30)
       end)
 
     {:ok, view, _} = live(conn, "/training")
     refute has_element?(view, "#max-level-hero-arrow-1")
+    assert has_element?(view, "#training-ascent-status", "challenge unlocked")
     view |> element("#start-league-challenge") |> render_click()
     [encounter] = TeamRuns.encounters(scope, record.id)
     assert_redirect(view, TrainingEncounters.path(encounter, 1))

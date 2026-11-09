@@ -30,6 +30,7 @@ defmodule Moba.Game.TeamTraining do
       turn: 1,
       targets: %{},
       target_sequence: 0,
+      target_refreshes_used: 0,
       encounters: [],
       catalog: catalog,
       unlocked_codes: if(scope.user, do: Accounts.unlocked_codes_for(scope.user), else: []),
@@ -146,8 +147,11 @@ defmodule Moba.Game.TeamTraining do
   def pending_skill_heroes(run), do: Enum.filter(team(run), &(&1.hero.skill_levels_available > 0))
   def dead?(h), do: h.hero.pve_state == "dead" || h.hp <= 0
   def roster_alive?(run), do: Enum.all?(team(run), &(!dead?(&1)))
-  def focus_target_locked?(run, h), do: run.reward_mode == :focus && Loadouts.max_level?(h.hero)
-  def can_battle_target?(run, h), do: !dead?(h) && !focus_target_locked?(run, h)
+  def can_battle_target?(h), do: !dead?(h) && !Loadouts.max_level?(h.hero)
+
+  def league_turns_ready?(run),
+    do: run.turns_left == 0 || Enum.all?(team(run), &Loadouts.max_level?(&1.hero))
+
   def active_encounter(%{phase: :engagement, encounters: encounters}), do: List.last(encounters)
   def active_encounter(_), do: nil
 
@@ -157,8 +161,8 @@ defmodule Moba.Game.TeamTraining do
 
   def hero_name(%{name: name}, _team), do: name
 
-  def boss_preview(%{phase: :playing, turns_left: 0} = run) do
-    if run.league_tier == Moba.master_league_tier() && run.league_tier < run.goal do
+  def boss_preview(%{phase: :playing} = run) do
+    if run.league_tier == Moba.master_league_tier() && run.league_tier < run.goal && league_turns_ready?(run) do
       boss = run.boss || boss(run)
 
       put_in(
@@ -218,7 +222,7 @@ defmodule Moba.Game.TeamTraining do
 
   def battle(%{phase: :playing, turns_left: left} = run, target_id) when left > 0 do
     target =
-      if can_battle_target?(run, run.heroes[run.selected]),
+      if can_battle_target?(run.heroes[run.selected]),
         do: Enum.find(run.targets[run.selected] || [], &(&1.id == target_id))
 
     case target do
@@ -241,9 +245,28 @@ defmodule Moba.Game.TeamTraining do
 
   def battle(run, _), do: run
 
-  def league(%{phase: :playing, turns_left: 0, league_tier: tier} = run) do
+  def target_refreshes_left(%{phase: :playing, turns_left: turns, pve_tier: tier} = run)
+      when turns > 0 and tier >= 4 do
+    if can_battle_target?(run.heroes[run.selected]),
+      do: max(0, Moba.refresh_targets_count(tier) - Map.get(run, :target_refreshes_used, 0)),
+      else: 0
+  end
+
+  def target_refreshes_left(_), do: 0
+
+  def refresh_selected_targets(run) do
+    if target_refreshes_left(run) > 0 do
+      run
+      |> Map.update(:target_refreshes_used, 1, &(&1 + 1))
+      |> refresh_targets([run.selected])
+    else
+      run
+    end
+  end
+
+  def league(%{phase: :playing, league_tier: tier} = run) do
     cond do
-      !roster_alive?(run) || pending_skill_heroes(run) != [] ->
+      !league_turns_ready?(run) || !roster_alive?(run) || pending_skill_heroes(run) != [] ->
         run
 
       tier >= run.goal ->
@@ -253,7 +276,7 @@ defmodule Moba.Game.TeamTraining do
         boss = boss_preview(run)
 
         encounter(
-          %{run | boss: boss, boss_attempts: run.boss_attempts + 1},
+          %{run | turns_left: 0, boss: boss, boss_attempts: run.boss_attempts + 1},
           :boss,
           run.order,
           [boss],
@@ -265,7 +288,7 @@ defmodule Moba.Game.TeamTraining do
         next = String.replace(Moba.leagues()[tier + 1], " League", "")
 
         encounter(
-          %{run | league_attempts: run.league_attempts + 1},
+          %{run | turns_left: 0, league_attempts: run.league_attempts + 1},
           :league,
           run.order,
           league_opponents(run),

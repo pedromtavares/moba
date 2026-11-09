@@ -32,6 +32,7 @@
             pending={@battle_pending}
             boss_ready={@boss_ready}
             team_mode={@team_mode}
+            turns_ready={@turns_ready}
           />
         </p>
         <p :if={@challenge_ready} class="ascent-rules">
@@ -89,7 +90,9 @@
       <span class="ascent-rank-name">{short_league(tier)}</span>
       <span :if={tier == @current_hero.league_tier} class="ascent-rank-caption">Current league</span>
       <div
-        :if={tier == @next && tier > @current_hero.league_tier}
+        :if={
+          tier == @next && tier > @current_hero.league_tier && (!@turns_ready || @current_hero.pve_current_turns == 0)
+        }
         class="ascent-turns"
         role="img"
         aria-label={"#{@spent_turns} of 5 turns spent"}
@@ -120,16 +123,15 @@
         <.icon name="game-battle-log" /> Battle Log
       </.link>
       <button
-        :if={
-          !@team_mode && @show_controls && @current_hero.pve_current_turns > 0 &&
-            @current_hero.refresh_targets_count > 0
-        }
+        :if={@refreshes_left > 0}
         id={GH.dom_id(@id_prefix, "training-refresh-targets")}
+        type="button"
         class="ascent-tool"
         phx-click="refresh-targets"
-        title={"#{@current_hero.refresh_targets_count} refreshes remaining"}
+        phx-value-hero_id={@hero_id}
+        title={"#{@refreshes_left} refreshes remaining"}
       >
-        <.icon name="game-refresh" /> Refresh Targets <small>{@current_hero.refresh_targets_count}</small>
+        <.icon name="game-refresh" /> Refresh Targets <small>{@refreshes_left}</small>
       </button>
     </div>
     <div :if={@reward_controls != []} class="team-reward-controls">{render_slot(@reward_controls)}</div>

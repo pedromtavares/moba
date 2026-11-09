@@ -64,6 +64,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
     do: update_run(socket, &TeamTraining.reward_mode(&1, if(mode == "shared", do: :shared, else: :focus)))
 
   def handle_event("battle", %{"id" => id}, socket), do: begin_encounter(socket, &TeamTraining.battle(&1, integer(id)))
+  def handle_event("refresh-targets", _, socket), do: update_run(socket, &TeamTraining.refresh_selected_targets/1)
   def handle_event("league", _, socket), do: begin_encounter(socket, &TeamTraining.league/1)
   def handle_event("buyback", _, socket), do: update_run(socket, &TeamTraining.buyback/1)
 
@@ -226,7 +227,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
         battle_guide_hero: if(onboarding_guest, do: battle_guide_hero(run, encounters)),
         max_level_guides: max_level_guides(run),
         skill_guide_hero:
-          if(run.phase == :playing && run.turns_left == 0 && TeamTraining.roster_alive?(run),
+          if(run.phase == :playing && TeamTraining.league_turns_ready?(run) && TeamTraining.roster_alive?(run),
             do: List.first(TeamTraining.pending_skill_heroes(run))
           ),
         record: record,
@@ -244,13 +245,13 @@ defmodule MobaWeb.V2.TrainingLive.Team do
     practiced =
       for %{kind: :farm, status: :finished, recipient: id} <- encounters, into: MapSet.new(), do: id
 
-    Enum.find(run.order, fn id -> id not in practiced and TeamTraining.can_battle_target?(run, run.heroes[id]) end)
+    Enum.find(run.order, fn id -> id not in practiced and TeamTraining.can_battle_target?(run.heroes[id]) end)
   end
 
   defp battle_guide_hero(_, _), do: nil
 
-  defp max_level_guides(%{phase: :playing, reward_mode: :focus, turns_left: turns} = run) when turns > 0 do
-    {available, blocked} = Enum.split_with(TeamTraining.team(run), &TeamTraining.can_battle_target?(run, &1))
+  defp max_level_guides(%{phase: :playing, turns_left: turns} = run) when turns > 0 do
+    {available, blocked} = Enum.split_with(TeamTraining.team(run), &TeamTraining.can_battle_target?/1)
 
     for hero <- blocked, not TeamTraining.dead?(hero), into: %{} do
       next = Enum.min_by(available, &{abs(&1.id - hero.id), -&1.id}, fn -> nil end)
@@ -280,8 +281,8 @@ defmodule MobaWeb.V2.TrainingLive.Team do
     |> assign(
       run: run,
       selected: assigns.hero,
-      focus_target_locked: TeamTraining.focus_target_locked?(run, assigns.hero),
       max_level: Loadouts.max_level?(assigns.hero.hero),
+      league_turns_ready: TeamTraining.league_turns_ready?(run),
       skill_guidance: if(assigns.skill_guide_hero, do: select_hero(guide_hero.id)),
       id_prefix: if(assigns.hero.id == 1, do: "", else: "team-#{assigns.hero.id}"),
       editing: Map.get(assigns.ui, :editing, false),

@@ -19,7 +19,8 @@
     skill_guidance={@skill_guidance}
     goal_override={@run.goal}
     battle_pending={@run.phase == :engagement}
-    target_battles_locked={@focus_target_locked}
+    target_battles_locked={@max_level}
+    target_refreshes={TeamTraining.target_refreshes_left(@run)}
     show_controls={@run.phase == :playing && TeamTraining.roster_alive?(@run)}
   >
     <:history_controls>
@@ -179,7 +180,7 @@
     </div>
   </section>
   <section
-    :if={@run.turns_left == 0 && !TeamTraining.roster_alive?(@run)}
+    :if={@league_turns_ready && !TeamTraining.roster_alive?(@run)}
     id={GH.dom_id(@id_prefix, "team-league-buyback")}
     class="team-last-result"
     role="status"
@@ -198,7 +199,7 @@
     </div>
   </section>
   <section
-    :if={@run.turns_left > 0 && @focus_target_locked && !TeamTraining.dead?(@selected)}
+    :if={!@league_turns_ready && @max_level && !TeamTraining.dead?(@selected)}
     id={GH.dom_id(@id_prefix, "team-max-level-panel")}
     class="team-max-level-panel"
     aria-labelledby={GH.dom_id(@id_prefix, "team-max-level-title")}
@@ -206,14 +207,14 @@
   >
     <span class="team-eyebrow">Level {@selected.hero.level} · MAX</span>
     <h2 id={GH.dom_id(@id_prefix, "team-max-level-title")}>{@selected.hero.avatar.name} has reached max level.</h2>
-    <p>This hero can only fight in league challenges while Focus is on.</p>
+    <p>This hero can only fight in league challenges.</p>
     <p>
       {if @max_level_guide,
         do: "Select the highlighted teammate to battle targets.",
-        else: "Switch to Shared to battle targets."}
+        else: "Buy back a teammate to battle targets."}
     </p>
   </section>
-  <%= if @run.turns_left > 0 && TeamTraining.can_battle_target?(@run, @selected) do %>
+  <%= if @run.turns_left > 0 && TeamTraining.can_battle_target?(@selected) do %>
     <div
       class="row d-flex align-items-center targets team-targets"
       id={GH.dom_id(@id_prefix, "team-targets")}

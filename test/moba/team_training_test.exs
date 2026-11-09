@@ -358,8 +358,13 @@ defmodule Moba.Game.TeamTrainingTest do
   end
 
   test "a fully capped roster gains no extra farm or levels", %{scope: scope, run: run} do
-    run = Enum.reduce(run.order, run, &grant(&2, &1, 30_000, 37_700)) |> easy_target()
-    finished = run |> TeamTraining.battle(hd(run.targets[1]).id) |> finish_team(scope)
+    run =
+      Enum.reduce(run.order, run, fn id, acc ->
+        acc = grant(acc, id, 30_000, 37_700)
+        put_in(acc.heroes[id].hero.skill_levels_available, 0)
+      end)
+
+    finished = run |> TeamTraining.league() |> simple_league() |> finish_team(scope)
 
     for unit <- TeamTraining.team(finished) do
       assert unit.hero.total_gold_farm == 30_000
@@ -792,7 +797,8 @@ defmodule Moba.Game.TeamTrainingTest do
 
   test "turns gate league entry and Roshan is the final 3v1 encounter", %{run: run} do
     assert TeamTraining.league(run) == run
-    pending = %{run | turns_left: 0, league_tier: 5, goal: 6} |> TeamTraining.league()
+    maxed = Enum.reduce(run.order, run, fn id, acc -> put_in(acc.heroes[id].hero.level, 30) end)
+    pending = %{maxed | league_tier: 5, goal: 6} |> TeamTraining.league()
     e = TeamTraining.active_encounter(pending)
     assert e.kind == :boss
     assert length(e.radiant) == 3
