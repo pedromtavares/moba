@@ -7,7 +7,7 @@ defmodule MobaWeb.V2.LoadingScreenTest do
     Game.update_hero_collection!(finished)
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
 
-    for path <- ["/base", "/arena", "/player/#{hero.player_id}", "/community", "/tavern", "/library", "/users/settings"] do
+    for path <- ["/base", "/arena", "/player/#{hero.player_id}", "/community", "/library", "/users/settings"] do
       document = conn |> get(path) |> html_response(200) |> LazyHTML.from_document()
       assert Enum.count(LazyHTML.query(document, "#game-loading-screen[hidden][role=status]")) == 1, path
       assert Enum.count(LazyHTML.query(document, "#game-loading-icon[src='/images/navigation/profile.webp']")) == 1

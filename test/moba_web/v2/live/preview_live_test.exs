@@ -21,8 +21,7 @@ defmodule MobaWeb.V2.PreviewLiveTest do
           {"/library", "#manual-heading"},
           {"/community", "#community-heading"},
           {"/player/#{player.id}", "#profile-cinematic"},
-          {"/hero/#{hero.id}", "#hero-detail"},
-          {"/tavern", "#tavern"}
+          {"/hero/#{hero.id}", "#hero-detail"}
         ] do
       {:ok, view, _} = live(conn, path)
       assert has_element?(view, "#game-page .base-atmosphere[aria-hidden=true]")
@@ -131,17 +130,6 @@ defmodule MobaWeb.V2.PreviewLiveTest do
       })
 
     assert redirected_to(response) == "/training"
-  end
-
-  test "tavern tabs expose the current collection", %{conn: conn} do
-    hero = create_base_hero()
-    conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
-    {:ok, view, _} = live(conn, "/tavern")
-    assert has_element?(view, "#show-avatars-link[aria-selected=true]")
-    refute has_element?(view, "#show-skills-link")
-    view |> element("#show-skins-link") |> render_click()
-    assert has_element?(view, "#show-skins-link[aria-selected=true]")
-    assert has_element?(view, "#show-avatars-link[aria-selected=false]")
   end
 
   test "profile defaults to the season leaderboard when it has no ranked hero", %{conn: conn} do

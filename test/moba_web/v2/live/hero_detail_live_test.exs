@@ -12,7 +12,7 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     assert has_element?(view, "#hero-detail-loadout #item-#{hd(hero.items).id}-#{hero.id}")
     assert has_element?(view, "#hero-detail-stats .hero-stats")
     refute has_element?(view, "#hero-detail-stats button")
-    assert has_element?(view, "#hero-view-skins[href^='/tavern?']")
+    assert has_element?(view, "#hero-view-skins[href='/base?avatar=#{hero.avatar.code}']")
     assert has_element?(view, "#hero-detail-player[href='/player/#{hero.player_id}']")
     assert has_element?(view, "#hero-training-status[data-finished='false']")
     assert has_element?(view, "#hero-detail-duration", "#{hero.pve_current_turns + hero.pve_total_turns}")

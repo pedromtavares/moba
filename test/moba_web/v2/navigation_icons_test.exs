@@ -15,7 +15,6 @@ defmodule MobaWeb.V2.NavigationIconsTest do
           {"Base", "base"},
           {"Arena", "arena"},
           {"Profile", "profile"},
-          {"Tavern", "tavern"},
           {"Community", "community"},
           {"Library", "manual"},
           {"Admin", "admin"}
@@ -25,9 +24,10 @@ defmodule MobaWeb.V2.NavigationIconsTest do
     end
 
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar a.active"), "aria-label") == ["Arena"]
+    assert Enum.empty?(LazyHTML.query(document, "#game-sidebar a[aria-label=Tavern]"))
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar i"), "class") == []
 
-    for label <- ["Base", "Arena", "Profile", "Tavern", "Community", "Library"] do
+    for label <- ["Base", "Arena", "Profile", "Community", "Library"] do
       link = LazyHTML.query(document, "#game-sidebar a[aria-label='#{label}']")
       assert LazyHTML.attribute(link, "data-sidebar-hotkey") == []
       assert LazyHTML.attribute(link, "aria-keyshortcuts") == []
@@ -71,6 +71,8 @@ defmodule MobaWeb.V2.NavigationIconsTest do
         preview: true
       )
       |> LazyHTML.from_fragment()
+
+    assert Enum.empty?(LazyHTML.query(document, "#topnav a[aria-label=Tavern]"))
 
     for {label, image} <- [{"Training", "training"}, {"Base", "base"}, {"Arena", "arena"}, {"Profile", "profile"}] do
       icon = LazyHTML.query(document, "#topnav a[aria-label='#{label}'] img.nav-emblem")

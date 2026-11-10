@@ -131,7 +131,7 @@
                         <div class="col">
                           <.link
                             class="btn btn-light btn-block mt-1"
-                            navigate={preview_path(assigns, ~p"/tavern?#{%{avatar: @hero.avatar.code}}")}
+                            navigate={preview_path(assigns, ~p"/base?#{%{avatar: @hero.avatar.code}}")}
                           >
                             <i class="ui-icon ui-palette mr-1"></i>View Skins
                           </.link>
@@ -414,7 +414,7 @@
                 <tr>
                   <td class="text-center text-info">
                     <.link
-                      navigate={preview_path(assigns, ~p"/tavern")}
+                      navigate={preview_path(assigns, ~p"/base")}
                       data-toggle="tooltip"
                       title="Shards are the in-game currency that you can use to unlock game content."
                     >

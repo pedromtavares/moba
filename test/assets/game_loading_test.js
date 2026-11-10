@@ -142,7 +142,7 @@ test('each destination uses its navigation emblem, falling back to the sidebar h
   for (const [path, emblem] of [
     ['/base', 'base'], ['/training', 'training'], ['/new', 'training'],
     ['/battles/123', 'training'], ['/arena', 'arena'], ['/matches/123', 'arena'],
-    ['/tavern?tab=skills', 'tavern'], ['/community', 'community'], ['/library', 'manual'],
+    ['/tavern?avatar=juggernaut', 'base'], ['/community', 'community'], ['/library', 'manual'],
     ['/admin/players', 'admin'], ['/player/2', 'profile'], ['/hero/123', 'profile'],
     ['/unknown', 'profile'], ['http://[invalid', 'profile']
   ]) {

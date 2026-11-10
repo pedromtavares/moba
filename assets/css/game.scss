@@ -140,8 +140,7 @@ body:has(.game-page .dashboard) #topnav a[href$="/base"],
 body:has(.game-page .training) #topnav a[href$="/training"],
 body:has(.game-page .arena, .game-page .duel, .game-page .matches) #topnav a[href$="/arena"],
 body:has(.game-page .user-profile) #topnav a[href*="/player/"],
-body:has(.game-page .community) #topnav a[href$="/community"],
-body:has(.game-page .tavern) #topnav a[href$="/tavern"] {
+body:has(.game-page .community) #topnav a[href$="/community"] {
   color: #e6c58e;
   box-shadow: inset 0 -2px #d6ad6a;
 }

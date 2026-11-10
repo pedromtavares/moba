@@ -3,9 +3,14 @@
     <%= for hero <- (@current_player.hero_collection || []) do %>
       <% undefeated = undefeated_avatar?(hero) %>
       <% name = hero["avatar"]["name"] %>
-      <div
+      <button
+        id={"base-avatar-#{hero["code"]}"}
+        type="button"
         style="width: 100px;"
         class={["avatar-container text-center mx-1", undefeated && "is-undefeated"]}
+        phx-click="browse-avatar"
+        phx-value-code={hero["code"]}
+        aria-pressed={to_string(@selected_avatar != nil && @selected_avatar.code == hero["code"])}
         data-toggle="tooltip"
         title={if undefeated, do: "#{name} · Perfect Run", else: name}
       >
@@ -15,17 +20,29 @@
           alt={if undefeated, do: "#{name}, Perfect Run", else: name}
         />
         <.league_badge tier={hero["tier"]} variant="legacy" />
-      </div>
+      </button>
     <% end %>
     <%= for avatar <- @blank_collection do %>
-      <div style="width:100px;height:75px" class="avatar-container text-center mx-1">
+      <% locked = !avatar_unlocked?(avatar, @unlocked_codes) %>
+      <button
+        id={"base-avatar-#{avatar.code}"}
+        type="button"
+        style="width:100px;height:75px"
+        class="avatar-container text-center mx-1"
+        phx-click="browse-avatar"
+        phx-value-code={avatar.code}
+        aria-pressed={to_string(@selected_avatar != nil && @selected_avatar.code == avatar.code)}
+        aria-label={if locked, do: "#{avatar.name}, locked", else: avatar.name}
+        data-toggle="tooltip"
+        title={avatar.name}
+      >
         <img
           src={GH.image_url(avatar)}
           class="avatar blank-avatar"
-          data-toggle="tooltip"
-          title={avatar.name}
+          alt=""
         />
-      </div>
+        <i :if={locked} class="ui-icon ui-lock base-avatar-lock" aria-hidden="true"></i>
+      </button>
     <% end %>
   </div>
 </div>

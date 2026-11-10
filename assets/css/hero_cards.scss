@@ -84,18 +84,6 @@
   .card-footer .progress-bar { border-radius: inherit; }
 }
 
-.game-page .hero-card-skin.card {
-  > .card-body { min-height: 400px; }
-  .card-header .name { flex-wrap: wrap; justify-content: flex-start !important; gap: 6px; border: 0; background: transparent; }
-  .card-header .name > img { height: 28px !important; padding: 0 !important; }
-  .card-header h3 { padding: 0 !important; font-family: 'Nunito', sans-serif; font-size: 21px; font-weight: 800; }
-  .card-header .name > a { font-size: 12px; margin-left: auto; }
-  > .card-footer { padding: 10px; }
-  .card-footer > .row:first-child { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr); gap: 6px; }
-  .card-footer > .row:first-child > div { width: auto; max-width: none; padding: 0; }
-  .card-footer .btn { min-height: 38px; padding: 8px; font-family: 'Nunito', sans-serif; font-size: 12px; letter-spacing: 0; }
-}
-
 .game-page .matches .picked-hero .hero-card.card > .card-body { min-height: 100px; }
 .game-page .duel .hero-card.card > .card-body { min-height: 200px; }
 .game-page .arena-edit .overflow > .row { margin-right: 0; margin-left: 0; }

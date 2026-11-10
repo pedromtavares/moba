@@ -139,11 +139,11 @@ defmodule MobaWeb.V2.Components.ProgressionComponents do
               <p id="progression-requirement">{@quest.description}</p>
             </div>
           </div>
-          <.link id="progression-shards" navigate={preview_path(assigns, "/tavern")} class="progression-shards">
+          <.link id="progression-shards" navigate={preview_path(assigns, "/base")} class="progression-shards">
             <span class="progression-shard-symbol" aria-hidden="true">◆</span>
             <strong>+{@quest.prize}</strong>
             <span>{if @earned, do: "Shards earned", else: "Shards on rank up"}</span>
-            <span class="progression-shards-link">Tavern <span aria-hidden="true">→</span></span>
+            <span class="progression-shards-link">Base <span aria-hidden="true">→</span></span>
           </.link>
           <dl class="progression-details">
             <div id="progression-difficulty">

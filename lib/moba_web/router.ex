@@ -45,6 +45,7 @@ defmodule MobaWeb.Router do
     pipe_through [:browser]
 
     get "/", MobaWeb.GameController, :index
+    get "/tavern", MobaWeb.GameController, :redirect_tavern
   end
 
   scope "/", MobaWeb do
@@ -100,7 +101,6 @@ defmodule MobaWeb.Router do
       live "/player/:player_id", PlayerLive, :show, as: :player
       live "/hero/:id", HeroLive
       live "/teams/:id", TeamLive
-      live "/tavern", TavernLive
     end
   end
 

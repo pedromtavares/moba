@@ -28,12 +28,6 @@
   .avatar-attribute small { display: inline-block; font-size: 10px; color: #a5a4a2; font-style: normal !important; white-space: nowrap; }
 
   /* A compact collection navigation with a single accent for the current section. */
-  .tavern-nav { max-width: 700px; margin: 0 auto 24px; gap: 12px; }
-  .tavern .tavern-nav .nav-link { padding: 18px 12px; font-size: 15px; font-weight: 600; letter-spacing: .01em; }
-  .tavern-nav .loading-text { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
-  .tavern .tavern-nav .nav-link i { color: #8f96a4 !important; font-size: 18px; transition: color 180ms ease, filter 180ms ease; }
-  .tavern .tavern-nav .nav-link:hover i, .tavern .tavern-nav .nav-link.active i { color: #dfbf88 !important; filter: drop-shadow(0 0 8px #d6ad6a33); }
-  .tavern > .row:first-child p { max-width: 760px; margin: 12px auto 20px; line-height: 1.7; }
 
   /* The reward belongs beside the action; the button has one clear purpose. */
   .arena-progress-label { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; color: #a9a59b; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
@@ -227,10 +221,6 @@
 
 @media (max-width: 767px) {
   .game-page {
-    .tavern-nav { gap: 0; margin-bottom: 16px; }
-    .tavern .tavern-nav .nav-link { padding: 14px 6px; font-size: 13px; }
-    .tavern-nav .loading-text { gap: 7px; }
-    .tavern .tavern-nav .nav-link i { font-size: 15px; }
     #pvp-progression .card-body { padding: 20px 8px 0; }
     #pvp-progression .info-box { padding: 10px 6px; }
     #pvp-progression .info-box small { font-size: 10px; }

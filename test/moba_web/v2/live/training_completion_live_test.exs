@@ -18,7 +18,7 @@ defmodule MobaWeb.V2.TrainingCompletionLiveTest do
     assert has_element?(view, "#completion-view-rewards[data-target='#pve-tier-rewards']")
     assert has_element?(view, "#pve-tier-rewards[data-tier='1'][data-earned='true']")
     assert has_element?(view, "#pve-tier-rewards-label", "Novice")
-    assert has_element?(view, "#progression-shards[href='/tavern']", "+200")
+    assert has_element?(view, "#progression-shards[href='/base']", "+200")
     assert has_element?(view, "#progression-bonus", Game.get_quest(1).training_bonus)
     assert has_element?(view, "#progression-close[data-dismiss='modal']")
     assert has_element?(view, "#progression-dismiss[data-dismiss='modal']")

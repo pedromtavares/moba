@@ -225,7 +225,7 @@ test('profile transitions show only the username and clear richer previous targe
   assert.equal(page.nodes['game-loading-subtitle'].hidden, true);
   assert.equal(page.nodes['game-loading-art'].hidden, true);
   assert.equal(page.nodes['game-loading-opponent'].hidden, true);
-  page.emit('phx:page-loading-start', {kind: 'redirect', to: '/tavern'});
+  page.emit('phx:page-loading-start', {kind: 'redirect', to: '/base'});
   assert.equal(page.nodes['game-loading-screen'].dataset.simple, 'false');
 });
 

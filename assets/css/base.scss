@@ -252,15 +252,23 @@ body:has(.game-page) {
   }
   .base-run-pagination span { min-width: 2ch; color: #e5cb99; font: 800 13px 'Nunito', sans-serif; font-variant-numeric: tabular-nums; }
   .base-run-pagination button:disabled { opacity: .38; }
+  .base-run-controls.base-avatar-navigation {
+    grid-column: 1;
+    justify-self: start;
+  }
 
   @media (max-width: 1023px) {
     .base-run-toolbar { grid-template-columns: minmax(0, 1fr) auto; }
     .base-run-toolbar .base-invoke { grid-column: 1; justify-self: start; }
+    .base-run-toolbar-avatar { grid-template-columns: auto minmax(0, 1fr); }
+    .base-run-toolbar-avatar .base-invoke { grid-column: 2; }
   }
 
   @media (max-width: 575px) {
-    .base-run-toolbar { grid-template-columns: minmax(0, 1fr); }
+    .base-run-toolbar:not(.base-run-toolbar-avatar) { grid-template-columns: minmax(0, 1fr); }
     .base-run-toolbar .base-invoke { justify-self: stretch; max-width: none; }
+    .base-avatar-navigation, .base-avatar-navigation .base-run-pagination { gap: 3px; }
+    .base-avatar-navigation .btn { padding-inline: 5px; }
   }
 
   .hero-list > .row.no-gutters { padding: 6px; }

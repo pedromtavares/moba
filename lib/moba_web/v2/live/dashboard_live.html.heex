@@ -97,7 +97,20 @@
           <div class="col">
             <div class="card">
               <div class="card-body p-0 text-center" id="hero-list-container">
-                <div class="base-run-toolbar">
+                <div class={["base-run-toolbar", @selected_avatar && "base-run-toolbar-avatar"]}>
+                  <div :if={@selected_avatar} class="base-run-controls base-avatar-navigation">
+                    <button id="base-close-avatar" type="button" class="btn btn-light" phx-click="close-avatar">
+                      <span aria-hidden="true">←</span> Back to runs
+                    </button>
+                    <.run_pagination
+                      :if={@avatar_runs}
+                      id="base-avatar-runs"
+                      event="page-avatar-runs"
+                      label="Choose a hero for skins"
+                      run_page={@avatar_runs.run_page}
+                      more_runs={@avatar_runs.more_runs}
+                    />
+                  </div>
                   <.link
                     navigate={preview_path(assigns, training_cta_path(assigns))}
                     class={[
@@ -111,32 +124,14 @@
                     {training_cta_label(@register_to_train)}
                   </.link>
 
-                  <div class="base-run-controls">
-                    <nav :if={@run_page > 0 || @more_runs} class="base-run-pagination" aria-label="Training run pages">
-                      <button
-                        id="base-runs-previous"
-                        type="button"
-                        class="btn btn-light"
-                        phx-click="page-runs"
-                        phx-value-direction="previous"
-                        aria-label="Previous page"
-                        disabled={@run_page == 0}
-                      >
-                        ←
-                      </button>
-                      <span aria-live="polite">{@run_page + 1}</span>
-                      <button
-                        id="base-runs-next"
-                        type="button"
-                        class="btn btn-light"
-                        phx-click="page-runs"
-                        phx-value-direction="next"
-                        aria-label="Next page"
-                        disabled={!@more_runs}
-                      >
-                        →
-                      </button>
-                    </nav>
+                  <div :if={!@selected_avatar} class="base-run-controls">
+                    <.run_pagination
+                      id="base-runs"
+                      event="page-runs"
+                      label="Training run pages"
+                      run_page={@run_page}
+                      more_runs={@more_runs}
+                    />
                     <button id="base-toggle-runs" type="button" class="btn btn-light" phx-click="toggle-runs">
                       {if @filter == "unfinished", do: "Show Finished Runs", else: "Show Pending Runs"}
                     </button>
@@ -145,135 +140,8 @@
 
                 <.hero_collection :if={!@preview} {assigns} />
 
-                <div class="w-100 hero-list darker" id={"hero-list-#{@filter}"}>
-                  <.hud_notice
-                    :if={@preview && @visible_heroes == [] && @visible_teams == []}
-                    id="base-no-heroes"
-                    title={if @filter == "finished", do: "No trained heroes yet", else: "No heroes in training"}
-                  >
-                    <:actions>
-                      <.link navigate={preview_path(assigns, training_cta_path(assigns))} class="btn base-secondary">
-                        {training_cta_label(@register_to_train)} <span aria-hidden="true">→</span>
-                      </.link>
-                    </:actions>
-                  </.hud_notice>
-                  <div class="row no-gutters base-run-grid">
-                    <.team_card :for={team <- @visible_teams} team={team} />
-                    <%= for hero <- @visible_heroes do %>
-                      <div class="col-lg-4 col-md-6" id={"visible-hero-#{hero.id}"}>
-                        <div
-                          class="card hero-card mb-0"
-                          style={"background-image: url(#{GH.background_url(hero)})"}
-                        >
-                          <div class="card-header pt-0 pb-1">
-                            <h4 class="text-white d-flex justify-content-between align-items-center mb-0">
-                              <span class="font-italic font-20 f-rpg hero-card-rank">
-                                <%= if hero.pve_ranking do %>
-                                  #{hero.pve_ranking}
-                                <% end %>
-                              </span>
-                              <div class="hero-card-name">
-                                <.league_badge tier={hero.league_tier} variant="legacy" />
-                                {hero.name}
-                              </div>
-                              <span
-                                id={"hero-level-#{hero.id}"}
-                                class="font-15 font-italic hero-card-meta"
-                                data-toggle="tooltip"
-                                title={TT.hero_stats_tooltip(hero, true)}
-                                tabindex="0"
-                              >
-                                Level {hero.level} {hero.avatar.name}
-                              </span>
-                            </h4>
-                          </div>
-                          <div class="card-body p-0 d-flex align-items-center justify-content-center"></div>
-                          <div class="card-footer transparent p-1">
-                            <div class="row">
-                              <div class="col justify-content-between d-flex hero-card-controls">
-                                <%= if can_delete_hero?(hero) do %>
-                                  <button
-                                    type="button"
-                                    class="btn btn-danger hero-card-delete"
-                                    title="Delete hero"
-                                    data-confirm="Are you sure you want to DELETE your hero?"
-                                    data-confirm-title={@preview && "Delete hero?"}
-                                    data-confirm-accept={@preview && "Delete hero"}
-                                    phx-click="archive"
-                                    phx-value-id={hero.id}
-                                  >
-                                    <i class="ui-icon ui-trash mr-1"></i><span class="hero-card-delete-label">Delete</span>
-                                  </button>
-                                <% end %>
-                                <%= if hero.finished_at do %>
-                                  <.link
-                                    class="btn btn-primary hero-card-customize"
-                                    navigate={preview_path(assigns, ~p"/hero/#{hero}")}
-                                  >
-                                    <i class="ui-icon ui-id-card mr-1"></i> Customize
-                                  </.link>
-                                <% else %>
-                                  <button
-                                    type="button"
-                                    class="btn btn-success hero-card-resume"
-                                    phx-click="continue"
-                                    phx-value-id={hero.id}
-                                    data-toggle="tooltip"
-                                    title={"#{hero.pve_total_turns + hero.pve_current_turns} turns left"}
-                                  >
-                                    <i class="ui-icon ui-sword mr-1"></i> Continue
-                                  </button>
-                                <% end %>
-                                <div class="btn-group hero-card-metrics">
-                                  <span
-                                    tabindex="0"
-                                    class="game-stat btn btn-icon btn-outline-light text-warning hero-card-farm"
-                                    data-toggle="tooltip"
-                                    title={"Total farm: #{hero.total_xp_farm + hero.total_gold_farm}. Gold farm: #{hero.total_gold_farm}. XP farm: #{hero.total_xp_farm}"}
-                                  >
-                                    <i class="ui-icon ui-crown"></i>
-                                    <span class="hero-card-farm-value">
-                                      {GH.farming_amount_label(hero.total_xp_farm + hero.total_gold_farm)}
-                                    </span>
-                                    <small class={["hero-card-metric-label", !@preview && "d-none"]}>
-                                      Total farm
-                                    </small>
-                                  </span>
-                                  <%= if hero.finished_at do %>
-                                    <span
-                                      tabindex="0"
-                                      class="game-stat btn btn-icon btn-outline-light text-success hero-card-duration"
-                                      data-toggle="tooltip"
-                                      title="Time it took to finish Training"
-                                    >
-                                      <i class="ui-icon ui-clock"></i>
-                                      {GH.minutes_label(GH.finished_time(hero), @preview)} min
-                                    </span>
-                                  <% end %>
-                                </div>
-                              </div>
-                            </div>
-                            <div class="row mt-1">
-                              <div class="col-12">
-                                <.hero_skill_strip
-                                  skills={hero.skills}
-                                  id_prefix="skill"
-                                  id_suffix={hero.id}
-                                />
-                                <.hero_item_strip
-                                  items={Moba.Game.sort_items(hero.items)}
-                                  container_class="items-container row no-gutters float-right"
-                                  id_prefix="item"
-                                  id_suffix={hero.id}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    <% end %>
-                  </div>
-                </div>
+                <.avatar_details :if={@selected_avatar} {assigns} />
+                <.run_list :if={!@selected_avatar} {assigns} />
               </div>
             </div>
           </div>
@@ -345,7 +213,7 @@
                       <tr>
                         <td class="text-center text-info">
                           <.link
-                            navigate={preview_path(assigns, ~p"/tavern")}
+                            navigate={preview_path(assigns, ~p"/base")}
                             data-toggle="tooltip"
                             title="Shards are the in-game currency that you can use to unlock game content."
                           >

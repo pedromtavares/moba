@@ -111,20 +111,6 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
               <span>Profile</span>
             </span>
           </.link>
-          <.link
-            navigate={preview_path(assigns, ~p"/tavern")}
-            aria-label="Tavern"
-            data-toggle={if !@preview, do: "tooltip"}
-            data-tippy-placement="right"
-            data-tippy-arrow={false}
-            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Tavern</h3>"}
-            class={sidebar_class("tavern", %{sidebar_code: @sidebar_code})}
-          >
-            <.icon name="nav-tavern" class="" />
-            <span :if={@preview} class="sidebar-label">
-              <span>Tavern</span>
-            </span>
-          </.link>
         <% end %>
         <.link
           navigate={preview_path(assigns, ~p"/community")}
@@ -212,9 +198,6 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
                       </.link>
                       <.link navigate={preview_path(assigns, ~p"/community")} class="nav-link" aria-label="Community">
                         <.icon name="nav-community" class="" />
-                      </.link>
-                      <.link navigate={preview_path(assigns, ~p"/tavern")} class="nav-link" aria-label="Tavern">
-                        <.icon name="nav-tavern" class="" />
                       </.link>
                     <% end %>
                   <% end %>

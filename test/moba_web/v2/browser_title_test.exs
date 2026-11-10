@@ -9,7 +9,7 @@ defmodule MobaWeb.V2.BrowserTitleTest do
     conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
     record = team_run(scope, player)
 
-    for path <- ["/new", "/new/solo", "/base", "/training", "/arena", "/community", "/tavern", "/library"] do
+    for path <- ["/new", "/new/solo", "/base", "/training", "/arena", "/community", "/library"] do
       response = conn |> get(path) |> html_response(200) |> LazyHTML.from_document()
       assert LazyHTML.text(LazyHTML.query(response, "title")) == "Browser MOBA - Free PvP Auto-Battler"
       {:ok, view, _} = live(conn, path)

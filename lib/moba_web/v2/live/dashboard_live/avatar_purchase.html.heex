@@ -1,0 +1,13 @@
+<% price = Accounts.price_to_unlock(@resource) %>
+<div class="base-avatar-purchase">
+  <button
+    id={"base-#{@action}-#{@resource.code}"}
+    class="btn base-secondary"
+    type="button"
+    phx-click={@action}
+    aria-describedby={@requirement_id}
+    disabled={@requirement_id != nil || @player.user.shard_count < price}
+  >
+    Unlock for <span><.icon name="game-shard" /> {price} Shards</span>
+  </button>
+</div>

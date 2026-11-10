@@ -44,7 +44,8 @@ defmodule MobaWeb.AuthController do
 
   defp origin_for(conn, param) do
     case param do
-      "tavern" -> "/tavern"
+      "tavern" -> "/base"
+      "base" -> "/base"
       _ -> "/player/#{conn.assigns.current_player.id}"
     end
   end

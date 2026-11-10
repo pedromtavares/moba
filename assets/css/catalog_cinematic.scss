@@ -1,0 +1,10 @@
+.game-page {
+  #library { max-width: none; }
+  .catalog-discord { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 50px; padding: 12px 16px; border: 1px solid #a99de377; border-radius: 6px; background: linear-gradient(115deg, #464373cc, #252940ed); color: #eceaff; font: 800 14px/1.4 'Nunito', sans-serif; box-shadow: inset 0 1px #e0dbff1a; transition: background .18s, border-color .18s; }
+  .catalog-discord { flex-shrink: 0; min-height: 38px; padding: 7px 12px; white-space: nowrap; }
+  .catalog-discord > i { flex-shrink: 0; font-size: 23px; color: #c3baf5; }
+  .catalog-discord > span:last-child { margin-left: auto; color: #bfb4ee; font-size: 20px; }
+  .catalog-discord:hover { color: #fff; border-color: #d4c7ff; background: linear-gradient(115deg, #5a548ccc, #343957ed); }
+  .catalog-discord:focus-visible { outline: 2px solid #e6c58e; outline-offset: 3px; }
+  #library .select-avatar > .card-box { border: 1px solid #bda77b33; border-radius: 8px; background: linear-gradient(145deg, #19243280, #0a111ce0) !important; }
+}

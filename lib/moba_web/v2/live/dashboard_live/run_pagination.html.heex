@@ -1,0 +1,25 @@
+<nav :if={@run_page > 0 || @more_runs} class="base-run-pagination" aria-label={@label}>
+  <button
+    id={@id <> "-previous"}
+    type="button"
+    class="btn btn-light"
+    phx-click={@event}
+    phx-value-direction="previous"
+    aria-label="Previous page"
+    disabled={@run_page == 0}
+  >
+    ←
+  </button>
+  <span aria-live="polite">{@run_page + 1}</span>
+  <button
+    id={@id <> "-next"}
+    type="button"
+    class="btn btn-light"
+    phx-click={@event}
+    phx-value-direction="next"
+    aria-label="Next page"
+    disabled={!@more_runs}
+  >
+    →
+  </button>
+</nav>

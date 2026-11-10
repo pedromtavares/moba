@@ -234,17 +234,33 @@ defmodule Moba.Game.Heroes do
     |> Repo.all()
   end
 
-  def list_solo_training(scope, status, limit \\ Moba.base_hero_count(), offset \\ 0) do
-    query = HeroQuery.latest(scope.player_id, limit) |> HeroQuery.solo()
-
-    query =
-      case scope.user do
-        %{id: user_id} -> from(h in query, join: p in assoc(h, :player), where: p.user_id == ^user_id)
-        nil -> from(h in query, join: p in assoc(h, :player), where: is_nil(p.user_id))
-      end
-
+  def list_solo_training(scope, status, limit \\ Moba.base_hero_count(), offset \\ 0, avatar_code \\ nil) do
+    query = HeroQuery.latest(scope.player_id, limit) |> owned_training(scope) |> HeroQuery.solo()
+    query = if avatar_code, do: for_avatar(query, avatar_code), else: query
     query = if status == "finished", do: HeroQuery.finished(query), else: HeroQuery.unfinished(query)
     from(hero in query, order_by: [desc: hero.id], offset: ^offset) |> Repo.all()
+  end
+
+  def get_finished_avatar_hero(scope, id, avatar_code) do
+    Hero
+    |> HeroQuery.with_player(scope.player_id)
+    |> HeroQuery.unarchived()
+    |> HeroQuery.finished()
+    |> owned_training(scope)
+    |> for_avatar(avatar_code)
+    |> Repo.get(id)
+  end
+
+  defp owned_training(query, %{user: %{id: user_id}}) do
+    from h in query, join: p in assoc(h, :player), where: p.user_id == ^user_id
+  end
+
+  defp owned_training(query, %{user: nil}) do
+    from h in query, join: p in assoc(h, :player), where: is_nil(p.user_id)
+  end
+
+  defp for_avatar(query, avatar_code) do
+    from h in query, join: a in assoc(h, :avatar), where: a.code == ^avatar_code
   end
 
   def latest_finished_heroes(player_id) do

@@ -63,7 +63,7 @@ See `lib/moba/game/avatars.ex` for the unit calculation: `avatar_stat_units()` a
 - **Per-level scaling**: HP/level, MP/level, ATK/level (varies by role)
 - **Ultimate skill**: Each avatar has a predefined ultimate ability
 
-**Unlocking**: 10 base avatars (no `level_requirement`) are available to new players. The other 14 are unlockable. The Tavern features Tinker as a free unlock through Discord connection; standard avatar unlocks cost 150 shards. See `AvatarQuery.base_current()`, `Accounts.Unlocks`, and `AuthController.callback/2`.
+**Unlocking**: 10 base avatars (no `level_requirement`) are available to new players. The other 14 are unlockable. Base offers Tinker as a free unlock through Discord connection; standard avatar unlocks cost 150 shards. See `AvatarQuery.base_current()`, `Accounts.Unlocks`, and `AuthController.callback/2`.
 
 ### 1.2 Skills
 
@@ -98,7 +98,7 @@ See `lib/moba/game/skills.ex` → `can_level_skill?/2`.
 
 ### 1.3 Items
 
-30 enabled items across four rarity tiers: 6 Normal, 6 Rare, 9 Epic, and 9 Legendary. The in-game place to buy and transmute hero items is called the **Shop**; account unlocks live in the **Tavern**.
+30 enabled items across four rarity tiers: 6 Normal, 6 Rare, 9 Epic, and 9 Legendary. The in-game place to buy and transmute hero items is called the **Shop**; account unlocks live in the **Base** collection.
 
 **Inventory**: Maximum 6 items per hero
 
@@ -672,23 +672,17 @@ Permanent currency on User account.
 
 **Uses**:
 - Unlock avatars: 150 shards
-- Unlock skills: 100 shards
 - Unlock skins: 500 (Master) or 1,000 (Grandmaster)
 - Shard buyback: 5% of current (minimum 5)
 
-### 6.3 Tavern (Unlock Shop)
+### 6.3 Base collection unlocks
 
-Permanent unlock store using shards.
+Select an avatar in Base to see its unlock price or browse its skins.
 
-**Avatar Unlocks**: 150 shards
-- Unlocks avatar for hero creation
-
-**Skill Unlocks**: 100 shards
-- Unlocks skill for hero creation
-
-**Skin Unlocks** (48 in the current catalog; two per playable avatar):
-- 500 shards (requires owning avatar at Master league)
-- 1,000 shards (requires owning avatar at Grandmaster league)
+- Standard avatar unlocks cost 150 shards and make the avatar available in hero creation.
+- Connecting Discord unlocks Tinker for free.
+- Master skins cost 500 shards and require a completed run with that avatar in Master League or higher.
+- Grandmaster skins cost 1,000 shards and require a completed Grandmaster run with that avatar.
 
 ---
 
@@ -833,7 +827,7 @@ The cinematic redesign is the default on the canonical game and account routes. 
 |--------|-------|--------------------|
 | First hero | `/start` | Avatar role filters, random pick, preset or custom skill builds, guest creation |
 | Start training | `/new` | Collection context, avatar selection, reusable build artwork, selected loadout |
-| Base | `/base` | Account-rank journey, progression rewards, finished/in-progress heroes, full roster collection |
+| Base | `/base` | Account-rank journey, progression rewards, finished/in-progress heroes, full roster collection, avatar and skin unlocks |
 | Training | `/training` | League ascent, battle/meditation/mining tabs, Shop, league and Roshan challenges |
 | Battle history / replay | `/battles`, `/battles/:id` | Compact history, readable turn resources and effects, contextual outcome and continuation |
 | Arena | `/arena` | 5v5 entry and daily progress, recent matches, bracket standings, Live PvP, duel history |
@@ -841,7 +835,6 @@ The cinematic redesign is the default on the canonical game and account routes. 
 | Match / duel | `/matches/:id`, `/arena/:id` | Match summaries and battle details; duel picks, timers, chat for live duels, rewards and replays |
 | Player profile | `/player/:player_id`, `/user/:id` | Full-width featured-hero banner, player metrics, battle history, daily/season standings, collection |
 | Hero | `/hero/:id` | Hero art, loadout, stats, league progress, farm/time metrics, training leaderboard |
-| Tavern | `/tavern` | Avatar, skill, and skin unlocks; shard balance, costs and availability; featured Discord unlock |
 | Community / Game Manual | `/community`, `/library` | Message board, updates and player lists; illustrated game reference |
 | Account | `/users/...` | Matching sign-in, registration, recovery, confirmation, and settings screens |
 

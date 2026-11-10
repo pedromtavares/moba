@@ -1,6 +1,6 @@
 # BrowserMOBA Design Principles
 
-The redesign gives BrowserMOBA a cinematic dark fantasy identity while keeping repeated play quick and readable. Base is the visual reference for Training, Arena, Community, Tavern, the Game Manual, profiles, and account screens. These principles describe the shipped interface, rather than a future feature plan.
+The redesign gives BrowserMOBA a cinematic dark fantasy identity while keeping repeated play quick and readable. Base is the visual reference for Training, Arena, Community, the Game Manual, profiles, and account screens. These principles describe the shipped interface, rather than a future feature plan.
 
 ## 1. Give each screen a purpose
 
@@ -93,7 +93,7 @@ Reveal readable titles beneath icons on hover or keyboard focus. Reserve the tit
 
 Onboarding uses a single arrow pointing to the first battle target after roster creation. Remove it after that roster starts its first battle. Keep all other controls available for players to discover without guided steps or overlays.
 
-Call the place to buy or transmute hero items **Shop** in gameplay. Keep account unlocks in the **Tavern**. Evocative terms such as “forge” can appear in marketing copy when they do not obscure an action's location.
+Call the place to buy or transmute hero items **Shop** in gameplay. Keep account unlocks in the **Base** collection. Evocative terms such as “forge” can appear in marketing copy when they do not obscure an action's location.
 
 Use short, purposeful instructions and consistent action names. The Space shortcut belongs to a ready Claim XP / Claim Gold action in farming tabs, with a visible key hint. It must not trigger while typing, using another control, or interacting with a dialog. Battle Attack has no global Space shortcut.
 

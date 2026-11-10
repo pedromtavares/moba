@@ -43,16 +43,29 @@ defmodule Moba.Game.TeamRuns do
     |> Repo.one()
   end
 
-  def list_training(scope, player_id, status, limit \\ Moba.base_hero_count(), offset \\ 0) do
+  def list_training(scope, player_id, status, limit \\ Moba.base_hero_count(), offset \\ 0, avatar_code \\ nil) do
     phases = if status == "finished", do: ["finished"], else: ["playing", "engagement"]
 
     from(r in owned(scope),
+      as: :training_run,
       where: r.player_id == ^player_id and r.phase in ^phases,
       order_by: [desc: r.id],
       limit: ^limit,
       offset: ^offset
     )
+    |> filter_training_avatar(avatar_code)
     |> Repo.all()
+  end
+
+  defp filter_training_avatar(query, nil), do: query
+
+  defp filter_training_avatar(query, code) do
+    member =
+      from h in Game.Schema.Hero,
+        join: a in assoc(h, :avatar),
+        where: h.training_team_id == parent_as(:training_run).id and a.code == ^code and is_nil(h.archived_at)
+
+    where(query, exists(subquery(member)))
   end
 
   def active(scope, player_id) do

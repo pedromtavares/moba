@@ -1,7 +1,7 @@
 defmodule Moba.Accounts.Schema.Unlock do
   @moduledoc """
   Unlocks are basically rewards that users can get in exchange for shards
-  in the Tavern. The resource is specified by resource_code.
+  in Base. The resource is specified by resource_code.
   Currently Avatars and Skills can be unlocked.
   """
   use Ecto.Schema

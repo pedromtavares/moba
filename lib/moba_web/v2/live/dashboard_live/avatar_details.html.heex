@@ -1,0 +1,179 @@
+<section id="base-avatar-details" class="base-avatar-details" aria-label={@selected_avatar.name}>
+  <%= if @avatar_runs do %>
+    <div class="base-avatar-mobile-nav" role="group" aria-label="Avatar details">
+      <button
+        :for={{panel, label} <- [{"runs", "Runs"}, {"skins", "Skins"}]}
+        id={"base-avatar-panel-#{panel}"}
+        type="button"
+        class="btn"
+        phx-click="avatar-panel"
+        phx-value-panel={panel}
+        aria-pressed={to_string(@avatar_panel == panel)}
+      >
+        {label}
+      </button>
+    </div>
+    <div class="base-avatar-workspace" data-panel={@avatar_panel}>
+      <div class="base-avatar-runs">
+        <.run_list {Map.merge(assigns, @avatar_runs)} avatar_history />
+      </div>
+
+      <% art = skin_background(@selected_skin, @selected_avatar) %>
+      <% locked_skin = @selected_skin.id && @selected_skin.code not in @unlocked_codes %>
+      <div class="base-avatar-skins" aria-label="Skins">
+        <div class="base-skin-preview">
+          <img src={art} alt={"#{@selected_avatar.name} · #{@selected_skin.name}"} />
+          <header class="base-skin-header">
+            <div class="base-skin-identity">
+              <div class="base-skin-name">
+                <.league_badge :if={@selected_skin.league_tier} tier={@selected_skin.league_tier} variant="legacy" />
+                <div>
+                  <h3>{@selected_skin.name}</h3>
+                  <p :if={@selected_skin.author_name}>
+                    <a
+                      :if={@selected_skin.author_link}
+                      href={@selected_skin.author_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      by {@selected_skin.author_name}
+                    </a>
+                    <span :if={!@selected_skin.author_link}>by {@selected_skin.author_name}</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+            <button
+              id="base-skin-zoom-button"
+              type="button"
+              class="base-skin-zoom-button"
+              data-toggle="modal"
+              data-target="#base-skin-zoom"
+              aria-haspopup="dialog"
+              aria-controls="base-skin-zoom"
+              aria-label="View full-size artwork"
+              title="View full-size artwork"
+            >
+              <span aria-hidden="true">⤢</span>
+            </button>
+          </header>
+        </div>
+        <div class="base-skin-controls">
+          <div class="base-skin-picker" role="group" aria-label="Skin previews">
+            <button
+              :for={skin <- @avatar_skins}
+              id={"base-preview-skin-#{skin.code}"}
+              type="button"
+              phx-click="preview-skin"
+              phx-value-code={skin.code}
+              aria-pressed={to_string(@selected_skin.code == skin.code)}
+              aria-label={skin.name}
+              title={skin.name}
+            >
+              <img src={skin_background(skin, @selected_avatar)} alt="" />
+            </button>
+          </div>
+        </div>
+        <% league_locked? = @current_player.user && locked_skin && !skin_league_met?(@selected_skin, @current_player) %>
+        <% league_suffix = if @selected_skin.league_tier == 5, do: " or higher.", else: "." %>
+        <div class="base-skin-actions">
+          <p :if={league_locked?} id="base-skin-requirement" class="base-skin-requirement">
+            <i class="ui-icon ui-lock" aria-hidden="true"></i>
+            <span>
+              Finish a {@selected_avatar.name} run at <strong>{GH.league_name(@selected_skin.league_tier)}</strong>{league_suffix}
+            </span>
+          </p>
+          <div class="base-skin-action-row">
+            <span :if={@current_player.user} class="base-skin-balance">
+              <span><.icon name="game-shard" /> <strong>{@current_player.user.shard_count}</strong></span>
+              <span>Shards available</span>
+            </span>
+            <%= cond do %>
+              <% !@current_player.user -> %>
+                <.link navigate={~p"/users/register?from=training"} class="btn base-secondary">
+                  Register to use skins
+                </.link>
+              <% locked_skin -> %>
+                <.avatar_purchase
+                  resource={@selected_skin}
+                  player={@current_player}
+                  action="unlock-skin"
+                  requirement_id={if league_locked?, do: "base-skin-requirement"}
+                />
+              <% @skin_hero -> %>
+                <button
+                  id="base-equip-skin"
+                  class="btn base-secondary"
+                  type="button"
+                  phx-click="equip-skin"
+                  disabled={@skin_hero.skin_id == @selected_skin.id}
+                >
+                  {if @skin_hero.skin_id == @selected_skin.id, do: "Equipped", else: "Equip"}
+                </button>
+              <% true -> %>
+                <p class="base-avatar-note">Finish a run to equip skins.</p>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  <% else %>
+    <.avatar_showcase
+      id="base-avatar-unlock-preview"
+      class="base-avatar-locked"
+      avatar={@selected_avatar}
+      avatars={@avatar_catalog}
+    >
+      <div class="base-avatar-unlock">
+        <%= cond do %>
+          <% !@current_player.user -> %>
+            <.link navigate={~p"/users/register?from=training"} class="btn base-secondary">Register to unlock</.link>
+          <% @selected_avatar.code == "tinker" -> %>
+            <a id="base-discord-unlock" href="/auth?origin=base" class="btn base-secondary">
+              <.icon name="game-discord" /> Unlock Tinker with Discord
+            </a>
+          <% true -> %>
+            <span class="base-skin-balance">
+              <span><.icon name="game-shard" /> <strong>{@current_player.user.shard_count}</strong></span>
+              <span>Shards available</span>
+            </span>
+            <.avatar_purchase
+              resource={@selected_avatar}
+              player={@current_player}
+              action="unlock-avatar"
+              requirement_id={nil}
+            />
+        <% end %>
+      </div>
+    </.avatar_showcase>
+  <% end %>
+</section>
+<div
+  :if={@avatar_runs}
+  id="base-skin-zoom"
+  class="modal fade base-skin-zoom"
+  tabindex="-1"
+  role="dialog"
+  aria-labelledby="base-skin-zoom-title"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 id="base-skin-zoom-title">{@selected_avatar.name} · {@selected_skin.name}</h2>
+        <button
+          id="base-skin-zoom-close"
+          type="button"
+          class="btn base-secondary"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
+      </div>
+      <div class="base-skin-zoom-viewport" tabindex="0" role="region" aria-label="Full-size skin artwork">
+        <img src={skin_background(@selected_skin, @selected_avatar)} alt="" />
+      </div>
+    </div>
+  </div>
+</div>

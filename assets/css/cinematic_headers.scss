@@ -2,14 +2,11 @@
   .game-page {
     --cinematic-header-height: 242px;
 
-    .user-profile #profile-cinematic,
-    #tavern-heading {
+    .user-profile #profile-cinematic {
       height: var(--cinematic-header-height);
       min-height: var(--cinematic-header-height);
       box-sizing: border-box;
     }
-
-    #tavern-heading { padding-top: 28px; padding-bottom: 28px; }
   }
 }
 
@@ -28,11 +25,6 @@
 @media (min-width: 1200px) and (max-height: 850px) {
   .game-page {
     --cinematic-header-height: 192px;
-
-    #tavern-heading { padding-top: 18px; padding-bottom: 18px; }
-
-    #tavern-heading h1 { font-size: 42px; }
-    .tavern-heading-description { margin-top: 8px; font-size: 14px; }
   }
 }
 

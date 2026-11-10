@@ -46,6 +46,11 @@ defmodule MobaWeb.GameController do
     conn |> put_status(:moved_permanently) |> redirect(to: path)
   end
 
+  def redirect_tavern(conn, %{"avatar" => code}) when is_binary(code),
+    do: redirect(conn, to: ~p"/base?#{%{avatar: code}}")
+
+  def redirect_tavern(conn, _params), do: redirect(conn, to: ~p"/base")
+
   def create(conn, %{"team" => "true"} = params) do
     if get_session(conn, :player_id) || conn.assigns.current_user do
       redirect(conn, to: "/")

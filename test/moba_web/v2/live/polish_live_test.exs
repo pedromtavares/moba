@@ -8,18 +8,18 @@ defmodule MobaWeb.V2.PolishLiveTest do
     :ok
   end
 
-  test "Tavern excludes skills without charging players for their access", %{conn: conn} do
+  test "Base unlocks exclude skills without charging players for their access", %{conn: conn} do
     hero = create_base_hero()
     skill = Game.get_skill_by_code!("decay", false, 5)
     Moba.Repo.update!(Ecto.Changeset.change(skill, level_requirement: 1, enabled: true))
     Accounts.update_user!(hero.player.user, %{shard_count: 100})
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
-    {:ok, view, _} = live(conn, "/tavern")
+    {:ok, view, _} = live(conn, "/base?avatar=bloodseeker")
 
-    refute has_element?(view, "#show-skills-link")
+    assert has_element?(view, "#base-avatar-unlock-preview")
     refute has_element?(view, "#skill-#{skill.id}")
     refute has_element?(view, "[phx-click='unlock-skill']")
-    assert has_element?(view, "#tavern-shards strong", "100")
+    assert has_element?(view, ".base-avatar-unlock strong", "100")
     assert Accounts.get_user!(hero.player.user_id).shard_count == 100
   end
 

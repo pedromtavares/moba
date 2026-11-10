@@ -136,7 +136,7 @@ export function initGameLoading() {
     catch (_) { return 'profile'; }
     return {
       base: 'base', training: 'training', new: 'training', battles: 'training',
-      arena: 'arena', matches: 'arena', tavern: 'tavern', community: 'community',
+      arena: 'arena', matches: 'arena', tavern: 'base', community: 'community',
       library: 'manual', admin: 'admin'
     }[section] || 'profile';
   }

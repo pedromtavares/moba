@@ -171,6 +171,170 @@ defmodule MobaWeb.V2.DashboardLiveTest do
     end
   end
 
+  describe "avatar collection" do
+    test "explains the league requirement before the skin purchase controls", %{conn: conn} do
+      player = create_player!()
+      Accounts.update_user!(Accounts.get_user!(player.user_id), %{shard_count: 1_000})
+      avatar = base_avatar()
+      [_master, grandmaster | _] = Game.list_avatar_skins(avatar.code)
+
+      {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/base?avatar=#{avatar.code}")
+      view |> element("#base-preview-skin-#{grandmaster.code}") |> render_click()
+
+      assert has_element?(
+               view,
+               "#base-skin-requirement",
+               "Finish a Phantom Assassin run at Grandmaster."
+             )
+
+      assert has_element?(
+               view,
+               "#base-skin-requirement + .base-skin-action-row #base-unlock-skin-#{grandmaster.code}[disabled][aria-describedby=base-skin-requirement]",
+               "Unlock for 1000 Shards"
+             )
+    end
+
+    test "legacy Tavern links open the corresponding Base skin gallery", %{conn: conn} do
+      assert redirected_to(get(conn, "/tavern")) == "/base"
+      path = redirected_to(get(conn, "/tavern?avatar=phantom_assassin"))
+      assert path == "/base?avatar=phantom_assassin"
+
+      hero = create_combat_hero(%{finished_at: Timex.now()})
+      {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), path)
+      assert has_element?(view, "#base-avatar-details[aria-label='Phantom Assassin']")
+      assert has_element?(view, ".base-avatar-workspace[data-panel=skins] #base-preview-skin-default")
+      view |> element("#base-close-avatar") |> render_click()
+      assert_patch(view, "/base")
+      refute has_element?(view, "#base-avatar-details")
+
+      view |> element("#base-avatar-tinker") |> render_click()
+      assert has_element?(view, "#base-avatar-unlock-preview #base-discord-unlock[href='/auth?origin=base']")
+    end
+
+    test "shows only matching completed runs and returns to pending runs", %{conn: conn} do
+      {scope, player} = team_account()
+      team = team_run(scope, player)
+      {:ok, team} = Game.TeamRuns.update(scope, team, &%{&1 | phase: :finished})
+      [member | _] = Game.get_heroes(team.hero_ids)
+      avatar = member.avatar
+      pending = create_base_hero(%{}, player, avatar)
+      [older, newer] = for _ <- 1..2, do: create_combat_hero(%{finished_at: Timex.now()}, player, avatar)
+      other_avatar = Enum.find(Game.list_creation_avatars(), &(&1.code != avatar.code))
+      other = create_combat_hero(%{finished_at: Timex.now()}, player, other_avatar)
+      other_owner = create_combat_hero(%{finished_at: Timex.now()}, create_player!(), avatar)
+
+      {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/base")
+      assert has_element?(view, "#hero-list-unfinished #visible-hero-#{pending.id}")
+      view |> element("#base-avatar-#{avatar.code}") |> render_click()
+
+      assert has_element?(view, "#base-avatar-#{avatar.code}[aria-pressed=true]")
+
+      assert has_element?(
+               view,
+               ".base-run-toolbar > .base-avatar-navigation + #base-invoke-btn[href='/new']",
+               "Start training"
+             )
+
+      assert has_element?(
+               view,
+               "#base-avatar-details #visible-hero-#{member.id} a[href='/teams/#{team.id}']",
+               "View team"
+             )
+
+      refute has_element?(view, "#base-avatar-details select")
+
+      refute has_element?(
+               view,
+               "#visible-hero-#{pending.id}, #visible-hero-#{other.id}, #visible-hero-#{other_owner.id}, #visible-hero-#{newer.id}"
+             )
+
+      view |> element(".base-avatar-navigation #base-avatar-runs-next") |> render_click()
+      assert has_element?(view, "#base-avatar-details #visible-hero-#{newer.id}")
+      refute has_element?(view, "#visible-hero-#{older.id}, #visible-hero-#{member.id}")
+      view |> element("#base-avatar-runs-next") |> render_click()
+      assert has_element?(view, "#base-avatar-details #visible-hero-#{older.id}")
+      assert has_element?(view, "#base-avatar-runs-next[disabled]")
+
+      view |> element(".base-avatar-navigation #base-close-avatar") |> render_click()
+      assert has_element?(view, "#hero-list-unfinished #visible-hero-#{pending.id}")
+      refute has_element?(view, "#base-avatar-details")
+    end
+
+    test "uses existing unlock prices and only equips an owned skin on the chosen run", %{conn: conn} do
+      player = create_player!()
+      Accounts.update_user!(Accounts.get_user!(player.user_id), %{shard_count: 1_000})
+      hero = create_combat_hero(%{league_tier: 6, finished_at: Timex.now()}, player)
+      other_run = create_combat_hero(%{league_tier: 6, finished_at: Timex.now()}, player)
+      Game.update_hero_collection!(hero)
+      [master, grandmaster | _] = Game.list_avatar_skins(hero.avatar.code)
+
+      {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/base")
+      view |> element("#base-avatar-bloodseeker") |> render_click()
+      assert has_element?(view, ".base-avatar-navigation #base-close-avatar")
+      assert has_element?(view, "#base-avatar-unlock-preview h2", "Bloodseeker")
+      assert has_element?(view, "#base-avatar-unlock-preview .avatar-showcase-role", "Bruiser")
+      assert has_element?(view, "#base-avatar-unlock-preview .avatar-showcase-ultimate[data-toggle=tooltip]", "Rupture")
+      assert has_element?(view, "#base-avatar-unlock-preview progress[aria-label=Defense]")
+      assert has_element?(view, "#base-avatar-unlock-preview .base-skin-balance", "Shards available")
+      assert has_element?(view, "#base-unlock-avatar-bloodseeker", "150 Shards")
+      view |> element("#base-unlock-avatar-bloodseeker") |> render_click()
+      assert has_element?(view, "#base-avatar-details", "No completed runs for this avatar yet")
+      assert "bloodseeker" in Accounts.unlocked_codes_for(Accounts.get_user!(player.user_id))
+
+      view |> element("#base-avatar-#{hero.avatar.code}") |> render_click()
+      assert has_element?(view, ".base-skin-header #base-skin-zoom-button[data-target='#base-skin-zoom']")
+      assert has_element?(view, "#base-skin-zoom-close[data-dismiss=modal]")
+      assert has_element?(view, ".base-skin-controls #base-preview-skin-default")
+      view |> element("#base-preview-skin-#{grandmaster.code}") |> render_click()
+      assert has_element?(view, ".base-skin-header h3", grandmaster.name)
+      refute has_element?(view, ".base-skin-header", "1000 Shards")
+      assert has_element?(view, ".base-skin-header img[alt=Grandmaster]")
+      assert has_element?(view, ".base-skin-header a[href='#{grandmaster.author_link}']", grandmaster.author_name)
+      art = MobaWeb.V2.Components.GameHelpers.background_url(grandmaster)
+      assert has_element?(view, "#base-skin-zoom .base-skin-zoom-viewport img[src='#{art}']")
+      assert has_element?(view, "#base-skin-zoom-title", grandmaster.name)
+
+      assert has_element?(
+               view,
+               ".base-avatar-skins > .base-skin-actions #base-unlock-skin-#{grandmaster.code}[disabled]",
+               "Unlock for 1000 Shards"
+             )
+
+      assert has_element?(view, ".base-skin-actions .base-skin-balance", "Shards available")
+      assert has_element?(view, ".base-avatar-skins > .base-skin-actions .base-skin-balance strong", "850")
+      refute has_element?(view, ".base-skin-actions .base-avatar-note, #base-skin-requirement")
+      render_click(view, "unlock-skin")
+      assert Accounts.get_user!(player.user_id).shard_count == 850
+
+      view |> element("#base-preview-skin-#{master.code}") |> render_click()
+      render_click(view, "equip-skin")
+      assert Game.get_hero!(hero.id).skin_id == nil
+      view |> element("#base-unlock-skin-#{master.code}") |> render_click()
+      assert Accounts.get_user!(player.user_id).shard_count == 350
+      refute has_element?(view, "#base-unlock-skin-#{master.code}")
+
+      view |> element("#base-avatar-runs-next") |> render_click()
+      assert has_element?(view, "#base-avatar-details #visible-hero-#{hero.id}")
+      assert has_element?(view, "#base-preview-skin-default[aria-pressed=true]")
+      view |> element("#base-preview-skin-#{master.code}") |> render_click()
+      view |> element("#base-equip-skin") |> render_click()
+      assert Game.get_hero!(hero.id).skin_id == master.id
+      assert Game.get_hero!(other_run.id).skin_id == nil
+      assert has_element?(view, "#base-equip-skin[disabled]", "Equipped")
+      assert has_element?(view, ".base-skin-actions .base-skin-balance strong", "350")
+
+      view |> element("#base-avatar-runs-previous") |> render_click()
+      assert has_element?(view, "#base-avatar-details #visible-hero-#{other_run.id}")
+      assert has_element?(view, "#base-preview-skin-default[aria-pressed=true]")
+      view |> element("#base-avatar-runs-next") |> render_click()
+      assert has_element?(view, "#base-preview-skin-#{master.code}[aria-pressed=true]")
+
+      view |> element("#base-preview-skin-default") |> render_click()
+      view |> element("#base-equip-skin") |> render_click()
+      assert Game.get_hero!(hero.id).skin_id == nil
+    end
+  end
+
   describe "connected mount" do
     test "renders pve progression and hero list", %{conn: conn} do
       hero =

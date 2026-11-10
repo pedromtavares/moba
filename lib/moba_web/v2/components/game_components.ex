@@ -13,6 +13,77 @@ defmodule MobaWeb.V2.Components.GameComponents do
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   attr :id, :string, required: true
+  attr :class, :string, default: nil
+  attr :avatar, :map, required: true
+  attr :avatars, :list, required: true
+  slot :inner_block, required: true
+
+  def avatar_showcase(assigns) do
+    ~H"""
+    <div class={["avatar-showcase-stage", @class]} id={@id} style={"--avatar-art: url(#{GH.background_url(@avatar)})"}>
+      <div class="avatar-showcase-identity">
+        <p class="avatar-showcase-role">
+          <img src={"/images/#{@avatar.role}_icon.png"} alt="" /> {role(@avatar)}
+        </p>
+        <h2>{@avatar.name}</h2>
+        <p>{@avatar.description}</p>
+      </div>
+      <div class="avatar-showcase-readout">
+        <div
+          :if={@avatar.ultimate}
+          class="avatar-showcase-ultimate"
+          tabindex="0"
+          data-toggle="tooltip"
+          title={TT.skill_tooltip(@avatar.ultimate)}
+        >
+          <img src={GH.image_url(@avatar.ultimate)} alt="" />
+          <div><small>Ultimate</small><strong>{@avatar.ultimate.name}</strong></div>
+        </div>
+        <div class="avatar-showcase-attributes" aria-label={role_description(@avatar)}>
+          <div
+            :for={
+              {stat, label, icon} <- [
+                {:offense, "Offense", "game-offense"},
+                {:defense, "Defense", "game-defense"},
+                {:magic, "Magic", "game-magic"},
+                {:speed, "Speed", "game-speed"}
+              ]
+            }
+            class="avatar-showcase-attribute"
+            data-stat={stat}
+          >
+            <span><.icon name={icon} />{label}</span>
+            <progress value={avatar_display_percentage(stat, @avatar, @avatars)} max="100" aria-label={label}></progress>
+          </div>
+        </div>
+        {render_slot(@inner_block)}
+      </div>
+    </div>
+    """
+  end
+
+  defp role(%{role: role}) when not is_nil(role), do: String.capitalize(role)
+  defp role(_), do: ""
+
+  defp role_description(%{role: role}) do
+    case role do
+      "tank" -> "High defense for sustained damage absorption."
+      "bruiser" -> "Tankier than most, good offense."
+      "nuker" -> "Obliterate opponents with constant spellcasting."
+      "carry" -> "Swift destruction."
+      "support" -> "Tactical spellcasting for elegant victories."
+      _ -> ""
+    end
+  end
+
+  defp avatar_display_percentage(stat, avatar, avatars) do
+    field = %{offense: :display_offense, defense: :display_defense, magic: :display_magic, speed: :display_speed}[stat]
+    value = Map.fetch!(avatar, field)
+    maximum = Enum.reduce(avatars, value, fn entry, max_value -> max(max_value, Map.fetch!(entry, field)) end)
+    if maximum > 0, do: value * 100 / maximum, else: 0
+  end
+
+  attr :id, :string, required: true
 
   def catalog_discord_link(assigns) do
     ~H"""
