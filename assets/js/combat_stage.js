@@ -1,5 +1,6 @@
 const number = value => Math.round(Number(value) || 0);
 const percent = (value, total) => total > 0 ? Math.max(0, Math.min(100, value / total * 100)) : 0;
+const speedDurations = {normal: 2, fast: 1, instant: 0};
 
 // Choose the largest square icons that fit the fixed effects area, preferring one row.
 export const effectGrid = (count, width, height, maxSize = 72, gap = 6) => {
@@ -22,32 +23,34 @@ export default {
     this.actions = {};
     this.activeEffects = {};
     this.motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-    this.sound = false;
-    try { this.sound = localStorage.getItem('moba-combat-sound') === 'on'; } catch (_) { /* optional preference */ }
-    this.soundButton = this.el.querySelector('[data-stage-sound]');
+    this.speedButtons = [...this.el.querySelectorAll('[data-speed-choice]')];
     this.replayButton = this.el.querySelector('[data-stage-replay]');
-    this.onSound = () => {
-      this.sound = !this.sound;
-      this.unlockSound();
-      try { localStorage.setItem('moba-combat-sound', this.sound ? 'on' : 'off'); } catch (_) { /* optional preference */ }
-      this.soundLabel();
+    this.setSpeed(this.el.dataset.battleSpeed);
+    this.onSpeed = event => {
+      const {speedChoice} = event.currentTarget.dataset;
+      if (speedChoice === this.speed) return;
+      this.setSpeed(speedChoice);
+      if (this.speed === 'instant' || !this.busy) {
+        this.cancel();
+        this.settle();
+      }
+      this.pushEvent('battle-speed', {speed: speedChoice}).catch(() => {});
+      this.trainingReady();
     };
     this.onReplay = () => {
-      if (this.busy || !this.scene.events.length) return;
+      if (this.speed === 'instant' || this.busy || !this.scene.events.length) return;
       this.queue.push(...(this.scene.fullReplay ? this.scene.events : this.scene.events.slice(-2)));
       this.drain();
     };
     this.guard = event => {
-      this.unlockSound();
       if (this.busy && event.target.closest('#attack-button, [data-battle-continue=true]')) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
     };
-    this.soundButton.addEventListener('click', this.onSound);
+    this.speedButtons.forEach(button => button.addEventListener('click', this.onSpeed));
     this.replayButton.addEventListener('click', this.onReplay);
     document.addEventListener('click', this.guard, true);
-    this.soundLabel();
     this.effectObserver = new ResizeObserver(entries => {
       entries.forEach(({target, contentRect}) => this.fitEffects(target, contentRect.width, contentRect.height));
     });
@@ -63,7 +66,7 @@ export default {
     this.renderLogToggle();
     const fresh = scene.events.filter(event => event.number > this.seen);
     this.seen = Math.max(this.seen, ...scene.events.map(event => event.number));
-    this.queue.push(...fresh);
+    if (this.speed !== 'instant') this.queue.push(...fresh);
     if (!this.busy && this.queue.length) this.drain();
     else if (!this.busy) this.settle();
     if (!this.busy) this.trainingReady();
@@ -75,10 +78,9 @@ export default {
     this.cancel();
     this.effectObserver.disconnect();
     clearInterval(this.turnClockInterval);
-    this.soundButton.removeEventListener('click', this.onSound);
+    this.speedButtons.forEach(button => button.removeEventListener('click', this.onSpeed));
     this.replayButton.removeEventListener('click', this.onReplay);
     document.removeEventListener('click', this.guard, true);
-    if (this.audio) this.audio.close().catch(() => {});
   },
 
   reset(scene) {
@@ -94,14 +96,21 @@ export default {
 
   trainingReady() {
     const playback = this.scene.trainingPlayback;
-    if (!playback?.enabled || this.busy || playback.frame === this.trainingFrame) return;
+    if (!playback?.enabled || this.busy || playback.frame === this.trainingFrame ||
+        playback.frame === this.pendingTrainingFrame?.frame) return;
     const frame = playback.frame;
-    this.trainingFrame = frame;
+    const pending = {frame};
+    this.pendingTrainingFrame = pending;
     const epoch = this.epoch;
     this.wait(this.scene.finished ? 650 : 160).then(() => {
-      if (epoch !== this.epoch || this.scene.trainingPlayback?.frame !== frame) return;
+      if (this.pendingTrainingFrame !== pending) return;
+      this.pendingTrainingFrame = null;
+      if (epoch !== this.epoch || !this.scene.trainingPlayback?.enabled || this.scene.trainingPlayback.frame !== frame) return;
       const target = this.el.closest('[data-training-encounter]');
-      if (target) this.pushEventTo(target, 'training-playback-ready', {frame});
+      if (target) {
+        this.trainingFrame = frame;
+        this.pushEventTo(target, 'training-playback-ready', {frame});
+      }
     });
   },
 
@@ -140,6 +149,7 @@ export default {
   cancel() {
     if (this.logScrollFrame) cancelAnimationFrame(this.logScrollFrame);
     this.epoch++;
+    this.pendingTrainingFrame = null;
     this.queue = [];
     this.busy = false;
     this.animations.forEach(animation => animation.cancel());
@@ -152,17 +162,13 @@ export default {
     }
   },
 
-  soundLabel() {
-    this.soundButton.textContent = this.sound ? 'Sound on' : 'Sound off';
-    this.soundButton.setAttribute('aria-pressed', String(this.sound));
-  },
-
-  unlockSound() {
-    if (!this.sound) return;
-    const Audio = window.AudioContext || window.webkitAudioContext;
-    if (!Audio) return;
-    this.audio = this.audio || new Audio();
-    if (this.audio.state === 'suspended') this.audio.resume().catch(() => {});
+  setSpeed(speed) {
+    this.speed = Object.hasOwn(speedDurations, speed) ? speed : 'normal';
+    this.el.dataset.playbackSpeed = this.speed;
+    this.speedButtons.forEach(button => {
+      button.setAttribute('aria-pressed', String(button.dataset.speedChoice === this.speed));
+    });
+    this.replayButton.disabled = this.speed === 'instant';
   },
 
   setUnits(units) {
@@ -319,7 +325,8 @@ export default {
     if (opening) {
       if (this.logScrollFrame) cancelAnimationFrame(this.logScrollFrame);
       this.logScrollFrame = requestAnimationFrame(() => {
-        document.getElementById('combat-log-panel')?.scrollIntoView({behavior: this.motion.matches ? 'auto' : 'smooth', block: 'start'});
+        const behavior = this.speed === 'instant' ? 'instant' : this.motion.matches ? 'auto' : 'smooth';
+        document.getElementById('combat-log-panel')?.scrollIntoView({behavior, block: 'start'});
       });
     }
   },
@@ -456,7 +463,6 @@ export default {
       bolt.src = event.image;
       this.el.querySelector('.stage-vfx').append(bolt);
       this.animate(bolt, [{left:event.actor === 'left' ? '29%' : '71%', opacity:0, transform:'translate(-50%, -50%) scale(.3) rotate(-20deg)'}, {offset:.25, opacity:1}, {left:event.target === 'left' ? '24%' : '76%', opacity:1, transform:'translate(-50%, -50%) scale(1.2) rotate(15deg)'}], 280).then(() => bolt.remove());
-      this.tone(event.kind === 'spell' ? 420 : 140, .09);
     }
     await this.wait(275);
     if (epoch !== this.epoch) return;
@@ -480,7 +486,6 @@ export default {
     });
     this.refreshTooltips();
     if (event.flag && event.flag !== 'Evaded') this.float(['Stunned', 'Charging'].includes(event.flag) ? event.actor : event.target, event.flag.toUpperCase(), 'status');
-    this.tone(event.flag === 'Critical' ? 65 : 90, .1);
     await this.wait(410);
   },
 
@@ -512,31 +517,17 @@ export default {
   },
 
   animate(element, frames, duration) {
-    const animation = element.animate(frames, {duration: duration * 2, easing:'cubic-bezier(.2,.7,.2,1)'});
+    if (this.speed === 'instant') return Promise.resolve();
+    const animation = element.animate(frames, {duration: duration * (speedDurations[this.speed] ?? 2), easing:'cubic-bezier(.2,.7,.2,1)'});
     this.animations.add(animation);
     return animation.finished.catch(() => {}).finally(() => this.animations.delete(animation));
   },
 
   wait(duration) {
+    if (this.speed === 'instant') return Promise.resolve();
     return new Promise(resolve => {
-      const timer = setTimeout(() => { this.waits.delete(timer); resolve(); }, duration * 2);
+      const timer = setTimeout(() => { this.waits.delete(timer); resolve(); }, duration * (speedDurations[this.speed] ?? 2));
       this.waits.set(timer, resolve);
     });
-  },
-
-  tone(frequency, duration) {
-    if (!this.sound || !this.audio || this.audio.state !== 'running') return;
-    const oscillator = this.audio.createOscillator();
-    const gain = this.audio.createGain();
-    const now = this.audio.currentTime;
-    oscillator.type = 'triangle';
-    oscillator.frequency.setValueAtTime(frequency, now);
-    oscillator.frequency.exponentialRampToValueAtTime(Math.max(frequency / 3, 30), now + duration);
-    gain.gain.setValueAtTime(.045, now);
-    gain.gain.exponentialRampToValueAtTime(.001, now + duration);
-    oscillator.connect(gain);
-    gain.connect(this.audio.destination);
-    oscillator.start(now);
-    oscillator.stop(now + duration);
   }
 };

@@ -1,6 +1,7 @@
 defmodule MobaWeb.V2.MatchLive do
   use MobaWeb, :v2_live_view
   on_mount MobaWeb.V2.Hooks.TeamAccess
+  on_mount MobaWeb.V2.Hooks.BattlePreferences
 
   import MobaWeb.CoreComponents, only: [icon: 1]
 

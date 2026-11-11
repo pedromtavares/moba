@@ -188,16 +188,16 @@
   .battle-experience-before { background: #526274; }
   .battle-experience-earned { background: #8dbad0; }
   .battle-result-footer { display: flex; align-items: center; justify-content: flex-end; gap: 18px; }
-  .battle-level-up { position: relative; display: flex; align-items: center; gap: 14px; margin-right: auto; color: #f5d18e; animation: battle-level-reveal 850ms cubic-bezier(.16, 1, .3, 1) both; }
+  .battle-level-up { position: relative; display: flex; align-items: center; gap: 14px; margin-right: auto; color: #f5d18e; animation: battle-level-reveal calc(850ms * var(--battle-motion, 1)) cubic-bezier(.16, 1, .3, 1) both; }
   .battle-level-number { position: relative; display: flex; align-items: center; justify-content: center; width: 58px; height: 58px; border: 1px solid #e9c080; border-radius: 50%; background: radial-gradient(circle, #9b6b303d, #171718 70%); box-shadow: inset 0 0 12px #e6ad5326, 0 0 28px #e6ad5333; font-size: 30px; line-height: 1; text-shadow: 0 0 14px #f0bc6766; }
   .battle-level-number::before { content: ''; position: absolute; inset: -6px; border: 1px solid #e9c08040; border-radius: 50%; }
   .battle-level-up > span { font-size: 23px; font-weight: 800; text-shadow: 0 0 20px #d99c4940; }
-  .battle-level-up::after { content: ''; position: absolute; left: 29px; top: 29px; width: 3px; height: 3px; border-radius: 50%; background: #ffe2a6; box-shadow: -38px -24px #f3c77f, 28px -38px #f3c77f, 42px 10px #f3c77f, -24px 36px #f3c77f, 52px -14px #f3c77f; pointer-events: none; animation: battle-level-sparks 1200ms ease-out both; }
-  #battle-bar .battle-outcome[data-level-up="true"] .battle-experience .progress { position: relative; border-color: #e9c08080; animation: battle-level-glow 1800ms ease-out both; }
+  .battle-level-up::after { content: ''; position: absolute; left: 29px; top: 29px; width: 3px; height: 3px; border-radius: 50%; background: #ffe2a6; box-shadow: -38px -24px #f3c77f, 28px -38px #f3c77f, 42px 10px #f3c77f, -24px 36px #f3c77f, 52px -14px #f3c77f; pointer-events: none; animation: battle-level-sparks calc(1200ms * var(--battle-motion, 1)) ease-out both; }
+  #battle-bar .battle-outcome[data-level-up="true"] .battle-experience .progress { position: relative; border-color: #e9c08080; animation: battle-level-glow calc(1800ms * var(--battle-motion, 1)) ease-out both; }
   [data-level-up="true"] .battle-experience-before { background: #8f7548; }
   [data-level-up="true"] .battle-experience-earned { background: linear-gradient(90deg, #d6ad68, #ffe2a6); }
   [data-level-up="true"] .battle-experience > strong { color: #f5d18e; font-size: 16px; font-weight: 800; }
-  [data-level-up="true"] .battle-experience .progress::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, #fff6dbaa 50%, transparent 70%); transform: translateX(-100%); animation: battle-level-sweep 1000ms 250ms ease-out both; pointer-events: none; }
+  [data-level-up="true"] .battle-experience .progress::after { content: ''; position: absolute; inset: 0; background: linear-gradient(110deg, transparent 30%, #fff6dbaa 50%, transparent 70%); transform: translateX(-100%); animation: battle-level-sweep calc(1000ms * var(--battle-motion, 1)) calc(250ms * var(--battle-motion, 1)) ease-out both; pointer-events: none; }
   .battle-result-actions { display: flex; justify-content: flex-end; align-items: center; gap: 10px; }
   .battle-result-actions .btn { width: auto; min-height: 46px; padding: 11px 18px; font: 700 16px/1.3 'Nunito', sans-serif; letter-spacing: 0; }
   .battle-result-actions .btn i { margin-right: 7px; }
@@ -385,7 +385,7 @@
     .battle-result-identity > img { display: none; }
     h3 { font-size: clamp(38px, 3.6vw, 60px); }
   }
-  .duel-victory-seal { position: relative; display: grid; place-items: center; width: 96px; height: 96px; border: 1px solid #ebc981aa; border-radius: 50%; background: radial-gradient(circle, #dfb64f30, #0a1622c9 75%); color: #f3d28d; box-shadow: 0 0 32px #dfb64f26, inset 0 0 22px #e8bf6926; animation: duel-victory-reveal .65s ease-out both; }
+  .duel-victory-seal { position: relative; display: grid; place-items: center; width: 96px; height: 96px; border: 1px solid #ebc981aa; border-radius: 50%; background: radial-gradient(circle, #dfb64f30, #0a1622c9 75%); color: #f3d28d; box-shadow: 0 0 32px #dfb64f26, inset 0 0 22px #e8bf6926; animation: duel-victory-reveal calc(.65s * var(--battle-motion, 1)) ease-out both; }
   .duel-victory-seal::before { content: ''; position: absolute; inset: -7px; border: 1px solid #ebc98138; border-radius: inherit; }
   .duel-victory-seal .ui-icon { font-size: 40px; filter: drop-shadow(0 0 10px #eac57566); }
 }

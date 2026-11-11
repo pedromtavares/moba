@@ -42,6 +42,33 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     assert_patch_or_redirect(view, a.match.id)
   end
 
+  test "battle speed is saved on the viewing player and carries across battle types", a do
+    attacker = hd(a.picks)
+    defender = create_base_hero()
+    battle = create_basic_battle(attacker, defender)
+    conn = log_in_player(a.conn, player_id: a.player.id)
+    {:ok, view, _} = live(conn, "/battles/#{battle.id}")
+    assert has_element?(view, "#battle-speed-normal[aria-pressed=true]")
+    assert has_element?(view, "#battle-speed-fast .ui-play + .ui-play")
+    assert has_element?(view, "#battle-speed-instant .ui-bolt")
+    refute has_element?(view, "[data-stage-sound]")
+
+    render_hook(view, "battle-speed", %{"speed" => "fast"})
+    assert Game.get_player!(a.player.id).preferences.battle_speed == :fast
+
+    {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
+    {:ok, arena, _} = live(conn, "/matches/#{match.id}/battles")
+    assert has_element?(arena, "#combat-stage[data-battle-speed=fast] #battle-speed-fast[aria-pressed=true]")
+
+    render_hook(arena, "battle-speed", %{"speed" => "instant"})
+    render_hook(arena, "battle-speed", %{"speed" => "invalid", "player_id" => defender.player_id})
+    assert Game.get_player!(a.player.id).preferences.battle_speed == :instant
+    assert Game.get_player!(defender.player_id).preferences.battle_speed == :normal
+
+    {:ok, reopened, _} = live(conn, "/battles/#{battle.id}")
+    assert has_element?(reopened, "#battle-speed-instant[aria-pressed=true]")
+  end
+
   test "manual actions, pause buttons, next pairing and reload retain the cinematic layout", a do
     {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
     conn = log_in_player(a.conn, player_id: a.player.id)

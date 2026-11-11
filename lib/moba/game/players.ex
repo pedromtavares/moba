@@ -141,8 +141,14 @@ defmodule Moba.Game.Players do
   end
 
   def update_preferences!(player, preferences) do
-    current_preferences = Map.from_struct(player.preferences)
-    update_player!(player, %{preferences: Map.merge(current_preferences, preferences)})
+    {:ok, player} =
+      Repo.transaction(fn ->
+        current = Repo.one!(from p in Player, where: p.id == ^player.id, lock: "FOR UPDATE")
+        saved = if current.preferences, do: Map.from_struct(current.preferences), else: %{}
+        update_player!(%{player | preferences: current.preferences}, %{preferences: Map.merge(saved, preferences)})
+      end)
+
+    player
   end
 
   def update_tutorial_step!(player, step), do: update_player!(player, %{tutorial_step: step})

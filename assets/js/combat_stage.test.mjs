@@ -36,6 +36,58 @@ test('incoming turns join the current sequence once, including duplicate server 
   assert.equal(hook.busy, false);
 });
 
+test('Fast halves effect durations and autoplay delays, and Instant schedules neither', async t => {
+  const durations = [];
+  const delays = [];
+  let runTimer;
+  t.mock.method(globalThis, 'setTimeout', (callback, delay) => {
+    delays.push(delay);
+    runTimer = callback;
+    return delays.length;
+  });
+  const element = {animate(_frames, {duration}) {
+    durations.push(duration);
+    return {finished: Promise.resolve()};
+  }};
+  const hook = {...CombatStage, animations: new Set(), waits: new Map()};
+
+  for (const speed of ['normal', 'fast']) {
+    hook.speed = speed;
+    await hook.animate(element, [], 400);
+    const waiting = hook.wait(160);
+    runTimer();
+    await waiting;
+  }
+
+  hook.speed = 'instant';
+  await hook.animate(element, [], 400);
+  await hook.wait(160);
+  assert.deepEqual(durations, [800, 400]);
+  assert.deepEqual(delays, [320, 160]);
+});
+
+test('Instant renders the latest saved state and advances autoplay without replaying queued effects', async () => {
+  const target = {};
+  const sent = [];
+  const hook = {
+    ...CombatStage, speed: 'instant', busy: false, epoch: 1, seen: 0, queue: [],
+    scene: {id: 12, events: []},
+    el: {dataset: {}, closest: () => target},
+    renderTurnClock() {},
+    renderLogToggle() {},
+    settle() { assert.equal(this.scene.events.length, 2); },
+    drain() { assert.fail('Instant must skip the animation queue'); },
+    pushEventTo: (...args) => sent.push(args)
+  };
+  hook.el.dataset.scene = JSON.stringify({id: 12, events: [{number: 1}, {number: 2}],
+    trainingPlayback: {enabled: true, frame: 'battle:2'}});
+  hook.updated();
+  hook.updated();
+  await Promise.resolve();
+  assert.equal(hook.seen, 2);
+  assert.deepEqual(sent, [[target, 'training-playback-ready', {frame: 'battle:2'}]]);
+});
+
 test('each hero retains its own latest action and every effect icon across responses and resets', t => {
   const originalDocument = globalThis.document;
   globalThis.document = {createElement: () => ({dataset: {}, setAttribute() {}, append(child) { if (!this.image) this.image = child; else this.badge = child; }})};
@@ -266,14 +318,13 @@ test('central battle log control stays in sync and brings expanded turns into vi
   assert.equal(button.disabled, true);
 });
 
-test('reduced motion applies the confirmed resources immediately without animation or audio', async () => {
+test('reduced motion applies the confirmed resources immediately without animation', async () => {
   const applied = [];
   const hook = Object.assign({}, CombatStage, {
     el: {dataset: {}}, motion: {matches: true},
     headline() {},
     setVitals(side, vitals) { applied.push([side, vitals.hp]); },
     animate() { assert.fail('Reduced motion must skip animation'); },
-    tone() { assert.fail('Reduced motion must skip action sounds'); }
   });
   await hook.play({actor: 'left', kind: 'spell', after: {left: {hp: 900}, right: {hp: 0}}}, 1);
   assert.deepEqual(applied, [['left', 900], ['right', 0]]);

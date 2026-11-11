@@ -7,6 +7,7 @@
   data-scene={Jason.encode!(@combat_scene)}
   data-finished={to_string(@combat_scene.finished)}
   data-log-expanded={to_string(@show_combat_log)}
+  data-battle-speed={@battle_speed}
   aria-label="Live battlefield"
 >
   <header class="stage-heading">
@@ -16,8 +17,38 @@
     </span>
     <span class="stage-turn-status" data-stage-status>{@combat_scene.status}</span>
     <div class="stage-tools">
-      <button type="button" data-stage-replay class="stage-tool" hidden={@combat_scene.events == []}>↻ Replay</button>
-      <button type="button" data-stage-sound class="stage-tool" aria-pressed="false">Sound off</button>
+      <button
+        type="button"
+        data-stage-replay
+        class="stage-tool"
+        hidden={@combat_scene.events == []}
+        disabled={@battle_speed == :instant}
+      >
+        ↻ Replay
+      </button>
+      <div class="stage-speed" role="group" aria-label="Battle speed">
+        <span class="stage-speed-label" aria-hidden="true">Battle speed</span>
+        <div class="stage-speed-options">
+          <button
+            :for={
+              {speed, label, icon} <- [
+                {:normal, "Normal", "game-play"},
+                {:fast, "Fast", "game-play"},
+                {:instant, "Instant", "game-energy"}
+              ]
+            }
+            id={"battle-speed-#{speed}"}
+            type="button"
+            data-speed-choice={speed}
+            aria-pressed={to_string(@battle_speed == speed)}
+          >
+            <span class="stage-speed-icon" aria-hidden="true">
+              <.icon name={icon} /><.icon :if={speed == :fast} name={icon} />
+            </span>
+            {label}
+          </button>
+        </div>
+      </div>
     </div>
   </header>
   <div

@@ -24,6 +24,7 @@ defmodule MobaWeb.V2.Components.TrainingBattle do
           page_navigation={true}
           current_scope={@current_scope}
           access_session={@access_session}
+          battle_speed={@battle_speed}
         />
       </main>
     </Layouts.app>
