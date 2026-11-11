@@ -3,31 +3,51 @@
   class="profile-cinematic"
   style={"--profile-scene: url(#{if @featured, do: GH.background_url(@featured), else: "/images/tutorial/hall-of-legends.jpg"})"}
 >
-  <div class="profile-cinematic-identity">
-    <img
-      src={"/images/pve/#{@player.pve_tier}.png"}
-      class={"profile-crest big-rank-shadow-#{shadow_rank(@player)}"}
-      alt={Moba.pve_tiers()[@player.pve_tier]}
-    />
-    <div>
-      <h1>
-        <img :if={@player.user.discord.id} src={@player.user.discord.avatar} class="discord-avatar" alt="" />
-        {username(@player)}
-      </h1>
-      <p class="profile-rank-title">
-        {Moba.pve_tiers()[@player.pve_tier]} <span>·</span>
-        <%= cond do %>
-          <% @player.pvp_tier == 2 && @player.ranking == 1 -> %>
-            The Immortal
-          <% @player.pvp_tier == 2 -> %>
-            Immortals Arena
-          <% @player.pvp_tier == 1 -> %>
-            Shadows Arena
-          <% true -> %>
-            Plebs Arena
-        <% end %>
-      </p>
+  <div class="profile-cinematic-player">
+    <div class="profile-cinematic-identity">
+      <img
+        src={"/images/pve/#{@player.pve_tier}.png"}
+        class={"profile-crest big-rank-shadow-#{shadow_rank(@player)}"}
+        alt={Moba.pve_tiers()[@player.pve_tier]}
+      />
+      <div>
+        <h1>
+          <img :if={@player.user.discord.id} src={@player.user.discord.avatar} class="discord-avatar" alt="" />
+          {username(@player)}
+        </h1>
+        <p class="profile-rank-title">
+          {Moba.pve_tiers()[@player.pve_tier]} <span>·</span>
+          <%= cond do %>
+            <% @player.pvp_tier == 2 && @player.ranking == 1 -> %>
+              The Immortal
+            <% @player.pvp_tier == 2 -> %>
+              Immortals Arena
+            <% @player.pvp_tier == 1 -> %>
+              Shadows Arena
+            <% true -> %>
+              Plebs Arena
+          <% end %>
+        </p>
+      </div>
     </div>
+    <nav
+      :if={@player.id == @current_player.id}
+      id="profile-actions"
+      class="profile-actions"
+      aria-label="Account actions"
+    >
+      <.link navigate={preview_path(assigns, ~p"/users/settings")}>
+        <.icon name="game-edit" /> Edit Profile
+      </.link>
+      <div class="profile-actions-links">
+        <.link href="/auth/discord" class="profile-action-discord">
+          <.icon name="game-discord" /> Connect Discord
+        </.link>
+        <.link href={preview_path(assigns, ~p"/users/log_out")} method="delete" class="profile-action-logout">
+          <.icon name="game-sign-out" /> Log out
+        </.link>
+      </div>
+    </nav>
   </div>
   <div :if={@featured} id={"hero_#{@featured.id}"} class="profile-featured">
     <.link

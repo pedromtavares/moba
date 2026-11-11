@@ -107,6 +107,8 @@ defmodule MobaWeb.V2.ArenaLiveTest do
     conn = log_in_player(conn, player_id: player.id)
     {:ok, arena, _} = live(conn, "/arena")
     assert has_element?(arena, "#arena-header-footer dd.arena-stat-blue", "50%")
+    assert has_element?(arena, "#arena-matches-pager #arena-matches-table tbody[data-listing-rows]")
+    assert has_element?(arena, "#arena-matches-pager-controls button[aria-controls=arena-matches-pager-viewport]")
 
     {:ok, profile, _} = live(conn, "/player/#{player.id}")
     assert has_element?(profile, "#profile-3v3-win-rate", "50%")

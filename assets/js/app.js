@@ -11,6 +11,7 @@ import {Socket} from "phoenix";
 import {LiveSocket} from "phoenix_live_view";
 import Hooks from "./hooks";
 import CommunityPager from "./community_pager";
+import ListingPager from "./listing_pager";
 import {initGameConfirmations} from "./game_feedback";
 import {initTooltips, hideTooltips} from "./tooltips";
 import {initAnalytics} from "./analytics";
@@ -48,7 +49,10 @@ window.addEventListener("phx:page-loading-stop", () => {
 });
 
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content");
-let liveSocket = new LiveSocket("/live", Socket, {hooks: {...Hooks, CommunityPager}, params: {_csrf_token: csrfToken}});
+let liveSocket = new LiveSocket("/live", Socket, {
+  hooks: {...Hooks, CommunityPager, ListingPager: {...ListingPager, hideTooltips}},
+  params: {_csrf_token: csrfToken}
+});
 liveSocket.connect();
 
 window.jQuery = $;

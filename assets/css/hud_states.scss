@@ -28,7 +28,6 @@
   .arena-daily-limit strong { display: block; color: #e5d0a8; font-size: 23px; font-weight: 800; line-height: 1.3; }
   .arena-daily-limit span { display: block; margin-top: 8px; color: #a9b5c5; font-size: 16px; line-height: 1.5; }
   #arena-no-matches, #arena-no-duels { background: #ffffff03; border-style: dashed; }
-  .arena-history:has(#arena-no-matches) { flex: 0 0 auto; }
   .card.duels:has(#arena-pending-duel):not(:has(#arena-duels-table)) { height: auto !important; border-bottom: 0; padding-bottom: 0; }
 }
 

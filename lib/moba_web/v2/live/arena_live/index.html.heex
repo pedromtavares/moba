@@ -158,7 +158,7 @@
                 <div
                   :if={@history_tab == "matches"}
                   id="arena-history-matches"
-                  class="history arena-history"
+                  class="arena-history-panel"
                   aria-labelledby="arena-history-matches-tab"
                 >
                   <.hud_notice
@@ -169,41 +169,49 @@
                   >
                     <.icon name="game-strategy" />
                   </.hud_notice>
-                  <table :if={@matches != []} class="table-dark table mb-0 history-table" id="arena-matches-table">
-                    <%= for match <- @matches do %>
-                      <% rewards = rewards_badge(match.rewards.attacker_pvp_points) %>
-                      <tr>
-                        <td class="d-flex justify-content-center table-player-cell">
-                          <img src={"/images/pve/#{match.opponent.pve_tier}.png"} class="mr-2" style="max-height: 40px" />
-                          <div style="width: 70%">
-                            <h4 class="mt-2">
+                  <.listing_pager :if={@matches != []} id="arena-matches-pager" label="3v3 history">
+                    <table class="table-dark table mb-0 history-table" id="arena-matches-table">
+                      <tbody data-listing-rows>
+                        <%= for match <- @matches do %>
+                          <% rewards = rewards_badge(match.rewards.attacker_pvp_points) %>
+                          <tr>
+                            <td class="d-flex justify-content-center table-player-cell">
+                              <img
+                                src={"/images/pve/#{match.opponent.pve_tier}.png"}
+                                class="mr-2"
+                                style="max-height: 40px"
+                              />
+                              <div style="width: 70%">
+                                <h4 class="mt-2">
+                                  <.link
+                                    navigate={preview_path(assigns, ~p"/player/#{match.opponent.id}")}
+                                    data-profile-username={Moba.Utils.username(match.opponent)}
+                                    class="text-white"
+                                  >
+                                    {username(match.opponent)}
+                                  </.link>
+                                  <small class="history-detail">{match_type_title(match)}</small>
+                                </h4>
+                              </div>
+                            </td>
+                            <td width="15%" class="text-center">
+                              <h5 class={match_result_class(match)}>{match_result_label(match)}</h5>
+                              <span :if={rewards} class={rewards.class}>{rewards.label}</span>
+                            </td>
+                            <td>
                               <.link
-                                navigate={preview_path(assigns, ~p"/player/#{match.opponent.id}")}
-                                data-profile-username={Moba.Utils.username(match.opponent)}
-                                class="text-white"
+                                navigate={preview_path(assigns, ~p"/matches/#{match}")}
+                                class="btn btn-light game-review"
+                                aria-label={"Review match #{match.id}"}
                               >
-                                {username(match.opponent)}
+                                <i class="ui-icon ui-eye"></i>
                               </.link>
-                              <small class="history-detail">{match_type_title(match)}</small>
-                            </h4>
-                          </div>
-                        </td>
-                        <td width="15%" class="text-center">
-                          <h5 class={match_result_class(match)}>{match_result_label(match)}</h5>
-                          <span :if={rewards} class={rewards.class}>{rewards.label}</span>
-                        </td>
-                        <td>
-                          <.link
-                            navigate={preview_path(assigns, ~p"/matches/#{match}")}
-                            class="btn btn-light game-review"
-                            aria-label={"Review match #{match.id}"}
-                          >
-                            <i class="ui-icon ui-eye"></i>
-                          </.link>
-                        </td>
-                      </tr>
-                    <% end %>
-                  </table>
+                            </td>
+                          </tr>
+                        <% end %>
+                      </tbody>
+                    </table>
+                  </.listing_pager>
                 </div>
                 <.duel_history {assigns} />
               </div>

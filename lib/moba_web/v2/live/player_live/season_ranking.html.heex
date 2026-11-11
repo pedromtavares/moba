@@ -21,12 +21,10 @@
       <th data-toggle="tooltip" title={TT.season_score_tooltip(@player)}>Season Score</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody data-listing-rows>
     <%= for {player, index} <- Enum.with_index(@ranking, 1) do %>
       <tr
         id={"player-#{player.id}"}
-        phx-hook={if player.id == @player.id, do: "HalfScroll"}
-        phx-container="#user-ranking"
         class={if player.id == @player.id, do: "selected-player"}
         data-bracket={if @preview, do: arena_bracket(player)}
       >

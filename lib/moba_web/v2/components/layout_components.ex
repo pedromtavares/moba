@@ -15,6 +15,43 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
     router: MobaWeb.Router,
     statics: MobaWeb.static_paths()
 
+  attr :id, :string, required: true
+  attr :label, :string, required: true
+  attr :initial_row, :string, default: nil
+  attr :page_size, :integer, default: nil
+  slot :inner_block, required: true
+  slot :before_controls
+
+  def listing_pager(assigns) do
+    ~H"""
+    <div id={@id} class="listing-pager" phx-hook="ListingPager" data-initial-row={@initial_row} data-page-size={@page_size}>
+      <div id={"#{@id}-viewport"} class="listing-pager-viewport">
+        {render_slot(@inner_block)}
+      </div>
+      {render_slot(@before_controls)}
+      <nav id={"#{@id}-controls"} class="listing-pager-controls" aria-label={"#{@label} pagination"} hidden>
+        <button
+          type="button"
+          data-page-step="-1"
+          aria-label={"Previous page of #{@label}"}
+          aria-controls={"#{@id}-viewport"}
+        >
+          <span aria-hidden="true">←</span>
+        </button>
+        <span class="listing-page-count" data-page-label aria-live="polite"></span>
+        <button
+          type="button"
+          data-page-step="1"
+          aria-label={"Next page of #{@label}"}
+          aria-controls={"#{@id}-viewport"}
+        >
+          <span aria-hidden="true">→</span>
+        </button>
+      </nav>
+    </div>
+    """
+  end
+
   # -------------------------------------------------------------------
   # Sidebar
   # -------------------------------------------------------------------

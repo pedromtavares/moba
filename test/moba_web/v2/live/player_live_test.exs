@@ -19,6 +19,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert has_element?(view, "#user-profile")
       refute has_element?(view, "#profile-cinematic .profile-eyebrow")
       assert has_element?(view, "#profile-ranking-header")
+      assert has_element?(view, "#profile-season-ranking-pager[data-initial-row='player-#{hero.player_id}']")
       assert has_element?(view, "#profile-cinematic strong[title='Arena Rating'][data-toggle=tooltip]", "0 AR")
       assert has_element?(view, "#profile-cinematic .profile-metric-label", "Arena Rating")
       assert has_element?(view, "#profile-ranking-header", "Season score")
@@ -62,8 +63,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       {:ok, view, _} = live(conn, "/player/#{hero.player_id}")
       assert has_element?(view, ".profile-metrics > #profile-registration-age:first-child strong", expected)
       assert has_element?(view, "#profile-registration-age .profile-metric-label", "Registered")
-      assert has_element?(view, "#user-profile > .card-footer #profile-actions")
-      refute has_element?(view, "#user-profile > .card-footer .font-italic")
+      assert has_element?(view, "#profile-cinematic .profile-cinematic-identity + #profile-actions")
+      refute has_element?(view, "#user-profile > .card-footer")
     end
   end
 
@@ -216,6 +217,12 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/player/#{hero.player_id}")
 
     assert has_element?(view, "#matches-btn[aria-pressed=true]")
+
+    assert has_element?(
+             view,
+             "#profile-matches-pager[data-page-size='5'] #profile-matches-table tbody[data-listing-rows]"
+           )
+
     assert has_element?(view, "#profile-matches-table .opponent .history-detail", "Manual match")
     assert has_element?(view, "#profile-matches-table [data-result=Defeat] small", "-2 Arena Rating")
     assert has_element?(view, "#profile-matches-table a[href='/matches/#{match.id}'][aria-label]")
@@ -223,6 +230,8 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     view |> element("#duels-btn") |> render_click()
 
     assert has_element?(view, "#duels-btn[aria-pressed=true]")
+    assert has_element?(view, "#profile-duels-pager[data-page-size='5'] #profile-duels-table tbody[data-listing-rows]")
+    refute has_element?(view, "#profile-matches-pager")
     assert has_element?(view, "#profile-duels-table [data-result=Victory] small", "+5 Arena Rating")
     assert has_element?(view, "#profile-duels-table a[href='/arena/#{live_duel.id}'][aria-label]")
     refute has_element?(view, "#profile-arena-debut")
@@ -309,11 +318,12 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
     view |> element("#profile-ranking-team") |> render_click()
     assert has_element?(view, "#profile-ranking-team[aria-pressed=true]", "Team")
+    assert has_element?(view, "#profile-team-ranking-pager[data-initial-row='profile-ranked-team-#{best.id}']")
     assert has_element?(view, "#profile-ranked-team-#{leader.id} td:first-child", "#1")
 
     assert has_element?(
              view,
-             "#profile-ranked-team-#{best.id}.selected-player[phx-hook=HalfScroll] td:first-child",
+             "#profile-ranked-team-#{best.id}.selected-player td:first-child",
              "#2"
            )
 
@@ -440,7 +450,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
       assert has_element?(
                view,
-               "#profile-ranked-hero-#{hero.id}.selected-player[phx-hook=HalfScroll] .profile-hero-position",
+               "#profile-ranked-hero-#{hero.id}.selected-player .profile-hero-position",
                "#200"
              )
 
@@ -457,7 +467,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
       view |> element("#profile-ranking-hero") |> render_click()
       assert has_element?(view, "#profile-hero-ranking-table")
-      assert has_element?(view, "#profile-ranked-hero-#{hero.id}[phx-hook=HalfScroll]")
+      assert has_element?(view, "#profile-hero-ranking-pager[data-initial-row='profile-ranked-hero-#{hero.id}']")
     end
 
     test "only a top-200 hero qualifies and the empty hero leaderboard stays usable", %{conn: conn} do
@@ -470,7 +480,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       refute has_element?(view, "#profile-ranked-hero-#{hero.id}")
     end
 
-    test "another profile's heroes are highlighted instead of the viewer's, with only its best hero scrolled into view",
+    test "another profile's heroes are highlighted and its best hero sets the starting page",
          %{conn: conn} do
       viewer = create_base_hero() |> Game.update_hero!(%{pve_ranking: 1})
       profile_hero = create_base_hero() |> Game.update_hero!(%{pve_ranking: 50})
@@ -484,9 +494,14 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert has_element?(view, "#profile-ranking-season[aria-pressed=true]")
       view |> element("#profile-ranking-hero") |> render_click()
       assert has_element?(view, "#profile-ranking-hero[aria-pressed=true]")
-      assert has_element?(view, "#profile-ranked-hero-#{profile_hero.id}.selected-player[phx-hook=HalfScroll]")
+
+      assert has_element?(
+               view,
+               "#profile-hero-ranking-pager[data-initial-row='profile-ranked-hero-#{profile_hero.id}']"
+             )
+
+      assert has_element?(view, "#profile-ranked-hero-#{profile_hero.id}.selected-player")
       assert has_element?(view, "#profile-ranked-hero-#{second.id}.selected-player")
-      refute has_element?(view, "#profile-ranked-hero-#{second.id}[phx-hook=HalfScroll]")
       refute has_element?(view, "#profile-ranked-hero-#{viewer.id}.selected-player")
 
       updated = Game.update_hero!(profile_hero, %{finished_at: Timex.shift(profile_hero.inserted_at, minutes: 24)})

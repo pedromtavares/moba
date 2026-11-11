@@ -7,14 +7,12 @@
       <th scope="col">Training time</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody data-listing-rows>
     <tr
       :for={hero <- @hero_ranking}
       id={"profile-ranked-hero-#{hero.id}"}
       class={hero.player_id == @player.id && "selected-player"}
       data-profile-hero={to_string(hero.player_id == @player.id)}
-      phx-hook={if hero.id == @best_ranked_hero_id, do: "HalfScroll"}
-      phx-container="#user-ranking"
     >
       <td class="profile-hero-position">
         <h1 class="f-rpg">#{hero.pve_ranking}</h1>

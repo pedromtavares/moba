@@ -81,6 +81,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-your-standing [aria-label=Unranked]")
     assert has_element?(view, "#arena-standings-empty")
+    assert has_element?(view, "#arena-your-standing + #arena-standings-3v3-pager-controls")
     refute has_element?(view, "#arena-your-standing .arena-standing-movement")
   end
 

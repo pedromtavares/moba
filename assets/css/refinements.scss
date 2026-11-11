@@ -58,7 +58,6 @@
   .arena-board > .col { padding: 0; min-width: 0; }
   .arena-board .ranking > .nav { min-height: 56px; align-items: center; margin-bottom: 16px !important; }
   .arena .arena-board #matchmaking-container, .arena .arena-board #pvp_duels { height: auto !important; }
-  .arena .arena-history { max-height: 60vh; }
   .arena-overview .history-table .history-detail { margin-top: 5px; text-align: left; font-size: 12px; color: #969da9; }
 
   /* Clear columns and compact player identities replace oversized, centered cells. */
@@ -100,9 +99,6 @@
   .ranking-table #loading-ranking { color: #d6b47c !important; }
 
   .user-profile #user-profile { height: auto !important; }
-  .profile-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 2px 4px 12px; font-size: 15px; }
-  .profile-actions a { color: #bcb5a8 !important; transition: color 180ms ease; }
-  .profile-actions a:hover { color: #f0d7aa !important; }
   .user-profile .profile-metrics { margin: 8px 0; padding: 16px 0 !important; border-bottom: 1px solid var(--base-line); }
   .profile-metrics > .col + .col { border-left: 1px solid var(--base-line); }
   .profile-metrics strong { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; }
@@ -182,7 +178,6 @@
     #user-profile { display: flex; flex-direction: column; }
     #user-profile > .card-body, #user-profile > .row { flex: 0 0 auto; }
     #user-profile > .card-footer { flex: 0 0 auto; padding-top: 12px !important; margin-top: 12px; }
-    #user-ranking { overflow: hidden auto; }
   }
 
   .game-page .arena-overview {
@@ -192,10 +187,8 @@
     > .row > .col > .row:first-child:not(.arena-board) { flex: 0 0 auto; }
     .arena-board { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr); overflow: hidden; }
     .arena-board > .col { height: 100%; min-height: 0; }
-    .arena-board :is(#matchmaking-container, #pvp_duels, .ranking) { height: 100% !important; max-height: none; margin-bottom: 0; padding-bottom: 12px; border-bottom: 1px solid var(--base-line); display: flex; flex-direction: column; }
+    .arena-board :is(#matchmaking-container, #pvp_duels, .ranking) { height: 100% !important; max-height: none; margin-bottom: 0; border-bottom: 1px solid var(--base-line); display: flex; flex-direction: column; }
     .arena-board .card-body { display: flex; flex-direction: column; flex: 1; min-height: 0; }
-    .arena-board .arena-history { flex: 1; min-height: 0; max-height: none; overflow: hidden auto; }
-    .arena-board .ranking > .card-body { overflow: hidden auto; }
     .arena-board .ranking .nav { flex: 0 0 auto; margin-top: 0 !important; }
   }
 }
@@ -216,7 +209,6 @@
 @media (max-width: 1199px) {
   .game-page .arena-board { grid-template-columns: minmax(0, 1fr); }
   .game-page .arena-board > .col { width: 100%; max-width: 100%; }
-  .game-page .arena .arena-history { max-height: 420px; }
 }
 
 @media (max-width: 767px) {
@@ -236,10 +228,6 @@
     .avatar-attributes { gap: 4px; }
     .avatar-attribute strong { font-size: 22px; }
   }
-}
-
-@media (max-width: 767px) {
-  .game-page .profile-actions { gap: 8px; font-size: 13px; }
 }
 
 .game-page {

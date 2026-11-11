@@ -163,12 +163,16 @@
               {assigns}
             />
 
-            <div class="profile-history">
-              <p :if={@filter == "matches" && @matches == []} class="profile-rank-empty">
-                No completed 3v3 matches yet.
-              </p>
+            <p :if={@filter == "matches" && @matches == []} class="profile-rank-empty">
+              No completed 3v3 matches yet.
+            </p>
+            <.listing_pager
+              :if={@filter == "duels" || @matches != []}
+              id={"profile-#{@filter}-pager"}
+              label={if @filter == "matches", do: "3v3 history", else: "1v1 history"}
+              page_size={5}
+            >
               <table
-                :if={@filter == "duels" || @matches != []}
                 id={"profile-#{@filter}-table"}
                 class="profile-history-table"
               >
@@ -184,7 +188,7 @@
                     <th scope="col">Replay</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody data-listing-rows>
                   <%= if @filter == "matches" do %>
                     <.history_row
                       :for={match <- @matches}
@@ -210,27 +214,11 @@
                   <% end %>
                 </tbody>
               </table>
-            </div>
+            </.listing_pager>
           <% end %>
 
-          <div :if={!@preview || @player.id == @current_player.id} class="card-footer p-1">
-            <nav
-              :if={@preview && @player.id == @current_player.id}
-              id="profile-actions"
-              class="profile-actions"
-              aria-label="Account actions"
-            >
-              <.link navigate={preview_path(assigns, ~p"/users/settings")}>
-                <i class="ui-icon ui-edit mr-1"></i>Edit Profile
-              </.link>
-              <.link href="/auth/discord" class="profile-action-discord">
-                <i class="ui-icon ui-chat-controller"></i> Connect Discord
-              </.link>
-              <.link href={preview_path(assigns, ~p"/users/log_out")} method="delete" class="profile-action-logout">
-                <i class="ui-icon ui-sign-out mr-1"></i>Log out
-              </.link>
-            </nav>
-            <div :if={!@preview} class="row">
+          <div :if={!@preview} class="card-footer p-1">
+            <div class="row">
               <div class="col text-center">
                 <span class="font-italic text-dark">
                   {registered_label(@player)}
@@ -241,7 +229,7 @@
         </div>
       </div>
       <div class="col-md-12 col-xl-4 profile-ranking-column">
-        <div class="card ranking" phx-hook="EqualHeight" phx-target=".collection-container" id="user-ranking">
+        <div class="card ranking" id="user-ranking">
           <div class="card-body" id="ranking-card">
             <div :if={@preview} id="profile-ranking-header" class="profile-ranking-header">
               <div class="profile-ranking-title">
@@ -274,9 +262,21 @@
                 </button>
               </div>
             </div>
-            <.season_ranking :if={@ranking_tab == "season"} {assigns} />
-            <.team_ranking :if={@ranking_tab == "team"} {assigns} />
-            <.hero_ranking :if={@ranking_tab == "hero"} {assigns} />
+            <.listing_pager
+              id={"profile-#{@ranking_tab}-ranking-pager"}
+              label={"#{String.capitalize(@ranking_tab)} leaderboard"}
+              initial_row={
+                case @ranking_tab do
+                  "season" -> "player-#{@player.id}"
+                  "team" -> @best_team_rank[:id] && "profile-ranked-team-#{@best_team_rank[:id]}"
+                  "hero" -> @best_ranked_hero_id && "profile-ranked-hero-#{@best_ranked_hero_id}"
+                end
+              }
+            >
+              <.season_ranking :if={@ranking_tab == "season"} {assigns} />
+              <.team_ranking :if={@ranking_tab == "team"} {assigns} />
+              <.hero_ranking :if={@ranking_tab == "hero"} {assigns} />
+            </.listing_pager>
           </div>
         </div>
       </div>

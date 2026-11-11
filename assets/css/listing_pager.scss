@@ -1,0 +1,56 @@
+.game-page .listing-pager {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+
+  [data-listing-rows] > [hidden], .listing-pager-controls[hidden] { display: none !important; }
+
+  .listing-pager-viewport { flex: 1; min-height: 0; overflow: clip; }
+  .listing-pager-controls {
+    display: grid;
+    grid-template-columns: 36px minmax(48px, max-content) 36px;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 8px 10px;
+    border-top: 1px solid #c7b17b33;
+    background: radial-gradient(ellipse at 50% 0%, #c7b17b16, transparent 70%), #0a121d80;
+    color: #e4c58f;
+  }
+  .listing-page-count {
+    text-align: center;
+    color: #c8bda8;
+    font: 800 12px/1.3 'Nunito', sans-serif;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .listing-pager-controls button {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #c7b17b55;
+    border-radius: 5px;
+    background: linear-gradient(145deg, #dbc08b21, #0b1521 85%);
+    color: inherit;
+    font: 900 20px/1 'Nunito', sans-serif;
+    transition: border-color .16s, background .16s, color .16s;
+  }
+  .listing-pager-controls button:hover:not([aria-disabled="true"]) {
+    border-color: #e4c58fa8;
+    background: #c7b17b26;
+    color: #fff0cc;
+    cursor: pointer;
+  }
+  .listing-pager-controls button:focus-visible { outline: 2px solid #e4c58f; outline-offset: 2px; }
+  .listing-pager-controls button[aria-disabled="true"] { opacity: .4; cursor: default; }
+}
+
+@media (max-width: 1199px) {
+  .game-page .listing-pager .listing-pager-viewport { max-height: clamp(180px, 50dvh, 520px); }
+}
