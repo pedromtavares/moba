@@ -2,6 +2,7 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
   @moduledoc "Persistent cinematic controls for team-training battles and matches."
   use MobaWeb, :v2_live_component
   import MobaWeb.CoreComponents, only: [icon: 1]
+  alias Moba.Engine.Core.Helper
   alias Moba.Game.{TeamRuns, TeamTraining, TrainingEncounters}
   alias Moba.Game.Training.Loadouts
   alias Moba.Game.Training.Combat
@@ -77,7 +78,7 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
       frame != a.frame ->
         {:noreply, socket}
 
-      a.active && (a.auto_mode != :none || (a.manual_view && a.turn.attacker.player_id != -1)) ->
+      a.automatic_turn ->
         {:noreply, mutate(socket, %{auto: true})}
 
       a.transition ->
@@ -182,13 +183,17 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
       !!active_match && !!full.finished && index < length(replay.battles) && is_nil(a.replay_turns) &&
         (!manual_view || mode == :match)
 
-    enabled = mode != :none || (active && manual_view) || transition
+    automatic_turn =
+      active &&
+        (mode != :none || (manual_view && (prepared.attacker.player_id != -1 || Helper.disabled?(prepared.attacker))))
+
+    enabled = mode != :none || automatic_turn || transition
 
     scene =
       Map.merge(scene, %{turnDeadline: nil, fullReplay: true, trainingPlayback: %{enabled: enabled, frame: frame}})
 
     hero = Enum.find([battle.attacker, battle.defender], &(&1.id == prepared.attacker.hero_id))
-    can_act = active && manual_view && prepared.attacker.player_id == -1 && mode == :none
+    can_act = active && manual_view && !automatic_turn
 
     control_turn =
       if prepared.attacker.player_id == -1,
@@ -239,6 +244,7 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
       live_group: active_match,
       transition: transition,
       auto_mode: mode,
+      automatic_turn: automatic_turn,
       shown_turns: shown,
       turn: prepared,
       initial_turn: initial,

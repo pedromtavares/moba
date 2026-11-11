@@ -2,6 +2,7 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
   @moduledoc "Manual Arena combat using the shared cinematic battlefield and training controls."
   use MobaWeb, :v2_live_component
   import MobaWeb.CoreComponents, only: [icon: 1]
+  alias Moba.Engine.Core.Helper
   alias Moba.Game.Arena
   alias MobaWeb.V2.BattleLive
   alias MobaWeb.V2.Components.CombatScene
@@ -56,7 +57,7 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
       frame != a.frame ->
         {:noreply, socket}
 
-      a.active && !a.battle.finished && (a.auto_mode != :none || a.turn.attacker.player_id != a.match.player_id) ->
+      a.automatic_turn ->
         {:noreply, mutate(socket, %{auto: true})}
 
       a.active && a.battle.finished && a.auto_mode == :match ->
@@ -104,10 +105,11 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
     initial = BattleLive.initial_turn(battle, battles) || turn
     frame = "arena-#{battle.id}:#{length(battle.turns)}:#{a.mode_token}"
 
-    enabled =
-      active &&
-        ((!battle.finished && (mode != :none || turn.attacker.player_id != player.id)) ||
-           (battle.finished && mode == :match))
+    automatic_turn =
+      active && !battle.finished &&
+        (mode != :none || turn.attacker.player_id != player.id || Helper.disabled?(turn.attacker))
+
+    enabled = automatic_turn || (active && battle.finished && mode == :match)
 
     scene =
       CombatScene.build(battle, initial, turn, player)
@@ -118,7 +120,7 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
         trainingPlayback: %{enabled: enabled, frame: frame}
       })
 
-    can_act = active && !battle.finished && turn.attacker.player_id == player.id && mode == :none
+    can_act = active && !battle.finished && !automatic_turn
     recorded_battles = battles |> Enum.take_while(&(&1.id <= battle.id)) |> Enum.reverse()
 
     lineups =
@@ -162,6 +164,7 @@ defmodule MobaWeb.V2.ArenaBattleComponent do
       lineups: lineups,
       active: active,
       auto_mode: mode,
+      automatic_turn: automatic_turn,
       can_act: can_act,
       control_turn: control_turn,
       control_hero: hero,

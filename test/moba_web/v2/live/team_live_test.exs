@@ -934,6 +934,40 @@ defmodule MobaWeb.V2.TeamLiveTest do
     assert has_element?(view, "#attack-button[data-hero='1']:not([disabled])")
   end
 
+  test "a silenced training hero uses a basic attack with auto battle off", %{conn: conn, scope: scope, player: player} do
+    record = team_run(scope, player)
+
+    {:ok, record} =
+      TeamRuns.update(scope, record, fn run ->
+        run = easy_target(run)
+        run = put_in(run.heroes[1].hero.speed, 0)
+        run = TeamTraining.battle(run, hd(run.targets[1]).id)
+        run = TeamTraining.battle_action(scope, run, %{auto: true})
+        encounter = TeamTraining.active_encounter(run)
+        [turn] = encounter.duel.battle.turns
+        battle = %{encounter.duel.battle | turns: [put_in(turn.defender.silenced, true)]}
+        duel = %{encounter.duel | battle: battle}
+        %{run | resolution: %{duel: duel}, encounters: [%{encounter | duel: duel, battles: [battle]}]}
+      end)
+
+    encounter = record |> TeamRuns.state() |> TeamTraining.active_encounter()
+    {:ok, view, html} = live(conn, TrainingEncounters.path(encounter, 1))
+    assert has_element?(view, "#attack-button[disabled]")
+    assert has_element?(view, "#training-auto-battle[aria-pressed=false]")
+
+    [data] = html |> LazyHTML.from_fragment() |> LazyHTML.query("#combat-stage") |> LazyHTML.attribute("data-scene")
+    assert %{"enabled" => true, "frame" => frame} = Jason.decode!(data)["trainingPlayback"]
+    view |> element("#combat-stage") |> render_hook("training-playback-ready", %{"frame" => frame})
+
+    saved = TeamRuns.get_encounter(scope, record.id, encounter.id)
+    {:ok, replay} = TrainingEncounters.replay(saved)
+    [_, attack] = hd(replay.battles).turns
+    assert attack.attacker.hero_id == 1
+    assert attack.attacker.silenced
+    assert attack.skill_code == "basic_attack"
+    assert is_nil(attack.item_code)
+  end
+
   test "a pending battle can be resumed after reloading and foreign admins cannot access it", %{
     conn: conn,
     scope: scope,

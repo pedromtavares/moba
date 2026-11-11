@@ -94,6 +94,36 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     assert Engine.latest_match_battle(match.id).turns == []
   end
 
+  test "a stunned hero passes its Arena turn with auto battle off", a do
+    {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
+    battle = Engine.latest_match_battle(match.id)
+    opening = Engine.build_turn(battle)
+
+    Moba.Repo.insert!(%Moba.Engine.Schema.Turn{
+      battle_id: battle.id,
+      number: 1,
+      skill_code: "basic_attack",
+      attacker: opening.defender,
+      defender: %{opening.attacker | stunned: true}
+    })
+
+    conn = log_in_player(a.conn, player_id: a.player.id)
+    {:ok, view, html} = live(conn, "/matches/#{match.id}/battles")
+    assert has_element?(view, "#attack-button[disabled]")
+    assert has_element?(view, "#training-auto-battle[aria-pressed=false]")
+
+    [data] = html |> LazyHTML.from_fragment() |> LazyHTML.query("#combat-stage") |> LazyHTML.attribute("data-scene")
+    assert %{"enabled" => true, "frame" => frame} = Jason.decode!(data)["trainingPlayback"]
+    view |> element("#combat-stage") |> render_hook("training-playback-ready", %{"frame" => frame})
+
+    [previous, passed] = Engine.latest_match_battle(match.id).turns
+    assert passed.attacker.player_id == a.player.id
+    assert passed.attacker.stunned
+    assert is_nil(passed.skill_code)
+    assert passed.defender.current_hp == previous.attacker.current_hp
+    assert has_element?(view, "#training-auto-battle[aria-pressed=false]")
+  end
+
   test "the first batch fills the library and collection selections can be removed directly", a do
     for n <- 1..10,
         do:
