@@ -90,7 +90,7 @@ body:has(.game-page) #navigation { overflow-x: hidden; }
     box-shadow: inset 0 1px #e8c58b73, 0 0 22px #e46a5059, 0 0 46px #b6413533;
   }
 
-  .btn.active, .current-featured img { border-color: #d6b47c !important; box-shadow: 0 0 12px #d6ad6a26; }
+  .btn.active { border-color: #d6b47c !important; box-shadow: 0 0 12px #d6ad6a26; }
   .training .farm-tabs .nav-link { border: 0 !important; border-bottom: 2px solid transparent !important; }
   .training .farm-tabs .nav-link.active { border-bottom-color: #d6b47c !important; }
   .training .gank-button { background: #0c111acc; border: 1px solid var(--base-line); border-radius: 4px; }

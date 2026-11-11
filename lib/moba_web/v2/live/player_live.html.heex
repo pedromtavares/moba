@@ -19,20 +19,29 @@
             <div class="card-body pb-1 d-flex">
               <div class="row">
                 <%= for hero <- @profile_collection do %>
+                  <% selected = @featured != nil && @featured.id == hero["hero_id"] %>
+                  <% perfect = GH.perfect_collection_run?(hero) %>
+                  <% name = hero["avatar_name"] || hero["code"] %>
                   <div class="col-3 text-center">
-                    <a
-                      href="javascript:;"
-                      class={if @featured && @featured.id == hero["hero_id"], do: "current-featured"}
+                    <button
+                      type="button"
+                      class={["profile-avatar-select", selected && "current-featured"]}
+                      aria-pressed={to_string(selected)}
                       phx-click="set-featured"
                       phx-value-id={hero["hero_id"]}
-                      phx-hook="Loading"
                       id={"set-featured-#{hero["hero_id"]}"}
+                      data-toggle="tooltip"
+                      title={if perfect, do: "#{name} · Perfect Run", else: name}
                     >
-                      <div class="avatar-container">
-                        <img src={GH.image_url(hero["avatar"])} class={avatar_class(hero)} />
+                      <span class={["avatar-container", perfect && "is-undefeated"]}>
+                        <img
+                          src={GH.image_url(hero["avatar"])}
+                          class="avatar"
+                          alt={if perfect, do: "#{name}, Perfect Run", else: name}
+                        />
                         <.league_badge tier={hero["tier"]} variant="legacy" />
-                      </div>
-                    </a>
+                      </span>
+                    </button>
                   </div>
                 <% end %>
                 <%= for avatar <- @blank_collection do %>

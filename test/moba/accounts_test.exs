@@ -135,6 +135,30 @@ defmodule Moba.AccountsTest do
       assert "has already been taken" in errors_on(changeset).email
     end
 
+    test "preserves username casing and rejects case-insensitive collisions" do
+      user = user_fixture(username: "CaseKeeper")
+      assert user.username == "CaseKeeper"
+      assert Accounts.get_user_by_username("CASEKEEPER").id == user.id
+
+      assert {:error, changeset} = Accounts.register_user(valid_user_attributes(username: "casekeeper"))
+      assert errors_on(changeset).username == ["has already been taken"]
+
+      assert {:ok, updated} = Accounts.update_user_settings(user, %{username: "CASEKEEPER"})
+      assert updated.username == "CASEKEEPER"
+    end
+
+    test "the database rejects case variants even when validation is bypassed" do
+      user_fixture(username: "UniqueFighter")
+
+      changeset =
+        %User{}
+        |> Ecto.Changeset.change(%{username: "uniquefighter", email: unique_user_email()})
+        |> Ecto.Changeset.unique_constraint(:username, name: :users_username_case_conflict)
+
+      assert {:error, rejected} = Moba.Repo.insert(changeset, mode: :savepoint)
+      assert errors_on(rejected).username == ["has already been taken"]
+    end
+
     test "registers users with a hashed password" do
       email = unique_user_email()
       {:ok, user} = Accounts.register_user(valid_user_attributes(email: email))

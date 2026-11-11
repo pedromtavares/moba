@@ -12,7 +12,6 @@ defmodule MobaWeb.V2.LibraryLiveTest do
 
   test "the Library has three icon tabs and opens on Avatars", %{view: view} do
     assert has_element?(view, "#manual-title", "Library")
-    assert has_element?(view, "#manual-heading .manual-heading-description", "Refine your strategy.")
     assert has_element?(view, "#library[phx-hook=ManualCodex][phx-update=ignore]")
 
     for {key, label, icon} <- [
@@ -20,7 +19,12 @@ defmodule MobaWeb.V2.LibraryLiveTest do
           {"skills", "Skills", "manual"},
           {"items", "Items", "catalog-items"}
         ] do
-      assert has_element?(view, "#library-tab-#{key}[role=tab][aria-controls=manual-#{key}]", label)
+      assert has_element?(
+               view,
+               "#manual-heading > #library-tabs #library-tab-#{key}[role=tab][aria-controls=manual-#{key}]",
+               label
+             )
+
       assert has_element?(view, "#library-tab-#{key} img[src$='/#{icon}.webp']")
       assert has_element?(view, "#manual-#{key}[role=tabpanel][aria-labelledby=library-tab-#{key}]")
     end

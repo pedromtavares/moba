@@ -10,18 +10,18 @@
     <div>
       <div class="ascent-kicker">
         <span class="ascent-eyebrow">Training · League ascent</span>
-        <.link
-          :if={!@history && is_nil(@current_player.user_id)}
-          id={GH.dom_id(@id_prefix, "training-guest-sign-in")}
-          href="/users/log_in"
-          class="ascent-guest-sign-in"
-        >
-          <.icon name="game-sign-in" />
-          <span>Already registered? <strong>Sign in</strong></span>
-        </.link>
       </div>
       <h2 id={GH.dom_id(@id_prefix, "training-ascent-title")}>Road to <span>{short_league(@goal)}</span></h2>
     </div>
+    <.link
+      :if={!@history && is_nil(@current_player.user_id)}
+      id={GH.dom_id(@id_prefix, "training-guest-sign-in")}
+      href="/users/log_in"
+      class="ascent-guest-sign-in"
+    >
+      <.icon name="game-sign-in" />
+      <span>Already registered? <strong>Sign in</strong></span>
+    </.link>
     <div id={if @challenge_ready, do: GH.dom_id(@id_prefix, "league-challenge-intro")} class="ascent-objective">
       <div>
         <p id={GH.dom_id(@id_prefix, "training-ascent-status")} class="ascent-status" role="status">

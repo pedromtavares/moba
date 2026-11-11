@@ -36,14 +36,18 @@
       class="profile-featured-heading"
     >
       <.league_badge tier={@featured.league_tier} variant="legacy" />
-      <div>
-        <strong>{@featured.name}</strong>
-        <span data-toggle="tooltip" title={TT.hero_stats_tooltip(@featured, true)}>
-          Level {@featured.level} · {@featured.avatar.name}
+      <div class="profile-featured-copy">
+        <div class="profile-featured-title">
+          <strong>{@featured.name}</strong>
+          <span class="profile-featured-rank">
+            <span :if={@featured.pve_ranking}>#{@featured.pve_ranking}</span>
+            <span aria-hidden="true">↗</span>
+          </span>
+        </div>
+        <span class="profile-featured-level" data-toggle="tooltip" title={TT.hero_stats_tooltip(@featured, true)}>
+          Level {@featured.level} {@featured.avatar.name}
         </span>
       </div>
-      <span :if={@featured.pve_ranking} class="profile-featured-rank">#{@featured.pve_ranking}</span>
-      <span aria-hidden="true">↗</span>
     </.link>
     <div class="profile-featured-loadout">
       <.hero_skill_strip

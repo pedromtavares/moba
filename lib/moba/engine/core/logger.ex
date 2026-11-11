@@ -112,6 +112,9 @@ defmodule Moba.Engine.Core.Logger do
   defp describe_applied_effect("hp_regen", {amount, hero}),
     do: "reduced #{hero}'s healing by [hp]#{-amount}[/hp]"
 
+  defp describe_applied_effect("healing_scheduled", {amount, hero}) when amount > 0,
+    do: "#{hero} will recover [hp]#{amount} Health[/hp] over their next three turns"
+
   defp describe_applied_effect("mp_regen", {amount, hero}), do: "restored [mp]#{amount} Energy[/mp] to #{hero}"
   defp describe_applied_effect("mp_burn", {amount, hero}), do: "drained [mp]#{amount} Energy[/mp] from #{hero}"
 
@@ -219,12 +222,29 @@ defmodule Moba.Engine.Core.Logger do
     "#{hero} restored [mp]#{mp} Energy[/mp] and reduced all running cooldowns by [status]#{turns} turns[/status]"
   end
 
-  defp description_for("purifying_flames", %{"hp_regen" => {hp, hero}}, _) do
-    "Purifying Flames restored [hp]#{hp} Health[/hp] to #{hero}"
-  end
+  defp description_for("purifying_flames", effects, _) do
+    hit =
+      case effects["damage"] do
+        {damage, hero} ->
+          hit = "Purifying Flames dealt [damage]#{damage} damage[/damage] to #{hero}"
 
-  defp description_for("purifying_flames", %{"damage" => {damage, hero}}, _) do
-    "Purifying Flames dealt [damage]#{damage} damage[/damage] to #{hero}, who will heal on their next three turns"
+          case effects["healing_scheduled"] do
+            {0, _} -> hit
+            {amount, _} -> hit <> ", who will recover [hp]#{amount} Health[/hp] over their next three turns"
+            nil -> hit <> ", who will heal on their next three turns"
+          end
+
+        nil ->
+          nil
+      end
+
+    heal =
+      case effects["hp_regen"] do
+        {hp, hero} -> "Purifying Flames restored [hp]#{hp} Health[/hp] to #{hero}"
+        nil -> nil
+      end
+
+    [hit, heal] |> Enum.reject(&is_nil/1) |> Enum.join(". ")
   end
 
   defp description_for("fortunes_end", %{"damage" => {damage, hero}}, _) do

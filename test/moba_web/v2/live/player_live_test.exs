@@ -113,7 +113,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       ids =
         html
         |> LazyHTML.from_fragment()
-        |> LazyHTML.query("#profile-collection a[id^=set-featured-]")
+        |> LazyHTML.query("#profile-collection button[id^=set-featured-]")
         |> LazyHTML.attribute("id")
 
       assert ids == Enum.map([first, ranked_tie, second, third], &"set-featured-#{&1.id}")
@@ -125,7 +125,22 @@ defmodule MobaWeb.V2.PlayerLiveTest do
     end
 
     test "preview selection updates the banner hero and loadout", %{conn: conn} do
-      first = create_base_hero(%{finished_at: Timex.now()}) |> Game.buy_item!(base_item())
+      player = Game.get_player!(create_player!().id)
+
+      first =
+        create_base_hero(
+          %{
+            name: player.user.username,
+            finished_at: Timex.now(),
+            league_tier: Moba.max_league_tier(),
+            pve_ranking: 15,
+            total_gold_farm: 30_000,
+            total_xp_farm: 30_000
+          },
+          player
+        )
+        |> Game.buy_item!(base_item())
+
       Game.update_hero_collection!(first)
 
       second =
@@ -142,13 +157,26 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       view |> element("#set-featured-#{first.id}") |> render_click()
       assert has_element?(view, "#profile-cinematic #hero_#{first.id}")
       assert has_element?(view, "#profile-featured-link[href='/hero/#{first.id}']")
+      assert has_element?(view, "#profile-featured-link .profile-featured-title strong", first.name)
+      assert has_element?(view, "#profile-featured-link .profile-featured-title .profile-featured-rank", "#15")
+
+      assert has_element?(
+               view,
+               "#profile-featured-link .profile-featured-level[data-toggle=tooltip]",
+               "Level #{first.level} #{first.avatar.name}"
+             )
+
       assert has_element?(view, "#profile-cinematic #item-#{hd(first.items).id}-#{first.id}")
+      assert has_element?(view, "#set-featured-#{first.id}[aria-pressed=true][title$='Perfect Run'] .is-undefeated")
+      refute has_element?(view, "#set-featured-#{second.id} .is-undefeated")
       refute has_element?(view, "#profile-collection .hero-card")
 
       view |> element("#set-featured-#{second.id}") |> render_click()
-      assert has_element?(view, "#profile-cinematic #hero_#{second.id}", "Second hero")
+      assert has_element?(view, "#hero_#{second.id} .profile-featured-title strong", "Second hero")
+      assert has_element?(view, "#hero_#{second.id} .profile-featured-level", second.avatar.name)
       assert has_element?(view, "#profile-cinematic #skill-#{hd(second.skills).id}-#{second.id}")
-      assert has_element?(view, "#set-featured-#{second.id}.current-featured")
+      assert has_element?(view, "#set-featured-#{second.id}.current-featured[aria-pressed=true]")
+      assert has_element?(view, "#set-featured-#{first.id}[aria-pressed=false] .is-undefeated")
       refute has_element?(view, "#profile-cinematic #hero_#{first.id}")
       refute has_element?(view, "#profile-cinematic #item-#{hd(first.items).id}-#{first.id}")
     end

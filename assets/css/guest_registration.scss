@@ -1,0 +1,223 @@
+body:has(#guest-registration) {
+  padding-bottom: 0;
+  > #topnav { display: none; }
+  #main-wrapper > .container-fluid { padding-inline: 0; }
+}
+
+#registration_form .form-group label { display: block; }
+
+.guest-registration {
+  --guest-gold: #efd39a;
+  --guest-line: #d6b97e50;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #080f19;
+  color: #f5ebd9;
+  font-family: 'Nunito', sans-serif;
+
+  .guest-registration-scene, .guest-registration-scene img, &::before {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .guest-registration-scene { z-index: -2; pointer-events: none; mask-image: linear-gradient(#000 55%, transparent 96%); }
+  .guest-registration-scene img { object-fit: cover; object-position: center 42%; }
+  &::before {
+    content: '';
+    z-index: -1;
+    background:
+      radial-gradient(ellipse at 18% 32%, #1219230a, transparent 38%),
+      linear-gradient(90deg, #08111de8, #0a111ca6 48%, #080f19ed 100%),
+      linear-gradient(0deg, #080f19 1%, transparent 73%);
+  }
+
+  .guest-registration-header, .guest-registration-content {
+    width: min(100%, 1540px);
+    margin-inline: auto;
+    padding-inline: clamp(20px, 5vw, 88px);
+  }
+  .guest-registration-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 20px;
+    padding-block: clamp(14px, 2.5vh, 30px);
+  }
+  .guest-registration-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--guest-gold);
+    font-weight: 900;
+    font-size: 13px;
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+  .guest-registration-brand img { object-fit: contain; filter: drop-shadow(0 0 12px #dfb45e46); }
+  .guest-registration-sign-in {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 12px;
+    border: 1px solid #d6b97e3b;
+    border-radius: 6px;
+    background: #0b1423cc;
+    color: #d6deea;
+    font-size: 13px;
+    text-align: right;
+  }
+  .guest-registration-sign-in :is(.ui-icon, strong) { color: var(--guest-gold); flex-shrink: 0; }
+
+  .guest-registration-content {
+    display: grid;
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    align-items: center;
+    gap: clamp(32px, 5.5vw, 92px);
+    padding-block: clamp(20px, 4vh, 55px) clamp(28px, 6vh, 78px);
+  }
+  .guest-registration-story > h1 {
+    margin: 0;
+    color: #fff0d3;
+    font: 950 clamp(46px, 5.2vw, 86px)/.98 'Nunito', sans-serif;
+    letter-spacing: -.05em;
+    text-shadow: 0 6px 36px #040811cc;
+  }
+  .guest-registration-story > h1 span { display: block; color: var(--guest-gold); }
+  .guest-registration-story > p {
+    max-width: 42ch;
+    margin: 16px 0 0;
+    color: #e4e7ed;
+    font: 650 clamp(16px, 1.4vw, 23px)/1.45 'Nunito', sans-serif;
+    text-shadow: 0 2px 14px #080f19;
+  }
+  #guest-registration-roster { margin-top: clamp(18px, 4vh, 40px); }
+  .guest-roster-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .guest-roster-heading h2 { margin: 0; color: #f5ebd9; font: 850 17px/1.2 'Nunito', sans-serif; }
+  .guest-roster-league {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-inline-start: auto;
+    color: var(--guest-gold);
+    font-size: 14px;
+    font-weight: 850;
+  }
+  .guest-roster-league img { width: 27px; height: 29px; object-fit: contain; }
+  .guest-roster-portraits {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    list-style: none;
+    border: 1px solid var(--guest-line);
+    border-radius: 10px;
+    box-shadow: 0 20px 55px #0006, 0 0 34px #bf9c5e19;
+  }
+  .guest-roster-portraits.is-solo { grid-template-columns: minmax(0, 1fr); }
+  .guest-roster-hero {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: end;
+    min-height: clamp(165px, 32vh, 350px);
+    background: #141d29;
+  }
+  .guest-roster-hero + .guest-roster-hero { border-inline-start: 1px solid var(--guest-line); }
+  .guest-roster-hero img, .guest-roster-hero::after { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .guest-roster-hero img { z-index: -2; object-fit: cover; object-position: 50% 40%; }
+  .guest-roster-hero::after { z-index: -1; content: ''; background: linear-gradient(0deg, #080f19 0%, #080f19ba 17%, #080f1900 65%); }
+  .guest-roster-caption { display: grid; gap: 2px; padding: clamp(8px, 1.5vw, 20px); }
+  .guest-roster-caption strong { color: #fff1d8; font-size: clamp(14px, 1.45vw, 23px); line-height: 1.15; }
+  .guest-roster-caption > span { color: #c4d1df; font-size: 13px; }
+
+  .guest-registration-panel {
+    padding: clamp(20px, 3vw, 36px);
+    border: 1px solid #e2c28450;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #1a2735ec, #0a111de8 68%);
+    box-shadow: 0 22px 60px #02060b99, inset 0 1px #efd39a26;
+    backdrop-filter: blur(14px);
+  }
+  .guest-registration-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--guest-line);
+  }
+  .guest-registration-panel-header img { flex: none; object-fit: contain; filter: drop-shadow(0 0 12px #dfb45e46); }
+  .guest-registration-panel-header h2 {
+    margin: 0;
+    color: #fff0d3;
+    font: 900 clamp(20px, 1.75vw, 26px)/1.15 'Nunito', sans-serif;
+  }
+  .guest-registration-panel .form-group { margin-bottom: 15px; }
+  .guest-registration-panel label { margin: 0; color: #e1e6ee; font: 800 14px/1.4 'Nunito', sans-serif; }
+  .guest-registration-panel label > span { display: block; margin-bottom: 6px; }
+  .guest-registration-panel .form-control {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border-color: #acbbcc40;
+    border-radius: 7px;
+    background: #080f19ad;
+    font-size: 16px;
+  }
+  .guest-registration-panel .form-control:focus { border-color: #eac589a8; background: #101b2b; box-shadow: 0 0 0 3px #d6b97e1f; }
+  .guest-registration-panel .form-control[aria-invalid=true] { border-color: #e89799a3; }
+  .guest-registration-panel .form-group p { margin: 5px 0 0; color: #f2a7a8; font-size: 13px; }
+  .guest-registration-submit {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 56px;
+    margin-top: 22px;
+    padding: 12px 17px;
+    border: 1px solid #d7aa6cae;
+    border-radius: 6px;
+    background: linear-gradient(120deg, #622326, #923d30 60%, #6b252a);
+    box-shadow: inset 0 1px #ffe0a940, 0 0 24px #b7433338;
+    color: #fff0d6;
+    font: 900 19px/1.2 'Nunito', sans-serif;
+    cursor: pointer;
+    transition: background-color .2s, box-shadow .2s;
+  }
+  .guest-registration-submit:hover { box-shadow: inset 0 1px #ffe0a980, 0 0 28px #d65c5066; }
+  .guest-registration-sign-in:hover { color: #fff1d6; border-color: #efd39a99; text-decoration: none; }
+  :is(.guest-registration-submit, .guest-registration-sign-in):focus-visible { outline: 2px solid var(--guest-gold); outline-offset: 4px; }
+
+  @media (max-width: 900px) {
+    .guest-registration-header, .guest-registration-content { padding-inline: clamp(16px, 4vw, 36px); }
+    .guest-registration-content { gap: 22px; }
+  }
+  @media (max-width: 700px) {
+    .guest-registration-header { gap: 8px; }
+    .guest-registration-brand { gap: 6px; font-size: 11px; letter-spacing: .08em; }
+    .guest-registration-brand img { width: 30px; height: 30px; }
+    .guest-registration-sign-in { margin-inline-start: auto; padding-inline: 8px; font-size: 12px; white-space: nowrap; }
+    .guest-registration-content { grid-template-columns: minmax(0, 1fr); align-content: start; gap: 24px; }
+    .guest-registration-story > h1 { font-size: clamp(35px, 9vw, 58px); }
+    .guest-roster-hero { min-height: clamp(136px, 27vw, 205px); }
+    .guest-registration-panel { width: min(100%, 480px); }
+  }
+  @media (max-width: 370px) {
+    .guest-registration-brand > span { display: none; }
+  }
+}

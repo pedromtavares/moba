@@ -9,42 +9,40 @@
 >
   <main class="content catalog-viewport catalog-compact" id="library" phx-hook="ManualCodex" phx-update="ignore">
     <header
-      :if={@preview}
       class="catalog-heading"
       id="manual-heading"
       style="--manual-scene: url(/images/training/meditation-dark-fantasy.png)"
     >
-      <div class="manual-heading-copy">
-        <p class="catalog-eyebrow">Knowledge is power</p>
-        <div class="manual-title-row">
+      <div :if={@preview} class="catalog-heading-content">
+        <div>
+          <p class="catalog-eyebrow">Knowledge is power</p>
           <h1 id="manual-title">Library</h1>
-          <p class="manual-heading-description">Refine your strategy.</p>
         </div>
+        <.catalog_discord_link id="manual-discord" />
       </div>
-      <.catalog_discord_link id="manual-discord" />
+      <div id="library-tabs" class="cinematic-catalog-tabs" role="tablist" aria-label="Library reference">
+        <button
+          :for={
+            {key, label, icon, tone} <- [
+              {"avatars", "Avatars", "nav-profile", nil},
+              {"skills", "Skills", "nav-manual", "blue"},
+              {"items", "Items", "nav-catalog-items", "violet"}
+            ]
+          }
+          type="button"
+          id={"library-tab-#{key}"}
+          data-catalog-tone={tone}
+          data-library-tab
+          role="tab"
+          aria-selected={to_string(key == "avatars")}
+          aria-controls={"manual-#{key}"}
+          tabindex={if key == "avatars", do: 0, else: -1}
+        >
+          <.icon name={icon} />
+          <span>{label}</span>
+        </button>
+      </div>
     </header>
-    <div class="cinematic-catalog-tabs" role="tablist" aria-label="Library reference">
-      <button
-        :for={
-          {key, label, icon, tone} <- [
-            {"avatars", "Avatars", "nav-profile", nil},
-            {"skills", "Skills", "nav-manual", "blue"},
-            {"items", "Items", "nav-catalog-items", "violet"}
-          ]
-        }
-        type="button"
-        id={"library-tab-#{key}"}
-        data-catalog-tone={tone}
-        data-library-tab
-        role="tab"
-        aria-selected={to_string(key == "avatars")}
-        aria-controls={"manual-#{key}"}
-        tabindex={if key == "avatars", do: 0, else: -1}
-      >
-        <.icon name={icon} />
-        <span>{label}</span>
-      </button>
-    </div>
 
     <section id="manual-avatars" class="manual-reference-section" role="tabpanel" aria-labelledby="library-tab-avatars">
       <div class="manual-reference-frame"><.avatar_reference avatars={@avatars} /></div>

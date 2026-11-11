@@ -419,6 +419,7 @@ defmodule MobaWeb.V2.CommunityLive do
           <.activity_metrics
             label={if is_integer(@league_tier), do: "#{GH.league_name(@league_tier)} League"}
             at={@joined_at}
+            show_time={@admin}
             time_label="Joined"
           >
             <:emblem :if={is_integer(@league_tier)}>
@@ -504,7 +505,7 @@ defmodule MobaWeb.V2.CommunityLive do
         </div>
       </:ranks>
       <:footer :if={@activity}>
-        <.recent_activity activity={@activity} preview={@preview} />
+        <.recent_activity activity={@activity} preview={@preview} admin={@admin} />
       </:footer>
     </.player_banner>
     """
@@ -512,6 +513,7 @@ defmodule MobaWeb.V2.CommunityLive do
 
   attr :activity, :map, required: true
   attr :preview, :boolean, required: true
+  attr :admin, :boolean, required: true
 
   defp recent_activity(assigns) do
     assigns = assign(assigns, :path, activity_path(assigns.activity))
@@ -519,7 +521,12 @@ defmodule MobaWeb.V2.CommunityLive do
 
     ~H"""
     <.activity_container path={@path} preview={@preview} result={@result}>
-      <.activity_metrics label={activity_title(@activity)} detail={activity_detail(@activity)} at={@activity.at}>
+      <.activity_metrics
+        label={activity_title(@activity)}
+        detail={activity_detail(@activity)}
+        at={@activity.at}
+        show_time={@admin}
+      >
         <:emblem><.icon name={activity_icon(@activity)} /></:emblem>
       </.activity_metrics>
     </.activity_container>
@@ -543,22 +550,29 @@ defmodule MobaWeb.V2.CommunityLive do
 
   attr :label, :string, required: true
   attr :at, :any, required: true
+  attr :show_time, :boolean, required: true
   attr :detail, :string, default: nil
   attr :time_label, :string, default: nil
   slot :emblem
 
   defp activity_metrics(assigns) do
     ~H"""
-    <dl class="player-card-metrics community-team-metrics community-activity-metrics">
-      <div :if={@label} data-tone="streak">
-        <dt>{render_slot(@emblem)}<strong>{@label}</strong></dt>
-        <dd :if={@detail}><small>{@detail}</small></dd>
+    <div class="community-activity-metrics">
+      <div :if={@label} class="community-activity-summary">
+        {render_slot(@emblem)}
+        <span class="community-activity-text">
+          <strong>{@label}</strong>
+          <%= if @detail do %>
+            <span class="community-activity-detail">{@detail}</span>
+          <% end %>
+        </span>
       </div>
-      <div class="community-activity-time" data-tone="wins">
-        <dt><.icon name="game-clock" /><span class={unless @time_label, do: "sr-only"}>{@time_label || "Time"}</span></dt>
-        <dd><time datetime={DateTime.to_iso8601(@at)}>{relative_time(@at)}</time></dd>
+      <div :if={@show_time} class="community-activity-time">
+        <.icon name="game-clock" />
+        <span :if={@time_label}>{@time_label}</span>
+        <time datetime={DateTime.to_iso8601(@at)}>{relative_time(@at)}</time>
       </div>
-    </dl>
+    </div>
     """
   end
 
@@ -692,10 +706,10 @@ defmodule MobaWeb.V2.CommunityLive do
   defp activity_path(%{kind: :match, id: id}), do: ~p"/matches/#{id}"
   defp activity_path(%{id: id}), do: ~p"/arena/#{id}"
 
+  defp activity_icon(%{team_name: _}), do: "game-arena-3v3"
   defp activity_icon(%{kind: :training_finished}), do: "game-trophy"
-  defp activity_icon(%{kind: :training_started, team_name: _}), do: "game-strategy"
   defp activity_icon(%{kind: :training_started}), do: "game-magic"
-  defp activity_icon(%{kind: :match}), do: "game-strategy"
+  defp activity_icon(%{kind: :match}), do: "game-arena-3v3"
   defp activity_icon(_), do: "game-swords"
 
   defp activity_title(%{kind: :training_started}), do: "Started training"
@@ -717,7 +731,8 @@ defmodule MobaWeb.V2.CommunityLive do
   end
 
   defp activity_detail(%{avatar: avatar}), do: avatar
-  defp activity_detail(%{team_name: name}), do: name || "3v3 team"
+  defp activity_detail(%{team_name: nil}), do: "a 3v3 team"
+  defp activity_detail(%{team_name: name}), do: "Team #{name}"
   defp activity_detail(%{opponent: opponent}), do: "vs #{opponent}"
 
   defp live_player_ids do

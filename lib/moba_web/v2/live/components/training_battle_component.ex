@@ -263,14 +263,9 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
     )
   end
 
-  defp display_battle(battle, prepared, %{name: nil} = team) do
-    display_hero = fn
-      %{name: _} = hero -> %{hero | name: TeamTraining.hero_name(hero, team)}
-      hero -> hero
-    end
-
-    attacker = display_hero.(battle.attacker)
-    defender = display_hero.(battle.defender)
+  defp display_battle(battle, prepared, team) do
+    attacker = display_training_hero(battle.attacker, team)
+    defender = display_training_hero(battle.defender, team)
     names = %{attacker.id => attacker.name, defender.id => defender.name}
 
     display_turn = fn turn ->
@@ -287,15 +282,19 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
       battle
       | attacker: attacker,
         defender: defender,
-        initiator: display_hero.(battle.initiator),
-        winner: display_hero.(battle.winner),
+        initiator: display_training_hero(battle.initiator, team),
+        winner: display_training_hero(battle.winner, team),
         turns: Enum.map(battle.turns, display_turn)
     }
 
     {battle, display_turn.(prepared)}
   end
 
-  defp display_battle(battle, prepared, _team), do: {battle, prepared}
+  defp display_training_hero(%{name: _} = hero, team), do: %{hero | name: training_hero_name(hero, team)}
+  defp display_training_hero(hero, _team), do: hero
+
+  defp training_hero_name(%{player: %{id: -1}} = hero, team), do: TeamTraining.hero_name(hero, team)
+  defp training_hero_name(hero, _team), do: hero.name
 
   defp find_resource(resources, id), do: Enum.find(resources, &(to_string(&1.id) == id))
 

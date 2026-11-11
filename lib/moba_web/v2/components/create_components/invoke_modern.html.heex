@@ -18,6 +18,10 @@
     <img class="invoke-art-layer" alt="" />
   </div>
   <div class="invoke-atmosphere" aria-hidden="true"></div>
+  <.link :if={is_nil(@current_player.user_id)} href="/users/log_in" id="invoke-guest-sign-in">
+    <i class="ui-icon ui-sign-in" aria-hidden="true"></i>
+    <span>Already registered? <strong>Sign in</strong></span>
+  </.link>
   <div class="invoke-stage-content">
     <div class="invoke-identity" id={"avatar-#{@selected_avatar.id}"} data-invoke-identity>
       <nav :if={@current_player.user_id} id="training-mode" class="training-mode" aria-label="Training mode">
@@ -42,10 +46,6 @@
       <div class="invoke-details" id={"invoke-details-#{@selected_avatar.id}"}>
         <.invoke_stats avatar={@selected_avatar} avatars={@all_avatars} />
       </div>
-      <.link :if={is_nil(@current_player.user_id)} href="/users/log_in" id="invoke-guest-sign-in">
-        <i class="ui-icon ui-sign-in" aria-hidden="true"></i>
-        <span>Already registered? <strong>Sign in</strong></span>
-      </.link>
     </div>
 
     <aside class="invoke-build-panel" aria-label="Hero build">

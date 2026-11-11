@@ -1,10 +1,10 @@
 # BrowserMOBA Product Doc
 
-Last checked against the repository on 2026-10-29. This document describes the current game. Visual and interaction principles are in [design.md](design.md).
+Last checked against the repository on 2026-11-10. This document describes the current game. Visual and interaction principles are in [DESIGN.md](DESIGN.md).
 
 ## Overview
 
-BrowserMOBA is a free-to-play, open-source turn-based RPG that brings MOBA-style strategic gameplay to casual browser gaming. Players train heroes through PvE leagues, then compete in async PvP matches and real-time duels.
+BrowserMOBA is a free-to-play, open-source turn-based RPG that brings MOBA-style strategic gameplay to casual browser gaming. Players train three-hero rosters or solo heroes through PvE leagues, then compete in 3v3 Arena matches and async or live 1v1 duels.
 
 ### Content Snapshot
 
@@ -12,31 +12,31 @@ Counts come from [`priv/repo/seed_catalog.json`](../priv/repo/seed_catalog.json)
 
 | Content | Current catalog |
 |---------|-----------------|
-| Playable avatars | 24 across 5 roles; 10 base avatars and 14 unlockable avatars |
-| Selectable normal skills | 24; 12 base skills and 12 unlockable skills |
-| Avatar ultimates | 24; one predefined ultimate per playable avatar |
+| Playable avatars | 24 across 5 roles (10 starter avatars and 14 unlockable avatars) |
+| Selectable normal skills | 24, available to everyone |
+| Avatar ultimates | 24, one predefined ultimate per playable avatar |
 | Items | 30: 6 Normal, 6 Rare, 9 Epic, 9 Legendary |
 | Cosmetic skins | 48: one Master and one Grandmaster skin for each playable avatar |
 | Training leagues | 7, Bronze through Grandmaster |
 | Account ranks | 8, Initiate through Invoker |
 | Arena brackets | 3: Plebs, Shadows, Immortals |
 
-The catalog also includes the non-playable Boss avatar and four disabled boss skills. The 196 skill records include all skill levels and those boss skills; they are not 196 distinct player abilities. The 48 enabled player abilities are 24 selectable normal skills plus 24 avatar ultimates.
+The catalog also includes the non-playable Boss avatar and four disabled boss skills. The 196 skill records include level variants and boss skills. The 48 enabled player abilities consist of 24 selectable normal skills and 24 avatar ultimates.
 
 ### Design Philosophy
 
 - **Simple mechanics, deep strategy**: The game optimizes for straightforward rules with emergent complexity
 - **Casual sessions**: Turn-based training and async competition, playable in short browser sessions
-- **Async competition**: Players compete against historical opponents—past top players' heroes remain in the game forever
+- **Async competition**: Eligible trained heroes can fight using saved combat orders while their owners are away
 - **No pay-to-win**: All content unlockable through gameplay, no real-money purchases
 
 ### Core Game Loop
 
-1. **Create Hero**: Choose an unlocked avatar from the 24-avatar roster + 3 normal skills; its ultimate is automatic
-2. **Train (PvE)**: Battle through 7 leagues using limited turns, buy items, level skills
-3. **Complete Training**: Defeat Roshan boss to reach Grandmaster league
-4. **Compete (PvP)**: Use trained heroes in 5v5 matches and 1v1 duels
-5. **Progress Account**: Complete quests to unlock harder content and earn shards
+1. **Draft** three different unlocked avatars, or choose one in Solo 1v1. Each hero takes three normal skills from a preset or custom build and gets its avatar's ultimate.
+2. **Train** by fighting targets, spending skill points, and building each hero's inventory.
+3. **Advance** through league challenges and defeat Roshan to reach Grandmaster when the account rank permits it.
+4. **Compete** with eligible trained heroes in 3v3 Arena matches and 1v1 duels.
+5. **Progress** through account ranks, earn Shards, and unlock avatars and skins in Base.
 
 ---
 
@@ -94,7 +94,7 @@ The playable catalog contains 24 normal skills and 24 avatar ultimates. Heroes h
 
 See `lib/moba/game/skills.ex` → `can_level_skill?/2`.
 
-**Unlocking**: 12 normal skills are available by default; the other 12 cost 100 shards each. Avatar ultimates are assigned with the avatar, rather than selected from the normal skill pool.
+**Availability**: All 24 normal skills are available to guests and registered players. Avatar ultimates come with the avatar.
 
 ### 1.3 Items
 
@@ -198,7 +198,7 @@ Speed above 100 grants evasion chance (see `lib/moba/engine/core/helper.ex` → 
 - **1% evade chance per 1 Speed above 100**
 - Only triggers on **non-ultimate skills**
 - Only blocks **normal (physical) damage** — magic damage still applies
-- Has internal cooldown (can't evade consecutive turns)
+- Has a 3-turn cooldown. Echo Stomp bypasses Evade and does not trigger its cooldown.
 
 Example: 120 Speed = 20% chance to evade physical damage from non-ultimate skills
 
@@ -234,221 +234,80 @@ Four buff/debuff arrays on each battler:
 
 ## 3. PvE Training System
 
-Training is the hero progression mode where players battle through leagues to reach Grandmaster.
+Team 3v3 is the default, including for guests. Registered players can switch to Solo 1v1. Both modes use the same combat engine and leagues, but differ in how players spend turns, earn rewards, and advance.
 
-### 3.1 Turn Economy
+### 3.1 Drafting and loadouts
 
-Heroes have limited turns to complete training. See `constants.ex` → `total_pve_turns/1`:
+- Guests draft on `/start`. Registered players draft on `/new` and can choose solo at `/new/solo`. The roster suggests Juggernaut, Lina, then Tusk when those avatars are available. A registered team name defaults to the username and is inherited by its heroes. Guest heroes use avatar names.
+- Each hero gets at least 1,200 starting gold. Novice and higher accounts start with 2,000 per hero.
+- The default combat order puts a castable ultimate first, followed by the chosen active skills. Passive skills trigger through combat rules. Players can edit combat orders separately from the display order.
+- Team training enables Auto Buy by default. Nukers open with Tranquil Boots and Vanguard. Other roles open with Arcane Boots and Shadow Blade. Auto Buy then follows the build's item order and upgrades or replaces eligible Rare and Epic items with Legendaries when it can afford them. The opening boots and items manually bought or transmuted by the player are protected from automation.
+- Team battles can be played turn by turn or automated one battle at a time or across a full encounter. Solo training uses manual shopping and battle controls.
 
-| PvE Tier | Total Turns |
-|----------|-------------|
-| 0 (Initiate) | 15 |
-| 1 (Novice) | 20 |
-| 2+ (Adept and above) | 25 |
+### 3.2 Turns, targets, and rewards
 
-**Actions per turn**:
-- **Battle**: Fight a target, earn XP + gold on victory
-- **Meditate**: Passive XP farming (safer, less reward)
-- **Mine**: Passive gold farming (safer, less reward)
+Solo has one hero and can spend turns fighting, meditating for XP, or mining for gold. Team training shares a turn pool, has no meditation or mining, and sends only the selected hero into a normal target battle. Both modes start with five turns available and unlock up to five more per league stage from a reserve of 15 turns for Initiate, 20 for Novice, and 25 for Adept and above.
 
-**Passive Farm Range** (see `farm_per_turn/1`):
-| PvE Tier | Farm Range per Turn |
-|----------|---------------------|
-| 0 | 800-1,200 |
-| 1 | 850-1,200 |
-| 2 | 900-1,200 |
-| 3 | 950-1,200 |
-| 4+ | 1,000-1,200 |
+Each roster member gets three targets based on their own earned XP and gold. Target pools refresh for the full roster after an encounter. Expert and higher ranks also get manual refreshes, which reroll the selected hero's targets in team training.
 
-### 3.2 Target System
+| Account rank | Team target mix | XP and gold per solo target win, before team multiplier |
+|--------------|-----------------|-----------------------------------------------------------|
+| Initiate | 2 Easy, 1 Medium | Easy 500, Medium 600 |
+| Novice | 1 Easy, 2 Medium | Easy 500, Medium 600 |
+| Adept | 2 Medium, 1 Hard | Medium 500, Hard 600 |
+| Veteran | 1 Medium, 2 Hard | Medium 500, Hard 600 |
+| Expert and above | 3 Hard | Hard 600 |
 
-Targets are bot heroes generated based on the player's current "total farm" (XP + gold earned).
+Team rewards are triple the solo amount for each resource. **Shared** splits a normal battle reward across all three heroes. **Focus** gives it to the hero who fought. League and Roshan rewards always split across the roster. Each team hero caps at level 30 and 30,000 earned gold. Excess XP and gold are redirected independently to other heroes with room. A level-30 hero can still fight league challenges, but can no longer start a normal target battle in either reward mode.
 
-**Target Difficulties**:
+### 3.3 League challenges
 
-| Difficulty | Reward | Bot Quality |
-|------------|--------|-------------|
-| Weak | 500 (tier 0-1) | Fewer skills, weaker items |
-| Moderate | 600 (tier 0-1), 500 (tier 2+) | Medium build |
-| Strong | 600 | Full skills, best items |
+| Training Rank | Highest available league |
+|---------------|--------------------------|
+| Initiate | Diamond |
+| Novice | Master |
+| Adept and above | Grandmaster |
 
-See `pve_battle_rewards/2` in `constants.ex`.
+- Solo retains its sequence of one-on-one league battles. Bronze through Diamond have 2, 3, 4, 5, and 5 battles respectively.
+- A team advances by winning one 3v3 elimination encounter. It uses the three hardest defender slots from the solo challenge, with an extra earlier slot in the Bronze-to-Silver challenge. Defender scaling uses the midpoint between the roster's average farm and its highest-farm hero.
+- A team can start a challenge after spending its current turns or reaching level 30 on all three heroes. All three must be alive and all available skill points must be spent. The survivor starts the next pairing and carries its remaining health and energy forward. The winning team recovers after the challenge.
+- A league promotion awards 2,000 XP and 2,000 gold in solo, or a team pool of 6,000 XP and 6,000 gold.
 
-**Target Distribution by PvE Tier**:
-| Tier | Weak | Moderate | Strong |
-|------|------|----------|--------|
-| 0 | 3 | 3 | 0 |
-| 1 | 3 | 6 | 0 |
-| 2 | 0 | 6 | 3 |
-| 3 | 0 | 3 | 6 |
-| 4+ | 0 | 0 | 9 |
+### 3.4 Roshan
 
-**Target Refresh**: Higher PvE tiers unlock more refreshes (see `refresh_targets_count/1`):
-| PvE Tier | Refreshes |
-|----------|-----------|
-| 0-3 | 5 |
-| 4 | 5 |
-| 5 | 10 |
-| 6 | 15 |
-| 7 | 20 |
+Roshan is the final challenge from Master to Grandmaster. In team training he has 10,000 HP and fights the roster in order. Remaining health carries over and initiative is evaluated again for each new pairing using the training Speed rule. If the first attempt fails, he regains up to half his maximum health for the final attempt. Defeating him earns the Grandmaster promotion and a separate boss bonus of 2,000 XP and gold in solo or 6,000 of each across the team. Losing the final attempt leaves the run at Master.
 
-### 3.3 League Progression
+### 3.5 Death, recovery, and Perfect Runs
 
-7 leagues from Bronze to Grandmaster (see `@leagues` in `constants.ex`):
+Gold buyback costs 10 gold per hero level and deducts from recorded gold farm. Eligible players can use Shard buyback below Master to preserve farm. Selling items returns their full gold price without reducing recorded farm. Death itself is not a separate Perfect Run disqualifier. Beginner protection and turn refunds can affect the outcome of a target loss. Resetting a team restarts all three heroes with the same builds.
 
-| Tier | League | Base Level Range |
-|------|--------|------------------|
-| 0 | Bronze | 3-6 |
-| 1 | Silver | 6-9 |
-| 2 | Gold | 9-12 |
-| 3 | Platinum | 13-16 |
-| 4 | Diamond | 17-20 |
-| 5 | Master | 22-25 |
-| 6 | Grandmaster | 25+ |
+A completed **Perfect Run** reaches Grandmaster and earns at least 60,000 farm in solo or 60,000 average farm across a team. Each distinct avatar on a qualifying team can count toward Invoker. The in-progress Perfect indicator shows whether the run can still meet that target.
 
-**Steps per League**: Each league has multiple steps to complete before advancing:
-- Bronze: 2 steps
-- Silver: 3 steps
-- Gold: 4 steps
-- Platinum: 5 steps
-- Diamond: 5 steps
-- Master: 1 step (boss fight)
+### 3.6 Completion and records
 
-**League Challenges**: Battle bot defenders that get stronger per step. Defender level and difficulty increase with each step.
+Team members become ordinary finished heroes in the collection. Heroes that meet Arena eligibility can be picked individually or as part of a roster, and completing team training does not create a saved Arena lineup. Finished teams have their own page and leaderboard. Their individual heroes do not enter the solo rankings.
 
-**League Win Bonus**: `@league_win_bonus` = 2,000 gold + XP per advancement
-
-**Max Available League** (based on PvE tier, see `max_available_league/1`):
-| PvE Tier | Max League |
-|----------|------------|
-| 0 | Diamond (tier 4) |
-| 1 | Master (tier 5) |
-| 2+ | Grandmaster (tier 6) |
-
-### 3.4 Roshan Boss Fight
-
-Roshan is the final boss at Master League (tier 5).
-
-**Boss Mechanics**:
-- Level 25, League Tier 6, "boss" difficulty
-- **Passive ability**: +Armor and +Power every turn
-- This creates a **DPS check**—slow builds get overwhelmed as Roshan scales
-
-**Attempts**:
-- 2 chances to defeat Roshan
-- If you lose attempt 1: Roshan regenerates **50% of max HP** (`@boss_regeneration_multiplier`)
-- If you lose attempt 2: Hero finishes at Master League (not Grandmaster)
-
-**Victory Bonus**: `@boss_win_bonus` = 2,000 gold + XP
-
-**Design Intent**: Roshan filters out suboptimal builds that are too slow or defensive. Only heroes with sufficient burst damage can reach Grandmaster, ensuring Arena heroes are competitively viable.
-
-### 3.5 Death & Buyback
-
-When a hero dies in training:
-
-**Gold Buyback**:
-- Cost: Current level × `@buyback_multiplier` (10) gold
-- **Reduces Total Farm** (hurts ranking)
-- Always available
-
-**Shard Buyback**:
-- Cost: 5% of current shards (minimum `@shard_buyback_minimum` = 5)
-- **Preserves Total Farm** (no ranking penalty)
-- Only available if:
-  - Player PvE tier > 3
-  - Hero league tier < 5 (Master)
-  - Player has enough shards
-
-**Strategic Implication**: Shard buyback enables "perfect runs" (60K total farm) by avoiding gold penalties. Players need to progress their account (earn shards in Arena) to maximize PvE performance.
-
-### 3.6 Hero Completion
-
-A hero finishes training when:
-- `pve_current_turns == 0`
-- `pve_total_turns == 0`  
-- `boss_id == nil` (boss defeated or not applicable)
-- Hero is either dead, reached max available league, or in Master League
-
-**On Completion**:
-- `finished_at` timestamp set
-- Hero becomes available for Arena **immediately**
-- Hero becomes available to **other players' teams** after 30 days (`@available_hero_days`)
-- PvE ranking updated based on total farm + completion time
-
-### 3.7 Perfect Run (60K Farm)
-
-The maximum achievable farm is `@max_total_farm` = 60,000 (30K XP + 30K gold).
-
-**Achieving Perfect Runs**:
-- Battle all Strong targets without dying
-- Use shard buyback if death occurs
-- Optimal skill leveling and item purchasing order
-
-**Note**: One meta involves using Meditation to gain extra XP to offset gold surplus (since battles give equal XP/gold but max gear costs 28,800 gold, leaving gold headroom). This can result in higher effective power than pure 60K farm builds.
+A normal roster target fight is stored as a Battle. Multi-battle roster encounters are stored as training Matches with individual Battles. Solo league challenges retain their solo battle flow.
 
 ---
 
 ## 4. PvP Arena System
 
-The Arena is where trained heroes compete. Two modes: 5v5 Matches and 1v1 Duels.
+The Arena offers 3v3 team matches and 1v1 duels. Arena Rating is shared across both modes, while daily bracket standings use 3v3 wins.
 
-### 4.1 Team Management
+### 4.1 Lineup management
 
-Before competing in matches, players manage teams of 5 heroes.
+Arena lineups have three ordered slots. Pick eligible finished heroes individually, load a finished training roster, or use a saved Arena team. Arena teams are separate records and can mix heroes from different training runs. Create and reorder them in `/arena/edit`, or mark a lineup for defense. The match picker also supports repeating the last lineup and dragging heroes into slots.
 
-**Team Schema** (see `lib/moba/game/schema/team.ex`):
-- `name`: Custom team name
-- `pick_ids`: Array of hero IDs (order matters for battle sequence)
-- `defensive`: Boolean - if true, used when defending; if false, used when attacking
-- `used_count`: Tracks times picked in manual matches
+Manual picks can use the player's finished Platinum-or-higher heroes, eligible public heroes for higher brackets, or available bot picks. Automatic matchmaking requires a registered account at Novice or higher with at least one Grandmaster collection entry or two entries at Master or higher. Bots can fill empty slots. Former five-hero saved lineups use their first three slots. Historical 5v5 matches retain their original replays.
 
-**Team Features**:
-- Create multiple named teams
-- Add heroes from:
-  - Own finished training heroes
-  - Top 100 public heroes (available after `@available_hero_days` = 30 days)
-- Reorder heroes within team (affects battle order—first hero fights first)
-- Mark teams as "Defensive" (automatically used when opponent attacks you)
+### 4.2 3v3 matches
 
-**Offensive vs Defensive Teams**:
-- When you initiate a match (attacker): Your non-defensive team is used
-- When opponent attacks you (defender): Your defensive team is used
-- Allows different strategies for attacking vs defending
-
-**Team Edit UI**: `lib/moba_web/live/arena_live/edit.ex`
-
-### 4.2 5v5 Matches
-
-**Setup**:
-- Each player's team of 5 heroes fights
-- Uses saved team if available, otherwise auto-selects heroes
-- **Auto-fill**: If player has fewer than 5 heroes, remaining slots filled with bot heroes
-
-**Auto-fill Logic** (see `lib/moba/game/arena.ex` → `match_pick_auto_fill_ids/2`):
-- For Plebs (tier 0): Uses trained heroes, fills remaining with `Heroes.pvp_bots()`
-- For higher tiers: Prioritizes Grandmaster heroes, fills with bot heroes
-- Ensures new players can compete even without 5 trained heroes
-
-**Battle Flow**:
-- Sequential 1v1 battles
-- Winner stays and fights next opponent hero
-- **Carryover**: Winner restores `current_hp + (total_hp × 0.2)` and `current_mp + (total_mp × 0.2)`
-- Buffs/debuffs **cleared** between battles (fresh state)
-- Match ends when one team loses all 5 heroes
-
-**Winner Advantage**: The winner is always the **attacker** in the next battle, gaining first-attack advantage.
-
-**Daily Limit**: `@daily_match_limit` = 20 3v3 matches per day
-
-**Match Modes**:
-- **Auto**: System creates matches every 30 minutes (see `lib/moba/conductor.ex` → `season_tick!/0`)
-- **Manual**: The player initiates the match. The first 20 eligible Arena games per day award 30 shards each, shared across manual 3v3 and 1v1.
-
-**Manual Match Strategy**: 
-- Each manual victory can replace an auto loss
-- But manual losses can also replace wins
-- Players can play all 20 manually or let auto-play handle it
+- An ordered series of one-on-one battles ends when one lineup is eliminated. The survivor starts the next fight with its remaining health and energy plus 20% of each maximum. Temporary effects reset between battles.
+- Manual matches start turn-by-turn, with **Auto battle** and **Auto all battles** available. Scheduled matchmaking runs every 30 minutes and plays automatically.
+- Arena counts up to 20 matches per day. A manual match can replace an auto match once the daily slots are filled, up to 20 manual matches.
+- The first 20 eligible manual 3v3 matches and 1v1 duels combined award 30 Shards each. Using up the reward allowance does not reduce the remaining 3v3 match allowance or cap 1v1 play. For example, 10 manual matches and 10 duels exhaust the reward allowance and leave room for 10 more manual matches.
+- The displayed 3v3 win rate uses the account’s latest 100 scored 3v3 matches with a winner, counting matches in which the account was the challenger.
 
 ### 4.3 Bot Players for Matchmaking
 
@@ -461,7 +320,7 @@ For new arena entrants with low/zero Arena Rating, **bot players** serve as guar
 
 **Matchmaking Fallback**:
 - `Players.matchmaking_opponent/1` first tries to find real players
-- For Plebs: `pleb_opponents/3` searches within ±100/+50 point range
+- For Plebs, `pleb_opponents/3` searches from 100 AR below the player to 50 AR above
 - If no real opponent found: falls back to bot players
 - Ensures new players always have someone to fight
 
@@ -471,7 +330,7 @@ For new arena entrants with low/zero Arena Rating, **bot players** serve as guar
 
 **Types**:
 - **Live Duels**: Real-time pick/battle against online opponent
-- **Season Duels (Async)**: Challenge any player, their heroes are played automatically
+- **Season Duels (Async)**: Matchmake against another account whose heroes follow saved combat orders
 
 **Duel Structure**:
 - 2 battles per duel
@@ -490,7 +349,7 @@ For new arena entrants with low/zero Arena Rating, **bot players** serve as guar
 
 **Pick Timer**: `@duel_timer_in_seconds` = 60 seconds. **Auto-pick on timeout** (system picks for you).
 
-**Season Duels**: Players can farm unlimited Arena Rating via async duels. However, auto 5v5 match losses eventually offset these gains, creating equilibrium.
+**Season Duels**: There is no daily play cap. A player chooses actions manually while the async opponent follows saved combat orders. Live and Season Duels do not offer the Auto battle controls.
 
 **Important**: In async duels, opponent heroes are **real player data** played automatically. Players should configure `skill_order` and `item_order` on their heroes to optimize AI play.
 
@@ -507,11 +366,11 @@ Three PvP brackets with daily promotion/demotion:
 **Daily Reset Logic** (see `lib/moba/conductor.ex` → `pvp_tick!/0`):
 
 **Plebs**:
-- Top 5 by `daily_wins` → Promote to Shadows
+- Top 6 by `daily_wins` → Promote to Shadows
 
 **Shadows**:
 - Top 4 by `daily_wins` → Promote to Immortals
-- Bottom 5 by `daily_wins` → Demote to Plebs
+- Bottom 6 by `daily_wins` → Demote to Plebs
 - Rest stay in Shadows
 
 **Immortals**:
@@ -520,29 +379,32 @@ Three PvP brackets with daily promotion/demotion:
 
 ### 4.6 Arena Rating (AR)
 
-Arena Rating (AR) is the shared competitive rating for 5v5 matches and 1v1 duels. Rating gains and losses depend on the game mode, result, and rating difference between players. The internal field remains `pvp_points`.
+Arena Rating (AR) is the shared competitive rating for 3v3 matches and 1v1 duels. Rating gains and losses depend on the game mode, result, and rating difference between players. The internal field remains `pvp_points`.
 
-**Duel Points** (see `victory_duel_points/2`, `defeat_duel_points/2`, `tie_duel_points/2`):
+For the formulas below, `diff` is the opponent’s rating minus the challenger’s rating.
 
-| Scenario | Points |
-|----------|--------|
-| Victory (similar rating, ±40) | 5 |
-| Victory (underdog, opponent higher) | `ceil(150 / abs(diff))` (minimum 2) |
-| Victory (favorite, opponent lower) | `ceil(diff × 0.15)` |
-| Auto duel victory | 3× normal points |
-| Tie (you're stronger) | `-ceil(diff × 0.05)` |
-| Tie (you're weaker) | `+ceil(diff × 0.05)` |
+| 1v1 result | Challenger rating change |
+|------------|--------------------------|
+| Live win, gap below 40 | +5 |
+| Live win, challenger favored by 40–200 | `+max(2, ceil(150 / abs(diff)))` |
+| Live win, challenger trails by 40–200 | `+ceil(diff × 0.15)` |
+| Live loss | The reverse of what the opponent would gain for winning |
+| Live draw | `max(2, ceil(abs(diff) × 0.05))`, lost if the challenger is higher rated and gained otherwise |
+| Season win | Three times the equivalent live win |
+| Season loss | Same loss as in a live duel |
+| Season draw | +2 |
 
-**Maximum difference**: `@maximum_points_difference` = 200. No points if gap exceeds this.
-**Minimum points**: `@minimum_duel_points` = 2
+A gap above 200 zeros out wins, losses, and live draws. In live duels the other player receives the opposite change. In Season Duels only the challenger’s rating changes.
 
-**Match Points** (see `victory_match_points/1`, `defeat_match_points/1`):
-- Victory (similar): 2 points
-- Victory (underdog): `ceil(50 / abs(diff))`
-- Victory (favorite): `ceil(diff × 0.05)`
-- Defeat: `ceil(victory_match_points(-diff) × 1.1)` or 2 minimum
+| 3v3 result | Challenger rating change |
+|------------|--------------------------|
+| Win, gap below 40 | +2 |
+| Win, challenger favored by 40 or more | `+ceil(50 / abs(diff))` |
+| Win, challenger trails by 40 or more | `+ceil(diff × 0.05)` |
+| Loss, `diff` strictly between −40 and 80 | −2 |
+| Other loss | The opponent’s equivalent win value multiplied by 1.1, rounded up and subtracted |
 
-**Long-term Behavior**: Points deflate/reach equilibrium. Players with very high points lose significantly when defeated, preventing runaway inflation.
+The opponent receives the opposite change in 3v3.
 
 ### 4.7 Immortal Streak
 
@@ -572,7 +434,7 @@ Three-tier hierarchy:
 
 **User** (see `lib/moba/accounts/schema/user.ex`):
 - `shard_count`: Account currency
-- `unlocks`: Purchased avatars/skills/skins
+- `unlocks`: Unlocked avatars and skins
 - Discord integration
 
 **Player** (see `lib/moba/game/schema/player.ex`):
@@ -601,9 +463,9 @@ Three-tier hierarchy:
 | 4 | Expert | 15 avatars on Platinum+ |
 | 5 | Master | 20 avatars on Master+ |
 | 6 | Grandmaster | 20 avatars on Grandmaster |
-| 7 | Invoker | 20 avatars on Grandmaster with 60K farm |
+| 7 | Invoker | 20 distinct avatars in Perfect Grandmaster runs |
 
-**Collection vs. progression goals**: The collection covers all 24 playable avatars. Master, Grandmaster, and Invoker still require 20 distinct qualifying avatars, not all 24. Invoker qualification is based on Grandmaster league and at least 60K total farm for each distinct avatar code; the quest does not separately test a no-deaths flag.
+**Collection vs. progression goals**: The collection covers all 24 playable avatars. Master, Grandmaster, and Invoker still require 20 distinct qualifying avatars, not all 24. Invoker counts distinct avatars from Grandmaster runs with at least 60K solo farm or 60K team average farm.
 
 **Cumulative Tracking**: Completing a higher tier (e.g., Master) also counts toward lower tier requirements (e.g., Platinum+).
 
@@ -638,9 +500,10 @@ Each tier advancement grants rewards (see `lib/moba/game/quests.ex`):
 - Secondary sort: `total_wins`
 - Only includes players active after cutoff date
 
-**PvE Ranking** (`@pve_ranking_limit` = 200):
-- Sorted by: `total_gold_farm + total_xp_farm` DESC, then completion time
-- Only finished heroes in Master/Grandmaster league
+**Solo and team training rankings**:
+- Solo ranks by total farm, then fastest completion. The global board includes eligible recent finishes and qualifying Master or Grandmaster runs within its historical window. League boards begin at Gold and compare finished solo runs in that exact league, including past runs. Grandmaster hero pages show the global board.
+- Team ranks finished runs by combined farm, then fastest completion. The board displays average farm per hero, which gives the same order for three-hero rosters. Team members count toward account progression and the collection, independently of solo ranks.
+- Profiles use a cached collection with the best eligible finished hero per avatar. Solo and team heroes are ordered by farm, then training time, with solo rank used when available.
 
 ---
 
@@ -795,71 +658,46 @@ Roshan's +armor/+power per turn passive serves as a **build validator**:
 
 ### 9.1 Persistent Historical Opponents
 
-**All finished heroes remain in the game forever**:
-- Past top players' heroes continue competing
-- New players battle against historical best
-- Creates persistent challenge even without active opponents
+Eligible completed builds can keep appearing in automatic matches and Season Duels while their owners are offline. Saved combat orders determine how those heroes play.
 
-**Implications**:
-- Reaching #1 requires beating accumulated years of optimization
-- Competitive players typically engage for 2-3 weeks, return periodically
-- Game remains challenging without constant new content
+### 9.2 Season Duels
 
-### 9.2 Season Duels (Infinite Farming)
-
-Players can farm unlimited Arena Rating via async 1v1 duels:
-- Challenge any player's heroes
-- AI plays both sides using `skill_order`/`item_order`
-- No daily limit on season duels
-
-**Equilibrium Mechanism**:
-- Auto 5v5 matches (30/day) eventually result in losses
-- High-point players lose significant points on defeat
-- Prevents runaway point inflation
+Season 1v1 matchmakes against another account’s trained lineup and works while the opponent is offline. The player controls their hero and the opponent follows saved orders. Live 1v1 pairs two connected players. Both share Arena Rating with 3v3 and use the same daily Shard allowance for eligible games.
 
 ---
 
 ## Player Experience
 
-The cinematic redesign is the default on the canonical game and account routes. Existing `/new/...` bookmarks permanently redirect to the matching canonical URL, preserving query parameters and confirmation/reset tokens. Navigation and forms use the canonical paths.
-
 | Screen | Route | Current experience |
 |--------|-------|--------------------|
-| First hero | `/start` | Avatar role filters, random pick, preset or custom skill builds, guest creation |
-| Start training | `/new` | Collection context, avatar selection, reusable build artwork, selected loadout |
-| Base | `/base` | Account-rank journey, progression rewards, finished/in-progress heroes, full roster collection, avatar and skin unlocks |
-| Training | `/training` | League ascent, battle/meditation/mining tabs, Shop, league and Roshan challenges |
-| Battle history / replay | `/battles`, `/battles/:id` | Compact history, readable turn resources and effects, contextual outcome and continuation |
-| Arena | `/arena` | 5v5 entry and daily progress, recent matches, bracket standings, Live PvP, duel history |
-| Team builder | `/arena/edit` | Saved teams, ordered lineup, hero collection, inline hero editing |
-| Match / duel | `/matches/:id`, `/arena/:id` | Match summaries and battle details; duel picks, timers, chat for live duels, rewards and replays |
-| Player profile | `/player/:player_id`, `/user/:id` | Full-width featured-hero banner, player metrics, battle history, daily/season standings, collection |
-| Hero | `/hero/:id` | Hero art, loadout, stats, league progress, farm/time metrics, training leaderboard |
-| Community / Game Manual | `/community`, `/library` | Message board, updates and player lists; illustrated game reference |
-| Account | `/users/...` | Matching sign-in, registration, recovery, confirmation, and settings screens |
+| Guest roster | `/start` | Draft three avatars using presets or custom builds |
+| Start training | `/new`, `/new/solo` | Team 3v3 by default, with Solo 1v1 available to registered players |
+| Base | `/base` | Account rank progress, collection, paginated pending and finished runs, avatar and skin unlocks |
+| Training | `/training` | League progress, roster tabs, target cards, Shop, league and Roshan challenges |
+| Battle history / replay | `/battles`, `/battles/:id` | Turn-by-turn resources and effects, battle log, and contextual result actions |
+| Arena | `/arena` | Play or resume 3v3 and 1v1, mode-specific history and standings, and a separate Live 1v1 column |
+| Arena team builder | `/arena/edit` | Saved teams, defensive lineup, and a paginated hero collection sorted by farm by default |
+| Match summary | `/matches/:id` | Shared lineup layout for pre-match selection and completed matches, with health and energy summaries afterward |
+| Match battles | `/matches/:match_id/battles` | Cinematic combat and battle navigation. Completed matches open on the final battle by default |
+| 1v1 Duel | `/arena/:id` | Picks, timers, results, replays, and chat and rematch for live opponents |
+| Player profile | `/player/:player_id`, `/user/:id` | Featured hero, 3v3 and 1v1 history, Season / Team / Hero rankings, and collection |
+| Hero and team profiles | `/hero/:id`, `/teams/:id` | Training results, builds, league progress, and rankings. Finished roster runs open their team profile |
+| Community | `/community` | Recent Players, Top Players, Top Teams, and Top Heroes. Admins also see activity totals and Arena Stats |
+| Library | `/library` | Avatars, Skills, and Items with their artwork and game data |
+| Account | `/users/...` | Sign-in, registration, recovery, confirmation, and settings |
 
-### Training
+### Training controls
 
-- There are no guided tutorials. A newly created roster shows an arrow above the first battle target until its first battle starts.
-- Roster training offers three targets per hero at every progression tier. New players get two Easy targets and one Medium target.
-- League challenges replace farming controls when no turns remain. Stage wins show the cleared battle and the next step; promotions show the earned league and rewards.
-- Roshan's panel shows health and attempt state, including the final-attempt recovery information.
-- Meditation and mining show progress and a Claim XP / Claim Gold action. A visible **Space** hint appears when the claim is ready. The shortcut ignores typing, other interactive controls, and open dialogs; Attack has no global Space shortcut.
+- Roster tabs switch heroes instantly with preloaded targets. Use **1–3** to switch heroes, **Q/W/E/R** to level skills, **F** to open or close the Shop, and **Left/Right** and **Space** to select and start a target battle.
+- In battle, **Space** attacks or continues from the result. **T** and **G** toggle automation where available.
+- Guest onboarding uses contextual arrows rather than tutorial screens. The first battles guide the player through all three hero tabs, and the finish flow points the player back to Base and registration.
 
-### Arena and Match Playback
+### Collection and Arena presentation
 
-- Arena standings use a **Plebs / Shadows / Immortals** button group. The player's own standing remains visible when browsing another bracket.
-- **Live PvP** has its own subsection with a prominent availability switch and live opponents to challenge. **Duel history** is separate and shows completed results and replays. **Play a Season Duel** remains a distinct async action in the Arena header.
-- Pending matches and duels have explicit resume actions. Daily-limit and empty-roster states explain the next available action.
-- 5v5 playback keeps the score and central battle summary visible while team lineups scroll independently. Summary rows show each hero's portrait, health, and energy. **Battle details** restores the fuller battle cards; individual battles link to their replay.
-
-### Profiles, Collections, and Customization
-
-- Profiles pair a full-width cinematic banner with battle history, leaderboard, and collection columns. Selecting a collection hero updates the banner's featured hero and loadout.
-- The collection has a slot for each of the 24 playable avatars. Rank badges and selection states communicate progress without requiring 24 full hero cards.
-- Battle history has a full-width **Matches / Duels** switch. The leaderboard has **Daily / Season** controls and an independently scrolling list.
-- Hero pages hide the editing HUD by default. Owners, including guest owners, can select **Customize hero** to load it. **Close customization** hides the HUD and closes the Shop and unsaved order-editing state. Other players see the hero's public details without the customization control.
-- The desktop sidebar remains a fixed icon rail: a glow marks the active route, titles appear beneath icons on hover or keyboard focus, and reserved label space prevents items from moving.
+- Selecting an avatar in Base opens its completed runs and skins, or its unlock showcase. Unlock controls pair the cost with the available balance and show the league prerequisite when needed. Old Tavern links redirect to Base. Avatar-specific links open the corresponding skin gallery.
+- Arena's 3v3 leaderboard shows daily wins and bracket movement. The 1v1 leaderboard sorts by Arena Rating. Season Score is shown separately in profile and Community.
+- Completed manual and automated matches use the same summary. Battles can be opened individually, and fallen heroes are dimmed so their builds remain visible.
+- Public hero pages show builds and results. Only the owner can open **Customize hero** or see training milestones.
 
 ---
 
@@ -876,6 +714,8 @@ The cinematic redesign is the default on the canonical game and account routes. 
 | Constants | `lib/moba/constants.ex` |
 | Scheduled tasks | `lib/moba/conductor.ex` |
 | Bot generation | `lib/moba/game/builds.ex` |
+| Team training | `lib/moba/game/team_training.ex`, `lib/moba/game/team_runs.ex`, `lib/moba/game/training_encounters.ex` |
+| Arena and Match rules | `lib/moba/game/arena.ex`, `lib/moba/game/matches.ex`, `lib/moba/game/season_score.ex` |
 
 ### 10.2 Scheduled Tasks
 
@@ -913,14 +753,14 @@ All values from `lib/moba/constants.ex`:
 ### General
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `@base_hero_count` | 6 | Base heroes available |
+| `@base_hero_count` | 6 | Default list limit in game code, separate from the 10 starter avatars |
 | `@turn_mp_regen_multiplier` | 0.02 | MP regen per turn (2%) |
 | `@shard_buyback_minimum` | 5 | Min shards for buyback |
 
 ### PvE
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `@total_pve_turns` | 25 | Base turns (tier 2+) |
+| `@total_pve_turns` | 25 | Reserve turns at Adept and above |
 | `@turns_per_tier` | 5 | Turns per league tier |
 | `@base_xp` | 600 | XP for level 2 |
 | `@xp_increment` | 50 | Additional XP per level |
@@ -944,15 +784,15 @@ All values from `lib/moba/constants.ex`:
 ### PvP
 | Constant | Value | Description |
 |----------|-------|-------------|
-| `@daily_match_limit` | 20 | 3v3 matches per day and shared daily shard rewards |
+| `@daily_match_limit` | 20 | Daily 3v3 match limit and size of the separate shared reward allowance |
 | `@matchmaking_shards` | 30 | Shards per eligible Arena game |
 | `@duel_timer_in_seconds` | 60 | Pick timeout |
 | `@turn_timer_in_seconds` | 30 | Battle turn timeout |
 | `@immortal_streak_multiplier` | 0.01 | 1% stat penalty per streak |
 | `@daily_ranking_limit` | 50 | Daily leaderboard size |
 | `@season_ranking_limit` | 50 | Season leaderboard size |
-| `@maximum_points_difference` | 200 | Max ELO diff for points |
-| `@minimum_duel_points` | 2 | Min points per duel |
+| `@maximum_points_difference` | 200 | Rating gap cutoff for duel wins, losses, and live draws |
+| `@minimum_duel_points` | 2 | Minimum used in the favorite-win and draw calculations |
 | `@available_hero_days` | 30 | Days before hero public |
 
 ---

@@ -32,12 +32,30 @@ defmodule Moba.Engine.Core.Spell do
     turn |> Effect.dispel_debuffs(turn.resource.level) |> Effect.mp_regen_by_base_amount() |> Effect.reduce_cooldowns()
   end
 
-  defp effects_for(%{resource: %Skill{code: "purifying_flames", buff: true}} = turn, _options) do
+  defp effects_for(%{resource: %Skill{code: "purifying_flames", buff: true, final: true}} = turn, _options) do
     Effect.hp_regen_by_base_amount(turn)
   end
 
+  defp effects_for(
+         %{resource: %Skill{code: "purifying_flames", buff: true, duration: duration} = resource} = turn,
+         %{buff: %{healing_total: total, duration: remaining}}
+       )
+       when is_integer(total) do
+    tick = div(total, duration) + if(remaining > duration - rem(total, duration), do: 1, else: 0)
+    %{turn | resource: %{resource | base_amount: tick}} |> Effect.add_to_final()
+  end
+
+  defp effects_for(%{resource: %Skill{code: "purifying_flames", buff: true}} = turn, _options) do
+    # Buffs already active at deployment have no snapshotted healing total.
+    Effect.hp_regen_by_base_amount(turn)
+  end
+
+  defp effects_for(%{resource: %Skill{code: "purifying_flames", final: true}} = turn, %{defended: defended}) do
+    Effect.resolve_purifying_flames(turn, defended)
+  end
+
   defp effects_for(%{resource: %Skill{code: "purifying_flames"}} = turn, _options) do
-    turn |> Effect.base_damage() |> Effect.grant_opponent_buff()
+    turn |> Effect.base_damage() |> Effect.add_to_final(:hit_followup)
   end
 
   defp effects_for(%{resource: %Skill{code: "fortunes_end", attacker_debuff: true}} = turn, _options), do: turn

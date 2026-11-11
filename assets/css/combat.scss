@@ -361,9 +361,7 @@
   min-height: 184px;
   padding: 24px 28px;
   overflow: hidden;
-  border: 1px solid #c3ad7e40;
-  border-radius: 10px;
-  background: linear-gradient(90deg, #0b1421fa 25%, #0b1421de 62%, #0b1421a3), var(--duel-result-art, none) right 35% / cover;
+  background: linear-gradient(90deg, #0b1421fa 25%, #0b1421de 62%, #0b1421a3), var(--duel-result-art, var(--result-scene, none)) right 35% / cover;
   box-shadow: inset 0 1px #f0d9aa12;
   .battle-result-identity { gap: 20px; }
   .battle-result-identity > img { width: 88px; height: 88px; border-color: #d4bd8770; box-shadow: 0 0 30px #e7c77a18; }
@@ -382,8 +380,7 @@
     --result-color: #f4d592;
     grid-template-columns: 96px minmax(0, 1fr) auto;
     min-height: 230px;
-    border-color: #e8c78288;
-    background: radial-gradient(ellipse at 8% 55%, #dbad4933, transparent 60%), linear-gradient(90deg, #0b1421f5 15%, #0b1421d9 60%, #0b142170), var(--duel-result-art, none) right 35% / cover;
+    background: radial-gradient(ellipse at 8% 55%, #dbad4933, transparent 60%), linear-gradient(90deg, #0b1421f5 15%, #0b1421d9 60%, #0b142170), var(--duel-result-art, var(--result-scene, none)) right 35% / cover;
     box-shadow: inset 0 1px #ffe4ac33, 0 0 32px #e5ba5f15;
     .battle-result-identity > img { display: none; }
     h3 { font-size: clamp(38px, 3.6vw, 60px); }

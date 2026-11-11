@@ -411,11 +411,6 @@ defmodule MobaWeb.V2.DashboardLive do
       not Game.available_hero?(hero)
   end
 
-  @max_total_farm Moba.max_total_farm()
-
-  defp undefeated_avatar?(%{"total_farm" => farm}), do: farm == @max_total_farm
-  defp undefeated_avatar?(_), do: false
-
   defp training_difficulty_for(tier) do
     Map.get(Game.get_quest(tier), :difficulty) || Game.get_quest(7).difficulty
   end

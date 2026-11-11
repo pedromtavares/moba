@@ -28,7 +28,12 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: viewer.id), "/community")
 
     assert has_element?(view, "#user-#{owner.id} .community-best-team-rank[href='/teams/#{finished.id}']", "#1")
-    assert has_element?(view, "#show-pvp-link + #show-teams-link + #show-pve-link")
+
+    assert has_element?(
+             view,
+             "#community-heading > #community-tabs > #show-pvp-link + #show-teams-link + #show-pve-link"
+           )
+
     assert has_element?(view, "#show-teams-link img.nav-emblem[src='/images/navigation/base.webp']")
     view |> element("#show-teams-link") |> render_click()
 
@@ -61,9 +66,9 @@ defmodule MobaWeb.V2.CommunityLiveTest do
       refute has_element?(view, "#{portrait} span")
     end
 
-    assert has_element?(view, "#{card} .community-activity-metrics dt", "Started training")
-    assert has_element?(view, "#{card} .community-activity-metrics dd", "Moonwatch")
-    assert has_element?(view, "#{card} .community-activity-metrics time[datetime]")
+    assert has_element?(view, "#{card} .community-activity-text", "Started training Team Moonwatch")
+    assert has_element?(view, "#{card} .community-activity-summary .ui-arena-3v3")
+    refute has_element?(view, "#{card} .community-activity-metrics time")
     refute has_element?(view, "#{card} a.community-activity-link")
 
     {:ok, finished} = Game.TeamRuns.update(scope, run, &%{&1 | phase: :finished})
@@ -83,7 +88,12 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     send(view.pid, :refresh_recent_players)
     refute has_element?(view, "#{card} .community-team-portraits")
     assert has_element?(view, "#{card}[style*='--player-art']")
-    assert has_element?(view, "#{card} .community-activity-link[href='/hero/#{solo.id}']", "Started training")
+
+    assert has_element?(
+             view,
+             "#{card} .community-activity-link[href='/hero/#{solo.id}'] .community-activity-text",
+             "Started training #{solo.avatar.name}"
+           )
   end
 
   test "top player cards show direct score contributions, Arena titles and prominent footer metrics", %{conn: conn} do
@@ -207,7 +217,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     assert has_element?(
              view,
-             "#user-#{player.id} .community-activity-link small",
+             "#user-#{player.id} .community-activity-detail",
              Accounts.get_user!(opponent.user_id).username
            )
   end
@@ -302,10 +312,12 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     refute has_element?(view, "#user-#{hero.player_id} .community-player-status[data-toggle=tooltip]")
     refute has_element?(view, "#user-#{hero.player_id} .community-player-status[title]")
+    refute has_element?(view, "#user-#{hero.player_id} .community-activity-time")
 
     admin = viewer.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
     admin_conn = conn |> log_in_user(admin) |> put_session(:player_id, viewer.player_id)
     {:ok, view, _} = live(admin_conn, "/community")
+    assert has_element?(view, "#user-#{hero.player_id} .community-activity-time time[datetime]")
 
     assert has_element?(
              view,
@@ -510,12 +522,11 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#guest-#{guest.id} .community-guest-solo-caption .community-guest-level", "Lv 8")
     solo_footer = "#guest-#{guest.id} > footer.community-ranking-footer"
     roster_footer = "#guest-#{roster_guest.id} > footer.community-ranking-footer"
-    assert has_element?(view, "#{solo_footer} .community-activity-time dt", "Joined")
-    assert has_element?(view, "#{solo_footer} .community-activity-metrics time[datetime]", "2h ago")
+    refute has_element?(view, "#{solo_footer} time, #{roster_footer} time")
     assert has_element?(view, "#{solo_footer} [data-toggle=tooltip][title='PvE rank: Initiate']")
-    assert has_element?(view, "#{solo_footer} .community-activity-metrics dt", "Silver League")
+    assert has_element?(view, "#{solo_footer} .community-activity-text", "Silver League")
     assert has_element?(view, "#{roster_footer} [data-toggle=tooltip][title='PvE rank: Novice']")
-    assert has_element?(view, "#{roster_footer} .community-activity-metrics dt", "Platinum League")
+    assert has_element?(view, "#{roster_footer} .community-activity-text", "Platinum League")
     refute has_element?(view, "#community-admin-summary")
 
     for {%{hero: member}, index} <-
@@ -528,10 +539,16 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     end
 
     assert has_element?(view, "#guest-#{draft_guest.id} .community-guest-level", "Lv 1")
-    assert has_element?(view, "#guest-#{draft_guest.id} .community-activity-metrics dt", "Bronze League")
+    assert has_element?(view, "#guest-#{draft_guest.id} .community-activity-text", "Bronze League")
 
     view |> element("#show-pvp-link") |> render_click()
     refute has_element?(view, "#guest-#{guest.id}")
+
+    admin = viewer.player.user |> Ecto.Changeset.change(is_admin: true) |> Moba.Repo.update!()
+    admin_conn = conn |> log_in_user(admin) |> put_session(:player_id, viewer.player_id)
+    {:ok, admin_view, _} = live(admin_conn, "/community")
+    assert has_element?(admin_view, "#{solo_footer} .community-activity-time", "Joined")
+    assert has_element?(admin_view, "#{solo_footer} time[datetime]", "2h ago")
   end
 
   test "rankings load only when selected and inactive panels are not rendered", %{conn: conn} do

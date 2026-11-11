@@ -15,8 +15,30 @@ defmodule Moba.TeamTrainingIntegrationTest do
 
     user = Test.AccountsHelper.create_user()
     Moba.after_registration(user, player.id)
-    assert TeamRuns.get!(%{user: user}, draft.id).player_id == player.id
+    claimed = TeamRuns.get!(%{user: user}, draft.id)
+    assert claimed.player_id == player.id
+    assert claimed.name == user.username
+    assert TeamRuns.state(claimed).name == user.username
     assert_raise Ecto.NoResultsError, fn -> TeamRuns.get!(scope, draft.id) end
+  end
+
+  test "registration names both completed and active guest rosters" do
+    guest_scope = %{user: nil}
+    {:ok, player} = TeamRuns.start_guest_training(Ecto.UUID.generate(), team_picks(guest_scope))
+    guest_scope = TeamRuns.scope(player)
+    finished = TeamRuns.latest(guest_scope, player.id)
+    {:ok, finished} = TeamRuns.update(guest_scope, finished, &%{&1 | phase: :finished})
+    active = team_run(guest_scope, player)
+
+    user = Test.AccountsHelper.create_user()
+    Moba.after_registration(user, player.id)
+    scope = %{user: user}
+
+    assert TeamRuns.get!(scope, finished.id).name == user.username
+    assert Enum.all?(Game.get_heroes(finished.hero_ids), &(&1.name == user.username))
+    assert {:ok, run} = scope |> TeamRuns.get!(active.id) |> TeamRuns.read_state()
+    assert run.name == user.username
+    assert Enum.all?(TeamTraining.team(run), &(&1.hero.name == user.username))
   end
 
   test "a completed TrainingTeam exports its three builds once, counts collection and progression, and never enters solo ranks" do

@@ -3,6 +3,7 @@ defmodule Moba.Accounts.Schema.User do
   import Ecto.Changeset
 
   alias Moba.{Game, Accounts}
+  alias Moba.Accounts.Query.UserQuery
   import Ecto.Query, only: [from: 2]
 
   schema "users" do
@@ -57,9 +58,7 @@ defmodule Moba.Accounts.Schema.User do
     |> cast(attrs, [:email, :password, :username])
     |> validate_email(opts)
     |> validate_password(opts)
-    |> validate_required([:username])
-    |> validate_length(:username, min: 3, max: 15)
-    |> unique_constraint(:username)
+    |> validate_username()
   end
 
   def settings_changeset(user, attrs) do
@@ -112,11 +111,25 @@ defmodule Moba.Accounts.Schema.User do
 
   defp validations_and_constraints(changeset) do
     changeset
-    |> validate_required([:username, :email])
-    |> validate_length(:username, min: 3, max: 15)
+    |> validate_required([:email])
+    |> validate_username()
     |> unique_constraint(:email)
     |> unique_constraint(:email, name: :users_email_normalized_index)
+  end
+
+  defp validate_username(changeset) do
+    changeset
+    |> validate_required([:username])
+    |> validate_length(:username, min: 3, max: 15)
+    |> validate_change(:username, fn :username, username ->
+      query = UserQuery.with_username(__MODULE__, username)
+      id = get_field(changeset, :id)
+      query = if id, do: from(u in query, where: u.id != ^id), else: query
+
+      if Moba.Repo.exists?(query), do: [username: "has already been taken"], else: []
+    end)
     |> unique_constraint(:username)
+    |> unique_constraint(:username, name: :users_username_case_conflict)
   end
 
   defp validate_email(changeset, opts) do

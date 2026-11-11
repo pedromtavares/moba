@@ -322,16 +322,28 @@
   }
 }
 
+.game-page #battle-page:has(.combat-stage) #battle-bar:has(:is(.battle-outcome, .league-outcome, .battle-competitive-result)) {
+  padding: 0;
+  overflow: hidden;
+  > .container-fluid { max-width: none; }
+
+  :is(.battle-outcome, .league-outcome:not(.is-stage-victory, .is-promoted, .is-defeat), .battle-competitive-result:not(.is-duel-result)) {
+    padding: 24px 28px;
+    background: linear-gradient(90deg, #0b1421f5, #0a1421d9 60%, #0a1421a6), var(--result-scene) center 48% / cover;
+  }
+}
+
 .game-page #battle-page:has(.combat-stage) #battle-bar:has(.battle-outcome) {
-  padding: 28px 32px;
   .battle-outcome-heading h3 { font-size: clamp(24px, 2.2vw, 32px); line-height: 1.25; }
   .battle-result-footer { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 20px; min-height: 76px; margin-top: 20px; }
   .battle-level-up { grid-column: 1; grid-row: 1; margin: 0; }
   .battle-result-actions { grid-column: 2; grid-row: 1; justify-self: end; }
 }
 @media (max-width: 767px) {
+  .game-page #battle-page:has(.combat-stage) #battle-bar:has(:is(.battle-outcome, .league-outcome, .battle-competitive-result)) {
+    :is(.battle-outcome, .league-outcome:not(.is-stage-victory, .is-promoted, .is-defeat), .battle-competitive-result:not(.is-duel-result)) { padding: 18px 16px; }
+  }
   .game-page #battle-page:has(.combat-stage) #battle-bar:has(.battle-outcome) {
-    padding: 18px 16px;
     .battle-result-footer { grid-template-columns: minmax(0, 1fr) auto; gap: 16px 8px; margin-top: 16px; }
     .battle-level-up > span { font-size: 17px; }
     .battle-result-actions { grid-column: 1 / -1; grid-row: auto; justify-self: stretch; }

@@ -5,7 +5,7 @@ defmodule Moba.Engine.Core.Processor do
 
   alias Moba.Engine
   alias Engine.Core.{BuffPause, Effect, Helper, Spell}
-  @final_effect_order %{effect: 0, healing_reduction: 1, healing_steal: 2}
+  @final_effect_order %{effect: 0, hit_followup: 1, healing_reduction: 2, healing_steal: 3}
   # require Logger
 
   @doc """
@@ -107,9 +107,7 @@ defmodule Moba.Engine.Core.Processor do
   # Buffs are benevolent effects that the attacker casts on itself.
   # They are applied every turn until their duration wears off.
   defp apply_buffs(%{attacker: %{buffs: buffs}} = turn) do
-    Enum.reduce(buffs, turn, fn %{resource: buff, duration: duration}, acc ->
-      acc |> apply_buff(buff, duration)
-    end)
+    Enum.reduce(buffs, turn, &apply_buff(&2, &1))
   end
 
   # Debuffs are malevolent effects that the attacker casts on the defender.
@@ -307,7 +305,7 @@ defmodule Moba.Engine.Core.Processor do
     effects
     |> Enum.sort_by(&Map.fetch!(@final_effect_order, &1.phase))
     |> Enum.reduce(turn, fn %{resource: resource}, acc ->
-      apply_final_resource(acc, resource)
+      apply_resource(acc, %{resource | final: true}, %{defended: turn.defender})
     end)
   end
 
@@ -343,20 +341,21 @@ defmodule Moba.Engine.Core.Processor do
     }
   end
 
-  defp apply_buff(%{attacker: attacker} = turn, buff, duration) when duration > 0 do
+  defp apply_buff(%{attacker: attacker} = turn, %{resource: buff, duration: duration} = instance) when duration > 0 do
     if BuffPause.paused?(attacker) do
       %{turn | resource: %{buff | buff: nil}} |> Effect.paused_buff()
     else
       resource = %{buff | buff: true}
+      buffs = List.delete(attacker.buffs, instance) ++ [%{instance | duration: duration - 1}]
 
       turn
-      |> Map.put(:attacker, %{attacker | buffs: tick_buff_duration(attacker.buffs, buff)})
-      |> apply_resource(resource)
+      |> Map.put(:attacker, %{attacker | buffs: buffs})
+      |> apply_resource(resource, %{buff: instance})
       |> Map.put(:resource, %{buff | buff: nil})
     end
   end
 
-  defp apply_buff(turn, _, _), do: turn
+  defp apply_buff(turn, _), do: turn
 
   defp apply_debuff(%{defender: defender} = turn, debuff, duration) when duration > 0 do
     resource = %{debuff | debuff: true}
@@ -497,9 +496,8 @@ defmodule Moba.Engine.Core.Processor do
     |> maybe_apply_debuff()
   end
 
-  defp maybe_apply_buff(%{resource: %{duration: duration, buff: true} = resource} = turn) do
-    turn
-    |> apply_buff(resource, duration)
+  defp maybe_apply_buff(%{resource: %{buff: true}, attacker: attacker} = turn) do
+    apply_buff(turn, List.last(attacker.buffs))
   end
 
   defp maybe_apply_buff(turn), do: turn
@@ -511,13 +509,9 @@ defmodule Moba.Engine.Core.Processor do
 
   defp maybe_apply_debuff(turn), do: turn
 
-  defp apply_final_resource(turn, resource) do
-    apply_resource(turn, %{resource | final: true})
-  end
-
-  defp apply_resource(turn, resource) do
+  defp apply_resource(turn, resource, options \\ %{}) do
     %{turn | resource: resource}
-    |> Spell.apply(%{})
+    |> Spell.apply(options)
   end
 
   defp apply_resource_interruption(turn, resource) do

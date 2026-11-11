@@ -15,7 +15,7 @@ body:has(.game-page :is(.catalog-viewport, .base-page)) {
   --manual-gold: #ddc18d;
   --manual-line: #b8a2763d;
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: clamp(6px, 1.1vh, 12px);
   height: 100%;
   min-height: 0;
@@ -32,12 +32,8 @@ body:has(.game-page :is(.catalog-viewport, .base-page)) {
     display: grid;
     grid-auto-flow: column;
     grid-auto-columns: minmax(0, 1fr);
-    gap: 5px;
-    padding: 4px;
-    border: 1px solid var(--manual-line);
-    border-radius: 9px;
-    background: linear-gradient(110deg, #182435e0, #0b1420e6);
-    box-shadow: inset 0 1px #fff1;
+    border-top: 1px solid var(--manual-line);
+    background: linear-gradient(180deg, #0a1321a8, #0a1321f2);
   }
   .cinematic-catalog-tabs button {
     --tab-accent: #e7bd7c;
@@ -47,15 +43,15 @@ body:has(.game-page :is(.catalog-viewport, .base-page)) {
     gap: clamp(6px, 1vw, 12px);
     min-width: 0;
     padding: 7px 5px;
-    border: 1px solid transparent;
-    border-radius: 5px;
-    background: #09121b80;
+    border: 0;
+    background: transparent;
     color: #acbacb;
     font: 900 clamp(14px, 1.4vw, 19px)/1.2 'Nunito', sans-serif;
-    transition: background .2s, color .2s, border-color .2s;
+    transition: background .2s, color .2s, box-shadow .2s;
   }
-  [data-catalog-tone=blue] { --tab-accent: #a8c9e8; }
-  [data-catalog-tone=violet] { --tab-accent: #cdb0e9; }
+  .cinematic-catalog-tabs button + button { border-inline-start: 1px solid #b8a27624; }
+  .cinematic-catalog-tabs button[data-catalog-tone=blue] { --tab-accent: #a8c9e8; }
+  .cinematic-catalog-tabs button[data-catalog-tone=violet] { --tab-accent: #cdb0e9; }
   .cinematic-catalog-tabs .nav-emblem {
     width: clamp(26px, 3.5vw, 44px);
     height: clamp(26px, 3.5vw, 44px);
@@ -68,40 +64,43 @@ body:has(.game-page :is(.catalog-viewport, .base-page)) {
     filter: drop-shadow(0 0 7px color-mix(in srgb, var(--tab-accent) 52%, transparent));
   }
   .cinematic-catalog-tabs button:hover, .cinematic-catalog-tabs button[aria-selected=true] {
-    border-color: color-mix(in srgb, var(--tab-accent) 58%, transparent);
-    background: linear-gradient(125deg, color-mix(in srgb, var(--tab-accent) 18%, #111c2b), #111c2b);
+    background: radial-gradient(ellipse at 50% 100%, color-mix(in srgb, var(--tab-accent) 22%, transparent), transparent 85%);
     color: #f5e8d1;
   }
   .cinematic-catalog-tabs button[aria-selected=true] { box-shadow: inset 0 -2px var(--tab-accent); }
   :is(button, a):focus-visible { outline: 2px solid #e4c88f; outline-offset: 2px; }
+  .cinematic-catalog-tabs button:focus-visible { outline-offset: -3px; }
 
 }
 
 .game-page .catalog-compact {
   .catalog-heading {
+    min-width: 0;
+    border: 1px solid var(--manual-line);
+    border-radius: 12px;
+    overflow: clip;
+  }
+  .catalog-heading-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
     padding: clamp(12px, 2.4vh, 24px) clamp(12px, 2.6vw, 36px);
-    border: 1px solid #bda77b38;
-    border-radius: 12px;
   }
   .catalog-heading h1 { margin: 0; color: #f5edda; font-size: clamp(22px, 4vw, 51px); font-weight: 900; line-height: 1; letter-spacing: -.035em; }
   .catalog-eyebrow { margin: 0 0 3px; color: #dfc48e; font-size: 10px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
-  .cinematic-catalog-tabs button { padding-block: 8px; }
+  .cinematic-catalog-tabs button { padding-block: 6px; }
   .cinematic-catalog-tabs .nav-emblem { flex: none; width: 32px; height: 32px; }
 }
 
 @media (max-width: 840px), (max-height: 530px) {
-  .game-page .catalog-compact .catalog-heading { padding-block: 8px; }
+  .game-page .catalog-compact .catalog-heading-content { padding-block: 8px; }
 }
 
 @media (max-width: 560px) {
   .game-page .catalog-compact {
     .cinematic-catalog-tabs button { flex-direction: column; gap: 3px; min-height: 59px; padding: 4px 2px; font-size: 10px; }
     .cinematic-catalog-tabs .nav-emblem { width: 22px; height: 22px; }
-    .manual-heading-description { display: none; }
   }
 }
 
@@ -117,7 +116,7 @@ body:has(.game-page :is(.catalog-viewport, .base-page)) {
 @media (min-width: 561px) and (max-height: 460px) {
   .game-page .catalog-viewport.catalog-compact {
     padding-block: 4px;
-    .catalog-heading { padding: 4px 8px; }
+    .catalog-heading-content { padding: 4px 8px; }
     .catalog-heading h1 { font-size: 24px; }
     .catalog-eyebrow { display: none; }
     .cinematic-catalog-tabs button { gap: 4px; min-height: 39px; padding: 4px 2px; font-size: 12px; }
@@ -127,9 +126,7 @@ body:has(.game-page :is(.catalog-viewport, .base-page)) {
 
 .game-page #library {
   [hidden] { display: none !important; }
-  #manual-heading { background: linear-gradient(90deg, #08111eed, #08111e80 50%, #08111e55), var(--manual-scene) center 52% / cover; }
-  .manual-title-row { display: flex; align-items: baseline; gap: clamp(8px, 1.5vw, 20px); }
-  .manual-heading-description { margin: 0; color: #cbd2dc; font-size: 13px; line-height: 1.3; }
+  #manual-heading { background: linear-gradient(90deg, #08111eed, #08111e80 50%, #08111e55), var(--manual-scene) center 52% / cover; background-clip: padding-box; }
 
   .manual-reference-section { min-width: 0; min-height: 0; container-type: size; }
   .manual-reference-frame {

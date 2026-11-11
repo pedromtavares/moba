@@ -195,10 +195,10 @@ defmodule Moba.Game.SkillDescriptions do
 
       "purifying_flames" ->
         card(
-          "Deal heavy magic damage, then heal the opponent over time.",
+          "Deal magic damage. The opponent heals for 35% of the hit over three turns.",
           [
             damage(s),
-            effect(:healing, "Enemy healing per turn", amount(s.base_amount), :health),
+            effect(:healing, "Total enemy healing", percentage(35, "of damage taken"), :health),
             effect(:duration, "Healing lasts", turns(s.duration, "enemy turns"), :status)
           ],
           []

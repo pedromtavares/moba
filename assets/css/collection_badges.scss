@@ -17,27 +17,33 @@
       filter: drop-shadow(0 2px 3px #0009);
     }
     .avatar:hover { transform: none; }
+    .is-undefeated > .league-logo {
+      filter: drop-shadow(0 2px 3px #0009) drop-shadow(0 0 5px #db576c9e);
+    }
+    .is-undefeated::after {
+      content: "";
+      position: absolute;
+      top: calc(100% + 3px);
+      left: calc(50% + 10px);
+      width: 7px;
+      height: 7px;
+      border: 1px solid #f3c597;
+      border-radius: 1px;
+      background: #ad4358;
+      box-shadow: 0 0 0 1px #111824, 0 0 5px #d6506970;
+      transform: rotate(45deg);
+      z-index: 2;
+      pointer-events: none;
+    }
+  }
+  .user-profile .collection {
+    .profile-avatar-select { max-width: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
+    .profile-avatar-select:hover .avatar { box-shadow: 0 0 0 1px #d6b47c99, 0 0 12px #d6ad6a26; }
+    .current-featured .avatar { box-shadow: 0 0 0 1px #f2d091, 0 0 0 3px #d6ad6a24, 0 0 14px #d6ad6a40; }
+    .profile-avatar-select:focus-visible .avatar { outline: 2px solid #f2d091; outline-offset: 3px; }
   }
   .user-profile .collection .row > .col-3 { padding-bottom: 16px; }
   .dashboard .collection .avatar-container { margin-bottom: 20px !important; }
-  .dashboard .collection .is-undefeated > .league-logo {
-    filter: drop-shadow(0 2px 3px #0009) drop-shadow(0 0 5px #db576c9e);
-  }
-  .dashboard .collection .is-undefeated::after {
-    content: "";
-    position: absolute;
-    top: calc(100% + 3px);
-    left: calc(50% + 10px);
-    width: 7px;
-    height: 7px;
-    border: 1px solid #f3c597;
-    border-radius: 1px;
-    background: #ad4358;
-    box-shadow: 0 0 0 1px #111824, 0 0 5px #d6506970;
-    transform: rotate(45deg);
-    z-index: 2;
-    pointer-events: none;
-  }
   @media (min-width: 1200px) {
     .dashboard .collection { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 28px 14px; width: 100%; max-width: 1560px; padding: 0 24px 20px; }
     .dashboard .collection .avatar-container { width: 100% !important; height: auto !important; min-width: 0; margin: 0 !important; }

@@ -379,17 +379,72 @@ defmodule Moba.Engine.HeroExpansionTest do
     assert auto.defender.damage == 60
   end
 
-  test "Purifying Flames heals only on the target's following three turns" do
-    flames = skill("purifying_flames", %{base_damage: 150, base_amount: 20, duration: 3})
-    result = fight(battler(), battler(), flames)
-    assert result.defender.current_hp == 350
-    assert [%Buff{duration: 3}] = result.defender.buffs
+  test "Purifying Flames snapshots the post-armor hit and heals over three saved turns without target Power" do
+    alias Test.CombatCase, as: Combat
 
-    for duration <- [3, 2, 1, 0] do
-      hero = battler(%{buffs: [%Buff{resource: flames, duration: duration}]})
-      healed = fight(hero, battler())
-      assert healed.attacker.current_hp == if(duration > 0, do: 520, else: 500)
+    flames = Combat.skill("purifying_flames")
+    battle = Combat.battle([flames], [], %{power: 20}, %{armor: 80, power: 50})
+    {battle, cast} = Combat.step_saved(battle, flames)
+
+    assert cast.defender.damage == 36
+    assert cast.defender.hp_regen == 0
+    assert [%Buff{duration: 3, healing_total: 13}] = cast.defender.buffs
+    assert Map.new(Logger.descriptions_for(cast))["purifying_flames"] =~ "recover [hp]13 Health[/hp]"
+
+    Enum.reduce([5, 4, 4, 0], battle, fn expected, battle ->
+      {battle, healed} = Combat.step_saved(battle)
+      assert healed.attacker.hp_regen == expected
+      {battle, opponent_turn} = Combat.step_saved(battle)
+      assert opponent_turn.defender.hp_regen == 0
+      battle
+    end)
+  end
+
+  test "Purifying Flames grants no healing when defenses block the entire hit" do
+    flames = skill("purifying_flames", %{base_damage: 150, duration: 3})
+    vanguard = %{item("vanguard", %{base_amount: 150, roll_number: 101}) | passive: true}
+
+    for attrs <- [%{invulnerable: true}, %{passive_items: [vanguard]}] do
+      result = fight(battler(), battler(attrs), flames)
+      assert result.defender.damage == 0
+      assert result.defender.buffs == []
+      log = Map.new(Logger.descriptions_for(result))["purifying_flames"]
+      assert log =~ "dealt [damage]0 damage[/damage]"
+      refute log =~ "recover"
     end
+  end
+
+  test "Purifying Flames only heals from its own share of damage when Dagon and Pulse Nova also hit" do
+    flames = skill("purifying_flames", %{base_damage: 150, duration: 3})
+    nova = skill("pulse_nova", %{base_damage: 40})
+    dagon = item("dagon", %{base_amount: 100})
+    caster = battler(%{base_power: 20, pulse_nova: nova})
+    result = fight(caster, battler(%{base_armor: 50}), flames, dagon)
+    assert result.defender.damage == 174
+    assert [%Buff{healing_total: 32}] = result.defender.buffs
+    assert Map.new(Logger.descriptions_for(result))["purifying_flames"] =~ "dealt [damage]90 damage[/damage]"
+  end
+
+  test "Purifying Flames stacks healing and applies Silver Edge before Bloodstone" do
+    flames = skill("purifying_flames", %{base_damage: 150, duration: 3})
+    bloodstone = item("bloodstone", %{duration: 2, hp_regen_multiplier: 0.4})
+    silver_edge = item("silver_edge", %{duration: 2, hp_regen_multiplier: 0.5})
+    first = fight(battler(), battler(%{base_armor: 80}), flames)
+    [earlier] = first.defender.buffs
+    target = battler(%{base_power: 100, buffs: [%{earlier | duration: 1}]})
+    second = fight(battler(), target, flames)
+
+    victim = %{
+      target
+      | buffs: second.defender.buffs,
+        attacker_debuffs: [%Buff{resource: bloodstone, duration: 2}, %Buff{resource: silver_edge, duration: 2}]
+    }
+
+    healed = fight(victim, battler())
+    # The two ticks contribute 3 and 18 HP. Silver Edge leaves 11 after rounding, then Bloodstone steals 4.
+    assert healed.attacker.hp_regen == 7
+    assert healed.defender.hp_regen == 4
+    assert Enum.map(healed.attacker.buffs, &{&1.duration, &1.healing_total}) == [{0, 11}, {2, 53}]
   end
 
   test "Fortune's End pauses healing, temporary defenses and Power while preserving buffs, base stats and debuffs" do

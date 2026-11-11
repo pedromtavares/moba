@@ -79,6 +79,14 @@ defmodule Moba.Game.TeamRuns do
 
   def scope(player), do: %{user: player.user, player_id: player.id}
 
+  def name_claimed_teams!(player_id, username) do
+    unnamed = from(r in TrainingTeam, where: r.player_id == ^player_id and is_nil(r.name))
+    {_, ids} = unnamed |> select([r], r.id) |> Repo.update_all(set: [name: username])
+
+    from(h in Game.Schema.Hero, where: h.player_id == ^player_id and h.training_team_id in ^ids)
+    |> Repo.update_all(set: [name: username])
+  end
+
   def start_guest!(key, pick) when is_map(pick) do
     {:ok, player} =
       guest_start(key, fn player, scope ->
@@ -271,6 +279,12 @@ defmodule Moba.Game.TeamRuns do
 
   def update(scope, %TrainingTeam{} = previous, fun) do
     Repo.transaction(fn ->
+      # Use the same lock order as guest registration, which also updates team rows.
+      if is_nil(scope.user) do
+        guest = scope |> players() |> lock("FOR UPDATE") |> Repo.get(previous.player_id)
+        if is_nil(guest), do: Repo.rollback(:not_found)
+      end
+
       current = scope |> owned() |> lock("FOR UPDATE") |> Repo.get(previous.id)
       if is_nil(current), do: Repo.rollback(:not_found)
       if current.lock_version != previous.lock_version, do: Repo.rollback(:stale)
@@ -356,11 +370,11 @@ defmodule Moba.Game.TeamRuns do
     from(e in TeamEncounter, join: r in subquery(owned(scope)), on: r.id == e.team_run_id, where: r.id == ^run_id)
   end
 
-  def read_state(%TrainingTeam{phase: phase, state: binary}) do
+  def read_state(%TrainingTeam{phase: phase, state: binary} = record) do
     with {:ok, run} <- Snapshot.read(binary),
          true <- valid_run?(run),
          true <- Atom.to_string(run.phase) == phase do
-      {:ok, run}
+      {:ok, apply_team_name(run, record)}
     else
       _ -> {:error, :invalid_snapshot}
     end
@@ -394,9 +408,20 @@ defmodule Moba.Game.TeamRuns do
 
   def state(%TeamEncounter{state: nil} = record), do: record |> TrainingEncounters.load() |> state()
 
+  def state(%TrainingTeam{state: state} = record), do: state |> Snapshot.decode() |> apply_team_name(record)
+
   def state(record) do
     Snapshot.decode(record.state)
   end
+
+  defp apply_team_name(%{phase: :draft} = run, %{name: name}) when is_binary(name), do: Map.put(run, :name, name)
+
+  defp apply_team_name(%{heroes: heroes} = run, %{name: name}) when is_binary(name) and is_map(heroes) do
+    heroes = Map.new(heroes, fn {id, unit} -> {id, put_in(unit.hero.name, name)} end)
+    run |> Map.put(:name, name) |> Map.put(:heroes, heroes)
+  end
+
+  defp apply_team_name(run, _record), do: run
 
   defp attributes(run),
     do: %{name: Map.get(run, :name), state: Snapshot.encode(run), phase: to_string(run.phase), turn: run.turn}
@@ -415,7 +440,7 @@ defmodule Moba.Game.TeamRuns do
         values =
           Map.take(h, attrs)
           |> Map.merge(%{
-            name: TeamTraining.hero_name(h, record),
+            name: TeamTraining.hero_name(h, run),
             league_tier: run.league_tier,
             pve_current_turns: 0,
             pve_total_turns: 0,

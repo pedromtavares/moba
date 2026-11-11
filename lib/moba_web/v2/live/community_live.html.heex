@@ -12,37 +12,38 @@
       class="catalog-heading"
       style="--community-scene: url(/images/tutorial/hall-of-legends.jpg)"
     >
-      <div class="community-heading-copy">
-        <p class="catalog-eyebrow">The gathering hall</p>
-        <h1>Community</h1>
+      <div class="catalog-heading-content">
+        <div class="community-heading-copy">
+          <p class="catalog-eyebrow">The gathering hall</p>
+          <h1>Community</h1>
+        </div>
+        <.catalog_discord_link id="community-discord" />
       </div>
-      <.catalog_discord_link id="community-discord" />
+      <nav id="community-tabs" class="cinematic-catalog-tabs" role="tablist" aria-label="Community">
+        <button
+          :for={
+            {tab, label, icon} <-
+              [
+                {"online", "Recent players", "nav-community"},
+                {"pvp", "Top players", "nav-profile"},
+                {"teams", "Top teams", "nav-base"},
+                {"pve", "Top heroes", "nav-training"}
+              ] ++ if(@is_admin, do: [{"balance", "Arena stats", "nav-arena"}], else: [])
+          }
+          id={"show-#{tab}-link"}
+          type="button"
+          role="tab"
+          class={@active_tab == tab && "active"}
+          aria-label={label}
+          aria-selected={to_string(@active_tab == tab)}
+          aria-controls={"community-#{tab}"}
+          phx-click={if @active_tab != tab, do: "show-#{tab}"}
+        >
+          <.icon name={icon} />
+          <span>{label}</span>
+        </button>
+      </nav>
     </header>
-
-    <nav class="cinematic-catalog-tabs" role="tablist" aria-label="Community">
-      <button
-        :for={
-          {tab, label, icon} <-
-            [
-              {"online", "Recent players", "nav-community"},
-              {"pvp", "Top players", "nav-profile"},
-              {"teams", "Top teams", "nav-base"},
-              {"pve", "Top heroes", "nav-training"}
-            ] ++ if(@is_admin, do: [{"balance", "Arena stats", "nav-arena"}], else: [])
-        }
-        id={"show-#{tab}-link"}
-        type="button"
-        role="tab"
-        class={@active_tab == tab && "active"}
-        aria-label={label}
-        aria-selected={to_string(@active_tab == tab)}
-        aria-controls={"community-#{tab}"}
-        phx-click={if @active_tab != tab, do: "show-#{tab}"}
-      >
-        <.icon name={icon} />
-        <span>{label}</span>
-      </button>
-    </nav>
 
     <section :if={@active_tab == "online"} id="community-online" role="tabpanel" aria-labelledby="show-online-link">
       <div :if={@is_admin} id="community-admin-summary" aria-label="Activity metrics">

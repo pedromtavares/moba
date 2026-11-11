@@ -10,7 +10,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
     html = conn |> get("/training") |> html_response(200)
     refute html =~ ~s(href="/community")
     {:ok, training, _} = live(conn, "/training")
-    assert has_element?(training, "#training-guest-sign-in[href='/users/log_in']")
+    assert has_element?(training, "#training-ascent .ascent-heading > a#training-guest-sign-in[href='/users/log_in']")
     refute has_element?(training, "a[href='/community']")
 
     hero

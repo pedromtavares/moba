@@ -6,10 +6,11 @@ defmodule MobaWeb.UserRegistrationLiveTest do
 
   describe "Registration page" do
     test "renders registration page", %{conn: conn} do
-      {:ok, _lv, html} = live(conn, ~p"/users/register")
+      {:ok, lv, html} = live(conn, ~p"/users/register?from=training")
 
       assert html =~ "Create an account"
       assert html =~ "Sign In"
+      refute has_element?(lv, "#guest-registration")
     end
 
     test "redirects if already logged in", %{conn: conn} do
@@ -33,6 +34,18 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       assert result =~ "Create an account"
       assert result =~ "must have the @ sign and no spaces"
       assert result =~ "should be at least 6 character"
+    end
+
+    test "shows a username error for another casing of an existing name", %{conn: conn} do
+      user_fixture(username: "ArenaHero")
+      {:ok, lv, _html} = live(conn, ~p"/users/register")
+
+      form = form(lv, "#registration_form", user: valid_user_attributes(username: "arenahero"))
+      render_change(form)
+      assert has_element?(lv, ".form-group:has(#user_username)", "has already been taken")
+
+      render_submit(form)
+      assert has_element?(lv, ".form-group:has(#user_username)", "has already been taken")
     end
 
     test "keeps password value while validating other fields", %{conn: conn} do
@@ -76,8 +89,10 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       {:ok, lv, _html} =
         conn
         |> recycle()
-        |> live(~p"/users/register")
+        |> live(~p"/users/register?from=training")
 
+      assert has_element?(lv, "#guest-roster-title", "Your hero")
+      assert has_element?(lv, "#guest-registration-roster .guest-roster-hero strong", guest_hero.avatar.name)
       attrs = valid_user_attributes()
       form = form(lv, "#registration_form", user: attrs)
       render_submit(form)
@@ -128,7 +143,18 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       assert before.heroes[1].hero.wins == 1
       assert [_encounter] = Game.TeamRuns.encounters(guest_scope, record.id)
 
-      {:ok, registration, _} = conn |> recycle() |> live(~p"/users/register")
+      {:ok, registration, _} = conn |> recycle() |> live(~p"/users/register?from=training")
+      assert has_element?(registration, "#guest-registration-sign-in[href='/users/log_in']")
+      assert has_element?(registration, "#guest-registration-title", "Register to enter the Arena.")
+      assert has_element?(registration, "#guest-registration-roster[aria-label='Training roster'] .guest-roster-league")
+      refute has_element?(registration, "#guest-roster-title")
+
+      for {unit, position} <- Enum.with_index(Game.TeamTraining.team(before), 1) do
+        selector = "#guest-registration-roster li:nth-child(#{position})"
+        assert has_element?(registration, selector <> " strong", unit.hero.avatar.name)
+        assert has_element?(registration, selector <> " .guest-roster-caption > span", "Level #{unit.hero.level}")
+      end
+
       attrs = valid_user_attributes()
       form = form(registration, "#registration_form", user: attrs)
       render_submit(form)
@@ -140,7 +166,10 @@ defmodule MobaWeb.UserRegistrationLiveTest do
       assert Game.get_player!(guest.id).user_id == user.id
       refute Game.TeamRuns.get(guest_scope, record.id)
       scope = %{user: user, player_id: guest.id}
-      assert Game.TeamRuns.state(Game.TeamRuns.get!(scope, record.id)) == before
+      claimed = Game.TeamRuns.get!(scope, record.id)
+      assert claimed.state == record.state
+      assert claimed.name == user.username
+      assert Enum.all?(Game.TeamTraining.team(Game.TeamRuns.state(claimed)), &(&1.hero.name == user.username))
       assert [_encounter] = Game.TeamRuns.encounters(scope, record.id)
 
       {:ok, base, _} = conn |> recycle() |> live(~p"/base")

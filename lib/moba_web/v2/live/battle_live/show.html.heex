@@ -112,7 +112,11 @@ log_modal_open? = log_modal? && @show_combat_log %>
     </div>
   </div>
 
-  <div id="battle-bar" inert={log_modal_open?}>
+  <div
+    id="battle-bar"
+    inert={log_modal_open?}
+    style={@preview && "--result-scene: url(/images/tutorial/arena-of-ascension.jpg)"}
+  >
     <div class="container-fluid">
       <div class="row">
         <.turn_hero

@@ -411,10 +411,9 @@
   position: relative; isolation: isolate; overflow: hidden; display: grid;
   grid-template-columns: 76px minmax(0, 1fr) auto; grid-template-rows: auto;
   align-items: center; gap: 22px; min-height: 120px; margin: 0; padding: 18px 24px;
-  border: 1px solid #c6ae704d; border-radius: 9px;
   background: radial-gradient(ellipse at 12% 50%, #d4aa4822, transparent 60%), linear-gradient(90deg, #101d2af2, #0b1520cf);
   .league-outcome-heading { display: contents; }
-  .arena-result-art { position: absolute; z-index: -1; inset: 0 0 0 auto; width: 60%; height: 100%; object-fit: cover; object-position: center 35%; opacity: .25; mask-image: linear-gradient(90deg, transparent, #000); }
+  .arena-result-art { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; opacity: .25; mask-image: linear-gradient(90deg, transparent 20%, #000); }
   .arena-result-emblem { grid-column: 1; grid-row: 1; display: grid; place-items: center; width: 76px; height: 76px; color: #f3d590; }
   .arena-result-emblem img { width: 70px; height: 60px; object-fit: cover; border: 1px solid #d3b97b88; border-radius: 6px; }
   .arena-result-emblem .ui-icon { font-size: 66px; filter: drop-shadow(0 0 18px #e5b74a66); }
@@ -426,9 +425,9 @@
   .arena-result-rating span { color: #d7e1e4; font-size: clamp(18px, 1.9vw, 26px); font-weight: 800; }
   :is(.league-continue, .league-return) { grid-column: 3; grid-row: 1; display: inline-flex; align-items: center; justify-content: center; gap: 16px; flex-shrink: 0; width: auto; max-width: none; min-height: 60px; padding: 16px 24px; white-space: nowrap; font: 900 20px/1.3 'Nunito', sans-serif; letter-spacing: 0; }
   kbd { flex: none; font: 900 12px/1.3 'Nunito', sans-serif; padding: 3px 6px; border: 1px solid #ead2a366; border-radius: 4px; background: #151c24aa; color: #f5deae; }
-  &.is-match-result { min-height: 144px; border-color: #e9c77888; background: radial-gradient(ellipse at 10% 50%, #d5a94c3d, transparent 60%), linear-gradient(90deg, #0b1623f5, #0c1722d9 65%, #101b26aa), var(--victory-scene) center 48% / cover; box-shadow: inset 0 1px #ffe3ac22, 0 0 26px #d4ad5214; }
+  &.is-match-result { min-height: 144px; background: radial-gradient(ellipse at 10% 50%, #d5a94c3d, transparent 60%), linear-gradient(90deg, #0b1623f5, #0c1722d9 65%, #101b26aa), var(--victory-scene) center 48% / cover; box-shadow: inset 0 1px #ffe3ac22, 0 0 26px #d4ad5214; }
   &.is-match-result .league-outcome-eyebrow { color: #edd096; font-size: 14px; }
-  &.is-defeat { border-color: #ba7e804d; background: linear-gradient(100deg, #281d2a, #0e1926dd); }
+  &.is-defeat { background: linear-gradient(100deg, #281d2a, #0e1926dd); }
   &.is-defeat :is(h3, .arena-result-rating strong) { color: #e7a0ac; text-shadow: none; }
 }
 @media (max-width: 767px) {
@@ -444,7 +443,7 @@
   }
 }
 @media (min-width: 900px) {
-  .game-page #arena-battle-page #battle-page #battle-bar { padding: 12px 20px; }
+  .game-page #arena-battle-page #battle-page #battle-bar:not(:has(.arena-fight-result)) { padding: 12px 20px; }
   .game-page #arena-battle-page .stage-fighter-heading h2 { margin-bottom: 0; }
   .game-page #arena-battle-page #combat-stage[data-finished=true] {
     .stage-action-side { min-height: 120px; padding-top: 10px; padding-bottom: 10px; }

@@ -91,7 +91,11 @@ defmodule MobaWeb.V2.PlayerLive do
   defp assign_collection(socket, player, selected \\ nil) do
     collection =
       (player.hero_collection || [])
-      |> Enum.map(&Map.get(&1, "profile", &1))
+      |> Enum.map(fn entry ->
+        entry
+        |> Map.get("profile", entry)
+        |> Map.put("avatar_name", get_in(entry, ["avatar", "name"]))
+      end)
       |> Enum.sort_by(& &1["position"])
 
     codes = MapSet.new(collection, & &1["code"])
@@ -151,14 +155,6 @@ defmodule MobaWeb.V2.PlayerLive do
 
       [] ->
         %{state: :train, hero: player.current_pve_hero || featured, action: "Train a new hero", path: ~p"/new"}
-    end
-  end
-
-  defp avatar_class(hero) do
-    if hero["total_farm"] == Moba.max_total_farm() do
-      "avatar max-farm"
-    else
-      "avatar"
     end
   end
 

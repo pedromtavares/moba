@@ -10,6 +10,8 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def dom_id("", id), do: id
   def dom_id(prefix, id), do: "#{prefix}-#{id}"
 
+  def perfect_collection_run?(entry), do: entry["total_farm"] == Moba.max_total_farm()
+
   def win_rate(%{matches: 0}), do: 0
   def win_rate(%{wins: wins, matches: matches}), do: round(wins * 100 / matches)
 

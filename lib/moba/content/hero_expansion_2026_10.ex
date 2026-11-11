@@ -121,12 +121,11 @@ defmodule Moba.Content.HeroExpansion202610 do
     %{
       code: "purifying_flames",
       name: "Purifying Flames",
-      effects:
-        "[damage]Magic damage: [base_damage][/damage]\n[hp]Enemy healing: [base_amount] per turn for 3 turns[/hp]",
+      effects: "[damage]Magic damage: [base_damage][/damage]\n[hp]Enemy healing: 35% of damage taken over 3 turns[/hp]",
       cooldown: 3,
       duration: 3,
       ultimate: false,
-      description: "Deal magic damage, then heal the opponent on each of their next three turns.",
+      description: "Deal magic damage. The opponent heals for 35% of the hit over three turns.",
       level_requirement: 1,
       ranks: [
         %{mp_cost: 15, base_amount: 20, base_damage: 150},

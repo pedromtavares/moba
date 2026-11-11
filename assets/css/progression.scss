@@ -104,10 +104,8 @@
   grid-template-columns: 100px minmax(0, 1fr) auto;
   align-items: center;
   gap: 14px 26px;
-  margin: 4px 0;
+  margin: 0;
   padding: 24px 28px;
-  border: 1px solid #d6b47c40;
-  border-radius: 10px;
   background: radial-gradient(ellipse at 12% 40%, #d5a75326, transparent 55%), linear-gradient(90deg, #0b1421f5, #0a1421d9 60%, #0a1421a6), var(--victory-scene) center 48% / cover;
   box-shadow: inset 0 1px #f5ddad26, 0 0 32px #d6b47c0d;
 
@@ -167,12 +165,9 @@
   isolation: isolate;
   overflow: hidden;
   padding: 24px 28px 18px;
-  margin: 4px 0;
-  border: 1px solid var(--promotion-glow);
-  border-top: 2px solid var(--promotion-color);
-  border-radius: 10px;
+  margin: 0;
   background: radial-gradient(ellipse at 12% 25%, var(--promotion-glow), transparent 60%), linear-gradient(90deg, #09111ceb, #09111cda), var(--promotion-scene) center 48% / cover;
-  box-shadow: inset 0 1px #ffffff0a, 0 0 32px var(--promotion-glow);
+  box-shadow: inset 0 2px var(--promotion-color);
 
   &::after { content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: linear-gradient(110deg, transparent 30%, var(--promotion-glow) 50%, transparent 70%); transform: translateX(-100%); animation: completion-sweep 1.5s ease-out both; }
   .league-outcome-heading { display: grid; grid-template-columns: 190px minmax(0, 1fr) auto; gap: 24px; }
@@ -229,8 +224,6 @@
 }
 
 .game-page #battle-page #battle-bar:has(.league-outcome.is-defeat) {
-  padding: 0;
-  overflow: hidden;
   border-color: #bd798044;
   background: linear-gradient(110deg, #19202e, #111724 60%, #201820);
 }
@@ -240,7 +233,7 @@
   isolation: isolate;
   overflow: hidden;
   padding: 28px;
-  .league-defeat-art { position: absolute; z-index: -1; top: 0; right: 0; width: 65%; height: 100%; object-fit: cover; object-position: center 35%; opacity: .23; filter: saturate(.3); mask-image: linear-gradient(90deg, transparent, #0009 45%, #000); animation: league-defeat-reveal .85s ease-out both; }
+  .league-defeat-art { position: absolute; z-index: -1; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%; opacity: .23; filter: saturate(.3); mask-image: linear-gradient(90deg, transparent, #0009 55%, #000); animation: league-defeat-reveal .85s ease-out both; }
   &::before { content: ''; position: absolute; z-index: -1; inset: 0; pointer-events: none; background: radial-gradient(ellipse at 5% 30%, #ac5c6821, transparent 65%), linear-gradient(0deg, #0c1321bb, transparent 80%); }
   .league-outcome-heading { display: grid; grid-template-columns: 82px minmax(0, 1fr) auto; align-items: center; gap: 24px; }
   .league-defeat-emblem { display: grid; place-items: center; width: 82px; height: 94px; }
@@ -265,7 +258,7 @@
 @media (max-width: 767px) {
   .game-page #battle-page #battle-bar .league-outcome.is-defeat {
     padding: 20px 16px;
-    .league-defeat-art { width: 100%; opacity: .18; }
+    .league-defeat-art { opacity: .18; }
     .league-outcome-heading { grid-template-columns: 52px minmax(0, 1fr); gap: 14px; }
     .league-defeat-emblem { width: 52px; height: 64px; }
     .league-defeat-emblem img { width: 40px; height: 48px; }

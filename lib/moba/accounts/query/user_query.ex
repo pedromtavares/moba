@@ -12,7 +12,7 @@ defmodule Moba.Accounts.Query.UserQuery do
   end
 
   def with_username(query, username) do
-    from u in query, where: fragment("lower(?) = ?", u.username, ^String.downcase(username))
+    from u in query, where: fragment("lower(?) = lower(?)", u.username, type(^username, :string))
   end
 
   def inserted_recently(query \\ User, since_hours_ago \\ 24) do

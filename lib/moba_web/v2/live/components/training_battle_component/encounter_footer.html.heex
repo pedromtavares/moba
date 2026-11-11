@@ -8,7 +8,7 @@
         {String.capitalize(to_string(side))}
       </strong>
       <div :for={h <- heroes} class="training-film-hero">
-        <% name = TeamTraining.hero_name(h.hero, @team_record) %>
+        <% name = training_hero_name(h.hero, @team_record) %>
         <% state =
           Enum.find_value(Enum.reverse(Enum.take(@replay.battles, @index - 1) ++ [@battle]), fn battle ->
             turn = List.last(battle.turns)
@@ -40,11 +40,11 @@
         id={"training-battle-link-#{position}"}
         navigate={battle_path(@replay, position)}
       >
-        Battle {position} · {TeamTraining.hero_name(battle.attacker, @team_record)} vs {TeamTraining.hero_name(
+        Battle {position} · {training_hero_name(battle.attacker, @team_record)} vs {training_hero_name(
           battle.defender,
           @team_record
         )} · {if battle.finished,
-          do: if(battle.winner, do: TeamTraining.hero_name(battle.winner, @team_record) <> " wins", else: "Draw"),
+          do: if(battle.winner, do: training_hero_name(battle.winner, @team_record) <> " wins", else: "Draw"),
           else: "Fight / Auto"} ↗
       </.link>
     </div>

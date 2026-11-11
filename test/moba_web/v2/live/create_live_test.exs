@@ -10,7 +10,7 @@ defmodule MobaWeb.V2.CreateLiveTest do
       link =
         html
         |> LazyHTML.from_fragment()
-        |> LazyHTML.query("#invoke-modern a#invoke-guest-sign-in[href='/users/log_in']")
+        |> LazyHTML.query("#invoke-modern > a#invoke-guest-sign-in[href='/users/log_in']")
 
       assert LazyHTML.text(link) =~ "Already registered? Sign in"
     end

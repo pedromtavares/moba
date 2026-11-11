@@ -99,9 +99,37 @@ defmodule Moba.Engine.Core.Effect do
     |> update_defender_number(:current_hp, -amount)
   end
 
-  def grant_opponent_buff(%{defender: defender, resource: resource} = turn) do
-    buff = %Buff{resource: resource, duration: resource.duration}
-    update_defender(turn, :buffs, defender.buffs ++ [buff])
+  def resolve_purifying_flames(%{defender: defender, resource: resource} = turn, defended) do
+    # Armor and flat blocks resolve against the combined hit. Attribute a
+    # proportional share to Flames before independent late hits like Pulse Nova.
+    raw_damage =
+      Enum.sum(for %{"key" => :damage, "value" => value} <- defended.effects, value > 0, do: value)
+
+    hit_damage =
+      cond do
+        defender.executed -> 0
+        defender.immortal -> min(defended.damage, max(defended.current_hp - defender.current_hp, 0))
+        true -> defended.damage
+      end
+
+    damage = round(hit_damage * (resource.base_damage || 0) / max(raw_damage, 1))
+    healing = div(damage * 35 + 50, 100)
+
+    effects =
+      Enum.map(defender.effects, fn
+        %{"resource" => "purifying_flames", "key" => :damage} = event -> %{event | "value" => damage}
+        event -> event
+      end)
+
+    scheduled = effect_entry(turn, defender, :healing_scheduled, healing)
+    turn = %{turn | defender: %{defender | effects: effects ++ [scheduled]}}
+
+    if healing > 0 do
+      buff = %Buff{resource: %{resource | final: nil}, duration: resource.duration, healing_total: healing}
+      update_defender(turn, :buffs, defender.buffs ++ [buff])
+    else
+      turn
+    end
   end
 
   def pause_opponent_buffs(%{defender: defender} = turn) do

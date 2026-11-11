@@ -155,7 +155,9 @@ defmodule Moba.Game.TeamTraining do
   def active_encounter(%{phase: :engagement, encounters: encounters}), do: List.last(encounters)
   def active_encounter(_), do: nil
 
-  def hero_name(%{name: name, avatar: avatar}, %{name: nil, player_id: player_id}) do
+  def hero_name(_hero, %{name: name}) when is_binary(name), do: name
+
+  def hero_name(%{name: name, avatar: avatar}, %{player_id: player_id}) do
     if name == "Guest ##{player_id}", do: avatar.name, else: name
   end
 

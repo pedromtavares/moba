@@ -313,6 +313,15 @@ defmodule MobaWeb.V2.TeamLiveTest do
     assert has_element?(result, ".stage-left [data-unit-name]", avatar)
     assert has_element?(result, ".combat-turn-actor", avatar)
     refute render(result) =~ "Guest ##{guest.id}"
+
+    user = Test.AccountsHelper.create_user()
+    Moba.after_registration(user, guest.id)
+    conn = build_conn() |> log_in_user(user) |> put_session(:player_id, guest.id)
+    {:ok, claimed_replay, _} = live(conn, path)
+    assert has_element?(claimed_replay, ".stage-left [data-unit-name]", user.username)
+    assert has_element?(claimed_replay, ".combat-turn-actor", user.username)
+    assert has_element?(claimed_replay, ".stage-right [data-unit-name]", hd(encounter.dire).hero.name)
+    refute render(claimed_replay) =~ "Guest ##{guest.id}"
   end
 
   test "draft accepts and persists the roster only on Begin Training", %{

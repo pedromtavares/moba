@@ -19,7 +19,18 @@
   box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 36px rgba(0,0,0,.15);
 
   .ascent-heading { display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-  .ascent-kicker { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; }
+  .ascent-kicker { display: flex; align-items: center; }
+  &:not(.is-challenge-stage) .ascent-heading:has(> .ascent-guest-sign-in) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title sign-in" "title objective";
+    align-items: start;
+    gap: 6px 20px;
+
+    > div:first-child { grid-area: title; }
+    .ascent-guest-sign-in { grid-area: sign-in; justify-self: end; }
+    .ascent-objective { grid-area: objective; justify-self: end; text-align: end; }
+  }
   .ascent-eyebrow { color: #baa77d; font-size: 11px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
   .ascent-guest-sign-in {
     display: inline-flex;
@@ -139,6 +150,11 @@
   .game-page .training-ascent {
     padding: 14px 12px 0;
     .ascent-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+    &:not(.is-challenge-stage) .ascent-heading:has(> .ascent-guest-sign-in) {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "sign-in" "title" "objective";
+      .ascent-objective { text-align: start; }
+    }
     .ascent-objective { width: 100%; justify-content: space-between; gap: 10px; }
     .ascent-eyebrow { font-size: 10px; }
     h2 { font-size: 25px; }
@@ -182,6 +198,8 @@
 
   .ascent-heading { display: contents; }
   .ascent-heading > div:first-child { grid-row: 1; text-align: center; }
+  .ascent-heading:has(> .ascent-guest-sign-in) > div:first-child { padding-top: 26px; }
+  .ascent-guest-sign-in { position: absolute; inset-block-start: 10px; inset-inline-end: 12px; z-index: 1; }
   .ascent-kicker { justify-content: center; }
   .ascent-eyebrow { font-size: 12px; letter-spacing: .24em; }
   h2 { margin-top: 8px; font-size: clamp(38px, 4vw, 64px); text-shadow: 0 4px 24px #0009; }
