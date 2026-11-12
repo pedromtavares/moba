@@ -1,8 +1,7 @@
-body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
+:is(html, body):has(.game-page .shop-modal.d-block) { overflow: hidden; }
 
 .game-page .shop-modal {
   inset: 0 0 var(--shop-hud-height, 180px);
-  padding: 16px;
   overflow: hidden;
   background: #040910e8;
   backdrop-filter: blur(14px);
@@ -38,6 +37,7 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
   [data-rarity=rare] { --shop-accent: #8abde6; --shop-glow: #438fd52e; }
   [data-rarity=epic] { --shop-accent: #bb9ae4; --shop-glow: #9762d82e; }
   [data-rarity=legendary] { --shop-accent: #ec9a9e; --shop-glow: #b8404c35; }
+  [data-rarity=forged-legendary] { --shop-accent: #f2bb79; --shop-glow: #d69d5550; }
   [data-rarity=inventory] { --shop-accent: #e3c083; --shop-glow: #d5a04c20; }
   button { font-family: inherit; cursor: pointer; }
   button:disabled { cursor: not-allowed; }
@@ -51,6 +51,8 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
   .shop-keyboard-hint kbd { padding: 3px 5px; border: 1px solid #dfbf7c66; border-radius: 4px; background: #09101de6; color: #f2dba5; font: 800 12px/1.2 'Nunito', sans-serif; }
   .shop-eyebrow { display: block; color: var(--shop-accent); font-size: 11px; font-weight: 900; line-height: 1.4; letter-spacing: .18em; text-transform: uppercase; }
   .shop-heading h2 { display: flex; align-items: center; gap: 22px; margin: 3px 0 0; color: #f5ead2; font-size: clamp(30px, 3vw, 48px); font-weight: 900; line-height: 1.05; }
+  &[data-forging=true] .shop-heading h2 { gap: clamp(8px, 1.2vw, 18px); }
+  .shop-forge-picker-title { color: #e7d0ff; font-size: clamp(13px, 1.55vw, 22px); line-height: 1.15; }
   .shop-heading-rule { flex: 1; max-width: 240px; height: 1px; background: linear-gradient(90deg, #cfae6955, transparent); }
   .shop-wallet { display: flex; align-items: baseline; gap: 9px; color: #e3c083; white-space: nowrap; }
   .shop-wallet strong { font-size: clamp(24px, 2.4vw, 36px); font-weight: 900; line-height: 1; font-variant-numeric: tabular-nums; }
@@ -99,6 +101,108 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
   .shop-detail-actions > *, .shop-sell { flex: 1; min-width: 0; }
   .shop-detail-actions form { margin: 0; }
   .shop-detail-actions form button { width: 100%; }
+  .shop-forge-form { display: grid; gap: 8px; }
+  .shop-forge-form .shop-primary:not(:disabled) { background: linear-gradient(120deg, #804520, #5f2b25); }
+  .shop-forge-form .shop-action-hint { margin: 0; }
+  .shop-forged-epic { margin: 0; color: #dfc79c; }
+  .shop-forge-picker { display: flex; flex-direction: column; align-items: stretch; min-width: 0; padding: clamp(10px, 1.6vw, 22px); }
+  .shop-forge-picker.is-current {
+    background: radial-gradient(ellipse at 50% 0%, #38274c, transparent 75%), linear-gradient(120deg, #231c33, #101824);
+  }
+  .shop-forge-grid {
+    --forge-divider: #c4a0e83b;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(104px, 1fr);
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+  }
+  .shop-forge-grid .shop-forge-choice {
+    container: forge-card / inline-size;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    place-items: stretch;
+    isolation: isolate;
+    overflow: hidden;
+    gap: 6px;
+    padding: clamp(7px, 1vw, 14px);
+    aspect-ratio: auto;
+    border: 0 solid var(--forge-divider);
+    border-radius: 0;
+    background: transparent;
+    text-align: left;
+    transition: background-color 160ms, box-shadow 160ms;
+  }
+  @media (min-width: 901px) {
+    .shop-forge-grid .shop-forge-choice:nth-child(n+4) { border-block-start-width: 1px; }
+    .shop-forge-grid .shop-forge-choice:not(:nth-child(3n+1)) { border-inline-start-width: 1px; }
+  }
+  .shop-forge-grid .shop-forge-choice:hover { border-color: var(--forge-divider); filter: none; transform: none; }
+  .shop-forge-grid .shop-forge-choice:hover:not(:disabled) { background-color: #c7a1ee12; }
+  .shop-forge-grid .shop-forge-choice[aria-pressed=true] {
+    border-color: var(--forge-divider);
+    background-color: #c7a1ee1c;
+    box-shadow: inset 0 -2px #ffe4ae;
+  }
+  .shop-forge-grid .shop-forge-choice:focus-visible { outline-offset: -3px; }
+  .shop-forge-choice-art {
+    position: relative;
+    min-height: 0;
+  }
+  .shop-forge-grid .shop-forge-choice-art img {
+    position: absolute;
+    inset: 0;
+    width: min(120px, 100%);
+    height: min(89px, 100%);
+    margin: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 5px 9px #07050e9c);
+  }
+  .shop-forge-choice-info {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 4px 9px;
+    min-width: 0;
+    text-shadow: 0 1px 4px #08060c, 0 2px 10px #08060c;
+  }
+  .shop-forge-choice-name { min-width: 0; color: #fff3ff; font-size: clamp(12px, 8cqi, 20px); font-weight: 900; line-height: 1.1; }
+  .shop-forge-choice-price { display: grid; justify-items: start; flex: 0 0 auto; gap: 2px; color: #ffe2a0; line-height: 1; }
+  .shop-forge-gold { display: inline-flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+  .shop-forge-gold strong { font-size: clamp(17px, 12cqi, 28px); font-weight: 900; font-variant-numeric: tabular-nums; }
+  .shop-forge-gold i { align-self: center; font-size: clamp(12px, 7cqi, 20px); }
+  .shop-forge-price-label { font-size: clamp(10px, 5.5cqi, 13px); font-weight: 800; }
+  @container forge-card (max-width: 152px) {
+    .shop-forge-choice-info { flex-direction: column; align-items: flex-start; }
+  }
+  .shop-forge-showcase {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(8px, 1.5vw, 20px);
+  }
+  .shop-forge-sockets {
+    display: grid;
+    grid-template-columns: minmax(0, 148px) auto minmax(0, 148px);
+    align-items: center;
+    gap: clamp(4px, .7vw, 10px);
+  }
+  .shop-forge-socket {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 120 / 89;
+    border: 1px solid color-mix(in srgb, var(--shop-accent) 68%, transparent);
+    border-radius: 8px;
+    background: #111021;
+    box-shadow: 0 0 20px var(--shop-glow);
+  }
+  .shop-forge-socket img { width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+  .shop-forge-socket.is-empty { border-style: dashed; color: #bca9d4; font-size: 11px; font-weight: 800; }
+  .shop-forge-join { color: #f1ca89; font-size: clamp(12px, 1.5vw, 18px); }
+  .shop-forge-showcase[data-forge-preview=true] .shop-forge-socket[data-rarity=epic] img { animation: shop-forge-seat 230ms ease-out; }
   .shop-primary, .shop-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 52px; padding: 12px 16px; border: 1px solid #e2ba7f80; border-radius: 7px; color: #ffedce; font-size: 17px; line-height: 1.3; font-weight: 900; background: linear-gradient(120deg, #853b36, #582229); box-shadow: inset 0 1px #fff2, 0 5px 18px #0003; transition: filter 160ms, border-color 160ms; }
   .shop-primary:hover:not(:disabled), .shop-secondary:hover:not(:disabled) { filter: brightness(1.2); border-color: #ffdda3; }
   .shop-primary:disabled, .shop-secondary:disabled { opacity: .4; box-shadow: none; }
@@ -113,6 +217,19 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
   .shop-empty-inventory > img { width: 100px; height: 100px; object-fit: contain; margin-bottom: 20px; filter: drop-shadow(0 0 30px #d6aa5b44); }
   .shop-empty-inventory h3 { color: #f5ead2; font-size: clamp(24px, 3vw, 40px); font-weight: 900; line-height: 1.2; margin: 12px 0; }
   .shop-empty-inventory p { color: #aab7c9; font-size: 15px; line-height: 1.5; }
+}
+
+@keyframes shop-forge-seat {
+  from { opacity: .55; transform: scale(.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@media (min-width: 601px) and (max-width: 900px) {
+  .game-page :is(#shop, .cinematic-shop) .shop-forge-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    .shop-forge-choice:nth-child(n+3) { border-block-start-width: 1px; }
+    .shop-forge-choice:nth-child(even) { border-inline-start-width: 1px; }
+  }
 }
 
 @media (max-width: 1100px) {
@@ -147,7 +264,6 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
 }
 
 @media (max-width: 600px) {
-  .game-page .shop-modal { padding: 6px; }
   .game-page :is(#shop, .cinematic-shop) {
     padding: 10px; border-radius: 12px; gap: 10px;
     .shop-heading { gap: 12px; }
@@ -159,6 +275,22 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
     .shop-wallet > span, .shop-heading-rule { display: none; }
     #close-button { flex-basis: 32px; width: 32px; height: 32px; }
     .shop-workspace { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: 8px; }
+    &[data-forging=true] .shop-workspace { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr; }
+    .shop-forge-picker { gap: 4px; padding: 6px; }
+    .shop-forge-grid {
+      grid-template-columns: none;
+      grid-auto-columns: minmax(102px, 28%);
+      grid-auto-flow: column;
+      grid-auto-rows: 120px;
+      scroll-snap-type: x proximity;
+    }
+    .shop-forge-grid .shop-forge-choice {
+      grid-template-rows: 50px minmax(0, 1fr);
+      gap: 4px;
+      scroll-snap-align: start;
+    }
+    .shop-forge-choice-info { justify-content: flex-end; }
+    .shop-forge-grid .shop-forge-choice + .shop-forge-choice { border-inline-start-width: 1px; }
     .shop-shelves { gap: 5px; }
     .shop-shelf { padding: 7px; gap: 5px; border-radius: 7px; }
     .shop-shelf-label > span { font-size: 13px; }
@@ -191,6 +323,7 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
 
 @media (prefers-reduced-motion: reduce) {
   .game-page :is(#shop, .cinematic-shop) button { transition: none; transform: none; }
+  .game-page :is(#shop, .cinematic-shop) .shop-forge-showcase[data-forge-preview=true] .shop-forge-socket img { animation: none; }
 }
 
 .game-page :is(#shop, .cinematic-shop) .shop-inspect-tabs { display: none; }
@@ -244,5 +377,179 @@ body:has(.game-page .shop-modal.d-block) { overflow: hidden; }
   .game-page :is(#shop, .cinematic-shop) {
     .shop-heading { flex-wrap: wrap; }
     .shop-keyboard-hint { order: 1; flex-basis: 100%; font-size: 12px; gap: 4px; }
+  }
+}
+
+@media (max-width: 760px) {
+  .game-page :is(#shop, .cinematic-shop)[data-forging=true] .shop-keyboard-hint { display: none; }
+}
+
+.game-page .shop-modal > :is(#shop, .cinematic-shop) {
+  overflow-y: auto;
+  scrollbar-width: none;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 0;
+
+  .shop-workspace { flex: 1 0 auto; }
+  .shop-shelves {
+    contain: size;
+    gap: 0;
+    overflow: clip;
+    border: 1px solid #b4c0d22e;
+    border-radius: 12px;
+    background: #111c29a3;
+
+    > .shop-shelf { border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+    > .shop-shelf + .shop-shelf { border-block-start: 1px solid #a7b5ca2b; }
+    > .shop-shelf.is-current {
+      background: linear-gradient(90deg, var(--shop-glow), transparent 75%);
+      box-shadow: inset 3px 0 var(--shop-accent);
+    }
+  }
+}
+
+@container (min-width: 601px) and (max-height: 480px) {
+  .game-page .shop-modal .shop-forge-picker { contain: size; }
+}
+
+@container (max-width: 900px) {
+  .game-page .shop-modal > :is(#shop, .cinematic-shop) .shop-tooltip-readout {
+    .skill-tooltip-effects { width: 100%; }
+    .skill-tooltip-effects .skill-tooltip-effect { grid-template-columns: minmax(0, 1fr) fit-content(46%); }
+    .item-tooltip-stats { gap: 0 12px; }
+    .item-tooltip-stats .item-tooltip-stat { gap: 4px; }
+    .item-tooltip-stat dt { gap: 5px; }
+    .item-tooltip-stat .skill-tooltip-effect-icon { font-size: 16px; }
+    .item-tooltip-stat dd strong { white-space: nowrap; }
+  }
+}
+
+@container (max-width: 600px) {
+  .game-page .shop-modal > :is(#shop, .cinematic-shop) {
+    .shop-item-showcase:not(.shop-forge-showcase) {
+      :is(#shop-detail-image, .shop-detail-image) { max-width: 44px; max-height: 44px; }
+      :is(#shop-detail-name, .shop-detail-name) { font-size: 19px; }
+    }
+    .shop-tooltip-readout > .item-tooltip:not([data-rarity=forged-legendary]) .item-tooltip-stats {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+}
+
+.game-page :is(#shop, .cinematic-shop):is([data-forging=true], :has(.shop-detail[data-rarity=forged-legendary])) {
+  .shop-detail {
+    --forge-column-gap: clamp(10px, 1.8vw, 24px);
+    gap: clamp(10px, 2cqh, 16px);
+  }
+  .shop-forge-form .shop-detail-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--forge-column-gap);
+  }
+  .shop-forge-showcase :is(#shop-detail-name, .shop-detail-name) { margin: 4px 0 5px; font-size: clamp(17px, 2vw, 28px); }
+  .shop-forge-showcase .shop-eyebrow { font-size: 9px; letter-spacing: .12em; }
+  .shop-forged-epic { font-size: 13px; line-height: 1.2; }
+
+  .shop-tooltip-readout > .item-tooltip[data-rarity=forged-legendary] {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px var(--forge-column-gap);
+
+    > :not(.forged-item-tooltip-component) { grid-column: 1 / -1; }
+    > .skill-tooltip-meta { margin: 0 0 4px; padding: 0; border: 0; }
+    .forged-item-tooltip-component { min-width: 0; }
+    .forged-item-tooltip-component + .forged-item-tooltip-component {
+      position: relative;
+      margin: 0;
+      padding: 0 0 0 clamp(8px, 1.4vw, 18px);
+      border: 0;
+
+      &::before {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: calc((var(--forge-column-gap) + 1px) / -2);
+        inline-size: 1px;
+        background: #bba37540;
+        content: "";
+      }
+    }
+    .forged-item-tooltip-component > .skill-tooltip-summary { color: #f5ead2; }
+    .skill-tooltip-summary { margin: 0 0 4px; font-size: 14px; line-height: 1.35; }
+    .skill-tooltip-notes { margin: 5px 0 0; font-size: 13px; line-height: 1.35; }
+    .item-tooltip-stats {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 88px), 1fr));
+      gap: 0 12px;
+      margin: 0;
+      padding: 0;
+      border: 0;
+    }
+    .skill-tooltip-effects { width: 100%; }
+    .skill-tooltip-effect { gap: 4px; padding: 2px 0; }
+    .skill-tooltip-effect dt { gap: 4px; font-size: 13px; }
+    .skill-tooltip-effect-icon, .skill-tooltip-meta-icon { font-size: 14px; }
+    :is(.item-tooltip-stat, .skill-tooltip-term) strong { font-size: 15px; }
+    .skill-tooltip-unit { font-size: 13px; }
+    .skill-tooltip-meta-entry { padding: 3px 6px; font-size: 13px; }
+  }
+}
+
+@container (width > 600px) and (min-height: 550px) {
+  .game-page .shop-modal > :is(#shop, .cinematic-shop)[data-forging=true] {
+    .shop-detail {
+      gap: clamp(14px, 2.5cqh, 24px);
+      padding-block-start: clamp(16px, 3cqh, 28px);
+    }
+    .shop-forge-showcase .shop-eyebrow { font-size: 11px; }
+    .shop-forged-epic { font-size: 15px; }
+
+    .shop-tooltip-readout > .item-tooltip[data-rarity=forged-legendary] {
+      --forge-summary-size: clamp(15px, 1.18vw, 18px);
+      --forge-label-size: clamp(14px, 1.05vw, 16px);
+      row-gap: clamp(10px, 2cqh, 17px);
+
+      > .skill-tooltip-meta { margin: 0; }
+      .forged-item-tooltip-component > .skill-tooltip-summary { margin-bottom: 6px; }
+      .skill-tooltip-summary { font-size: var(--forge-summary-size); }
+      .skill-tooltip-notes, .skill-tooltip-unit { font-size: var(--forge-label-size); }
+      .item-tooltip-stats { grid-template-columns: repeat(auto-fit, minmax(min(100%, 108px), 1fr)); }
+      .skill-tooltip-effect { padding: 4px 0; }
+      .skill-tooltip-effect dt, .skill-tooltip-meta-entry { font-size: var(--forge-label-size); }
+      .skill-tooltip-effect-icon, .skill-tooltip-meta-icon { font-size: 16px; }
+      :is(.item-tooltip-stat, .skill-tooltip-term) strong { font-size: clamp(17px, 1.35vw, 21px); }
+    }
+  }
+}
+
+@container (min-width: 1000px) and (min-height: 760px) {
+  .game-page .shop-modal > :is(#shop, .cinematic-shop)[data-forging=true] {
+    .shop-forge-showcase {
+      flex: 1 0 auto;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      row-gap: clamp(10px, 1.6cqh, 18px);
+    }
+
+    .shop-forge-showcase .shop-item-identity { grid-row: 1; text-align: center; }
+    .shop-forge-sockets { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
+    .shop-forge-socket {
+      inline-size: min(100%, clamp(136px, 20cqh, 174px));
+      justify-self: center;
+    }
+  }
+}
+
+@container (min-width: 1000px) and (min-height: 550px) {
+  .game-page .shop-modal > :is(#shop, .cinematic-shop)[data-forging=true] .shop-tooltip-readout > .item-tooltip[data-rarity=forged-legendary] {
+    > .skill-tooltip-summary:has(+ .skill-tooltip-meta) {
+      grid-column: 1;
+      align-self: center;
+      margin: 0;
+    }
+    > .skill-tooltip-summary + .skill-tooltip-meta {
+      grid-column: 2;
+      align-self: center;
+      justify-content: flex-end;
+    }
   }
 }

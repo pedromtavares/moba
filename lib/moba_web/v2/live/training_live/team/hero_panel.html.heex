@@ -24,16 +24,13 @@
     show_controls={@run.phase == :playing && TeamTraining.roster_alive?(@run)}
   >
     <:history_controls>
-      <button
+      <.link
         id={GH.dom_id(@id_prefix, "team-battle-log")}
-        type="button"
         class="ascent-tool"
-        phx-click="show-log"
-        phx-value-hero_id={@selected.id}
-        aria-expanded={to_string(@show_log)}
+        navigate={~p"/battles?#{[run: @record.id]}"}
       >
-        <.icon name="game-battle-log" /> Battle log <small>{length(@encounters)}</small>
-      </button>
+        <.icon name="game-battle-log" /> Battle log <small>{@encounter_count}</small>
+      </.link>
     </:history_controls>
     <:reward_controls>
       <button
@@ -60,22 +57,6 @@
       </button>
     </:reward_controls>
   </TrainingComponents.training_header>
-
-  <nav
-    :if={@show_log}
-    id={GH.dom_id(@id_prefix, "team-encounter-log")}
-    class="team-encounter-log"
-    aria-label="Team battle history"
-  >
-    <p :if={@encounters == []}>Your battles will appear here.</p>
-    <.link
-      :for={e <- Enum.reverse(@encounters)}
-      id={GH.dom_id(@id_prefix, "team-replay-#{e.id}")}
-      navigate={TrainingEncounters.path(e)}
-    >
-      Turn {e.turn} · {e.label} <span aria-hidden="true">↗</span>
-    </.link>
-  </nav>
 
   <section
     :if={TeamTraining.dead?(@selected)}

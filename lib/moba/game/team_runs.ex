@@ -336,7 +336,8 @@ defmodule Moba.Game.TeamRuns do
       on: battle.training_encounter_id == e.id and battle.training_index == 1,
       where: r.id == ^run_id,
       where: not is_nil(match.id) or not is_nil(battle.id),
-      order_by: [asc: e.id]
+      order_by: [asc: e.id],
+      select_merge: %{state: coalesce(match.training_state, battle.training_state)}
     )
     |> Repo.all()
     |> Enum.flat_map(fn record ->
@@ -344,9 +345,11 @@ defmodule Moba.Game.TeamRuns do
         {:ok, replay} ->
           [
             Map.merge(
-              Map.take(record, [:id, :team_run_id, :turn, :label]),
-              Map.take(replay, [:match_id, :battle_ids, :kind, :status, :recipient])
+              Map.take(record, [:id, :team_run_id, :turn, :label, :inserted_at]),
+              Map.take(replay, [:match_id, :battle_ids, :kind, :status, :recipient, :winner, :reward_totals])
             )
+            |> Map.put(:fighter, first_hero(replay[:radiant]))
+            |> Map.put(:opponent, first_hero(replay[:dire]))
           ]
 
         {:error, :invalid_snapshot} ->
@@ -354,6 +357,9 @@ defmodule Moba.Game.TeamRuns do
       end
     end)
   end
+
+  defp first_hero([%{hero: hero} | _]), do: hero
+  defp first_hero(_), do: nil
 
   def encounter!(scope, run_id, id) do
     scope

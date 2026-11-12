@@ -168,6 +168,47 @@ defmodule Moba.GameTest do
       assert hero.finished_at
     end
 
+    test "finishing a solo Grandmaster tops up combat power while ranking by earned farm" do
+      winner =
+        create_combat_hero(%{
+          league_tier: Moba.max_league_tier(),
+          total_gold_farm: 30_000,
+          total_xp_farm: 30_000
+        })
+        |> Game.finish_pve!()
+
+      hero =
+        create_combat_hero(%{
+          league_tier: Moba.max_league_tier(),
+          experience: 500,
+          gold: 700,
+          total_gold_farm: 29_000,
+          total_xp_farm: 28_000
+        })
+        |> Game.update_hero!(%{}, full_legendary_inventory())
+
+      finished = Game.finish_pve!(hero)
+      gained_levels = Moba.max_hero_level() - hero.level
+
+      assert winner.gold == 32_000
+      assert finished.level == Moba.max_hero_level()
+      assert finished.experience == 0
+      assert finished.atk == hero.atk + gained_levels * hero.avatar.atk_per_level
+      assert finished.total_hp == hero.total_hp + gained_levels * hero.avatar.hp_per_level
+      assert finished.total_mp == hero.total_mp + gained_levels * hero.avatar.mp_per_level
+      assert finished.skill_levels_available == hero.skill_levels_available + 14
+      assert finished.gold == 3_200
+      assert finished.total_gold_farm == 29_000
+      assert finished.total_xp_farm == 28_000
+      assert Game.get_hero!(winner.id).pve_ranking == 1
+      assert Game.get_hero!(finished.id).pve_ranking == 2
+
+      forged = Game.Items.forge_item!(finished.player, finished, "scythe_of_vyse", "soul_booster")
+      assert forged.gold == 0
+      assert Game.finish_pve!(hero).gold == 0
+      assert Game.get_player!(hero.player_id).total_farm == 57_000
+    end
+
     test "#finish_pve! awards Novice for one Platinum finish and Adept for one Master finish" do
       player = create_player!()
       platinum = Moba.platinum_league_tier()
@@ -189,7 +230,10 @@ defmodule Moba.GameTest do
       create_combat_hero(%{league_tier: master - 1}, player, alternate_avatar()) |> Game.finish_pve!()
       assert Game.get_player!(player.id).pve_tier == 1
 
-      create_combat_hero(%{league_tier: master}, player) |> Game.finish_pve!()
+      hero = create_combat_hero(%{league_tier: master}, player)
+      finished = Game.finish_pve!(hero)
+      assert finished.level == hero.level
+      assert finished.gold == hero.gold
 
       %{pve_progression: progression} = updated = Game.get_player!(player.id)
       assert length(progression.season_codes) == 2

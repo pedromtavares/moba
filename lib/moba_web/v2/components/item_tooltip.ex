@@ -3,7 +3,7 @@ defmodule MobaWeb.V2.Components.ItemTooltip do
   import MobaWeb.CoreComponents, only: [icon: 1]
   import MobaWeb.V2.Components.SkillTooltip, only: [effect_rows: 1, metadata_rows: 1]
 
-  alias Moba.Game.{ItemDescriptions, SkillDescriptions}
+  alias Moba.Game.{ItemDescriptions, Items, SkillDescriptions}
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
   @stats [
@@ -22,6 +22,45 @@ defmodule MobaWeb.V2.Components.ItemTooltip do
 
   attr :item, :map, required: true
   attr :show_heading, :boolean, default: true
+  attr :show_timing, :boolean, default: true
+
+  def card(%{item: %{forged_epic: epic} = item} = assigns) do
+    legendary = Map.delete(item, :forged_epic)
+    activation = Items.activation(item)
+
+    assigns =
+      assign(assigns,
+        components: [legendary, epic],
+        activation: activation,
+        metadata:
+          if(activation,
+            do: metadata(%{active: true, mp_cost: activation.energy, cooldown: activation.cooldown}),
+            else: []
+          ),
+        two_boots?: Enum.all?([legendary, epic], &Items.boots?/1)
+      )
+
+    ~H"""
+    <article class="skill-tooltip item-tooltip" data-item-code={@item.code} data-rarity="forged-legendary">
+      <header :if={@show_heading} class="skill-tooltip-heading">
+        <img :if={@item.image} src={GH.image_url(@item)} alt="" />
+        <div>
+          <h3>Forged {@item.name}</h3>
+          <span class="skill-tooltip-rank"><span class="item-tooltip-rarity">Forged Legendary</span></span>
+        </div>
+      </header>
+      <p :if={match?(%{components: [_, _]}, @activation)} class="skill-tooltip-summary">
+        Both active effects trigger together.
+      </p>
+      <.metadata_rows entries={@metadata} />
+      <div :for={component <- @components} class="forged-item-tooltip-component">
+        <p class="skill-tooltip-summary"><strong>{component.name}</strong></p>
+        <.card item={component} show_heading={false} show_timing={is_nil(@activation)} />
+      </div>
+      <p :if={@two_boots?} class="skill-tooltip-summary">Speed from boots counts only once.</p>
+    </article>
+    """
+  end
 
   def card(assigns) do
     item = assigns.item
@@ -34,7 +73,7 @@ defmodule MobaWeb.V2.Components.ItemTooltip do
         <div>
           <h3>{@item.name}</h3>
           <span class="skill-tooltip-rank">
-            <span class="item-tooltip-rarity">{String.capitalize(@item.rarity || "")}</span>
+            <span class="item-tooltip-rarity">{GH.item_rarity_name(@item)}</span>
             <span>{if @item.active, do: "Active item", else: "Passive item"}</span>
           </span>
         </div>
@@ -59,7 +98,7 @@ defmodule MobaWeb.V2.Components.ItemTooltip do
           <p :for={note <- @content.notes}>{note}</p>
         </div>
       </div>
-      <.metadata_rows entries={@metadata} />
+      <.metadata_rows :if={@show_timing} entries={@metadata} />
     </article>
     """
   end

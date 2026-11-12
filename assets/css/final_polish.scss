@@ -226,6 +226,32 @@ body:has(.game-confirm-dialog[open]) { overflow: hidden; }
   &.item-tooltip[data-rarity=rare] .item-tooltip-rarity { color: #8abde6; }
   &.item-tooltip[data-rarity=epic] .item-tooltip-rarity { color: #bb9ae4; }
   &.item-tooltip[data-rarity=legendary] .item-tooltip-rarity { color: #ec9a9e; }
+  &.item-tooltip[data-rarity=forged-legendary] .item-tooltip-rarity { color: #f2bb79; }
+}
+
+.forged-item-slot { position: relative; }
+
+.forged-item-inset {
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  display: block;
+  width: 43%;
+  max-width: 24px;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 1px solid #f2bb79;
+  border-radius: 3px;
+  background: #10141e;
+  pointer-events: none;
+
+  img { display: block; width: 100%; height: 100%; object-fit: cover; }
+}
+
+.forged-item-tooltip-component + .forged-item-tooltip-component {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f2bb7940;
 }
 
 .game-tooltip-content .stat-tooltip {

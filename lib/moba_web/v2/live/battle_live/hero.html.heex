@@ -44,7 +44,7 @@
           id_suffix={@hero.id}
         />
         <%= if length(@hero.items) > 0 do %>
-          <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
+          <.hero_item_strip items={GH.sorted_item_slots(@hero)} id_prefix="item" id_suffix={@hero.id} />
         <% end %>
       </div>
     </div>

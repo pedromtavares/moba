@@ -208,6 +208,17 @@ defmodule MobaWeb.V2.TrainingLive do
   end
 
   def handle_event(
+        "forge",
+        %{"legendary_code" => legendary, "epic_code" => epic},
+        %{assigns: %{current_hero: hero, current_player: player}} = socket
+      )
+      when not is_nil(hero) and is_binary(legendary) and is_binary(epic) do
+    {:noreply, assign(socket, current_hero: Game.Items.forge_item!(player, hero, legendary, epic))}
+  end
+
+  def handle_event("forge", _, socket), do: {:noreply, socket}
+
+  def handle_event(
         "finish-transmute",
         %{"transmute_code" => transmute_code, "recipe_codes" => recipe_codes},
         %{assigns: %{current_hero: hero}} = socket

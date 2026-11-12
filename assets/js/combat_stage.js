@@ -128,6 +128,8 @@ export default {
         const tile = document.createElement('span');
         tile.className = 'stage-build-resource';
         tile.dataset.buildCode = resource.code;
+        if (resource.cooldownCodes) tile.dataset.cooldownCodes = resource.cooldownCodes.join(',');
+        if (resource.passiveCooldownCodes?.length) tile.dataset.passiveCooldownCodes = resource.passiveCooldownCodes.join(',');
         const image = document.createElement('img');
         image.id = `stage-build-${unit.side}-${kind === 'skills' ? 'skill' : 'item'}-${resource.id}`;
         image.src = resource.image;
@@ -140,6 +142,17 @@ export default {
         cooldown.setAttribute('aria-label', `${resource.name} cooldown in turns`);
         cooldown.hidden = true;
         tile.append(image, cooldown);
+        if (resource.forgedEpic) {
+          tile.classList.add('forged-item-slot');
+          const inset = document.createElement('span');
+          inset.className = 'forged-item-inset';
+          inset.setAttribute('aria-hidden', 'true');
+          const epicImage = document.createElement('img');
+          epicImage.src = resource.forgedEpic;
+          epicImage.alt = '';
+          inset.append(epicImage);
+          tile.append(inset);
+        }
         return tile;
       }));
     });
@@ -246,11 +259,19 @@ export default {
 
   renderBuildCooldowns(side, cooldowns = {}) {
     this.el.querySelectorAll(`[data-build-side="${side}"] [data-build-code]`).forEach(tile => {
-      const remaining = Math.max(0, number(cooldowns[tile.dataset.buildCode]));
-      tile.dataset.cooling = String(remaining > 0);
+      const activeCodes = (tile.dataset.cooldownCodes ?? tile.dataset.buildCode).split(',').filter(Boolean);
+      const passiveCodes = (tile.dataset.passiveCooldownCodes || '').split(',').filter(Boolean);
+      const longest = codes => Math.max(0, ...codes.map(code => number(cooldowns[code])));
+      const active = longest(activeCodes);
+      const passive = active === 0 ? longest(passiveCodes) : 0;
+      tile.dataset.cooling = String(active > 0 || (activeCodes.length === 0 && passive > 0));
       const badge = tile.querySelector('[data-build-cooldown]');
-      badge.hidden = remaining === 0;
-      badge.textContent = remaining;
+      badge.hidden = active === 0 && passive === 0;
+      badge.textContent = active || passive;
+      if (passive) badge.dataset.cooldownKind = 'passive';
+      else delete badge.dataset.cooldownKind;
+      const name = tile.querySelector('img').alt;
+      badge.setAttribute('aria-label', `${name} ${passive ? 'passive ' : ''}cooldown in turns`);
     });
   },
 

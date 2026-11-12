@@ -174,16 +174,24 @@ defmodule Moba.EngineTest do
 
     test "attacker beats boss and ranks up", %{strong_hero: hero} do
       master_league_tier = Moba.master_league_tier()
-      with_boss = Game.generate_boss!(hero)
+
+      with_boss =
+        hero
+        |> Game.update_hero!(%{league_step: 1, league_tier: master_league_tier, pve_tier: 2, pve_total_turns: 0})
+        |> Game.generate_boss!()
 
       battle =
-        Game.start_league_battle!(Game.update_hero!(with_boss, %{league_step: 1, league_tier: master_league_tier}))
+        Game.start_league_battle!(with_boss)
         |> Engine.auto_finish_battle!()
 
       assert battle.winner_id == with_boss.id
 
       with_boss = Game.get_hero!(with_boss.id)
-      assert with_boss.gold == hero.gold + Moba.boss_win_bonus()
+      assert with_boss.finished_at
+      assert with_boss.level == Moba.max_hero_level()
+      assert with_boss.gold == 32_000
+      assert with_boss.total_gold_farm == hero.total_gold_farm + Moba.boss_win_bonus()
+      assert with_boss.total_xp_farm == hero.total_xp_farm + Moba.boss_win_bonus()
       assert with_boss.league_step == 0
       assert with_boss.league_tier == master_league_tier + 1
     end

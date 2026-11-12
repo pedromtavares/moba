@@ -54,6 +54,7 @@ defmodule MobaWeb.V2.Components.GameHelpers do
           | skills: Enum.map(snapshot["skills"], &Ecto.embedded_load(Moba.Game.Schema.Skill, &1, :json)),
             items: Enum.map(snapshot["items"], &Ecto.embedded_load(Moba.Game.Schema.Item, &1, :json))
         }
+        |> Map.put(:forged_pairs, snapshot["forged_items"] || %{})
     end
   end
 
@@ -246,6 +247,21 @@ defmodule MobaWeb.V2.Components.GameHelpers do
   def rarity_color("epic"), do: "purple"
   def rarity_color("legendary"), do: "red"
   def rarity_color(_), do: "gray"
+
+  def item_display_rarity(%{forged_epic: _}), do: "forged-legendary"
+  def item_display_rarity(item), do: item.rarity
+
+  def item_rarity_name(%{forged_epic: _}), do: "Forged Legendary"
+  def item_rarity_name(item), do: String.capitalize(item.rarity || "")
+
+  def item_display_name(%{forged_epic: epic} = item), do: "Forged #{item.name} + #{epic.name}"
+  def item_display_name(item), do: item.name
+
+  def sorted_item_slots(%{items: items} = hero) when is_list(items) do
+    hero |> Moba.Game.Items.item_slots() |> Moba.Game.sort_items()
+  end
+
+  def sorted_item_slots(_hero), do: []
 
   def damage_type_label("normal"), do: "Normal"
   def damage_type_label("magic"), do: "Magic"

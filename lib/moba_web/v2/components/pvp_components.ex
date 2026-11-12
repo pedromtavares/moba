@@ -80,7 +80,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
         <div class="row">
           <div class="col-12">
             <.hero_skill_strip skills={@hero.skills} />
-            <.hero_item_strip items={sort_items(@hero.items)} />
+            <.hero_item_strip items={GH.sorted_item_slots(@hero)} />
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ defmodule MobaWeb.V2.Components.PvpComponents do
       <div class="roster-loadout">
         <.hero_skill_strip skills={@hero.skills} container_class="skills-container" />
         <.hero_item_strip
-          items={sort_items(@hero.items)}
+          items={GH.sorted_item_slots(@hero)}
           container_class="items-container"
           item_container_class="item-container"
         />
@@ -224,7 +224,4 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   defp hero_stats_title(hero) do
     "HP: #{hero.total_hp} | MP: #{hero.total_mp} | ATK: #{hero.atk} | POW: #{hero.power} | ARM: #{hero.armor} | SPD: #{hero.speed}"
   end
-
-  defp sort_items(items) when is_list(items), do: Moba.Game.sort_items(items)
-  defp sort_items(_), do: []
 end

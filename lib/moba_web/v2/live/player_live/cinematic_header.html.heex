@@ -77,7 +77,7 @@
         id_suffix={@featured.id}
       />
       <.hero_item_strip
-        items={Game.sort_items(@featured.items)}
+        items={GH.sorted_item_slots(@featured)}
         container_class="items-container"
         item_container_class="item-container"
         id_prefix="item"

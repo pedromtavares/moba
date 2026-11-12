@@ -41,7 +41,7 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
           <%= if hero = Enum.at(@picked_heroes, position - 1) do %>
             <div id={"hero-#{hero.id}"}>
               <.roster_hero
-                hero={hero}
+                hero={GH.match_hero_loadout(hero, @battles)}
                 stats={GH.match_hero_stats(hero, @match.player, @battles)}
                 position={position}
                 defeated={eliminated?(hero, @match.player, revealed)}
@@ -223,7 +223,7 @@ last_reveal = if @tick > 0 && @tick <= length(@battles), do: List.last(revealed)
       <div class="squad-scroll lineup-list" id="opponent-heroes-container">
         <div :for={{hero, index} <- Enum.with_index(@match.opponent_picks, 1)} id={"opponent-hero-#{hero.id}"}>
           <.roster_hero
-            hero={hero}
+            hero={GH.match_hero_loadout(hero, @battles)}
             stats={GH.match_hero_stats(hero, @match.opponent, @battles)}
             position={index}
             defeated={eliminated?(hero, @match.opponent, revealed)}

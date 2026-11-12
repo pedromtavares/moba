@@ -13,7 +13,7 @@ defmodule MobaWeb.V2.HeroLive do
   def mount(_params, _session, socket) do
     socket =
       attach_hook(socket_init(socket), :authorize_hero_changes, :handle_event, fn event, _, socket ->
-        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit reorder-items open-shop-item buy sell finish-transmute) do
+        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit reorder-items open-shop-item buy sell finish-transmute forge) do
           hero = Game.get_hero!(socket.assigns.hero.id)
 
           if hero.player_id == socket.assigns.current_player.id do
@@ -160,6 +160,14 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply, update_hero_assigns(socket, updated_hero)}
   end
 
+  def handle_event("forge", %{"legendary_code" => legendary, "epic_code" => epic}, socket)
+      when is_binary(legendary) and is_binary(epic) do
+    %{hero: hero, current_player: player} = socket.assigns
+    {:noreply, update_hero_assigns(socket, Game.Items.forge_item!(player, hero, legendary, epic))}
+  end
+
+  def handle_event("forge", _, socket), do: {:noreply, socket}
+
   def handle_event(
         "finish-transmute",
         %{"transmute_code" => transmute_code, "recipe_codes" => recipe_codes},
@@ -172,16 +180,17 @@ defmodule MobaWeb.V2.HeroLive do
     {:noreply, update_hero_assigns(socket, updated_hero)}
   end
 
-  def handle_info({"hero", %{id: id}}, socket) do
-    {:noreply, socket |> update_hero_assigns(Game.get_hero!(id)) |> maybe_reset_shop()}
+  def handle_info({"hero", %{id: id}}, %{assigns: %{hero: %{id: id}}} = socket) do
+    {:noreply, update_hero_assigns(socket, Game.get_hero!(id))}
   end
+
+  def handle_info({"hero", _}, socket), do: {:noreply, socket}
 
   def handle_info({"ranking", _}, %{assigns: %{hero: %{id: id}}} = socket) do
     {:noreply,
      socket
      |> assign(ranking: Moba.pve_ranking())
-     |> update_hero_assigns(Game.get_hero!(id))
-     |> maybe_reset_shop()}
+     |> update_hero_assigns(Game.get_hero!(id))}
   end
 
   defp owner_assigns(
@@ -341,13 +350,6 @@ defmodule MobaWeb.V2.HeroLive do
       description: "Finish a Grandmaster run with 30K XP farm and 30K gold farm."
     }
   end
-
-  defp maybe_reset_shop(%{assigns: %{hero: %{id: shown_id}, current_hero: %{id: current_id}}} = socket)
-       when shown_id != current_id do
-    assign(socket, show_shop: false)
-  end
-
-  defp maybe_reset_shop(socket), do: socket
 
   defp params_to_order(nil), do: []
 

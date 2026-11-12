@@ -5,6 +5,7 @@ defmodule Moba.Engine.Battles do
 
   alias Moba.{Repo, Engine, Game}
   alias Engine.Schema.{Turn, Battle}
+  alias Engine.Core.Turns
   alias Game.Query.HeroQuery
 
   import Ecto.Query
@@ -45,7 +46,7 @@ defmodule Moba.Engine.Battles do
         where: b.type == ^type
 
     query
-    |> load()
+    |> preload(attacker: :avatar, defender: :avatar)
     |> Repo.all()
   end
 
@@ -144,7 +145,7 @@ defmodule Moba.Engine.Battles do
   defp load_resources(%{turns: turns} = battle) do
     turns =
       Enum.map(turns, fn turn ->
-        %{turn | skill: Moba.load_resource(turn.skill_code), item: Moba.load_resource(turn.item_code)}
+        %{turn | skill: Moba.load_resource(turn.skill_code), item: Turns.logged_item(turn, battle.loadouts)}
       end)
 
     battle = Map.put(battle, :turns, turns)

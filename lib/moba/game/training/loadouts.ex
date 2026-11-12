@@ -3,7 +3,7 @@ defmodule Moba.Game.Training.Loadouts do
   alias Moba.{Game, Repo}
   alias Moba.Game.Schema.{Hero, Player}
   @rares ~w(vanguard maelstrom shadow_blade pipe_of_insight arcane_boots soul_booster)
-  @max_level 30
+  @max_level Moba.max_hero_level()
 
   def catalog do
     avatars =

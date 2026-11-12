@@ -1,76 +1,297 @@
-.game-page #battle-history {
-  .history-board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 36px; margin: 24px 0 0; }
-  .history-section { min-width: 0; }
-  .history-section-heading { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; padding: 0 0 18px; }
-  .history-section-heading h2 { margin: 0; color: #e8dfce; font-size: 28px; font-weight: 800; }
-  .history-summary { display: flex; gap: 24px; margin: 0; font-variant-numeric: tabular-nums; }
-  .history-summary > div { display: flex; flex-direction: column-reverse; }
-  .history-summary > div + div { padding-left: 24px; border-left: 1px solid var(--base-line); }
-  .history-summary dt { margin-top: 3px; color: #a7afba; font-size: 14px; font-weight: 400; }
-  .history-summary dd { margin: 0; color: #e9e3d8; font-size: 32px; font-weight: 800; line-height: 1.2; }
-  .history-summary dd small { margin-left: 2px; font-size: 21px; }
-  .history-wins { color: #89c8ac; }
-  .history-ratio { padding: 0 8px; color: #727d8d; font-weight: 400; }
-  .history-losses { color: #d18e98; }
+html:has(#battle-history), body:has(#battle-history) { overflow: hidden; }
 
-  .battle-history-table { width: 100%; margin: 0; table-layout: fixed; }
-  .battle-history-table thead th { padding: 12px 8px; border-top: 1px solid var(--base-line); border-bottom: 1px solid var(--base-line); background: transparent; color: #a7afba; font-size: 14px; font-weight: 600; text-align: left; }
-  .battle-history-table thead th:first-child { width: 46%; padding-left: 0; }
-  .battle-history-table thead th:nth-child(2) { width: 14%; }
-  .battle-history-table thead th:nth-child(3) { width: 30%; }
-  .battle-history-table thead th:last-child { width: 10%; padding-right: 0; }
-  .battle-row { cursor: default; transition: background 180ms ease; }
-  .battle-row:hover { background: #d6b47c08; }
-  .battle-history-table td { padding: 16px 8px; border-color: #baa98a20; vertical-align: middle; text-align: left; }
-  .battle-history-table td:first-child { padding-left: 0; }
-  .battle-history-table td:last-child { padding-right: 0; }
-  .history-opponent { display: grid; grid-template-columns: 60px minmax(0, 1fr); align-items: center; gap: 14px; color: #ece7df; }
-  .history-opponent img { width: 60px; height: 60px; border: 1px solid #baa98a40; border-radius: 5px; object-fit: cover; }
-  .history-opponent strong { display: block; font-size: 22px; font-weight: 800; line-height: 1.25; overflow-wrap: anywhere; }
-  .history-opponent small { display: block; margin-top: 4px; color: #c4c8ce; font-size: 16px; line-height: 1.3; }
-  .history-time { display: block; margin-top: 4px; color: #98a3b2; font-size: 14px; line-height: 1.3; }
-  .history-opponent:hover { color: #f0d7aa; }
-  .history-outcome { display: inline-block; font-size: 19px; font-weight: 900; line-height: 1.3; }
-  .history-outcome[data-result="WIN"] { color: #89c8ac; }
-  .history-outcome[data-result="LOSS"] { color: #e199a3; }
-  .history-outcome[data-result="TIE"] { color: #e1c28a; }
-  .history-difficulty { display: block; margin-top: 5px; color: #aeb6c2; font-size: 13px; }
-  .difficulty-weak { color: #83bca7; }
-  .difficulty-strong { color: #d99aa7; }
-  .history-rewards { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 19px; font-weight: 800; font-variant-numeric: tabular-nums; }
-  .history-rewards > span { white-space: nowrap; }
-  .history-xp { color: #91c7e6; }
-  .history-gold, .history-promotion { color: #e9c58b; }
-  .history-no-reward { color: #7b8798; font-size: 18px; }
-  .history-step, .history-promotion { display: flex; align-items: center; gap: 7px; margin-top: 5px; font-size: 16px; font-weight: 600; line-height: 1.4; }
-  .history-step-win { color: #89c8ac; }
-  .history-step-loss { color: #e199a3; }
-  .history-promotion img { width: 30px; height: 34px; object-fit: contain; }
-  .battle-history-table .history-open { text-align: right; }
-  .history-replay { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; border: 1px solid #baa98a55; border-radius: 5px; background: #c6a7790d; color: #e4c28b; font-size: 16px; transition: background 180ms ease, border-color 180ms ease; }
-  .history-replay:hover { color: #fff0cf; border-color: #d6b47c99; background: #c6a77926; }
-  .history-replay:focus-visible, .history-opponent:focus-visible { outline: 2px solid #d6b47c; outline-offset: 3px; }
-  .battle-history-table .history-empty { padding: 40px 16px; color: #b8b3aa; font-size: 18px; text-align: center; }
-}
+body:has(#battle-history) {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
 
-@media (max-width: 1199px) {
-  .game-page #battle-history .history-board { grid-template-columns: minmax(0, 1fr); gap: 32px; }
-}
-@media (max-width: 575px) {
-  .game-page #battle-history {
-    .history-section-heading { gap: 14px; }
-    .history-section-heading h2 { width: 100%; font-size: 26px; }
-    .history-summary { gap: 20px; }
-    .history-summary > div + div { padding-left: 20px; }
-    .battle-history-table thead { display: none; }
-    .battle-history-table .battle-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px 16px; padding: 18px 0; border-top: 1px solid #baa98a30; }
-    .battle-history-table .battle-row td { padding: 0; border: 0; }
-    .history-opponent-cell { grid-column: 1; grid-row: 1; }
-    .history-result { grid-column: 2; grid-row: 1; align-self: center; text-align: right !important; }
-    .history-reward-cell { grid-column: 1; grid-row: 2; align-self: center; padding-left: 74px !important; }
-    .history-open { grid-column: 2; grid-row: 2; }
+  > #topnav { flex-shrink: 0; }
+  #main-wrapper { flex: 1; min-height: 0; }
+  #main-wrapper > .container-fluid, [data-phx-main], #game-page, #game-page > .row, #game-content {
+    height: 100%;
+    min-height: 0;
   }
 }
+
+.game-page #battle-history {
+  --history-inset: clamp(8px, 1.4vw, 20px);
+  --history-line: #cfb38142;
+  --history-portrait: clamp(50px, 7.5dvh, 74px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(8px, 1.8dvh, 18px);
+  height: 100%;
+  padding: clamp(6px, 1.5dvh, 14px) 0;
+  overflow: clip;
+
+  .history-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    min-height: clamp(116px, 19dvh, 200px);
+    padding: clamp(14px, 2.8dvh, 30px) clamp(16px, 3vw, 42px);
+    border: 1px solid #c7b17b55;
+    border-radius: 14px;
+    background:
+      linear-gradient(90deg, #08111ef8 9%, #0b1423ba 38%, #0b142334 75%, #0b142370),
+      linear-gradient(0deg, #07111ede, transparent 73%),
+      var(--history-scene) center 45% / cover;
+    box-shadow: inset 0 1px #f4dbab26, 0 12px 40px #0003;
+  }
+  .history-heading-identity { display: flex; align-items: center; gap: clamp(10px, 2vw, 28px); min-width: 0; }
+  .history-heading-identity > div:last-child { min-width: 0; }
+  .history-heading .league-logo {
+    display: block;
+    width: clamp(40px, 6vw, 86px);
+    height: auto;
+    margin: 0;
+    filter: drop-shadow(0 5px 18px #d3a56a3d);
+  }
+  .history-heading h1 {
+    margin: 0;
+    color: #f5edda;
+    font: 900 clamp(32px, 4.75vw, 70px)/1 'Nunito', sans-serif;
+    letter-spacing: -.035em;
+    text-shadow: 0 3px 24px #0009;
+  }
+  .history-heading p {
+    margin: 8px 0 0;
+    overflow: hidden;
+    color: #e2c995;
+    font-size: clamp(14px, 1.4vw, 20px);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .history-return {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 15px;
+    border: 1px solid #c7b17b66;
+    border-radius: 7px;
+    background: #0a1421d9;
+    color: #efd3a2;
+    font: 900 clamp(13px, 1.2vw, 17px)/1.2 'Nunito', sans-serif;
+  }
+  .history-return:hover, .history-return:focus-visible { color: #fff0cf; border-color: #dfc18b; }
+
+  .history-board {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid #bda77b42;
+    border-radius: 12px;
+    background: radial-gradient(ellipse at 10% 0, #25394a9c, transparent 66%), linear-gradient(145deg, #152130, #0a111c 78%);
+    box-shadow: inset 0 1px #e2d1ab15;
+  }
+  .history-command {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 20px;
+    margin-inline: var(--history-inset);
+    padding-block: clamp(8px, 1.5dvh, 16px);
+  }
+  .listing-mode-switch { flex: 1 1 490px; max-width: 540px; min-width: 0; }
+  .listing-mode-switch button { min-height: 46px; padding: 7px 10px; font-size: clamp(13px, 1.45vw, 19px); }
+  .listing-mode-switch .ui-icon { font-size: 1.2em; }
+  .history-summary { display: flex; flex: 0 0 auto; align-items: stretch; margin: 0; }
+  .history-summary > div { display: grid; gap: 3px; align-content: center; padding-inline: clamp(12px, 2vw, 30px); border-inline-start: 1px solid var(--history-line); }
+  .history-summary dt { color: #b2bfcd; font-size: clamp(12px, 1.1vw, 15px); font-weight: 800; }
+  .history-summary dd {
+    margin: 0;
+    color: #f0d6a4;
+    font: 900 clamp(22px, 2.4vw, 34px)/1 'Nunito', sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .history-wins { color: #a3d9bd; }
+  .history-losses { color: #efa6ab; }
+  .history-record-divider { padding-inline: .22em; color: #7f8f9f; font-weight: 700; }
+
+  .history-section { display: flex; flex: 1; flex-direction: column; min-height: 0; min-width: 0; }
+  .history-section[hidden] { display: none; }
+  .listing-pager-viewport { max-height: none; }
+  .history-list { display: flex; flex-direction: column; gap: clamp(5px, 1dvh, 10px); margin: 0; padding: 0 var(--history-inset); list-style: none; }
+  .listing-pager-viewport[data-full-page] .history-list { height: 100%; }
+  .listing-pager-viewport[data-full-page] .battle-row { flex: 1 0 auto; }
+  .listing-pager-viewport:has(.history-empty) .history-list { min-height: 100%; justify-content: center; }
+
+  .battle-row {
+    --history-outcome-color: #e5c48b;
+    --history-outcome-glow: #d7ab6425;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(104px, .31fr) minmax(180px, .48fr) auto;
+    align-items: center;
+    gap: clamp(7px, 1.4vw, 21px);
+    min-height: clamp(74px, 10dvh, 104px);
+    padding-inline-end: clamp(8px, 1.2vw, 18px);
+    overflow: hidden;
+    border: 1px solid #9facbd35;
+    border-inline-start: 3px solid var(--history-outcome-color);
+    border-radius: 8px;
+    background: linear-gradient(105deg, #182635, #101a28 75%);
+    transition: border-color 150ms, background 150ms;
+  }
+  .battle-row[data-result='WIN'] { --history-outcome-color: #9bd6b8; --history-outcome-glow: #69af8c2b; }
+  .battle-row[data-result='LOSS'] { --history-outcome-color: #ef9fa9; --history-outcome-glow: #c9677728; }
+  .battle-row:hover, .battle-row:focus-within { border-color: var(--history-outcome-color); }
+  .history-opponent {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-self: stretch;
+    align-items: center;
+    gap: clamp(8px, 1.25vw, 18px);
+    min-width: 0;
+    padding: 6px clamp(8px, 1.2vw, 18px);
+    color: #f4eddf;
+    text-shadow: 0 1px 6px #03080d;
+  }
+  .history-opponent::before {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, #142130b3, #16233373 68%),
+      var(--history-opponent-art, none) center 36% / cover,
+      var(--history-outcome-glow);
+    mask-image: linear-gradient(90deg, #000 56%, transparent);
+    content: "";
+  }
+  .history-opponent img, .history-opponent-emblem {
+    flex: none;
+    width: var(--history-portrait);
+    height: var(--history-portrait);
+    object-fit: cover;
+    border: 1px solid #baa98a65;
+    border-radius: 6px;
+    box-shadow: 0 5px 14px #050b15a6;
+  }
+  .history-opponent-emblem { display: grid; place-items: center; background: #132435; color: #d8bc85; font-size: 24px; }
+  .history-opponent-copy { display: block; min-width: 0; }
+  .history-opponent strong, .history-opponent small, .history-time { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .history-opponent strong { font: 900 clamp(18px, 1.8vw, 26px)/1.15 'Nunito', sans-serif; }
+  .history-opponent small, .history-time, .history-difficulty { color: #bcc8d6; font-size: clamp(12px, 1.12vw, 15px); line-height: 1.3; }
+  .history-time { color: #a4b5c8; }
+  .history-opponent:hover { color: #fff1cd; }
+  .history-outcome { display: block; color: var(--history-outcome-color); font: 900 clamp(16px, 1.65vw, 24px)/1.1 'Nunito', sans-serif; }
+  .history-outcome[data-result='IN PROGRESS'] { font-size: clamp(12px, 1.2vw, 17px); }
+  .history-difficulty { display: block; margin-top: 3px; }
+  .history-rewards { display: flex; flex-wrap: wrap; align-items: center; gap: 3px clamp(7px, 1.2vw, 17px); font-variant-numeric: tabular-nums; }
+  .history-rewards > span { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; }
+  .history-rewards strong { font: 900 clamp(17px, 1.8vw, 26px)/1.15 'Nunito', sans-serif; }
+  .history-rewards small { font-size: .6em; font-weight: 800; }
+  .history-xp { color: #9cd8f6; }
+  .history-gold, .history-promotion { color: #f1ce90; }
+  .history-step-win { color: #a3d9bd; }
+  .history-step-loss { color: #efa6ab; }
+  .history-no-reward { color: #8f9cad; }
+  .history-step, .history-promotion { display: block; margin-top: 3px; font-size: clamp(13px, 1.15vw, 16px); font-weight: 800; }
+  .history-replay {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 90px;
+    min-height: 42px;
+    padding: 6px 12px;
+    border: 1px solid #baa98a66;
+    border-radius: 6px;
+    background: linear-gradient(145deg, #c6a77929, #101b29);
+    color: #efd1a0;
+    font-size: clamp(13px, 1.18vw, 16px);
+    font-weight: 900;
+  }
+  .history-replay:hover { color: #fff0cf; border-color: #d6b47c99; background: #c6a77926; }
+  .history-replay:focus-visible, .history-opponent:focus-visible { outline: 2px solid #d6b47c; outline-offset: -2px; }
+  .history-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: clamp(74px, 20dvh, 180px);
+    color: #d0d8e4;
+    font-size: clamp(18px, 1.7vw, 24px);
+  }
+  .history-empty .ui-icon { color: #c6ab78; font-size: clamp(20px, 3dvh, 32px); }
+
+  .listing-pager-footer { margin-top: 8px; }
+  .listing-pager-controls { grid-template-columns: 44px minmax(56px, max-content) 44px; }
+  .listing-pager-controls button { width: 44px; height: 36px; font-size: 22px; }
+  .listing-page-count { font-size: 16px; }
+}
+
+@media (max-width: 680px) {
+  .game-page #battle-history {
+    --history-portrait: clamp(38px, 6dvh, 55px);
+    .history-heading { min-height: 92px; gap: 8px; padding: 11px; }
+    .history-heading h1 { font-size: clamp(25px, 7vw, 40px); }
+    .history-heading p { margin-top: 5px; font-size: 13px; }
+    .history-return { max-width: 113px; padding: 7px; font-size: 12px; }
+    .history-command { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; padding-block: 6px; }
+    .listing-mode-switch { width: 100%; max-width: none; }
+    .listing-mode-switch button { min-height: 34px; gap: 4px; padding: 4px; white-space: normal; }
+    .history-summary { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .history-summary > div { display: flex; align-items: baseline; justify-content: space-between; gap: 4px; padding-inline: 7px; }
+    .history-summary > div:first-child { border-inline-start: 0; }
+    .history-summary dd { font-size: 20px; }
+    .battle-row {
+      grid-template-columns: minmax(0, 1fr) minmax(54px, auto) 34px;
+      grid-template-rows: minmax(0, 1fr) auto;
+      gap: 2px 6px;
+      min-height: 76px;
+      padding: 0 6px 5px 0;
+    }
+    .history-opponent { grid-area: 1 / 1; gap: 6px; padding: 4px 0 1px 5px; }
+    .history-opponent strong { font-size: clamp(15px, 3.9vw, 19px); }
+    .history-result { grid-area: 1 / 2; text-align: right; }
+    .history-reward-cell { grid-area: 2 / 1 / auto / span 2; padding-inline-start: calc(var(--history-portrait) + 11px); }
+    .history-replay { grid-area: 1 / 3 / span 2; min-width: 34px; min-height: 34px; padding: 0; }
+    .history-replay > span { display: none; }
+    .history-rewards strong { font-size: 17px; }
+  }
+}
+
+@media (max-height: 520px) {
+  .game-page #battle-history {
+    --history-portrait: 38px;
+    gap: 5px;
+    padding-block: 4px;
+    .history-heading { min-height: 0; padding-block: 6px; }
+    .history-heading h1 { font-size: 24px; }
+    .history-heading .league-logo { width: 34px; }
+    .history-heading p { margin-top: 2px; font-size: 13px; }
+    .history-command { padding-block: 4px; gap: 4px 8px; }
+    .listing-mode-switch button { min-height: 27px; padding-block: 3px; font-size: 13px; }
+    .history-summary > div { gap: 2px; }
+    .history-summary dd { font-size: 20px; }
+    .battle-row { min-height: 56px; }
+    .history-opponent { padding-block: 3px; }
+    .history-opponent strong { font-size: 17px; }
+    .history-outcome { font-size: 16px; }
+    .history-rewards strong { font-size: 17px; }
+    .history-replay { min-height: 32px; }
+    .listing-pager-footer { margin-top: 4px; padding-block: 3px; }
+    .listing-pager-controls button { height: 29px; }
+  }
+}
+
+@media (max-width: 360px) {
+  .game-page #battle-history {
+    .history-return { max-width: 98px; }
+    .listing-mode-switch .ui-icon { display: none; }
+    .history-summary > div { padding-inline: 4px; }
+    .history-summary dt { font-size: 11px; }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .game-page #battle-history :is(.battle-row, .history-replay) { transition: none; }
+  .game-page #battle-history .battle-row { transition: none; }
 }

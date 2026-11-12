@@ -27,7 +27,7 @@ fallen? = eliminated?(hero, @player, @battles) %>
   </div>
   <div class="arena-draft-build">
     <.hero_skill_strip skills={hero.skills} container_class="skills-container" /><.hero_item_strip
-      items={hero.items}
+      items={Game.Items.item_slots(hero)}
       container_class="items-container"
       item_container_class="item-container"
     />

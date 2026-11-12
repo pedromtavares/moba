@@ -36,7 +36,7 @@ log_modal_open? = log_modal? && @show_combat_log %>
         <div class="col-12 col-md-5 battle-contender">
           <.hero
             preview={@preview}
-            hero={@battle.attacker}
+            hero={GH.match_hero_loadout(@battle.attacker, [@battle])}
             last_hero={last_hero_for(@battle.attacker, @last_turn)}
             battle={@battle}
             snapshot={@snapshot}
@@ -55,7 +55,7 @@ log_modal_open? = log_modal? && @show_combat_log %>
         <div class="col-12 col-md-5 battle-contender">
           <.hero
             preview={@preview}
-            hero={@battle.defender}
+            hero={GH.match_hero_loadout(@battle.defender, [@battle])}
             last_hero={last_hero_for(@battle.defender, @last_turn)}
             battle={@battle}
             snapshot={@battle.defender_snapshot}

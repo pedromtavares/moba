@@ -1,7 +1,7 @@
 defmodule MobaWeb.V2.Components.HeroBarComponents do
   use Phoenix.Component
 
-  import MobaWeb.V2.Components.GameComponents, only: [hero_stat_group: 1]
+  import MobaWeb.V2.Components.GameComponents, only: [hero_stat_group: 1, forged_inset: 1]
 
   alias Moba.Game
   alias MobaWeb.V2.Components.GameHelpers, as: GH
@@ -18,6 +18,7 @@ defmodule MobaWeb.V2.Components.HeroBarComponents do
   attr :preview, :boolean, default: false
   attr :event_target, :any, default: nil
   attr :reorderable, :boolean, default: false
+  attr :forge_enabled, :boolean, default: false
   attr :id_prefix, :string, default: ""
   attr :hero_id, :integer, default: nil
   attr :team_roster, :boolean, default: false

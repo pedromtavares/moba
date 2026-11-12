@@ -19,7 +19,7 @@ function environment(options = {}) {
   vm.createContext(context); vm.runInContext(source, context);
   const hook = {...context.module.exports,
     el: {getClientRects: () => state.visible ? [{}] : [], getAttribute: () => options.component ? '7' : null,
-      querySelector: () => ({dataset: {recipeRarity: state.recipe}}),
+      querySelector: () => ({dataset: {recipeRarity: state.recipe, forging: state.forging}}),
       querySelectorAll: selector => (selector === '.shop-shelf' ? state.rows : state.actions) || []},
     pushEvent: () => { state.closed++; }, pushEventTo: (target, event, params, reply) => {
       if (event === 'close-shop') { state.closed++; state.component = true; }
@@ -44,6 +44,40 @@ test('F closes only the visible shop, without capturing typing, modifiers or hel
   assert.equal(state.component, true);
   for (const extra of [{repeat: true}, {ctrlKey: true}, {altKey: true}, {target: {closest: () => ({})}}]) state.press('f', extra);
   assert.equal(state.closed, 1);
+});
+
+test('Forge arrows browse the visual grid and Space picks an Epic before confirming', () => {
+  const {state} = environment();
+  const button = (id, offsetTop, action, disabled = false) => ({
+    id, offsetTop, disabled, clicks: 0, dataset: {},
+    classList: {contains: name => name === (action ? 'shop-primary' : 'shop-tile')},
+    getClientRects: () => [{}],
+    getAttribute: name => name === 'phx-click' && !action ? 'choose-forge-epic' : null,
+    focus() { state.focused = this; },
+    scrollIntoView() { this.scrolled = true; },
+    click() { this.clicks++; }
+  });
+  const first = button('first', 0);
+  const unavailable = button('unavailable', 0, false, true);
+  const last = button('last', 80);
+  const confirm = button('finish-forge', 0, true);
+  const target = button => ({closest: selector => selector.startsWith('input') ? null : button});
+  state.forging = 'true';
+  state.rows = [{querySelectorAll: () => [first, unavailable, last]}];
+  state.actions = [confirm];
+  state.show(true);
+
+  state.press('ArrowDown', {target: target(first)});
+  assert.equal(state.focused, last);
+  assert.equal(last.scrolled, true);
+  assert.equal(state.inspected.length, 0);
+  state.press(' ', {target: target(last)});
+  assert.equal(last.clicks, 1);
+  assert.equal(confirm.clicks, 0);
+  state.press('ArrowDown', {target: target(last)});
+  assert.equal(state.focused, confirm);
+  state.press(' ', {target: target(confirm)});
+  assert.equal(confirm.clicks, 1);
 });
 
 test('arrows inspect items immediately; Space activates actions and skips unavailable ingredients', () => {

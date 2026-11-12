@@ -3,9 +3,12 @@ defmodule Moba.Game.Training do
   Module focused on cross-resource orchestration and logic related to hero training (single-player)
   """
   alias Moba.{Engine, Game, Repo}
-  alias Game.{Avatars, Heroes, Leagues, Players, Quests, Skills, Targets}
-  alias Game.Schema.Player
+  alias Game.{Avatars, Heroes, Items, Leagues, Players, Quests, Skills, Targets}
+  alias Game.Query.HeroQuery
+  alias Game.Schema.{Hero, Player}
   import Ecto.Query, only: [from: 2]
+
+  @grandmaster_gold_budget 32_000
 
   @doc "Validates an untrusted creation selection against the player's unlocked, level-one resources."
   def creation_loadout(player, avatar_id, skill_ids)
@@ -230,17 +233,54 @@ defmodule Moba.Game.Training do
   end
 
   def finish_pve!(%{finished_at: nil} = hero) do
-    hero = update_hero!(hero, %{finished_at: Timex.now()})
+    {:ok, {hero, newly_finished?}} =
+      Repo.transaction(fn ->
+        current = Repo.one!(from h in HeroQuery.load(), where: h.id == ^hero.id, lock: "FOR UPDATE")
 
-    Quests.track_pve_progression!(hero)
-    Players.add_total_farm!(hero)
-    refresh_hero_collection!(hero.player_id)
-    Moba.rank_finished_heroes()
+        if current.finished_at do
+          {current, false}
+        else
+          finished =
+            current
+            |> Hero.changeset(%{finished_at: Timex.now()})
+            |> grant_grandmaster_power()
+            |> Repo.update!()
+
+          {finished, true}
+        end
+      end)
+
+    if newly_finished? do
+      broadcast_to_hero(hero.id)
+      Quests.track_pve_progression!(hero)
+      Players.add_total_farm!(hero)
+      refresh_hero_collection!(hero.player_id)
+      Moba.rank_finished_heroes()
+    end
 
     hero
   end
 
   def finish_pve!(hero), do: hero
+
+  defp grant_grandmaster_power(%{data: hero} = changeset) do
+    if hero.league_tier == Moba.max_league_tier() && is_nil(hero.training_team_id) &&
+         is_nil(hero.bot_difficulty) && hero.player_id do
+      equipment_value =
+        hero
+        |> Items.item_slots()
+        |> Enum.reduce(0, fn item, value -> value + Items.item_sell_price(hero, item) end)
+
+      changeset =
+        Ecto.Changeset.put_change(changeset, :gold, max(hero.gold, @grandmaster_gold_budget - equipment_value))
+
+      Enum.reduce(hero.level..(Moba.max_hero_level() - 1)//1, changeset, fn level, acc ->
+        Hero.level_up(acc, level, 0)
+      end)
+    else
+      changeset
+    end
+  end
 
   def generate_boss!(hero) do
     boss =

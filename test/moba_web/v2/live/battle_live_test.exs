@@ -91,6 +91,46 @@ defmodule MobaWeb.V2.BattleLiveTest do
     assert has_element?(view, ".item-img.empty-item")
   end
 
+  test "a mixed forged slot displays the passive countdown until its active starts cooling", %{conn: conn} do
+    legendary = Game.get_item_by_code!("linkens_sphere")
+    epic = Game.get_item_by_code!("dagon")
+    silence = Game.get_item_by_code!("orchid_malevolence")
+
+    defender =
+      create_combat_hero(%{gold: 8_000, finished_at: Timex.now(), total_hp: 1_000})
+      |> Game.buy_item!(legendary)
+
+    defender = Game.Items.forge_item!(defender.player, defender, legendary.code, epic.code)
+    opponent = create_combat_hero(%{gold: 4_800, total_hp: 1_000}) |> Game.buy_item!(silence)
+
+    battle = create_basic_battle(opponent, defender)
+    battle = Engine.continue_battle!(battle, %{skill: nil, item: silence})
+    conn = log_in_player(conn, player_id: defender.player_id)
+    path = "/battles/#{battle.id}"
+    {:ok, view, _} = live(conn, path)
+
+    slot = "[data-build-side=right] [data-build-code=linkens_sphere]"
+    assert has_element?(view, "#{slot}[data-cooling=false] [data-cooldown-kind=passive]", "#{legendary.cooldown}")
+    assert has_element?(view, "#attacker-item-#{legendary.id}.can-use")
+
+    render_click(view, "next-turn", %{"hero_id" => "#{defender.id}", "skill_id" => "", "item_id" => "#{legendary.id}"})
+
+    [data] =
+      view
+      |> render()
+      |> LazyHTML.from_fragment()
+      |> LazyHTML.query("#combat-stage")
+      |> LazyHTML.attribute("data-scene")
+
+    fighter = Enum.find(Jason.decode!(data)["units"], &(&1["side"] == "right"))
+    assert fighter["cooldowns"][epic.code] == epic.cooldown
+    assert fighter["cooldowns"][legendary.code] > 0
+
+    {:ok, view, _} = live(conn, path)
+    assert has_element?(view, "#{slot}[data-cooling=true] [data-build-cooldown]:not([hidden])", "#{epic.cooldown}")
+    refute has_element?(view, "#{slot} [data-cooldown-kind=passive]")
+  end
+
   test "next turn event", %{conn: conn, battle: battle, attacker: attacker} do
     skill = base_skill()
     {:ok, view, _html} = live(conn, "/battles/#{battle.id}")

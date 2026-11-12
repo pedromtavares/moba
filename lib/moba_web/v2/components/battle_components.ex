@@ -118,7 +118,7 @@ defmodule MobaWeb.V2.Components.BattleComponents do
     <%= cond do %>
       <% insufficient_mp?(@resource, @battler) -> %>
         <span class="badge badge-pill badge-primary cooldown">
-          <i class="ui-icon ui-bolt"></i> {@resource.mp_cost}
+          <i class="ui-icon ui-bolt"></i> {energy_cost(@resource)}
         </span>
       <% cooldown = resource_cooldown(@resource, @battler) -> %>
         <span class="badge badge-pill badge-warning cooldown">
@@ -408,16 +408,27 @@ defmodule MobaWeb.V2.Components.BattleComponents do
   defp default_title(resource), do: resource.name
 
   defp insufficient_mp?(resource, battler) do
-    resource.mp_cost && battler.current_mp < resource.mp_cost
+    cost = energy_cost(resource)
+    cost && battler.current_mp < cost
+  end
+
+  defp energy_cost(%{forged_epic: _} = item), do: get_in(Game.Items.activation(item), [:energy])
+  defp energy_cost(resource), do: resource.mp_cost
+
+  defp resource_cooldown(%{forged_epic: _} = item, battler) do
+    if activation = Game.Items.activation(item) do
+      display_resource_cooldown(battler.cooldowns[activation.cooldown_code])
+    end
   end
 
   defp resource_cooldown(%Game.Schema.Item{active: false}, _), do: nil
   defp resource_cooldown(%Game.Schema.Skill{passive: true}, _), do: nil
 
   defp resource_cooldown(resource, battler) do
-    cooldown = battler.cooldowns[resource.code]
-    display_cooldown(cooldown && cooldown + 1)
+    display_resource_cooldown(battler.cooldowns[resource.code])
   end
+
+  defp display_resource_cooldown(cooldown), do: display_cooldown(cooldown && cooldown + 1)
 
   defp display_cooldown(result) when result < 0, do: 0
   defp display_cooldown(result), do: result

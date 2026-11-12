@@ -10,6 +10,7 @@ defmodule Moba.Game.Schema.HeroItem do
   schema "heroes_items" do
     belongs_to :hero, Hero
     belongs_to :item, Item
+    belongs_to :forged_into, __MODULE__
 
     timestamps()
   end

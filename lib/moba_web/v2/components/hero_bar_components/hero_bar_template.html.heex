@@ -222,19 +222,27 @@
                 role="group"
                 aria-label="Hero inventory"
               >
-                <%= for item <- sorted_items(@current_hero) do %>
+                <% slots = sorted_items(@current_hero)
+                priorities = Game.Items.item_priority_codes(@current_hero) %>
+                <%= for item <- slots do %>
                   <div
-                    class={"item-container #{if !item.active, do: "passive", else: "active"}"}
+                    class={[
+                      "item-container",
+                      if(Game.Items.slot_active?(item), do: "active", else: "passive"),
+                      Map.has_key?(item, :forged_epic) && "forged-item-slot"
+                    ]}
                     id={GH.dom_id(@id_prefix, "inventory-#{item.id}")}
                     data-item-code={item.code}
-                    data-item-name={item.name}
-                    data-rarity={item.rarity}
+                    data-item-name={GH.item_display_name(item)}
+                    data-rarity={GH.item_display_rarity(item)}
                     phx-click={!@editing && "open-shop-item"}
                     phx-value-code={item.code}
                     {target_attrs(@event_target, @hero_id)}
                     role={@reorderable && "button"}
                     tabindex={if @reorderable, do: "0"}
-                    aria-label={if @reorderable, do: "#{item.name}. Drag to reorder, or use Alt and arrow keys."}
+                    aria-label={
+                      if @reorderable, do: "#{GH.item_display_name(item)}. Drag to reorder, or use Alt and arrow keys."
+                    }
                     aria-keyshortcuts={if @reorderable, do: "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown"}
                     data-toggle="tooltip"
                     title={TT.item_tooltip(item)}
@@ -245,22 +253,27 @@
                       alt=""
                       draggable="false"
                     />
-                    <%= if @editing do %>
-                      <%= if item.active do %>
-                        <div class="form-group">
-                          <select class="custom-select" name={"item_order[#{item.code}]"}>
-                            <%= for {code, index} <- Enum.with_index(@current_hero.item_order, 1) do %>
-                              <option value={index} selected={if code == item.code, do: "selected"}>{index}</option>
-                            <% end %>
-                          </select>
-                        </div>
-                      <% end %>
+                    <.forged_inset :if={!@editing} item={item} />
+                    <%= if @editing && Game.Items.slot_active?(item) do %>
+                      <div class="form-group" title={GH.item_display_name(item)}>
+                        <select
+                          class="custom-select"
+                          name={"item_order[#{item.code}]"}
+                          aria-label={"#{GH.item_display_name(item)} priority"}
+                        >
+                          <%= for {code, index} <- Enum.with_index(priorities, 1) do %>
+                            <option value={index} selected={if code == item.code, do: "selected"}>
+                              {index}
+                            </option>
+                          <% end %>
+                        </select>
+                      </div>
                     <% end %>
                   </div>
                 <% end %>
 
-                <%= if length(@current_hero.items) < 6 do %>
-                  <%= for _ <- (length(@current_hero.items)..5) do %>
+                <%= if length(slots) < 6 do %>
+                  <%= for _ <- (length(slots)..5) do %>
                     <div class="item-container float-left">
                       <div class="item-img empty-item d-flex justify-content-center align-items-center">
                         <i class="ui-icon ui-cube ui-2x"></i>
@@ -388,6 +401,7 @@
       current_hero={@current_hero}
       event_target={@event_target}
       reorderable={@reorderable && !@editing}
+      forge_enabled={@forge_enabled}
       id={GH.dom_id(@id_prefix, "shop")}
     />
   </div>

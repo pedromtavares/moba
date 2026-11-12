@@ -132,6 +132,8 @@
   #battle-bar .skill-img, #battle-bar .item-img, #battle-bar .empty-item { display: block; width: 100%; height: auto; margin: 0; padding: 0; border: 1px solid #ffffff21; border-image: none; border-radius: 4px; object-fit: cover; }
   #battle-bar .skill-img { aspect-ratio: 1; }
   #battle-bar .item-img, #battle-bar .empty-item { aspect-ratio: 1.4; }
+  #battle-bar .forged-battle-slot > .item-img { border-color: #f2bb7970; }
+  #battle-bar .forged-battle-slot .forged-item-inset { right: auto; left: 2px; width: 35%; }
   #battle-bar .empty-item { position: relative; background: #ffffff03; box-shadow: inset 0 1px 8px #00000026; }
   #battle-bar .empty-item::after { content: '◇'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #ffffff16; font-size: 15px; }
   #battle-bar .battle-items-row { margin-top: 8px !important; }

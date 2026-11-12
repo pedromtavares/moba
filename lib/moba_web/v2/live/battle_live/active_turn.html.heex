@@ -105,40 +105,16 @@
   <div class="row battle-items-row">
     <div class="col">
       <div class="items-container" aria-label="Items">
-        <%= for {item, index} <- Enum.with_index(@hero.items) do %>
-          <%= if can_use?(@turn, item) do %>
-            <div class="img-container item-container float-left">
-              <.battle_resource_image
-                resource={item}
-                phx-value-id={item.id}
-                data-index={index}
-                role={@preview && "button"}
-                tabindex={@preview && "0"}
-                aria-label={@preview && "Select #{item.name}"}
-                aria-pressed={@preview && "false"}
-                phx-hook="InstaItem"
-                data-name={item.name}
-                class="item-img can-use"
-                id={"attacker-item-#{item.id}"}
-              />
-              <%= if item.mp_cost > 0 do %>
-                <span class="badge badge-pill badge-primary mp-cost">{item.mp_cost}</span>
-              <% end %>
-              <span class="hotkey item-hotkey f-rpg">{item_hotkey(index)}</span>
-            </div>
-          <% else %>
-            <div class="img-container item-container float-left inactive">
-              <.battle_resource_image
-                resource={item}
-                data-index={index}
-                class="item-img inactive"
-              />
-              <.resource_status_badge preview={@preview} resource={item} battler={@turn.attacker} />
-            </div>
-          <% end %>
-        <% end %>
-        <%= if Enum.count(@hero.items) < 6 do %>
-          <%= for _ <- (Enum.count(@hero.items)..5) do %>
+        <% slots = Game.Items.item_slots(@hero) %>
+        <.battle_item_control
+          :for={{item, index} <- Enum.with_index(slots)}
+          item={item}
+          index={index}
+          turn={@turn}
+          preview={@preview}
+        />
+        <%= if length(slots) < 6 do %>
+          <%= for _ <- (length(slots)..5) do %>
             <div class="img-container item-container float-left">
               <.empty_item_slot />
             </div>

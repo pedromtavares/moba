@@ -1,5 +1,6 @@
 defmodule Moba.Engine.Core.Turns do
   alias Moba.{Engine, Repo}
+  alias Moba.Game.Items
   alias Engine.Schema.{Battler, Turn}
 
   @combat_fields [
@@ -22,11 +23,14 @@ defmodule Moba.Engine.Core.Turns do
     loadouts =
       Map.new([battle.attacker, battle.defender], fn hero ->
         hero = preload_hero(hero)
+        pairs = hero |> Items.preload_forge_pairs() |> Items.forge_pairs()
 
         snapshot = %{
           "immortal_streak" => Map.get(hero.player || %{}, :current_immortal_streak, 0),
           "skills" => Enum.map(hero.skills, &Ecto.embedded_dump(&1, :json)),
           "items" => Enum.map(hero.items, &Ecto.embedded_dump(&1, :json)),
+          "forged_items" => pairs,
+          "item_order" => if(map_size(pairs) > 0, do: hero.item_order),
           "stats" => Map.new(@combat_fields, &{Atom.to_string(&1), Map.fetch!(hero, &1)})
         }
 
@@ -49,7 +53,9 @@ defmodule Moba.Engine.Core.Turns do
         hero
         |> Map.merge(stats)
         |> Map.put(:skills, Enum.map(snapshot["skills"], &Ecto.embedded_load(Moba.Game.Schema.Skill, &1, :json)))
-        |> Map.put(:items, Enum.map(snapshot["items"], &Ecto.embedded_load(Moba.Game.Schema.Item, &1, :json)))
+        |> Map.put(:items, snapshot_items(snapshot))
+        |> Map.put(:forged_pairs, snapshot["forged_items"] || %{})
+        |> Map.put(:item_order, snapshot["item_order"] || hero.item_order)
     end
   end
 
@@ -75,11 +81,29 @@ defmodule Moba.Engine.Core.Turns do
     %{
       turn
       | skill_code: skill && skill.code,
-        item_code: item && item.code,
+        item_code: item_code(item),
         attacker: serialize_battler(attacker),
         defender: serialize_battler(defender)
     }
   end
+
+  def logged_item(%{item_code: "forged:" <> code, attacker: %{hero_id: id}}, loadouts) do
+    with %{} = snapshot <- loadouts[to_string(id)],
+         loadout = %{items: snapshot_items(snapshot), forged_pairs: snapshot["forged_items"] || %{}},
+         item when not is_nil(item) <- Enum.find(Items.item_slots(loadout), &(&1.code == code)) do
+      item
+    else
+      _ -> Moba.load_resource(code)
+    end
+  end
+
+  def logged_item(%{item_code: code}, _loadouts), do: Moba.load_resource(code)
+
+  defp item_code(%{forged_epic: _, code: code}), do: "forged:" <> code
+  defp item_code(item), do: item && item.code
+
+  defp snapshot_items(snapshot),
+    do: Enum.map(snapshot["items"], &Ecto.embedded_load(Moba.Game.Schema.Item, &1, :json))
 
   # Heroes in initial pve_tiers are constantly buffed for league battles
   @doc false
@@ -145,7 +169,9 @@ defmodule Moba.Engine.Core.Turns do
     |> flush(hero, resolve_resource)
   end
 
-  defp flush(battler, %{items: items, skills: skills} = hero, resolve_resource) do
+  defp flush(battler, %{skills: skills} = hero, resolve_resource) do
+    slots = Items.item_slots(hero)
+
     %{
       battler
       | damage: 0,
@@ -160,10 +186,12 @@ defmodule Moba.Engine.Core.Turns do
         effects: [],
         active_skills: hero_active_skills(hero),
         passive_skills: hero_passive_skills(hero),
-        active_items: hero_active_items(hero),
+        active_items: Enum.filter(slots, &Items.slot_active?/1),
         passive_items: hero_passive_items(hero),
         skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
-        item_order: codes_to_resources(hero.item_order, items),
+        item_order: codes_to_resources(Items.item_priority_codes(hero), slots),
+        cooldowns: merge_item_cooldowns(battler.cooldowns, slots),
+        future_cooldowns: merge_item_cooldowns(battler.future_cooldowns, slots),
         last_skill: load_resource(battler.last_skill_code, skills),
         double_skill: load_resource(battler.double_skill_code, battler.double_skill_level, skills, resolve_resource),
         delayed_skill: load_resource(battler.delayed_skill_code, battler.delayed_skill_level, skills, resolve_resource),
@@ -187,9 +215,19 @@ defmodule Moba.Engine.Core.Turns do
     battle_hero(battle, hero)
   end
 
-  defp hero_active_items(%{items: items}), do: Enum.filter(items, & &1.active)
   defp hero_active_skills(%{skills: skills}), do: Enum.filter(skills, &(!&1.passive))
   defp hero_passive_items(%{items: items}), do: Enum.filter(items, & &1.passive)
+
+  defp merge_item_cooldowns(cooldowns, slots) do
+    for %{active: true, code: base, forged_epic: %{active: true, code: epic}} <- slots, reduce: cooldowns do
+      acc ->
+        case Map.pop(acc, epic) do
+          {nil, acc} -> acc
+          {remaining, acc} -> Map.update(acc, base, remaining, &max(&1, remaining))
+        end
+    end
+  end
+
   defp hero_passive_skills(%{skills: skills}), do: Enum.filter(skills, & &1.passive)
 
   def keys_to_atoms(string_key_map) when is_map(string_key_map) do
@@ -245,7 +283,8 @@ defmodule Moba.Engine.Core.Turns do
 
   # Heroes do not exist in the Engine domain, they must be transformed to a Battler
   defp prepare_battler(hero, player, battle, orders) do
-    %{skills: skills, items: items, avatar: avatar} = hero = battle_hero(battle, hero)
+    %{skills: skills, avatar: avatar} = hero = battle_hero(battle, hero)
+    slots = Items.item_slots(hero)
     initial_hp = prepare_stat(player, battle, orders, :attacker_initial_hp)
     initial_mp = prepare_stat(player, battle, orders, :attacker_initial_mp)
 
@@ -271,10 +310,10 @@ defmodule Moba.Engine.Core.Turns do
       base_armor: buffed_total(hero, battle, hero.armor + hero.item_armor),
       active_skills: hero_active_skills(hero),
       passive_skills: hero_passive_skills(hero),
-      active_items: hero_active_items(hero),
+      active_items: Enum.filter(slots, &Items.slot_active?/1),
       passive_items: hero_passive_items(hero),
       skill_order: codes_to_resources(hero.skill_order, [Moba.basic_attack() | skills]),
-      item_order: codes_to_resources(hero.item_order, items)
+      item_order: codes_to_resources(Items.item_priority_codes(hero), slots)
     }
   end
 

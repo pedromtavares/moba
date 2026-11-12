@@ -4,6 +4,7 @@ defmodule Moba.Engine.Core.Processor do
   """
 
   alias Moba.Engine
+  alias Moba.Game.Items
   alias Engine.Core.{BuffPause, Effect, Helper, Spell}
   @final_effect_order %{effect: 0, hit_followup: 1, healing_reduction: 2, healing_steal: 3}
   # require Logger
@@ -453,11 +454,28 @@ defmodule Moba.Engine.Core.Processor do
 
   # Uses an item that was ordered by the UI.
   defp use_item(%{attacker: attacker, orders: %{item: item}} = turn) do
-    if item && item.active && Helper.can_use?(attacker, item, :active) do
-      cast_item(item, turn)
+    slot = Helper.owned_active_item(attacker, item)
+
+    if Helper.can_use?(attacker, slot, :active) do
+      cast_item(slot, turn)
     else
       turn
     end
+  end
+
+  defp cast_item(%{forged_epic: _} = item, turn) do
+    activation = Items.activation(item)
+
+    turn =
+      Enum.reduce(activation.components, turn, fn component, acc ->
+        %{acc | resource: component} |> apply_spell(%{active: true})
+      end)
+
+    resource = %{item | code: activation.cooldown_code, mp_cost: activation.energy, cooldown: activation.cooldown}
+
+    %{turn | resource: resource, item: item}
+    |> Effect.mp_cost()
+    |> Effect.add_cooldown()
   end
 
   # Casts an active Item. Like Skills, some have cooldowns and mp_costs

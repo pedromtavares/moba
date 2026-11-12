@@ -5,7 +5,7 @@ const vm = require('node:vm');
 
 const source = fs.readFileSync('assets/js/hooks.js', 'utf8')
   .replace(/^import .*;\n/gm, '')
-  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|ManualCodex) = .*;\n/gm, '')
+  .replace(/^Hooks\.(InvokeStage|CombatStage|InventoryOrder|LineupOrder|ManualCodex) = .*;\n/gm, '')
   .replace('export default Hooks;', 'module.exports = Hooks.ShopViewport;');
 
 function environment({roster = true, desktop = true} = {}) {
@@ -63,8 +63,11 @@ test('mobile roster follows the full page content width when desktop hero stats 
   assert.equal(page.tabs.style.width, '1118px');
 });
 
-test('solo HUD retains its original shop height without adding roster space', () => {
+test('solo HUD reserves its current height for the shop and adds no roster space', () => {
   const page = environment({roster: false});
   assert.equal(page.properties.get('--shop-hud-height'), '171px');
   assert.equal(page.spacing.size, 0);
+  page.el.getBoundingClientRect = () => ({top: 752, left: 0, right: 1200, height: 148});
+  page.observer.callback();
+  assert.equal(page.properties.get('--shop-hud-height'), '148px');
 });

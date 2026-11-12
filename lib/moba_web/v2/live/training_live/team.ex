@@ -20,8 +20,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
          initial_hero: nil,
          hero_ui: %{},
          show_shop: false,
-         show_log: false,
-         encounters: []
+         encounter_count: 0
        )}
 
   def handle_params(params, _, socket) do
@@ -118,7 +117,6 @@ defmodule MobaWeb.V2.TrainingLive.Team do
   def handle_event("show-build", _, socket), do: update_ui(socket, show_build: true)
   def handle_event("show-navigation", _, socket), do: update_ui(socket, show_build: false)
   def handle_event("hide-build", _, socket), do: update_ui(socket, show_build: false)
-  def handle_event("show-log", _, socket), do: {:noreply, assign(socket, show_log: !socket.assigns.show_log)}
   def handle_event(_, _, socket), do: {:noreply, socket}
   def handle_info(:training_access_revoked, socket), do: {:noreply, redirect(socket, to: "/base")}
   def handle_info(_, socket), do: {:noreply, socket}
@@ -235,7 +233,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
         run: run,
         initial_hero: socket.assigns.initial_hero || run.selected,
         selected: run.heroes[run.selected],
-        encounters: encounters
+        encounter_count: length(encounters)
       )
 
     if run.phase == :finished, do: push_navigate(socket, to: ~p"/teams/#{record.id}"), else: socket

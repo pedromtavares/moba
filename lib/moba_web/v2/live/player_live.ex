@@ -231,7 +231,7 @@ defmodule MobaWeb.V2.PlayerLive do
           <div class="row">
             <div class="col-12 mt-1">
               <.hero_skill_strip skills={@hero.skills} id_prefix="skill" id_suffix={@hero.id} />
-              <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
+              <.hero_item_strip items={GH.sorted_item_slots(@hero)} id_prefix="item" id_suffix={@hero.id} />
             </div>
           </div>
         </div>

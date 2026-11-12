@@ -2,8 +2,8 @@ defmodule MobaWeb.V2.CombatSceneTest do
   use ExUnit.Case, async: true
 
   alias Moba.Engine.Schema.{Battle, Battler, Turn}
-  alias Moba.Game.Schema.{Avatar, Hero}
-  alias MobaWeb.V2.Components.CombatScene
+  alias Moba.Game.Schema.{Avatar, Hero, Item}
+  alias MobaWeb.V2.Components.{CombatScene, GameHelpers}
 
   setup do
     left = %Battler{
@@ -86,6 +86,42 @@ defmodule MobaWeb.V2.CombatSceneTest do
     assert reply.before["left"].hp == 950
     assert reply.after["left"].hp == 700
     assert Enum.map(scene.units, & &1.hp) == [700, 510]
+  end
+
+  test "effects use the artwork of both forged components", %{initial: initial, battle: battle} do
+    dagon = %Item{
+      id: 1,
+      code: "dagon",
+      name: "Dagon",
+      active: true,
+      image: %{file_name: "dagon.png", updated_at: nil}
+    }
+
+    dagon5 = %Item{
+      id: 2,
+      code: "dagon5",
+      name: "Dagon 5",
+      active: true,
+      image: %{file_name: "dagon5.png", updated_at: nil}
+    }
+
+    forged = Map.put(dagon5, :forged_epic, dagon)
+
+    effects = [
+      %{"resource" => "dagon5", "key" => "damage", "value" => 150, "priority" => 1},
+      %{"resource" => "dagon", "key" => "damage", "value" => 75, "priority" => 2}
+    ]
+
+    for {played_item, active_items} <- [{forged, []}, {nil, [forged]}] do
+      turn = %{initial | number: 1, item: played_item, defender: %{initial.defender | effects: effects}}
+      next_turn = %{initial | attacker: %{initial.attacker | active_items: active_items}}
+
+      scene = CombatScene.build(%{battle | turns: [turn]}, initial, next_turn, nil)
+      [event] = scene.events
+      icons = Map.new(event.effects, &{&1.code, &1.image})
+
+      assert icons == %{"dagon" => GameHelpers.image_url(dagon), "dagon5" => GameHelpers.image_url(dagon5)}
+    end
   end
 
   test "overkill and zero energy stay in range, expired effects are omitted", %{initial: initial, battle: battle} do

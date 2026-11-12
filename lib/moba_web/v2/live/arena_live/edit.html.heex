@@ -1,4 +1,19 @@
-<Layouts.app flash={@flash} current_scope={@current_scope} preview={@preview} current_player={@current_player} current_hero={@current_hero} sidebar_code={@sidebar_code}>
+<Layouts.app
+  flash={@flash}
+  current_scope={@current_scope}
+  preview={@preview}
+  current_player={@current_player}
+  current_hero={@current_hero}
+  sidebar_code={@sidebar_code}
+>
   <.teams_modern {assigns} />
-  <.hero_bar :if={@hero} preview={@preview} current_hero={@hero} editing={@editing} show_build={@show_build} show_shop={@show_shop} />
+  <.hero_bar
+    :if={@hero}
+    preview={@preview}
+    current_hero={@hero}
+    editing={@editing}
+    show_build={@show_build}
+    show_shop={@show_shop}
+    forge_enabled={true}
+  />
 </Layouts.app>

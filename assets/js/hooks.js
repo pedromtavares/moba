@@ -526,10 +526,21 @@ Hooks.ShopKeyboard = {
   navigateShop(event){
     const arrows = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
     if (!arrows.includes(event.key) && event.code !== 'Space') return;
-    const rows = Array.from(this.el.querySelectorAll('.shop-shelf')).map(row =>
-      Array.from(row.querySelectorAll('.shop-shelf-label, .shop-tile')).filter(button =>
-        button.getClientRects().length && !button.disabled && button.getAttribute('aria-disabled') !== 'true')
-    ).filter(row => row.length);
+    const shop = this.el.querySelector('.cinematic-shop');
+    const forging = shop?.dataset.forging === 'true';
+    const rows = Array.from(this.el.querySelectorAll('.shop-shelf')).flatMap(shelf => {
+      const buttons = Array.from(shelf.querySelectorAll('.shop-shelf-label, .shop-tile')).filter(button =>
+        button.getClientRects().length && !button.disabled && button.getAttribute('aria-disabled') !== 'true');
+      if (!forging) return [buttons];
+
+      const byRow = new Map();
+      buttons.forEach(button => {
+        const row = byRow.get(button.offsetTop) || [];
+        row.push(button);
+        byRow.set(button.offsetTop, row);
+      });
+      return [...byRow.values()];
+    }).filter(row => row.length);
     const buttons = rows.flat();
     if (!buttons.length) return;
     const actions = Array.from(this.el.querySelectorAll('.shop-detail button')).filter(button =>
@@ -545,7 +556,7 @@ Hooks.ShopKeyboard = {
     if (event.code === 'Space') {
       if (this.shopInspectionPending) return;
       if (actions.includes(focused)) focused.click();
-      else if (this.el.querySelector('.cinematic-shop')?.dataset.recipeRarity && current.getAttribute('phx-click') === 'select-inventory') current.click();
+      else if (forging || (shop?.dataset.recipeRarity && current.getAttribute('phx-click') === 'select-inventory')) current.click();
       else {
         const primary = Array.from(this.el.querySelectorAll('.shop-detail .shop-primary, .shop-sell, .transmute-button')).find(button =>
           button.getClientRects().length && !button.disabled && button.getAttribute('aria-disabled') !== 'true');
@@ -563,13 +574,15 @@ Hooks.ShopKeyboard = {
     const rowIndex = rows.findIndex(row => row.includes(current));
     const row = rows[rowIndex];
     const column = row.indexOf(current);
+    const nextAction = (forging && actions.find(button => button.classList.contains('shop-primary'))) || actions[0];
+    if (nextAction && ((event.key === 'ArrowRight' && column === row.length - 1) ||
+      (forging && event.key === 'ArrowDown' && rowIndex === rows.length - 1))) {
+      this.shopCursor = current.id;
+      nextAction.focus({preventScroll: true});
+      return;
+    }
     if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
       const direction = event.key === 'ArrowLeft' ? -1 : 1;
-      if (direction === 1 && column === row.length - 1 && actions.length) {
-        this.shopCursor = current.id;
-        actions[0].focus({preventScroll: true});
-        return;
-      }
       current = row[(column + direction + row.length) % row.length];
     } else {
       const direction = event.key === 'ArrowUp' ? -1 : 1;
@@ -582,6 +595,10 @@ Hooks.ShopKeyboard = {
     this.shopCursor = button.id;
     button.focus({preventScroll: true});
     const event = button.getAttribute('phx-click');
+    if (event === 'choose-forge-epic') {
+      button.scrollIntoView({block: 'nearest', inline: 'nearest'});
+      return;
+    }
     // Browsing ingredients must not add them to a transmutation recipe.
     if (event === 'select-inventory' && this.el.querySelector('.cinematic-shop')?.dataset.recipeRarity) return;
     if (!['select-shop', 'select-inventory', 'select-category'].includes(event)) return;

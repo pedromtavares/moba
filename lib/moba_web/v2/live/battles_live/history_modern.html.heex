@@ -1,53 +1,104 @@
 <div class="history-board">
-  <%= for {kind, title, battles} <- [{"ganks", "Battles", @pve_battles}, {"league", "League Challenge", @league_battles}] do %>
-    <section class="history-section" aria-labelledby={"history-#{kind}-title"}>
-      <header class="history-section-heading">
-        <h2 id={"history-#{kind}-title"}>{title}</h2>
-        <dl class="history-summary">
-          <%= if kind == "ganks" do %>
-            <div>
-              <dt>Wins / Losses</dt>
-              <dd>
-                <span class="history-wins">{@current_hero.wins}</span><span class="history-ratio">/</span><span class="history-losses">{@current_hero.losses}</span>
-              </dd>
-            </div>
-            <div>
-              <dt>Win rate</dt>
-              <dd>{win_rate(@current_hero)}<small>%</small></dd>
-            </div>
-          <% else %>
-            <div>
-              <dt>Attempts</dt>
-              <dd>{@current_hero.league_attempts}</dd>
-            </div>
-            <div>
-              <dt>Success rate</dt>
-              <dd>{league_success_rate(@current_hero)}<small>%</small></dd>
-            </div>
-          <% end %>
-        </dl>
-      </header>
-      <table
-        class="table battle-history-table"
-        aria-label={if kind == "ganks", do: "Training battles", else: "League Challenge battles"}
+  <div class="history-command">
+    <div class="listing-mode-switch" role="group" aria-label="Battle history categories">
+      <button
+        :for={section <- @sections}
+        type="button"
+        id={"history-#{section.id}-title"}
+        phx-click="history-tab"
+        phx-value-tab={section.id}
+        aria-controls={"history-#{section.id}-section"}
+        aria-pressed={to_string(section.id == @history_tab)}
       >
-        <thead>
-          <tr>
-            <th scope="col">Opponent</th>
-            <th scope="col">Result</th>
-            <th scope="col">{if kind == "ganks", do: "Rewards", else: "Progress / rewards"}</th>
-            <th scope="col"><span class="sr-only">Replay</span></th>
-          </tr>
-        </thead>
-        <tbody id={"history-#{kind}"}>
-          <tr :if={battles == []} id={"history-#{kind}-empty"}>
-            <td colspan="4" class="history-empty">
-              {if kind == "ganks", do: "No battles yet", else: "No challenges yet"}
-            </td>
-          </tr>
-          <.battle_row :for={battle <- battles} preview={true} battle={battle} current_hero={@current_hero} />
-        </tbody>
-      </table>
-    </section>
-  <% end %>
+        <.icon name={if section.id == "ganks", do: "game-swords", else: "game-trophy"} />
+        {section.title}
+      </button>
+    </div>
+
+    <dl :for={section <- @sections} :if={section.id == @history_tab} class="history-summary">
+      <div :for={{label, value} <- section.summary}>
+        <dt>{label}</dt>
+        <dd>
+          <%= case value do %>
+            <% {wins, losses} -> %>
+              <span class="history-wins">{wins}</span><span class="history-record-divider">/</span><span class="history-losses">{losses}</span>
+            <% _ -> %>
+              {value}
+          <% end %>
+        </dd>
+      </div>
+    </dl>
+  </div>
+
+  <section
+    :for={section <- @sections}
+    id={"history-#{section.id}-section"}
+    class="history-section"
+    aria-labelledby={"history-#{section.id}-title"}
+    hidden={section.id != @history_tab}
+  >
+    <.listing_pager id={"history-#{section.id}-pager"} label={String.downcase(section.title)} max_page_size={8}>
+      <ol id={"history-#{section.id}"} class="history-list" aria-label={section.title} data-listing-rows>
+        <li :if={section.entries == []} id={"history-#{section.id}-empty"} class="history-empty">
+          <.icon name={if section.id == "ganks", do: "game-swords", else: "game-trophy"} />
+          <strong>{if section.id == "ganks", do: "No battles yet", else: "No challenges yet"}</strong>
+        </li>
+        <li :for={entry <- section.entries} id={entry.id} class="battle-row" data-result={entry.result}>
+          <.link
+            navigate={entry.path}
+            class="history-opponent"
+            style={if entry.avatar, do: "--history-opponent-art: url(#{GH.background_url(entry.avatar)})"}
+          >
+            <img :if={entry.avatar} src={GH.image_url(entry.avatar)} alt="" loading="lazy" />
+            <span :if={!entry.avatar} class="history-opponent-emblem" aria-hidden="true">
+              <.icon name="game-swords" />
+            </span>
+            <span class="history-opponent-copy">
+              <strong title={entry.name}>{entry.name}</strong>
+              <small>{entry.detail}</small>
+              <span class="history-time">{relative_time(entry.inserted_at)}</span>
+            </span>
+          </.link>
+
+          <div class="history-result">
+            <span :if={entry.result} class="history-outcome" data-result={entry.result}>{entry.result}</span>
+            <small :if={entry.difficulty} class="history-difficulty">{entry.difficulty}</small>
+          </div>
+
+          <div class="history-reward-cell">
+            <div :if={(entry.xp || 0) > 0 || (entry.gold || 0) > 0} class="history-rewards">
+              <span :if={(entry.xp || 0) > 0} class="history-xp">
+                <.icon name="game-xp" /><strong>+{entry.xp}<small> XP</small></strong>
+              </span>
+              <span :if={(entry.gold || 0) > 0} class="history-gold">
+                <.icon name="game-gold" /><strong>+{entry.gold}<small>g</small></strong>
+              </span>
+            </div>
+            <%= case entry.progress do %>
+              <% {:promotion, tier} -> %>
+                <span class="history-promotion">
+                  <.icon name="game-rank-up" /> Promoted · {GH.league_name(tier)}
+                </span>
+              <% {:step_win, step} -> %>
+                <span class="history-step history-step-win">Battle {step} cleared</span>
+              <% {:step_loss, step} -> %>
+                <span class="history-step history-step-loss">Battle {step} failed</span>
+              <% nil -> %>
+                <span :if={(entry.xp || 0) == 0 && (entry.gold || 0) == 0} class="history-no-reward">—</span>
+            <% end %>
+          </div>
+
+          <.link
+            id={entry.replay_id}
+            navigate={entry.path}
+            class="history-replay"
+            aria-label={if entry.result == "IN PROGRESS", do: "Resume #{entry.name}", else: "Replay #{entry.name}"}
+          >
+            <.icon name="game-play" />
+            <span>{if entry.result == "IN PROGRESS", do: "Resume", else: "Replay"}</span>
+          </.link>
+        </li>
+      </ol>
+    </.listing_pager>
+  </section>
 </div>

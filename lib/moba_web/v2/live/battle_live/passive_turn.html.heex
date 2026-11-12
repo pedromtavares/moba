@@ -58,16 +58,20 @@
   <div class="row">
     <div class="col">
       <div class="items-container">
-        <%= for item <- @hero.items do %>
-          <div class="img-container float-left inactive">
+        <% slots = Game.Items.item_slots(@hero) %>
+        <%= for item <- slots do %>
+          <% used? =
+            @last_turn && @last_turn.item && Enum.any?(Game.Items.slot_items(item), &(&1.code == @last_turn.item.code)) %>
+          <div class={["img-container float-left inactive", Map.has_key?(item, :forged_epic) && "forged-item-slot"]}>
             <.battle_resource_image
               resource={item}
-              class={"item-img #{if @last_turn && @last_turn.item == item, do: "last-item"}"}
+              class={"item-img #{if used?, do: "last-item"}"}
             />
+            <.forged_inset item={item} />
           </div>
         <% end %>
-        <%= if Enum.count(@hero.items) < 6 do %>
-          <%= for _ <- (Enum.count(@hero.items)..5) do %>
+        <%= if length(slots) < 6 do %>
+          <%= for _ <- (length(slots)..5) do %>
             <div class="img-container item-container float-left">
               <.empty_item_slot />
             </div>

@@ -1,283 +1,180 @@
 defmodule MobaWeb.V2.BattlesLive do
   use MobaWeb, :v2_live_view
+  on_mount MobaWeb.V2.Hooks.TeamAccess
+  import MobaWeb.CoreComponents, only: [icon: 1]
 
-  alias MobaWeb.V2.Components.TrainingComponents
+  alias Moba.Game.{TeamRuns, TrainingEncounters}
 
   embed_templates "battles_live/*"
 
+  def mount(%{"run" => param}, _, socket) do
+    %{current_player: player, current_scope: scope} = socket.assigns
+
+    with param when is_binary(param) <- param,
+         {id, ""} when id > 0 and id <= 9_223_372_036_854_775_807 <- Integer.parse(param),
+         %{player_id: player_id} = run when player_id == player.id <- TeamRuns.get(scope, id) do
+      {:ok, load_team(socket, run)}
+    else
+      _ ->
+        {:ok,
+         socket
+         |> put_flash(:error, "That team’s battle log is unavailable.")
+         |> push_navigate(to: ~p"/base")}
+    end
+  end
+
+  def mount(_, _, %{assigns: %{current_hero: nil}} = socket) do
+    %{current_player: player, current_scope: scope} = socket.assigns
+
+    case TeamRuns.active(scope, player.id) do
+      nil -> {:ok, push_navigate(socket, to: ~p"/base")}
+      run -> {:ok, load_team(socket, run)}
+    end
+  end
+
   def mount(_, _, socket) do
-    {:ok, socket |> maybe_redirect() |> socket_init()}
+    hero = socket.assigns.current_hero
+    battles = Enum.map(Engine.list_battles(hero, "pve"), &solo_entry(&1, hero.id))
+    challenges = Enum.map(Engine.list_battles(hero, "league"), &solo_entry(&1, hero.id))
+
+    {:ok,
+     assign(socket,
+       history_tab: "ganks",
+       subject: hero.name,
+       league_tier: hero.league_tier,
+       return_path: ~p"/training",
+       sections: sections(battles, challenges, hero.wins, hero.losses, hero.league_attempts, hero.league_successes)
+     )}
   end
 
-  def handle_event("redirect", %{"id" => id}, socket) do
-    {:noreply, push_navigate(socket, to: preview_path(socket, ~p"/battles/#{id}"))}
+  def handle_event("history-tab", %{"tab" => tab}, socket) when tab in ["ganks", "league"] do
+    {:noreply, assign(socket, :history_tab, tab)}
   end
 
-  defp maybe_redirect(%{assigns: %{current_hero: nil}} = socket) do
-    push_navigate(socket, to: preview_path(socket, "/base"))
-  end
-
-  defp maybe_redirect(socket), do: socket
-
-  defp socket_init(%{assigns: %{current_hero: hero}} = socket) when not is_nil(hero) do
-    league_battles = Engine.list_battles(hero, "league")
-    pve_battles = Engine.list_battles(hero, "pve")
+  defp load_team(socket, run) do
+    {battles, challenges} =
+      socket.assigns.current_scope
+      |> TeamRuns.encounters(run.id)
+      |> Enum.reverse()
+      |> Enum.split_with(&(&1.kind == :farm))
 
     assign(socket,
-      league_battles: league_battles,
-      pve_battles: pve_battles,
-      sidebar_code: "training"
+      history_tab: "ganks",
+      subject: run.name || "Team training",
+      league_tier: run.league_tier,
+      return_path: ~p"/training?#{[run: run.id]}",
+      sections:
+        sections(
+          Enum.map(battles, &team_entry/1),
+          Enum.map(challenges, &team_entry/1),
+          Enum.count(battles, &(&1[:winner] == :radiant)),
+          Enum.count(battles, &(&1[:winner] == :dire)),
+          length(challenges),
+          Enum.count(challenges, &(&1[:winner] == :radiant))
+        )
     )
   end
 
-  defp socket_init(socket), do: socket
-
-  defp opponent_for(battle, current_hero_id) do
-    if current_hero_id == battle.attacker_id, do: battle.defender, else: battle.attacker
+  defp sections(battles, challenges, wins, losses, attempts, successes) do
+    [
+      %{
+        id: "ganks",
+        title: "Training Battles",
+        entries: battles,
+        summary: [{"Wins / Losses", {wins, losses}}, {"Win rate", rate(wins, wins + losses)}]
+      },
+      %{
+        id: "league",
+        title: "League Challenges",
+        entries: challenges,
+        summary: [{"Attempts", attempts}, {"Success rate", rate(successes, attempts)}]
+      }
+    ]
   end
 
-  defp result_badge_label(%{type: "pve", winner: winner}, current_hero_id) do
-    cond do
-      is_nil(winner) -> "TIE"
-      winner.id == current_hero_id -> "WIN"
-      true -> "LOSS"
-    end
-  end
+  defp rate(_, 0), do: "0%"
+  defp rate(wins, total), do: "#{round(wins * 100 / total)}%"
 
-  defp result_badge_label(%{winner: winner}, current_hero_id) do
-    if winner && winner.id == current_hero_id, do: "WIN", else: "LOSS"
-  end
+  defp solo_entry(battle, hero_id) do
+    {opponent, snapshot} =
+      if battle.attacker_id == hero_id,
+        do: {battle.defender, battle.defender_snapshot},
+        else: {battle.attacker, battle.attacker_snapshot}
 
-  defp result_badge_class(%{type: "pve", winner: winner}, current_hero_id) do
-    cond do
-      is_nil(winner) -> "badge badge-light-warning"
-      winner.id == current_hero_id -> "badge badge-light-success"
-      true -> "badge badge-light-dark"
-    end
-  end
-
-  defp result_badge_class(%{winner: winner}, current_hero_id) do
-    if winner && winner.id == current_hero_id, do: "badge badge-light-success", else: "badge badge-light-danger"
-  end
-
-  defp difficulty_badge(nil), do: nil
-  defp difficulty_badge("weak"), do: {"EASY", "badge badge-light-success"}
-  defp difficulty_badge("moderate"), do: {"MEDIUM", "badge badge-light-primary"}
-  defp difficulty_badge("strong"), do: {"HARD", "badge badge-light-danger"}
-  defp difficulty_badge(_), do: nil
-
-  defp reward_badges(battle, current_hero_id) do
-    rewards = battle.rewards
-
-    points =
-      if current_hero_id == battle.attacker_id do
-        rewards.attacker_pvp_points
-      else
-        rewards.defender_pvp_points
+    result =
+      cond do
+        battle.winner_id == hero_id -> "WIN"
+        battle.type == "pve" && is_nil(battle.winner_id) -> "TIE"
+        true -> "LOSS"
       end
 
+    level = (snapshot && snapshot.level) || opponent.level
+    avatar = opponent.avatar
+    detail = if opponent.name == avatar.name, do: "Lv #{level}", else: "Lv #{level} · #{avatar.name}"
+
     %{
-      xp: rewards.total_xp,
-      gold: rewards.total_gold,
-      pvp_points: if(battle.type == "pvp", do: points, else: nil)
+      id: "battle-#{battle.id}",
+      replay_id: "replay-battle-#{battle.id}",
+      path: ~p"/battles/#{battle.id}",
+      name: opponent.name,
+      avatar: avatar,
+      detail: detail,
+      inserted_at: battle.inserted_at,
+      result: result,
+      difficulty: difficulty_label(battle.difficulty),
+      xp: battle.rewards && battle.rewards.total_xp,
+      gold: battle.rewards && battle.rewards.total_gold,
+      progress: league_progress(battle, result)
     }
   end
 
-  defp pvp_badge_class(points) when points > 0, do: "badge badge-light-primary"
-  defp pvp_badge_class(_), do: "badge badge-light-dark"
+  defp team_entry(encounter) do
+    opponent = encounter.opponent
+    fighter = encounter.fighter
 
-  defp relative_time(%{inserted_at: inserted_at}) do
-    Timex.format!(inserted_at, "{relative}", :relative)
-  end
-
-  defp league_step_result(%{type: "league"} = battle, current_hero_id) do
-    winner = battle.winner && battle.winner.id == current_hero_id
-
-    if winner do
-      if battle.attacker_snapshot.league_step == 0 do
-        {:rank, battle.attacker_snapshot.league_tier}
-      else
-        {:step_win, battle.attacker_snapshot.previous_league_step}
+    result =
+      case {encounter.status, encounter[:winner]} do
+        {:pending, _} -> "IN PROGRESS"
+        {:finished, :radiant} -> "WIN"
+        {:finished, :dire} -> "LOSS"
+        {:finished, :draw} -> "TIE"
+        _ -> nil
       end
-    else
-      {:step_loss, battle.attacker_snapshot.previous_league_step}
-    end
+
+    %{
+      id: "encounter-#{encounter.id}",
+      replay_id: "team-replay-#{encounter.id}",
+      path: TrainingEncounters.path(encounter),
+      name: if(encounter.kind == :farm && opponent, do: opponent.name, else: encounter.label),
+      avatar: opponent && opponent.avatar,
+      detail:
+        if(encounter.kind == :farm && fighter,
+          do: "Turn #{encounter.turn} · #{fighter.name}",
+          else: "Turn #{encounter.turn}"
+        ),
+      inserted_at: encounter.inserted_at,
+      result: result,
+      difficulty: if(encounter.kind == :farm, do: encounter.label),
+      xp: get_in(encounter, [:reward_totals, :xp]),
+      gold: get_in(encounter, [:reward_totals, :gold]),
+      progress: nil
+    }
   end
 
-  defp league_step_result(_battle, _current_hero_id), do: nil
+  defp difficulty_label("weak"), do: "Easy"
+  defp difficulty_label("moderate"), do: "Medium"
+  defp difficulty_label("strong"), do: "Hard"
+  defp difficulty_label(_), do: nil
 
-  defp max_available_league(%{pve_tier: pve_tier, league_attempts: attempts} = hero) do
-    max = Moba.max_available_league(pve_tier)
+  defp league_progress(%{type: "league", attacker_snapshot: %{league_step: 0, league_tier: tier}}, "WIN")
+       when is_integer(tier),
+       do: {:promotion, tier}
 
-    if max != Moba.max_league_tier() || attempts == 0 || league_success_rate(hero) >= 100 do
-      max
-    else
-      max - 1
-    end
-  end
+  defp league_progress(%{type: "league", attacker_snapshot: %{previous_league_step: step}}, result)
+       when is_integer(step),
+       do: {if(result == "WIN", do: :step_win, else: :step_loss), step}
 
-  defp turn_percentage(%{pve_current_turns: turns}) do
-    (5 - turns) * 100 / 5
-  end
+  defp league_progress(_, _), do: nil
 
-  defp expert_hero?(%{pve_tier: tier}) when tier >= 4, do: true
-  defp expert_hero?(_), do: false
-
-  defp elapsed_time(%{inserted_at: inserted_at}) do
-    Timex.diff(Timex.now(), inserted_at, :minutes)
-  end
-
-  defp win_rate(%{wins: wins, losses: losses}) do
-    total = wins + losses
-    if total == 0, do: 0, else: round(wins * 100 / total)
-  end
-
-  defp league_success_rate(%{league_attempts: attempts, league_successes: successes}) when attempts > 0 do
-    round(successes * 100 / attempts)
-  end
-
-  defp league_success_rate(_), do: 0
-
-  attr :battle, :map, required: true
-  attr :current_hero, :map, required: true
-  attr :preview, :boolean, default: false
-
-  defp battle_row(assigns) do
-    ~H"""
-    <% opponent = opponent_for(@battle, @current_hero.id) %>
-    <% difficulty = difficulty_badge(@battle.difficulty) %>
-    <% rewards = @battle.rewards && reward_badges(@battle, @current_hero.id) %>
-    <% league_result = league_step_result(@battle, @current_hero.id) %>
-    <% result = result_badge_label(@battle, @current_hero.id) %>
-    <% opponent_snapshot =
-      if @battle.attacker_id == @current_hero.id, do: @battle.defender_snapshot, else: @battle.attacker_snapshot %>
-
-    <tr
-      id={"battle-#{@battle.id}"}
-      class="battle-row"
-      phx-click={if !@preview, do: "redirect"}
-      phx-value-id={if !@preview, do: @battle.id}
-      phx-hook={if !@preview, do: "Loading"}
-    >
-      <%= if @preview do %>
-        <td class="history-opponent-cell">
-          <.link navigate={preview_path(assigns, ~p"/battles/#{@battle.id}")} class="history-opponent">
-            <img src={GH.image_url(opponent.avatar)} alt={opponent.avatar.name} />
-            <span>
-              <strong>{opponent.name}</strong>
-              <small>
-                Lv {(opponent_snapshot && opponent_snapshot.level) || opponent.level}<span :if={
-                  opponent.name != opponent.avatar.name
-                }> · {opponent.avatar.name}</span>
-              </small>
-              <span class="history-time">{relative_time(@battle)}</span>
-            </span>
-          </.link>
-        </td>
-        <td class="history-result">
-          <span class="history-outcome" data-result={result}>{result}</span>
-          <small :if={difficulty} class={"history-difficulty difficulty-#{@battle.difficulty}"}>
-            {elem(difficulty, 0)}
-          </small>
-        </td>
-        <td class="history-reward-cell">
-          <div :if={rewards} class="history-rewards">
-            <span :if={rewards.xp > 0} class="history-xp">+{rewards.xp} XP</span>
-            <span :if={rewards.gold > 0} class="history-gold">+{rewards.gold}g</span>
-            <span :if={rewards.pvp_points} class={pvp_badge_class(rewards.pvp_points)}>
-              {rewards.pvp_points} Arena Rating
-            </span>
-          </div>
-          <span
-            :if={!league_result && (!rewards || (rewards.xp == 0 && rewards.gold == 0 && is_nil(rewards.pvp_points)))}
-            class="history-no-reward"
-          >
-            —
-          </span>
-          <%= if league_result do %>
-            <%= case league_result do %>
-              <% {:rank, tier} -> %>
-                <span class="history-promotion">
-                  <img src={"/images/league/#{tier}.png"} alt={Moba.leagues()[tier]} /> Promoted · {GH.league_name(tier)}
-                </span>
-              <% {:step_win, step} -> %>
-                <span class="history-step history-step-win">
-                  <i class="ui-icon ui-check" aria-hidden="true"></i>Battle {step} cleared
-                </span>
-              <% {:step_loss, step} -> %>
-                <span class="history-step history-step-loss">
-                  <i class="ui-icon ui-close" aria-hidden="true"></i>Battle {step} failed
-                </span>
-            <% end %>
-          <% end %>
-        </td>
-        <td class="history-open">
-          <.link
-            id={"replay-battle-#{@battle.id}"}
-            navigate={preview_path(assigns, ~p"/battles/#{@battle.id}")}
-            class="history-replay"
-            aria-label={"Replay battle against #{opponent.name}"}
-          >
-            <i class="ui-icon ui-play" aria-hidden="true"></i>
-          </.link>
-        </td>
-      <% else %>
-        <td>
-          <span class={result_badge_class(@battle, @current_hero.id)}>
-            {result_badge_label(@battle, @current_hero.id)}
-          </span>
-        </td>
-        <td>
-          <img src={GH.image_url(opponent.avatar)} class="avatar img-border-xs" />
-          <br />
-          <span class="text-dark font-italic">{opponent.name}</span>
-        </td>
-        <td>
-          <%= if difficulty do %>
-            <span class={elem(difficulty, 1)}>{elem(difficulty, 0)}</span>
-            <br />
-          <% end %>
-          <%= if rewards do %>
-            <div>
-              <%= if rewards.xp > 0 do %>
-                <span class="badge badge-light-info">{rewards.xp} XP</span>
-              <% end %>
-              <%= if rewards.gold > 0 do %>
-                <span class="badge badge-light-warning">{rewards.gold}g</span>
-              <% end %>
-              <%= if rewards.pvp_points do %>
-                <span class={pvp_badge_class(rewards.pvp_points)}>{rewards.pvp_points} Arena Rating</span>
-              <% end %>
-            </div>
-          <% end %>
-          <%= if league_result do %>
-            <ul class="nav nav-pills nav-justified form-wizard-header flex-center">
-              <%= case league_result do %>
-                <% {:rank, tier} -> %>
-                  <img src={"/images/league/#{tier}.png"} class="mr-1 league-rank" />
-                <% {:step_win, step} -> %>
-                  <li class="nav-item">
-                    <a href="javascript:;" class="nav-link success">
-                      <span class="number"><i class="ui-icon ui-check" aria-hidden="true"></i></span>
-                      <span class="d-none d-sm-inline">{step}</span>
-                    </a>
-                  </li>
-                <% {:step_loss, step} -> %>
-                  <li class="nav-item">
-                    <a href="javascript:;" class="nav-link failure">
-                      <span class="number"><i class="ui-icon ui-close" aria-hidden="true"></i></span>
-                      <span class="d-none d-sm-inline">{step}</span>
-                    </a>
-                  </li>
-              <% end %>
-            </ul>
-          <% end %>
-        </td>
-        <td>
-          <span class="loading-text">{relative_time(@battle)}</span>
-        </td>
-      <% end %>
-    </tr>
-    """
-  end
+  defp relative_time(inserted_at), do: Timex.format!(inserted_at, "{relative}", :relative)
 end

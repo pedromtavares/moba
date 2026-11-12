@@ -310,6 +310,17 @@ defmodule MobaWeb.V2.ArenaLive do
   def handle_event("sell", _, socket), do: {:noreply, socket}
 
   def handle_event(
+        "forge",
+        %{"legendary_code" => legendary, "epic_code" => epic},
+        %{assigns: %{hero: hero, current_player: player}} = socket
+      )
+      when not is_nil(hero) and is_binary(legendary) and is_binary(epic) do
+    {:noreply, refresh_edit_hero(socket, player, Game.Items.forge_item!(player, hero, legendary, epic))}
+  end
+
+  def handle_event("forge", _, socket), do: {:noreply, socket}
+
+  def handle_event(
         "finish-transmute",
         %{"transmute_code" => transmute_code, "recipe_codes" => recipe_codes},
         %{assigns: %{hero: hero, current_player: player}} = socket

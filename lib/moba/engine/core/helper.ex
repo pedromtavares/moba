@@ -4,6 +4,8 @@ defmodule Moba.Engine.Core.Helper do
   """
 
   alias Moba.Engine
+  alias Moba.Game.Items
+  alias Moba.Game.Schema.Item
 
   @doc """
   Makes sure a Battler has MP (case the spell requires one) and that
@@ -12,6 +14,17 @@ defmodule Moba.Engine.Core.Helper do
   def can_use?(_, nil, _), do: false
 
   def can_use?(%{pulse_nova: nova}, %{code: "pulse_nova"}, :active) when not is_nil(nova), do: false
+
+  def can_use?(battler, %Item{} = item, :active) do
+    case owned_active_item(battler, item) do
+      nil ->
+        false
+
+      slot ->
+        %{energy: energy, cooldown_code: code} = Items.activation(slot)
+        ready?(battler, energy, battler.cooldowns[code])
+    end
+  end
 
   def can_use?(battler, resource, type) do
     resources =
@@ -36,9 +49,17 @@ defmodule Moba.Engine.Core.Helper do
         battler.cooldowns[resource.code]
       end
 
-    owned? &&
-      (is_nil(resource.mp_cost) || battler.current_mp >= resource.mp_cost) &&
-      (is_nil(cooldown) || cooldown + 1 <= 0)
+    owned? && ready?(battler, resource.mp_cost, cooldown)
+  end
+
+  def owned_active_item(battler, %Item{} = item) do
+    Enum.find(battler.active_items, &(&1.code == item.code && &1.id == item.id))
+  end
+
+  def owned_active_item(_battler, _item), do: nil
+
+  defp ready?(battler, cost, cooldown) do
+    (is_nil(cost) || battler.current_mp >= cost) && (is_nil(cooldown) || cooldown + 1 <= 0)
   end
 
   def should_use?(%{current_hp: hp, total_hp: max_hp}, %{code: "tranquil_boots"}, :active, nil)

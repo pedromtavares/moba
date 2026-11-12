@@ -1,0 +1,29 @@
+<% usable? = can_use?(@turn, @item)
+forged? = Map.has_key?(@item, :forged_epic)
+name = GH.item_display_name(@item)
+key = @index + 1 %>
+<div class={["img-container item-container float-left", forged? && "forged-battle-slot", !usable? && "inactive"]}>
+  <%= if usable? do %>
+    <% energy = Game.Items.activation(@item).energy %>
+    <.battle_resource_image
+      resource={@item}
+      phx-value-id={@item.id}
+      data-index={@index}
+      role={@preview && "button"}
+      tabindex={@preview && "0"}
+      aria-label={@preview && "Select #{name}"}
+      aria-pressed={@preview && "false"}
+      aria-keyshortcuts={to_string(key)}
+      phx-hook="InstaItem"
+      data-name={name}
+      class="item-img can-use"
+      id={"attacker-item-#{@item.id}"}
+    />
+    <span :if={energy > 0} class="badge badge-pill badge-primary mp-cost">{energy}</span>
+    <span class="hotkey item-hotkey f-rpg" aria-hidden="true">{key}</span>
+  <% else %>
+    <.battle_resource_image resource={@item} data-index={@index} class="item-img inactive" />
+    <.resource_status_badge preview={@preview} resource={@item} battler={@turn.attacker} />
+  <% end %>
+  <.forged_inset item={@item} />
+</div>

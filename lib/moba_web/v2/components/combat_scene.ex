@@ -3,6 +3,7 @@ defmodule MobaWeb.V2.Components.CombatScene do
 
   alias MobaWeb.V2.Components.GameHelpers, as: GH
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
+  alias Moba.Game.Items
   @generic_effects ~w(stunned silenced disarmed invulnerable physically_invulnerable charging evade)
 
   def build(battle, initial, next_turn, player) do
@@ -60,15 +61,14 @@ defmodule MobaWeb.V2.Components.CombatScene do
   defp build_details(hero, prepared, battle) do
     snapshot = battle.loadouts[to_string(hero.id)]
 
-    skills =
-      if snapshot,
-        do: Enum.map(snapshot["skills"], &Ecto.embedded_load(Moba.Game.Schema.Skill, &1, :json)),
-        else: prepared.active_skills ++ prepared.passive_skills
-
-    items =
-      if snapshot,
-        do: Enum.map(snapshot["items"], &Ecto.embedded_load(Moba.Game.Schema.Item, &1, :json)),
-        else: Enum.uniq_by(prepared.active_items ++ prepared.passive_items, & &1.id)
+    {skills, items} =
+      if snapshot do
+        loadout = GH.match_hero_loadout(hero, [battle])
+        {loadout.skills, Moba.Game.Items.item_slots(loadout)}
+      else
+        {prepared.active_skills ++ prepared.passive_skills,
+         Enum.uniq_by(prepared.active_items ++ prepared.passive_items, & &1.id)}
+      end
 
     %{
       tier: hero.league_tier || 0,
@@ -79,6 +79,30 @@ defmodule MobaWeb.V2.Components.CombatScene do
         |> Enum.map(&build_resource(&1, :skill)),
       items: Enum.map(items, &build_resource(&1, :item))
     }
+  end
+
+  defp build_resource(%{forged_epic: epic} = item, :item) do
+    cooldown_codes =
+      case Items.activation(item) do
+        nil -> []
+        activation -> Enum.map(activation.components, & &1.code)
+      end
+
+    passive_cooldown_codes =
+      for %{active: false, passive: true, cooldown: cooldown, code: code} <- Items.slot_items(item),
+          is_integer(cooldown) && cooldown > 0,
+          do: code
+
+    item
+    |> Map.delete(:forged_epic)
+    |> build_resource(:item)
+    |> Map.merge(%{
+      name: GH.item_display_name(item),
+      tooltip: TT.item_tooltip(item),
+      forgedEpic: GH.image_url(epic),
+      cooldownCodes: cooldown_codes,
+      passiveCooldownCodes: passive_cooldown_codes
+    })
   end
 
   defp build_resource(resource, type) do
@@ -121,7 +145,7 @@ defmodule MobaWeb.V2.Components.CombatScene do
       end
 
     skill = turn.skill || Moba.basic_attack()
-    action = if turn.item, do: "#{skill.name} + #{turn.item.name}", else: skill.name
+    action = if turn.item, do: "#{skill.name} + #{GH.item_display_name(turn.item)}", else: skill.name
     descriptions = Moba.Engine.effect_descriptions(turn)
 
     %{
@@ -158,7 +182,11 @@ defmodule MobaWeb.V2.Components.CombatScene do
       end)
 
     ([Moba.basic_attack(), Moba.evade()] ++ pools ++ Enum.flat_map(turns, &[&1.skill, &1.item]))
-    |> Enum.reject(&is_nil/1)
+    |> Enum.flat_map(fn
+      nil -> []
+      %{forged_epic: _} = slot -> Items.slot_items(slot)
+      resource -> [resource]
+    end)
     |> Map.new(&{&1.code, &1})
   end
 
@@ -201,7 +229,7 @@ defmodule MobaWeb.V2.Components.CombatScene do
       maxHp: max(battler.total_hp, 1),
       mp: max(0, min(round(battler.current_mp), battler.total_mp)),
       maxMp: max(battler.total_mp, 0),
-      cooldowns: Map.new(battler.cooldowns || %{}, fn {code, remaining} -> {code, max(remaining + 1, 0)} end),
+      cooldowns: display_cooldowns(battler),
       statuses: %{
         stunned: battler.stunned || false,
         silenced: battler.silenced || false,
@@ -230,6 +258,12 @@ defmodule MobaWeb.V2.Components.CombatScene do
       ],
       activeEffects: active_effects(battler, resources)
     }
+  end
+
+  defp display_cooldowns(battler) do
+    current = Map.new(battler.cooldowns || %{}, fn {code, remaining} -> {code, max(remaining + 1, 0)} end)
+    upcoming = Map.new(battler.future_cooldowns || %{}, fn {code, remaining} -> {code, max(remaining, 0)} end)
+    Map.merge(current, upcoming, fn _code, current, upcoming -> max(current, upcoming) end)
   end
 
   defp active_effects(battler, resources) do

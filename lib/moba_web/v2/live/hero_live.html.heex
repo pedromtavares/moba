@@ -122,7 +122,7 @@
                   <div class="row">
                     <div class="col-12 mt-1 d-flex justify-content-center">
                       <.hero_skill_strip skills={@hero.skills} id_prefix="skill" id_suffix={@hero.id} />
-                      <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
+                      <.hero_item_strip items={GH.sorted_item_slots(@hero)} id_prefix="item" id_suffix={@hero.id} />
                     </div>
                   </div>
                   <%= if @hero.player.user_id && @hero.player_id == @current_player.id do %>
@@ -434,6 +434,7 @@
   <% end %>
   <.hero_bar
     :if={@show_hud && @hero.player_id == @current_player.id}
+    forge_enabled={true}
     reorderable={true}
     preview={@preview}
     current_hero={@hero}

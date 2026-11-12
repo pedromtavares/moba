@@ -73,6 +73,7 @@ defmodule Moba.Game.Schema.Hero do
     field :item_power, :integer, default: 0
 
     many_to_many :items, Game.Schema.Item, join_through: Game.Schema.HeroItem, on_replace: :delete
+    has_many :forged_components, Game.Schema.HeroItem, where: [forged_into_id: {:not, nil}]
     many_to_many :skills, Game.Schema.Skill, join_through: Game.Schema.HeroSkill, on_replace: :delete
 
     has_many :targets, Game.Schema.Target, foreign_key: :attacker_id

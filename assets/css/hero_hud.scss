@@ -99,6 +99,7 @@
   .hud-skill-points strong { padding: 2px 8px; border: 1px solid #e5b85e77; border-radius: 5px; background: #e5b85e22; font-size: 19px; }
 
   .hud-inventory h3 { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 23px; }
+  .hud-inventory h3:has(.hud-shop-hotkey) { overflow: visible; }
   .toggle-shop { position: relative; border-color: #d3a54e88 !important; border-radius: 5px; padding: 6px 9px; font-size: 14px; letter-spacing: .04em; }
   .hud-shop-hotkey { top: -7px; left: -6px; }
   .toggle-shop.active-shop { background: #f0bf62; color: #241b0d !important; box-shadow: 0 0 15px #e5b85533; }

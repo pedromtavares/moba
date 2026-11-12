@@ -23,7 +23,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
     assert Enum.count(LazyHTML.query(LazyHTML.from_fragment(html), "a[href='/community']")) == 1
   end
 
-  test "alive, dead, farming and history share the same training overview", %{conn: conn} do
+  test "alive, dead and farming share the training overview", %{conn: conn} do
     hero = create_base_hero(%{pve_tier: 4, pve_current_turns: 3, refresh_targets_count: 2})
     conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, alive, _} = live(conn, "/training")
@@ -36,31 +36,24 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
         pve_farming_started_at: Timex.now()
       })
 
-      for path <- ["/training", "/battles"] do
-        {:ok, view, _} = live(conn, path)
-        header = view |> element(".training-header") |> render() |> LazyHTML.from_fragment()
+      {:ok, view, _} = live(conn, "/training")
+      header = view |> element(".training-header") |> render() |> LazyHTML.from_fragment()
 
-        assert LazyHTML.text(LazyHTML.query(header, ".ascent-heading h2, .ascent-track, .ascent-farm")) ==
-                 LazyHTML.text(LazyHTML.query(reference, ".ascent-heading h2, .ascent-track, .ascent-farm"))
+      assert LazyHTML.text(LazyHTML.query(header, ".ascent-heading h2, .ascent-track, .ascent-farm")) ==
+               LazyHTML.text(LazyHTML.query(reference, ".ascent-heading h2, .ascent-track, .ascent-farm"))
 
-        assert LazyHTML.attribute(LazyHTML.query(header, "img"), "src") ==
-                 LazyHTML.attribute(LazyHTML.query(reference, "img"), "src")
+      assert LazyHTML.attribute(LazyHTML.query(header, "img"), "src") ==
+               LazyHTML.attribute(LazyHTML.query(reference, "img"), "src")
 
-        if path == "/battles" do
-          assert has_element?(view, ".training-header #history-return-training[href='/training']")
-          refute has_element?(view, "#training-battle-log")
-        else
-          assert has_element?(view, ".training-header #training-battle-log[href='/battles']")
-          refute has_element?(view, "#history-return-training")
-        end
+      assert has_element?(view, ".training-header #training-battle-log[href='/battles']")
+      refute has_element?(view, "#history-return-training")
 
-        if path == "/training" && state != "dead" do
-          assert has_element?(view, ".training-header #training-refresh-targets[title='2 refreshes remaining']")
-          assert has_element?(view, ".training-header #show-farm-tabs[role=switch][checked]")
-        else
-          refute has_element?(view, "#training-refresh-targets")
-          refute has_element?(view, "#show-farm-tabs")
-        end
+      if state == "dead" do
+        refute has_element?(view, "#training-refresh-targets")
+        refute has_element?(view, "#show-farm-tabs")
+      else
+        assert has_element?(view, ".training-header #training-refresh-targets[title='2 refreshes remaining']")
+        assert has_element?(view, ".training-header #show-farm-tabs[role=switch][checked]")
       end
     end
   end
@@ -84,11 +77,14 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
   test "history header returns to training in the same preview scope", %{conn: conn} do
     hero = create_base_hero(%{pve_tier: 4})
     conn = log_in_player(conn, player_id: hero.player_id)
-    {:ok, history, _} = live(conn, "/battles")
+    {:ok, training, _} = live(conn, "/training")
+
+    {:ok, history, _} =
+      training |> element("#training-battle-log") |> render_click() |> follow_redirect(conn, "/battles")
 
     {:ok, training, _} =
       history
-      |> element(".training-header #history-return-training")
+      |> element("#history-return-training")
       |> render_click()
       |> follow_redirect(conn, "/training")
 
@@ -159,7 +155,7 @@ defmodule MobaWeb.V2.TrainingHeaderLiveTest do
     hero = create_base_hero(%{pve_tier: 4, league_tier: 6, pve_current_turns: 0})
     conn = log_in_player(conn, player_id: hero.player_id)
     {:ok, history, _} = live(conn, "/battles")
-    assert has_element?(history, "#training-ascent-status", "Grandmaster reached")
+    assert has_element?(history, ".history-heading", "Grandmaster")
     refute has_element?(history, "img[src='/images/league/7.png']")
   end
 end

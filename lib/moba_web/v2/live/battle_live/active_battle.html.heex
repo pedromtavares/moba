@@ -12,7 +12,7 @@
         turn={@turn}
         skill={@skill}
         turn_timer={@turn_timer}
-        hero={@battle.attacker}
+        hero={GH.match_hero_loadout(@battle.attacker, [@battle])}
       />
     <% else %>
       <.passive_turn
@@ -23,7 +23,7 @@
         turn={@turn}
         skill={@skill}
         turn_timer={@turn_timer}
-        hero={@battle.attacker}
+        hero={GH.match_hero_loadout(@battle.attacker, [@battle])}
       />
     <% end %>
   </div>
@@ -43,7 +43,7 @@
         turn={@turn}
         skill={@skill}
         turn_timer={@turn_timer}
-        hero={@battle.defender}
+        hero={GH.match_hero_loadout(@battle.defender, [@battle])}
       />
     <% else %>
       <.passive_turn
@@ -54,7 +54,7 @@
         turn={@turn}
         skill={@skill}
         turn_timer={@turn_timer}
-        hero={@battle.defender}
+        hero={GH.match_hero_loadout(@battle.defender, [@battle])}
       />
     <% end %>
   </div>

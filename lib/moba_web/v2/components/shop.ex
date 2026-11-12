@@ -65,6 +65,94 @@ defmodule MobaWeb.V2.Components.Shop do
     """
   end
 
+  attr :items, :list, required: true
+  attr :costs, :map, required: true
+  attr :selected, :map, default: nil
+  attr :id_prefix, :string, required: true
+  attr :event_target, :any, required: true
+
+  def forge_picker(assigns) do
+    ~H"""
+    <section
+      id={GH.dom_id(@id_prefix, "forge-picker")}
+      class="shop-shelf shop-forge-picker is-current"
+      data-rarity="epic"
+      aria-labelledby={GH.dom_id(@id_prefix, "forge-picker-title")}
+    >
+      <div id={GH.dom_id(@id_prefix, "forge-choices")} class="shop-forge-grid" phx-mounted={JS.focus_first()}>
+        <%= for item <- @items do %>
+          <% cost = @costs[item.code]
+          selected? = @selected && @selected.code == item.code %>
+          <button
+            id={GH.dom_id(@id_prefix, "forge-epic-#{item.code}")}
+            type="button"
+            class={["shop-tile shop-forge-choice", selected? && "is-selected"]}
+            phx-click="choose-forge-epic"
+            phx-value-code={item.code}
+            phx-target={@event_target}
+            disabled={is_nil(cost)}
+            aria-pressed={to_string(!!selected?)}
+          >
+            <span class="shop-forge-choice-art">
+              <img src={GH.image_url(item)} alt="" />
+            </span>
+            <span class="shop-forge-choice-info">
+              <span class="shop-forge-choice-name">{item.name}</span>
+              <span class="shop-forge-choice-price">
+                <%= if is_integer(cost) && cost != 0 do %>
+                  <span :if={cost < 0} class="shop-forge-price-label">Refund</span>
+                  <span class="shop-forge-gold">
+                    <.icon name="game-gold" />
+                    <strong>{abs(cost)}</strong> <span class="shop-forge-price-label">gold</span>
+                  </span>
+                <% else %>
+                  <span class="shop-forge-price-label">{forge_cost_label(cost)}</span>
+                <% end %>
+              </span>
+            </span>
+          </button>
+        <% end %>
+      </div>
+    </section>
+    """
+  end
+
+  attr :legendary, :map, required: true
+  attr :epic, :map, default: nil
+  attr :id_prefix, :string, required: true
+
+  def forge_showcase(assigns) do
+    ~H"""
+    <div class="shop-item-showcase shop-forge-showcase" data-forge-preview={to_string(!is_nil(@epic))}>
+      <div class="shop-forge-sockets" aria-hidden="true">
+        <div class="shop-forge-socket" data-rarity="legendary">
+          <img src={GH.image_url(@legendary)} alt="" />
+        </div>
+        <.icon name="game-plus" class="shop-forge-join" />
+        <div class={["shop-forge-socket", !@epic && "is-empty"]} data-rarity="epic">
+          <%= if @epic do %>
+            <img id={GH.dom_id(@id_prefix, "forge-preview-#{@epic.code}")} src={GH.image_url(@epic)} alt="" />
+          <% else %>
+            <span>Epic</span>
+          <% end %>
+        </div>
+      </div>
+      <div class="shop-item-identity" aria-live="polite">
+        <span class="shop-eyebrow">{if @epic, do: "Forged Legendary", else: "Forge"}</span>
+        <h3 id={GH.dom_id(@id_prefix, "shop-detail-name")} class="shop-detail-name">
+          {if @epic, do: "Forged #{@legendary.name}", else: @legendary.name}
+        </h3>
+        <p :if={@epic} class="shop-forged-epic">+ {@epic.name}</p>
+      </div>
+    </div>
+    """
+  end
+
+  def forge_cost_label(nil), do: "Already forged"
+  def forge_cost_label(cost) when cost < 0, do: "Refund #{-cost} gold"
+  def forge_cost_label(0), do: "Free"
+  def forge_cost_label(cost), do: "#{cost} gold"
+
   attr :item, :map, required: true
   attr :id_prefix, :string, required: true
   attr :transmuting, :boolean, default: false
@@ -81,9 +169,15 @@ defmodule MobaWeb.V2.Components.Shop do
       />
       <div class="shop-item-identity">
         <span class="shop-eyebrow">
-          {if @transmuting, do: "Transmute", else: String.capitalize(@item.rarity)}<span class="shop-item-kind">{if @item.active, do: "Active item", else: "Passive item"}</span>
+          {if @transmuting, do: "Transmute", else: GH.item_rarity_name(@item)}
+          <span :if={!Map.has_key?(@item, :forged_epic)} class="shop-item-kind">
+            {if @item.active, do: "Active item", else: "Passive item"}
+          </span>
         </span>
-        <h3 id={GH.dom_id(@id_prefix, "shop-detail-name")} class="shop-detail-name">{@item.name}</h3>
+        <h3 id={GH.dom_id(@id_prefix, "shop-detail-name")} class="shop-detail-name">
+          {if Map.has_key?(@item, :forged_epic), do: "Forged #{@item.name}", else: @item.name}
+        </h3>
+        <p :if={epic = Map.get(@item, :forged_epic)} class="shop-forged-epic">+ {epic.name}</p>
       </div>
     </div>
     """

@@ -200,28 +200,41 @@
             aria-label={"#{unit.name} items"}
             hidden={unit.build.items == []}
           >
-            <span
-              :for={item <- unit.build.items}
-              class="stage-build-resource"
-              data-build-code={item.code}
-              data-cooling={to_string(Map.get(unit.cooldowns, item.code, 0) > 0)}
-            >
-              <img
-                id={"stage-build-#{unit.side}-item-#{item.id}"}
-                src={item.image}
-                alt={item.name}
-                data-toggle="tooltip"
-                title={item.tooltip}
-                tabindex="0"
-              />
+            <%= for item <- unit.build.items do %>
+              <% codes = item[:cooldownCodes] || [item.code]
+              passive_codes = item[:passiveCooldownCodes] || []
+              active_remaining = build_cooldown(unit.cooldowns, codes)
+              passive_remaining = build_cooldown(unit.cooldowns, passive_codes)
+              passive? = active_remaining == 0 && passive_remaining > 0
+              remaining = if passive?, do: passive_remaining, else: active_remaining %>
               <span
-                data-build-cooldown
-                hidden={Map.get(unit.cooldowns, item.code, 0) == 0}
-                aria-label={"#{item.name} cooldown in turns"}
+                class={["stage-build-resource", item[:forgedEpic] && "forged-item-slot"]}
+                data-build-code={item.code}
+                data-cooldown-codes={item[:cooldownCodes] && Enum.join(codes, ",")}
+                data-passive-cooldown-codes={passive_codes != [] && Enum.join(passive_codes, ",")}
+                data-cooling={to_string(active_remaining > 0 || (codes == [] && passive?))}
               >
-                {Map.get(unit.cooldowns, item.code, 0)}
+                <img
+                  id={"stage-build-#{unit.side}-item-#{item.id}"}
+                  src={item.image}
+                  alt={item.name}
+                  data-toggle="tooltip"
+                  title={item.tooltip}
+                  tabindex="0"
+                />
+                <span
+                  data-build-cooldown
+                  data-cooldown-kind={if passive?, do: "passive"}
+                  hidden={remaining == 0}
+                  aria-label={"#{item.name} #{if passive?, do: "passive "}cooldown in turns"}
+                >
+                  {remaining}
+                </span>
+                <span :if={item[:forgedEpic]} class="forged-item-inset" aria-hidden="true">
+                  <img src={item.forgedEpic} alt="" />
+                </span>
               </span>
-            </span>
+            <% end %>
           </div>
         </div>
       </div>

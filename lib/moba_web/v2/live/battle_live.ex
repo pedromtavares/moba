@@ -256,7 +256,6 @@ defmodule MobaWeb.V2.BattleLive do
 
   defp active_defender?(_, _, _), do: false
 
-  defp can_use?(_, %Game.Schema.Item{active: false}), do: false
   defp can_use?(_, %Game.Schema.Skill{passive: true}), do: false
   defp can_use?(turn, resource), do: Engine.can_use_resource?(turn, resource)
 
@@ -264,8 +263,14 @@ defmodule MobaWeb.V2.BattleLive do
   defp skill_name(skill), do: (skill && skill["name"]) || "Basic Attack"
 
   defp item_name(nil), do: ""
-  defp item_name(%{name: name}), do: "and #{name}"
+  defp item_name(%{name: _} = item), do: "and #{GH.item_display_name(item)}"
   defp item_name(item), do: "and #{item["name"]}"
+
+  defp build_cooldown(cooldowns, codes) do
+    codes
+    |> Enum.map(&Map.get(cooldowns, &1, 0))
+    |> Enum.max(fn -> 0 end)
+  end
 
   defp competitive_result(battle, player) do
     final? = final_duel_battle?(battle)
@@ -460,6 +465,8 @@ defmodule MobaWeb.V2.BattleLive do
     |> TT.skill_tooltip()
   end
 
+  defp turn_item_description(%{item: %{forged_epic: _} = item}), do: TT.item_tooltip(item)
+
   defp turn_item_description(turn) do
     item = struct_from_map(turn.item, as: %Game.Schema.Item{})
     %{item | name: "#{turn.attacker.name} activated #{item.name}"} |> TT.item_tooltip()
@@ -505,13 +512,6 @@ defmodule MobaWeb.V2.BattleLive do
   defp skill_hotkey(2), do: "E"
   defp skill_hotkey(3), do: "R"
   defp skill_hotkey(4), do: "F"
-
-  defp item_hotkey(0), do: "1"
-  defp item_hotkey(1), do: "2"
-  defp item_hotkey(2), do: "3"
-  defp item_hotkey(3), do: "4"
-  defp item_hotkey(4), do: "5"
-  defp item_hotkey(5), do: "6"
 
   defp show_step(%{league_tier: tier}, step), do: step <= Game.max_league_step_for(tier)
 

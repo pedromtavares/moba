@@ -6,11 +6,18 @@
   data-selected-rarity={@selected_shop && @selected_shop.rarity}
   data-recipe-rarity={@transmute && Game.previous_item_rarity(@transmute)}
   data-recipe-count={@transmute && ingredients_count_for(@transmute)}
+  data-forging={to_string(@forging)}
 >
   <img class="shop-backdrop" src={GH.background_url(@current_hero)} alt="" aria-hidden="true" />
   <header class="shop-heading">
     <div class="shop-heading-copy">
-      <h2 id={GH.dom_id(@id_prefix, "shop-title")}>Shop<span class="shop-heading-rule"></span></h2>
+      <h2 id={GH.dom_id(@id_prefix, "shop-title")}>
+        Shop
+        <span :if={@forging} id={GH.dom_id(@id_prefix, "forge-picker-title")} class="shop-forge-picker-title">
+          Choose an Epic
+        </span>
+        <span class="shop-heading-rule"></span>
+      </h2>
     </div>
     <p class="shop-keyboard-hint" aria-label="Use arrow keys to browse and Space for the selected action">
       <kbd>←</kbd><kbd>↑</kbd><kbd>↓</kbd><kbd>→</kbd> Browse <span></span><kbd>SPACE</kbd> Action
@@ -32,105 +39,120 @@
   </header>
 
   <div class="shop-workspace">
-    <nav class="shop-shelves" aria-label="Shop rarities and inventory">
-      <section
-        id={GH.dom_id(@id_prefix, "inventory")}
-        class={["shop-shelf shop-inventory", @selected_category == "inventory" && "is-current"]}
-        data-rarity="inventory"
-      >
-        <button
-          type="button"
-          id={GH.dom_id(@id_prefix, "shop-category-inventory")}
-          class="shop-shelf-label"
-          phx-click="select-category"
-          phx-value-rarity="inventory"
-          phx-target={@myself}
-          aria-pressed={to_string(@selected_category == "inventory")}
-        >
-          <span>Inventory</span><small>{length(@current_hero.items)} / 6 slots</small>
-        </button>
-        <div
-          class="shop-miniatures"
-          id={GH.dom_id(@id_prefix, "shop-inventory-order")}
-          phx-hook="InventoryOrder"
-          data-inventory-order="true"
-          data-hero-id={@current_hero.id}
-          data-reorderable={to_string(@reorderable)}
-          data-order-status={GH.dom_id(@id_prefix, "shop-inventory-status")}
-          role="group"
-          aria-label="Inventory items"
-        >
-          <button
-            :for={item <- Game.inventory_items(@current_hero)}
-            type="button"
-            id={GH.dom_id(@id_prefix, "transmute-#{item.id}")}
-            class={[
-              "shop-tile inventory-item",
-              !can_select_inventory(item, @transmute, @recipe) && "is-unavailable",
-              ((@selected_inventory && @selected_inventory.code == item.code) || item in @recipe) && "is-selected"
-            ]}
-            aria-label={item.name}
-            aria-pressed={
-              to_string((@selected_inventory && @selected_inventory.code == item.code) || item in @recipe || false)
-            }
-            disabled={!@reorderable && !can_select_inventory(item, @transmute, @recipe)}
-            aria-disabled={to_string(!can_select_inventory(item, @transmute, @recipe))}
-            aria-keyshortcuts={@reorderable && "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown"}
-            data-item-code={item.code}
-            data-item-name={item.name}
-            phx-click="select-inventory"
-            phx-value-code={item.code}
-            data-rarity={item.rarity}
-            phx-target={@myself}
-          >
-            <img
-              src={GH.image_url(item)}
-              alt=""
-              class="tooltip-mobile"
-              data-toggle="tooltip"
-              title={TT.item_tooltip(item)}
-              draggable="false"
-            />
-            <span :if={item in @recipe} class="shop-owned" aria-label="Ingredient selected">✓</span>
-          </button>
-          <div
-            :for={_ <- List.duplicate(nil, max(0, 6 - length(@current_hero.items)))}
-            class="shop-empty-slot"
-            aria-label="Empty inventory slot"
-          >
-            <span>+</span>
-          </div>
-        </div>
-        <span
-          id={GH.dom_id(@id_prefix, "shop-inventory-status")}
-          class="sr-only"
-          role="status"
-          aria-live="polite"
-          phx-update="ignore"
-        >
-        </span>
-      </section>
-
-      <Shop.shelf
-        :for={rarity <- categories()}
-        rarity={rarity}
-        items={rarity_filter(@items, rarity)}
-        selected_category={@selected_category}
-        selected_item={@selected_shop}
-        owned_items={@current_hero.items}
+    <%= if @forging do %>
+      <Shop.forge_picker
+        items={@forge_epics}
+        costs={@forge_costs}
+        selected={@forge_epic}
         id_prefix={@id_prefix}
         event_target={@myself}
       />
-    </nav>
+    <% else %>
+      <nav class="shop-shelves" aria-label="Shop rarities and inventory">
+        <section
+          id={GH.dom_id(@id_prefix, "inventory")}
+          class={["shop-shelf shop-inventory", @selected_category == "inventory" && "is-current"]}
+          data-rarity="inventory"
+        >
+          <button
+            type="button"
+            id={GH.dom_id(@id_prefix, "shop-category-inventory")}
+            class="shop-shelf-label"
+            phx-click="select-category"
+            phx-value-rarity="inventory"
+            phx-target={@myself}
+            aria-pressed={to_string(@selected_category == "inventory")}
+          >
+            <span>Inventory</span><small>{length(@slots)} / 6 slots</small>
+          </button>
+          <div
+            class="shop-miniatures"
+            id={GH.dom_id(@id_prefix, "shop-inventory-order")}
+            phx-hook="InventoryOrder"
+            data-inventory-order="true"
+            data-hero-id={@current_hero.id}
+            data-reorderable={to_string(@reorderable)}
+            data-order-status={GH.dom_id(@id_prefix, "shop-inventory-status")}
+            role="group"
+            aria-label="Inventory items"
+          >
+            <button
+              :for={item <- @slots}
+              type="button"
+              id={GH.dom_id(@id_prefix, "transmute-#{item.id}")}
+              class={[
+                "shop-tile inventory-item",
+                !can_select_inventory(item, @transmute, @recipe) && "is-unavailable",
+                ((@selected_inventory && @selected_inventory.code == item.code) || item in @recipe) && "is-selected"
+              ]}
+              aria-label={GH.item_display_name(item)}
+              aria-pressed={
+                to_string((@selected_inventory && @selected_inventory.code == item.code) || item in @recipe || false)
+              }
+              disabled={!@reorderable && !can_select_inventory(item, @transmute, @recipe)}
+              aria-disabled={to_string(!can_select_inventory(item, @transmute, @recipe))}
+              aria-keyshortcuts={@reorderable && "Alt+ArrowLeft Alt+ArrowRight Alt+ArrowUp Alt+ArrowDown"}
+              data-item-code={item.code}
+              data-item-name={GH.item_display_name(item)}
+              phx-click="select-inventory"
+              phx-value-code={item.code}
+              data-rarity={GH.item_display_rarity(item)}
+              phx-target={@myself}
+            >
+              <img
+                src={GH.image_url(item)}
+                alt=""
+                class="tooltip-mobile"
+                data-toggle="tooltip"
+                title={TT.item_tooltip(item)}
+                draggable="false"
+              />
+              <.forged_inset item={item} />
+              <span :if={item in @recipe} class="shop-owned" aria-label="Ingredient selected">✓</span>
+            </button>
+            <div
+              :for={_ <- List.duplicate(nil, max(0, 6 - length(@slots)))}
+              class="shop-empty-slot"
+              aria-label="Empty inventory slot"
+            >
+              <span>+</span>
+            </div>
+          </div>
+          <span
+            id={GH.dom_id(@id_prefix, "shop-inventory-status")}
+            class="sr-only"
+            role="status"
+            aria-live="polite"
+            phx-update="ignore"
+          >
+          </span>
+        </section>
+
+        <Shop.shelf
+          :for={rarity <- categories()}
+          rarity={rarity}
+          items={rarity_filter(@items, rarity)}
+          selected_category={@selected_category}
+          selected_item={@selected_shop}
+          owned_items={@current_hero.items}
+          id_prefix={@id_prefix}
+          event_target={@myself}
+        />
+      </nav>
+    <% end %>
 
     <section
       id={GH.dom_id(@id_prefix, "shop-detail")}
       class="shop-detail"
-      data-rarity={@detail_item && @detail_item.rarity}
+      data-rarity={@detail_item && GH.item_display_rarity(@detail_item)}
       aria-label="Selected item details"
     >
       <%= if @detail_item do %>
-        <Shop.item_showcase item={@detail_item} id_prefix={@id_prefix} transmuting={not is_nil(@transmute)} />
+        <%= if @forging do %>
+          <Shop.forge_showcase legendary={@selected_inventory} epic={@forge_epic} id_prefix={@id_prefix} />
+        <% else %>
+          <Shop.item_showcase item={@detail_item} id_prefix={@id_prefix} transmuting={not is_nil(@transmute)} />
+        <% end %>
 
         <div class="shop-item-description" data-detail-tab={@detail_tab}>
           <div class="shop-inspect-tabs" aria-label="Item information">
@@ -152,6 +174,43 @@
 
         <div class="shop-detail-bottom">
           <%= cond do %>
+            <% @forging -> %>
+              <% cost = @forge_epic && @forge_costs[@forge_epic.code] %>
+              <.form
+                for={to_form(%{})}
+                id={GH.dom_id(@id_prefix, "shop-forge-form")}
+                phx-submit="forge"
+                class="shop-forge-form"
+                {target_attrs(@event_target, @hero_id)}
+              >
+                <input type="hidden" name="legendary_code" value={@selected_inventory.code} />
+                <input type="hidden" name="epic_code" value={@forge_epic && @forge_epic.code} />
+                <p :if={cost && cost > @current_hero.gold} class="shop-action-hint">
+                  {cost - @current_hero.gold} more gold needed
+                </p>
+                <div class="shop-detail-actions">
+                  <button
+                    type="submit"
+                    class="shop-primary"
+                    id={GH.dom_id(@id_prefix, "finish-forge")}
+                    disabled={is_nil(cost) || cost > @current_hero.gold}
+                  >
+                    <span class="loading-text">
+                      {if Map.has_key?(@selected_inventory, :forged_epic), do: "Swap Epic", else: "Forge"}{cost &&
+                        " · #{String.downcase(Shop.forge_cost_label(cost))}"}
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    class="shop-secondary"
+                    id={GH.dom_id(@id_prefix, "cancel-forge")}
+                    phx-click="cancel-forge"
+                    phx-target={@myself}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </.form>
             <% @transmute -> %>
               <div class="shop-recipe">
                 <p id={GH.dom_id(@id_prefix, "transmute-instructions")}>{transmute_instructions_for(@transmute)}</p>
@@ -203,21 +262,42 @@
                 </button>
               </div>
             <% @selected_inventory -> %>
-              <p class="shop-action-hint">Sell this item to free an inventory slot.</p>
-              <button
-                type="button"
-                class="shop-secondary shop-sell"
-                phx-click="sell"
-                phx-value-code={@selected_inventory.code}
-                id={GH.dom_id(@id_prefix, "sell-#{@selected_inventory.id}")}
-                {target_attrs(@event_target, @hero_id)}
-              >
-                Sell for
-                <i class="ui-icon ui-coins" aria-hidden="true"></i> {Game.item_sell_price(
-                  @current_hero,
-                  @selected_inventory
-                )}
-              </button>
+              <p class="shop-action-hint">
+                <%= cond do %>
+                  <% Map.has_key?(@selected_inventory, :forged_epic) -> %>
+                    Selling refunds both items and the forge fee.
+                  <% @forge_enabled && Items.forge_available?(@current_hero, @selected_inventory) -> %>
+                    Combine this Legendary with an Epic in one slot.
+                  <% true -> %>
+                    Sell this item to free an inventory slot.
+                <% end %>
+              </p>
+              <div class="shop-detail-actions">
+                <button
+                  :if={@forge_enabled && Items.forge_available?(@current_hero, @selected_inventory)}
+                  type="button"
+                  class="shop-primary"
+                  id={GH.dom_id(@id_prefix, "start-forge")}
+                  phx-click="start-forge"
+                  phx-target={@myself}
+                >
+                  {if Map.has_key?(@selected_inventory, :forged_epic), do: "Swap Epic", else: "Forge"}
+                </button>
+                <button
+                  type="button"
+                  class="shop-secondary shop-sell"
+                  phx-click="sell"
+                  phx-value-code={@selected_inventory.code}
+                  id={GH.dom_id(@id_prefix, "sell-#{@selected_inventory.id}")}
+                  {target_attrs(@event_target, @hero_id)}
+                >
+                  Sell for
+                  <i class="ui-icon ui-coins" aria-hidden="true"></i> {Game.item_sell_price(
+                    @current_hero,
+                    @selected_inventory
+                  )}
+                </button>
+              </div>
             <% true -> %>
               <p
                 :if={purchase_hint(@current_hero, @selected_shop)}

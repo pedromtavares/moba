@@ -63,6 +63,7 @@ defmodule Moba.Constants do
       @buyback_multiplier 10
       @refresh_targets_count 5
       @max_total_farm 60_000
+      @max_hero_level 30
       @seconds_per_turn 2
       @max_pve_tier 7
       @pve_ranking_limit 200
@@ -114,6 +115,7 @@ defmodule Moba.Constants do
       def buyback_multiplier, do: @buyback_multiplier
       def refresh_targets_count, do: @refresh_targets_count
       def max_total_farm, do: @max_total_farm
+      def max_hero_level, do: @max_hero_level
       def seconds_per_turn, do: @seconds_per_turn
       def farm_per_turn(0), do: 800..1200
       def farm_per_turn(1), do: 850..1200

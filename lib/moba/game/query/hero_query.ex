@@ -22,6 +22,7 @@ defmodule Moba.Game.Query.HeroQuery do
       :items,
       :avatar,
       :skin,
+      forged_components: :forged_into,
       player: :user,
       skills: ^SkillQuery.ordered()
     ])

@@ -36,8 +36,6 @@
   .team-reward-mode:focus-visible { outline: none; }
   .team-reward-mode:focus-visible .team-reward-track { outline: 2px solid #edcc90; outline-offset: 4px; }
   .team-reward-mode:disabled { opacity: .5; cursor: default; }
-  .team-encounter-log { display: grid; gap: 4px; max-height: 280px; overflow: hidden auto; padding: 18px 24px; margin-top: 16px; border: 1px solid #c0ab7840; border-radius: 8px; background: #0b1725; }
-  .team-encounter-log a { display: flex; justify-content: space-between; padding: 9px; color: #d5c090; font-size: 16px; }
   .team-pending { margin-top: 20px; }
   .team-last-result { display: flex; gap: 16px; align-items: center; padding: 18px 24px; color: #e2c48e; border: 1px solid #b5a16e44; border-radius: 8px; background: #11203099; margin-top: 20px; }
   .team-last-result strong { display: block; margin-bottom: 12px; }

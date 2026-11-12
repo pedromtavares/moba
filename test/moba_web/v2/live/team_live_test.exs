@@ -62,14 +62,64 @@ defmodule MobaWeb.V2.TeamLiveTest do
 
     {:ok, view, _} = live(conn, "/training?run=#{record.id}")
     assert has_element?(view, "#team-targets[data-hero='1']")
-    render_click(view, "show-log")
-    refute has_element?(view, "#team-replay-#{orphan.id}")
-    refute has_element?(view, "#team-replay-#{broken.id}")
+    assert has_element?(view, "#team-battle-log[href='/battles?run=#{record.id}']")
+    {:ok, history, _} = view |> element("#team-battle-log") |> render_click() |> follow_redirect(conn)
+    refute has_element?(history, "#team-replay-#{orphan.id}")
+    refute has_element?(history, "#team-replay-#{broken.id}")
     assert TeamRuns.state(TeamRuns.get!(scope, record.id)).heroes == before.heroes
 
+    {:ok, view, _} = history |> element("#history-return-training") |> render_click() |> follow_redirect(conn)
     view |> element("#gank-#{hd(before.targets[1]).id}") |> render_click()
     assert [encounter] = TeamRuns.encounters(scope, record.id)
     assert_redirect(view, TrainingEncounters.path(encounter, 1))
+  end
+
+  test "battle history keeps the team’s rewards, pending challenge, and replay links", %{
+    conn: conn,
+    scope: scope,
+    player: player
+  } do
+    record = team_run(scope, player)
+
+    {:ok, record} =
+      TeamRuns.update(scope, record, fn run ->
+        run = easy_target(run)
+        run |> TeamTraining.battle(hd(run.targets[1]).id) |> finish_team(scope)
+      end)
+
+    {:ok, record} =
+      TeamRuns.update(scope, record, fn run ->
+        heroes =
+          Map.new(run.heroes, fn {id, unit} ->
+            {id, put_in(unit.hero.skill_levels_available, 0)}
+          end)
+
+        TeamTraining.league(%{run | turns_left: 0, heroes: heroes})
+      end)
+
+    [farm, league] = TeamRuns.encounters(scope, record.id)
+    history_path = "/battles?run=#{record.id}"
+    training_path = "/training?run=#{record.id}"
+    {:ok, training, _} = live(conn, training_path)
+    assert has_element?(training, "#team-battle-log[href='#{history_path}']")
+
+    {:ok, history, _} =
+      training |> element("#team-battle-log") |> render_click() |> follow_redirect(conn, history_path)
+
+    assert has_element?(history, "#history-return-training[href='#{training_path}']")
+    assert has_element?(history, "#encounter-#{farm.id} .history-opponent", farm.opponent.name)
+    assert has_element?(history, "#encounter-#{farm.id} .history-outcome", "WIN")
+    assert farm.reward_totals.gold > 0
+    assert has_element?(history, "#encounter-#{farm.id} .history-gold", "+#{farm.reward_totals.gold}g")
+    assert has_element?(history, "#team-replay-#{farm.id}[href='/battles/#{hd(farm.battle_ids)}']")
+
+    history |> element("#history-league-title") |> render_click()
+    assert has_element?(history, "#history-league-section:not([hidden]) #encounter-#{league.id}", "IN PROGRESS")
+    assert has_element?(history, "#team-replay-#{league.id}[href='/matches/#{league.match_id}']")
+
+    other = create_player!()
+    foreign_conn = Phoenix.ConnTest.build_conn() |> log_in_player(player_id: other.id)
+    assert {:error, {:live_redirect, %{to: "/base"}}} = live(foreign_conn, history_path)
   end
 
   test "an unreadable run offers a way back to Base and a fresh draft", %{conn: conn, scope: scope, player: player} do

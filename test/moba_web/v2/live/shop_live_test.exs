@@ -2,6 +2,91 @@ defmodule MobaWeb.V2.ShopLiveTest do
   use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
+  test "finished hero customization forges, displays, swaps and sells multiple pairs independently", %{conn: conn} do
+    hero = create_base_hero(%{gold: 35_200, finished_at: Timex.now(), league_tier: 6})
+    hero = Enum.reduce(full_legendary_inventory(), hero, &Game.buy_item!(&2, &1))
+    active_hero = create_base_hero(%{}, Game.get_player!(hero.player_id))
+    refute active_hero.id == hero.id
+    legendary = Game.get_item_by_code!("scythe_of_vyse")
+    second_legendary = Game.get_item_by_code!("orchid_malevolence")
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/hero/#{hero.id}")
+    view |> element("#customize-hero") |> render_click()
+    view |> element("#inventory-#{legendary.id}") |> render_click()
+    view |> element("#start-forge") |> render_click()
+    assert has_element?(view, "#shop-title #forge-picker-title", "Choose an Epic")
+    assert has_element?(view, "#forge-picker[aria-labelledby=forge-picker-title]")
+    assert has_element?(view, ".shop-forge-socket.is-empty")
+    assert has_element?(view, "#finish-forge[disabled]", "Forge")
+    refute has_element?(view, "#shop-forge-form select")
+    view |> element("#forge-epic-soul_booster") |> render_click()
+    assert has_element?(view, "#forge-epic-soul_booster[aria-pressed=true]", "3200 gold")
+    assert has_element?(view, "#forge-preview-soul_booster")
+    assert has_element?(view, "#shop-detail .shop-eyebrow", "Forged Legendary")
+    assert has_element?(view, "#shop-detail-description .forged-item-tooltip-component", "Soul Booster")
+    assert has_element?(view, "#finish-forge", "Forge · 3200 gold")
+    assert Game.get_hero!(hero.id).gold == 6_400
+    view |> form("#shop-forge-form") |> render_submit()
+
+    assert has_element?(view, "#shop-gold", "3200")
+    assert has_element?(view, "#shop-modal.d-block")
+    assert has_element?(view, "#inventory", "6 / 6 slots")
+    assert has_element?(view, "#inventory-#{legendary.id}[data-rarity=forged-legendary] .forged-item-inset")
+    assert has_element?(view, "#start-forge", "Swap Epic")
+    refute has_element?(view, "#shop-inventory-order [data-item-code=soul_booster]")
+
+    view |> element("#inventory-#{second_legendary.id}") |> render_click()
+    view |> element("#start-forge") |> render_click()
+    assert has_element?(view, "#forge-epic-soul_booster[disabled]", "Already forged")
+    view |> element("#forge-epic-octarine_core") |> render_click()
+    assert has_element?(view, "#shop-detail-description [data-kind=energy]", "25 Energy")
+    assert has_element?(view, "#shop-detail-description [data-kind=cooldown]", "6 turns")
+    view |> form("#shop-forge-form") |> render_submit()
+    assert Game.get_hero!(hero.id).gold == 0
+    assert has_element?(view, "#inventory", "6 / 6 slots")
+    assert has_element?(view, "#inventory-#{second_legendary.id}[data-rarity=forged-legendary]")
+
+    epic = Game.get_item_by_code!("soul_booster")
+    second_epic = Game.get_item_by_code!("octarine_core")
+    battle = create_basic_battle(Game.get_hero!(hero.id), create_combat_hero())
+    {:ok, battle_view, _} = live(log_in_player(conn, player_id: hero.player_id), "/battles/#{battle.id}")
+    assert has_element?(battle_view, ".forged-battle-slot #attacker-item-#{legendary.id}")
+    assert has_element?(battle_view, ".forged-battle-slot #attacker-item-#{second_legendary.id}")
+    refute has_element?(battle_view, "#attacker-item-#{epic.id}, #attacker-item-#{second_epic.id}")
+    refute has_element?(battle_view, ".forged-battle-slot [aria-keyshortcuts^='Shift']")
+
+    html = battle_view |> render() |> LazyHTML.from_fragment()
+    assert Enum.count(LazyHTML.query(html, ".forged-battle-slot .item-img.can-use")) == 2
+
+    assert has_element?(battle_view, "#stage-build-left-item-#{legendary.id}[title*='Forged Legendary']")
+    assert has_element?(battle_view, ".stage-build-items [data-build-code=scythe_of_vyse] .forged-item-inset")
+    refute has_element?(battle_view, ".stage-build-items .forged-item-inset [data-build-cooldown]")
+
+    view |> element("#close-button") |> render_click()
+    render_click(view, "start-edit")
+    assert has_element?(view, "select[name='item_order[scythe_of_vyse]']")
+    refute has_element?(view, "select[name='item_order[soul_booster]']")
+    render_click(view, "cancel-edit")
+
+    view |> element("#inventory-#{legendary.id}") |> render_click()
+    view |> element("#start-forge") |> render_click()
+    view |> element("#forge-epic-bloodstone") |> render_click()
+    assert has_element?(view, "#finish-forge", "Swap Epic · free")
+    view |> element("#cancel-forge") |> render_click()
+    refute has_element?(view, "#forge-picker")
+    assert has_element?(view, "#shop-detail-description .forged-item-tooltip-component", "Soul Booster")
+
+    view |> element("#start-forge") |> render_click()
+    view |> element("#forge-epic-bloodstone") |> render_click()
+    view |> form("#shop-forge-form") |> render_submit()
+    assert has_element?(view, "#shop-detail-description .forged-item-tooltip-component", "Bloodstone")
+
+    view |> element("#sell-#{legendary.id}") |> render_click()
+    assert has_element?(view, "#shop-gold", "8000")
+    assert has_element?(view, "#inventory", "5 / 6 slots")
+    assert Game.get_hero!(hero.id) |> Game.Items.forge_pairs() == %{"orchid_malevolence" => "octarine_core"}
+  end
+
   test "the detail panel shares item tooltip descriptions, colored effects, and timing icons", %{conn: conn} do
     hero = create_base_hero(%{gold: 10_000})
     Game.update_tutorial_step!(hero.player, 39)

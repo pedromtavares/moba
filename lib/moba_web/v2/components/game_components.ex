@@ -251,17 +251,28 @@ defmodule MobaWeb.V2.Components.GameComponents do
   def hero_item_strip(assigns) do
     ~H"""
     <div class={@container_class}>
-      <div :for={item <- @items} class={@item_container_class}>
+      <div :for={item <- @items} class={[@item_container_class, Map.has_key?(item, :forged_epic) && "forged-item-slot"]}>
         <img
           src={GH.image_url(item)}
-          class={[@image_class, !item.active && "passive"]}
+          class={[@image_class, !Moba.Game.Items.slot_active?(item) && "passive"]}
           data-toggle="tooltip"
           title={tooltip_for(@tooltip_fun, item, &TT.item_tooltip/1)}
           id={dom_id(@id_prefix, item.id, @id_suffix)}
-          alt={item.name}
+          alt={GH.item_display_name(item)}
         />
+        <.forged_inset item={item} />
       </div>
     </div>
+    """
+  end
+
+  attr :item, :map, required: true
+
+  def forged_inset(assigns) do
+    ~H"""
+    <span :if={epic = Map.get(@item, :forged_epic)} class="forged-item-inset" aria-hidden="true">
+      <img src={GH.image_url(epic)} alt="" draggable="false" />
+    </span>
     """
   end
 
@@ -290,7 +301,7 @@ defmodule MobaWeb.V2.Components.GameComponents do
         <div id={@stats_id} class="hero-detail-stats"><.hero_stat_group hero={@hero} /></div>
         <div class="hero-detail-build" id={@build_id}>
           <.hero_skill_strip skills={@hero.skills} id_prefix={@skill_id_prefix} id_suffix={@hero.id} />
-          <.hero_item_strip items={Moba.Game.sort_items(@hero.items)} id_prefix={@item_id_prefix} id_suffix={@hero.id} />
+          <.hero_item_strip items={GH.sorted_item_slots(@hero)} id_prefix={@item_id_prefix} id_suffix={@hero.id} />
           <nav :if={@actions != []} class="hero-detail-build-actions" aria-label={@actions_label}>
             {render_slot(@actions)}
           </nav>

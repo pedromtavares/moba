@@ -302,7 +302,7 @@ defmodule MobaWeb.V2.CommunityLive do
           />
           <.hero_item_strip
             :if={@hero.items != []}
-            items={Game.sort_items(@hero.items)}
+            items={GH.sorted_item_slots(@hero)}
             container_class="community-hero-items"
             item_container_class="community-hero-item"
             id_prefix="item"

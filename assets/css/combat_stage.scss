@@ -240,6 +240,10 @@
   .stage-build-items { border-left: 1px solid #a8b7ca33; padding-left: 12px; }
   .stage-build-items img { width: 42px; height: 36px; }
   .stage-build-items [data-build-cooldown] { min-width: 19px; font-size: 14px; }
+  .stage-build-items .forged-item-inset img { width: 100%; height: 100%; border: 0; border-radius: inherit; }
+  .stage-build-items .forged-item-slot > [data-build-cooldown] { right: auto; left: -2px; }
+  .stage-build-items [data-cooldown-kind=passive] { color: #a6d8eb; border-color: #7bb5cc99; font-size: 12px; }
+  .stage-build-items [data-cooldown-kind=passive]::before { content: 'Passive'; display: block; font-size: 8px; }
   .stage-build-resources:not(.stage-build-items) img { width: 100%; height: auto; aspect-ratio: 1; }
   .stage-ready { position: absolute; z-index: 3; top: 39%; left: 50%; transform: translate(-50%, -50%); width: max-content; max-width: 75%; padding: 13px 20px; border: 1px solid #d4b7803b; border-radius: 6px; background: #0a1421d9; text-align: center; box-shadow: 0 8px 35px #0004; }
   .stage-ready h3 { margin: 0 0 5px; color: #f0d7a3; font-size: 20px; font-weight: 900; }

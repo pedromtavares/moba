@@ -43,7 +43,19 @@
   src: url("/static/fonts/rpg.ttf");
 }
 
-body { font-family: 'Nunito', sans-serif; }
+body {
+  font-family: 'Nunito', sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input,
+textarea,
+[contenteditable]:not([contenteditable="false"]),
+#combat-log-panel {
+  -webkit-user-select: text;
+  user-select: text;
+}
 
 .f-rpg{
   font-family: rpg;
