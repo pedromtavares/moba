@@ -13,19 +13,11 @@
     <% else %>
       <span aria-label={if @mode == "3v3", do: "Unranked", else: "Outside leaderboard"}>—</span>
     <% end %>
-    <%= if @movement do %>
-      <% {direction, bracket} = @movement
-
-      label =
-        "Projected #{if direction == :up, do: "promotion", else: "relegation"} to #{bracket} at the next daily reset" %>
-      <span class="arena-standing-movement" data-direction={direction} title={label} role="img" aria-label={label}>
-        <.icon name={if direction == :up, do: "game-rank-up", else: "game-rank-down"} />
-      </span>
-    <% end %>
+    <.standing_movement movement={@movement} />
   </span>
   <img src={"/images/pve/#{@player.pve_tier}.png"} alt="" class="arena-standing-emblem" />
   <span class="arena-standing-identity">
-    <strong>{username(@player)} <small :if={@player.id == @current_player.id}>You</small></strong>
+    <strong>{username(@player)}</strong>
     <span :if={@mode == "3v3"} class="arena-standing-meta">
       <span class="arena-standing-bracket">{arena_bracket(@player)}</span>
       <span>· {@player.daily_matches} {if @player.daily_matches == 1, do: "match", else: "matches"} played</span>

@@ -3,6 +3,7 @@ defmodule MobaWeb.V2.TeamLive do
   on_mount MobaWeb.V2.Hooks.TeamAccess
   alias Moba.Game.TeamRuns
   alias Phoenix.LiveView.JS
+  import MobaWeb.CoreComponents, only: [icon: 1]
   import MobaWeb.V2.Components.ProgressionComponents, only: [training_completion: 1, progression_rewards: 1]
   import MobaWeb.V2.Components.TrainingComponents, only: [perfect_indicator: 1]
 

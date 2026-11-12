@@ -11,6 +11,7 @@ defmodule MobaWeb.V2.ArenaLiveTest do
       |> log_in_player(player_id: hero.player_id)
 
     {:ok, arena_view, arena_html} = live(conn, "/arena")
+    assert has_element?(arena_view, "#pvp-progression h1", "PvP Arena")
     assert arena_html =~ "Play 3v3"
     assert arena_html =~ "Play 1v1"
 

@@ -6,6 +6,7 @@
         id={"base-avatar-panel-#{panel}"}
         type="button"
         class="btn"
+        data-nav-loading="spinner"
         phx-click="avatar-panel"
         phx-value-panel={panel}
         aria-pressed={to_string(@avatar_panel == panel)}
@@ -64,6 +65,7 @@
               :for={skin <- @avatar_skins}
               id={"base-preview-skin-#{skin.code}"}
               type="button"
+              data-nav-loading="spinner"
               phx-click="preview-skin"
               phx-value-code={skin.code}
               aria-pressed={to_string(@selected_skin.code == skin.code)}

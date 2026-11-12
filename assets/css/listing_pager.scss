@@ -1,3 +1,36 @@
+.game-page {
+  :is(.listing-mode-heading, .profile-ranking-header) {
+    flex-shrink: 0;
+    padding: 14px;
+    border-bottom: 1px solid #c7b17b33;
+    background: linear-gradient(110deg, #202a35, #111b27);
+    box-shadow: 0 4px 16px #0002;
+  }
+
+  :is(.listing-mode-switch, .profile-ranking-switch) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+    padding: 3px;
+    border: 1px solid #c7b17b33;
+    border-radius: 6px;
+    background: #08111b99;
+
+    button { min-height: 34px; padding: 7px 10px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #acb8c8; font: 800 11px 'Nunito', sans-serif; white-space: nowrap; cursor: pointer; transition: color .15s, background .15s; }
+    button:hover { color: #f4dfb4; background: #c7b17b0d; }
+    button[aria-pressed="true"] { border-color: #d1b57c55; background: #c7b17b24; color: #f4dfb4; }
+    button:focus-visible { outline: 2px solid #dfc18b; outline-offset: 2px; }
+  }
+
+  .listing-mode-switch button { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; }
+  .listing-mode-switch button[aria-pressed="true"]:not([phx-click]) { cursor: default; }
+  .listing-mode-switch .ui-icon { font-size: 16px; }
+}
+
+@media (min-width: 1200px) and (max-width: 1400px) {
+  .game-page :is(.listing-mode-heading, .profile-ranking-header) { padding: 12px 10px; }
+}
+
 .game-page .listing-pager {
   display: flex;
   flex: 1;
@@ -8,6 +41,20 @@
   [data-listing-rows] > [hidden], .listing-pager-controls[hidden] { display: none !important; }
 
   .listing-pager-viewport { flex: 1; min-height: 0; overflow: clip; }
+  .listing-pager-footer {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    flex-shrink: 0;
+    margin-top: auto;
+    padding: 8px 10px;
+    border-top: 1px solid #c7b17b33;
+    background: radial-gradient(ellipse at 50% 0%, #c7b17b16, transparent 70%), #0a121d80;
+  }
+  .listing-pager-footer:has(.listing-pager-summary) { justify-content: space-between; }
+  .listing-pager-footer:not(:has(.listing-pager-summary)):has(.listing-pager-controls[hidden]) { display: none; }
   .listing-pager-controls {
     display: grid;
     grid-template-columns: 36px minmax(48px, max-content) 36px;
@@ -15,10 +62,6 @@
     align-items: center;
     gap: 8px;
     flex-shrink: 0;
-    margin-top: auto;
-    padding: 8px 10px;
-    border-top: 1px solid #c7b17b33;
-    background: radial-gradient(ellipse at 50% 0%, #c7b17b16, transparent 70%), #0a121d80;
     color: #e4c58f;
   }
   .listing-page-count {

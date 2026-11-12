@@ -19,7 +19,6 @@
   <div class="row no-gutters base-run-grid">
     <.team_card :for={team <- @visible_teams} team={team} />
     <%= for hero <- @visible_heroes do %>
-      <% team_run? = assigns[:avatar_history] && hero.training_team_id %>
       <div class="col-lg-4 col-md-6" id={"visible-hero-#{hero.id}"}>
         <div
           class="card hero-card mb-0"
@@ -66,22 +65,22 @@
                   </button>
                 <% end %>
                 <%= if hero.finished_at do %>
-                  <.link
-                    class="btn btn-primary hero-card-customize"
-                    navigate={
-                      preview_path(
-                        assigns,
-                        if(team_run?, do: ~p"/teams/#{hero.training_team_id}", else: ~p"/hero/#{hero}")
-                      )
-                    }
-                  >
-                    <i class="ui-icon ui-id-card mr-1"></i>
-                    {cond do
-                      team_run? -> "View team"
-                      assigns[:avatar_history] -> "View hero"
-                      true -> "Customize"
-                    end}
-                  </.link>
+                  <div class="hero-card-run-actions">
+                    <.link
+                      class="btn btn-primary hero-card-customize"
+                      navigate={preview_path(assigns, ~p"/hero/#{hero}")}
+                    >
+                      <.icon name={if assigns[:avatar_history], do: "game-hero", else: "game-profile"} />
+                      {if assigns[:avatar_history], do: "View hero", else: "Customize"}
+                    </.link>
+                    <.link
+                      :if={assigns[:avatar_history] && hero.training_team_id}
+                      class="btn btn-light hero-card-customize hero-card-view-team"
+                      navigate={preview_path(assigns, ~p"/teams/#{hero.training_team_id}")}
+                    >
+                      <.icon name="game-team" /> View team
+                    </.link>
+                  </div>
                 <% else %>
                   <button
                     type="button"

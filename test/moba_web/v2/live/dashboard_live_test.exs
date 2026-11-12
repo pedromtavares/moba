@@ -237,6 +237,12 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       assert has_element?(
                view,
+               "#base-avatar-details #visible-hero-#{member.id} a[href='/hero/#{member.id}']",
+               "View hero"
+             )
+
+      assert has_element?(
+               view,
                "#base-avatar-details #visible-hero-#{member.id} a[href='/teams/#{team.id}']",
                "View team"
              )
@@ -250,6 +256,8 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       view |> element(".base-avatar-navigation #base-avatar-runs-next") |> render_click()
       assert has_element?(view, "#base-avatar-details #visible-hero-#{newer.id}")
+      assert has_element?(view, "#visible-hero-#{newer.id} a[href='/hero/#{newer.id}']", "View hero")
+      refute has_element?(view, "#visible-hero-#{newer.id} a[href^='/teams/']")
       refute has_element?(view, "#visible-hero-#{older.id}, #visible-hero-#{member.id}")
       view |> element("#base-avatar-runs-next") |> render_click()
       assert has_element?(view, "#base-avatar-details #visible-hero-#{older.id}")

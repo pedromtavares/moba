@@ -117,23 +117,13 @@
   .profile-actions .profile-action-discord:hover { border-color: #a5a9ed66; background: #7378d524; color: #e4e5ff; }
   .profile-actions .profile-action-logout { color: #a1aebf; }
   .profile-actions .profile-action-logout:hover { border-color: #ce879a44; background: #ce879a0d; color: #e2a6b3; }
-  :is(.profile-ranking-header, .profile-history-switcher) { padding: 14px; border-bottom: 1px solid #c7b17b33; background: linear-gradient(110deg, #202a35, #111b27); box-shadow: 0 4px 16px #0002; }
-  .profile-ranking-header { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-  .profile-history-switcher { flex-shrink: 0; }
+  .profile-ranking-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
   .profile-ranking-title { display: flex; align-items: center; gap: 10px; min-width: 0; }
   .profile-ranking-title > .ui-icon { color: #d9b878; font-size: 20px; }
   .profile-ranking-title strong { display: block; color: #f0e4ce; font-size: 16px; font-weight: 900; line-height: 1.2; }
   .profile-ranking-title span { display: block; margin-top: 3px; color: #a8b5c5; font-size: 10px; }
-  .profile-ranking-switch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); flex: 1 0 210px; max-width: 260px; gap: 3px; padding: 3px; border: 1px solid #c7b17b33; border-radius: 6px; background: #08111b99; }
-  .profile-ranking-switch button { min-height: 34px; padding: 7px 10px; border: 1px solid transparent; border-radius: 3px; background: transparent; color: #acb8c8; font: 800 11px 'Nunito', sans-serif; white-space: nowrap; cursor: pointer; transition: color .15s, background .15s; }
-  .profile-ranking-switch button:hover { color: #f4dfb4; background: #c7b17b0d; }
-  .profile-ranking-switch button[aria-pressed="true"] { border-color: #d1b57c55; background: #c7b17b24; color: #f4dfb4; }
-  .profile-ranking-switch button:focus-visible { outline: 2px solid #dfc18b; outline-offset: 2px; }
+  .profile-ranking-switch { flex: 1 0 210px; max-width: 260px; }
   .profile-leaderboard-switch { grid-template-columns: repeat(3, minmax(0, 1fr)); flex-basis: min(210px, 100%); }
-  .profile-history-tabs { max-width: none; }
-  .profile-history-tabs button { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 13px; }
-  .profile-history-tabs button[aria-pressed="true"] { cursor: default; }
-  .profile-history-tabs .ui-icon { font-size: 16px; }
   .profile-history-row:hover { background: #c6a77906; }
   .profile-history-result-column { width: clamp(94px, 8vw, 132px); }
   .profile-history-replay-column { width: 58px; }
@@ -153,12 +143,15 @@
   #user-ranking .profile-leaderboard-table .profile-score-column,
   #user-ranking .profile-leaderboard-table :is(td, th):last-child { width: 96px; text-align: center; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) td { height: 80px; padding: 14px 10px; vertical-align: middle; border-top: 0; border-bottom: 1px solid #baa98a1a; }
+  #user-ranking .profile-leaderboard-table td { height: 60px; padding-block: 4px; }
+  #user-ranking .listing-pager-viewport[data-full-page] .profile-leaderboard-table { height: 100%; }
   #user-profile:has(.profile-history-table) { padding-bottom: 0; }
   #user-profile .profile-history-table td { height: 60px; padding: 6px 10px; }
   #user-profile .profile-history-row .profile-ranked-name { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
   #user-profile .profile-history-result { line-height: 1.2; }
   #user-ranking .profile-leaderboard-table tfoot th { height: 80px; padding: 14px 10px; vertical-align: middle; border-top: 1px solid #d6b47c66; background: #18212b; white-space: normal; }
   #user-ranking .profile-leaderboard-table :is(h1, h3) { margin: 0; font-size: 26px; font-weight: 800; line-height: 1.35; }
+  #profile-team-ranking-table .profile-training-time h3 { line-height: 1.2; }
   #user-ranking .profile-leaderboard-table h1 { color: #bdb7ac; white-space: nowrap; }
   #user-ranking .profile-leaderboard-table .profile-rank-unranked { color: #c4bba9; font-size: 13px; }
   #user-ranking .profile-leaderboard-table .selected-player { background: linear-gradient(90deg, #d6ad5f20, #d6ad5f04); }
@@ -182,6 +175,11 @@
   .profile-ranked-identity > span { min-width: 0; }
   :is(#user-ranking .profile-leaderboard-table, .profile-history-table) .profile-ranked-name { display: block; margin: 0 !important; color: #e9e4db; font-size: 16px; font-weight: 800; line-height: 1.35; overflow-wrap: anywhere; }
   .profile-ranking-detail { display: block; margin-top: 4px; color: #9fa8b7; font-size: 10px; line-height: 1.4; overflow-wrap: anywhere; }
+  #profile-team-ranking-table :is(.profile-ranked-name, .profile-ranking-detail) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .profile-ranking-unit { display: block; margin-top: 3px; color: #9fa8b7; font-size: 10px; line-height: 1.4; }
   .profile-ranked-identity:hover .profile-ranked-name { color: #f0d7aa; }
   #profile-ranking-table tr[data-bracket] { --bracket-color: #929eaf; }
@@ -193,7 +191,10 @@
 }
 @media (min-width: 1200px) {
   .game-page .user-profile {
-    --profile-board-min-height: calc(var(--profile-board-base-height, 300px) + var(--profile-board-duel-height, 0px));
+    --profile-board-min-height: max(
+      calc(var(--profile-board-base-height, 300px) + var(--profile-board-duel-height, 0px)),
+      var(--profile-board-ranking-height, 0px)
+    );
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, .918fr) minmax(0, 1.082fr);
     grid-template-rows: auto minmax(var(--profile-board-min-height), 1fr);
@@ -203,6 +204,8 @@
     padding-top: 12px;
     &:has(.profile-history-row:nth-child(5)) { --profile-board-base-height: 430px; }
     &:has(#profile-duel-record) { --profile-board-duel-height: 90px; }
+    &:has(.profile-leaderboard-table tbody > tr:nth-child(5)) { --profile-board-ranking-height: 460px; }
+    &:has(#profile-ranking-table tbody > tr:nth-child(5)):has(#profile-current-standing) { --profile-board-ranking-height: 540px; }
     #profile-cinematic { grid-column: 1 / -1; grid-row: 1; grid-template-columns: subgrid; grid-template-rows: minmax(0, 1fr) auto; column-gap: 20px; margin: 0; padding: 24px 0 0; }
     .profile-cinematic-player { grid-column: 1 / 3; grid-row: 1; margin-left: 30px; }
     .profile-cinematic-identity { margin-right: 20px; }
@@ -247,7 +250,6 @@
     .ranking-table th:first-child, .ranking-table td:first-child { width: 90px; }
     .ranking-table th:last-child, .ranking-table td:last-child { width: 85px; }
     .ranking-table :is(th, td) { padding-left: 10px; padding-right: 10px; }
-    :is(.profile-ranking-header, .profile-history-switcher) { padding: 12px 10px; }
     .profile-ranking-header { gap: 8px; }
     .profile-ranking-title { gap: 7px; }
     .profile-ranking-title strong { font-size: 14px; }
@@ -266,7 +268,7 @@
 }
 @media (max-width: 1199px) {
   .game-page .user-profile {
-    #user-profile .listing-pager-viewport { max-height: none; }
+    :is(#user-profile, #profile-team-ranking-pager) .listing-pager-viewport { max-height: none; }
     .profile-board { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .profile-board > [class*="col-"] { width: auto; max-width: none; }
     .profile-collection-column { grid-column: 1 / -1; grid-row: 2; }

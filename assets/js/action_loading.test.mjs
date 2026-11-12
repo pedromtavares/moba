@@ -28,10 +28,10 @@ function page() {
   };
 }
 
-function button({id = '', width = 120, community = false, attributes = {}} = {}) {
+function button({id = '', width = 120, community = false, navLoading, attributes = {}} = {}) {
   const control = {
     id,
-    dataset: {},
+    dataset: {navLoading},
     textContent: 'Original label',
     matches: selector => selector !== 'form',
     closest: selector => selector === '.community' ? (community ? control : null) : control,
@@ -62,6 +62,7 @@ test('form submits mark the submitter and leave Community alone', async () => {
   const live = page();
   const submit = button();
   const form = {
+    dataset: {},
     matches: selector => selector === 'form',
     closest: () => null,
     querySelector: () => submit
@@ -95,4 +96,44 @@ test('hook-driven attacks use the same loading feedback', async () => {
   assert.equal(attack.dataset.actionLoading, 'Attacking…');
   await reply();
   assert.equal(attack.dataset.actionLoading, undefined);
+});
+
+test('navigation shows text on wide controls and a spinner on compact controls', async () => {
+  const live = page();
+  const tabs = button({navLoading: 'text'});
+  const narrowTab = button({navLoading: 'text', width: 64});
+  const portrait = button({navLoading: 'spinner'});
+
+  for (const [control, label] of [[tabs, 'Loading…'], [narrowTab, 'spinner'], [portrait, 'spinner']]) {
+    const reply = live.push(control, 'change-panel');
+    assert.equal(control.dataset.actionLoading, label);
+    assert.equal(control.textContent, 'Original label');
+    assert.equal(live.click(control), true);
+    await reply();
+    assert.equal(control.dataset.actionLoading, undefined);
+    assert.equal(control.getAttribute('aria-busy'), null);
+    assert.equal(live.click(control), false);
+  }
+});
+
+test('Community tabs keep their labels and show progress while the LiveView request is pending', async () => {
+  const live = page();
+  const tab = button({community: true, navLoading: 'progress', attributes: {'aria-busy': 'false'}});
+
+  const reply = live.push(tab, 'show-pvp');
+  assert.equal(tab.dataset.actionLoading, 'progress');
+  assert.equal(tab.textContent, 'Original label');
+  assert.equal(tab.getAttribute('aria-busy'), 'true');
+  await reply();
+  assert.equal(tab.dataset.actionLoading, undefined);
+  assert.equal(tab.getAttribute('aria-busy'), 'false');
+});
+
+test('profile hero selection shows Loading on narrow portraits', async () => {
+  const live = page();
+  const portrait = button({width: 55, navLoading: 'Loading…'});
+  const reply = live.push(portrait, 'set-featured');
+  assert.equal(portrait.dataset.actionLoading, 'Loading…');
+  await reply();
+  assert.equal(portrait.dataset.actionLoading, undefined);
 });

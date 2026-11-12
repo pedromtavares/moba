@@ -142,19 +142,26 @@
           <div class="col">
             <div class="card matchmaking" id="matchmaking-container" phx-hook="EqualHeight" phx-target=".arena .ranking">
               <div class="card-body p-0">
-                <div class="arena-history-switcher" role="group" aria-label="Battle history">
-                  <button
-                    :for={{tab, label} <- [{"matches", "3v3"}, {"duels", "1v1"}]}
-                    id={"arena-history-#{tab}-tab"}
-                    type="button"
-                    phx-click="history-tab"
-                    phx-value-type={tab}
-                    aria-pressed={to_string(@history_tab == tab)}
-                    aria-controls={if tab == "matches", do: "arena-history-matches", else: "arena-duel-history-section"}
-                  >
-                    {label}
-                  </button>
-                </div>
+                <header class="listing-mode-heading">
+                  <div class="listing-mode-switch" role="group" aria-label="Battle history">
+                    <button
+                      :for={
+                        {tab, label, icon} <- [{"matches", "3v3", "game-arena-3v3"}, {"duels", "1v1", "game-swords"}]
+                      }
+                      id={"arena-history-#{tab}-tab"}
+                      type="button"
+                      data-nav-loading="text"
+                      phx-click="history-tab"
+                      phx-value-type={tab}
+                      aria-pressed={to_string(@history_tab == tab)}
+                      aria-controls={
+                        if tab == "matches", do: "arena-history-matches", else: "arena-duel-history-section"
+                      }
+                    >
+                      <.icon name={icon} /> {label}
+                    </button>
+                  </div>
+                </header>
                 <div
                   :if={@history_tab == "matches"}
                   id="arena-history-matches"

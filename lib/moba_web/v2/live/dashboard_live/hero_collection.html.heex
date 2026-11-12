@@ -8,6 +8,7 @@
         type="button"
         style="width: 100px;"
         class={["avatar-container text-center mx-1", undefeated && "is-undefeated"]}
+        data-nav-loading="spinner"
         phx-click="browse-avatar"
         phx-value-code={hero["code"]}
         aria-pressed={to_string(@selected_avatar != nil && @selected_avatar.code == hero["code"])}
@@ -29,6 +30,7 @@
         type="button"
         style="width:100px;height:75px"
         class="avatar-container text-center mx-1"
+        data-nav-loading="spinner"
         phx-click="browse-avatar"
         phx-value-code={avatar.code}
         aria-pressed={to_string(@selected_avatar != nil && @selected_avatar.code == avatar.code)}

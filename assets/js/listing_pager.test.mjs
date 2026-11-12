@@ -11,6 +11,12 @@ test('fixed-size history shows five records per page and keeps the remainder', (
   assert.deepEqual(fixedPageStarts(13, 5), [0, 5, 10]);
 });
 
+test('a capped leaderboard uses up to five rows depending on available height', () => {
+  const heights = Array(13).fill(64);
+  assert.deepEqual(pageStarts(heights, 0, 600, 5), [0, 5, 10]);
+  assert.deepEqual(pageStarts(heights, 0, 270, 5), [0, 4, 8, 12]);
+});
+
 test('fits whole rows with varying heights and accounts for the gap', () => {
   assert.deepEqual(pageStarts([72, 84, 76, 70, 65], 8, 165), [0, 2, 4]);
   assert.deepEqual(pageStarts([72, 84, 76, 70, 65], 8, 160), [0, 1, 2, 4]);

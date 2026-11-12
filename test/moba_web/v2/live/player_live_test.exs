@@ -19,7 +19,12 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert has_element?(view, "#user-profile")
       refute has_element?(view, "#profile-cinematic .profile-eyebrow")
       assert has_element?(view, "#profile-ranking-header")
-      assert has_element?(view, "#profile-season-ranking-pager[data-initial-row='player-#{hero.player_id}']")
+
+      assert has_element?(
+               view,
+               "#profile-season-ranking-pager[data-initial-row='player-#{hero.player_id}'][data-max-page-size='5']"
+             )
+
       assert has_element?(view, "#profile-cinematic strong[title='Arena Rating'][data-toggle=tooltip]", "0 AR")
       assert has_element?(view, "#profile-cinematic .profile-metric-label", "Arena Rating")
       assert has_element?(view, "#profile-ranking-header", "Season score")
@@ -318,7 +323,12 @@ defmodule MobaWeb.V2.PlayerLiveTest do
 
     view |> element("#profile-ranking-team") |> render_click()
     assert has_element?(view, "#profile-ranking-team[aria-pressed=true]", "Team")
-    assert has_element?(view, "#profile-team-ranking-pager[data-initial-row='profile-ranked-team-#{best.id}']")
+
+    assert has_element?(
+             view,
+             "#profile-team-ranking-pager[data-page-size='5'][data-initial-row='profile-ranked-team-#{best.id}']"
+           )
+
     assert has_element?(view, "#profile-ranked-team-#{leader.id} td:first-child", "#1")
 
     assert has_element?(

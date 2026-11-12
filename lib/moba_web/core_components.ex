@@ -294,6 +294,8 @@ defmodule MobaWeb.CoreComponents do
       "team" => "ui-users",
       "plus" => "ui-plus",
       "hero" => "ui-helmet",
+      "profile" => "ui-id-card",
+      "close" => "ui-close",
       "item" => "ui-cube",
       "armor" => "ui-shield",
       "power" => "ui-vortex",

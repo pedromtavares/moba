@@ -99,7 +99,13 @@
               <div class="card-body p-0 text-center" id="hero-list-container">
                 <div class={["base-run-toolbar", @selected_avatar && "base-run-toolbar-avatar"]}>
                   <div :if={@selected_avatar} class="base-run-controls base-avatar-navigation">
-                    <button id="base-close-avatar" type="button" class="btn btn-light" phx-click="close-avatar">
+                    <button
+                      id="base-close-avatar"
+                      type="button"
+                      class="btn btn-light"
+                      data-nav-loading="text"
+                      phx-click="close-avatar"
+                    >
                       <span aria-hidden="true">←</span> Back to runs
                     </button>
                     <.run_pagination
@@ -132,7 +138,13 @@
                       run_page={@run_page}
                       more_runs={@more_runs}
                     />
-                    <button id="base-toggle-runs" type="button" class="btn btn-light" phx-click="toggle-runs">
+                    <button
+                      id="base-toggle-runs"
+                      type="button"
+                      class="btn btn-light"
+                      data-nav-loading="text"
+                      phx-click="toggle-runs"
+                    >
                       {if @filter == "unfinished", do: "Show Finished Runs", else: "Show Pending Runs"}
                     </button>
                   </div>

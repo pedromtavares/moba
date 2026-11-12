@@ -1,38 +1,22 @@
 <div id="hero-detail" class="hero-detail">
   <div class="hero-detail-overview">
     <article class="hero-card card hero-detail-card" id="hero-detail-card" aria-labelledby="hero-detail-name">
-      <div class="card-header">
-        <div class="hero-detail-identity">
-          <div>
-            <h2 id="hero-detail-name">{@hero.name}</h2>
-            <span class="hero-detail-avatar-name">{@hero.avatar.name}</span>
-          </div>
-          <div class="hero-detail-level"><span>Level</span><strong>{@hero.level}</strong></div>
-        </div>
-      </div>
-      <div class="card-body">
-        <img src={GH.background_url(@hero)} alt={@hero.avatar.name} />
-      </div>
-      <div class="card-footer">
-        <div id="hero-detail-stats" class="hero-detail-stats"><.hero_stats_buttons hero={@hero} /></div>
-        <div class="row">
-          <div class="col-12 hero-detail-loadout" id="hero-detail-loadout">
-            <.hero_skill_strip skills={@hero.skills} id_prefix="skill" id_suffix={@hero.id} />
-            <.hero_item_strip items={Game.sort_items(@hero.items)} id_prefix="item" id_suffix={@hero.id} />
-          </div>
-        </div>
-        <nav
-          :if={@hero.player.user_id || @hero.player_id == @current_player.id}
-          class="hero-detail-actions"
-          aria-label="Hero actions"
-        >
+      <.hero_detail_portrait
+        hero={@hero}
+        name={@hero.name}
+        name_id="hero-detail-name"
+        stats_id="hero-detail-stats"
+        build_id="hero-detail-loadout"
+      >
+        <:actions :if={@hero.player.user_id || @hero.player_id == @current_player.id}>
           <.link
             :if={@hero.player.user_id}
             id="hero-detail-player"
             navigate={preview_path(assigns, ~p"/player/#{@hero.player_id}")}
             data-profile-username={Moba.Utils.username(@hero.player)}
           >
-            Player profile <span aria-hidden="true">→</span>
+            <.icon name="game-profile" />
+            <span>Player profile</span>
           </.link>
           <button
             :if={@hero.player_id == @current_player.id}
@@ -42,37 +26,11 @@
             aria-expanded={to_string(@show_hud)}
             aria-controls="hero-bar"
           >
-            {if @show_hud, do: "Close customization", else: "Customize hero"}
+            <.icon name={if @show_hud, do: "game-close", else: "game-hero"} />
+            <span>{if @show_hud, do: "Close customization", else: "Customize hero"}</span>
           </button>
-          <%= if @hero.player_id == @current_player.id && @skin_selection do %>
-            <div class="hero-detail-skins" id="hero-detail-skins">
-              <button
-                :if={has_previous_skin?(@skin_selection)}
-                id="hero-previous-skin"
-                type="button"
-                phx-click="set-skin"
-                phx-value-skin-code={previous_skin_for(@skin_selection)}
-                aria-label="Previous skin"
-              >
-                ←
-              </button>
-              <.link id="hero-view-skins" navigate={preview_path(assigns, ~p"/base?#{%{avatar: @hero.avatar.code}}")}>
-                View skins
-              </.link>
-              <button
-                :if={has_next_skin?(@skin_selection)}
-                id="hero-next-skin"
-                type="button"
-                phx-click="set-skin"
-                phx-value-skin-code={next_skin_for(@skin_selection)}
-                aria-label="Next skin"
-              >
-                →
-              </button>
-            </div>
-          <% end %>
-        </nav>
-      </div>
+        </:actions>
+      </.hero_detail_portrait>
     </article>
   </div>
 

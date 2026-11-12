@@ -19,35 +19,45 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   attr :label, :string, required: true
   attr :initial_row, :string, default: nil
   attr :page_size, :integer, default: nil
+  attr :max_page_size, :integer, default: nil
   slot :inner_block, required: true
-  slot :before_controls
+  slot :summary
 
   def listing_pager(assigns) do
     ~H"""
-    <div id={@id} class="listing-pager" phx-hook="ListingPager" data-initial-row={@initial_row} data-page-size={@page_size}>
+    <div
+      id={@id}
+      class="listing-pager"
+      phx-hook="ListingPager"
+      data-initial-row={@initial_row}
+      data-page-size={@page_size}
+      data-max-page-size={@max_page_size}
+    >
       <div id={"#{@id}-viewport"} class="listing-pager-viewport">
         {render_slot(@inner_block)}
       </div>
-      {render_slot(@before_controls)}
-      <nav id={"#{@id}-controls"} class="listing-pager-controls" aria-label={"#{@label} pagination"} hidden>
-        <button
-          type="button"
-          data-page-step="-1"
-          aria-label={"Previous page of #{@label}"}
-          aria-controls={"#{@id}-viewport"}
-        >
-          <span aria-hidden="true">←</span>
-        </button>
-        <span class="listing-page-count" data-page-label aria-live="polite"></span>
-        <button
-          type="button"
-          data-page-step="1"
-          aria-label={"Next page of #{@label}"}
-          aria-controls={"#{@id}-viewport"}
-        >
-          <span aria-hidden="true">→</span>
-        </button>
-      </nav>
+      <div class="listing-pager-footer">
+        <div :if={@summary != []} class="listing-pager-summary">{render_slot(@summary)}</div>
+        <nav id={"#{@id}-controls"} class="listing-pager-controls" aria-label={"#{@label} pagination"} hidden>
+          <button
+            type="button"
+            data-page-step="-1"
+            aria-label={"Previous page of #{@label}"}
+            aria-controls={"#{@id}-viewport"}
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <span class="listing-page-count" data-page-label aria-live="polite"></span>
+          <button
+            type="button"
+            data-page-step="1"
+            aria-label={"Next page of #{@label}"}
+            aria-controls={"#{@id}-viewport"}
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+        </nav>
+      </div>
     </div>
     """
   end
@@ -89,16 +99,16 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
         <%= if @current_player.user_id do %>
           <.link
             navigate={preview_path(assigns, ~p"/arena")}
-            aria-label="Arena"
+            aria-label="PvP"
             data-toggle={if !@preview, do: "tooltip"}
             data-tippy-placement="right"
             data-tippy-arrow={false}
-            title={if !@preview, do: "<h3 class='ml-2 mr-2'>Arena</h3>"}
+            title={if !@preview, do: "<h3 class='ml-2 mr-2'>PvP</h3>"}
             class={sidebar_class("arena", %{sidebar_code: @sidebar_code})}
           >
             <.icon name="nav-arena" class="" />
             <span :if={@preview} class="sidebar-label">
-              <span>Arena</span>
+              <span>PvP</span>
             </span>
           </.link>
         <% else %>
@@ -109,12 +119,12 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
             data-tippy-placement="right"
             title={
               if !@preview,
-                do: "<h3 class='ml-2 mr-2'>Arena (locked)<br/><em class='font-15'>you must create an account</em></h3>"
+                do: "<h3 class='ml-2 mr-2'>PvP (locked)<br/><em class='font-15'>you must create an account</em></h3>"
             }
-            aria-label="Arena locked: create an account to play"
+            aria-label="PvP locked: create an account to play"
           >
             <.icon name="nav-arena" class="" />
-            <span :if={@preview} class="sidebar-label">Arena · Locked</span>
+            <span :if={@preview} class="sidebar-label">PvP · Locked</span>
           </a>
         <% end %>
         <%= if guest?(@current_player) do %>
@@ -220,7 +230,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
                   </.link>
                   <%= if @current_player do %>
                     <%= if length(@current_player.hero_collection) > 0 do %>
-                      <.link navigate={preview_path(assigns, ~p"/arena")} class="nav-link" aria-label="Arena">
+                      <.link navigate={preview_path(assigns, ~p"/arena")} class="nav-link" aria-label="PvP">
                         <.icon name="nav-arena" class="" />
                       </.link>
                     <% end %>

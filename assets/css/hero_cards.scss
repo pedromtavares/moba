@@ -53,6 +53,10 @@
   .hero-card-actions .btn { flex: 1; margin: 0 !important; }
   .hero-card-controls { display: grid !important; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 8px; padding: 12px 12px 4px; }
   .hero-card-controls .hero-card-resume, .hero-card-controls .hero-card-customize { grid-column: 1; grid-row: 1; min-height: 38px; padding: 9px 14px; font-size: 13px; font-weight: 800; }
+  .hero-card-run-actions { grid-column: 1; grid-row: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .hero-card-run-actions .btn { gap: 5px; white-space: nowrap; }
+  .hero-card-controls:has(.hero-card-view-team) { grid-template-columns: minmax(0, 1fr) auto; }
+  .hero-card-controls:has(.hero-card-view-team) .hero-card-metrics { grid-column: 2; }
   .hero-card-controls .hero-card-delete { grid-column: 2; grid-row: 1; width: 34px; min-height: 34px; padding: 0; border: 0; background: transparent !important; color: #8f929d; box-shadow: none; }
   .hero-card-controls .hero-card-delete i { margin: 0 !important; }
   .hero-card-delete-label { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }

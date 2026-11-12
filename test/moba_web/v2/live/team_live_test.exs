@@ -1398,12 +1398,12 @@ defmodule MobaWeb.V2.TeamLiveTest do
     for {id, index} <- Enum.with_index(record.hero_ids) do
       hero = Game.get_hero!(id)
       assert has_element?(result, "#team-profile-tab-#{id}[aria-selected=#{index == 0}]", hero.avatar.name)
-      assert has_element?(result, "#team-profile-hero-#{id} .hero-detail-stats")
-      assert has_element?(result, "#team-profile-hero-#{id} .hero-detail-loadout img")
+      assert has_element?(result, "#team-profile-hero-#{id} .hero-detail-portrait .hero-detail-stats")
+      assert has_element?(result, "#team-profile-hero-#{id} .hero-detail-portrait .hero-detail-build .skill-img")
 
       assert has_element?(
                result,
-               "#team-profile-view-hero-#{id} + #team-profile-player-#{id}[href='/player/#{player.id}']"
+               ".hero-detail-build-actions #team-profile-view-hero-#{id} + #team-profile-player-#{id}[href='/player/#{player.id}']"
              )
 
       assert has_element?(result, "#team-profile-hero-#{id}#{if index > 0, do: ".d-none"}")
@@ -1541,7 +1541,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
 
     assert has_element?(
              owner,
-             "#team-profile-hero-#{hd(record.hero_ids)} .hero-detail-actions [id^=team-save-account][href='/users/register']"
+             "#team-profile-hero-#{hd(record.hero_ids)} .hero-detail-build-actions [id^=team-save-account][href='/users/register']"
            )
 
     {:ok, visitor, _} = live(conn, "/teams/#{record.id}")

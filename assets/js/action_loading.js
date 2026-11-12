@@ -42,7 +42,6 @@ const verbs = {
   rematch: 'Requesting',
   'create-message': 'Sending',
   'delete-message': 'Deleting',
-  'set-featured': 'Saving',
   'unlock-avatar': 'Unlocking',
   'unlock-skin': 'Unlocking',
   send_email: 'Sending',
@@ -70,12 +69,12 @@ function pendingVerb(event, control) {
   }
 }
 
-function showActionLoading(control, verb, complete, compact) {
+function showActionLoading(control, label, complete, blockClick = true) {
   const token = {};
   const previous = pending.get(control);
   const busy = previous ? previous.busy : control.getAttribute('aria-busy');
-  pending.set(control, {token, busy, blockClick: Boolean(verb)});
-  control.dataset.actionLoading = compact ? '' : `${verb}…`;
+  pending.set(control, {token, busy, blockClick});
+  control.dataset.actionLoading = label;
   control.setAttribute('aria-busy', 'true');
 
   const clear = () => {
@@ -90,9 +89,18 @@ function showActionLoading(control, verb, complete, compact) {
 
 export function initActionLoading() {
   document.addEventListener('phx:push', ({target, detail}) => {
+    const navigation = target.dataset.navLoading;
+    if (detail.eventType === 'click' && navigation) {
+      const label = navigation === 'text'
+        ? (target.getBoundingClientRect().width >= 88 ? 'Loading…' : 'spinner')
+        : navigation;
+      showActionLoading(target, label, detail.loadingComplete);
+      return;
+    }
+
     if (target.closest('.community')) return;
     if (detail.eventType === 'change' && target.matches('select, input[type="range"]')) {
-      showActionLoading(target, null, detail.loadingComplete, true);
+      showActionLoading(target, '', detail.loadingComplete, false);
       return;
     }
     if (!['click', 'submit', 'hook'].includes(detail.eventType)) return;
@@ -110,7 +118,7 @@ export function initActionLoading() {
     if (detail.eventType === 'hook' && !verb && !control.hasAttribute('phx-click')) return;
     const width = control.getBoundingClientRect().width;
     const compact = !verb || (control.id !== 'combat-log-toggle' && width < 72);
-    showActionLoading(control, verb, detail.loadingComplete, compact);
+    showActionLoading(control, compact ? '' : `${verb}…`, detail.loadingComplete, Boolean(verb));
   });
 
   document.addEventListener('click', event => {

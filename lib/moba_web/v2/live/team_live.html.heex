@@ -33,47 +33,37 @@
           role="tabpanel"
           aria-labelledby={"team-profile-tab-#{hero.id}"}
         >
-          <div class="card-header">
-            <div class="hero-detail-identity">
-              <div>
-                <h2>{Game.TeamTraining.hero_name(hero, @team)}</h2>
-                <span class="hero-detail-avatar-name">{hero.avatar.name}</span>
-              </div>
-              <div class="hero-detail-level"><span>Level</span><strong>{hero.level}</strong></div>
-            </div>
-          </div>
-          <div class="card-body"><img src={GH.background_url(hero)} alt={hero.avatar.name} /></div>
-          <div class="card-footer">
-            <div class="hero-detail-stats"><.hero_stat_group hero={hero} /></div>
-            <div class="row">
-              <div class="col-12 hero-detail-loadout">
-                <.hero_skill_strip
-                  skills={MobaWeb.V2.Components.HeroBarComponents.sorted_skills(hero)}
-                  id_prefix="team-profile-skill"
-                  id_suffix={hero.id}
-                />
-                <.hero_item_strip items={Game.sort_items(hero.items)} id_prefix="team-profile-item" id_suffix={hero.id} />
-              </div>
-            </div>
-            <nav class="hero-detail-actions" aria-label={"#{hero.avatar.name} actions"}>
-              <.link id={"team-profile-view-hero-#{hero.id}"} navigate={~p"/hero/#{hero.id}"}>View hero →</.link>
+          <.hero_detail_portrait
+            hero={hero}
+            name={Game.TeamTraining.hero_name(hero, @team)}
+            skill_id_prefix="team-profile-skill"
+            item_id_prefix="team-profile-item"
+            actions_label={"#{hero.avatar.name} actions"}
+          >
+            <:actions>
+              <.link id={"team-profile-view-hero-#{hero.id}"} navigate={~p"/hero/#{hero.id}"}>
+                <.icon name="game-hero" />
+                <span>View hero</span>
+              </.link>
               <.link
                 :if={@team.player.user_id}
                 id={"team-profile-player-#{hero.id}"}
                 navigate={~p"/player/#{@team.player_id}"}
                 data-profile-username={Moba.Utils.username(@team.player)}
               >
-                Player profile →
+                <.icon name="game-profile" />
+                <span>Player profile</span>
               </.link>
               <.link
                 :if={@team.player_id == @current_player.id && !@current_scope.user}
                 id={"team-save-account-#{hero.id}"}
                 navigate={~p"/users/register"}
               >
-                Save your team →
+                <.icon name="game-plus" />
+                <span>Save your team</span>
               </.link>
-            </nav>
-          </div>
+            </:actions>
+          </.hero_detail_portrait>
         </article>
       </div>
       <section id="team-profile-performance" class="hero-detail-performance" aria-labelledby="team-league-title">

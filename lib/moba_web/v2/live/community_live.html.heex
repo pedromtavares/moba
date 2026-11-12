@@ -37,6 +37,7 @@
           aria-label={label}
           aria-selected={to_string(@active_tab == tab)}
           aria-controls={"community-#{tab}"}
+          data-nav-loading="progress"
           phx-click={if @active_tab != tab, do: "show-#{tab}"}
         >
           <.icon name={icon} />
@@ -66,6 +67,7 @@
             :for={{period, label} <- [{"daily", "Daily"}, {"weekly", "Weekly"}]}
             id={"community-period-#{period}"}
             type="button"
+            data-nav-loading="spinner"
             phx-click="user-filter"
             phx-value-period={period}
             aria-pressed={to_string(Atom.to_string(@user_filter) == period)}
@@ -143,6 +145,7 @@
               }
               id={id}
               type="button"
+              data-nav-loading="spinner"
               phx-click="match-filter"
               phx-value-type={filter}
               aria-pressed={to_string(@match_filter == filter)}
@@ -157,6 +160,7 @@
             :for={{key, label} <- [{:avatars, "Heroes"}, {:skills, "Skills"}, {:items, "Items"}]}
             id={"community-balance-category-#{key}"}
             type="button"
+            data-nav-loading="spinner"
             phx-click="balance-category"
             phx-value-category={key}
             aria-pressed={to_string(@balance_category == key)}

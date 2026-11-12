@@ -1,4 +1,4 @@
-export function pageStarts(heights, gap, availableHeight) {
+export function pageStarts(heights, gap, availableHeight, maxRows = Infinity) {
   const starts = [0];
   let usedHeight = 0;
 
@@ -6,7 +6,7 @@ export function pageStarts(heights, gap, availableHeight) {
     const nextHeight = usedHeight + gap + height;
     if (index === starts.at(-1)) {
       usedHeight = height;
-    } else if (nextHeight > availableHeight + 0.5) {
+    } else if (index - starts.at(-1) === maxRows || nextHeight > availableHeight + 0.5) {
       starts.push(index);
       usedHeight = height;
     } else {
@@ -67,6 +67,7 @@ export default {
   fitPages(list) {
     this.rows.forEach(row => { row.hidden = false; });
     this.controls.hidden = true;
+    this.viewport.removeAttribute('data-full-page');
 
     const heights = this.rows.map(row => row.getBoundingClientRect().height);
     const gap = list ? parseFloat(getComputedStyle(list).rowGap) || 0 : 0;
@@ -74,17 +75,23 @@ export default {
     const tableChrome = table ? table.getBoundingClientRect().height - list.getBoundingClientRect().height : 0;
     const availableHeight = () => this.viewport.getBoundingClientRect().height - tableChrome;
 
-    const pages = pageStarts(heights, gap, availableHeight());
+    const maxRows = Number(this.el.dataset.maxPageSize) || Infinity;
+    const pages = pageStarts(heights, gap, availableHeight(), maxRows);
     if (pages.length === 1) return pages;
 
     this.controls.hidden = false;
-    return pageStarts(heights, gap, availableHeight());
+    return pageStarts(heights, gap, availableHeight(), maxRows);
   },
 
   renderPage() {
     const start = this.starts[this.page];
     const end = this.starts[this.page + 1] ?? this.rows.length;
     this.rows.forEach((row, index) => { row.hidden = index < start || index >= end; });
+    const maxRows = Number(this.el.dataset.maxPageSize);
+    this.viewport.toggleAttribute(
+      'data-full-page',
+      maxRows > 0 && (end - start === maxRows || this.page < this.starts.length - 1)
+    );
 
     const label = this.controls.querySelector('[data-page-label]');
     const text = `${this.page + 1} / ${this.starts.length}`;

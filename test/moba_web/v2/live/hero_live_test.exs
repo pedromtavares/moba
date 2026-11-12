@@ -23,7 +23,7 @@ defmodule MobaWeb.V2.HeroLiveTest do
       assert has_element?(view, ".items-container")
     end
 
-    test "owner sees skin controls", %{conn: conn} do
+    test "owner sees the customization action with the hero bar closed", %{conn: conn} do
       hero = create_base_hero()
 
       conn =
@@ -31,9 +31,8 @@ defmodule MobaWeb.V2.HeroLiveTest do
         |> log_in_user(hero.player.user)
         |> put_session(:player_id, hero.player_id)
 
-      {:ok, view, html} = live(conn, "/hero/#{hero.id}")
+      {:ok, view, _html} = live(conn, "/hero/#{hero.id}")
 
-      assert html =~ "View skins"
       assert has_element?(view, "#customize-hero[aria-expanded=false]")
       refute has_element?(view, "#hero-bar")
       refute has_element?(view, "#toggle-shop")

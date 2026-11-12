@@ -3,6 +3,7 @@
     id={@id <> "-previous"}
     type="button"
     class="btn btn-light"
+    data-nav-loading="spinner"
     phx-click={@event}
     phx-value-direction="previous"
     aria-label="Previous page"
@@ -15,6 +16,7 @@
     id={@id <> "-next"}
     type="button"
     class="btn btn-light"
+    data-nav-loading="spinner"
     phx-click={@event}
     phx-value-direction="next"
     aria-label="Next page"

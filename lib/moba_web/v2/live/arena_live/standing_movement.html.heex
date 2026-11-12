@@ -1,0 +1,9 @@
+<%= if @movement do %>
+  <% {direction, bracket} = @movement
+
+  label =
+    "Projected #{if direction == :up, do: "promotion", else: "relegation"} to #{bracket} at the next daily reset" %>
+  <span class="arena-standing-movement" data-direction={direction} title={label} role="img" aria-label={label}>
+    <.icon name={if direction == :up, do: "game-rank-up", else: "game-rank-down"} />
+  </span>
+<% end %>

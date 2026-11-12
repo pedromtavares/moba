@@ -2,18 +2,19 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
   use MobaWeb.ConnCase
   import Phoenix.LiveViewTest
 
-  test "owner detail keeps the loadout, plain stats and skin navigation", %{conn: conn} do
+  test "owner detail groups the loadout and hero actions with the portrait", %{conn: conn} do
     hero = create_base_hero() |> Game.buy_item!(base_item())
     conn = conn |> log_in_user(hero.player.user) |> put_session(:player_id, hero.player_id)
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
-    assert has_element?(view, "#hero-detail-name", hero.name)
-    assert has_element?(view, "#hero-detail-loadout #skill-#{hd(hero.skills).id}-#{hero.id}")
-    assert has_element?(view, "#hero-detail-loadout #item-#{hd(hero.items).id}-#{hero.id}")
-    assert has_element?(view, "#hero-detail-stats .hero-stats")
+    assert has_element?(view, ".hero-detail-portrait #hero-detail-name", hero.name)
+    assert has_element?(view, ".hero-detail-portrait #hero-detail-loadout #skill-#{hd(hero.skills).id}-#{hero.id}")
+    assert has_element?(view, ".hero-detail-portrait #hero-detail-loadout #item-#{hd(hero.items).id}-#{hero.id}")
+    assert has_element?(view, ".hero-detail-portrait #hero-detail-stats .hero-stats")
     refute has_element?(view, "#hero-detail-stats button")
-    assert has_element?(view, "#hero-view-skins[href='/base?avatar=#{hero.avatar.code}']")
-    assert has_element?(view, "#hero-detail-player[href='/player/#{hero.player_id}']")
+    assert has_element?(view, "#hero-detail-loadout nav #hero-detail-player[href='/player/#{hero.player_id}']")
+    assert has_element?(view, "#hero-detail-loadout nav #customize-hero")
+    refute has_element?(view, "#hero-detail-card [phx-click='set-skin'], #hero-view-skins")
     assert has_element?(view, "#hero-training-status[data-finished='false']")
     assert has_element?(view, "#hero-detail-duration", "#{hero.pve_current_turns + hero.pve_total_turns}")
     assert has_element?(view, "#hero-league-milestone")
@@ -65,7 +66,6 @@ defmodule MobaWeb.V2.HeroDetailLiveTest do
     {:ok, view, _} = live(conn, "/hero/#{hero.id}")
 
     assert has_element?(view, "#hero-detail-player[href='/player/#{hero.player_id}']")
-    refute has_element?(view, "#hero-detail-skins")
     refute has_element?(view, "#customize-hero")
     refute has_element?(view, "#hero-league-milestone")
     render_click(view, "toggle-customize")

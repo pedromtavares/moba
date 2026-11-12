@@ -21,6 +21,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     assert has_element?(view, "#standing-player-#{player.id}.is-you .arena-standing-position", "26")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score strong", "2")
     assert has_element?(view, "#standing-player-#{player.id} a[href='/player/#{player.id}'][aria-current=true]")
+    refute has_element?(view, "#standing-player-#{player.id} .arena-standing-identity small")
     assert standings_ids(view) == Enum.map([immortal, shadow, player], &"standing-player-#{&1.id}")
 
     assert has_element?(
@@ -81,7 +82,14 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-your-standing [aria-label=Unranked]")
     assert has_element?(view, "#arena-standings-empty")
-    assert has_element?(view, "#arena-your-standing + #arena-standings-3v3-pager-controls")
+
+    assert has_element?(
+             view,
+             ".listing-pager-footer > .listing-pager-summary #arena-your-standing[aria-current=true] strong",
+             player.id |> Game.get_player!() |> Moba.Utils.username()
+           )
+
+    assert has_element?(view, ".listing-pager-footer > #arena-standings-3v3-pager-controls")
     refute has_element?(view, "#arena-your-standing .arena-standing-movement")
   end
 
@@ -151,6 +159,8 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     Cachex.put(:game_cache, "daily_ranking", [])
     {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
     assert has_element?(view, "#arena-your-standing .arena-standing-movement[aria-label*='promotion to Shadows']")
+    assert has_element?(view, "#arena-your-standing .arena-your-rank", "#31")
+    assert has_element?(view, "#arena-your-standing .arena-standing-bracket", "Plebs")
   end
 
   defp standings_ids(view) do

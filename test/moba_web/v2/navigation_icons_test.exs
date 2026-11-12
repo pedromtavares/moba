@@ -13,7 +13,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
 
     for {label, symbol} <- [
           {"Base", "base"},
-          {"Arena", "arena"},
+          {"PvP", "arena"},
           {"Profile", "profile"},
           {"Community", "community"},
           {"Library", "manual"},
@@ -23,11 +23,11 @@ defmodule MobaWeb.V2.NavigationIconsTest do
       assert LazyHTML.attribute(icon, "src") == ["/images/navigation/#{symbol}.webp"]
     end
 
-    assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar a.active"), "aria-label") == ["Arena"]
+    assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar a.active"), "aria-label") == ["PvP"]
     assert Enum.empty?(LazyHTML.query(document, "#game-sidebar a[aria-label=Tavern]"))
     assert LazyHTML.attribute(LazyHTML.query(document, "#game-sidebar i"), "class") == []
 
-    for label <- ["Base", "Arena", "Profile", "Community", "Library"] do
+    for label <- ["Base", "PvP", "Profile", "Community", "Library"] do
       link = LazyHTML.query(document, "#game-sidebar a[aria-label='#{label}']")
       assert LazyHTML.attribute(link, "data-sidebar-hotkey") == []
       assert LazyHTML.attribute(link, "aria-keyshortcuts") == []
@@ -47,7 +47,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
       |> LazyHTML.from_fragment()
 
     locked = LazyHTML.query(document, "#game-sidebar .no-action")
-    assert LazyHTML.attribute(locked, "aria-label") == ["Arena locked: create an account to play"]
+    assert LazyHTML.attribute(locked, "aria-label") == ["PvP locked: create an account to play"]
     assert LazyHTML.attribute(locked, "data-sidebar-hotkey") == []
     assert LazyHTML.attribute(LazyHTML.query(document, "#create-account-link"), "data-sidebar-hotkey") == []
     assert LazyHTML.attribute(LazyHTML.query(document, "#create-account-link"), "href") == ["/users/register"]
@@ -74,7 +74,7 @@ defmodule MobaWeb.V2.NavigationIconsTest do
 
     assert Enum.empty?(LazyHTML.query(document, "#topnav a[aria-label=Tavern]"))
 
-    for {label, image} <- [{"Training", "training"}, {"Base", "base"}, {"Arena", "arena"}, {"Profile", "profile"}] do
+    for {label, image} <- [{"Training", "training"}, {"Base", "base"}, {"PvP", "arena"}, {"Profile", "profile"}] do
       icon = LazyHTML.query(document, "#topnav a[aria-label='#{label}'] img.nav-emblem")
       assert LazyHTML.attribute(icon, "src") == ["/images/navigation/#{image}.webp"]
     end

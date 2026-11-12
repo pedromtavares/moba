@@ -1,36 +1,51 @@
 <section id="arena-standings" class="card ranking arena-standings" aria-labelledby="arena-standings-title">
-  <header class="arena-standings-heading">
+  <header class="listing-mode-heading">
     <h2 id="arena-standings-title" class="sr-only">
       {if @ranking_tab == "3v3", do: "Daily ranking", else: "Arena Rating"}
     </h2>
-    <div id="arena-standings-switcher" class="arena-history-switcher" role="group" aria-label="Leaderboard mode">
+    <div id="arena-standings-switcher" class="listing-mode-switch" role="group" aria-label="Leaderboard mode">
       <button
-        :for={mode <- ["3v3", "1v1"]}
+        :for={{mode, icon} <- [{"3v3", "game-arena-3v3"}, {"1v1", "game-swords"}]}
         id={"arena-standings-#{mode}"}
         type="button"
+        data-nav-loading="text"
         phx-click="standings-tab"
         phx-value-type={mode}
         aria-pressed={to_string(@ranking_tab == mode)}
         aria-controls={if @ranking == [], do: "arena-standings-empty", else: "arena-standings-list"}
       >
-        {mode}
+        <.icon name={icon} /> {mode}
       </button>
     </div>
   </header>
   <.listing_pager id={"arena-standings-#{@ranking_tab}-pager"} label="Arena standings">
-    <:before_controls :if={!ranking_inclusion?(@ranking, @current_player)}>
-      <footer id="arena-your-standing" class="arena-your-standing">
-        <p>Your standing</p>
-        <.standing_row
-          player={@current_player}
-          index={nil}
-          mode={@ranking_tab}
-          movement={if @ranking_tab == "3v3", do: arena_movement(@current_player, @ranking)}
-          current_player={@current_player}
-          preview={@preview}
-        />
-      </footer>
-    </:before_controls>
+    <:summary :if={!ranking_inclusion?(@ranking, @current_player)}>
+      <.link
+        id="arena-your-standing"
+        class="arena-your-standing"
+        navigate={preview_path(assigns, ~p"/player/#{@current_player.id}")}
+        data-profile-username={Moba.Utils.username(@current_player)}
+        data-bracket={if @ranking_tab == "3v3", do: arena_bracket(@current_player)}
+        aria-current="true"
+      >
+        <strong>{username(@current_player)}</strong>
+        <%= if @ranking_tab == "3v3" do %>
+          <span class="arena-your-rank">
+            <span :if={@current_player.ranking}>#{@current_player.ranking}</span>
+            <span :if={!@current_player.ranking} aria-label="Unranked">—</span>
+            <.standing_movement movement={arena_movement(@current_player, @ranking)} />
+          </span>
+          <span class="arena-standing-bracket">{arena_bracket(@current_player)}</span>
+          <span class="arena-your-result">
+            {@current_player.daily_wins} {if @current_player.daily_wins == 1, do: "win", else: "wins"}
+          </span>
+        <% else %>
+          <span class="arena-your-result" title="Arena Rating" aria-label={"#{@current_player.pvp_points} Arena Rating"}>
+            {@current_player.pvp_points} AR
+          </span>
+        <% end %>
+      </.link>
+    </:summary>
     <ol
       :if={@ranking != []}
       id="arena-standings-list"

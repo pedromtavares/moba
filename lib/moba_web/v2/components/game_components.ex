@@ -265,6 +265,41 @@ defmodule MobaWeb.V2.Components.GameComponents do
     """
   end
 
+  attr :hero, :map, required: true
+  attr :name, :string, required: true
+  attr :name_id, :string, default: nil
+  attr :stats_id, :string, default: nil
+  attr :build_id, :string, default: nil
+  attr :skill_id_prefix, :string, default: "skill"
+  attr :item_id_prefix, :string, default: "item"
+  attr :actions_label, :string, default: "Hero actions"
+  slot :actions
+
+  def hero_detail_portrait(assigns) do
+    ~H"""
+    <div class="hero-detail-portrait">
+      <img class="hero-detail-art" src={GH.background_url(@hero)} alt={@hero.avatar.name} />
+      <header class="hero-detail-identity">
+        <div>
+          <h2 id={@name_id}>{@name}</h2>
+          <span class="hero-detail-avatar-name">{@hero.avatar.name}</span>
+        </div>
+        <div class="hero-detail-level"><span>Level</span><strong>{@hero.level}</strong></div>
+      </header>
+      <div class="hero-detail-readout">
+        <div id={@stats_id} class="hero-detail-stats"><.hero_stat_group hero={@hero} /></div>
+        <div class="hero-detail-build" id={@build_id}>
+          <.hero_skill_strip skills={@hero.skills} id_prefix={@skill_id_prefix} id_suffix={@hero.id} />
+          <.hero_item_strip items={Moba.Game.sort_items(@hero.items)} id_prefix={@item_id_prefix} id_suffix={@hero.id} />
+          <nav :if={@actions != []} class="hero-detail-build-actions" aria-label={@actions_label}>
+            {render_slot(@actions)}
+          </nav>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   @doc """
   Renders a display-only hero stat with its tooltip.
   """

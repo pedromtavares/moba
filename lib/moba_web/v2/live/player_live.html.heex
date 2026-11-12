@@ -27,6 +27,7 @@
                       type="button"
                       class={["profile-avatar-select", selected && "current-featured"]}
                       aria-pressed={to_string(selected)}
+                      data-nav-loading="Loading…"
                       phx-click="set-featured"
                       phx-value-id={hero["hero_id"]}
                       id={"set-featured-#{hero["hero_id"]}"}
@@ -141,12 +142,13 @@
               <span :if={@preview} class="profile-metric-label">Season rank</span>
             </div>
           </div>
-          <div :if={@duels != []} class="profile-history-switcher">
-            <div class="profile-ranking-switch profile-history-tabs" role="group" aria-label="Battle history mode">
+          <div :if={@duels != []} class="profile-history-switcher listing-mode-heading">
+            <div class="listing-mode-switch" role="group" aria-label="Battle history mode">
               <button
                 :for={{tab, label, icon} <- [{"matches", "3v3", "game-arena-3v3"}, {"duels", "1v1", "game-swords"}]}
                 type="button"
                 id={"#{tab}-btn"}
+                data-nav-loading="text"
                 phx-click={if @filter != tab, do: "show-#{tab}"}
                 aria-pressed={to_string(@filter == tab)}
               >
@@ -254,6 +256,7 @@
                   :for={{tab, label} <- [{"season", "Season"}, {"team", "Team"}, {"hero", "Hero"}]}
                   id={"profile-ranking-#{tab}"}
                   type="button"
+                  data-nav-loading="text"
                   phx-click="profile-ranking"
                   phx-value-type={tab}
                   aria-pressed={to_string(@ranking_tab == tab)}
@@ -265,6 +268,8 @@
             <.listing_pager
               id={"profile-#{@ranking_tab}-ranking-pager"}
               label={"#{String.capitalize(@ranking_tab)} leaderboard"}
+              page_size={if @ranking_tab == "team", do: 5}
+              max_page_size={5}
               initial_row={
                 case @ranking_tab do
                   "season" -> "player-#{@player.id}"
