@@ -87,7 +87,7 @@
                             <% else %>
                               <div :if={@preview} id="arena-daily-limit" class="arena-daily-limit">
                                 <strong>Daily matches complete</strong>
-                                <span>{daily_reset_label()}</span>
+                                <span>{daily_reset_label(@daily_reset_at)}</span>
                               </div>
                               <span
                                 :if={!@preview}
@@ -95,7 +95,7 @@
                               >
                                 <i class="ui-icon ui-clock mr-1 ui-2x"></i>
                                 <br />
-                                {reset_timer()}
+                                {daily_reset_label(@daily_reset_at)}
                               </span>
                             <% end %>
                           <% end %>

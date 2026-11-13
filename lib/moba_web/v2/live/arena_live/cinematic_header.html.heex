@@ -1,22 +1,35 @@
 <header id="pvp-progression" class="arena-cinematic" style="--arena-scene: url(/images/tutorial/arena-of-ascension.jpg)">
   <div class="arena-cinematic-heading">
-    <div class="arena-banner-intro">
+    <div>
       <h1>PvP Arena</h1>
       <p id="current-pvp-tier">{tier_title(@current_player)}</p>
-      <.immortal_streak_debuff id="arena-immortal-streak-debuff" player={@current_player} />
     </div>
   </div>
   <div class="arena-cinematic-command">
     <div class="arena-daily-progress">
       <div class="arena-progress-label" id="arena-progress-label">
-        <span>Daily 3v3 matches</span>
+        <div class="arena-progress-caption">
+          <span id="arena-daily-matches-title">Daily 3v3 matches</span>
+          <span class="arena-reset-countdown">
+            <.icon name="game-clock" />
+            <span
+              id="arena-reset-countdown"
+              role="timer"
+              phx-hook="ArenaResetCountdown"
+              phx-update="ignore"
+              data-reset-at={@daily_reset_at && DateTime.to_unix(@daily_reset_at, :millisecond)}
+            >
+              {daily_reset_label(@daily_reset_at)}
+            </span>
+          </span>
+        </div>
         <strong>{@current_player.daily_matches}<span> / {Moba.daily_match_limit()}</span></strong>
       </div>
       <div
         class="progress"
         id="daily-progression"
         role="progressbar"
-        aria-labelledby="arena-progress-label"
+        aria-labelledby="arena-daily-matches-title"
         aria-valuemin="0"
         aria-valuemax={Moba.daily_match_limit()}
         aria-valuenow={min(@current_player.daily_matches, Moba.daily_match_limit())}
@@ -51,19 +64,23 @@
               <.icon name="game-arena-3v3" /><span>Resume 3v3</span><span aria-hidden="true">→</span>
             </.link>
           <% else %>
+            <% limit_reached? = manual_match_limit_reached?(@current_player, @manual_matches) %>
             <button
               id="enter-arena-button"
               type="button"
               data-game-fullscreen
               phx-click="matchmaking"
               class="btn battle-primary arena-play-button"
-              disabled={manual_match_limit_reached?(@current_player, @manual_matches)}
+              disabled={limit_reached?}
             >
               <span class="loading-text">
-                <.icon name="game-arena-3v3" /><span>Play 3v3</span><span aria-hidden="true">→</span>
+                <.icon name="game-arena-3v3" />
+                <span>{if limit_reached?, do: "3v3 daily limit reached", else: "Play 3v3"}</span>
+                <span :if={!limit_reached?} aria-hidden="true">→</span>
               </span>
             </button>
           <% end %>
+          <.arena_streak_penalty player={@current_player} />
         </div>
         <div class="arena-play-mode arena-play-1v1">
           <%= if @pending_duel do %>

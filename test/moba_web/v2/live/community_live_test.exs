@@ -50,7 +50,15 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     owner = create_base_hero().player
     scope = Game.TeamRuns.scope(owner)
     run = Test.TeamHelper.team_run(scope, owner)
-    {:ok, run} = Game.TeamRuns.update(scope, run, &Map.put(&1, :name, "Moonwatch"))
+
+    {:ok, run} =
+      Game.TeamRuns.update(scope, run, fn state ->
+        %{state | name: "Moonwatch", league_tier: 3}
+        |> put_in([:heroes, 1, :hero, Access.key(:level)], 3)
+        |> put_in([:heroes, 2, :hero, Access.key(:level)], 6)
+        |> put_in([:heroes, 3, :hero, Access.key(:level)], 9)
+      end)
+
     Accounts.set_online_now(owner.user)
     cache_recent_players([owner.id])
 
@@ -62,11 +70,16 @@ defmodule MobaWeb.V2.CommunityLiveTest do
 
     for {%{hero: hero}, position} <- Enum.with_index(Game.TeamTraining.team(Game.TeamRuns.state(run)), 1) do
       portrait = "#{card} .community-team-portraits > div:nth-child(#{position})"
-      assert has_element?(view, ~s(#{portrait}[role=img][aria-label="#{hero.avatar.name}"][style*="--team-hero-art"]))
-      refute has_element?(view, "#{portrait} span")
+      label = "#{hero.avatar.name}, level #{hero.level}"
+      assert has_element?(view, ~s(#{portrait}[role=img][aria-label="#{label}"][style*="--team-hero-art"]))
+      assert has_element?(view, "#{portrait} .community-hero-level", "Lv #{hero.level}")
+      refute has_element?(view, "#{portrait} span", hero.avatar.name)
     end
 
+    league_emblem = "#{card} .community-activity-detail > img[src='/images/league/3.png'][alt='Platinum']"
     assert has_element?(view, "#{card} .community-activity-text", "Started training Team Moonwatch")
+    assert has_element?(view, league_emblem)
+    refute has_element?(view, "#{card} .community-activity-text", "Platinum")
     assert has_element?(view, "#{card} .community-activity-summary .ui-arena-3v3")
     refute has_element?(view, "#{card} .community-activity-metrics time")
     refute has_element?(view, "#{card} a.community-activity-link")
@@ -75,7 +88,8 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     cache_recent_players([owner.id])
     send(view.pid, :refresh_recent_players)
     assert has_element?(view, "#{card} .community-activity-link[href='/teams/#{finished.id}']", "Finished training")
-    assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3)")
+    assert has_element?(view, "#{card} .community-team-portraits > div:nth-child(3) .community-hero-level", "Lv 9")
+    assert has_element?(view, league_emblem)
 
     solo =
       Game.create_hero!(%{name: "New solo"}, owner, base_avatar(), base_skills())
@@ -87,6 +101,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     cache_recent_players([owner.id])
     send(view.pid, :refresh_recent_players)
     refute has_element?(view, "#{card} .community-team-portraits")
+    refute has_element?(view, "#{card} .community-activity-detail > img")
     assert has_element?(view, "#{card}[style*='--player-art']")
 
     assert has_element?(
@@ -519,7 +534,7 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#guest-#{roster_guest.id}[data-current=true] .community-player-name", "You")
     assert has_element?(view, "#guest-#{guest.id}.community-player-card .community-player-name", "Guest ##{guest.id}")
     assert has_element?(view, "#guest-#{guest.id} .community-guest-solo-caption", hero.avatar.name)
-    assert has_element?(view, "#guest-#{guest.id} .community-guest-solo-caption .community-guest-level", "Lv 8")
+    assert has_element?(view, "#guest-#{guest.id} .community-guest-solo-caption .community-hero-level", "Lv 8")
     solo_footer = "#guest-#{guest.id} > footer.community-ranking-footer"
     roster_footer = "#guest-#{roster_guest.id} > footer.community-ranking-footer"
     refute has_element?(view, "#{solo_footer} time, #{roster_footer} time")
@@ -534,11 +549,11 @@ defmodule MobaWeb.V2.CommunityLiveTest do
       portrait = "#guest-#{roster_guest.id} .community-team-portraits > div:nth-child(#{index})"
       label = "#{member.avatar.name}, level #{member.level}"
       assert has_element?(view, ~s(#{portrait}[role=img][aria-label="#{label}"][style*="--team-hero-art"]))
-      assert has_element?(view, "#{portrait} .community-guest-level", "Lv #{member.level}")
+      assert has_element?(view, "#{portrait} .community-hero-level", "Lv #{member.level}")
       refute has_element?(view, "#{portrait} span", member.avatar.name)
     end
 
-    assert has_element?(view, "#guest-#{draft_guest.id} .community-guest-level", "Lv 1")
+    assert has_element?(view, "#guest-#{draft_guest.id} .community-hero-level", "Lv 1")
     assert has_element?(view, "#guest-#{draft_guest.id} .community-activity-text", "Bronze League")
 
     view |> element("#show-pvp-link") |> render_click()

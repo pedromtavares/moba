@@ -63,7 +63,14 @@ defmodule Moba.Game.CommunityActivity do
     for {_player_id, team} <- teams,
         {kind, at} <- [training_started: team.started_at, training_finished: team.finished_at],
         at && DateTime.compare(utc_timestamp(at), since) != :lt do
-      %{player_id: team.player_id, kind: kind, id: team.id, at: at, team_name: team.name}
+      %{
+        player_id: team.player_id,
+        kind: kind,
+        id: team.id,
+        at: at,
+        team_name: team.name,
+        league_tier: team.league_tier
+      }
     end
   end
 

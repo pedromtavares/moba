@@ -1,6 +1,9 @@
 .game-page .immortal-streak-debuff { display: inline-flex; align-items: center; max-width: 100%; padding: 6px 10px; border: 1px solid #d98d9440; border-radius: 5px; background: #29151cc7; color: #e9a5ac; font-size: 11px; font-weight: 700; line-height: 1.5; cursor: help; }
 .game-page .immortal-streak-debuff:focus-visible { outline: 2px solid #e9a5ac; outline-offset: 3px; }
 
+.game-tooltip-content .arena-streak-tooltip .arena-streak-tooltip-icon { flex-shrink: 0; color: #dfc18a; font-size: 24px; }
+.game-tooltip-content .arena-streak-tooltip .skill-tooltip-effects { border-top: 1px solid #bba37540; }
+
 .game-page .arena-overview {
   #pvp-progression.arena-cinematic {
     position: relative;
@@ -16,13 +19,14 @@
   .arena-cinematic-heading { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
   .arena-cinematic h1 { margin: 0; color: #f5edda; font: 900 clamp(38px, 4vw, 60px)/1.05 'Nunito', sans-serif; letter-spacing: -.035em; text-shadow: 0 3px 24px #0009; }
   .arena-cinematic #current-pvp-tier { max-width: 58ch; margin: 12px 0 0; color: #d1d6df; font-size: 16px; line-height: 1.5; }
-  .arena-banner-intro { position: relative; }
-  .arena-banner-intro .immortal-streak-debuff { position: absolute; top: calc(100% + 4px); left: 0; gap: 7px; padding: 1px 9px; border-color: #ddbd8233; border-radius: 4px; background: linear-gradient(90deg, #111e2bba, #111e2b38); color: #d9bda2; font-size: 11px; line-height: 16px; letter-spacing: .02em; box-shadow: inset 0 1px #f4dbab0a; }
-  .arena-banner-intro .immortal-streak-debuff::before { content: ''; width: 4px; height: 4px; flex-shrink: 0; transform: rotate(45deg); background: #d69c8c; box-shadow: 0 0 8px #d69c8c55; }
   .arena-cinematic-command { display: grid; grid-template-columns: minmax(0, 1fr) minmax(420px, 1fr); align-items: center; gap: clamp(24px, 4vw, 64px); margin: 26px 0 22px; }
   .arena-daily-progress { max-width: 900px; }
-  .arena-cinematic .arena-progress-label { margin-bottom: 8px; color: #bfc4cc; font-size: 11px; font-weight: 800; }
+  .arena-cinematic .arena-progress-label { gap: 10px; margin-bottom: 8px; color: #bfc4cc; font-size: 11px; font-weight: 800; }
+  .arena-progress-caption { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-width: 0; }
+  .arena-reset-countdown { display: inline-flex; align-items: center; gap: 5px; color: #e1c38d; font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums; letter-spacing: 0; text-transform: none; white-space: nowrap; }
+  .arena-reset-countdown .ui-icon { font-size: 1em; }
   .arena-cinematic .arena-progress-label strong { font-size: 24px; }
+  .arena-progress-label > strong { flex-shrink: 0; white-space: nowrap; }
   .arena-cinematic #daily-progression { height: 32px !important; margin: 0; background: #07101bb3; }
   .arena-cinematic .arena-progress-legend { color: #a9b3c0; margin-top: 8px; }
   .arena-cinematic-action .battle-primary { display: flex; align-items: center; justify-content: center; gap: 28px; width: 100%; min-height: 60px; padding: 16px 20px; font: 900 19px/1.2 'Nunito', sans-serif; letter-spacing: 0; border-radius: 6px; }
@@ -44,6 +48,10 @@
 
   .arena-play-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .arena-play-mode { display: flex; flex-direction: column; min-width: 0; gap: 8px; }
+  .arena-streak-penalty { display: inline-flex; align-self: center; align-items: center; gap: 6px; color: #d6b68b; font-size: 12px; font-weight: 700; line-height: 1.3; text-align: center; cursor: help; }
+  .arena-streak-penalty .ui-icon { flex-shrink: 0; font-size: 13px; }
+  .arena-streak-penalty:hover, .arena-streak-penalty:focus-visible { color: #ffe3b4; }
+  .arena-streak-penalty:focus-visible { outline: 1px solid currentColor; outline-offset: 3px; border-radius: 2px; }
   .arena-cinematic .arena-play-button, .arena-cinematic #enter-arena-button { gap: 10px; min-height: 68px; padding: 16px; font-size: clamp(16px, 1.5vw, 22px); white-space: nowrap; box-shadow: inset 0 1px #ffd9a51a, 0 6px 24px #0003; transition: transform .18s, box-shadow .18s; }
   .arena-play-button .loading-text { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; }
   .arena-cinematic #enter-arena-button .loading-text { justify-content: center; }
@@ -52,6 +60,9 @@
   .arena-play-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: inset 0 1px #ffd9a533, 0 8px 24px #0005; }
   .arena-play-button:focus-visible { outline: 2px solid #ebcc92; outline-offset: 3px; }
   .arena-play-button:disabled { opacity: .45; cursor: not-allowed; }
+  .arena-cinematic #enter-arena-button:disabled { opacity: .8; border-color: #d4af7955; background: #111d2be8 !important; color: #e6cfaa !important; font-size: clamp(13px, 1.1vw, 17px); white-space: normal; }
+  .arena-cinematic #enter-arena-button:disabled .loading-text > span:last-child { margin-left: 0; }
+  .arena-cinematic #enter-arena-button:disabled .ui-icon { flex-shrink: 0; }
   .arena-cinematic .arena-entry-reward { display: flex; justify-content: center; gap: 8px; margin-bottom: 0; font-size: 13px; }
   .arena-history-panel { display: flex; flex-direction: column; flex: 1; min-height: 0; }
   .arena-history-panel .history-table { table-layout: fixed; }
@@ -244,7 +255,6 @@
     .arena-cinematic h1 { font-size: 42px; }
     .arena-cinematic #current-pvp-tier { font-size: 14px; }
     .arena-cinematic-command { grid-template-columns: minmax(0, 1fr); gap: 22px; margin: 22px 0; }
-    .arena-cinematic-heading:has(#arena-immortal-streak-debuff) + .arena-cinematic-command { margin-top: 34px; }
     .arena-cinematic-footer { flex-direction: column; align-items: stretch; gap: 16px; }
     .arena-cinematic-stats { justify-content: space-between; gap: 10px; }
     .arena-cinematic-stats > div { flex-direction: column; gap: 5px; padding: 0 0 0 12px; }

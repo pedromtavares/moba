@@ -371,6 +371,7 @@ defmodule MobaWeb.V2.ArenaLive do
     |> assign_standings(ranking_tab)
     |> assign(
       current_time: current_time,
+      daily_reset_at: Moba.Conductor.pvp_reset_at(Game.current_season()),
       duels: duels,
       finished_duels: Enum.filter(duels, &(&1.phase == "finished")),
       reward_games: Game.Arena.daily_reward_games(player),
@@ -583,21 +584,13 @@ defmodule MobaWeb.V2.ArenaLive do
   defp tier_title(%{pvp_tier: 1}), do: "You are a Shadow, rise above the rest to become an Immortal."
   defp tier_title(_), do: "You are a Pleb, fight to become a Shadow."
 
-  defp reset_timer do
-    Moba.current_season().last_pvp_update_at
-    |> Timex.shift(days: 1)
-    |> Timex.format("{relative}", :relative)
-    |> elem(1)
-    |> then(&"A new fight begins #{&1}")
-  end
+  defp daily_reset_label(nil), do: "Reset pending"
 
-  defp daily_reset_label do
-    reset_at = Moba.current_season().last_pvp_update_at |> Timex.shift(days: 1) |> Timex.to_datetime()
-
+  defp daily_reset_label(reset_at) do
     if DateTime.compare(reset_at, DateTime.utc_now()) == :gt do
       "Resets #{Timex.format!(reset_at, "{relative}", :relative)}"
     else
-      "Daily reset pending"
+      "Reset pending"
     end
   end
 

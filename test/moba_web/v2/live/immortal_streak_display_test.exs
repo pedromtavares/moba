@@ -6,7 +6,7 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
   alias Moba.Game.Matches
   alias MobaWeb.V2.Components.GameHelpers, as: GH
 
-  test "Arena explains the debuff beneath the title copy, including when resuming", %{
+  test "Arena shows the penalty under the 3v3 action and explains it in a tooltip", %{
     conn: conn
   } do
     player = create_player!(%{current_immortal_streak: 7})
@@ -16,19 +16,35 @@ defmodule MobaWeb.V2.ImmortalStreakDisplayTest do
 
     assert has_element?(
              view,
-             ".arena-banner-intro > #current-pvp-tier + #arena-immortal-streak-debuff",
-             "−7.0% Hero Stats"
+             ".arena-play-3v3 > #enter-arena-button + #arena-immortal-streak-debuff",
+             "−7% hero stats"
            )
 
     assert has_element?(view, "#arena-immortal-streak-debuff[data-toggle=tooltip][tabindex='0']")
-    refute has_element?(view, ".arena-play-actions .immortal-streak-debuff")
-    assert_tooltip(view, "#arena-immortal-streak-debuff")
+    assert has_element?(view, "#arena-immortal-streak-debuff .ui-shield")
+    refute has_element?(view, ".arena-cinematic-heading #arena-immortal-streak-debuff")
+    refute has_element?(view, ".arena-play-1v1 #arena-immortal-streak-debuff")
+
+    [tooltip] =
+      view
+      |> element("#arena-immortal-streak-debuff")
+      |> render()
+      |> LazyHTML.from_fragment()
+      |> LazyHTML.attribute("title")
+
+    tooltip = LazyHTML.from_fragment(tooltip)
+    assert tooltip |> LazyHTML.query(".skill-tooltip-heading h3") |> LazyHTML.text() == "Immortal Streak"
+    assert tooltip |> LazyHTML.query(".skill-tooltip-summary") |> LazyHTML.text() =~ "lose 1% of their stats in 3v3"
+    assert tooltip |> LazyHTML.query(".skill-tooltip-effect dd strong") |> LazyHTML.text() == "7"
 
     match(player, opponent, [], [])
     {:ok, resume, _} = live(conn, "/arena")
-    assert has_element?(resume, ".arena-play-3v3 > #resume-arena-match")
-    assert has_element?(resume, ".arena-banner-intro > #current-pvp-tier + #arena-immortal-streak-debuff")
-    assert_tooltip(resume, "#arena-immortal-streak-debuff")
+
+    assert has_element?(
+             resume,
+             ".arena-play-3v3 > #resume-arena-match + #arena-immortal-streak-debuff",
+             "−7% hero stats"
+           )
   end
 
   test "3v3 lineup stats include the streak reduction with the engine's rounding", %{conn: conn} do

@@ -224,14 +224,16 @@ defmodule MobaWeb.V2.CommunityLive do
         aria-label={unless @show_names, do: portrait_label(hero, @show_levels)}
       >
         <span :if={@show_names}>{hero.avatar.name}</span>
-        <span :if={@show_levels} class="community-guest-level" aria-hidden="true">Lv {hero.level}</span>
+        <span :if={@show_levels && Map.get(hero, :level)} class="community-hero-level" aria-hidden="true">
+          Lv {hero.level}
+        </span>
       </div>
     </div>
     """
   end
 
-  defp portrait_label(hero, true), do: "#{hero.avatar.name}, level #{hero.level}"
-  defp portrait_label(hero, false), do: hero.avatar.name
+  defp portrait_label(%{level: level} = hero, true) when is_integer(level), do: "#{hero.avatar.name}, level #{level}"
+  defp portrait_label(hero, _show_levels), do: hero.avatar.name
 
   attr :hero, :map, required: true
   attr :preview, :boolean, required: true
@@ -411,7 +413,7 @@ defmodule MobaWeb.V2.CommunityLive do
       </:summary>
       <:banner_bottom>
         <span :if={@solo_hero} class="community-guest-solo-caption">
-          {@solo_hero.avatar.name} <span class="community-guest-level">Lv {@solo_hero.level}</span>
+          {@solo_hero.avatar.name} <span class="community-hero-level">Lv {@solo_hero.level}</span>
         </span>
       </:banner_bottom>
       <:footer>
@@ -423,7 +425,7 @@ defmodule MobaWeb.V2.CommunityLive do
             time_label="Joined"
           >
             <:emblem :if={is_integer(@league_tier)}>
-              <img class="community-guest-league-emblem" src={"/images/league/#{@league_tier}.png"} alt="" />
+              <img class="community-league-emblem" src={"/images/league/#{@league_tier}.png"} alt="" />
             </:emblem>
           </.activity_metrics>
         </div>
@@ -524,6 +526,7 @@ defmodule MobaWeb.V2.CommunityLive do
       <.activity_metrics
         label={activity_title(@activity)}
         detail={activity_detail(@activity)}
+        detail_league_tier={Map.get(@activity, :league_tier)}
         at={@activity.at}
         show_time={@admin}
       >
@@ -552,6 +555,7 @@ defmodule MobaWeb.V2.CommunityLive do
   attr :at, :any, required: true
   attr :show_time, :boolean, required: true
   attr :detail, :string, default: nil
+  attr :detail_league_tier, :integer, default: nil
   attr :time_label, :string, default: nil
   slot :emblem
 
@@ -562,9 +566,15 @@ defmodule MobaWeb.V2.CommunityLive do
         {render_slot(@emblem)}
         <span class="community-activity-text">
           <strong>{@label}</strong>
-          <%= if @detail do %>
-            <span class="community-activity-detail">{@detail}</span>
-          <% end %>
+          <span :if={@detail} class="community-activity-detail">
+            <img
+              :if={is_integer(@detail_league_tier)}
+              class="community-league-emblem"
+              src={"/images/league/#{@detail_league_tier}.png"}
+              alt={GH.league_name(@detail_league_tier)}
+            />
+            {@detail}
+          </span>
         </span>
       </div>
       <div :if={@show_time} class="community-activity-time">
@@ -603,7 +613,7 @@ defmodule MobaWeb.V2.CommunityLive do
       style={if @roster == [], do: "--player-art: url(#{GH.background_url(@hero)})"}
     >
       <div class={["community-player-banner", @roster != [] && "community-team-banner"]}>
-        <.team_portraits :if={@roster != []} heroes={@roster} show_names={false} show_levels={not is_nil(@guest_name)} />
+        <.team_portraits :if={@roster != []} heroes={@roster} show_names={false} show_levels />
         <header class="community-player-heading">
           <div class="community-player-identity">
             <span :if={@guest_name} class="community-player-name">

@@ -4,10 +4,65 @@ defmodule MobaWeb.V2.Components.PvpComponents do
   """
   use Phoenix.Component
 
+  import MobaWeb.CoreComponents, only: [icon: 1]
+
   import MobaWeb.V2.Components.GameComponents,
     only: [battle_hero_stat_group: 1, hero_item_strip: 1, hero_skill_strip: 1, hero_stat_group: 1, league_badge: 1]
 
+  alias Moba.Game.SkillDescriptions
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+
+  attr :player, :map, required: true
+
+  def arena_streak_penalty(assigns) do
+    assigns = assign(assigns, :percent, GH.immortal_streak_debuff_percent(assigns.player))
+
+    ~H"""
+    <span
+      :if={@percent}
+      id="arena-immortal-streak-debuff"
+      class="arena-streak-penalty tooltip-mobile"
+      data-toggle="tooltip"
+      title={arena_streak_tooltip(@player.current_immortal_streak)}
+      tabindex="0"
+    >
+      <.icon name="game-armor" />
+      <span>−{SkillDescriptions.number(@percent)}% hero stats</span>
+    </span>
+    """
+  end
+
+  defp arena_streak_tooltip(streak) do
+    %{streak: streak, per_day: SkillDescriptions.number(Moba.immortal_streak_multiplier() * 100)}
+    |> arena_streak_tooltip_card()
+    |> Phoenix.HTML.Safe.to_iodata()
+    |> IO.iodata_to_binary()
+  end
+
+  defp arena_streak_tooltip_card(assigns) do
+    ~H"""
+    <article class="skill-tooltip arena-streak-tooltip">
+      <header class="skill-tooltip-heading">
+        <.icon name="game-trophy" class="arena-streak-tooltip-icon" />
+        <h3>Immortal Streak</h3>
+      </header>
+      <p class="skill-tooltip-summary">
+        Your heroes lose {@per_day}% of their stats in 3v3 for each day you hold The Immortal title.
+      </p>
+      <dl class="skill-tooltip-effects">
+        <div class="skill-tooltip-effect" data-tone="armor">
+          <dt><.icon name="game-clock" class="skill-tooltip-effect-icon" />Current streak</dt>
+          <dd>
+            <span class="skill-tooltip-term">
+              <strong>{@streak}</strong>
+              <span class="skill-tooltip-unit">{if @streak == 1, do: "day", else: "days"}</span>
+            </span>
+          </dd>
+        </div>
+      </dl>
+    </article>
+    """
+  end
 
   attr :player, :map, required: true
   attr :id, :string, required: true

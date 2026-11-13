@@ -14,6 +14,39 @@ Hooks.InventoryOrder = {...InventoryOrder, hideTooltips};
 Hooks.LineupOrder = {...LineupOrder, hideTooltips};
 Hooks.ManualCodex = {...ManualCodex, hideTooltips};
 
+Hooks.ArenaResetCountdown = {
+  mounted() {
+    this.updated();
+  },
+  updated() {
+    clearInterval(this.interval);
+    this.renderCountdown();
+    if (Number(this.el.dataset.resetAt) > Date.now()) {
+      this.interval = setInterval(() => this.renderCountdown(), 1000);
+    }
+  },
+  destroyed() {
+    clearInterval(this.interval);
+  },
+  renderCountdown() {
+    const remaining = Math.ceil((Number(this.el.dataset.resetAt || 0) - Date.now()) / 1000);
+    if (remaining <= 0) {
+      this.el.textContent = "Reset pending";
+      clearInterval(this.interval);
+      return;
+    }
+
+    const hours = Math.floor(remaining / 3600);
+    const minutes = Math.floor(remaining / 60) % 60;
+    const seconds = remaining % 60;
+    const duration = [];
+    if (hours) duration.push(`${hours}h`);
+    if (hours || minutes) duration.push(`${minutes}m`);
+    duration.push(`${seconds}s`);
+    this.el.textContent = `Resets in ${duration.join(" ")}`;
+  }
+};
+
 Hooks.EqualHeight = {
   mounted(){
     const target = this.el.getAttribute("phx-target")

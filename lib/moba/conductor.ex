@@ -9,6 +9,8 @@ defmodule Moba.Conductor do
   import Ecto.Query
   require Logger
 
+  @pvp_reset_interval 24 * 60 * 60
+
   @doc """
   Runs the auto matchmaking and touches a datetime field
   so Moba.Server knows when to run this again, currently every 30 mins.
@@ -35,11 +37,14 @@ defmodule Moba.Conductor do
   end
 
   def pvp_tick! do
-    run_due_tick(:last_pvp_update_at, 24 * 60 * 60, fn ->
+    run_due_tick(:last_pvp_update_at, @pvp_reset_interval, fn ->
       Game.update_daily_ranking!(true)
       Repo.update_all(PlayerQuery.current_season() |> PlayerQuery.non_bots(), set: [daily_matches: 0, daily_wins: 0])
     end)
   end
+
+  def pvp_reset_at(%{last_pvp_update_at: nil}), do: nil
+  def pvp_reset_at(%{last_pvp_update_at: last_reset}), do: DateTime.add(last_reset, @pvp_reset_interval)
 
   defp run_due_tick(field, interval, work) do
     {season, ran?} =

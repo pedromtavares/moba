@@ -20,10 +20,12 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     refute has_element?(view, "#arena-duels-table a[href='/arena/#{pending.id}']")
   end
 
-  test "a pending match stays resumable at the daily limit, then disables its play button", %{conn: conn} do
+  test "3v3 resumes a pending match at the limit and allows new matches after the daily reset", %{conn: conn} do
     hero = create_base_hero()
     player = Game.update_player!(hero.player, %{daily_matches: Moba.daily_match_limit()})
     opponent = create_player!()
+    last_reset = DateTime.utc_now() |> DateTime.add(-3600) |> DateTime.truncate(:second)
+    season = Game.update_season!(Game.current_season(), %{last_pvp_update_at: last_reset})
 
     for _ <- 1..(Moba.daily_match_limit() - 1) do
       create_match(player, opponent, %{phase: "scored", winner_id: player.id, rewards: %{attacker_pvp_points: 0}})
@@ -39,10 +41,21 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
 
     Game.Matches.update!(pending, %{phase: "scored", winner_id: player.id, rewards: %{attacker_pvp_points: 0}})
     {:ok, finished, _} = live(conn, "/arena")
-    assert has_element?(finished, "#enter-arena-button[disabled]", "Play 3v3")
+    deadline = last_reset |> DateTime.add(86_400) |> DateTime.to_unix(:millisecond)
+    assert has_element?(finished, "#arena-reset-countdown[role=timer][data-reset-at='#{deadline}']", "Resets in")
+    assert has_element?(finished, "#enter-arena-button[disabled]", "3v3 daily limit reached")
+    assert has_element?(finished, "#season-duel-button:not([disabled])", "Play 1v1")
     refute has_element?(finished, "#arena-entry-reward")
     refute has_element?(finished, "#resume-arena-match")
     refute has_element?(finished, "#arena-daily-limit.btn")
+
+    Game.update_season!(season, %{last_pvp_update_at: DateTime.add(last_reset, -86_400)})
+    reset_season = Conductor.pvp_tick!()
+    send(finished.pid, {"ranking", %{}})
+
+    new_deadline = reset_season.last_pvp_update_at |> DateTime.add(86_400) |> DateTime.to_unix(:millisecond)
+    assert has_element?(finished, "#arena-reset-countdown[data-reset-at='#{new_deadline}']")
+    assert has_element?(finished, "#enter-arena-button:not([disabled])", "Play 3v3")
   end
 
   test "empty team states guide creation and training", %{conn: conn} do

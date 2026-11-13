@@ -124,24 +124,29 @@ defmodule Moba.Admin.Seasons do
 
   defp training_team_card(%{phase: "finished", heroes: [_ | _]} = team) do
     heroes = Enum.map(team.hero_ids, fn id -> Enum.find(team.heroes, &(&1.id == id)) end) |> Enum.reject(&is_nil/1)
-    training_team_card(team, heroes)
+    training_team_card(team, heroes, team.league_tier)
   end
 
   defp training_team_card(team) do
     case Game.TeamRuns.read_state(team) do
-      {:ok, run} -> training_team_card(team, Enum.map(Game.TeamTraining.team(run), & &1.hero))
-      {:error, :invalid_snapshot} -> []
+      {:ok, run} ->
+        heroes = Enum.map(Game.TeamTraining.team(run), & &1.hero)
+        training_team_card(team, heroes, run.league_tier)
+
+      {:error, :invalid_snapshot} ->
+        []
     end
   end
 
-  defp training_team_card(_team, []), do: []
+  defp training_team_card(_team, [], _league_tier), do: []
 
-  defp training_team_card(team, [first | _] = heroes) do
+  defp training_team_card(team, [first | _] = heroes, league_tier) do
     [
       team
       |> Map.take([:id, :player_id, :name, :finished_at])
       |> Map.merge(%{
-        heroes: Enum.map(heroes, &Map.take(&1, [:avatar, :skin])),
+        heroes: Enum.map(heroes, &Map.take(&1, [:avatar, :skin, :level])),
+        league_tier: league_tier,
         started_at: first.inserted_at || team.inserted_at
       })
     ]

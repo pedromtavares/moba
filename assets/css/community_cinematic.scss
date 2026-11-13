@@ -171,7 +171,7 @@ body:has(.game-page #community) {
     overflow-wrap: anywhere;
   }
   .community-team-portraits > [data-fallen=true] { filter: grayscale(.65); }
-  .community-team-portraits .community-guest-level { color: var(--community-gold); }
+  .community-team-portraits .community-hero-level { color: var(--community-gold); }
   .community-hero-identity { min-width: 0; }
   .community-hero-meta {
     display: flex;
@@ -244,8 +244,8 @@ body:has(.game-page #community) {
   .community-admin-metrics dd { margin: 0; color: var(--community-gold); font-size: 16px; font-weight: 900; font-variant-numeric: tabular-nums; }
   #community-stat-active dd { color: #9ad2b9; }
   .community-guest-solo-caption { margin-top: auto; color: #f6efdf; font-weight: 800; text-shadow: 0 1px 5px #000; }
-  .community-guest-level { color: var(--community-gold); white-space: nowrap; }
-  .community-guest-league-emblem { flex: none; width: 17px; height: 17px; object-fit: contain; }
+  .community-hero-level { color: var(--community-gold); white-space: nowrap; }
+  .community-league-emblem { flex: none; width: 17px; height: 17px; object-fit: contain; }
 
   #community-arena-stats { height: 100%; display: grid; grid-template-rows: auto auto minmax(0, 1fr); gap: 8px; }
   #community-balance-baseline { margin: 0; color: #b8c5d3; font-size: 13px; }
@@ -299,6 +299,11 @@ body:has(.game-page #community) {
   .community-activity-summary .ui-icon { flex: none; }
   .community-activity-text { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .community-activity-detail { color: #e1e8f1; font-weight: 700; }
+  .community-activity-detail .community-league-emblem {
+    display: inline-block;
+    vertical-align: middle;
+    margin-inline-end: 4px;
+  }
   .community-activity-time {
     display: flex;
     align-items: center;

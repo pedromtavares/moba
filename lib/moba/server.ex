@@ -12,9 +12,6 @@ defmodule Moba.Server do
   # 30mins
   @tick_diff_in_seconds 60 * 30
 
-  # 24h
-  @pvp_update_diff_in_seconds 24 * 60 * 60
-
   def start_link(opts), do: GenServer.start_link(__MODULE__, [], Keyword.put_new(opts, :name, __MODULE__))
 
   def init(state) do
@@ -55,7 +52,9 @@ defmodule Moba.Server do
         Cleaner.cleanup_old_records()
       end
 
-      if time_diff_in_seconds(season.last_pvp_update_at) >= @pvp_update_diff_in_seconds do
+      reset_at = Conductor.pvp_reset_at(season)
+
+      if is_nil(reset_at) || DateTime.compare(DateTime.utc_now(), reset_at) != :lt do
         Conductor.pvp_tick!()
       end
     end
@@ -63,7 +62,7 @@ defmodule Moba.Server do
     state
   end
 
-  defp time_diff_in_seconds(nil), do: @pvp_update_diff_in_seconds
+  defp time_diff_in_seconds(nil), do: @tick_diff_in_seconds
   defp time_diff_in_seconds(field), do: Timex.diff(Timex.now(), field, :seconds)
 
   defp prod?, do: Application.get_env(:moba, :env) == :prod
