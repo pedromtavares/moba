@@ -18,6 +18,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
   attr :id, :string, required: true
   attr :label, :string, required: true
   attr :initial_row, :string, default: nil
+  attr :last_page_start, :integer, default: nil
   attr :page_size, :integer, default: nil
   attr :max_page_size, :integer, default: nil
   slot :inner_block, required: true
@@ -30,6 +31,7 @@ defmodule MobaWeb.V2.Components.LayoutComponents do
       class="listing-pager"
       phx-hook="ListingPager"
       data-initial-row={@initial_row}
+      data-last-page-start={@last_page_start}
       data-page-size={@page_size}
       data-max-page-size={@max_page_size}
     >

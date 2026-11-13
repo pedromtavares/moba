@@ -18,8 +18,13 @@
       </button>
     </div>
   </header>
-  <.listing_pager id={"arena-standings-#{@ranking_tab}-pager"} label="Arena standings">
-    <:summary :if={!ranking_inclusion?(@ranking, @current_player)}>
+  <.listing_pager
+    id={"arena-standings-#{@ranking_tab}-pager"}
+    label="Arena standings"
+    initial_row={"standing-player-#{@current_player.id}"}
+    last_page_start={if @nearby_ranking != [], do: length(@ranking)}
+  >
+    <:summary :if={@nearby_ranking == [] && !ranking_inclusion?(@ranking, @current_player)}>
       <.link
         id="arena-your-standing"
         class="arena-your-standing"
@@ -54,8 +59,17 @@
       aria-label={if @ranking_tab == "3v3", do: "Daily ranking", else: "Arena Rating descending"}
     >
       <li
-        :for={{player, index} <- Enum.with_index(@ranking, 1)}
-        id={"standing-player-#{player.id}"}
+        :for={
+          {player, index, nearby?} <-
+            Enum.map(Enum.with_index(@ranking, 1), fn {player, index} -> {player, index, false} end) ++
+              Enum.map(@nearby_ranking, fn {player, index} -> {player, index, true} end)
+        }
+        id={
+          if nearby? && player.id != @current_player.id,
+            do: "standing-nearby-player-#{player.id}",
+            else: "standing-player-#{player.id}"
+        }
+        data-nearby={nearby? && "true"}
         class={player.id == @current_player.id && "is-you"}
       >
         <.standing_row

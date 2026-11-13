@@ -34,7 +34,7 @@ defmodule MobaWeb.V2.ArenaLive do
   end
 
   def handle_event("standings-tab", %{"type" => mode}, socket) when mode in ["3v3", "1v1"] do
-    {:noreply, assign(socket, ranking: ranking_for(mode), ranking_tab: mode)}
+    {:noreply, assign_standings(socket, mode)}
   end
 
   def handle_event("history-tab", %{"type" => tab}, socket) when tab in ["matches", "duels"] do
@@ -365,10 +365,10 @@ defmodule MobaWeb.V2.ArenaLive do
     duel_opponents = opponents_from_presence(player)
     pending_duel = Game.Duels.pending_duel(player)
     ranking_tab = Map.get(socket.assigns, :ranking_tab, "3v3")
-    ranking = ranking_for(ranking_tab)
 
     socket
     |> assign_new(:history_tab, fn -> "matches" end)
+    |> assign_standings(ranking_tab)
     |> assign(
       current_time: current_time,
       duels: duels,
@@ -376,9 +376,7 @@ defmodule MobaWeb.V2.ArenaLive do
       reward_games: Game.Arena.daily_reward_games(player),
       recent_results: Game.Matches.recent_results(player),
       duel_opponents: duel_opponents,
-      pending_duel: pending_duel,
-      ranking: ranking,
-      ranking_tab: ranking_tab
+      pending_duel: pending_duel
     )
     |> list_matches()
   end
@@ -460,6 +458,17 @@ defmodule MobaWeb.V2.ArenaLive do
 
   defp ranking_for("3v3"), do: Moba.daily_ranking()
   defp ranking_for("1v1"), do: Game.season_points_ranking(Moba.daily_ranking_limit())
+
+  defp assign_standings(%{assigns: %{current_player: player}} = socket, mode) do
+    ranking = ranking_for(mode)
+
+    nearby =
+      if ranking != [] && !ranking_inclusion?(ranking, player),
+        do: Game.arena_ranking_neighbors(player, mode),
+        else: []
+
+    assign(socket, ranking: ranking, nearby_ranking: nearby, ranking_tab: mode)
+  end
 
   defp arena_bracket(%{pvp_tier: 2}), do: "Immortals"
   defp arena_bracket(%{pvp_tier: 1}), do: "Shadows"

@@ -229,6 +229,8 @@ defmodule Moba.Game do
 
   defdelegate season_points_ranking(limit), to: Players
 
+  defdelegate arena_ranking_neighbors(player, mode), to: Players
+
   defdelegate duel_opponent(player), to: Players
 
   defdelegate duel_opponents(player, online_ids), to: Players

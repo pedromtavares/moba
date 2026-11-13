@@ -104,6 +104,16 @@
   .arena-standing-score { text-align: right; }
   .arena-standing-score > strong { display: block; color: #8dcab0; font-size: 28px; font-weight: 900; line-height: 1.1; font-variant-numeric: tabular-nums; }
   .arena-standing-score > span { color: #8e9cac; font-size: 10px; white-space: nowrap; }
+  .arena-standings-list > li[data-nearby] {
+    height: 52px;
+
+    .arena-standing-row { grid-template-rows: minmax(0, 1fr); height: 100%; min-height: 0; padding-block: 3px; }
+    .arena-standing-identity > strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .arena-standing-identity > .arena-standing-meta { flex-wrap: nowrap; margin-top: 2px; line-height: 1.2; white-space: nowrap; }
+    .arena-standing-meta > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+    .arena-standing-score { display: grid; gap: 2px; line-height: 1; }
+    .arena-standing-score > strong { font-size: 24px; line-height: 1; }
+  }
   .arena-standings-list .is-you { background: linear-gradient(90deg, #c7b17b17, #c7b17b04); box-shadow: inset 2px 0 #dbbe83; }
   .is-you .arena-standing-position { color: #e6cb94; }
   .arena-your-standing { display: flex; align-items: center; gap: 6px; min-height: 30px; color: #d2c9b8; font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
@@ -197,6 +207,11 @@
     #arena-standings .listing-pager-summary { min-width: 0; }
 
     .arena-history-panel .history-table td, .arena-standings-list > li { height: var(--arena-list-row-height); }
+    .arena-standings-list > li[data-nearby] {
+      height: 20cqh;
+
+      .arena-standing-score > strong { font-size: clamp(18px, 8cqh, 28px); }
+    }
     .arena-history-panel .history-table td { padding-block: 8px !important; }
     .arena-standing-row { height: 100%; min-height: 0; padding-block: 8px; }
     .arena-standing-meta { line-height: 1.2; }
@@ -207,6 +222,9 @@
       white-space: nowrap;
     }
   }
+}
+@media (max-width: 1199px) {
+  .game-page #arena-standings .listing-pager-viewport:has([data-nearby]) { max-height: clamp(260px, 50dvh, 520px); }
 }
 @media (max-width: 991px) {
   .game-page .arena-overview {

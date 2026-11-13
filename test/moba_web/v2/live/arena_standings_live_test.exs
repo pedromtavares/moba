@@ -18,6 +18,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     assert has_element?(view, "#arena-history-matches-tab", "3v3")
     assert has_element?(view, "#arena-history-duels-tab", "1v1")
     assert has_element?(view, "#arena-standings-3v3[aria-pressed=true]")
+    assert has_element?(view, "#arena-standings-3v3-pager[data-initial-row=standing-player-#{player.id}]")
     assert has_element?(view, "#standing-player-#{player.id}.is-you .arena-standing-position", "26")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score strong", "2")
     assert has_element?(view, "#standing-player-#{player.id} a[href='/player/#{player.id}'][aria-current=true]")
@@ -55,6 +56,7 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
 
     view |> element("#arena-standings-1v1") |> render_click()
     assert has_element?(view, "#arena-standings-1v1[aria-pressed=true]")
+    assert has_element?(view, "#arena-standings-1v1-pager[data-initial-row=standing-player-#{player.id}]")
     assert has_element?(view, "#arena-standings-list[aria-label='Arena Rating descending']")
     assert Enum.take(standings_ids(view), 2) == Enum.map([player, composite_leader], &"standing-player-#{&1.id}")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-position", "1")
@@ -74,6 +76,34 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     assert standings_ids(view) == Enum.map([composite_leader, player], &"standing-player-#{&1.id}")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-position", "26")
     assert has_element?(view, "#standing-player-#{player.id} .arena-standing-score strong", "1")
+  end
+
+  test "3v3 appends a page centered on the player's daily rank outside the top 50", %{conn: conn} do
+    neighbors = for rank <- 87..93, do: create_player!(%{ranking: rank})
+    player = Enum.at(neighbors, 3)
+    top = for rank <- 1..50, do: %{player | id: 90_000 + rank, ranking: rank}
+    Cachex.put(:game_cache, "daily_ranking", top)
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
+
+    assert_nearby_page(view, "3v3", player, top, Enum.slice(neighbors, 1, 5), 88)
+
+    last_player = List.last(neighbors)
+    {:ok, view, _} = live(log_in_player(conn, player_id: last_player.id), "/arena")
+
+    assert_nearby_page(view, "3v3", last_player, top, Enum.take(neighbors, -5), 89)
+  end
+
+  test "1v1 keeps the top 50 when the nearby page overlaps it and preserves rating tie order", %{conn: conn} do
+    top = for rank <- 1..50, do: create_player!(%{pvp_points: 100_000, ranking: rank})
+    player = create_player!(%{pvp_points: 100_000})
+    after_player = for _ <- 1..2, do: create_player!(%{pvp_points: 100_000})
+    Cachex.put(:game_cache, "daily_ranking", top)
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
+    view |> element("#arena-standings-1v1") |> render_click()
+
+    assert_nearby_page(view, "1v1", player, top, Enum.take(top, -2) ++ [player | after_player], 49)
   end
 
   test "an unranked player's daily standing remains visible", %{conn: conn} do
@@ -170,5 +200,26 @@ defmodule MobaWeb.V2.ArenaStandingsLiveTest do
     |> LazyHTML.from_fragment()
     |> LazyHTML.query("li")
     |> LazyHTML.attribute("id")
+  end
+
+  defp assert_nearby_page(view, mode, player, top, nearby, first_rank) do
+    assert has_element?(
+             view,
+             "#arena-standings-#{mode}-pager[data-last-page-start='50'][data-initial-row=standing-player-#{player.id}]"
+           )
+
+    nearby_ids =
+      Enum.map(nearby, fn row ->
+        if row.id == player.id, do: "standing-player-#{row.id}", else: "standing-nearby-player-#{row.id}"
+      end)
+
+    assert standings_ids(view) == Enum.map(top, &"standing-player-#{&1.id}") ++ nearby_ids
+
+    for {id, rank} <- Enum.with_index(nearby_ids, first_rank) do
+      assert has_element?(view, "##{id}[data-nearby=true] .arena-standing-position", "##{rank}")
+    end
+
+    assert has_element?(view, "#standing-player-#{player.id}.is-you a[aria-current=true]")
+    refute has_element?(view, "#arena-your-standing")
   end
 end

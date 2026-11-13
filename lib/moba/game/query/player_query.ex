@@ -65,8 +65,10 @@ defmodule Moba.Game.Query.PlayerQuery do
     from _ in query, order_by: fragment("RANDOM()")
   end
 
-  def daily_ranked(limit) do
-    from(player in limit_by(current_season(), limit),
+  def daily_ranked(limit), do: limit_by(daily_ranked(), limit)
+
+  def daily_ranked do
+    from(player in current_season(),
       where: not is_nil(player.ranking),
       order_by: [asc: player.ranking]
     )
@@ -77,8 +79,10 @@ defmodule Moba.Game.Query.PlayerQuery do
     from(player in query, order_by: [desc: player.pvp_points])
   end
 
-  def season_points_ranked(limit) do
-    players = current_season() |> non_bots() |> non_guests() |> limit_by(limit)
+  def season_points_ranked(limit), do: limit_by(season_points_ranked(), limit)
+
+  def season_points_ranked do
+    players = current_season() |> non_bots() |> non_guests()
     from p in players, order_by: [desc: p.pvp_points, asc: p.id], preload: :user
   end
 

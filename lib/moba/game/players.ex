@@ -98,6 +98,40 @@ defmodule Moba.Game.Players do
 
   def season_points_ranking(limit), do: PlayerQuery.season_points_ranked(limit) |> Repo.all()
 
+  def arena_ranking_neighbors(%{ranking: rank} = player, "3v3") when is_integer(rank) do
+    ranking = PlayerQuery.daily_ranked()
+    previous = from p in ranking, where: p.ranking < ^rank
+    following = from p in ranking, where: p.ranking > ^rank
+    {higher, lower} = ranking_neighbors(previous, following)
+
+    Enum.map(higher ++ [player | lower], &{&1, &1.ranking})
+  end
+
+  def arena_ranking_neighbors(%{id: id, user_id: user_id, bot_options: nil, pvp_points: points} = player, "1v1")
+      when not is_nil(user_id) do
+    if player.season_id == Game.current_season().id do
+      ranking = PlayerQuery.season_points_ranked()
+      previous = from p in ranking, where: p.pvp_points > ^points or (p.pvp_points == ^points and p.id < ^id)
+      following = from p in ranking, where: p.pvp_points < ^points or (p.pvp_points == ^points and p.id > ^id)
+      {higher, lower} = ranking_neighbors(previous, following)
+      position = Repo.aggregate(previous, :count) + 1
+
+      Enum.with_index(higher ++ [player | lower], position - length(higher))
+    else
+      []
+    end
+  end
+
+  def arena_ranking_neighbors(_, _), do: []
+
+  defp ranking_neighbors(previous, following) do
+    higher = previous |> reverse_order() |> limit(4) |> Repo.all()
+    lower = following |> limit(4) |> Repo.all()
+    higher_count = min(length(higher), max(2, 4 - length(lower)))
+
+    {higher |> Enum.take(higher_count) |> Enum.reverse(), Enum.take(lower, 4 - higher_count)}
+  end
+
   def season_ranking(limit) do
     players = PlayerQuery.season_ranked(limit) |> Repo.all()
 

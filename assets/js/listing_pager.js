@@ -56,7 +56,11 @@ export default {
     const list = this.viewport.querySelector('[data-listing-rows]');
     this.rows = Array.from(list?.children || []);
     const pageSize = Number(this.el.dataset.pageSize);
-    this.starts = pageSize > 0 ? fixedPageStarts(this.rows.length, pageSize) : this.fitPages(list);
+    const lastPageStart = Number(this.el.dataset.lastPageStart);
+    const hasLastPage = lastPageStart > 0 && lastPageStart < this.rows.length;
+    const regularRows = hasLastPage ? this.rows.slice(0, lastPageStart) : this.rows;
+    this.starts = pageSize > 0 ? fixedPageStarts(regularRows.length, pageSize) : this.fitPages(list, regularRows, hasLastPage);
+    if (hasLastPage) this.starts.push(lastPageStart);
     this.controls.hidden = this.starts.length === 1;
 
     const index = this.anchor ?? this.rows.findIndex(row => row.id === this.el.dataset.initialRow);
@@ -64,12 +68,12 @@ export default {
     this.renderPage();
   },
 
-  fitPages(list) {
+  fitPages(list, regularRows, hasLastPage) {
     this.rows.forEach(row => { row.hidden = false; });
-    this.controls.hidden = true;
+    this.controls.hidden = !hasLastPage;
     this.viewport.removeAttribute('data-full-page');
 
-    const heights = this.rows.map(row => row.getBoundingClientRect().height);
+    const heights = regularRows.map(row => row.getBoundingClientRect().height);
     const gap = list ? parseFloat(getComputedStyle(list).rowGap) || 0 : 0;
     const table = list?.closest('table');
     const tableChrome = table ? table.getBoundingClientRect().height - list.getBoundingClientRect().height : 0;
@@ -77,7 +81,7 @@ export default {
 
     const maxRows = Number(this.el.dataset.maxPageSize) || Infinity;
     const pages = pageStarts(heights, gap, availableHeight(), maxRows);
-    if (pages.length === 1) return pages;
+    if (pages.length === 1 || hasLastPage) return pages;
 
     this.controls.hidden = false;
     return pageStarts(heights, gap, availableHeight(), maxRows);
