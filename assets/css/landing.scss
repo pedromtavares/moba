@@ -88,6 +88,16 @@
 .landing-entrance:focus-visible { outline: 2px solid #f1e5ce; outline-offset: 6px; }
 .landing-entrance:active { box-shadow: inset 0 0 30px #00000080; }
 
+.landing-page #landing-entrance {
+  background: radial-gradient(ellipse at 50% 0%, #ffd29c26, transparent 70%),
+    linear-gradient(135deg, #74282af0, #a63735ed 55%, #642126f0);
+  transition: box-shadow 180ms ease, border-color 180ms ease, color 180ms ease, transform 180ms ease;
+}
+@media (hover: hover) {
+  .landing-page #landing-entrance:hover { transform: translateY(-2px); }
+}
+.landing-page #landing-entrance:active { transform: none; }
+
 .landing-stats {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -168,7 +178,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .landing-entrance { transition: none; }
+  .landing-entrance, .landing-page #landing-entrance { transition: none; }
+  .landing-page #landing-entrance:hover { transform: none; }
 }
 
 .return-page .landing::after {

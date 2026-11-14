@@ -26,7 +26,7 @@
         <dl id="landing-stats" class="landing-stats" aria-label="Game statistics">
           <%= for {id, first, second, value} <- [
             {"players", "TOTAL", "PLAYERS", @counts.players},
-            {"heroes", "HEROES", "INVOKED", @counts.heroes},
+            {"heroes", "HEROES", "CREATED", @counts.heroes},
             {"matches", "MATCHES", "PLAYED", @counts.matches}
           ] do %>
             <div id={"landing-stat-#{id}"} class="landing-stat">
