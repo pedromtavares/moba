@@ -27,6 +27,7 @@ defmodule MobaWeb.V2.DraftLive do
        team_form: to_form(%{"name" => team_name}, as: :team),
        team_name_error: nil,
        draft_mode: true,
+       start_page: socket.assigns.live_action == :start,
        launch_label: "Add to roster",
        cache_key: "team-draft-#{if record, do: record.id, else: session["cache_key"]}"
      )}

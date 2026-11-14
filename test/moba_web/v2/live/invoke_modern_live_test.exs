@@ -12,6 +12,7 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
     {:ok, view, _} = live(conn, "/new/solo")
     assert has_element?(view, "#invoke-modern[phx-update=ignore][data-creation]")
     assert has_element?(view, "#invoke-hero-name", "Juggernaut")
+    assert has_element?(view, "#invoke-filter-all[data-invoke-action=filter]")
     refute has_element?(view, "#create-bar header > strong")
     refute has_element?(view, "#invoke-modern [phx-click], #invoke-modern [phx-change]")
 
@@ -96,7 +97,10 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
 
   test "guests add starter builds locally before submitting the full roster" do
     {:ok, view, _} = live(Phoenix.ConnTest.build_conn(), "/start")
-    assert has_element?(view, "#invoke-hero-name", "Juggernaut")
+    assert has_element?(view, "h1#invoke-start-heading", "Assemble your Team")
+    assert has_element?(view, "h2#invoke-hero-name", "Juggernaut")
+    assert has_element?(view, "#invoke-roster #randomize-button")
+    refute has_element?(view, "#invoke-roster [data-invoke-action=filter]")
     assert has_element?(view, "#create-button[type=button]:not([disabled])", "Add to roster")
     assert has_element?(view, "#team-draft-launch[action='/start'][method=post] input[name=_csrf_token]")
     assert has_element?(view, "#team-draft-launch input[name=roster][value='[]']")

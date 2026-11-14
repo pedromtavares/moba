@@ -1,6 +1,6 @@
 <section
   id="invoke-modern"
-  class="invoke-modern"
+  class={["invoke-modern", assigns[:start_page] && "invoke-modern--start"]}
   phx-hook="InvokeStage"
   phx-update="ignore"
   data-creation={invoke_creation_data(assigns)}
@@ -18,6 +18,7 @@
     <img class="invoke-art-layer" alt="" />
   </div>
   <div class="invoke-atmosphere" aria-hidden="true"></div>
+  <h1 :if={assigns[:start_page]} id="invoke-start-heading">Assemble your Team</h1>
   <.link :if={is_nil(@current_player.user_id)} href="/users/log_in" id="invoke-guest-sign-in">
     <i class="ui-icon ui-sign-in" aria-hidden="true"></i>
     <span>Already registered? <strong>Sign in</strong></span>
@@ -32,7 +33,8 @@
         <img src={"/images/#{@selected_avatar.role}_icon.png"} alt="" />
         <span data-invoke-role>{role(@selected_avatar)}</span>
       </div>
-      <h1 id="invoke-hero-name">{@selected_avatar.name}</h1>
+      <h2 :if={assigns[:start_page]} id="invoke-hero-name">{@selected_avatar.name}</h2>
+      <h1 :if={!assigns[:start_page]} id="invoke-hero-name">{@selected_avatar.name}</h1>
       <p class="invoke-gameplay" data-invoke-description>{@selected_avatar.description}</p>
       <div
         class="invoke-signature"
@@ -108,7 +110,7 @@
             aria-pressed={to_string(@selected_build_index == index)}
             class="invoke-build-pick"
           >
-            <span class="invoke-build-number">0{index + 1}</span>
+            <span :if={!assigns[:start_page]} class="invoke-build-number">0{index + 1}</span>
             <strong>{elem(build, 1)}</strong>
             <span class="invoke-build-mark" aria-hidden="true">
               {if @selected_build_index == index, do: "✓", else: "＋"}
@@ -226,8 +228,9 @@
   </div>
 
   <section id="invoke-roster" class="invoke-roster" aria-label="Hero roster" hidden={@custom}>
-    <nav class="invoke-filters" aria-label="Hero role">
+    <div class="invoke-filters">
       <button
+        :if={!assigns[:start_page]}
         id="invoke-filter-all"
         type="button"
         data-invoke-action="filter"
@@ -237,7 +240,7 @@
         All heroes
       </button>
       <button
-        :for={role <- roles()}
+        :for={role <- if(assigns[:start_page], do: [], else: roles())}
         id={"invoke-filter-#{role}"}
         type="button"
         data-invoke-action="filter"
@@ -253,9 +256,9 @@
         class="invoke-random"
         aria-label="Choose a random hero"
       >
-        ↻ Random
+        <span aria-hidden="true">↻</span><span>Random</span>
       </button>
-    </nav>
+    </div>
     <div class="invoke-avatar-strip">
       <button
         id="invoke-avatars-prev"
@@ -311,7 +314,9 @@
         <span aria-hidden="true">→</span>
       </button>
     </div>
-    <div :if={@avatars == []} class="invoke-no-heroes">No unlocked heroes in this role.</div>
+    <div :if={@avatars == []} class="invoke-no-heroes">
+      {if assigns[:start_page], do: "No unlocked heroes.", else: "No unlocked heroes in this role."}
+    </div>
   </section>
   <template id="invoke-selected-skill-template">
     <div class="invoke-loadout-slot">
@@ -332,7 +337,7 @@
   <template id="invoke-build-option-template">
     <article class="invoke-build">
       <button type="button" data-invoke-action="build" class="invoke-build-pick">
-        <span class="invoke-build-number"></span><strong></strong>
+        <span :if={!assigns[:start_page]} class="invoke-build-number"></span><strong></strong>
       </button>
       <div class="invoke-build-skills"></div>
     </article>

@@ -42,6 +42,14 @@ test('filters toggle without changing the chosen hero or build', () => {
   assert.equal(selectBuild(filtered, {type: 'filter', role: 'bruiser'}, data).filter, null);
 });
 
+test('the start page drops saved role filters without resetting the build', () => {
+  const saved = {...data.initial, preset: 1, filter: 'bruiser'};
+  const state = initialSelection({...data, role_filters: false}, saved);
+  assert.equal(state.filter, null);
+  assert.equal(state.avatar, saved.avatar);
+  assert.equal(state.preset, saved.preset);
+});
+
 test('stale browser selections fall back safely, and invalid preset indexes are ignored', () => {
   assert.deepEqual(initialSelection(data, {...data.initial, avatar: 'deleted'}), initialSelection(data));
   assert.deepEqual(initialSelection(data, {...data.initial, skills: ['deleted']}), initialSelection(data));

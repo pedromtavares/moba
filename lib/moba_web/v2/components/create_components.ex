@@ -680,6 +680,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
       storage_key: "invoke:#{assigns.cache_key}",
       draft_mode: Map.get(assigns, :draft_mode, false),
       draft_picks: Map.get(assigns, :draft_picks, []),
+      role_filters: !Map.get(assigns, :start_page, false),
       named: !is_nil(assigns.current_player.user_id) && !Map.get(assigns, :draft_mode, false),
       initial: %{
         avatar: to_string(assigns.selected_avatar.id),

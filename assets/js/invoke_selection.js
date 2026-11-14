@@ -8,7 +8,7 @@ export function initialSelection(data, saved = data.initial) {
     avatar: avatar.id, skills: [...new Set(preset !== null && choice.custom !== true ? data.builds[avatar.role][preset].skills : choice.skills)].filter(id => allowed.has(id)).slice(0, 3),
     preset, custom: choice.custom === true,
     name: typeof choice.name === 'string' ? choice.name : data.initial.name,
-    filter: ['tank', 'bruiser', 'carry', 'nuker', 'support'].includes(choice.filter) ? choice.filter : null
+    filter: data.role_filters !== false && ['tank', 'bruiser', 'carry', 'nuker', 'support'].includes(choice.filter) ? choice.filter : null
   };
 }
 

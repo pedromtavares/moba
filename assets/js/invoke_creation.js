@@ -153,7 +153,7 @@ export default class InvokeCreation {
   }
 
   rosterCapacity() {
-    if (window.innerWidth < 640) return 6;
+    if (window.innerWidth < 640) return this.data.role_filters === false ? 4 : 6;
     return window.innerWidth < 1000 ? 8 : 12;
   }
 
@@ -197,7 +197,8 @@ export default class InvokeCreation {
       const button = node.querySelector('button');
       button.id = `pick-build-${index}`;
       button.dataset.buildIndex = index;
-      button.querySelector('.invoke-build-number').textContent = `0${index + 1}`;
+      const number = button.querySelector('.invoke-build-number');
+      if (number) number.textContent = `0${index + 1}`;
       button.querySelector('strong').textContent = build.name;
       build.skills.forEach(id => {
         const skill = this.skills.get(id);

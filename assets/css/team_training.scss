@@ -193,6 +193,14 @@
   .game-page .team-draft-page { display: grid; grid-template-rows: minmax(0, 1fr) auto; height: var(--draft-height, calc(100dvh - 24px)); min-height: 0; }
   .game-page .team-draft-creator { min-height: 0; }
   .game-page .team-draft-creator .invoke-modern { height: 100% !important; min-height: 0 !important; }
+  .game-page .team-draft-page:has(.invoke-modern--start) {
+    grid-template-rows: 1fr auto;
+    height: auto;
+    min-height: var(--draft-height, calc(100dvh - 24px));
+    .team-draft-creator { display: flex; flex-direction: column; }
+    .invoke-modern { height: auto !important; flex: 1; }
+    .invoke-stage-content { min-height: min-content; }
+  }
   .game-page .team-draft-roster { display: grid; grid-template-columns: minmax(0, 1fr) 220px; align-items: stretch; gap: 18px; margin: 0; padding: 10px clamp(24px, 3vw, 64px) 4px; border: 0; }
   .game-page .team-draft-roster footer { margin: 0; }
   .game-page .team-draft-roster footer button { width: 100%; min-width: 0; min-height: 54px; font-size: 18px; }
@@ -217,7 +225,7 @@
   .game-page .team-draft-page #create-new .invoke-identity .training-mode { padding: 0; margin-bottom: 12px; }
   .game-page .team-draft-page #create-new .invoke-identity .training-mode a { padding: 5px 10px; font-size: 14px; }
   .game-page .team-draft-page #create-new .invoke-modern[data-mode=presets] .invoke-identity { width: clamp(280px, 27vw, 365px); padding-bottom: 0; }
-  .game-page .team-draft-page #create-new h1 { font-size: clamp(32px, 3vw, 44px); }
+  .game-page .team-draft-page #create-new #invoke-hero-name { font-size: clamp(32px, 3vw, 44px); }
   .game-page .team-draft-page #create-new .invoke-role { margin-bottom: 4px; }
   .game-page .team-draft-page #create-new .invoke-gameplay { font-size: 16px; line-height: 1.4; max-width: 100%; }
   .game-page .team-draft-page #create-new .invoke-signature { margin-top: 10px; }
@@ -227,7 +235,7 @@
   .game-page .team-draft-page #create-new .invoke-base-stats { padding-top: 10px; gap: 6px; }
   .game-page .team-draft-page #create-new .invoke-filters { padding: 2px 0 4px; }
   .game-page .team-draft-page #create-new .invoke-filters button { padding: 4px 8px; }
-  .game-page .team-draft-page #create-new .invoke-portrait > img { max-height: 58px; }
+  .game-page .team-draft-page #create-new .invoke-modern:not(.invoke-modern--start) .invoke-portrait > img { max-height: 58px; }
   .game-page .team-draft-pick { min-height: 96px; padding-top: 7px; padding-bottom: 7px; }
   .game-page .team-draft-skills img { max-width: 48px; }
 }
