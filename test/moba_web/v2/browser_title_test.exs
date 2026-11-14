@@ -4,7 +4,14 @@ defmodule MobaWeb.V2.BrowserTitleTest do
   import Test.TeamHelper
   alias Moba.Game.{TeamRuns, TeamTraining, TrainingEncounters}
 
-  @title "Free turn based RPG | Browser MOBA"
+  @title "Browser MOBA"
+
+  test "account and return pages use the app title", %{conn: conn} do
+    for path <- ["/users/log_in", "/users/register", "/users/reset_password", "/return"] do
+      response = conn |> get(path) |> html_response(200) |> LazyHTML.from_document()
+      assert LazyHTML.text(LazyHTML.query(response, "title")) == @title
+    end
+  end
 
   test "game pages keep the same browser title without LiveView title updates", %{conn: conn} do
     {scope, player} = team_account()
