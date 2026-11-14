@@ -40,11 +40,11 @@ defmodule MobaWeb.GameController do
     end
   end
 
-  def redirect_preview(conn, _params) do
-    path = preview_path(conn, conn.request_path)
-    path = if conn.query_string == "", do: path, else: path <> "?" <> conn.query_string
-    conn |> put_status(:moved_permanently) |> redirect(to: path)
-  end
+  def redirect_preview(conn, _params),
+    do: redirect_permanently(conn, preview_path(conn, conn.request_path))
+
+  def redirect_registration(conn, _params), do: redirect_permanently(conn, ~p"/users/register")
+  def redirect_login(conn, _params), do: redirect_permanently(conn, ~p"/users/log_in")
 
   def redirect_tavern(conn, %{"avatar" => code}) when is_binary(code),
     do: redirect(conn, to: ~p"/base?#{%{avatar: code}}")
@@ -107,6 +107,11 @@ defmodule MobaWeb.GameController do
       true ->
         redirect(conn, to: preview_path(conn, ~p"/start"))
     end
+  end
+
+  defp redirect_permanently(conn, path) do
+    path = if conn.query_string == "", do: path, else: path <> "?" <> conn.query_string
+    conn |> put_status(:moved_permanently) |> redirect(to: path)
   end
 
   defp format_number(n) do

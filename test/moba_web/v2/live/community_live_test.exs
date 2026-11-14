@@ -199,6 +199,13 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     hero = create_base_hero(%{pve_ranking: 15})
     player = Game.update_player!(hero.player, %{season_ranking: 3})
     opponent = create_player!()
+    first = create_combat_hero(%{level: 26}, player, alternate_avatar())
+    second = create_combat_hero(%{level: 28}, player, Game.get_avatar_by_code!("lina"))
+    third = create_combat_hero(%{level: 30}, player, Game.get_avatar_by_code!("tusk"))
+    defender = create_combat_hero(%{level: 24}, opponent)
+    scope = Game.TeamRuns.scope(player)
+    Test.TeamHelper.team_run(scope, player)
+    lineup = [third, first, second]
 
     match =
       Game.Matches.create!(%{
@@ -207,8 +214,8 @@ defmodule MobaWeb.V2.CommunityLiveTest do
         winner_id: player.id,
         phase: "scored",
         type: "manual",
-        player_picks: [],
-        opponent_picks: [],
+        player_picks: Enum.map(lineup, & &1.id),
+        opponent_picks: [defender.id],
         generated_picks: []
       })
 
@@ -223,6 +230,14 @@ defmodule MobaWeb.V2.CommunityLiveTest do
     assert has_element?(view, "#user-#{player.id} .community-player-status", "Online")
     assert has_element?(view, "#user-#{player.id} .community-season-rank", "#3")
     assert has_element?(view, "#user-#{player.id} .community-best-hero-rank[href='/hero/#{hero.id}']", "#15")
+
+    for {pick, position} <- Enum.with_index(lineup, 1) do
+      portrait = "#user-#{player.id} .community-team-portraits > div:nth-child(#{position})"
+      label = "#{pick.avatar.name}, level #{pick.level}"
+      assert has_element?(view, ~s(#{portrait}[aria-label="#{label}"] .community-hero-level), "Lv #{pick.level}")
+    end
+
+    refute has_element?(view, "#user-#{player.id} .community-team-portraits > div:nth-child(4)")
 
     assert has_element?(
              view,

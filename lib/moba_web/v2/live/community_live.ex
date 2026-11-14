@@ -435,19 +435,31 @@ defmodule MobaWeb.V2.CommunityLive do
   end
 
   defp recent_player_card(assigns) do
+    player = assigns.player
+    activity = Map.get(player, :recent_activity)
+    training_roster = get_in(player, [Access.key(:latest_training_team), :heroes]) || []
+
+    {hero, roster} =
+      case activity do
+        %{pvp_roster: roster} -> {nil, roster}
+        _ -> {Map.get(player, :latest_hero), training_roster}
+      end
+
     assigns =
       assign(assigns,
-        activity: Map.get(assigns.player, :recent_activity),
-        best_hero: Map.get(assigns.player, :best_ranked_hero),
-        best_team: Map.get(assigns.player, :best_ranked_team)
+        activity: activity,
+        hero: hero,
+        roster: roster,
+        best_hero: Map.get(player, :best_ranked_hero),
+        best_team: Map.get(player, :best_ranked_team)
       )
 
     ~H"""
     <.player_banner
       id={"user-#{@player.id}"}
       player={@player}
-      hero={Map.get(@player, :latest_hero)}
-      roster={get_in(@player, [Access.key(:latest_training_team), :heroes]) || []}
+      hero={@hero}
+      roster={@roster}
       preview={@preview}
       current={@current}
     >

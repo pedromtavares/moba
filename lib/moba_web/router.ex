@@ -46,6 +46,8 @@ defmodule MobaWeb.Router do
 
     get "/", MobaWeb.GameController, :index
     get "/tavern", MobaWeb.GameController, :redirect_tavern
+    get "/registration/new", MobaWeb.GameController, :redirect_registration
+    get "/session/new", MobaWeb.GameController, :redirect_login
   end
 
   scope "/", MobaWeb do

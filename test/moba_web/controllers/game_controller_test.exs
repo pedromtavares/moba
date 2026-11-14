@@ -20,6 +20,33 @@ defmodule MobaWeb.GameControllerTest do
     assert desktop == "/images/landing/home-heroes-v5.png"
   end
 
+  test "homepage and guest draft render the game title and description", %{conn: conn} do
+    for path <- ["/", "/start"] do
+      document = conn |> get(path) |> html_response(200) |> LazyHTML.from_document()
+
+      assert LazyHTML.query(document, "title") |> LazyHTML.text() == "Free turn based RPG | Browser MOBA"
+
+      assert LazyHTML.query(document, ~s(meta[name="description"])) |> LazyHTML.attribute("content") ==
+               [
+                 "Train custom heroes with MOBA abilities and items to battle against other players in turn based 3v3 team battles or 1v1 duels. Free to play."
+               ]
+    end
+  end
+
+  test "legacy account links redirect permanently to the current pages", %{conn: conn} do
+    for {legacy, destination} <- [
+          {"/registration/new", "/users/register"},
+          {"/session/new", "/users/log_in"}
+        ] do
+      assert conn |> get(legacy) |> redirected_to(301) == destination
+
+      query = "?utm_source=bookmark&campaign=old%20link"
+      redirect = conn |> get(legacy <> query) |> redirected_to(301)
+      assert redirect == destination <> query
+      assert conn |> get(redirect) |> response(200)
+    end
+  end
+
   test "user has active pve hero and is redirected to training", %{conn: conn} do
     hero = create_base_hero()
 

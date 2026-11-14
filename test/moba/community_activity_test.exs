@@ -31,22 +31,37 @@ defmodule Moba.CommunityActivityTest do
     assert id == hero.id
   end
 
-  test "season duels belong to their initiator and live duels belong to both participants" do
+  test "season duels show the initiator's picks and live duels show each participant's own picks" do
     player = create_player!()
     opponent = create_player!()
-    season_duel = Duels.create!(player, opponent, true)
+    player_first = create_combat_hero(%{}, player)
+    player_second = create_combat_hero(%{}, player, alternate_avatar())
+    opponent_first = create_combat_hero(%{}, opponent)
+    opponent_second = create_combat_hero(%{}, opponent, alternate_avatar())
+
+    picks = %{
+      player_first_pick_id: player_second.id,
+      player_second_pick_id: player_first.id,
+      opponent_first_pick_id: opponent_second.id,
+      opponent_second_pick_id: opponent_first.id
+    }
+
+    season_duel = player |> Duels.create!(opponent, true) |> change(picks) |> Repo.update!()
     Duels.finish!(season_duel, %{winner: player, attacker_pvp_points: 5, defender_pvp_points: 0})
 
     activities = CommunityActivity.latest_for_players([player.id, opponent.id])
-    assert %{kind: :season_duel, result: :won} = activities[player.id]
-    refute Map.has_key?(activities, opponent.id)
+    assert %{kind: :season_duel, result: :won, pvp_roster: roster} = activities[player.id]
+    assert Enum.map(roster, & &1.id) == [player_second.id, player_first.id]
+    assert %{kind: :training_started} = activities[opponent.id]
 
-    live_duel = Duels.create!(player, opponent, false)
+    live_duel = player |> Duels.create!(opponent, false) |> change(picks) |> Repo.update!()
     Duels.finish!(live_duel, %{winner: opponent, attacker_pvp_points: -5, defender_pvp_points: 5})
     activities = CommunityActivity.latest_for_players([player.id, opponent.id])
-    assert %{kind: :live_duel, result: :lost, opponent: name} = activities[player.id]
+    assert %{kind: :live_duel, result: :lost, opponent: name, pvp_roster: roster} = activities[player.id]
     assert name == Accounts.get_user!(opponent.user_id).username
-    assert %{kind: :live_duel, result: :won} = activities[opponent.id]
+    assert Enum.map(roster, & &1.id) == [player_second.id, player_first.id]
+    assert %{kind: :live_duel, result: :won, pvp_roster: roster} = activities[opponent.id]
+    assert Enum.map(roster, & &1.id) == [opponent_second.id, opponent_first.id]
   end
 
   test "ignores pending games, training duels, old events and other players" do

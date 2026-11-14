@@ -5,6 +5,7 @@ defmodule Moba.Game.CommunityActivity do
   import Moba.Utils, only: [username: 1]
 
   alias Moba.Repo
+  alias Moba.Game.Query.HeroQuery
   alias Moba.Game.Schema.{Duel, Hero, Match, Player}
 
   def latest_for_players(player_ids, training_teams \\ %{})
@@ -28,6 +29,39 @@ defmodule Moba.Game.CommunityActivity do
       :desc
     )
     |> Enum.reduce(%{}, fn activity, activities -> Map.put_new(activities, activity.player_id, activity) end)
+    |> load_pvp_rosters()
+  end
+
+  defp load_pvp_rosters(activities) do
+    ids =
+      activities
+      |> Map.values()
+      |> Enum.flat_map(&Map.get(&1, :pvp_pick_ids, []))
+      |> Enum.filter(&is_integer/1)
+      |> Enum.uniq()
+
+    heroes =
+      if ids == [] do
+        %{}
+      else
+        from(h in HeroQuery.load_avatar(),
+          where: h.id in ^ids,
+          select: struct(h, [:id, :level, :avatar_id, :skin_id])
+        )
+        |> Repo.all()
+        |> Map.new(&{&1.id, &1})
+      end
+
+    Map.new(activities, fn {player_id, activity} ->
+      case Map.pop(activity, :pvp_pick_ids) do
+        {nil, activity} ->
+          {player_id, activity}
+
+        {picks, activity} ->
+          roster = for id <- picks, hero = heroes[id], do: hero
+          {player_id, Map.put(activity, :pvp_roster, roster)}
+      end
+    end)
   end
 
   defp activity_priority(%{kind: :training_started, team_name: _}), do: 1
@@ -90,7 +124,8 @@ defmodule Moba.Game.CommunityActivity do
         id: match.id,
         at: match.updated_at,
         opponent: username(match.opponent),
-        result: result(match.winner_id, match.player_id)
+        result: result(match.winner_id, match.player_id),
+        pvp_pick_ids: match.player_picks || []
       }
     end)
   end
@@ -115,7 +150,13 @@ defmodule Moba.Game.CommunityActivity do
     |> Repo.all()
     |> Enum.map(fn duel ->
       player_id = Map.fetch!(duel, owner_field)
-      opponent = if owner_field == :player_id, do: duel.opponent_player, else: duel.player
+
+      {opponent, picks} =
+        if owner_field == :player_id do
+          {duel.opponent_player, [duel.player_first_pick_id, duel.player_second_pick_id]}
+        else
+          {duel.player, [duel.opponent_first_pick_id, duel.opponent_second_pick_id]}
+        end
 
       %{
         player_id: player_id,
@@ -123,7 +164,8 @@ defmodule Moba.Game.CommunityActivity do
         id: duel.id,
         at: duel.updated_at,
         opponent: username(opponent),
-        result: result(duel.winner_player_id, player_id)
+        result: result(duel.winner_player_id, player_id),
+        pvp_pick_ids: picks
       }
     end)
   end
