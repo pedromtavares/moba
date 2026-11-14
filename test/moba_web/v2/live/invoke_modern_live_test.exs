@@ -13,6 +13,8 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
     assert has_element?(view, "#invoke-modern[phx-update=ignore][data-creation]")
     assert has_element?(view, "#invoke-hero-name", "Juggernaut")
     assert has_element?(view, "#invoke-filter-all[data-invoke-action=filter]")
+    assert has_element?(view, ".invoke-role", "Carry")
+    assert has_element?(view, "#randomize-button")
     refute has_element?(view, "#create-bar header > strong")
     refute has_element?(view, "#invoke-modern [phx-click], #invoke-modern [phx-change]")
 
@@ -25,6 +27,7 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
     end
 
     assert has_element?(view, "#invoke-build-footer #create-button[data-invoke-action=create]")
+    assert has_element?(view, "#invoke-build-footer .invoke-energy")
     assert has_element?(view, ".invoke-base-stats [data-stat=health] .ui-heart")
     assert has_element?(view, ".invoke-attributes [data-stat=offense] .ui-fist")
   end
@@ -99,11 +102,30 @@ defmodule MobaWeb.V2.InvokeModernLiveTest do
     {:ok, view, _} = live(Phoenix.ConnTest.build_conn(), "/start")
     assert has_element?(view, "h1#invoke-start-heading", "Assemble your Team")
     assert has_element?(view, "h2#invoke-hero-name", "Juggernaut")
-    assert has_element?(view, "#invoke-roster #randomize-button")
-    refute has_element?(view, "#invoke-roster [data-invoke-action=filter]")
-    assert has_element?(view, "#create-button[type=button]:not([disabled])", "Add to roster")
+    assert has_element?(view, "[data-invoke-description]", "gamble on an even bigger finishing blow")
+    assert has_element?(view, ".invoke-signature strong", "Omnislash")
+    assert has_element?(view, ".invoke-signature [data-ultimate-summary]", "chance for maximum damage")
+    refute has_element?(view, ".invoke-role, #randomize-button, .team-draft-name img")
+
+    refute has_element?(
+             view,
+             "#invoke-roster [data-invoke-action=filter], #invoke-roster [data-invoke-action=roster-page]"
+           )
+
+    assert has_element?(view, "#invoke-build-0 button[aria-pressed=true]", "Blink Striker")
+    assert has_element?(view, "#invoke-build-0 .invoke-build-ability", "Blink Strike")
+    assert has_element?(view, "#invoke-build-footer[hidden]")
+    refute has_element?(view, ~s(#invoke-modern .invoke-energy, #invoke-modern [title*='data-kind="energy"']))
+    refute has_element?(view, "#invoke-roster h2, #invoke-build-heading, #invoke-draft-slot, .invoke-base-stats")
+
+    for label <- ~w(Offense Defense Magic Speed) do
+      assert has_element?(view, ~s(.invoke-attributes [role=meter][aria-label="#{label}"][aria-valuenow]))
+    end
+
+    refute has_element?(view, "#create-button")
     assert has_element?(view, "#team-draft-launch[action='/start'][method=post] input[name=_csrf_token]")
     assert has_element?(view, "#team-draft-launch input[name=roster][value='[]']")
-    assert has_element?(view, "#team-draft-begin[disabled]")
+    assert has_element?(view, ".invoke-build-panel + #team-draft-begin[type=button]", "Pick Juggernaut")
+    refute has_element?(view, "#team-draft-roster #team-draft-begin, #team-draft-begin small")
   end
 end

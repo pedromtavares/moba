@@ -1,0 +1,31 @@
+<div class="invoke-identity" id={"avatar-#{@selected_avatar.id}"} data-invoke-identity>
+  <nav :if={@current_player.user_id} id="training-mode" class="training-mode" aria-label="Training mode">
+    <.link navigate="/new" aria-current={Map.get(assigns, :draft_mode, false) && "page"}>Team 3v3</.link>
+    <.link navigate="/new/solo" aria-current={!Map.get(assigns, :draft_mode, false) && "page"}>Solo 1v1</.link>
+  </nav>
+  <div :if={!assigns[:start_page]} class="invoke-role">
+    <img src={"/images/#{@selected_avatar.role}_icon.png"} alt="" />
+    <span data-invoke-role>{role(@selected_avatar)}</span>
+  </div>
+  <h2 :if={assigns[:start_page]} id="invoke-hero-name">{@selected_avatar.name}</h2>
+  <h1 :if={!assigns[:start_page]} id="invoke-hero-name">{@selected_avatar.name}</h1>
+  <p class="invoke-gameplay" data-invoke-description>
+    {invoke_hero_description(@selected_avatar, assigns[:start_page])}
+  </p>
+  <div
+    class="invoke-signature"
+    tabindex="0"
+    data-toggle="tooltip"
+    title={invoke_skill_tooltip(@selected_avatar.ultimate, assigns[:start_page])}
+  >
+    <img src={GH.image_url(@selected_avatar.ultimate)} alt="" />
+    <div>
+      <small>Ultimate</small>
+      <strong>{@selected_avatar.ultimate.name}</strong>
+      <p :if={assigns[:start_page]} data-ultimate-summary>{invoke_ultimate_summary(@selected_avatar.ultimate)}</p>
+    </div>
+  </div>
+  <div class="invoke-details" id={"invoke-details-#{@selected_avatar.id}"}>
+    <.invoke_stats avatar={@selected_avatar} avatars={@all_avatars} show_base_stats={!assigns[:start_page]} />
+  </div>
+</div>

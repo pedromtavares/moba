@@ -1,0 +1,92 @@
+<section id="invoke-roster" class="invoke-roster" aria-label="Hero roster" hidden={@custom && !assigns[:start_page]}>
+  <div :if={!assigns[:start_page]} class="invoke-filters">
+    <button
+      id="invoke-filter-all"
+      type="button"
+      data-invoke-action="filter"
+      data-role=""
+      aria-pressed={to_string(is_nil(@filter))}
+    >
+      All heroes
+    </button>
+    <button
+      :for={role <- roles()}
+      id={"invoke-filter-#{role}"}
+      type="button"
+      data-invoke-action="filter"
+      data-role={role}
+      aria-pressed={to_string(@filter == role)}
+    >
+      <img src={"/images/#{role}_icon.png"} alt="" />{String.capitalize(role)}
+    </button>
+    <button
+      id="randomize-button"
+      type="button"
+      data-invoke-action="random"
+      class="invoke-random"
+      aria-label="Choose a random hero"
+    >
+      <span aria-hidden="true">↻</span><span>Random</span>
+    </button>
+  </div>
+  <div class="invoke-avatar-strip">
+    <button
+      :if={!assigns[:start_page]}
+      id="invoke-avatars-prev"
+      type="button"
+      class="invoke-roster-arrow"
+      data-invoke-action="roster-page"
+      data-direction="-1"
+      aria-label="Previous heroes"
+      aria-controls="invoke-avatars"
+      hidden={length(@avatars) <= 12}
+      disabled
+    >
+      <span aria-hidden="true">←</span>
+    </button>
+    <div
+      id="invoke-avatars"
+      class="invoke-avatar-grid"
+      style={"--invoke-columns: #{min(12, max(1, length(@avatars)))}"}
+    >
+      <button
+        :for={{avatar, index} <- @avatars |> Enum.uniq() |> Enum.sort_by(& &1.name) |> Enum.with_index()}
+        hidden={!assigns[:start_page] && index >= 12}
+        id={"pick-avatar-#{avatar.id}"}
+        type="button"
+        class="invoke-portrait"
+        data-invoke-action="avatar"
+        data-avatar-id={avatar.id}
+        data-role={avatar.role}
+        aria-pressed={to_string(@selected_avatar.id == avatar.id)}
+        aria-label={"Choose #{avatar.name}"}
+      >
+        <img src={GH.image_url(avatar)} alt="" />
+        <span>{avatar.name}</span>
+        <span
+          :if={Enum.any?(@current_player.hero_collection, &(&1["code"] == avatar.code))}
+          class="invoke-trained"
+          aria-label="Already trained"
+        >
+          ◆
+        </span>
+      </button>
+    </div>
+    <button
+      :if={!assigns[:start_page]}
+      id="invoke-avatars-next"
+      type="button"
+      class="invoke-roster-arrow"
+      data-invoke-action="roster-page"
+      data-direction="1"
+      aria-label="Next heroes"
+      aria-controls="invoke-avatars"
+      hidden={length(@avatars) <= 12}
+    >
+      <span aria-hidden="true">→</span>
+    </button>
+  </div>
+  <div :if={@avatars == []} class="invoke-no-heroes">
+    {if assigns[:start_page], do: "No unlocked heroes.", else: "No unlocked heroes in this role."}
+  </div>
+</section>

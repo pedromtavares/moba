@@ -7,7 +7,7 @@
   sidebar_code="training"
   hide_footer
 >
-  <main id="team-draft-page" class="team-draft-page">
+  <main id="team-draft-page" class={["team-draft-page", @start_page && "team-draft-page--start"]}>
     <div class="team-draft-creator" id="create-new">
       {MobaWeb.V2.Components.CreateComponents.invoke_modern(assigns)}
     </div>
@@ -17,13 +17,17 @@
           <span class="team-draft-empty-index" aria-label={"Empty roster slot #{index + 1}"}>0{index + 1}</span>
         </article>
         <template id="team-draft-pick-template">
-          <img class="team-draft-portrait" />
-          <div class="team-draft-name"><img alt="" /><strong></strong></div>
+          <img :if={!@start_page} class="team-draft-portrait" />
+          <div class="team-draft-name">
+            <img :if={!@start_page} alt="" />
+            <strong></strong>
+            <small :if={@start_page} data-draft-build-name></small>
+          </div>
           <button type="button" data-remove-pick>×</button>
           <div class="team-draft-skills"></div>
         </template>
       </div>
-      <footer>
+      <footer class="team-draft-actions" hidden={@start_page && is_nil(@current_scope.user)}>
         <.form
           for={@team_form}
           id="team-draft-launch"
@@ -43,6 +47,7 @@
           <div id="team-draft-submit" phx-update="ignore">
             <input type="hidden" name="roster" value="[]" />
             <button
+              :if={!@start_page}
               id="team-draft-begin"
               type="submit"
               class="invoke-primary"

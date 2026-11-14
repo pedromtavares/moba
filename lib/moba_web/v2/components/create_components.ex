@@ -6,7 +6,9 @@ defmodule MobaWeb.V2.Components.CreateComponents do
   import MobaWeb.CoreComponents, only: [input: 1, icon: 1]
 
   alias Moba.Game
+  alias Moba.Game.SkillDescriptions
   alias MobaWeb.V2.Components.GameHelpers, as: GH
+  alias MobaWeb.V2.Components.SkillTooltip
   alias MobaWeb.V2.Components.TooltipComponents, as: TT
 
   embed_templates "create_components/*"
@@ -548,6 +550,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
 
   attr :avatar, :map, required: true
   attr :avatars, :list, required: true
+  attr :show_base_stats, :boolean, default: true
 
   defp invoke_stats(assigns) do
     ~H"""
@@ -569,7 +572,7 @@ defmodule MobaWeb.V2.Components.CreateComponents do
         </div>
       </div>
     </div>
-    <dl class="invoke-base-stats">
+    <dl :if={@show_base_stats} class="invoke-base-stats">
       <div
         :for={
           {stat, label, value, gain} <- [
@@ -637,6 +640,8 @@ defmodule MobaWeb.V2.Components.CreateComponents do
   end
 
   defp invoke_creation_data(assigns) do
+    start_page = Map.get(assigns, :start_page, false)
+
     avatars =
       Enum.map(assigns.all_avatars, fn avatar ->
         %{
@@ -644,10 +649,13 @@ defmodule MobaWeb.V2.Components.CreateComponents do
           name: avatar.name,
           code: avatar.code,
           role: avatar.role,
-          description: avatar.description,
+          description: invoke_hero_description(avatar, start_page),
           art: GH.background_url(avatar),
           portrait: GH.image_url(avatar),
-          ultimate: invoke_skill_data(avatar.ultimate),
+          ultimate:
+            avatar.ultimate
+            |> invoke_skill_data(start_page)
+            |> Map.put(:summary, invoke_ultimate_summary(avatar.ultimate)),
           stats: %{
             health: avatar.total_hp,
             energy: avatar.total_mp,
@@ -675,12 +683,12 @@ defmodule MobaWeb.V2.Components.CreateComponents do
 
     Jason.encode!(%{
       avatars: avatars,
-      skills: Enum.map(assigns.skills, &invoke_skill_data/1),
+      skills: Enum.map(assigns.skills, &invoke_skill_data(&1, start_page)),
       builds: builds,
       storage_key: "invoke:#{assigns.cache_key}",
       draft_mode: Map.get(assigns, :draft_mode, false),
       draft_picks: Map.get(assigns, :draft_picks, []),
-      role_filters: !Map.get(assigns, :start_page, false),
+      role_filters: !start_page,
       named: !is_nil(assigns.current_player.user_id) && !Map.get(assigns, :draft_mode, false),
       initial: %{
         avatar: to_string(assigns.selected_avatar.id),
@@ -693,13 +701,33 @@ defmodule MobaWeb.V2.Components.CreateComponents do
     })
   end
 
-  defp invoke_skill_data(skill) do
+  defp invoke_skill_tooltip(skill, start_page), do: SkillTooltip.render(skill, show_energy: !start_page)
+
+  defp invoke_ultimate_summary(skill), do: SkillDescriptions.describe(skill).summary
+
+  defp invoke_hero_description(avatar, start_page) do
+    case {start_page, avatar.code} do
+      {true, "axe"} -> "Soak up hits and finish weakened enemies before they recover."
+      {true, "dazzle"} -> "Grow harder to kill and more dangerous the longer the fight lasts."
+      {true, "dragon_knight"} -> "Weather the opening attacks, then outlast your opponent in dragon form."
+      {true, "juggernaut"} -> "Hit hard and gamble on an even bigger finishing blow."
+      {true, "lina"} -> "Pressure enemies with spells and bring them down with one big burst."
+      {true, "phantom_assassin"} -> "Move first and look for openings to strike through armor."
+      {true, "puck"} -> "Set up your next move with a delayed stun that opens up combos."
+      {true, "sniper"} -> "Stay alive long enough to line up a devastating shot."
+      {true, "techies"} -> "Plant explosives and time your spells to land when they go off."
+      {true, "tusk"} -> "Stun your opponent to create an opening for follow-up hits."
+      _ -> avatar.description
+    end
+  end
+
+  defp invoke_skill_data(skill, start_page) do
     %{
       id: to_string(skill.id),
       name: skill.name,
       image: GH.image_url(skill),
       energy: skill.mp_cost || 0,
-      tooltip: TT.skill_tooltip(skill)
+      tooltip: invoke_skill_tooltip(skill, start_page)
     }
   end
 

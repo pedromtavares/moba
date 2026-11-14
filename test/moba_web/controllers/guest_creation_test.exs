@@ -60,8 +60,7 @@ defmodule MobaWeb.GuestCreationTest do
     counts = {Repo.aggregate(Player, :count), Repo.aggregate(TrainingTeam, :count)}
     session = conn |> get("/start") |> recycle()
     {:ok, view, _} = live(session, "/start")
-    assert has_element?(view, "#create-button[type=button][data-invoke-action=create]", "Add to roster")
-    assert has_element?(view, "#team-draft-launch[action='/start'] #team-draft-begin[disabled]")
+    assert has_element?(view, "#team-draft-begin[type=button][form=team-draft-launch]", "Pick Juggernaut")
     assert {Repo.aggregate(Player, :count), Repo.aggregate(TrainingTeam, :count)} == counts
 
     picks = Test.TeamHelper.team_picks(%{user: nil})

@@ -11,6 +11,7 @@ defmodule MobaWeb.V2.Components.SkillTooltip do
       content: Copy.describe(skill),
       full: Keyword.get(opts, :full, true),
       show_name: Keyword.get(opts, :show_name, true),
+      show_energy: Keyword.get(opts, :show_energy, true),
       details_only: Keyword.get(opts, :details_only, false),
       upgrade: Keyword.get(opts, :next) |> upgrade_for(skill)
     }
@@ -38,7 +39,7 @@ defmodule MobaWeb.V2.Components.SkillTooltip do
         <div :if={@content.notes != []} class="skill-tooltip-notes">
           <p :for={note <- @content.notes}>{note}</p>
         </div>
-        <.metadata_rows entries={metadata(@skill)} />
+        <.metadata_rows entries={metadata(@skill, @show_energy)} />
         <section :if={@upgrade} class="skill-upgrade-preview" aria-label="Next skill rank">
           <header><span>Next rank</span><strong>Rank {@upgrade.rank}</strong></header>
           <dl class="skill-tooltip-changes">
@@ -132,7 +133,7 @@ defmodule MobaWeb.V2.Components.SkillTooltip do
   defp unit_label(term),
     do: if(percentage?(term), do: term.unit |> String.trim_leading("%") |> String.trim(), else: term.unit)
 
-  defp metadata(skill) do
+  defp metadata(skill, show_energy) do
     passive = Map.get(skill, :passive, false)
     cost = Map.get(skill, :mp_cost) || 0
     cooldown = Map.get(skill, :cooldown) || 0
@@ -142,7 +143,7 @@ defmodule MobaWeb.V2.Components.SkillTooltip do
 
     Enum.reject(
       [
-        if(!passive || cost > 0, do: %{kind: :energy, icon: "game-energy", label: energy}),
+        if(show_energy && (!passive || cost > 0), do: %{kind: :energy, icon: "game-energy", label: energy}),
         if(!passive || !is_nil(Map.get(skill, :cooldown)), do: %{kind: :cooldown, icon: "game-clock", label: timing}),
         if(damage? && skill.code != "rearm" && skill.code != "spell_steal",
           do: damage_metadata(Map.get(skill, :damage_type))

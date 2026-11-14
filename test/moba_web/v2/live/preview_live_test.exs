@@ -111,15 +111,8 @@ defmodule MobaWeb.V2.PreviewLiveTest do
   test "guest creation submits and redirects through canonical routes", %{conn: conn} do
     {:ok, view, _} = live(conn, "/start")
 
-    assert view
-           |> element("#create-new")
-           |> render()
-           |> LazyHTML.from_fragment()
-           |> LazyHTML.query(".invoke-base-stats > div")
-           |> Enum.count() == 6
-
-    refute has_element?(view, "#create-new button.avatar-attribute")
-    assert has_element?(view, "#game-page #team-draft-launch[action='/start'] #team-draft-begin")
+    assert has_element?(view, "#game-page #team-draft-launch[action='/start']")
+    assert has_element?(view, "#game-page #team-draft-begin[form=team-draft-launch]")
 
     conn = conn |> get("/start") |> recycle()
 

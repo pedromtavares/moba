@@ -11,6 +11,7 @@ export default class InvokeCreation {
     this.state = initialSelection(this.data, saved || this.data.initial);
     this.skills = new Map(this.data.skills.map(skill => [skill.id, skill]));
     this.draft = this.el.closest('#team-draft-page');
+    this.draftAction = this.el.querySelector('#team-draft-begin');
     this.picks = restoreDraftPicks(this.data, saved?.picks ?? this.data.draft_picks);
     this.drafted = new Set(this.picks.map(pick => pick.avatar));
     const next = nextDraftAvatar(this.data.avatars, this.drafted);
@@ -24,7 +25,8 @@ export default class InvokeCreation {
       this.renderRoster(true);
     };
     this.click = event => {
-      const control = event.target.closest('[data-invoke-action]');
+      const control = event.target.closest('[data-invoke-action]') ||
+        (this.draftAction && event.target.closest('.invoke-build')?.querySelector('.invoke-build-pick'));
       if (!control || !this.el.contains(control) || control.disabled) return;
       event.preventDefault();
       const type = control.dataset.invokeAction;
@@ -55,7 +57,18 @@ export default class InvokeCreation {
       if (!button) return;
       this.picks.splice(Number(button.dataset.removePick), 1);
       this.updateDraft();
+      if (this.draftAction) this.focusSelectedHero();
     };
+    this.advanceDraft = event => {
+      if (this.picks.length === 3) return;
+      event.preventDefault();
+      this.create();
+    };
+    this.guardDraftSubmit = event => {
+      if (this.picks.length < 3) event.preventDefault();
+    };
+    this.draftAction?.addEventListener('click', this.advanceDraft);
+    this.draftAction?.form.addEventListener('submit', this.guardDraftSubmit, true);
     this.draft?.querySelector('#team-draft-picks').addEventListener('click', this.removePick);
     this.el.addEventListener('click', this.click);
     this.el.addEventListener('input', this.input);
@@ -63,11 +76,17 @@ export default class InvokeCreation {
     window.addEventListener('resize', this.resizeRoster);
     this.renderDraft();
     this.render(true);
-    this.animate(this.el.querySelector('.invoke-build-panel'), [{opacity: 0, transform: 'translateY(12px)'}, {opacity: 1, transform: 'none'}], {duration: 420});
+    const panel = this.el.querySelector('.invoke-build-panel');
+    if (!panel.hidden) this.animate(panel, [{opacity: 0, transform: 'translateY(12px)'}, {opacity: 1, transform: 'none'}], {duration: 420});
   }
 
   save() {
-    try { sessionStorage.setItem(this.data.storage_key, JSON.stringify({...this.state, ...(this.draft && {picks: this.picks})})); } catch (_) { /* Storage is optional. */ }
+    try {
+      sessionStorage.setItem(this.data.storage_key, JSON.stringify({
+        ...this.state,
+        ...(this.draft && {picks: this.picks})
+      }));
+    } catch (_) { /* Storage is optional. */ }
   }
 
   change(action) {
@@ -82,7 +101,8 @@ export default class InvokeCreation {
     this.render(previous.avatar !== this.state.avatar);
     this.save();
     if (previous.custom !== this.state.custom) {
-      this.el.scrollIntoView({block: 'start'});
+      if (this.draftAction) this.el.querySelector(this.state.custom ? '#back-to-builds-button' : '#custom-build-button').focus({preventScroll: true});
+      else this.el.scrollIntoView({block: 'start'});
       this.hook.measure();
       const after = panel.getBoundingClientRect();
       this.animate(panel, [
@@ -92,7 +112,7 @@ export default class InvokeCreation {
       this.el.querySelectorAll('.invoke-custom-grid:not([hidden]) .invoke-skill-choice').forEach((tile, index) => {
         this.animate(tile, [{opacity: 0, transform: 'translateY(10px)'}, {opacity: 1, transform: 'none'}], {duration: 260, delay: Math.min(index * 12, 180)});
       });
-    } else if (action.type === 'skill' || action.type === 'build') {
+    } else if (action.type === 'skill' || (action.type === 'build' && !this.draftAction)) {
       this.animate(this.el.querySelector('#create-bar'), [{opacity: .55, transform: 'translateY(5px)'}, {opacity: 1, transform: 'none'}], {duration: 220});
     }
   }
@@ -108,27 +128,39 @@ export default class InvokeCreation {
     this.el.dataset.mode = this.state.custom ? 'custom' : 'presets';
     this.el.dataset.role = avatar.role;
     this.el.setAttribute('aria-label', `Choose your hero · ${avatar.name}`);
-    for (const [selector, hidden] of [['#invoke-custom-skills', !this.state.custom], ['#invoke-builds', this.state.custom], ['#custom-build-button', this.state.custom], ['#back-to-builds-button', !this.state.custom], ['#invoke-roster', this.state.custom]]) this.el.querySelector(selector).hidden = hidden;
-    this.el.querySelector('.invoke-section-heading h2').textContent = this.state.custom ? 'Choose 3 skills' : 'Choose your build';
+    if (this.draftAction) this.renderDraftAction(avatar);
+    for (const [selector, hidden] of [['#invoke-custom-skills', !this.state.custom], ['#invoke-builds', this.state.custom], ['#custom-build-button', this.state.custom], ['#back-to-builds-button', !this.state.custom]]) this.el.querySelector(selector).hidden = hidden;
+    this.el.querySelector('#invoke-roster').hidden = !this.draftAction && this.state.custom;
+    const buildHeading = this.el.querySelector('#invoke-build-heading');
+    if (buildHeading) buildHeading.textContent = this.state.custom ? 'Choose 3 skills' : 'Choose your build';
     if (heroChanged) {
       const identity = this.el.querySelector('[data-invoke-identity]');
       identity.id = `avatar-${avatar.id}`;
       identity.querySelector('#invoke-hero-name').textContent = avatar.name;
-      identity.querySelector('[data-invoke-role]').textContent = avatar.role[0].toUpperCase() + avatar.role.slice(1);
-      identity.querySelector('.invoke-role img').src = `/images/${avatar.role}_icon.png`;
+      const role = identity.querySelector('.invoke-role');
+      if (role) {
+        role.querySelector('[data-invoke-role]').textContent = avatar.role[0].toUpperCase() + avatar.role.slice(1);
+        role.querySelector('img').src = `/images/${avatar.role}_icon.png`;
+      }
       identity.querySelector('[data-invoke-description]').textContent = avatar.description;
       const ultimate = identity.querySelector('.invoke-signature');
       ultimate.setAttribute('title', avatar.ultimate.tooltip);
       ultimate.querySelector('img').src = avatar.ultimate.image;
       ultimate.querySelector('strong').textContent = avatar.ultimate.name;
-      identity.querySelector('.invoke-details').id = `invoke-details-${avatar.id}`;
-      Object.entries(avatar.stats).forEach(([stat, value]) => { identity.querySelector(`.invoke-base-stats [data-stat="${stat}"] dd`).textContent = value; });
-      Object.entries(avatar.gains).forEach(([stat, value]) => { identity.querySelector(`.invoke-base-stats [data-stat="${stat}"] small`).textContent = `+${value} / level`; });
+      const summary = ultimate.querySelector('[data-ultimate-summary]');
+      if (summary) summary.textContent = avatar.ultimate.summary;
+      const details = identity.querySelector('.invoke-details');
+      details.id = `invoke-details-${avatar.id}`;
       Object.entries(avatar.ratings).forEach(([stat, value]) => {
-        const meter = identity.querySelector(`.invoke-attributes [data-stat="${stat}"] [role=meter]`);
+        const meter = details.querySelector(`.invoke-attributes [data-stat="${stat}"] [role=meter]`);
         meter.setAttribute('aria-valuenow', value);
         meter.querySelector('span').style.width = `${value}%`;
       });
+      const baseStats = details.querySelector('.invoke-base-stats');
+      if (baseStats) {
+        Object.entries(avatar.stats).forEach(([stat, value]) => { baseStats.querySelector(`[data-stat="${stat}"] dd`).textContent = value; });
+        Object.entries(avatar.gains).forEach(([stat, value]) => { baseStats.querySelector(`[data-stat="${stat}"] small`).textContent = `+${value} / level`; });
+      }
       this.setArt(avatar.art);
       this.renderBuilds(avatar);
       this.animate(identity, [{opacity: .35, transform: 'translateX(-8px)'}, {opacity: 1, transform: 'none'}], {duration: 340});
@@ -147,13 +179,25 @@ export default class InvokeCreation {
       button.querySelector('.invoke-check').hidden = !selected;
     });
     this.renderLoadout(avatar);
-    this.renderLaunch();
+    if (!this.draftAction) this.renderLaunch();
     this.measureFooter();
     this.hook.refreshTooltips?.();
   }
 
+  renderDraftAction(avatar) {
+    const ready = this.picks.length === 3;
+    this.draftAction.type = ready ? 'submit' : 'button';
+    this.draftAction.disabled = !ready && (this.drafted.has(avatar.id) || this.state.skills.length !== 3);
+    this.draftAction.querySelector('[data-draft-action-label]').textContent = ready ? 'Begin training' : `Pick ${avatar.name}`;
+  }
+
+  focusSelectedHero() {
+    this.el.querySelector('.invoke-portrait[aria-pressed=true]:enabled')?.focus();
+  }
+
   rosterCapacity() {
-    if (window.innerWidth < 640) return this.data.role_filters === false ? 4 : 6;
+    if (this.draftAction) return this.data.avatars.length;
+    if (window.innerWidth < 640) return 6;
     return window.innerWidth < 1000 ? 8 : 12;
   }
 
@@ -178,6 +222,7 @@ export default class InvokeCreation {
     grid.style.setProperty('--invoke-columns', Math.max(1, Math.min(size, filtered.length)));
 
     const previous = this.el.querySelector('#invoke-avatars-prev');
+    if (!previous) return;
     const next = this.el.querySelector('#invoke-avatars-next');
     previous.hidden = next.hidden = lastPage === 0;
     previous.disabled = this.rosterPage === 0;
@@ -190,6 +235,7 @@ export default class InvokeCreation {
 
   renderBuilds(avatar) {
     const list = this.el.querySelector('#invoke-builds');
+    const ability = this.el.querySelector('#invoke-build-ability-template').content.firstElementChild;
     list.replaceChildren(...this.data.builds[avatar.role].map((build, index) => {
       const node = this.el.querySelector('#invoke-build-option-template').content.firstElementChild.cloneNode(true);
       node.id = `invoke-build-${index}`;
@@ -200,29 +246,34 @@ export default class InvokeCreation {
       const number = button.querySelector('.invoke-build-number');
       if (number) number.textContent = `0${index + 1}`;
       button.querySelector('strong').textContent = build.name;
+      const abilities = node.querySelector('.invoke-build-skills');
       build.skills.forEach(id => {
         const skill = this.skills.get(id);
         if (!skill) return;
-        const image = document.createElement('img');
+        const tile = ability.cloneNode(true);
+        const image = tile.querySelector('img');
         image.src = skill.image;
         image.alt = skill.name;
-        image.tabIndex = 0;
-        image.dataset.toggle = 'tooltip';
         image.title = skill.tooltip;
         image.id = `skill_build_${id}_${index}`;
-        node.querySelector('.invoke-build-skills').append(image);
+        const label = tile.querySelector('small');
+        if (label) label.textContent = skill.name;
+        abilities.append(tile);
       });
       return node;
     }));
   }
 
   renderLoadout(avatar) {
-    const list = this.el.querySelector('.invoke-loadout-skills');
+    const footer = this.el.querySelector('#invoke-build-footer');
+    footer.hidden = Boolean(this.draftAction && !this.state.custom && this.state.preset !== null);
+    if (footer.hidden) return;
+    const list = footer.querySelector('.invoke-loadout-skills');
     const nodes = this.state.skills.map(id => this.skillSlot(this.skills.get(id)));
     while (nodes.length < 3) nodes.push(this.el.querySelector('#invoke-empty-skill-template').content.firstElementChild.cloneNode(true));
-    nodes.push(this.skillSlot(avatar.ultimate, true));
+    if (!this.draftAction) nodes.push(this.skillSlot(avatar.ultimate, true));
     list.replaceChildren(...nodes);
-    this.el.querySelector('#create-bar h3').textContent = this.state.preset === null ? (this.state.skills.length ? 'Custom Build' : 'Skill Build') : this.data.builds[avatar.role][this.state.preset].name;
+    if (!this.draftAction) footer.querySelector('#create-bar h3').textContent = this.state.preset === null ? (this.state.skills.length ? 'Custom Build' : 'Skill Build') : this.data.builds[avatar.role][this.state.preset].name;
   }
 
   skillSlot(skill, ultimate = false) {
@@ -242,8 +293,11 @@ export default class InvokeCreation {
       button.setAttribute('aria-label', `Remove ${skill.name}`);
     }
     slot.querySelector('strong').textContent = skill.name;
-    slot.querySelector('[data-energy]').textContent = skill.energy;
-    slot.querySelector('.invoke-energy').setAttribute('aria-label', `Energy cost: ${skill.energy}`);
+    const energy = slot.querySelector('.invoke-energy');
+    if (energy) {
+      energy.querySelector('[data-energy]').textContent = skill.energy;
+      energy.setAttribute('aria-label', `Energy cost: ${skill.energy}`);
+    }
     if (ultimate) {
       slot.classList.add('invoke-ultimate-slot');
       slot.querySelector('small').hidden = false;
@@ -276,10 +330,15 @@ export default class InvokeCreation {
   }
 
   create() {
-    if (this.el.querySelector('#create-button').disabled) return;
+    if ((this.draftAction || this.el.querySelector('#create-button')).disabled) return;
     if (this.draft) {
       this.picks.push({avatar: this.state.avatar, skills: [...this.state.skills], preset: this.state.custom ? null : this.state.preset});
+      if (this.draftAction && this.state.custom && this.picks.length < 3) this.state = {...this.state, custom: false, preset: 0};
       this.updateDraft();
+      if (this.draftAction) {
+        if (this.picks.length === 3) this.draftAction.focus();
+        else this.focusSelectedHero();
+      }
       return;
     }
     this.creating = true;
@@ -320,24 +379,30 @@ export default class InvokeCreation {
       empty.hidden = !!pick;
       slot.classList.toggle('is-empty', !pick);
       slot.classList.remove('has-preset');
-      slot.style.removeProperty('--draft-build-art');
+      slot.style.removeProperty('--draft-pick-art');
       if (!pick) return;
 
       const avatar = this.data.avatars.find(avatar => avatar.id === pick.avatar);
       const card = template.content.cloneNode(true);
+      const build = pick.preset === null ? null : this.data.builds[avatar.role][pick.preset];
       const portrait = card.querySelector('.team-draft-portrait');
-      portrait.src = avatar.portrait;
-      portrait.alt = avatar.name;
-      card.querySelector('.team-draft-name img').src = `/images/${avatar.role}_icon.png`;
+      if (portrait) {
+        portrait.src = avatar.portrait;
+        portrait.alt = avatar.name;
+      }
+      const role = card.querySelector('.team-draft-name img');
+      if (role) role.src = `/images/${avatar.role}_icon.png`;
       card.querySelector('strong').textContent = avatar.name;
       const remove = card.querySelector('[data-remove-pick]');
       remove.id = `team-draft-remove-${index}`;
       remove.dataset.removePick = index;
       remove.setAttribute('aria-label', `Remove ${avatar.name}`);
-      if (pick.preset !== null) {
-        const build = this.data.builds[avatar.role][pick.preset];
+      if (this.draftAction) {
+        card.querySelector('[data-draft-build-name]').textContent = build?.name ?? 'Custom build';
+        slot.style.setProperty('--draft-pick-art', `url("${avatar.art}")`);
+      } else if (build) {
         slot.classList.add('has-preset');
-        slot.style.setProperty('--draft-build-art', `url("${build.art}")`);
+        slot.style.setProperty('--draft-pick-art', `url("${build.art}")`);
       }
       const skills = card.querySelector('.team-draft-skills');
       [...pick.skills.map(id => this.skills.get(id)), avatar.ultimate].forEach((skill, position) => {
@@ -352,10 +417,12 @@ export default class InvokeCreation {
       slot.append(card);
     });
     this.draft.querySelector('[name=roster]').value = JSON.stringify(this.picks);
-    this.draft.querySelector('#team-draft-begin').disabled = this.picks.length !== 3;
+    if (!this.draftAction) this.draft.querySelector('#team-draft-begin').disabled = this.picks.length !== 3;
   }
 
   destroyed() {
+    this.draftAction?.removeEventListener('click', this.advanceDraft);
+    this.draftAction?.form?.removeEventListener('submit', this.guardDraftSubmit, true);
     this.draft?.querySelector('#team-draft-picks').removeEventListener('click', this.removePick);
     this.el.removeEventListener('click', this.click);
     this.el.removeEventListener('input', this.input);

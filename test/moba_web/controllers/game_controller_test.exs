@@ -67,9 +67,9 @@ defmodule MobaWeb.GameControllerTest do
     conn = get(conn, "/start")
     document = conn |> html_response(200) |> LazyHTML.from_document()
     assert LazyHTML.query(document, "#invoke-hero-name") |> LazyHTML.text() == "Juggernaut"
-    assert Enum.count(LazyHTML.query(document, "#randomize-button")) == 1
-    assert Enum.count(LazyHTML.query(document, "#create-button[type=button]:not([disabled])")) == 1
-    assert Enum.count(LazyHTML.query(document, "#team-draft-launch #team-draft-begin[disabled]")) == 1
+    assert Enum.empty?(LazyHTML.query(document, "#randomize-button"))
+    assert Enum.empty?(LazyHTML.query(document, "#create-button"))
+    assert Enum.count(LazyHTML.query(document, "#team-draft-begin[type=button][form=team-draft-launch]")) == 1
   end
 
   test "create as guest", %{conn: conn} do

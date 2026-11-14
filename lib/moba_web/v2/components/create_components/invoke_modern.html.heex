@@ -24,37 +24,13 @@
     <span>Already registered? <strong>Sign in</strong></span>
   </.link>
   <div class="invoke-stage-content">
-    <div class="invoke-identity" id={"avatar-#{@selected_avatar.id}"} data-invoke-identity>
-      <nav :if={@current_player.user_id} id="training-mode" class="training-mode" aria-label="Training mode">
-        <.link navigate="/new" aria-current={Map.get(assigns, :draft_mode, false) && "page"}>Team 3v3</.link>
-        <.link navigate="/new/solo" aria-current={!Map.get(assigns, :draft_mode, false) && "page"}>Solo 1v1</.link>
-      </nav>
-      <div class="invoke-role">
-        <img src={"/images/#{@selected_avatar.role}_icon.png"} alt="" />
-        <span data-invoke-role>{role(@selected_avatar)}</span>
-      </div>
-      <h2 :if={assigns[:start_page]} id="invoke-hero-name">{@selected_avatar.name}</h2>
-      <h1 :if={!assigns[:start_page]} id="invoke-hero-name">{@selected_avatar.name}</h1>
-      <p class="invoke-gameplay" data-invoke-description>{@selected_avatar.description}</p>
-      <div
-        class="invoke-signature"
-        tabindex="0"
-        data-toggle="tooltip"
-        title={TT.skill_tooltip(@selected_avatar.ultimate)}
-      >
-        <img src={GH.image_url(@selected_avatar.ultimate)} alt="" />
-        <div><small>Ultimate</small><strong>{@selected_avatar.ultimate.name}</strong></div>
-      </div>
-      <div class="invoke-details" id={"invoke-details-#{@selected_avatar.id}"}>
-        <.invoke_stats avatar={@selected_avatar} avatars={@all_avatars} />
-      </div>
-    </div>
-
+    <.invoke_roster :if={assigns[:start_page]} {assigns} />
+    <.invoke_identity {assigns} />
     <aside class="invoke-build-panel" aria-label="Hero build">
       <header class="invoke-section-heading">
-        <div>
-          <h2>{if @custom, do: "Choose 3 skills", else: "Choose your build"}</h2>
-        </div>
+        <h2 :if={!assigns[:start_page]} id="invoke-build-heading">
+          {if @custom, do: "Choose 3 skills", else: "Choose your build"}
+        </h2>
         <button
           hidden={@custom}
           class="invoke-secondary"
@@ -85,13 +61,17 @@
           aria-pressed={to_string(Enum.member?(@selected_skills, skill))}
           aria-disabled={to_string(length(@selected_skills) == 3 && !Enum.member?(@selected_skills, skill))}
         >
-          <span class="invoke-skill-image" data-toggle="tooltip" title={TT.skill_tooltip(skill)}>
+          <span
+            class="invoke-skill-image"
+            data-toggle="tooltip"
+            title={invoke_skill_tooltip(skill, assigns[:start_page])}
+          >
             <img src={GH.image_url(skill)} alt="" />
             <span hidden={!Enum.member?(@selected_skills, skill)} class="invoke-check" aria-hidden="true">✓</span>
             <span :if={skill.passive} class="invoke-passive-dot" title="Passive" aria-label="Passive">◆</span>
           </span>
           <strong>{skill.name}</strong>
-          <.invoke_energy skill={skill} />
+          <.invoke_energy :if={!assigns[:start_page]} skill={skill} />
         </button>
       </div>
       <div class="invoke-builds" id="invoke-builds" hidden={@custom}>
@@ -112,27 +92,34 @@
           >
             <span :if={!assigns[:start_page]} class="invoke-build-number">0{index + 1}</span>
             <strong>{elem(build, 1)}</strong>
-            <span class="invoke-build-mark" aria-hidden="true">
-              {if @selected_build_index == index, do: "✓", else: "＋"}
-            </span>
           </button>
           <div class="invoke-build-skills">
-            <img
-              :for={skill <- elem(build, 0)}
-              src={GH.image_url(skill)}
-              alt={skill.name}
-              tabindex="0"
-              data-toggle="tooltip"
-              title={TT.skill_tooltip(skill)}
-              id={"skill_build_#{skill.id}_#{index}"}
-            />
+            <span :for={skill <- elem(build, 0)} class="invoke-build-ability">
+              <img
+                src={GH.image_url(skill)}
+                alt={skill.name}
+                tabindex="0"
+                data-toggle="tooltip"
+                title={invoke_skill_tooltip(skill, assigns[:start_page])}
+                id={"skill_build_#{skill.id}_#{index}"}
+              />
+              <small :if={assigns[:start_page]} aria-hidden="true">{skill.name}</small>
+            </span>
           </div>
         </article>
       </div>
-      <div id="invoke-build-footer" class="invoke-build-footer">
+      <div
+        id="invoke-build-footer"
+        class="invoke-build-footer"
+        hidden={assigns[:start_page] && !@custom && !is_nil(@selected_build_index)}
+      >
         <section id="create-bar" class="invoke-loadout" aria-label="Selected skill build">
           <header>
-            <h3>{build_title(@selected_avatar, @selected_skills, @selected_build_index)}</h3>
+            <h3>
+              {if assigns[:start_page],
+                do: "Custom build",
+                else: build_title(@selected_avatar, @selected_skills, @selected_build_index)}
+            </h3>
           </header>
           <div class="invoke-loadout-skills">
             <div :for={skill <- @selected_skills} class="invoke-loadout-slot">
@@ -144,7 +131,12 @@
                 id={"skill_#{skill.id}"}
                 aria-label={"Remove #{skill.name}"}
               >
-                <img src={GH.image_url(skill)} alt={skill.name} data-toggle="tooltip" title={TT.skill_tooltip(skill)} />
+                <img
+                  src={GH.image_url(skill)}
+                  alt={skill.name}
+                  data-toggle="tooltip"
+                  title={invoke_skill_tooltip(skill, assigns[:start_page])}
+                />
                 <span class="invoke-remove" aria-hidden="true">×</span>
               </button>
               <img
@@ -154,15 +146,15 @@
                 id={"skill_#{skill.id}"}
                 tabindex="0"
                 data-toggle="tooltip"
-                title={TT.skill_tooltip(skill)}
+                title={invoke_skill_tooltip(skill, assigns[:start_page])}
               />
               <strong>{skill.name}</strong>
-              <.invoke_energy skill={skill} />
+              <.invoke_energy :if={!assigns[:start_page]} skill={skill} />
             </div>
             <div :for={_ <- List.duplicate(nil, max(3 - length(@selected_skills), 0))} class="invoke-loadout-slot">
               <span class="invoke-empty" aria-label="Empty skill slot">＋</span><span class="invoke-empty-label">Choose a skill</span>
             </div>
-            <div class="invoke-loadout-slot invoke-ultimate-slot">
+            <div :if={!assigns[:start_page]} class="invoke-loadout-slot invoke-ultimate-slot">
               <img
                 src={GH.image_url(@selected_avatar.ultimate)}
                 alt={@selected_avatar.ultimate.name}
@@ -179,7 +171,7 @@
           </div>
         </section>
 
-        <div class="invoke-launch">
+        <div :if={!assigns[:start_page]} class="invoke-launch">
           <%= if Map.get(assigns, :draft_mode, false) || (@current_player && Map.get(@current_player, :id)) do %>
             <.invoke_name
               :if={@current_player.user_id && !Map.get(assigns, :draft_mode, false)}
@@ -225,106 +217,26 @@
         </div>
       </div>
     </aside>
+    <button
+      :if={assigns[:start_page]}
+      id="team-draft-begin"
+      type="button"
+      form="team-draft-launch"
+      disabled
+    >
+      <span data-draft-action-label>Pick {@selected_avatar.name}</span>
+      <span class="team-draft-action-arrow" aria-hidden="true">→</span>
+    </button>
   </div>
 
-  <section id="invoke-roster" class="invoke-roster" aria-label="Hero roster" hidden={@custom}>
-    <div class="invoke-filters">
-      <button
-        :if={!assigns[:start_page]}
-        id="invoke-filter-all"
-        type="button"
-        data-invoke-action="filter"
-        data-role=""
-        aria-pressed={to_string(is_nil(@filter))}
-      >
-        All heroes
-      </button>
-      <button
-        :for={role <- if(assigns[:start_page], do: [], else: roles())}
-        id={"invoke-filter-#{role}"}
-        type="button"
-        data-invoke-action="filter"
-        data-role={role}
-        aria-pressed={to_string(@filter == role)}
-      >
-        <img src={"/images/#{role}_icon.png"} alt="" />{String.capitalize(role)}
-      </button>
-      <button
-        id="randomize-button"
-        type="button"
-        data-invoke-action="random"
-        class="invoke-random"
-        aria-label="Choose a random hero"
-      >
-        <span aria-hidden="true">↻</span><span>Random</span>
-      </button>
-    </div>
-    <div class="invoke-avatar-strip">
-      <button
-        id="invoke-avatars-prev"
-        type="button"
-        class="invoke-roster-arrow"
-        data-invoke-action="roster-page"
-        data-direction="-1"
-        aria-label="Previous heroes"
-        aria-controls="invoke-avatars"
-        hidden={length(@avatars) <= 12}
-        disabled
-      >
-        <span aria-hidden="true">←</span>
-      </button>
-      <div
-        id="invoke-avatars"
-        class="invoke-avatar-grid"
-        style={"--invoke-columns: #{min(12, max(1, length(@avatars)))}"}
-      >
-        <button
-          :for={{avatar, index} <- @avatars |> Enum.uniq() |> Enum.sort_by(& &1.name) |> Enum.with_index()}
-          hidden={index >= 12}
-          id={"pick-avatar-#{avatar.id}"}
-          type="button"
-          class="invoke-portrait"
-          data-invoke-action="avatar"
-          data-avatar-id={avatar.id}
-          data-role={avatar.role}
-          aria-pressed={to_string(@selected_avatar.id == avatar.id)}
-          aria-label={"Choose #{avatar.name}"}
-        >
-          <img src={GH.image_url(avatar)} alt="" />
-          <span>{avatar.name}</span>
-          <span
-            :if={Enum.any?(@current_player.hero_collection, &(&1["code"] == avatar.code))}
-            class="invoke-trained"
-            aria-label="Already trained"
-          >
-            ◆
-          </span>
-        </button>
-      </div>
-      <button
-        id="invoke-avatars-next"
-        type="button"
-        class="invoke-roster-arrow"
-        data-invoke-action="roster-page"
-        data-direction="1"
-        aria-label="Next heroes"
-        aria-controls="invoke-avatars"
-        hidden={length(@avatars) <= 12}
-      >
-        <span aria-hidden="true">→</span>
-      </button>
-    </div>
-    <div :if={@avatars == []} class="invoke-no-heroes">
-      {if assigns[:start_page], do: "No unlocked heroes.", else: "No unlocked heroes in this role."}
-    </div>
-  </section>
+  <.invoke_roster :if={!assigns[:start_page]} {assigns} />
   <template id="invoke-selected-skill-template">
     <div class="invoke-loadout-slot">
       <button type="button" data-invoke-action="skill">
         <img data-toggle="tooltip" alt="" /><span class="invoke-remove" aria-hidden="true">×</span>
       </button>
       <strong></strong>
-      <span class="invoke-ultimate-meta">
+      <span :if={!assigns[:start_page]} class="invoke-ultimate-meta">
         <small hidden>Ultimate</small><span class="invoke-energy"><.icon name="game-energy" class="invoke-stat-icon" /><span data-energy></span></span>
       </span>
     </div>
@@ -341,5 +253,11 @@
       </button>
       <div class="invoke-build-skills"></div>
     </article>
+  </template>
+  <template id="invoke-build-ability-template">
+    <span class="invoke-build-ability">
+      <img tabindex="0" data-toggle="tooltip" alt="" />
+      <small :if={assigns[:start_page]} aria-hidden="true"></small>
+    </span>
   </template>
 </section>
