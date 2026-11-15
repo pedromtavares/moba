@@ -89,12 +89,15 @@ defmodule MobaWeb.V2.PlayerLive do
   defp best_team_rank(player_id), do: Game.TeamRuns.best_ranks_for_players([player_id])[player_id]
 
   defp assign_collection(socket, player, selected \\ nil) do
+    perfect_picks = Game.Heroes.perfect_profile_picks(player.id)
+
     collection =
       (player.hero_collection || [])
       |> Enum.map(fn entry ->
         entry
         |> Map.get("profile", entry)
         |> Map.put("avatar_name", get_in(entry, ["avatar", "name"]))
+        |> Map.merge(Map.get(perfect_picks, entry["code"], %{}))
       end)
       |> Enum.sort_by(& &1["position"])
 
@@ -112,7 +115,7 @@ defmodule MobaWeb.V2.PlayerLive do
       profile_collection: collection,
       blank_collection: blank,
       featured: featured,
-      perfect_collection_codes: Game.Heroes.perfect_collection_codes(player.id)
+      perfect_collection_codes: MapSet.new(Map.keys(perfect_picks))
     )
   end
 

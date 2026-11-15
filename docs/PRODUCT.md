@@ -505,7 +505,7 @@ Each tier advancement grants rewards (see `lib/moba/game/quests.ex`):
 **Solo and team training rankings**:
 - Solo ranks by total farm, then fastest completion. The global board includes eligible recent finishes and qualifying Master or Grandmaster runs within its historical window. League boards begin at Gold and compare finished solo runs in that exact league, including past runs. Grandmaster hero pages show the global board.
 - Team ranks finished runs by combined farm, then fastest completion. The board displays average farm per hero, which gives the same order for three-hero rosters. Team members count toward account progression and the collection, independently of solo ranks.
-- Profiles use a cached collection with the best eligible finished hero per avatar. Solo and team heroes are ordered by farm, then training time, with solo rank used when available.
+- Profiles use a cached collection ordered by farm, then training time, with solo rank used when available. An avatar with a Perfect Run features its highest-farm perfect hero, using the same tiebreakers, in that avatar's existing position.
 
 ---
 

@@ -32,13 +32,13 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       {scope, player} = team_account()
       record = team_run(scope, player)
       run = Game.TeamRuns.state(record)
-      first = Game.TeamTraining.team(run) |> hd()
+      last = Game.TeamTraining.team(run) |> List.last()
 
       previous =
         create_base_hero(
           %{finished_at: Timex.now(), league_tier: 6, pve_ranking: 1, total_gold_farm: 30_000, total_xp_farm: 29_770},
           player,
-          first.hero.avatar
+          last.hero.avatar
         )
 
       {:ok, record} =
@@ -54,7 +54,10 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       assert record.total_farm == 180_000
       collection = Game.get_player!(player.id).hero_collection
-      assert Enum.find(collection, &(&1["code"] == first.hero.avatar.code))["hero_id"] == previous.id
+      code = last.hero.avatar.code
+      cached = Enum.find(collection, &(&1["code"] == code))
+      assert cached["hero_id"] == previous.id
+      assert cached["profile"]["hero_id"] == previous.id
 
       conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
       {:ok, base, _} = live(conn, "/base")
@@ -62,9 +65,16 @@ defmodule MobaWeb.V2.DashboardLiveTest do
 
       for entry <- collection do
         assert has_element?(base, ~s(#base-avatar-#{entry["code"]}.is-undefeated[title$='Perfect Run']))
-        profile_hero_id = get_in(entry, ["profile", "hero_id"])
-        assert has_element?(profile, ~s(#set-featured-#{profile_hero_id}[title$='Perfect Run'] .is-undefeated))
       end
+
+      for hero_id <- record.hero_ids do
+        assert has_element?(profile, ~s(#set-featured-#{hero_id}[title$='Perfect Run'] .is-undefeated))
+      end
+
+      refute has_element?(profile, "#set-featured-#{previous.id}")
+      hero_id = List.last(record.hero_ids)
+      profile |> element("#set-featured-#{hero_id}") |> render_click()
+      assert has_element?(profile, "#profile-featured-link[href='/hero/#{hero_id}']")
     end
 
     test "deleting a team removes it persistently and cannot affect another account", %{conn: conn} do

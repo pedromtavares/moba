@@ -86,25 +86,50 @@ defmodule Moba.Game.Heroes do
   def perfect_collection_codes(nil), do: MapSet.new()
 
   def perfect_collection_codes(player_id) do
+    query = perfect_collection_heroes(HeroQuery.finished(Hero), player_id)
+
+    from([_hero, avatar] in query, distinct: true, select: avatar.code)
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
+  def perfect_profile_picks(player_id) do
+    query = perfect_collection_heroes(HeroQuery.finished_pve(), player_id)
+
+    from([hero, avatar] in query,
+      distinct: avatar.code,
+      order_by: [asc_nulls_last: hero.pve_ranking, asc: hero.id],
+      select: {
+        avatar.code,
+        %{
+          "hero_id" => hero.id,
+          "tier" => hero.league_tier,
+          "total_farm" => hero.total_xp_farm + hero.total_gold_farm,
+          "avatar" => %{"code" => avatar.code, "image" => avatar.image},
+          "avatar_name" => avatar.name
+        }
+      }
+    )
+    |> Repo.all()
+    |> Map.new()
+  end
+
+  defp perfect_collection_heroes(query, player_id) do
     grandmaster = Moba.max_league_tier()
     solo_farm = Moba.max_total_farm()
     team_farm = 3 * solo_farm
 
-    from(hero in Hero,
+    from(hero in query,
       join: avatar in assoc(hero, :avatar),
       left_join: team in assoc(hero, :training_team),
-      where: hero.player_id == ^player_id and not is_nil(hero.finished_at) and is_nil(hero.archived_at),
+      where: hero.player_id == ^player_id and is_nil(hero.archived_at),
       where:
         (is_nil(hero.training_team_id) and hero.league_tier == ^grandmaster and
            hero.total_xp_farm + hero.total_gold_farm >= ^solo_farm) or
           (team.player_id == hero.player_id and team.phase == "finished" and not is_nil(team.finished_at) and
              team.league_tier == ^grandmaster and team.total_farm >= ^team_farm and
-             fragment("cardinality(?) = 3 AND ? = ANY(?)", team.hero_ids, hero.id, team.hero_ids)),
-      distinct: true,
-      select: avatar.code
+             fragment("cardinality(?) = 3 AND ? = ANY(?)", team.hero_ids, hero.id, team.hero_ids))
     )
-    |> Repo.all()
-    |> MapSet.new()
   end
 
   defp collection_entry(hero) do
