@@ -434,7 +434,7 @@
   <% end %>
   <.hero_bar
     :if={@show_hud && @hero.player_id == @current_player.id}
-    forge_enabled={true}
+    forge_enabled={Game.Items.forge_unlocked?(@hero)}
     reorderable={true}
     preview={@preview}
     current_hero={@hero}

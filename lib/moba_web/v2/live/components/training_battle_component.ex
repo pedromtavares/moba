@@ -54,7 +54,7 @@ defmodule MobaWeb.V2.TrainingBattleComponent do
     turn = socket.assigns.turn
     hero = socket.assigns.hero
     skill = find_resource(hero.skills, params["skill_id"])
-    item = find_resource(hero.items, params["item_id"])
+    item = find_resource(turn.attacker.active_items, params["item_id"])
     forced = turn.attacker.double_skill
 
     valid_skill =

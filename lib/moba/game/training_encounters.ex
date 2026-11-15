@@ -50,6 +50,7 @@ defmodule Moba.Game.TrainingEncounters do
             match_id: match && match.id,
             finished: snapshot.finished || false,
             winner_player_id: if(player_won?(snapshot), do: team.player_id),
+            loadouts: Map.get(snapshot, :loadouts, %{}),
             training_state: Snapshot.encode(if(multi, do: %{snapshot | turns: []}, else: encounter))
           })
           |> Repo.insert_or_update!()

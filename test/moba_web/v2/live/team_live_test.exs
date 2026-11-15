@@ -439,6 +439,104 @@ defmodule MobaWeb.V2.TeamLiveTest do
     assert has_element?(view, "#team-2-sell-#{item.id}")
   end
 
+  test "a max-level team hero forges from their own shop and keeps the pair when training ends", %{
+    conn: conn,
+    scope: scope,
+    player: player
+  } do
+    record = team_run(scope, player)
+    items = full_legendary_inventory()
+    legendary = Enum.find(items, &(&1.code == "scythe_of_vyse"))
+    epic = Game.get_item_by_code!("soul_booster")
+    legendary_tile = "transmute-#{legendary.id}"
+
+    {:ok, record} =
+      TeamRuns.update(scope, record, fn run ->
+        Enum.reduce([1, 2], run, fn id, run ->
+          update_in(run.heroes[id], fn unit ->
+            hero = struct(unit.hero, Game.Items.item_attributes(items))
+            level = if id == 2, do: Moba.max_hero_level(), else: hero.level
+            inventory = Enum.map(items, &%{item: &1, fixed: true})
+            %{unit | hero: %{hero | items: items, level: level, gold: 3_200}, inventory: inventory}
+          end)
+        end)
+      end)
+
+    path = "/training?run=#{record.id}"
+    {:ok, view, _} = live(conn, path)
+    view |> element("#toggle-shop") |> render_click()
+    view |> element("##{legendary_tile}") |> render_click()
+    refute has_element?(view, "#start-forge")
+
+    render_click(view, "forge", %{"hero_id" => "1", "legendary_code" => legendary.code, "epic_code" => epic.code})
+
+    view |> element("#team-2-#{legendary_tile}") |> render_click()
+    view |> element("#team-2-start-forge") |> render_click()
+    view |> element("#team-2-forge-epic-soul_booster") |> render_click()
+    assert has_element?(view, "#team-2-finish-forge:not([disabled])", "Forge · 3200 gold")
+    view |> form("#team-2-shop-forge-form") |> render_submit()
+
+    slot = "#team-2-inventory-#{legendary.id}[data-rarity=forged-legendary] .forged-item-inset"
+    assert has_element?(view, slot)
+    assert has_element?(view, "#team-2-inventory", "6 / 6 slots")
+
+    record = TeamRuns.get!(scope, record.id)
+    run = TeamRuns.state(record)
+    assert run.heroes[1].hero.gold == 3_200
+    assert Game.Items.forge_pairs(run.heroes[1].hero) == %{}
+    assert run.heroes[2].hero.gold == 0
+    assert run.heroes[2].hero.item_mp == run.heroes[1].hero.item_mp + epic.base_mp
+    assert Game.Items.forge_pairs(run.heroes[2].hero) == %{legendary.code => epic.code}
+
+    {:ok, reloaded, _} = live(conn, path)
+    assert has_element?(reloaded, slot)
+
+    {:ok, finished} = TeamRuns.update(scope, record, &%{&1 | phase: :finished})
+    hero = finished.hero_ids |> Enum.at(1) |> Game.get_hero!()
+    assert Game.Items.forge_pairs(hero) == %{legendary.code => epic.code}
+    assert length(Game.inventory_items(hero)) == 6
+    assert hero.gold == 0
+  end
+
+  test "a forged slot works in a manual league battle after the team spends its farming turns", %{
+    conn: conn,
+    scope: scope,
+    player: player
+  } do
+    record = team_run(scope, player)
+    legendary = Game.get_item_by_code!("linkens_sphere")
+    epic = Game.get_item_by_code!("dagon")
+
+    {:ok, record} =
+      TeamRuns.update(scope, record, fn run ->
+        %{run | turns_left: 0, reserve_turns: 0}
+        |> update_in([:heroes, 1, :hero], &%{&1 | gold: 8_000, speed: 100})
+        |> then(&TeamTraining.configure(scope, &1, :buy, legendary.code))
+        |> then(
+          &TeamTraining.configure(scope, &1, :forge, %{"legendary_code" => legendary.code, "epic_code" => epic.code})
+        )
+        |> TeamTraining.league()
+      end)
+
+    encounter = record |> TeamRuns.state() |> TeamTraining.active_encounter()
+    [battle_id] = encounter.battle_ids
+    {:ok, view, _} = live(conn, TrainingEncounters.path(encounter, 1))
+
+    assert has_element?(view, ".forged-battle-slot #attacker-item-#{legendary.id}.can-use")
+    refute has_element?(view, "#attacker-item-#{epic.id}")
+
+    view
+    |> element("#combat-stage")
+    |> render_hook("next-turn", %{"hero_id" => "1", "skill_id" => "", "item_id" => to_string(legendary.id)})
+
+    assert [%{item: %{id: legendary_id, forged_epic: %{id: epic_id}}, attacker: attacker}] =
+             Moba.Engine.get_battle!(battle_id).turns
+
+    assert legendary_id == legendary.id
+    assert epic_id == epic.id
+    assert attacker.cooldowns[epic.code] == epic.cooldown - 1
+  end
+
   test "all hero views and target artwork preload, and switching uses only client commands", %{
     conn: conn,
     scope: scope,
@@ -1036,7 +1134,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
     assert_raise Ecto.NoResultsError, fn -> live(other, TrainingEncounters.path(e, 1)) end
   end
 
-  test "later league battles keep the player's controls when a surviving opponent initiates", %{
+  test "later league battles keep the player's controls when a surviving opponent wins initiative", %{
     conn: conn,
     scope: scope,
     player: player
@@ -1052,9 +1150,15 @@ defmodule MobaWeb.V2.TeamLiveTest do
           Map.new(e.units, fn {id, h} ->
             unit =
               cond do
-                id in [1, 2] -> simple_unit(h, 1, 1)
-                id >= 1000 -> simple_unit(h, 5000, 20)
-                true -> %{h | hp: 5000, hero: %{run.heroes[id].hero | total_hp: 5000, item_hp: 0}}
+                id in [1, 2] ->
+                  simple_unit(h, 1, 1)
+
+                id >= 1000 ->
+                  simple_unit(h, 5000, 20)
+
+                true ->
+                  hero = %{run.heroes[id].hero | total_hp: 5000, item_hp: 0, speed: 0, item_speed: 0}
+                  %{h | hp: 5000, hero: hero}
               end
 
             {id, unit}
@@ -1083,9 +1187,9 @@ defmodule MobaWeb.V2.TeamLiveTest do
     e = TeamTraining.active_encounter(TeamRuns.state(record))
     full = List.last(e.battles)
     assert length(e.battles) == 3
-    assert full.attacker.player.id == -2
-    assert full.defender.id == 3
-    assert length(full.defender.skills) == 4
+    assert full.initiator_id == hd(e.dire).id
+    assert full.attacker.id == 3
+    assert length(full.attacker.skills) == 4
     path = TrainingEncounters.path(e, 3)
     {:ok, view, _} = live(conn, path)
     assert has_element?(view, "#attack-button[data-hero='3'][disabled]")
@@ -1106,7 +1210,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
 
     assert has_element?(view, "#attack-button[data-hero='3']:not([disabled])")
 
-    for skill <- full.defender.skills do
+    for skill <- full.attacker.skills do
       assert has_element?(
                view,
                "#battle-bar .battle-skills-row img[src='#{MobaWeb.V2.Components.GameHelpers.image_url(skill)}']"
@@ -1121,8 +1225,9 @@ defmodule MobaWeb.V2.TeamLiveTest do
     |> render_hook("next-turn", %{"hero_id" => "3", "skill_id" => "", "item_id" => ""})
 
     saved = TeamTraining.active_encounter(TeamRuns.state(TeamRuns.get!(scope, record.id)))
-    assert length(List.last(saved.battles).turns) == 2
-    assert List.last(List.last(saved.battles).turns).attacker.hero_id == 3
+    assert [opening, reply] = List.last(saved.battles).turns
+    assert opening.attacker.hero_id == full.initiator_id
+    assert reply.attacker.hero_id == 3
   end
 
   test "a fallen hero must afford buyback, can sell items, and returns to targets after paying", %{

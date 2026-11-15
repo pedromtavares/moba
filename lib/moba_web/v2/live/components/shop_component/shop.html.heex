@@ -183,6 +183,7 @@
                 class="shop-forge-form"
                 {target_attrs(@event_target, @hero_id)}
               >
+                <input :if={@hero_id} type="hidden" name="hero_id" value={@hero_id} />
                 <input type="hidden" name="legendary_code" value={@selected_inventory.code} />
                 <input type="hidden" name="epic_code" value={@forge_epic && @forge_epic.code} />
                 <p :if={cost && cost > @current_hero.gold} class="shop-action-hint">
@@ -266,7 +267,7 @@
                 <%= cond do %>
                   <% Map.has_key?(@selected_inventory, :forged_epic) -> %>
                     Selling refunds both items and the forge fee.
-                  <% @forge_enabled && Items.forge_available?(@current_hero, @selected_inventory) -> %>
+                  <% @forge_enabled && Items.forgeable_legendary?(@current_hero, @selected_inventory) -> %>
                     Combine this Legendary with an Epic in one slot.
                   <% true -> %>
                     Sell this item to free an inventory slot.
@@ -274,7 +275,7 @@
               </p>
               <div class="shop-detail-actions">
                 <button
-                  :if={@forge_enabled && Items.forge_available?(@current_hero, @selected_inventory)}
+                  :if={@forge_enabled && Items.forgeable_legendary?(@current_hero, @selected_inventory)}
                   type="button"
                   class="shop-primary"
                   id={GH.dom_id(@id_prefix, "start-forge")}

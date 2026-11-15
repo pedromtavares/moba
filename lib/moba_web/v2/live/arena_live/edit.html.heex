@@ -14,6 +14,6 @@
     editing={@editing}
     show_build={@show_build}
     show_shop={@show_shop}
-    forge_enabled={true}
+    forge_enabled={Game.Items.forge_unlocked?(@hero)}
   />
 </Layouts.app>

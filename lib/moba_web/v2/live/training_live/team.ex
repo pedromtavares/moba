@@ -86,6 +86,7 @@ defmodule MobaWeb.V2.TrainingLive.Team do
   def handle_event("sell", %{"code" => code}, socket), do: configure(socket, :sell, code)
   def handle_event("transmute", params, socket), do: configure(socket, :transmute, params)
   def handle_event("finish-transmute", params, socket), do: configure(socket, :transmute, params)
+  def handle_event("forge", params, socket), do: configure(socket, :forge, params)
   def handle_event("auto-buy", _, socket), do: configure(socket, :auto_buy, !socket.assigns.selected.auto_buy)
 
   def handle_event("reorder-items", %{"codes" => codes}, socket), do: configure(socket, :inventory_order, codes)

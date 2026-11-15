@@ -228,6 +228,7 @@
     :if={@run.phase == :playing}
     preview={true}
     reorderable={true}
+    forge_enabled={Loadouts.forge_unlocked?(@run, @selected.hero)}
     id_prefix={@id_prefix}
     hero_id={@selected.id}
     team_roster={true}

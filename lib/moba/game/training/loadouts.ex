@@ -1,6 +1,7 @@
 defmodule Moba.Game.Training.Loadouts do
   @moduledoc "Hero loadouts, progression and automatic purchasing for team training."
   alias Moba.{Game, Repo}
+  alias Moba.Game.Items
   alias Moba.Game.Schema.{Hero, Player}
   @rares ~w(vanguard maelstrom shadow_blade pipe_of_insight arcane_boots soul_booster)
   @max_level Moba.max_hero_level()
@@ -80,6 +81,9 @@ defmodule Moba.Game.Training.Loadouts do
             :transmute ->
               transmute(h, value, run.catalog, true)
 
+            :forge ->
+              if forge_unlocked?(run, h.hero), do: forge(h, value, run.catalog), else: h
+
             :orders ->
               hero_orders(h, value)
 
@@ -98,6 +102,8 @@ defmodule Moba.Game.Training.Loadouts do
   end
 
   def configure(run, _, _, _), do: run
+
+  def forge_unlocked?(run, hero), do: max_level?(hero) || (run.turns_left == 0 && run.reserve_turns == 0)
 
   defp spawn_hero(catalog, avatar, side, id) do
     build = catalog.builds[avatar.id]
@@ -154,15 +160,17 @@ defmodule Moba.Game.Training.Loadouts do
 
     items =
       if orders["item_order"],
-        do: ordered_codes(orders["item_order"], Enum.filter(h.hero.items, & &1.active)),
+        do: ordered_codes(orders["item_order"], Enum.filter(Items.item_slots(h.hero), &Items.slot_active?/1)),
         else: h.hero.item_order
 
     %{h | hero: %{h.hero | skill_order: skills, item_order: items}}
   end
 
   defp inventory_order(h, codes) when is_list(codes) do
-    if Enum.sort(codes) == Enum.sort(Enum.map(h.hero.items, & &1.code)) do
-      active = Enum.map(Enum.filter(h.hero.items, & &1.active), & &1.code)
+    slots = Items.item_slots(h.hero)
+
+    if Enum.sort(codes) == Enum.sort(Enum.map(slots, & &1.code)) do
+      active = Enum.map(Enum.filter(slots, &Items.slot_active?/1), & &1.code)
       %{h | hero: %{h.hero | inventory_order: codes, item_order: Enum.filter(codes, &(&1 in active))}}
     else
       h
@@ -211,7 +219,7 @@ defmodule Moba.Game.Training.Loadouts do
   defp buy_item(h, code, catalog, fixed?) do
     item = Enum.find(catalog.items, &(&1.code == code))
 
-    if item && length(h.inventory) < 6 && !Enum.any?(h.inventory, &(&1.item.code == code)) &&
+    if item && length(h.inventory) < 6 && !owned?(h, code) &&
          h.hero.gold >= Game.item_price(item) do
       purchase(h, item, [], fixed?)
     else
@@ -239,7 +247,7 @@ defmodule Moba.Game.Training.Loadouts do
     valid =
       result && result.rarity != "normal" && length(codes) == length(Enum.uniq(codes)) &&
         length(ingredients) == Game.item_ingredients_count(result) &&
-        length(codes) == length(ingredients) && !Enum.any?(h.inventory, &(&1.item.code == code)) &&
+        length(codes) == length(ingredients) && !owned?(h, code) &&
         Enum.all?(ingredients, &(&1.item.rarity == Game.previous_item_rarity(result)))
 
     if valid do
@@ -250,6 +258,28 @@ defmodule Moba.Game.Training.Loadouts do
   end
 
   defp transmute(h, _, _, _), do: h
+
+  defp forge(h, %{"legendary_code" => legendary_code, "epic_code" => epic_code}, catalog) do
+    legendary = Enum.find(h.hero.items, &(&1.code == legendary_code))
+    epic = Enum.find(h.hero.items, &(&1.code == epic_code)) || Enum.find(catalog.items, &(&1.code == epic_code))
+
+    case Items.affordable_forge_price(h.hero, legendary, epic) do
+      {:ok, cost} ->
+        forged = Map.put(legendary, :forged_epic, epic)
+
+        entries =
+          for entry <- h.inventory, entry.item.code != epic.code do
+            if entry.item.code == legendary.code, do: %{item: forged, fixed: true}, else: entry
+          end
+
+        sync_inventory(put_in(h.hero.gold, h.hero.gold - cost), entries)
+
+      :error ->
+        h
+    end
+  end
+
+  defp forge(h, _, _), do: h
 
   defp purchase(h, item, sold, fixed? \\ false) do
     gold = h.hero.gold + refund(h, sold) - Game.item_price(item)
@@ -263,13 +293,18 @@ defmodule Moba.Game.Training.Loadouts do
   end
 
   defp sync_inventory(h, entries) do
-    items = Enum.map(entries, & &1.item)
+    slots = Enum.map(entries, & &1.item)
+    items = Enum.flat_map(slots, &Items.slot_items/1)
+    retained = Enum.filter(h.hero.items, &(&1 in items))
+    items = retained ++ (items -- retained)
+    pairs = for %{code: code, forged_epic: epic} <- slots, into: %{}, do: {code, epic.code}
     attrs = Game.Items.item_attributes(items)
     hero = struct(h.hero, attrs)
-    codes = Enum.map(items, & &1.code)
+    hero = if pairs == %{}, do: Map.delete(hero, :forged_pairs), else: Map.put(hero, :forged_pairs, pairs)
+    codes = Enum.map(slots, & &1.code)
     saved = Enum.filter(h.hero.inventory_order, &(&1 in codes))
-    active = Enum.map(Enum.filter(items, & &1.active), & &1.code)
-    saved_active = Enum.filter(h.hero.item_order, &(&1 in active))
+    active = Enum.map(Enum.filter(slots, &Items.slot_active?/1), & &1.code)
+    saved_active = Items.item_priority_codes(%{hero | item_order: h.hero.item_order}) |> Enum.filter(&(&1 in active))
 
     hero = %{
       hero
@@ -351,10 +386,11 @@ defmodule Moba.Game.Training.Loadouts do
   end
 
   defp auto_item_allowed?(inventory, item) do
-    !Game.Items.boots?(item) || !Enum.any?(inventory, &Game.Items.boots?(&1.item))
+    !Items.boots?(item) ||
+      !Enum.any?(inventory, fn entry -> Enum.any?(Items.slot_items(entry.item), &Items.boots?/1) end)
   end
 
-  defp owned?(h, code), do: Enum.any?(h.inventory, &(&1.item.code == code))
+  defp owned?(h, code), do: Enum.any?(h.hero.items, &(&1.code == code))
 
   defp fixed?(h, entry) do
     # Snapshots from before fixed items did not track purchase origin.

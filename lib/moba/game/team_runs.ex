@@ -459,6 +459,7 @@ defmodule Moba.Game.TeamRuns do
         |> Game.Schema.Hero.create_changeset(values, player, h.avatar, h.skills, h.items)
         |> Ecto.Changeset.change(training_team_id: record.id, inserted_at: run.started_at, finished_at: finished)
         |> Repo.insert!()
+        |> Game.Items.persist_forge_pairs!(Game.Items.forge_pairs(h))
         |> Repo.preload([:player, :avatar])
       end)
 

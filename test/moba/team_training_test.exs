@@ -586,6 +586,28 @@ defmodule Moba.Game.TeamTrainingTest do
     end
   end
 
+  test "the first league pairing uses Speed and item Speed in either reward mode", %{run: run} do
+    for mode <- [:shared, :focus],
+        {speed, item_speed, tier, side} <- [
+          {0, 0, 2, :dire},
+          {100, 0, 2, :radiant},
+          {40, 60, 2, :radiant},
+          {0, 0, 0, :radiant}
+        ] do
+      ready =
+        %{run | turns_left: 0, pve_tier: tier}
+        |> TeamTraining.reward_mode(mode)
+        |> update_in([:heroes, 1, :hero], &%{&1 | speed: speed, item_speed: item_speed, pve_tier: tier})
+
+      encounter = ready |> TeamTraining.league() |> TeamTraining.active_encounter()
+      expected = if side == :radiant, do: 1, else: hd(encounter.dire).id
+
+      assert encounter.initiator == side
+      assert encounter.duel.battle.initiator_id == expected
+      assert Combat.next_turn(encounter.duel).attacker.hero_id == expected
+    end
+  end
+
   test "team league bonuses match solo for every beginner tier and leave enemy stats unbuffed", %{run: run} do
     fields = ~w(total_hp total_mp atk power armor speed base_atk base_power base_armor)a
 
@@ -601,16 +623,20 @@ defmodule Moba.Game.TeamTrainingTest do
 
       encounter = TeamTraining.active_encounter(pending)
       assert encounter.duel.battle.type == "league"
-      assert encounter.initiator == :radiant
       turn = Combat.next_turn(encounter.duel)
       solo = Moba.Engine.Core.Turns.build_turn(encounter.duel.battle, %{})
       assert Map.take(turn.attacker, fields) == Map.take(solo.attacker, fields)
-      assert turn.attacker.current_hp == solo.attacker.total_hp
-      assert turn.attacker.current_mp == solo.attacker.total_mp
+      assert Map.take(turn.defender, fields) == Map.take(solo.defender, fields)
+
+      {hero, opponent} =
+        if turn.attacker.hero_id == 1, do: {turn.attacker, turn.defender}, else: {turn.defender, turn.attacker}
+
+      assert hero.current_hp == hero.total_hp
+      assert hero.current_mp == hero.total_mp
 
       enemy = hd(encounter.dire)
-      assert turn.defender.total_hp == Loadouts.max_hp(enemy)
-      assert turn.defender.atk == enemy.hero.atk + enemy.hero.item_atk
+      assert opponent.total_hp == Loadouts.max_hp(enemy)
+      assert opponent.atk == enemy.hero.atk + enemy.hero.item_atk
       assert Enum.all?(encounter.dire, &(&1.hero.bot_difficulty != nil))
 
       for unit <- encounter.radiant do
@@ -637,12 +663,13 @@ defmodule Moba.Game.TeamTrainingTest do
     assert Enum.all?(encounter.dire, &(&1.hero.bot_difficulty == "moderate"))
     turn = Combat.next_turn(encounter.duel)
     enemy = hd(encounter.dire)
-    assert turn.defender.total_hp == Loadouts.max_hp(enemy)
-    assert turn.defender.atk == enemy.hero.atk + enemy.hero.item_atk
+    opponent = Enum.find([turn.attacker, turn.defender], &(&1.hero_id == enemy.id))
+    assert opponent.total_hp == Loadouts.max_hp(enemy)
+    assert opponent.atk == enemy.hero.atk + enemy.hero.item_atk
   end
 
-  test "buffed league pairings keep survivor-first and carry exact remaining resources", %{scope: scope, run: run} do
-    for survivor <- [:radiant, :dire] do
+  test "later league pairings use Speed and carry the survivor's exact remaining resources", %{scope: scope, run: run} do
+    for mode <- [:shared, :focus], survivor <- [:radiant, :dire] do
       heroes =
         Map.new(run.heroes, fn {id, unit} ->
           hp = if id == 1 && survivor == :dire, do: 1, else: 1000
@@ -652,7 +679,7 @@ defmodule Moba.Game.TeamTrainingTest do
           {id, unit}
         end)
 
-      pending = %{run | heroes: heroes, turns_left: 0} |> TeamTraining.league()
+      pending = %{run | heroes: heroes, turns_left: 0} |> TeamTraining.reward_mode(mode) |> TeamTraining.league()
       encounter = TeamTraining.active_encounter(pending)
 
       units =
@@ -685,19 +712,17 @@ defmodule Moba.Game.TeamTrainingTest do
       last_turn = List.last(first.turns)
       survivor_id = if survivor == :radiant, do: 1, else: enemy_id
       retained = Enum.find([last_turn.attacker, last_turn.defender], &(&1.hero_id == survivor_id))
+      expected = if survivor == :radiant, do: hd(encounter.remaining.dire), else: 2
       assert second.type == "league"
-      assert second.initiator_id == survivor_id
+      assert second.initiator_id == expected
       prepared = Combat.next_turn(encounter.duel)
-      assert prepared.attacker.hero_id == survivor_id
-      assert prepared.attacker.current_hp == retained.current_hp
-      assert prepared.attacker.current_mp == retained.current_mp
+      assert prepared.attacker.hero_id == expected
+      assert prepared.defender.hero_id == survivor_id
+      assert prepared.defender.current_hp == retained.current_hp
+      assert prepared.defender.current_mp == retained.current_mp
       assert retained.current_hp < retained.total_hp
-
-      if survivor == :dire do
-        assert prepared.defender.hero_id == 2
-        assert prepared.defender.current_hp == prepared.defender.total_hp
-        assert prepared.defender.current_mp == prepared.defender.total_mp
-      end
+      assert prepared.attacker.current_hp == prepared.attacker.total_hp
+      assert prepared.attacker.current_mp == prepared.attacker.total_mp
 
       finished = finish_team(next, scope)
       assert finished.last_result.winner == :radiant
@@ -779,9 +804,11 @@ defmodule Moba.Game.TeamTrainingTest do
     assert length(e.battles) == 3
     [first, second | _] = e.battles
     previous = List.last(first.turns)
-    retained = if previous.attacker.hero_id == 1, do: previous.attacker.current_hp, else: previous.defender.current_hp
-    assert hd(second.turns).attacker.starting_hp == retained
-    assert retained < 5000
+    starting = hd(second.turns)
+    retained = Enum.find([previous.attacker, previous.defender], &(&1.hero_id == 1))
+    survivor = Enum.find([starting.attacker, starting.defender], &(&1.hero_id == 1))
+    assert survivor.starting_hp == retained.current_hp
+    assert retained.current_hp < 5000
     assert Enum.all?(TeamTraining.team(finished), &(&1.hp == Loadouts.max_hp(&1)))
   end
 

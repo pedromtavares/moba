@@ -88,9 +88,9 @@ defmodule Moba.Game.Items do
     end
   end
 
-  def forge_available?(hero, legendary) do
-    not is_nil(hero.finished_at) && is_nil(hero.archived_at) && legendary?(legendary) && has_item?(hero, legendary)
-  end
+  def forge_unlocked?(hero), do: not is_nil(hero.finished_at) && is_nil(hero.archived_at)
+
+  def forgeable_legendary?(hero, item), do: legendary?(item) && has_item?(hero, item)
 
   def forgeable_epic?(hero, item), do: epic?(item) && !attached_epic?(hero, item.code)
 
@@ -100,36 +100,56 @@ defmodule Moba.Game.Items do
     if previous, do: purchase - item_price(previous), else: purchase + @forge_fee
   end
 
+  def affordable_forge_price(hero, legendary, epic) do
+    with %Item{} <- legendary,
+         %Item{} <- epic,
+         true <- forgeable_legendary?(hero, legendary) && forgeable_epic?(hero, epic),
+         cost when cost <= hero.gold <- forge_price(hero, legendary, epic) do
+      {:ok, cost}
+    else
+      _ -> :error
+    end
+  end
+
   def forge_item!(player, hero, legendary_code, epic_code) do
     with_inventory(hero, fn current ->
       legendary = find_item(current.items, legendary_code)
       previous = forged_epic(current, legendary_code)
 
       with true <- current.player_id == player.id,
-           %Item{} <- legendary,
-           true <- forge_available?(current, legendary),
-           %Item{} = epic <- find_item(current.items, epic_code) || current_epic(epic_code),
-           true <- forgeable_epic?(current, epic),
-           cost when cost <= current.gold <- forge_price(current, legendary, epic) do
+           true <- forge_unlocked?(current),
+           epic = find_item(current.items, epic_code) || current_epic(epic_code),
+           {:ok, cost} <- affordable_forge_price(current, legendary, epic) do
         inventory = if previous, do: List.delete(current.items, previous), else: current.items
         inventory = if find_item(inventory, epic.code), do: inventory, else: inventory ++ [epic]
         pairs = Map.put(forge_pairs(current), legendary.code, epic.code)
         updated = update_inventory!(current, inventory, pairs, current.gold - cost)
 
-        {1, _} =
-          from(entry in HeroItem,
-            join: base in HeroItem,
-            on: base.hero_id == entry.hero_id and base.item_id == ^legendary.id,
-            where: entry.hero_id == ^current.id and entry.item_id == ^epic.id,
-            update: [set: [forged_into_id: base.id]]
-          )
-          |> Repo.update_all([])
-
-        reload_forge_pairs(updated)
+        persist_forge_pairs!(updated, %{legendary.code => epic.code})
       else
         _ -> current
       end
     end)
+  end
+
+  def persist_forge_pairs!(hero, pairs) when map_size(pairs) == 0, do: hero
+
+  def persist_forge_pairs!(hero, pairs) do
+    for {legendary_code, epic_code} <- pairs do
+      legendary = find_item(hero.items, legendary_code)
+      epic = find_item(hero.items, epic_code)
+
+      {1, _} =
+        from(entry in HeroItem,
+          join: base in HeroItem,
+          on: base.hero_id == entry.hero_id and base.item_id == ^legendary.id,
+          where: entry.hero_id == ^hero.id and entry.item_id == ^epic.id,
+          update: [set: [forged_into_id: base.id]]
+        )
+        |> Repo.update_all([])
+    end
+
+    reload_forge_pairs(hero)
   end
 
   def previous_item_rarity(item) do
@@ -318,13 +338,15 @@ defmodule Moba.Game.Items do
 
   defp reload_forge_pairs(hero), do: Repo.preload(hero, [forged_components: :forged_into], force: true)
 
-  defp current_epic(code) do
+  defp current_epic(code) when is_binary(code) do
     ItemQuery.single_current()
     |> ItemQuery.enabled()
     |> ItemQuery.with_rarities(["epic"])
     |> ItemQuery.with_code(code)
     |> Repo.one()
   end
+
+  defp current_epic(_), do: nil
 
   defp forged_epic(hero, legendary), do: find_item(hero.items, forge_pairs(hero)[legendary])
 

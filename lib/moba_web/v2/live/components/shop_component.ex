@@ -156,7 +156,7 @@ defmodule MobaWeb.V2.ShopComponent do
 
   def handle_event("start-forge", _, %{assigns: assigns} = socket) do
     if assigns.forge_enabled && assigns.selected_inventory &&
-         Items.forge_available?(assigns.current_hero, assigns.selected_inventory) do
+         Items.forgeable_legendary?(assigns.current_hero, assigns.selected_inventory) do
       {:noreply, assign(socket, forging: true, forge_epic: nil, detail_tab: "overview")}
     else
       {:noreply, socket}

@@ -329,19 +329,10 @@ defmodule Moba.Game.TeamTraining do
 
       if remaining.radiant != [] && remaining.dire != [] && (units[r].hp == 0 || units[d].hp == 0) do
         next =
-          if e.kind == :boss do
-            Combat.new_duel(units[hd(remaining.radiant)], units[hd(remaining.dire)],
-              type: duel.battle.type,
-              initiative: :training
-            )
-          else
-            {a, b} =
-              if units[r].hp == 0,
-                do: {hd(remaining.dire), hd(remaining.radiant)},
-                else: {hd(remaining.radiant), hd(remaining.dire)}
-
-            Combat.new_duel(units[a], units[b], type: duel.battle.type)
-          end
+          Combat.new_duel(units[hd(remaining.radiant)], units[hd(remaining.dire)],
+            type: duel.battle.type,
+            initiative: :training
+          )
 
         put_encounter(run, %{e | duel: next, battles: e.battles ++ [next.battle]})
       else
@@ -366,8 +357,7 @@ defmodule Moba.Game.TeamTraining do
     type = if kind == :farm, do: "pve", else: "league"
     radiant = Enum.map(ids, &restore(run.heroes[&1], type))
     opponents = if kind == :boss, do: opponents, else: Enum.map(opponents, &restore/1)
-    options = if kind in [:farm, :boss], do: [type: type, initiative: :training], else: [type: type]
-    duel = Combat.new_duel(hd(radiant), hd(opponents), options)
+    duel = Combat.new_duel(hd(radiant), hd(opponents), type: type, initiative: :training)
     units = Map.new(radiant ++ opponents, &{&1.id, &1})
 
     e = %{

@@ -3,6 +3,7 @@ defmodule Moba.Game.Training.Combat do
   alias Moba.Engine.Core
   alias Moba.Engine.Core.{Turns, Processor}
   alias Moba.Engine.Schema.Battle
+  alias Moba.Game.Items
 
   defp rng do
     if :rand.export_seed() == :undefined, do: :rand.seed(:exsss)
@@ -32,6 +33,9 @@ defmodule Moba.Game.Training.Combat do
 
     battle = if opts[:initiative] == :training, do: Core.determine_initiator(battle), else: battle
     battle = %{battle | initiator_id: battle.initiator.id, initiator_player_id: battle.initiator_player.id}
+
+    battle =
+      if Items.forge_pairs(a) != %{} || Items.forge_pairs(d) != %{}, do: Turns.snapshot_loadouts(battle), else: battle
 
     %{
       battle: battle,

@@ -126,7 +126,7 @@ See `lib/moba/game/skills.ex` → `can_level_skill?/2`.
 
 **Selling**: Full gold refund in solo and team training, including after training ends.
 
-**Forging**: A finished hero can Forge each equipped Legendary with an Epic in the Shop, up to all six inventory slots. The fee per pair is 800 gold, plus 2,400 if the hero needs to buy the Epic. A **Forged Legendary** occupies one slot and keeps both items' stats and effects. One activation triggers every active effect in the pair, spends their combined Energy, and uses the longest active cooldown. Each Epic can belong to one pair. The usual duplicate item and boots Speed rules apply. Swapping the Epic credits the old Epic's price. Selling the whole pair refunds 8,000 gold.
+**Forging**: A finished hero can Forge each equipped Legendary with an Epic in the Shop, up to all six inventory slots. In 3v3 training, Forge unlocks for a hero at level 30 or when the team has spent all its farming turns. Forged items carry over when the run ends. The fee per pair is 800 gold, plus 2,400 if the hero needs to buy the Epic. A **Forged Legendary** occupies one slot and keeps both items' stats and effects. One activation triggers every active effect in the pair, spends their combined Energy, and uses the longest active cooldown. Each Epic can belong to one pair. The usual duplicate item and boots Speed rules apply. Swapping the Epic credits the old Epic's price. Selling the whole pair refunds 8,000 gold.
 
 ---
 
