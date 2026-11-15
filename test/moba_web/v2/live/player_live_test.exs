@@ -130,7 +130,7 @@ defmodule MobaWeb.V2.PlayerLiveTest do
       assert has_element?(view, "#profile-featured-link[href='/hero/#{third.id}']")
     end
 
-    test "a perfect solo run replaces a faster non-perfect run for the same avatar", %{conn: conn} do
+    test "perfect runs take priority within an avatar and across the collection", %{conn: conn} do
       player = Game.get_player!(create_player!().id)
       lina = Game.get_avatar_by_code!("lina")
       grandmaster = Moba.max_league_tier()
@@ -151,15 +151,31 @@ defmodule MobaWeb.V2.PlayerLiveTest do
           |> Moba.Repo.update!()
         end
 
-      Game.update_hero_collection!(best_perfect)
-      assert [%{"profile" => %{"hero_id" => previous_id}}] = Game.get_player!(player.id).hero_collection
-      assert previous_id == previous.id
+      dragon_knight =
+        create_combat_hero(
+          %{league_tier: Moba.master_league_tier(), finished_at: finished_at, total_gold_farm: Moba.max_total_farm()},
+          player,
+          Game.get_avatar_by_code!("dragon_knight")
+        )
+        |> Ecto.Changeset.change(inserted_at: NaiveDateTime.add(DateTime.to_naive(finished_at), -240))
+        |> Moba.Repo.update!()
+
+      Game.update_hero_collection!(dragon_knight)
+
+      cached = Game.get_player!(player.id).hero_collection |> Map.new(&{&1["code"], &1["profile"]})
+      assert cached["dragon_knight"]["position"] == 0
+      assert cached["lina"]["hero_id"] == previous.id
 
       {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/player/#{player.id}")
 
       assert has_element?(view, "#set-featured-#{best_perfect.id}.current-featured[title='Lina · Perfect Run']")
       assert has_element?(view, "#profile-featured-link[href='/hero/#{best_perfect.id}']")
       refute has_element?(view, "#set-featured-#{previous.id}, #set-featured-#{slower_perfect.id}")
+
+      assert has_element?(
+               view,
+               "#profile-collection .row > div:nth-child(2) #set-featured-#{dragon_knight.id}[title='Dragon Knight']"
+             )
     end
 
     test "preview selection updates the banner hero and loadout", %{conn: conn} do

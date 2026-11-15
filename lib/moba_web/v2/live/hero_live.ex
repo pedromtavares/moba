@@ -13,7 +13,7 @@ defmodule MobaWeb.V2.HeroLive do
   def mount(_params, _session, socket) do
     socket =
       attach_hook(socket_init(socket), :authorize_hero_changes, :handle_event, fn event, _, socket ->
-        if event in ~w(toggle-customize set-skin level skill start-edit finalize-edit reorder-items open-shop-item buy sell finish-transmute forge) do
+        if event in ~w(toggle-customize set-featured-hero set-skin level skill start-edit finalize-edit reorder-items open-shop-item buy sell finish-transmute forge) do
           hero = Game.get_hero!(socket.assigns.hero.id)
 
           if hero.player_id == socket.assigns.current_player.id do
@@ -64,6 +64,14 @@ defmodule MobaWeb.V2.HeroLive do
   end
 
   def handle_event("toggle-customize", _, socket), do: {:noreply, socket}
+
+  def handle_event("set-featured-hero", _, %{assigns: %{hero: hero, current_player: player}} = socket)
+      when hero.player_id == player.id and not is_nil(player.user_id) and is_nil(hero.archived_at) do
+    player = Game.update_preferences!(player, %{featured_hero_id: hero.id})
+    {:noreply, assign(socket, current_player: player)}
+  end
+
+  def handle_event("set-featured-hero", _, socket), do: {:noreply, socket}
 
   def handle_event(
         "set-skin",

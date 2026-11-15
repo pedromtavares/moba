@@ -93,6 +93,16 @@ defmodule Moba.Game.Heroes do
     |> MapSet.new()
   end
 
+  def profile_featured_hero(%{id: player_id, preferences: %{featured_hero_id: hero_id}}) when is_integer(hero_id) do
+    HeroQuery.load()
+    |> HeroQuery.with_player(player_id)
+    |> HeroQuery.with_ids([hero_id])
+    |> HeroQuery.unarchived()
+    |> Repo.one()
+  end
+
+  def profile_featured_hero(_player), do: nil
+
   def perfect_profile_picks(player_id) do
     query = perfect_collection_heroes(HeroQuery.finished_pve(), player_id)
 

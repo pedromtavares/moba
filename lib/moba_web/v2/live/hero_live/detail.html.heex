@@ -29,6 +29,13 @@
             <.icon name={if @show_hud, do: "game-close", else: "game-hero"} />
             <span>{if @show_hud, do: "Close customization", else: "Customize hero"}</span>
           </button>
+          <%= if @hero.player_id == @current_player.id && @current_player.user_id && is_nil(@hero.archived_at) do %>
+            <% featured? = Map.get(@current_player.preferences || %{}, :featured_hero_id) == @hero.id %>
+            <button id="set-featured-hero" type="button" phx-click="set-featured-hero" disabled={featured?}>
+              <.icon name="game-season-score" />
+              <span>{if featured?, do: "Featured on profile", else: "Set as Featured"}</span>
+            </button>
+          <% end %>
         </:actions>
       </.hero_detail_portrait>
     </article>
