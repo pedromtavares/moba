@@ -439,7 +439,7 @@ defmodule MobaWeb.V2.TeamLiveTest do
     assert has_element?(view, "#team-2-sell-#{item.id}")
   end
 
-  test "a max-level team hero forges from their own shop and keeps the pair when training ends", %{
+  test "a team hero can forge whenever they can afford it and keeps the pair when training ends", %{
     conn: conn,
     scope: scope,
     player: player
@@ -455,9 +455,9 @@ defmodule MobaWeb.V2.TeamLiveTest do
         Enum.reduce([1, 2], run, fn id, run ->
           update_in(run.heroes[id], fn unit ->
             hero = struct(unit.hero, Game.Items.item_attributes(items))
-            level = if id == 2, do: Moba.max_hero_level(), else: hero.level
+            gold = if id == 2, do: 3_200, else: 3_199
             inventory = Enum.map(items, &%{item: &1, fixed: true})
-            %{unit | hero: %{hero | items: items, level: level, gold: 3_200}, inventory: inventory}
+            %{unit | hero: %{hero | items: items, gold: gold}, inventory: inventory}
           end)
         end)
       end)
@@ -466,7 +466,9 @@ defmodule MobaWeb.V2.TeamLiveTest do
     {:ok, view, _} = live(conn, path)
     view |> element("#toggle-shop") |> render_click()
     view |> element("##{legendary_tile}") |> render_click()
-    refute has_element?(view, "#start-forge")
+    view |> element("#start-forge") |> render_click()
+    view |> element("#forge-epic-soul_booster") |> render_click()
+    assert has_element?(view, "#finish-forge[disabled]", "Forge · 3200 gold")
 
     render_click(view, "forge", %{"hero_id" => "1", "legendary_code" => legendary.code, "epic_code" => epic.code})
 
@@ -482,7 +484,9 @@ defmodule MobaWeb.V2.TeamLiveTest do
 
     record = TeamRuns.get!(scope, record.id)
     run = TeamRuns.state(record)
-    assert run.heroes[1].hero.gold == 3_200
+    assert run.turns_left > 0
+    assert run.heroes[2].hero.level == 1
+    assert run.heroes[1].hero.gold == 3_199
     assert Game.Items.forge_pairs(run.heroes[1].hero) == %{}
     assert run.heroes[2].hero.gold == 0
     assert run.heroes[2].hero.item_mp == run.heroes[1].hero.item_mp + epic.base_mp

@@ -82,7 +82,7 @@ defmodule Moba.Game.Training.Loadouts do
               transmute(h, value, run.catalog, true)
 
             :forge ->
-              if forge_unlocked?(run, h.hero), do: forge(h, value, run.catalog), else: h
+              forge(h, value, run.catalog)
 
             :orders ->
               hero_orders(h, value)
@@ -102,8 +102,6 @@ defmodule Moba.Game.Training.Loadouts do
   end
 
   def configure(run, _, _, _), do: run
-
-  def forge_unlocked?(run, hero), do: max_level?(hero) || (run.turns_left == 0 && run.reserve_turns == 0)
 
   defp spawn_hero(catalog, avatar, side, id) do
     build = catalog.builds[avatar.id]

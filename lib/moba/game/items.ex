@@ -88,7 +88,7 @@ defmodule Moba.Game.Items do
     end
   end
 
-  def forge_unlocked?(hero), do: not is_nil(hero.finished_at) && is_nil(hero.archived_at)
+  def forge_unlocked?(hero), do: is_nil(hero.archived_at)
 
   def forgeable_legendary?(hero, item), do: legendary?(item) && has_item?(hero, item)
 
@@ -221,7 +221,7 @@ defmodule Moba.Game.Items do
   def slot_active?(%{forged_epic: epic} = item), do: item.active || epic.active
   def slot_active?(item), do: item.active
 
-  def preload_forge_pairs(%Hero{finished_at: finished_at} = hero) when not is_nil(finished_at),
+  def preload_forge_pairs(%Hero{__meta__: %{state: :loaded}} = hero),
     do: Repo.preload(hero, forged_components: :forged_into)
 
   def preload_forge_pairs(hero), do: hero

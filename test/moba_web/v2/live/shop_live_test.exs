@@ -2,6 +2,29 @@ defmodule MobaWeb.V2.ShopLiveTest do
   use MobaWeb.ConnCase, async: true
   import Phoenix.LiveViewTest
 
+  test "solo training can forge before leveling up or finishing the run", %{conn: conn} do
+    legendary = Game.get_item_by_code!("scythe_of_vyse")
+    hero = create_base_hero(%{gold: 8_000}) |> Game.buy_item!(legendary)
+    Game.update_tutorial_step!(hero.player, 39)
+    assert hero.level == 1
+    assert is_nil(hero.finished_at)
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: hero.player_id), "/training")
+    view |> element("#inventory-#{legendary.id}") |> render_click()
+    view |> element("#start-forge") |> render_click()
+    view |> element("#forge-epic-soul_booster") |> render_click()
+    assert has_element?(view, "#finish-forge:not([disabled])", "Forge · 3200 gold")
+    view |> form("#shop-forge-form") |> render_submit()
+
+    assert has_element?(view, "#inventory-#{legendary.id}[data-rarity=forged-legendary]")
+    forged = hero.id |> Game.get_hero!() |> Ecto.reset_fields([:forged_components])
+    assert forged.gold == 0
+    assert is_nil(forged.finished_at)
+
+    battle = create_basic_battle(forged, create_combat_hero())
+    assert battle.loadouts[to_string(hero.id)]["forged_items"] == %{legendary.code => "soul_booster"}
+  end
+
   test "finished hero customization forges, displays, swaps and sells multiple pairs independently", %{conn: conn} do
     hero = create_base_hero(%{gold: 35_200, finished_at: Timex.now(), league_tier: 6})
     hero = Enum.reduce(full_legendary_inventory(), hero, &Game.buy_item!(&2, &1))

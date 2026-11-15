@@ -37,14 +37,13 @@ defmodule Moba.Game.ForgedItemsTest do
     phase_boots = item("phase_boots")
     hero = create_combat_hero(%{gold: 8_000}) |> Game.buy_item!(boots) |> Game.buy_item!(phase_boots)
 
-    assert Items.forge_item!(hero.player, hero, boots.code, phase_boots.code) |> Items.forge_pairs() == %{}
-    hero = Game.update_hero!(hero, %{finished_at: Timex.now()})
     assert Items.forge_item!(create_player!(), hero, boots.code, phase_boots.code) |> Items.forge_pairs() == %{}
     assert Items.forge_item!(hero.player, hero, boots.code, "missing") |> Items.forge_pairs() == %{}
     assert Items.forge_item!(hero.player, hero, boots.code, "sages_mask") |> Items.forge_pairs() == %{}
     assert Items.forge_item!(hero.player, hero, boots.code, "dagon") |> Items.forge_pairs() == %{}
 
     forged = Items.forge_item!(hero.player, hero, boots.code, phase_boots.code)
+    assert is_nil(forged.finished_at)
     assert forged.gold == 0
     assert forged.item_speed == hero.item_speed
     assert length(Game.inventory_items(forged)) == 1
