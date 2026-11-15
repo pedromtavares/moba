@@ -111,6 +111,47 @@ defmodule MobaWeb.V2.CommunityLiveTest do
            )
   end
 
+  test "top player banners follow the profile default and reflect a newly featured hero", %{conn: conn} do
+    player = create_player!(%{season_ranking: 1})
+    finished_at = DateTime.utc_now() |> DateTime.truncate(:second)
+
+    [ranked, perfect, chosen] =
+      for {code, file, farm, league} <- [
+            {"dragon_knight", "ranked-dk.jpg", 67_000, Moba.master_league_tier()},
+            {"lina", "perfect-lina.jpg", Moba.max_total_farm(), Moba.max_league_tier()},
+            {"juggernaut", "chosen-juggernaut.jpg", 50_000, Moba.master_league_tier()}
+          ] do
+        avatar =
+          code
+          |> Game.get_avatar_by_code!()
+          |> Ecto.Changeset.change(background: %{file_name: file, updated_at: nil})
+          |> Moba.Repo.update!()
+
+        create_combat_hero(%{finished_at: finished_at, total_gold_farm: farm, league_tier: league}, player, avatar)
+      end
+
+    Game.update_hero_collection!(chosen)
+    cached_player = Game.get_player!(player.id) |> Map.put(:top_hero, ranked)
+    Cachex.put(:game_cache, "season_ranking", [cached_player])
+
+    conn = log_in_player(conn, player_id: player.id)
+    {:ok, view, _} = live(conn, "/community")
+    card = "#player-card-#{player.id}"
+    view |> element("#show-pvp-link") |> render_click()
+    assert has_element?(view, "#{card}[style*='perfect-lina.jpg']")
+    {:ok, profile, _} = live(conn, "/player/#{player.id}")
+    assert has_element?(profile, "#profile-featured-link[href='/hero/#{perfect.id}']")
+
+    view |> element("#show-online-link") |> render_click()
+    Game.update_preferences!(player, %{featured_hero_id: chosen.id})
+    view |> element("#show-pvp-link") |> render_click()
+    assert has_element?(view, "#{card}[style*='chosen-juggernaut.jpg']")
+
+    Game.archive_hero!(chosen)
+    send(view.pid, {"ranking", %{}})
+    assert has_element?(view, "#{card}[style*='perfect-lina.jpg']")
+  end
+
   test "top player cards show direct score contributions, Arena titles and prominent footer metrics", %{conn: conn} do
     entries =
       for {tier, rank} <- [{2, 1}, {2, 2}, {1, 6}, {0, 26}] do

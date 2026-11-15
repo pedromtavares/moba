@@ -145,6 +145,23 @@ defmodule Moba.Game.Players do
     Enum.map(players, &Map.put(&1, :top_hero, Map.get(top_heroes, &1.id)))
   end
 
+  def profile_banner_heroes([]), do: %{}
+
+  def profile_banner_heroes(player_ids) do
+    players =
+      from(player in Player,
+        where: player.id in ^player_ids,
+        select: struct(player, [:id, :hero_collection, :preferences, :current_pve_hero_id])
+      )
+      |> Repo.all()
+
+    perfect_picks = Game.Heroes.perfect_profile_picks_for_players(player_ids)
+
+    players
+    |> Enum.map(&{&1, Game.Heroes.profile_collection(&1, Map.get(perfect_picks, &1.id, %{}))})
+    |> Game.Heroes.profile_featured_heroes(HeroQuery.load_avatar())
+  end
+
   def set_player_available!(player), do: update_player!(player, %{status: "available"})
 
   def set_player_unavailable!(player), do: update_player!(player, %{status: "unavailable"})

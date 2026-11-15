@@ -90,16 +90,7 @@ defmodule MobaWeb.V2.PlayerLive do
 
   defp assign_collection(socket, player, selected \\ nil) do
     perfect_picks = Game.Heroes.perfect_profile_picks(player.id)
-
-    collection =
-      (player.hero_collection || [])
-      |> Enum.map(fn entry ->
-        entry
-        |> Map.get("profile", entry)
-        |> Map.put("avatar_name", get_in(entry, ["avatar", "name"]))
-        |> Map.merge(Map.get(perfect_picks, entry["code"], %{}))
-      end)
-      |> Enum.sort_by(&{!Map.has_key?(perfect_picks, &1["code"]), &1["position"]})
+    collection = Game.Heroes.profile_collection(player, perfect_picks)
 
     codes = MapSet.new(collection, & &1["code"])
     blank = Enum.reject(Game.list_avatars(), &MapSet.member?(codes, &1.code))
@@ -108,7 +99,7 @@ defmodule MobaWeb.V2.PlayerLive do
       if selected && Enum.any?(collection, &(&1["hero_id"] == selected.id)) do
         selected
       else
-        Game.Heroes.profile_featured_hero(player) || default_collection_hero(collection) || player.current_pve_hero
+        Game.Heroes.profile_featured_hero(player, collection)
       end
 
     assign(socket,
@@ -118,9 +109,6 @@ defmodule MobaWeb.V2.PlayerLive do
       perfect_collection_codes: MapSet.new(Map.keys(perfect_picks))
     )
   end
-
-  defp default_collection_hero([]), do: nil
-  defp default_collection_hero([first | _]), do: List.first(Game.get_heroes([first["hero_id"]]))
 
   defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do
     user = Accounts.get_user!(user_id)

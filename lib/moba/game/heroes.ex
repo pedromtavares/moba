@@ -86,30 +86,72 @@ defmodule Moba.Game.Heroes do
   def perfect_collection_codes(nil), do: MapSet.new()
 
   def perfect_collection_codes(player_id) do
-    query = perfect_collection_heroes(HeroQuery.finished(Hero), player_id)
+    query = perfect_collection_heroes(HeroQuery.finished(Hero), [player_id])
 
     from([_hero, avatar] in query, distinct: true, select: avatar.code)
     |> Repo.all()
     |> MapSet.new()
   end
 
-  def profile_featured_hero(%{id: player_id, preferences: %{featured_hero_id: hero_id}}) when is_integer(hero_id) do
-    HeroQuery.load()
-    |> HeroQuery.with_player(player_id)
-    |> HeroQuery.with_ids([hero_id])
-    |> HeroQuery.unarchived()
-    |> Repo.one()
+  def profile_collection(player, perfect_picks) do
+    (player.hero_collection || [])
+    |> Enum.map(fn entry ->
+      entry
+      |> Map.get("profile", entry)
+      |> Map.put("avatar_name", get_in(entry, ["avatar", "name"]))
+      |> Map.merge(Map.get(perfect_picks, entry["code"], %{}))
+    end)
+    |> Enum.sort_by(&{!Map.has_key?(perfect_picks, &1["code"]), &1["position"]})
   end
 
-  def profile_featured_hero(_player), do: nil
+  def profile_featured_hero(player, collection) do
+    profile_featured_heroes([{player, collection}], HeroQuery.load())[player.id]
+  end
+
+  def profile_featured_heroes(players_with_collections, query) do
+    choices =
+      for {player, collection} <- players_with_collections, into: %{} do
+        saved_id = Map.get(player.preferences || %{}, :featured_hero_id)
+        collection_id = List.first(collection, %{})["hero_id"]
+        {player.id, Enum.reject([saved_id, collection_id, player.current_pve_hero_id], &is_nil/1)}
+      end
+
+    hero_ids = choices |> Map.values() |> List.flatten() |> Enum.uniq()
+
+    heroes =
+      if hero_ids == [] do
+        %{}
+      else
+        query |> HeroQuery.with_ids(hero_ids) |> HeroQuery.unarchived() |> Repo.all() |> Map.new(&{&1.id, &1})
+      end
+
+    for {player_id, ids} <- choices, into: %{} do
+      hero =
+        Enum.find_value(ids, fn id ->
+          case heroes[id] do
+            %{player_id: ^player_id} = hero -> hero
+            _ -> nil
+          end
+        end)
+
+      {player_id, hero}
+    end
+  end
 
   def perfect_profile_picks(player_id) do
-    query = perfect_collection_heroes(HeroQuery.finished_pve(), player_id)
+    Map.get(perfect_profile_picks_for_players([player_id]), player_id, %{})
+  end
+
+  def perfect_profile_picks_for_players([]), do: %{}
+
+  def perfect_profile_picks_for_players(player_ids) do
+    query = perfect_collection_heroes(HeroQuery.finished_pve(), player_ids)
 
     from([hero, avatar] in query,
-      distinct: avatar.code,
+      distinct: [hero.player_id, avatar.code],
       order_by: [asc_nulls_last: hero.pve_ranking, asc: hero.id],
       select: {
+        hero.player_id,
         avatar.code,
         %{
           "hero_id" => hero.id,
@@ -121,10 +163,12 @@ defmodule Moba.Game.Heroes do
       }
     )
     |> Repo.all()
-    |> Map.new()
+    |> Enum.reduce(%{}, fn {player_id, code, pick}, picks ->
+      Map.update(picks, player_id, %{code => pick}, &Map.put(&1, code, pick))
+    end)
   end
 
-  defp perfect_collection_heroes(query, player_id) do
+  defp perfect_collection_heroes(query, player_ids) do
     grandmaster = Moba.max_league_tier()
     solo_farm = Moba.max_total_farm()
     team_farm = 3 * solo_farm
@@ -132,7 +176,7 @@ defmodule Moba.Game.Heroes do
     from(hero in query,
       join: avatar in assoc(hero, :avatar),
       left_join: team in assoc(hero, :training_team),
-      where: hero.player_id == ^player_id and is_nil(hero.archived_at),
+      where: hero.player_id in ^player_ids and is_nil(hero.archived_at),
       where:
         (is_nil(hero.training_team_id) and hero.league_tier == ^grandmaster and
            hero.total_xp_farm + hero.total_gold_farm >= ^solo_farm) or

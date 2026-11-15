@@ -96,6 +96,7 @@
             :for={player <- @pvp_ranking}
             preview={@preview}
             player={player}
+            hero={@pvp_profile_heroes[player.id]}
             recent_results={Map.get(@pvp_recent_results, player.id, %{wins: 0, matches: 0})}
           />
           <p :if={@pvp_ranking == []} class="community-players-empty">No ranked players yet.</p>

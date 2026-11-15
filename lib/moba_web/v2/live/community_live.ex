@@ -102,7 +102,7 @@ defmodule MobaWeb.V2.CommunityLive do
   def handle_info({"ranking", _}, %{assigns: %{pvp_ranking: nil}} = socket), do: {:noreply, socket}
 
   def handle_info({"ranking", _}, socket) do
-    {:noreply, socket |> assign(pvp_ranking: nil) |> load_ranking("pvp")}
+    {:noreply, load_ranking(socket, "pvp")}
   end
 
   def handle_info(:refresh_recent_players, socket) do
@@ -116,7 +116,7 @@ defmodule MobaWeb.V2.CommunityLive do
     assigns = assign(assigns, :arena_title, player_card_title(assigns.player))
 
     ~H"""
-    <.player_banner id={"player-card-#{@player.id}"} player={@player} hero={@player.top_hero} preview={@preview} linked>
+    <.player_banner id={"player-card-#{@player.id}"} player={@player} hero={@hero} preview={@preview} linked>
       <:ranks>
         <span class="community-player-rank">#{@player.season_ranking}</span>
       </:ranks>
@@ -801,10 +801,15 @@ defmodule MobaWeb.V2.CommunityLive do
     end)
   end
 
-  defp load_ranking(%{assigns: %{pvp_ranking: nil}} = socket, "pvp") do
+  defp load_ranking(socket, "pvp") do
     players = Moba.season_ranking() |> Enum.filter(& &1.top_hero) |> Enum.take(30)
-    results = Game.Matches.recent_results(Enum.map(players, & &1.id))
-    assign(socket, pvp_ranking: players, pvp_recent_results: results)
+    ids = Enum.map(players, & &1.id)
+
+    assign(socket,
+      pvp_ranking: players,
+      pvp_profile_heroes: Game.Players.profile_banner_heroes(ids),
+      pvp_recent_results: Game.Matches.recent_results(ids)
+    )
   end
 
   defp load_ranking(%{assigns: %{pve_ranking: nil}} = socket, "pve") do
