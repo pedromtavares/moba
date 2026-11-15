@@ -208,7 +208,11 @@ defmodule MobaWeb.V2.DashboardLive do
 
   defp assign_blank_collection(%{assigns: %{current_player: player, avatar_catalog: avatars}} = socket) do
     codes = Enum.map(player.hero_collection || [], & &1["code"])
-    assign(socket, blank_collection: Enum.reject(avatars, &(&1.code in codes)))
+
+    assign(socket,
+      blank_collection: Enum.reject(avatars, &(&1.code in codes)),
+      perfect_collection_codes: Game.Heroes.perfect_collection_codes(player.id)
+    )
   end
 
   defp browse_avatar(socket, code) do

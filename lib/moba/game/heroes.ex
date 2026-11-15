@@ -83,6 +83,30 @@ defmodule Moba.Game.Heroes do
     |> Enum.map(fn {code, hero} -> Map.put(collection_entry(hero), :profile, Map.fetch!(profile_picks, code)) end)
   end
 
+  def perfect_collection_codes(nil), do: MapSet.new()
+
+  def perfect_collection_codes(player_id) do
+    grandmaster = Moba.max_league_tier()
+    solo_farm = Moba.max_total_farm()
+    team_farm = 3 * solo_farm
+
+    from(hero in Hero,
+      join: avatar in assoc(hero, :avatar),
+      left_join: team in assoc(hero, :training_team),
+      where: hero.player_id == ^player_id and not is_nil(hero.finished_at) and is_nil(hero.archived_at),
+      where:
+        (is_nil(hero.training_team_id) and hero.league_tier == ^grandmaster and
+           hero.total_xp_farm + hero.total_gold_farm >= ^solo_farm) or
+          (team.player_id == hero.player_id and team.phase == "finished" and not is_nil(team.finished_at) and
+             team.league_tier == ^grandmaster and team.total_farm >= ^team_farm and
+             fragment("cardinality(?) = 3 AND ? = ANY(?)", team.hero_ids, hero.id, team.hero_ids)),
+      distinct: true,
+      select: avatar.code
+    )
+    |> Repo.all()
+    |> MapSet.new()
+  end
+
   defp collection_entry(hero) do
     %{
       code: hero.avatar.code,

@@ -108,7 +108,12 @@ defmodule MobaWeb.V2.PlayerLive do
         true -> player.current_pve_hero
       end
 
-    assign(socket, profile_collection: collection, blank_collection: blank, featured: featured)
+    assign(socket,
+      profile_collection: collection,
+      blank_collection: blank,
+      featured: featured,
+      perfect_collection_codes: Game.Heroes.perfect_collection_codes(player.id)
+    )
   end
 
   defp user_assigns(user_id, cached_player, %{assigns: %{current_player: current_player}} = socket) do

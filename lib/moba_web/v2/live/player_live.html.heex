@@ -20,7 +20,7 @@
               <div class="row">
                 <%= for hero <- @profile_collection do %>
                   <% selected = @featured != nil && @featured.id == hero["hero_id"] %>
-                  <% perfect = GH.perfect_collection_run?(hero) %>
+                  <% perfect = MapSet.member?(@perfect_collection_codes, hero["code"]) %>
                   <% name = hero["avatar_name"] || hero["code"] %>
                   <div class="col-3 text-center">
                     <button

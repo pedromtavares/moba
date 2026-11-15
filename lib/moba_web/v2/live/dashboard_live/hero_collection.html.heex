@@ -1,7 +1,7 @@
 <div class={if !@preview, do: "pt-3"}>
   <div id="base-collection" class="collection" aria-label="Hero collection" role="group">
     <%= for hero <- (@current_player.hero_collection || []) do %>
-      <% undefeated = GH.perfect_collection_run?(hero) %>
+      <% undefeated = MapSet.member?(@perfect_collection_codes, hero["code"]) %>
       <% name = hero["avatar"]["name"] %>
       <button
         id={"base-avatar-#{hero["code"]}"}

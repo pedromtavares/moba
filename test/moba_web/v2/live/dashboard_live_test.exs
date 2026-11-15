@@ -28,6 +28,45 @@ defmodule MobaWeb.V2.DashboardLiveTest do
       refute has_element?(view, "#{card} .hero-card-meta", "Grandmaster")
     end
 
+    test "a perfect team marks every avatar in Base and profile collections", %{conn: conn} do
+      {scope, player} = team_account()
+      record = team_run(scope, player)
+      run = Game.TeamRuns.state(record)
+      first = Game.TeamTraining.team(run) |> hd()
+
+      previous =
+        create_base_hero(
+          %{finished_at: Timex.now(), league_tier: 6, pve_ranking: 1, total_gold_farm: 30_000, total_xp_farm: 29_770},
+          player,
+          first.hero.avatar
+        )
+
+      {:ok, record} =
+        Game.TeamRuns.update(scope, record, fn run ->
+          heroes =
+            Map.new(Enum.zip(run.order, [37_700, 36_950, 15_350]), fn {id, xp} ->
+              unit = run.heroes[id]
+              {id, put_in(unit.hero, %{unit.hero | total_gold_farm: 30_000, total_xp_farm: xp})}
+            end)
+
+          %{run | heroes: heroes, league_tier: 6, reward_mode: :focus, phase: :finished}
+        end)
+
+      assert record.total_farm == 180_000
+      collection = Game.get_player!(player.id).hero_collection
+      assert Enum.find(collection, &(&1["code"] == first.hero.avatar.code))["hero_id"] == previous.id
+
+      conn = conn |> log_in_user(scope.user) |> put_session(:player_id, player.id)
+      {:ok, base, _} = live(conn, "/base")
+      {:ok, profile, _} = live(conn, "/player/#{player.id}")
+
+      for entry <- collection do
+        assert has_element?(base, ~s(#base-avatar-#{entry["code"]}.is-undefeated[title$='Perfect Run']))
+        profile_hero_id = get_in(entry, ["profile", "hero_id"])
+        assert has_element?(profile, ~s(#set-featured-#{profile_hero_id}[title$='Perfect Run'] .is-undefeated))
+      end
+    end
+
     test "deleting a team removes it persistently and cannot affect another account", %{conn: conn} do
       {scope, player} = team_account()
       record = team_run(scope, player)

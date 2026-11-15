@@ -157,6 +157,7 @@ defmodule Moba.TeamTrainingIntegrationTest do
       assert length(progression.master_codes) == 3
       assert length(progression.grandmaster_codes) == if(league == 6, do: 3, else: 0)
       assert progression.invoker_codes == []
+      assert Game.Heroes.perfect_collection_codes(player.id) == MapSet.new()
     end
   end
 
