@@ -64,7 +64,7 @@
                               Resume match <span aria-hidden="true">→</span>
                             </.link>
                           <% else %>
-                            <%= if !manual_match_limit_reached?(@current_player, @manual_matches) do %>
+                            <%= if !manual_match_limit_reached?(@current_player, @manual_matches, @auto_matches) do %>
                               <button
                                 type="button"
                                 data-game-fullscreen

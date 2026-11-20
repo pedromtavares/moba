@@ -543,8 +543,11 @@ defmodule MobaWeb.V2.ArenaLive do
     count * 100 / max(Moba.daily_match_limit(), count + length(other_matches))
   end
 
-  defp manual_match_limit_reached?(player, manual_matches) do
-    player.daily_matches > Moba.daily_match_limit() || length(manual_matches) >= Moba.daily_match_limit()
+  defp manual_match_limit_reached?(player, manual_matches, auto_matches) do
+    automatic_results = Enum.count(auto_matches, &(&1.phase == "scored"))
+
+    length(manual_matches) >= Moba.daily_match_limit() ||
+      player.daily_matches - automatic_results >= Moba.daily_match_limit()
   end
 
   defp params_to_order(nil), do: []

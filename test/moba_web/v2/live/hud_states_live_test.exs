@@ -74,6 +74,27 @@ defmodule MobaWeb.V2.HudStatesLiveTest do
     assert has_element?(view, "#arena-team-empty")
   end
 
+  test "manual Arena entry stays available above the total cap when automatic matches can be replaced", %{conn: conn} do
+    player = create_player!(%{daily_matches: 21, total_matches: 21})
+    opponent = create_player!(%{total_matches: 1})
+
+    for index <- 1..21 do
+      create_match(player, opponent, %{
+        type: if(index <= 4, do: "manual", else: "auto"),
+        phase: "scored",
+        winner_id: opponent.id,
+        rewards: %{attacker_pvp_points: 0}
+      })
+    end
+
+    {:ok, view, _} = live(log_in_player(conn, player_id: player.id), "/arena")
+    assert has_element?(view, "#enter-arena-button:not([disabled])", "Play 3v3")
+    view |> element("#enter-arena-button") |> render_click()
+    pending = Game.Matches.pending_match(player)
+    assert_redirect(view, "/matches/#{pending.id}")
+    assert Game.get_player!(player.id).daily_matches == 19
+  end
+
   test "empty history and match pick tabs show clear next actions", %{conn: conn} do
     hero = create_base_hero()
     opponent = create_player!()

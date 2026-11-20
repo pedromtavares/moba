@@ -65,16 +65,57 @@ defmodule Moba.ArenaRewardsTest do
     assert Accounts.get_user!(player.user_id).shard_count == balance + 60
   end
 
-  test "lowering the daily cap preserves games already played above the new limit" do
+  test "manual matches replace automatic results at and above the cap without losing manual eligibility" do
+    for overflow <- [0, 1] do
+      played = Moba.daily_match_limit() + overflow
+      player = create_player!(%{daily_matches: played, total_matches: played, daily_wins: 15, total_wins: 15})
+      opponent = create_player!(%{total_matches: 1})
+      manual = for _ <- 1..4, do: match(player, opponent, %{winner_id: player.id})
+      victories = for _ <- 1..11, do: match(player, opponent, %{type: "auto", winner_id: player.id})
+      losses = for _ <- 1..(played - 15), do: match(player, opponent, %{type: "auto", winner_id: opponent.id})
+      balance = Accounts.get_user!(player.user_id).shard_count
+
+      pending = Game.manual_matchmaking!(player)
+      assert pending.type == "manual"
+      assert is_nil(pending.phase)
+      assert Game.manual_matchmaking!(player).id == pending.id
+      assert Accounts.get_user!(player.user_id).shard_count == balance + Moba.matchmaking_shards()
+      stored = Game.get_player!(player.id)
+      assert stored.daily_matches == 19
+      assert stored.total_matches == 19
+      assert stored.daily_wins == 15
+      assert stored.total_wins == 15
+
+      remaining = Game.list_matches(player)
+      assert length(remaining) == 20
+      assert Enum.count(remaining, &(&1.type == "manual")) == 5
+      assert Enum.all?(manual ++ victories, fn old -> Enum.any?(remaining, &(&1.id == old.id)) end)
+      assert Enum.all?(Enum.take(losses, overflow + 1), fn old -> Enum.all?(remaining, &(&1.id != old.id)) end)
+    end
+  end
+
+  test "twenty manual matches stop further games even when the counter exceeds the cap" do
     player = create_player!(%{daily_matches: 21, total_matches: 21})
     opponent = create_player!(%{total_matches: 1})
-    auto = match(player, opponent, %{type: "auto"})
+    for _ <- 1..21, do: match(player, opponent)
 
     refute Game.manual_matchmaking!(player)
     refute Arena.auto_matchmaking!(player)
     assert Game.get_player!(player.id).daily_matches == 21
+    assert length(Game.list_matches(player)) == 21
+  end
+
+  test "insufficient automatic replacements leave existing results and counters intact" do
+    player = create_player!(%{daily_matches: 21, total_matches: 21})
+    opponent = create_player!(%{total_matches: 1})
+    auto = match(player, opponent, %{type: "auto"})
+    balance = Accounts.get_user!(player.user_id).shard_count
+
+    refute Game.manual_matchmaking!(player)
+    assert Game.get_player!(player.id).daily_matches == 21
     assert [%{id: id}] = Game.list_matches(player)
     assert id == auto.id
+    assert Accounts.get_user!(player.user_id).shard_count == balance
   end
 
   test "no opponent means no game and no reward" do

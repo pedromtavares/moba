@@ -38,7 +38,11 @@ defmodule Moba.Game.Matches do
   def delete_oldest_auto(%{id: player_id}) do
     query = list_query(player_id, "auto") |> exclude(:order_by) |> exclude(:preload)
 
-    from(m in query, order_by: [desc: fragment("? = ?", m.winner_id, m.opponent_id), asc: :id], limit: 1)
+    from(m in query,
+      where: m.phase == "scored",
+      order_by: [desc: fragment("? = ?", m.winner_id, m.opponent_id), asc: :id],
+      limit: 1
+    )
     |> Repo.one()
     |> Repo.delete!()
   end
@@ -199,6 +203,14 @@ defmodule Moba.Game.Matches do
         order_by: [desc: m.id],
         limit: 1
     )
+  end
+
+  def pending_count(%{id: player_id}) do
+    from(m in Match,
+      where: m.player_id == ^player_id and (is_nil(m.phase) or m.phase != "scored"),
+      where: is_nil(m.training_team_id)
+    )
+    |> Repo.aggregate(:count)
   end
 
   def load(queryable \\ Match) do

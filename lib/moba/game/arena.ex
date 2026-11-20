@@ -18,7 +18,11 @@ defmodule Moba.Game.Arena do
 
         if opponent = Players.matchmaking_opponent(player) do
           locked = Players.lock_players!([player.id, opponent.id])
-          create_match!(Map.fetch!(locked, player.id), Map.fetch!(locked, opponent.id), "auto")
+          player = Map.fetch!(locked, player.id)
+
+          if player.daily_matches + Matches.pending_count(player) < @daily_match_limit do
+            create_match!(player, Map.fetch!(locked, opponent.id), "auto")
+          end
         end
       end)
 
@@ -191,10 +195,17 @@ defmodule Moba.Game.Arena do
               selected = Enum.find(skills, &(to_string(&1.id) == action[:skill_id]))
               item = Enum.find(items, &(to_string(&1.id) == action[:item_id]))
               skill = turn.attacker.double_skill || selected
-              valid_skill = action[:skill_id] in [nil, ""] || !is_nil(selected)
+
+              valid_skill =
+                if turn.attacker.double_skill,
+                  do: action[:skill_id] in [nil, "", to_string(skill.id)],
+                  else:
+                    action[:skill_id] in [nil, ""] ||
+                      (selected && Engine.can_use_resource?(turn, selected))
+
               valid_item = action[:item_id] in [nil, ""] || !is_nil(item)
 
-              if valid_skill && valid_item && (is_nil(skill) || Engine.can_use_resource?(turn, skill)) &&
+              if valid_skill && valid_item &&
                    (is_nil(item) || Engine.can_use_resource?(turn, item)) do
                 Engine.continue_battle!(battle, %{skill: skill, item: item, player_id: match.player_id})
               end
@@ -313,25 +324,30 @@ defmodule Moba.Game.Arena do
     if update_tiers?, do: Players.update_ranking_tiers!(), else: Players.update_ranking!()
   end
 
-  defp create_match!(%{daily_matches: @daily_match_limit} = player, opponent, "manual") do
+  defp create_match!(%{daily_matches: played} = player, %{id: _} = opponent, "manual")
+       when played >= @daily_match_limit do
     manual_matches = Matches.list_manual(player)
+    replacements = played - @daily_match_limit + 1
 
-    if length(manual_matches) >= @daily_match_limit do
-      nil
-    else
-      deleted = Matches.delete_oldest_auto(player)
-      base_attrs = %{daily_matches: player.daily_matches - 1, total_matches: player.total_matches - 1}
+    auto_matches = Enum.filter(Matches.list_matches(player), &(&1.type == "auto" && &1.phase == "scored"))
 
-      attrs =
-        if deleted.winner_id == player.id do
-          Map.merge(base_attrs, %{daily_wins: player.daily_wins - 1, total_wins: player.total_wins - 1})
-        else
-          base_attrs
-        end
+    if length(manual_matches) < @daily_match_limit && length(auto_matches) >= replacements do
+      Enum.reduce(1..replacements, player, fn _, current ->
+        deleted = Matches.delete_oldest_auto(current)
+        base_attrs = %{daily_matches: current.daily_matches - 1, total_matches: current.total_matches - 1}
 
-      player
-      |> Players.update_player!(attrs)
+        attrs =
+          if deleted.winner_id == current.id do
+            Map.merge(base_attrs, %{daily_wins: current.daily_wins - 1, total_wins: current.total_wins - 1})
+          else
+            base_attrs
+          end
+
+        Players.update_player!(current, attrs)
+      end)
       |> create_match!(opponent, "manual")
+    else
+      nil
     end
   end
 

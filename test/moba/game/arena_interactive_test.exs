@@ -65,6 +65,24 @@ defmodule Moba.Game.ArenaInteractiveTest do
     assert Engine.get_battle!(battle.id).turns == []
   end
 
+  test "automatic matchmaking reserves the final daily slot for an unfinished manual match", a do
+    Game.update_player!(a.player, %{daily_matches: 18, total_matches: 18})
+    Game.update_player!(a.opponent, %{total_matches: 1})
+    {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
+
+    automatic = Arena.auto_matchmaking!(a.player)
+    assert automatic.type == "auto"
+    assert Game.continue_match!(automatic).phase == "scored"
+    assert Game.get_player!(a.player.id).daily_matches == 19
+
+    refute Arena.auto_matchmaking!(a.player)
+    assert length(Game.list_matches(a.player)) == 2
+
+    complete(a.scope, match.id)
+    assert Game.get_player!(a.player.id).daily_matches == 20
+    refute Arena.auto_matchmaking!(a.player)
+  end
+
   defp complete(scope, id, budget \\ 30)
   defp complete(_, _, 0), do: flunk("Arena did not complete within its turn budget")
   defp complete(scope, id, budget) do

@@ -121,6 +121,87 @@ defmodule MobaWeb.V2.ArenaBattleLiveTest do
     assert Engine.latest_match_battle(match.id).turns == []
   end
 
+  test "manual Attack releases Illuminate after Scythe stuns the opponent, including after reload", a do
+    illuminate = Game.get_skill_by_code!("illuminate", false, 1)
+    scythe = Game.get_item_by_code!("scythe_of_vyse")
+    satanic = Game.get_item_by_code!("satanic")
+
+    channeler =
+      Game.create_hero!(
+        %{
+          name: "Channeler",
+          finished_at: Timex.now(),
+          league_tier: 6,
+          pve_tier: 1,
+          total_hp: 5000,
+          total_mp: 1000,
+          atk: 10,
+          power: 0,
+          speed: 100,
+          gold: 20_000
+        },
+        a.player,
+        base_avatar(),
+        [illuminate]
+      )
+      |> Game.buy_item!(scythe)
+      |> Game.buy_item!(satanic)
+
+    for enemy <- Game.get_match!(a.match.id).opponent_picks do
+      Game.update_hero!(enemy, %{total_hp: 10_000, armor: 0, speed: 0})
+    end
+
+    picks = [channeler | tl(a.picks)]
+    {:ok, match} = Game.start_match(a.match, a.player, Enum.map(picks, & &1.id), interactive: true)
+    conn = log_in_player(a.conn, player_id: a.player.id)
+    path = "/matches/#{match.id}/battles"
+    {:ok, view, _} = live(conn, path)
+
+    view
+    |> with_target("#arena-match-#{match.id}")
+    |> render_hook("next-turn", %{
+      hero_id: to_string(channeler.id),
+      skill_id: to_string(illuminate.id),
+      item_id: to_string(scythe.id)
+    })
+
+    [charging] = Engine.latest_match_battle(match.id).turns
+    assert charging.skill_code == "illuminate"
+    assert charging.item_code == "scythe_of_vyse"
+    assert charging.attacker.double_skill_code == "illuminate"
+    assert charging.defender.stunned
+
+    [data] =
+      render(view) |> LazyHTML.from_fragment() |> LazyHTML.query("#combat-stage") |> LazyHTML.attribute("data-scene")
+
+    frame = Jason.decode!(data)["trainingPlayback"]["frame"]
+    view |> element("#combat-stage") |> render_hook("training-playback-ready", %{"frame" => frame})
+
+    [_, skipped] = Engine.latest_match_battle(match.id).turns
+    assert skipped.attacker.stunned
+    assert is_nil(skipped.skill_code)
+    refute Engine.can_use_resource?(Engine.build_turn(Engine.latest_match_battle(match.id)), illuminate)
+
+    {:ok, resumed, _} = live(conn, path)
+    assert has_element?(resumed, "#training-auto-battle[aria-pressed=false]")
+    assert has_element?(resumed, "#attack-button:not([disabled])", "Illuminate")
+
+    action = %{hero_id: to_string(channeler.id), skill_id: to_string(illuminate.id), item_id: to_string(satanic.id)}
+
+    for invalid <- [%{action | skill_id: "invalid"}, %{action | item_id: "invalid"}] do
+      resumed |> with_target("#arena-match-#{match.id}") |> render_hook("next-turn", invalid)
+      assert length(Engine.latest_match_battle(match.id).turns) == 2
+    end
+
+    resumed |> with_target("#arena-match-#{match.id}") |> render_hook("next-turn", action)
+    [_, _, released] = Engine.latest_match_battle(match.id).turns
+    assert released.skill_code == "illuminate"
+    assert released.item_code == "satanic"
+    assert is_nil(released.attacker.double_skill_code)
+    assert released.defender.current_hp < skipped.attacker.current_hp
+    assert has_element?(resumed, "#training-auto-battle[aria-pressed=false]")
+  end
+
   test "a stunned hero passes its Arena turn with auto battle off", a do
     {:ok, match} = Game.start_match(a.match, a.player, Enum.map(a.picks, & &1.id), interactive: true)
     battle = Engine.latest_match_battle(match.id)

@@ -64,7 +64,7 @@
               <.icon name="game-arena-3v3" /><span>Resume 3v3</span><span aria-hidden="true">→</span>
             </.link>
           <% else %>
-            <% limit_reached? = manual_match_limit_reached?(@current_player, @manual_matches) %>
+            <% limit_reached? = manual_match_limit_reached?(@current_player, @manual_matches, @auto_matches) %>
             <button
               id="enter-arena-button"
               type="button"
